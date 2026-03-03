@@ -45,8 +45,8 @@
     <!-- Anti-Copy Protection -->
     <script src="/js/anti-copy-protection.js" defer></script>
 
-    <!-- Zyntra Chat Teams -->
-    <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260301">
     <style>
         .quick-action { text-align: left; flex-direction: row; gap: 14px; padding: 18px; }
         .quick-action .action-icon { width: 38px; height: 38px; border-radius: 8px; font-size: 15px; flex-shrink: 0; }
@@ -347,42 +347,60 @@ function carregarUsuario() {
     }).catch(function() {});
 }
 
+function _escHtml(text) {
+    var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
 function showAlert(msg, type) {
     var c = document.getElementById('alertContainer');
     var d = document.createElement('div');
     d.className = 'alert ' + (type || 'info');
     var iconMap = { 'success': 'check-circle', 'danger': 'times-circle', 'warning': 'exclamation-triangle', 'info': 'info-circle' };
-    d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + msg;
+    d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + _escHtml(msg);
     c.prepend(d);
     setTimeout(function() { if (d.parentNode) d.remove(); }, 5000);
 }
 
-var dadosRelatorios = {
-    os_abertas: { titulo:'Ordens de Serviço Abertas', resumo:[{label:'Total Abertas',value:'23'},{label:'Urgentes',value:'5'},{label:'Em Andamento',value:'12'},{label:'Aguardando',value:'6'}], colunas:['OS','Cliente','Descrição','Técnico','Data','Prioridade'], linhas:[['OS-001','Tech Solutions','Manutenção preventiva','João Silva','15/01/2026','Alta'],['OS-002','Indústria Metal','Reparo equipamento','Carlos Lima','14/01/2026','Média'],['OS-003','Comércio Rápido','Instalação sistema','Ana Costa','13/01/2026','Baixa']] },
-    os_periodo: { titulo:'OS por Período', resumo:[{label:'Este Mês',value:'45'},{label:'Mês Anterior',value:'38'},{label:'Variação',value:'+18%'},{label:'Média/Dia',value:'2.1'}], colunas:['Período','Abertas','Finalizadas','Canceladas','Taxa Conclusão'], linhas:[['Jan/2026','45','38','3','84%'],['Dez/2025','38','35','2','92%'],['Nov/2025','42','40','1','95%']] },
-    os_tecnico: { titulo:'OS por Técnico', resumo:[{label:'Técnicos Ativos',value:'8'},{label:'Média por Técnico',value:'5.6'},{label:'Melhor Taxa',value:'98%'},{label:'Tempo Médio',value:'3.2h'}], colunas:['Técnico','Total OS','Finalizadas','Pendentes','Taxa'], linhas:[['João Silva','12','10','2','83%'],['Carlos Lima','8','7','1','87%'],['Ana Costa','10','9','1','90%']] },
-    os_status: { titulo:'OS por Status', resumo:[{label:'Abertas',value:'23'},{label:'Em Andamento',value:'12'},{label:'Finalizadas',value:'142'},{label:'Canceladas',value:'5'}], colunas:['Status','Quantidade','% do Total','Tempo Médio'], linhas:[['Aberta','23','12.6%','N/A'],['Em Andamento','12','6.6%','2.1 dias'],['Finalizada','142','78.0%','4.3 dias'],['Cancelada','5','2.7%','N/A']] },
-    contratos_ativos: { titulo:'Contratos Ativos', resumo:[{label:'Total Ativos',value:'67'},{label:'Receita Mensal',value:'R$ 234.500'},{label:'Ticket Médio',value:'R$ 3.500'},{label:'Renovações',value:'12'}], colunas:['Contrato','Cliente','Valor Mensal','Início','Vencimento','Status'], linhas:[['CT-001','Tech Solutions','R$ 5.500','01/01/2026','31/12/2026','Ativo'],['CT-002','Indústria Metal','R$ 8.200','15/03/2025','14/03/2026','Ativo'],['CT-003','Comércio Rápido','R$ 2.800','01/06/2025','31/05/2026','Ativo']] },
-    contratos_vencimento: { titulo:'Contratos por Vencimento', resumo:[{label:'Vencendo 30d',value:'8'},{label:'Vencendo 60d',value:'5'},{label:'Vencendo 90d',value:'3'},{label:'Valor em Risco',value:'R$ 45.600'}], colunas:['Contrato','Cliente','Vencimento','Valor','Dias Restantes'], linhas:[['CT-015','ABC Ltda','28/01/2026','R$ 3.200','13'],['CT-023','XYZ SA','05/02/2026','R$ 7.800','21'],['CT-031','Gama ME','15/02/2026','R$ 2.100','31']] },
-    contratos_valor: { titulo:'Contratos por Valor', resumo:[{label:'Maior Contrato',value:'R$ 15.000'},{label:'Menor',value:'R$ 800'},{label:'Média',value:'R$ 3.500'},{label:'Total Mensal',value:'R$ 234.500'}], colunas:['Contrato','Cliente','Valor Mensal','% do Total'], linhas:[['CT-005','Grande Corp','R$ 15.000','6.4%'],['CT-002','Indústria Metal','R$ 8.200','3.5%'],['CT-001','Tech Solutions','R$ 5.500','2.3%']] },
-    contratos_cliente: { titulo:'Contratos por Cliente', resumo:[{label:'Clientes Ativos',value:'52'},{label:'Multi-contrato',value:'8'},{label:'Novos (mês)',value:'3'},{label:'Churn',value:'1'}], colunas:['Cliente','Qtd Contratos','Valor Total','Desde'], linhas:[['Tech Solutions','3','R$ 12.500','Jan/2024'],['Indústria Metal','2','R$ 11.400','Mar/2024'],['Grande Corp','1','R$ 15.000','Jun/2025']] },
-    renovacoes: { titulo:'Renovações Pendentes', resumo:[{label:'Pendentes',value:'12'},{label:'Valor Total',value:'R$ 67.800'},{label:'Renovadas',value:'8'},{label:'Taxa Renovação',value:'85%'}], colunas:['Contrato','Cliente','Vencimento','Valor','Status Negociação'], linhas:[['CT-015','ABC Ltda','28/01/2026','R$ 3.200','Em negociação'],['CT-023','XYZ SA','05/02/2026','R$ 7.800','Proposta enviada'],['CT-031','Gama ME','15/02/2026','R$ 2.100','Aguardando']] },
-    contratos_cancelados: { titulo:'Contratos Cancelados', resumo:[{label:'Cancelados (ano)',value:'8'},{label:'Valor Perdido',value:'R$ 28.400'},{label:'Principal Motivo',value:'Preço'},{label:'Taxa Cancel.',value:'4.2%'}], colunas:['Contrato','Cliente','Valor','Data Cancel.','Motivo'], linhas:[['CT-045','Delta ME','R$ 1.800','10/12/2025','Redução de custos'],['CT-038','Sigma SA','R$ 5.200','22/11/2025','Mudou fornecedor']] },
-    receita_recorrente: { titulo:'Receita Recorrente (MRR)', resumo:[{label:'MRR Atual',value:'R$ 234.500'},{label:'Crescimento',value:'+5.2%'},{label:'Churn MRR',value:'-R$ 3.800'},{label:'Expansão',value:'+R$ 15.200'}], colunas:['Mês','MRR','Novos','Churn','Net Growth'], linhas:[['Jan/2026','R$ 234.500','R$ 15.200','-R$ 3.800','+R$ 11.400'],['Dez/2025','R$ 223.100','R$ 12.800','-R$ 2.500','+R$ 10.300'],['Nov/2025','R$ 212.800','R$ 8.900','-R$ 4.100','+R$ 4.800']] },
-    faturamento_mensal: { titulo:'Faturamento Mensal', resumo:[{label:'Este Mês',value:'R$ 456.789'},{label:'Mês Anterior',value:'R$ 412.350'},{label:'Variação',value:'+10.8%'},{label:'Acumulado Ano',value:'R$ 456.789'}], colunas:['Mês','NFe Emitidas','Valor Total','Ticket Médio','Variação'], linhas:[['Jan/2026','89','R$ 456.789','R$ 5.132','+10.8%'],['Dez/2025','76','R$ 412.350','R$ 5.426','+3.2%'],['Nov/2025','82','R$ 399.510','R$ 4.872','-1.5%']] },
-    nfe_status: { titulo:'NFe por Status', resumo:[{label:'Autorizadas',value:'842'},{label:'Canceladas',value:'23'},{label:'Rejeitadas',value:'8'},{label:'Taxa Sucesso',value:'96.4%'}], colunas:['Status','Quantidade','% Total','Valor Total'], linhas:[['Autorizada','842','96.4%','R$ 4.567.890'],['Cancelada','23','2.6%','R$ 156.780'],['Rejeitada','8','0.9%','R$ 45.230'],['Pendente','1','0.1%','R$ 12.500']] },
-    top_clientes: { titulo:'Top Clientes', resumo:[{label:'Total Clientes',value:'156'},{label:'Top 10 = % Fat.',value:'62%'},{label:'Maior Cliente',value:'R$ 234.500'},{label:'Ticket Médio',value:'R$ 5.132'}], colunas:['#','Cliente','NFes','Valor Total','% do Total'], linhas:[['1','Grande Corp','45','R$ 234.500','5.1%'],['2','Indústria Metal','38','R$ 189.300','4.1%'],['3','Tech Solutions','42','R$ 178.900','3.9%'],['4','Comércio Rápido','29','R$ 145.600','3.2%'],['5','Construtora ABC','25','R$ 132.400','2.9%']] },
-    produtos_vendidos: { titulo:'Produtos Mais Vendidos', resumo:[{label:'Total Produtos',value:'342'},{label:'Top 10 = % Vendas',value:'45%'},{label:'Produto Líder',value:'Produto A'},{label:'Margem Média',value:'32%'}], colunas:['#','Produto','NCM','Qtd Vendida','Valor Total','% do Total'], linhas:[['1','Produto A','8471.30.19','1.250','R$ 312.500','15.2%'],['2','Produto B','8473.30.99','890','R$ 267.000','13.0%'],['3','Produto C','7326.90.90','2.100','R$ 189.000','9.2%']] },
-    impostos: { titulo:'Impostos Recolhidos', resumo:[{label:'ICMS',value:'R$ 234.567'},{label:'IPI',value:'R$ 45.890'},{label:'PIS',value:'R$ 23.456'},{label:'COFINS',value:'R$ 108.234'}], colunas:['Imposto','Base Cálculo','Alíquota Média','Valor Recolhido','% do Fat.'], linhas:[['ICMS','R$ 1.302.594','18%','R$ 234.567','5.1%'],['IPI','R$ 459.800','10%','R$ 45.890','1.0%'],['PIS','R$ 1.423.394','1.65%','R$ 23.456','0.5%'],['COFINS','R$ 1.423.394','7.6%','R$ 108.234','2.4%']] },
-    comparativo_anual: { titulo:'Comparativo Anual', resumo:[{label:'2026 (parcial)',value:'R$ 456.789'},{label:'2025 Total',value:'R$ 4.890.350'},{label:'Projeção 2026',value:'R$ 5.481.468'},{label:'Crescimento',value:'+12.1%'}], colunas:['Mês','2025','2026','Variação'], linhas:[['Janeiro','R$ 356.700','R$ 456.789','+28.1%'],['Fevereiro','R$ 378.400','—','—'],['Março','R$ 412.100','—','—']] }
-};
+var dadosRelatorioAtual = null;
 
 function gerarRelatorio(tipo) {
-    var dados = dadosRelatorios[tipo];
-    if (!dados) { showAlert('Relatório não disponível', 'warning'); return; }
+    var di = document.getElementById('reportDataInicio').value;
+    var df = document.getElementById('reportDataFim').value;
+    var params = new URLSearchParams();
+    params.append('tipo', tipo);
+    if (di) params.append('dataInicio', di);
+    if (df) params.append('dataFim', df);
 
-    document.getElementById('previewTitle').textContent = dados.titulo;
-    document.title = 'Aluforce: ' + dados.titulo;
+    document.getElementById('previewTitle').textContent = 'Carregando...';
+    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando relatório...</p></div>';
+    document.getElementById('previewSection').classList.add('active');
+    document.getElementById('currentReportType').value = tipo;
+
+    fetch('/api/nfe/relatorios/' + encodeURIComponent(tipo) + '?' + params.toString(), { credentials:'include' })
+    .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
+    .then(function(dados) {
+        if (!dados || (!dados.colunas && !dados.resumo)) throw new Error('Dados vazios');
+        dadosRelatorioAtual = dados;
+        renderizarRelatorio(dados);
+    })
+    .catch(function(err) {
+        dadosRelatorioAtual = null;
+        document.getElementById('previewTitle').textContent = 'Relatório Indisponível';
+        document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:48px 24px;">' +
+            '<i class="fas fa-database" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>' +
+            '<h3 style="color:var(--text-primary);font-size:16px;margin-bottom:8px;">Dados não disponíveis</h3>' +
+            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatório requer dados do servidor. Verifique se o endpoint da API está configurado ou tente novamente mais tarde.</p>' +
+            '</div>';
+    });
+}
+
+function renderizarRelatorio(dados) {
+    document.getElementById('previewTitle').textContent = dados.titulo || 'Relatório';
+    document.title = 'Aluforce: ' + (dados.titulo || 'Relatório');
 
     var periodo = '';
     var di = document.getElementById('reportDataInicio').value;
@@ -397,7 +415,7 @@ function gerarRelatorio(tipo) {
     if (dados.resumo) {
         html += '<div class="report-summary">';
         dados.resumo.forEach(function(r) {
-            html += '<div class="summary-card"><div class="label">' + r.label + '</div><div class="value">' + r.value + '</div></div>';
+            html += '<div class="summary-card"><div class="label">' + _escHtml(r.label) + '</div><div class="value">' + _escHtml(r.value) + '</div></div>';
         });
         html += '</div>';
     }
@@ -406,19 +424,21 @@ function gerarRelatorio(tipo) {
     }
     if (dados.colunas && dados.linhas) {
         html += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
-        dados.colunas.forEach(function(c) { html += '<th>' + c + '</th>'; });
+        dados.colunas.forEach(function(c) { html += '<th>' + _escHtml(c) + '</th>'; });
         html += '</tr></thead><tbody>';
-        dados.linhas.forEach(function(l) {
-            html += '<tr>';
-            l.forEach(function(v) { html += '<td>' + v + '</td>'; });
-            html += '</tr>';
-        });
+        if (dados.linhas.length === 0) {
+            html += '<tr><td colspan="' + dados.colunas.length + '" style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum registro encontrado para o período selecionado</td></tr>';
+        } else {
+            dados.linhas.forEach(function(l) {
+                html += '<tr>';
+                l.forEach(function(v) { html += '<td>' + _escHtml(v) + '</td>'; });
+                html += '</tr>';
+            });
+        }
         html += '</tbody></table></div>';
     }
 
     document.getElementById('previewContent').innerHTML = html;
-    document.getElementById('previewSection').classList.add('active');
-    document.getElementById('currentReportType').value = tipo;
 }
 
 function fecharPreview() {
@@ -435,9 +455,8 @@ document.addEventListener('click', function(e) {
 });
 
 function exportarPDF() {
-    var tipo = document.getElementById('currentReportType').value;
-    var dados = dadosRelatorios[tipo];
-    if (!dados) return;
+    var dados = dadosRelatorioAtual;
+    if (!dados) { showAlert('Nenhum relatório carregado para exportar', 'warning'); return; }
 
     var periodo = '';
     var di = document.getElementById('reportDataInicio').value;
@@ -451,11 +470,11 @@ function exportarPDF() {
     var tableHtml = '';
     if (dados.colunas && dados.linhas) {
         tableHtml = '<table><thead><tr>';
-        dados.colunas.forEach(function(c) { tableHtml += '<th>' + c + '</th>'; });
+        dados.colunas.forEach(function(c) { tableHtml += '<th>' + _escHtml(c) + '</th>'; });
         tableHtml += '</tr></thead><tbody>';
         dados.linhas.forEach(function(l, idx) {
             tableHtml += '<tr class="' + (idx % 2 === 0 ? 'even' : '') + '">';
-            l.forEach(function(v) { tableHtml += '<td>' + v + '</td>'; });
+            l.forEach(function(v) { tableHtml += '<td>' + _escHtml(v) + '</td>'; });
             tableHtml += '</tr>';
         });
         tableHtml += '</tbody></table>';
@@ -465,14 +484,14 @@ function exportarPDF() {
     if (dados.resumo) {
         summaryHtml = '<div class="summary-grid">';
         dados.resumo.forEach(function(r) {
-            summaryHtml += '<div class="summary-item"><div class="s-label">' + r.label + '</div><div class="s-value">' + r.value + '</div></div>';
+            summaryHtml += '<div class="summary-item"><div class="s-label">' + _escHtml(r.label) + '</div><div class="s-value">' + _escHtml(r.value) + '</div></div>';
         });
         summaryHtml += '</div>';
     }
 
     win.document.write(
         '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
-        '<title>' + dados.titulo + ' - Aluforce</title>' +
+        '<title>' + _escHtml(dados.titulo) + ' - Aluforce</title>' +
         '<style>' +
             '@page { size: A4; margin: 15mm 12mm; }' +
             '* { margin:0; padding:0; box-sizing:border-box; }' +
@@ -499,7 +518,7 @@ function exportarPDF() {
             '<div class="logo">ALUFORCE<small>Esquadrias de Alumínio</small></div>' +
             '<div class="meta"><strong>Relatório Gerado</strong><br>' + dataGeracao + (periodo ? '<br>Período: ' + periodo : '') + '</div>' +
         '</div>' +
-        '<div class="pdf-title">' + dados.titulo + '</div>' +
+        '<div class="pdf-title">' + _escHtml(dados.titulo) + '</div>' +
         '<div class="pdf-subtitle">Módulo Faturamento — Sistema Aluforce / Zyntra ERP</div>' +
         summaryHtml +
         tableHtml +
@@ -536,8 +555,8 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 
-<!-- Zyntra Chat Teams -->
-<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+<!-- Chat Widget BOB AI -->
+<script src="/chat/widget.js?v=20260301" defer></script>
 
 <!-- Enterprise Shared -->
 <script src="/js/sidebar-click-animation.js?v=20260301"></script>

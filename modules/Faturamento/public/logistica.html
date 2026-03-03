@@ -489,7 +489,11 @@ function imprimirEtiqueta(id) {
         `<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Transportadora</div><p>${esc(p.transportadora||'-')}</p></div><div><div class="lbl-title">Previsão</div><p>${previsao}</p></div></div></div>` +
         `<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Prioridade</div><span class="lbl-priority ${priorClass}">${esc(p.prioridade||'Média')}</span></div><div><div class="lbl-title">Volumes</div><p>1</p></div></div></div>` +
         `<div class="lbl-barcode"><div class="lbl-barcode-lines">${barcodeHtml}</div><div class="lbl-barcode-number">ALU-${String(p.pedido_id||p.id).padStart(6,'0')}</div></div>` +
-        `<script>window.onload=function(){window.print();}<\/script></body></html>`
+        `<script>window.onload=function(){window.print();}<\/script>
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+</body></html>`
     );
     win.document.close();
 }
@@ -673,5 +677,9 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
     <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
 </html>

@@ -10,7 +10,7 @@
     const PWA_CONFIG = {
         swPath: '/sw.js',
         updateCheckInterval: 60000, // 1 minuto
-        showInstallPrompt: true,
+        showInstallPrompt: false, // DESATIVADO - botão "Instalar App" removido
         debug: false
     };
 

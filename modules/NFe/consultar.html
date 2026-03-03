@@ -45,8 +45,8 @@
     <!-- Anti-Copy Protection -->
     <script src="/js/anti-copy-protection.js" defer></script>
 
-    <!-- Zyntra Chat Teams -->
-    <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260301">
     <style>
         /* Page-specific: rejeitada badge (not in design system) */
         .badge.rejeitada { background: #fef3c7; color: #92400e; }
@@ -119,8 +119,7 @@
                         </div>
                     </div>
 
-                    <!-- Alert Container -->
-                    <div id="alertContainer"></div>
+                    <!-- Alert Container (moved to fixed position outside main) -->
 
                     <!-- Filters Card -->
                     <div class="card fade-in mb-6">
@@ -324,15 +323,6 @@
             }).catch(() => {});
         }
 
-        // == Fallback data ==
-        const nfesFallback = [
-            { numero:'000001234', serie:'1', chave:'35260112345678000100550010000012341000012345', cliente:'Tech Solutions Ltda', dataEmissao:'2026-01-15T14:30:00', valor:15750.00, status:'autorizada' },
-            { numero:'000001233', serie:'1', chave:'35260112345678000100550010000012331000012344', cliente:'Indústria Metal SA', dataEmissao:'2026-01-15T10:15:00', valor:8900.50, status:'autorizada' },
-            { numero:'000001232', serie:'1', chave:'35260112345678000100550010000012321000012343', cliente:'Comércio Rápido ME', dataEmissao:'2026-01-14T16:45:00', valor:3200.00, status:'cancelada' },
-            { numero:'000001231', serie:'1', chave:'35260112345678000100550010000012311000012342', cliente:'Construtora ABC Ltda', dataEmissao:'2026-01-14T09:00:00', valor:45000.00, status:'pendente' },
-            { numero:'000001230', serie:'1', chave:'35260112345678000100550010000012301000012341', cliente:'Distribuidora XYZ', dataEmissao:'2026-01-13T11:30:00', valor:12500.75, status:'rejeitada' }
-        ];
-
         let nfesCarregadas = [];
 
         // == Carregar NFes ==
@@ -349,14 +339,13 @@
             .then(data => {
                 loading.style.display = 'none';
                 nfesCarregadas = data.notas || data.data || data || [];
-                if (!Array.isArray(nfesCarregadas) || nfesCarregadas.length === 0) {
-                    nfesCarregadas = nfesFallback;
-                }
+                if (!Array.isArray(nfesCarregadas)) { nfesCarregadas = []; }
                 filtrarEExibir();
             })
             .catch(() => {
                 loading.style.display = 'none';
-                nfesCarregadas = nfesFallback;
+                nfesCarregadas = [];
+                showAlert('Erro ao carregar NFe. Verifique sua conexão.', 'danger');
                 filtrarEExibir();
             });
         }
@@ -396,20 +385,21 @@
             tbody.innerHTML = filtradas.map(nfe => {
                 const dt = nfe.dataEmissao ? new Date(nfe.dataEmissao).toLocaleString('pt-BR') : '-';
                 const valor = (nfe.valor || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
-                const st = (nfe.status||'pendente').toLowerCase();
+                const st = escapeHtml((nfe.status||'pendente').toLowerCase());
                 const stLabel = st.charAt(0).toUpperCase() + st.slice(1);
+                const chaveEsc = escapeHtml(nfe.chave||'');
                 return `<tr>
-                    <td><strong>${nfe.numero||'-'}</strong></td>
-                    <td>${nfe.serie||'1'}</td>
-                    <td>${nfe.cliente||nfe.destinatario||'-'}</td>
-                    <td>${dt}</td>
-                    <td>${valor}</td>
-                    <td><span class="badge ${st}">${stLabel}</span></td>
+                    <td><strong>${escapeHtml(nfe.numero||'-')}</strong></td>
+                    <td>${escapeHtml(nfe.serie||'1')}</td>
+                    <td>${escapeHtml(nfe.cliente||nfe.destinatario||'-')}</td>
+                    <td>${escapeHtml(dt)}</td>
+                    <td>${escapeHtml(valor)}</td>
+                    <td><span class="badge ${st}">${escapeHtml(stLabel)}</span></td>
                     <td style="text-align:center;">
-                        <button class="action-btn view" title="Visualizar" onclick="visualizarNFe('${nfe.chave||''}')"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn" title="Download XML" onclick="baixarXML('${nfe.chave||''}')"><i class="fas fa-download"></i></button>
-                        <button class="action-btn" title="DANFE" onclick="window.location.href='danfe.html?chave=${nfe.chave||''}'"><i class="fas fa-print"></i></button>
-                        <button class="action-btn" title="Enviar Email" onclick="enviarEmail('${nfe.chave||''}')"><i class="fas fa-envelope"></i></button>
+                        <button class="action-btn view" title="Visualizar" onclick="visualizarNFe('${chaveEsc}')"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" title="Download XML" onclick="baixarXML('${chaveEsc}')"><i class="fas fa-download"></i></button>
+                        <button class="action-btn" title="DANFE" onclick="window.location.href='danfe.html?chave=${chaveEsc}'"><i class="fas fa-print"></i></button>
+                        <button class="action-btn" title="Enviar Email" onclick="enviarEmail('${chaveEsc}')"><i class="fas fa-envelope"></i></button>
                     </td>
                 </tr>`;
             }).join('');
@@ -466,7 +456,7 @@
             var d = document.createElement('div');
             d.className = 'alert ' + (type || 'info');
             var iconMap = { 'success': 'check-circle', 'danger': 'times-circle', 'error': 'times-circle', 'warning': 'exclamation-triangle', 'info': 'info-circle' };
-            d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + msg;
+            d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + escapeHtml(msg);
             c.prepend(d);
             setTimeout(function() { if (d.parentNode) d.remove(); }, 5000);
         }
@@ -561,7 +551,10 @@
                         anexar_danfe: document.getElementById('emailAnexarDANFE').checked
                     })
                 });
-                await response.json();
+                var result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Erro no envio do email');
+                }
                 showAlert('Email enviado com sucesso para ' + email, 'success');
                 fecharModal('modalEnviarEmail');
             } catch(e) {
@@ -616,8 +609,8 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 
-    <!-- Zyntra Chat Teams -->
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <!-- Chat Widget BOB AI -->
+    <script src="/chat/widget.js?v=20260301" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>

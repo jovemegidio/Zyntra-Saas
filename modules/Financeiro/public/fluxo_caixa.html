@@ -382,6 +382,10 @@
             const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
             w.document.write(`<html><head><title>Fluxo de Caixa</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Fluxo de Caixa</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${m.descricao||m.descrição||'-'}</td><td>${m.categoria||'-'}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'}">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table>    <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body></html>`);
             w.document.close(); w.print();
         }
@@ -395,5 +399,9 @@
     <script src="/js/popup-confirmacao.js"></script>
     <script src="../js/financeiro-sidebar.js?v=20260210"></script>
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
 </html>
