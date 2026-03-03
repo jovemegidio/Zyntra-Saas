@@ -703,8 +703,567 @@ module.exports.setupChatTeamsSocket = function setupChatTeamsSocket(io, pool) {
 };
 
 // ═══════════════════════════════════════════════════════════
-// BOT I.A. DE SUPORTE
+// BOT I.A. DE SUPORTE — Base de Conhecimento ALUFORCE
 // ═══════════════════════════════════════════════════════════
+
+// Base de conhecimento completa extraída da Central de Ajuda
+const BOB_KNOWLEDGE_BASE = {
+
+    // ── PRIMEIRO ACESSO / GUIA INICIAL ──
+    primeiroAcesso: {
+        keywords: /primeiro acesso|primeira vez|como acessar|credenciais|login.*primeiro|como entrar|acabei de contratar|comecar|começar|novo.*usuario|novo.*usu[aá]rio|como.*começo|iniciar.*sistema/i,
+        response: `📋 **Primeiro Acesso ao Aluforce**
+
+1. Acesse o portal pelo link enviado por e-mail
+2. Use as credenciais temporárias (usuário e senha)
+3. No primeiro login, crie uma nova senha
+4. Complete seu cadastro pessoal
+
+**Requisitos:**
+• Navegador: Chrome, Firefox, Edge ou Safari (atualizado)
+• Internet banda larga estável
+• Resolução mínima: 1024x768
+
+**Interface:**
+• **Menu lateral** — acesso a todos os módulos
+• **Dashboard** — visão geral dos indicadores
+• **Barra de pesquisa** — busca rápida
+• **Notificações** — atualizações importantes
+
+📖 [Ver tutorial completo](https://aluforce.api.br/ajuda/artigos/primeiro-acesso.html)`
+    },
+
+    configuracoes: {
+        keywords: /configura[çc][oõ]|configurar|dados.*empresa|configura[çc][oõ]es iniciais|segmento/i,
+        response: `⚙️ **Configurações Iniciais**
+
+Após o primeiro acesso, configure:
+
+1. **Dados da Empresa** — CNPJ, razão social, endereço
+2. **Configurações por Segmento** — ajustes específicos para seu ramo
+3. **Usuários e Permissões** — quem acessa o quê
+4. **Certificado Digital** — para emissão de NF-e
+
+📖 [Configurações Iniciais](https://aluforce.api.br/ajuda/artigos/configuracoes-iniciais.html)
+📖 [Configurações por Segmento](https://aluforce.api.br/ajuda/artigos/configuracoes-segmento.html)`
+    },
+
+    // ── VENDAS ──
+    vendas: {
+        keywords: /pedido.*venda|vender|vendas|criar.*pedido|novo.*pedido|como.*vend|modulo.*venda|kanban.*venda/i,
+        response: `🛒 **Módulo de Vendas**
+
+**Como criar um pedido de venda:**
+1. Acesse **Vendas** no menu lateral (ícone 🛒)
+2. Clique na aba **"Pedidos"**
+3. Clique em **"Incluir"** (+) no painel lateral
+4. Selecione o **cliente** (nome ou CNPJ)
+5. Adicione os **produtos** (código ou descrição)
+6. Defina a **condição de pagamento** (30/60/90, à vista, etc.)
+7. Configure o **frete** (CIF ou FOB) e transportadora
+8. Clique em **"Salvar Pedido"**
+
+**Status do pedido:**
+• Rascunho → Pendente → Aprovado → Em Produção → Faturado → Entregue
+
+📖 [Tutorial: Criar Pedido](https://aluforce.api.br/ajuda/artigos/tutorial-novo-pedido-venda.html)
+📖 [Duplicar Pedido](https://aluforce.api.br/ajuda/artigos/tutorial-duplicar-pedido.html)
+📖 [Gerar Orçamento](https://aluforce.api.br/ajuda/artigos/tutorial-gerar-orcamento.html)`
+    },
+
+    orcamento: {
+        keywords: /or[çc]amento|gerar.*or[çc]amento|proposta|proposta.*comercial/i,
+        response: `📄 **Gerar Orçamento**
+
+O Aluforce permite gerar orçamentos a partir de pedidos:
+1. Crie um pedido de venda normalmente
+2. Selecione a opção **"Gerar Orçamento"**
+3. O sistema gera um PDF formatado para o cliente
+4. Envie por e-mail diretamente pelo sistema
+
+📖 [Tutorial: Gerar Orçamento](https://aluforce.api.br/ajuda/artigos/tutorial-gerar-orcamento.html)
+📖 [Exportar Pedido em PDF](https://aluforce.api.br/ajuda/artigos/tutorial-exportar-pedido-pdf.html)`
+    },
+
+    comissoes: {
+        keywords: /comiss[aãõ]|comissao|comissões|acompanhar.*comiss/i,
+        response: `💰 **Comissões de Vendas**
+
+Acompanhe suas comissões no módulo de Vendas:
+1. Acesse **Vendas → Comissões**
+2. Filtre por período, vendedor ou status
+3. Veja o total de comissões a receber
+4. Exporte relatórios detalhados
+
+📖 [Tutorial: Acompanhar Comissões](https://aluforce.api.br/ajuda/artigos/tutorial-acompanhar-comissoes.html)`
+    },
+
+    prospeccao: {
+        keywords: /prospec[çc][aã]o|b2b|prospectar|leads|lead|captar.*cliente/i,
+        response: `🎯 **Prospecção B2B**
+
+Use a prospecção inteligente do Aluforce:
+1. Acesse **Vendas → Prospecções**
+2. Busque empresas por segmento, região ou porte
+3. Converta prospecções em clientes e pedidos
+
+📖 [Tutorial: Prospecção B2B](https://aluforce.api.br/ajuda/artigos/tutorial-prospeccao-b2b.html)`
+    },
+
+    tabelaPrecos: {
+        keywords: /tabela.*pre[çc]o|preco.*diferenciado|pre[çc]o.*especial|markup|margem/i,
+        response: `💲 **Tabela de Preços**
+
+Configure preços diferenciados:
+1. Acesse **Vendas → Tabela de Preços**
+2. Crie tabelas por tipo de cliente, região ou volume
+3. Vincule tabelas aos clientes automaticamente
+
+📖 [Tabela de Preços](https://aluforce.api.br/ajuda/artigos/tabela-precos.html)`
+    },
+
+    duplicarPedido: {
+        keywords: /duplicar.*pedido|copiar.*pedido|pedido.*semelhante|replicar.*pedido/i,
+        response: `📋 **Duplicar Pedido**
+
+Para criar pedidos semelhantes rapidamente:
+1. Abra o pedido que deseja duplicar
+2. Clique em **"Duplicar"** no painel de ações
+3. Altere cliente, itens ou condições conforme necessário
+4. Salve o novo pedido
+
+📖 [Tutorial: Duplicar Pedido](https://aluforce.api.br/ajuda/artigos/tutorial-duplicar-pedido.html)`
+    },
+
+    exportarPdf: {
+        keywords: /exportar.*pdf|pdf.*pedido|gerar.*pdf|imprimir.*pedido|baixar.*pedido/i,
+        response: `📥 **Exportar Pedido em PDF**
+
+1. Abra o pedido desejado
+2. Clique em **"Exportar"** no painel de ações
+3. Selecione **PDF**
+4. O documento será gerado com layout profissional
+
+📖 [Tutorial: Exportar PDF](https://aluforce.api.br/ajuda/artigos/tutorial-exportar-pedido-pdf.html)`
+    },
+
+    // ── COMPRAS ──
+    compras: {
+        keywords: /compra|pedido.*compra|comprar|fornecedor|cota[çc][aã]o|requisicao.*compra|requisi[çc][aã]o/i,
+        response: `📦 **Módulo de Compras**
+
+**Tutoriais disponíveis:**
+
+1. **Criar pedido de compra** — Cadastre pedidos completos
+2. **Cotação com fornecedores** — Compare preços e condições
+3. **Entrada de nota de compra** — Registre mercadorias recebidas
+4. **Cadastrar fornecedor** — Base de fornecedores organizada
+5. **Requisição de compra** — Solicite compras internamente
+6. **Aprovação de compras** — Fluxo de aprovação
+7. **Relatórios de compras** — Análise de gastos
+
+📖 [Tutorial: Pedido de Compra](https://aluforce.api.br/ajuda/artigos/tutorial-novo-pedido-compra.html)
+📖 [Tutorial: Cotação](https://aluforce.api.br/ajuda/artigos/tutorial-cotacao-fornecedores.html)
+📖 [Tutorial: Entrada de Nota](https://aluforce.api.br/ajuda/artigos/tutorial-entrada-nota-compra.html)
+📖 [Cadastrar Fornecedor](https://aluforce.api.br/ajuda/artigos/tutorial-cadastrar-fornecedor.html)`
+    },
+
+    // ── FINANCEIRO ──
+    financeiro: {
+        keywords: /financeiro|finan[çc]a|conta.*pagar|conta.*receber|fluxo.*caixa|concilia[çc][aã]o|banc[aá]ri|dre|balan[çc]o|tesouraria/i,
+        response: `💰 **Módulo Financeiro**
+
+**Funcionalidades disponíveis:**
+
+• **Contas a Pagar** — Gerencie todos os pagamentos
+• **Contas a Receber** — Controle recebimentos
+• **Fluxo de Caixa** — Projeção financeira completa
+• **Conciliação Bancária** — Integre extratos bancários
+• **Desconto de Duplicatas** — Antecipação de recebíveis
+• **Relatórios** — DRE, balanço e análises
+
+📖 [Contas a Pagar](https://aluforce.api.br/ajuda/artigos/tutorial-contas-pagar.html)
+📖 [Contas a Receber](https://aluforce.api.br/ajuda/artigos/tutorial-contas-receber.html)
+📖 [Fluxo de Caixa](https://aluforce.api.br/ajuda/artigos/tutorial-fluxo-caixa.html)
+📖 [Conciliação Bancária](https://aluforce.api.br/ajuda/artigos/tutorial-conciliacao-bancaria.html)`
+    },
+
+    contasPagar: {
+        keywords: /conta.*pagar|lan[çc]ar.*pagamento|pagar.*fornecedor|boleto.*pagar|vencimento/i,
+        response: `💸 **Contas a Pagar**
+
+Como lançar uma conta a pagar:
+1. Acesse **Financeiro → Contas a Pagar**
+2. Clique em **"Nova Conta"**
+3. Informe: fornecedor, valor, vencimento, categoria
+4. Defina a forma de pagamento
+5. Salve e acompanhe os vencimentos
+
+📖 [Tutorial: Contas a Pagar](https://aluforce.api.br/ajuda/artigos/tutorial-contas-pagar.html)`
+    },
+
+    contasReceber: {
+        keywords: /conta.*receber|recebimento|receber.*cliente|cobran[çc]a|inadimpl/i,
+        response: `💵 **Contas a Receber**
+
+Como registrar um recebimento:
+1. Acesse **Financeiro → Contas a Receber**
+2. Localize a duplicata ou título
+3. Registre o pagamento recebido
+4. Confirme a baixa
+
+📖 [Tutorial: Contas a Receber](https://aluforce.api.br/ajuda/artigos/tutorial-contas-receber.html)`
+    },
+
+    fluxoCaixa: {
+        keywords: /fluxo.*caixa|proje[çc][aã]o.*financeira|caixa.*futuro|previs[aã]o.*financeira/i,
+        response: `📊 **Fluxo de Caixa**
+
+Consulte projeção financeira:
+1. Acesse **Financeiro → Fluxo de Caixa**
+2. Selecione o período desejado
+3. Visualize entradas e saídas previstas
+4. Analise o saldo projetado
+5. Exporte relatórios
+
+📖 [Tutorial: Fluxo de Caixa](https://aluforce.api.br/ajuda/artigos/tutorial-fluxo-caixa.html)`
+    },
+
+    conciliacao: {
+        keywords: /concilia[çc][aã]o|extrato.*banc|importar.*extrato|conciliar/i,
+        response: `🏦 **Conciliação Bancária**
+
+Integre seus extratos bancários:
+1. Acesse **Financeiro → Conciliação Bancária**
+2. Importe o extrato (OFX/CSV)
+3. O sistema cruza lançamentos automaticamente
+4. Confirme as conciliações
+5. Resolva divergências manualmente
+
+📖 [Tutorial: Conciliação Bancária](https://aluforce.api.br/ajuda/artigos/tutorial-conciliacao-bancaria.html)`
+    },
+
+    descontoDuplicatas: {
+        keywords: /desconto.*duplicata|antecipa[çc][aã]o|antecipa.*receb[ií]v|factoring/i,
+        response: `📑 **Desconto de Duplicatas**
+
+Antecipação de recebíveis no Aluforce:
+1. Acesse **Financeiro → Desconto de Duplicatas**
+2. Selecione os títulos a antecipar
+3. Informe o banco e taxa de desconto
+4. Confirme a operação
+
+📖 [Desconto de Duplicatas](https://aluforce.api.br/ajuda/artigos/desconto-duplicatas.html)`
+    },
+
+    contasBancarias: {
+        keywords: /conta.*banc[aá]ri|gerenciar.*banco|cadastrar.*banco|banco.*cadastr/i,
+        response: `🏦 **Gerenciar Contas Bancárias**
+
+1. Acesse **Financeiro → Contas Bancárias**
+2. Cadastre suas contas (banco, agência, conta)
+3. Defina a conta padrão
+4. Integre para conciliação automática
+
+📖 [Tutorial: Contas Bancárias](https://aluforce.api.br/ajuda/artigos/tutorial-gerenciar-contas-bancarias.html)`
+    },
+
+    // ── FATURAMENTO / NF-e ──
+    nfe: {
+        keywords: /nf-?e|nota.*fiscal|emitir.*nota|fatura.*pedido|faturar|danfe|cancelar.*nota|carta.*corre[çc][aã]o|cc-?e/i,
+        response: `📄 **Notas Fiscais (NF-e)**
+
+**Operações disponíveis:**
+• **Emitir NF-e** — A partir de pedidos faturados
+• **Cancelar NF-e** — Dentro do prazo de 24h
+• **Carta de Correção (CC-e)** — Corrigir erros em notas emitidas
+• **Entrada de NF-e** — Importar notas de fornecedores
+• **Consultar NF-e** — Buscar notas emitidas
+• **NFS-e Nacional** — Migração para nova plataforma
+
+**Como faturar um pedido:**
+1. Abra o pedido com status **"Aprovado"**
+2. Clique em **"Faturar"**
+3. Confira dados fiscais (CFOP, NCM, CST)
+4. Clique em **"Emitir NF-e"**
+5. Aguarde a autorização da SEFAZ
+
+📖 [Tutorial: Faturar Pedido](https://aluforce.api.br/ajuda/artigos/tutorial-faturar-pedido.html)
+📖 [Tutorial: Emitir NF-e](https://aluforce.api.br/ajuda/artigos/tutorial-emitir-nfe.html)
+📖 [Tutorial: Cancelar NF-e](https://aluforce.api.br/ajuda/artigos/tutorial-cancelar-nfe.html)
+📖 [Tutorial: Carta de Correção](https://aluforce.api.br/ajuda/artigos/tutorial-carta-correcao-cce.html)`
+    },
+
+    nfse: {
+        keywords: /nfs-?e|nota.*servi[çc]o|nfs.*nacional|migra[çc][aã]o.*nfs/i,
+        response: `📋 **NFS-e Nacional**
+
+O Aluforce já suporta a migração para a NFS-e Nacional:
+• Emissão integrada com a nova plataforma
+• Consulta de notas de serviço
+• Adequação automática ao novo padrão
+
+📖 [NFS-e Nacional](https://aluforce.api.br/ajuda/artigos/nfs-e-nacional.html)`
+    },
+
+    pix: {
+        keywords: /pix|cobran[çc]a.*pix|qr.*code|gerar.*pix|pagar.*pix/i,
+        response: `💳 **Cobrança PIX**
+
+Gere cobranças PIX pelo Aluforce:
+1. Acesse **Faturamento → Cobrança PIX**
+2. Selecione o título ou valor
+3. Gere o QR Code
+4. Envie ao cliente por e-mail ou WhatsApp
+
+📖 [Tutorial: Cobrança PIX](https://aluforce.api.br/ajuda/artigos/tutorial-pix-cobranca.html)`
+    },
+
+    reguaCobranca: {
+        keywords: /r[eé]gua.*cobran[çc]a|cobran[çc]a.*autom[aá]tica|lembrete.*pagamento|notifica[çc][aã]o.*vencimento/i,
+        response: `🔔 **Régua de Cobrança**
+
+Configure cobranças automáticas:
+1. Acesse **Faturamento → Régua de Cobrança**
+2. Defina os gatilhos (X dias antes, no dia, X dias depois)
+3. Personalize as mensagens
+4. Ative a régua para clientes
+
+📖 [Tutorial: Régua de Cobrança](https://aluforce.api.br/ajuda/artigos/tutorial-regua-cobranca.html)`
+    },
+
+    // ── ESTOQUE ──
+    estoque: {
+        keywords: /estoque|invent[aá]rio|saldo.*estoque|entrada.*mercadoria|sa[ií]da.*mercadoria|consultar.*estoque|movimenta[çc][aã]o|armazem|almoxarifado/i,
+        response: `📦 **Módulo de Estoque**
+
+Controle completo de inventário:
+• Consultar saldo de produtos
+• Movimentações de entrada e saída
+• Inventário e contagem
+• Rastreabilidade de lotes
+
+📖 [Tutorial: Consultar Estoque](https://aluforce.api.br/ajuda/artigos/tutorial-consultar-estoque.html)
+📖 [Módulo Estoque](https://aluforce.api.br/ajuda/colecoes/estoque.html)`
+    },
+
+    // ── PCP / PRODUÇÃO ──
+    pcp: {
+        keywords: /pcp|produ[çc][aã]o|ordem.*produ[çc][aã]o|op\b|kanban|apontar.*produ[çc][aã]o|bom\b|estrutura.*material|apontamento/i,
+        response: `🏭 **PCP — Produção**
+
+**Funcionalidades:**
+• **Ordem de Produção (OP)** — Criar e gerenciar OPs
+• **Kanban** — Apontar produção visual
+• **Estoque de Materiais** — Consultar disponibilidade
+• **Relatórios de Produção** — Análise de performance
+• **Estrutura de Materiais (BOM)** — Composição dos produtos
+
+**Como criar uma Ordem de Produção:**
+1. Acesse **PCP → Ordens de Produção**
+2. Clique em **"Nova OP"**
+3. Selecione o produto e quantidade
+4. O sistema verifica materiais disponíveis
+5. Inicie a produção
+
+📖 [Tutorial: Criar OP](https://aluforce.api.br/ajuda/artigos/tutorial-criar-ordem-producao.html)
+📖 [Tutorial: Apontar Produção](https://aluforce.api.br/ajuda/artigos/tutorial-apontar-producao.html)
+📖 [Tutorial: Estrutura BOM](https://aluforce.api.br/ajuda/artigos/tutorial-estrutura-bom.html)`
+    },
+
+    // ── RH ──
+    rh: {
+        keywords: /rh|recursos.*humanos|holerite|f[eé]rias|ponto.*eletron|funcionario|funcion[aá]rio|folha.*pagamento|treinamento|admiss[aã]o|demiss[aã]o|contracheque/i,
+        response: `👥 **Recursos Humanos**
+
+**Funcionalidades disponíveis:**
+• **Holerite** — Consultar contracheque online
+• **Férias** — Solicitar e acompanhar férias
+• **Ponto Eletrônico** — Registrar entrada/saída
+• **Cadastro de Funcionários** — Dados completos
+• **Treinamentos** — Gerenciar capacitações
+
+📖 [Tutorial: Consultar Holerite](https://aluforce.api.br/ajuda/artigos/tutorial-consultar-holerite.html)
+📖 [Tutorial: Solicitar Férias](https://aluforce.api.br/ajuda/artigos/tutorial-solicitar-ferias.html)
+📖 [Tutorial: Registrar Ponto](https://aluforce.api.br/ajuda/artigos/tutorial-registrar-ponto.html)
+📖 [Tutorial: Cadastrar Funcionário](https://aluforce.api.br/ajuda/artigos/tutorial-cadastrar-funcionario.html)`
+    },
+
+    holerite: {
+        keywords: /holerite|contracheque|sal[aá]rio|demonstrativo.*pagamento|quanto.*ganho/i,
+        response: `💰 **Consultar Holerite**
+
+1. Acesse **RH → Meu Holerite**
+2. Selecione o mês/ano desejado
+3. Visualize proventos e descontos
+4. Baixe em PDF se necessário
+
+📖 [Tutorial: Consultar Holerite](https://aluforce.api.br/ajuda/artigos/tutorial-consultar-holerite.html)`
+    },
+
+    ferias: {
+        keywords: /f[eé]rias|solicitar.*f[eé]rias|minhas.*f[eé]rias|agendar.*f[eé]rias/i,
+        response: `🏖️ **Solicitar Férias**
+
+1. Acesse **RH → Minhas Férias**
+2. Clique em **"Solicitar Férias"**
+3. Selecione o período desejado
+4. Envie para aprovação do gestor
+
+📖 [Tutorial: Solicitar Férias](https://aluforce.api.br/ajuda/artigos/tutorial-solicitar-ferias.html)`
+    },
+
+    ponto: {
+        keywords: /ponto|registrar.*ponto|bater.*ponto|entrada.*sa[ií]da|jornada|hor[aá]rio/i,
+        response: `⏰ **Ponto Eletrônico**
+
+1. Acesse **RH → Ponto Eletrônico**
+2. Clique em **"Registrar Ponto"**
+3. Confirme sua entrada ou saída
+4. Consulte seu espelho de ponto
+
+📖 [Tutorial: Registrar Ponto](https://aluforce.api.br/ajuda/artigos/tutorial-registrar-ponto.html)`
+    },
+
+    // ── CADASTROS ──
+    cadastros: {
+        keywords: /cadastr.*cliente|cadastr.*produto|cadastr.*servi[çc]o|base.*cliente|cliente.*novo|produto.*novo/i,
+        response: `📝 **Cadastros**
+
+Gerencie sua base de dados:
+• **Clientes** — Razão social, CNPJ/CPF, contatos
+• **Fornecedores** — Base completa de fornecedores
+• **Produtos** — Catálogo com preços e estoque
+• **Serviços** — Serviços prestados pela empresa
+
+📖 [Cadastros](https://aluforce.api.br/ajuda/colecoes/cadastros.html)
+📖 [Cadastrar Fornecedor](https://aluforce.api.br/ajuda/artigos/tutorial-cadastrar-fornecedor.html)`
+    },
+
+    // ── RELATÓRIOS ──
+    relatorios: {
+        keywords: /relat[oó]rio|report|dashboard|indicador|an[aá]lise|exportar.*dados|performance|desempenho.*venda/i,
+        response: `📊 **Relatórios**
+
+O Aluforce possui relatórios em todos os módulos:
+• **Vendas** — Performance, comissões, faturamento
+• **Compras** — Gastos, fornecedores, comparativos
+• **Financeiro** — DRE, balanço, fluxo de caixa
+• **Estoque** — Saldos, movimentações, giro
+• **PCP** — Produção, eficiência, apontamentos
+• **RH** — Folha, ponto, treinamentos
+
+📖 [Relatórios de Vendas](https://aluforce.api.br/ajuda/artigos/relatorios-vendas.html)
+📖 [Relatórios Financeiros](https://aluforce.api.br/ajuda/artigos/relatorios-financeiros.html)`
+    },
+
+    // ── SEGURANÇA / PERMISSÕES ──
+    seguranca: {
+        keywords: /seguran[çc]a|permiss[aãõ]|usu[aá]rio.*permiss|quem.*acessa|nivel.*acesso|restringir|bloquear.*usu/i,
+        response: `🔒 **Segurança e Permissões**
+
+Gerencie acesso ao sistema:
+1. Acesse **Admin → Usuários e Permissões**
+2. Defina níveis de acesso por módulo
+3. Restrinja ações (visualizar, criar, editar, excluir)
+4. Configure perfis de acesso por departamento
+
+📖 [Usuários e Permissões](https://aluforce.api.br/ajuda/artigos/usuarios-permissoes.html)
+📖 [Segurança](https://aluforce.api.br/ajuda/colecoes/seguranca.html)`
+    },
+
+    // ── WHATSAPP ──
+    whatsapp: {
+        keywords: /whatsapp|wpp|whats|zap|gerenciar.*whatsapp|erp.*whatsapp/i,
+        response: `📱 **Aluforce no WhatsApp**
+
+Gerencie seu negócio pelo WhatsApp:
+• Consulte pedidos e status
+• Receba notificações de vencimentos
+• Acompanhe vendas em tempo real
+• Interaja com o sistema pelo celular
+
+📖 [Aluforce no WhatsApp](https://aluforce.api.br/ajuda/colecoes/whatsapp.html)`
+    },
+
+    // ── CENÁRIOS DE NEGÓCIO ──
+    cenarios: {
+        keywords: /cen[aá]rio.*neg[oó]cio|exemplo.*pr[aá]tico|caso.*uso|dia.*dia|como.*uso.*sistema/i,
+        response: `💼 **Cenários de Negócio na Prática**
+
+Exemplos práticos para seu dia a dia:
+• Como processar uma venda do início ao fim
+• Fluxo completo de compra e recebimento
+• Ciclo financeiro: faturamento → cobrança → recebimento
+• Produção: pedido → OP → apontamento → entrega
+
+📖 [Cenários de Negócio](https://aluforce.api.br/ajuda/colecoes/cenarios.html)`
+    },
+
+    // ── NOVIDADES ──
+    novidades: {
+        keywords: /novidade|atualiza[çc][aã]o|novo.*recurso|lan[çc]amento|changelog|o que.*novo|release/i,
+        response: `🆕 **Novidades do Aluforce**
+
+Fique por dentro das últimas atualizações:
+• Novos módulos e funcionalidades
+• Melhorias de interface
+• Correções e otimizações
+• Integrações novas
+
+📖 [Novidades](https://aluforce.api.br/ajuda/colecoes/novidades.html)`
+    },
+
+    // ── PORTAL ──
+    portal: {
+        keywords: /portal|plataforma.*comunica|portal.*aluforce|comunica[çc][aã]o.*interna/i,
+        response: `🌐 **Portal Aluforce**
+
+Plataforma que simplifica comunicação e gestão:
+• Dashboard centralizado
+• Comunicação interna entre departamentos
+• Acesso rápido a todos os módulos
+• Indicadores em tempo real
+
+📖 [Portal Aluforce](https://aluforce.api.br/ajuda/colecoes/portal.html)`
+    },
+
+    // ── TI / SUPORTE TÉCNICO (mantém os originais) ──
+    senha: {
+        keywords: /senha|password|esqueci.*senha|redefinir|resetar|trocar.*senha|n[aã]o.*consigo.*entrar|bloqueado/i,
+        response: null // handled dynamically with tiIsOnline
+    },
+
+    internet: {
+        keywords: /internet|rede|wifi|wi-fi|conex[aã]o|conectar|desconect|sem.*rede|caiu.*net/i,
+        response: null
+    },
+
+    impressora: {
+        keywords: /impress|printer|impressora|imprimir|papel|toner|scanner|scan|digitaliz/i,
+        response: null
+    },
+
+    email: {
+        keywords: /email|e-mail|outlook|correio|spam|anexo/i,
+        response: null
+    },
+
+    pcLento: {
+        keywords: /computador.*lento|pc.*lento|travando|trava|congelou|mem[oó]ria|ram\b|performance/i,
+        response: null
+    },
+
+    softwareInstalar: {
+        keywords: /instalar.*programa|software|aplicativo|atualizar.*windows|update.*sistema|licen[çc]a/i,
+        response: null
+    },
+
+    virusSeg: {
+        keywords: /v[ií]rus|malware|hack|invas[aã]o|phishing|suspeito|antiv[ií]rus/i,
+        response: null
+    }
+};
 
 function handleBotMessage(socket, chatNs, fromId, userMessage) {
     const botUser = {
@@ -747,59 +1306,66 @@ function handleBotMessage(socket, chatNs, fromId, userMessage) {
 function generateBotResponse(userMessage, tiIsOnline) {
     const msg = userMessage.toLowerCase().trim();
 
-    if (/^(oi|olá|ola|hey|hello|bom dia|boa tarde|boa noite|e aí|eae|fala)/i.test(msg)) {
+    // ── Saudações ──
+    if (/^(oi|olá|ola|hey|hello|bom dia|boa tarde|boa noite|e a[ií]|eae|fala|opa)\b/i.test(msg)) {
         const greetings = [
-            `Olá! 👋 Sou o BOB I.A., assistente virtual do departamento de TI.\n\nComo posso ajudar você hoje?`,
-            `Oi! 🤖 Sou o BOB! Estou aqui para ajudar com questões de TI.\n\nMe conte o que está acontecendo!`,
-            `Olá! Bem-vindo! Eu sou o BOB, suporte técnico virtual! 💡\n\nDescreva seu problema que vou tentar ajudar.`
+            `Olá! 👋 Sou o **BOB I.A.**, assistente virtual do Aluforce ERP!\n\nPosso te ajudar com qualquer módulo do sistema:\n🛒 Vendas • 📦 Compras • 💰 Financeiro\n📄 NF-e • 🏭 PCP • 👥 RH • 📦 Estoque\n\nDigite sua dúvida ou **"ajuda"** para ver tudo que sei! 💡`,
+            `Oi! 🤖 Sou o **BOB**, seu assistente virtual!\n\nPosso orientar sobre todos os módulos do Aluforce:\nVendas, Compras, Financeiro, NF-e, PCP, RH e muito mais!\n\nMe conte: **o que você precisa fazer?**`,
+            `Olá! Bem-vindo ao suporte do Aluforce! 💡\n\nSou o **BOB I.A.** e conheço todos os módulos do sistema.\nDescreva sua dúvida que vou te orientar com tutoriais e dicas!`
         ];
         return greetings[Math.floor(Math.random() * greetings.length)];
     }
 
-    if (/senha|password|login|acesso|acessar|entrar|esqueci|redefinir|resetar|trocar senha/i.test(msg)) {
-        return tiIsOnline
-            ? `🔐 **Problemas com senha/acesso?**\n\nUm técnico do TI está online agora! Envie uma mensagem direta para ele.\n\n• Verifique se o Caps Lock está desativado\n• Tente o último password que lembra\n• Limpe o cache do navegador (Ctrl+Shift+Del)`
-            : `🔐 **Problemas com senha/acesso?**\n\nO TI não está online no momento.\n\n1. Verifique se o **Caps Lock** está desativado\n2. Tente "Esqueci minha senha" na tela de login\n3. Limpe o cache: **Ctrl+Shift+Del**\n4. Anote os detalhes para o TI resolver depois\n\n⏰ Horário TI: Seg-Sex, 8h às 18h`;
-    }
-
-    if (/internet|rede|wifi|wi-fi|conexão|conectar|desconect|lento|lenta|velocidade|ping|caiu|sem rede/i.test(msg)) {
-        return `🌐 **Problemas de conectividade?**\n\n1. **Reinicie** roteador/modem (desligue 30s)\n2. Reconecte o Wi-Fi\n3. CMD: \`ipconfig /release\` → \`ipconfig /renew\`\n4. Teste em outro dispositivo\n5. Tente cabo de rede\n\n${tiIsOnline ? '✅ TI online para ajudar!' : '⏰ TI offline — registre o problema.'}`;
-    }
-
-    if (/impress|printer|impressora|imprimir|papel|toner|scanner|scan|digitaliz/i.test(msg)) {
-        return `🖨️ **Problemas com impressora?**\n\n1. Verifique se está **ligada e conectada**\n2. Veja se há **papel preso**\n3. Reinicie a impressora\n4. **Painel de Controle → Dispositivos e Impressoras**\n5. Limpe a fila de impressão\n\n${tiIsOnline ? '✅ TI online!' : '⏰ TI resolverá quando retornar.'}`;
-    }
-
-    if (/email|e-mail|outlook|correio|spam|anexo/i.test(msg)) {
-        return `📧 **Problemas com e-mail?**\n\n1. Verifique **conexão com internet**\n2. Tente acessar pelo **webmail**\n3. Outlook: **Arquivo → Configurações de Conta**\n4. Verifique pasta de **Spam/Lixo**\n5. Limite de anexo: 25MB\n\n${tiIsOnline ? '✅ TI online para verificar conta!' : '📝 Anote o erro e reporte ao TI.'}`;
-    }
-
-    if (/lento|lenta|travando|trava|demora|congelou|memória|ram|performance|desempenho/i.test(msg)) {
-        return `🖥️ **Computador lento?**\n\n1. **Reinicie** (resolve 80% dos casos!)\n2. Feche programas: **Ctrl+Alt+Del → Gerenciador**\n3. Verifique espaço em disco (>10% livre)\n4. Desative programas na **Inicialização**\n5. **Limpeza de Disco** no menu Iniciar\n\n${tiIsOnline ? '✅ TI pode verificar remotamente!' : '⏰ Agende verificação com TI.'}`;
-    }
-
-    if (/instalar|programa|software|aplicativo|atualizar|update|licença|ativar/i.test(msg)) {
-        return `💿 **Instalação/Software?**\n\nPor segurança:\n• Instalações devem ser solicitadas ao **TI**\n• Não instale programas desconhecidos\n• Atualizações Windows: automáticas\n\n${tiIsOnline ? '✅ Solicite ao TI online!' : '📝 Anote e solicite ao TI.\n⏰ Seg-Sex, 8h às 18h'}`;
-    }
-
-    if (/vírus|virus|malware|segurança|hack|invasão|phishing|suspeito|antivírus/i.test(msg)) {
-        return `🛡️ **Alerta de Segurança!**\n\n⚠️ Se suspeita de vírus:\n1. **NÃO clique** em links suspeitos\n2. **Desconecte** da rede\n3. **NÃO desligue** o PC\n4. Execute verificação do **antivírus**\n5. Mude senhas de outro dispositivo\n\n${tiIsOnline ? '🚨 Contate o TI IMEDIATAMENTE!' : '🚨 Mantenha PC desconectado!'}`;
-    }
-
-    if (/obrigad|valeu|thanks|brigad|show|perfeito|resolveu|funcionou|consegui/i.test(msg)) {
+    // ── Agradecimentos ──
+    if (/^(obrigad|valeu|thanks|brigad|show|perfeito|resolveu|funcionou|consegui|massa|top|legal|maravilha)/i.test(msg)) {
         const thanks = [
-            'De nada! 😊 Se precisar, é só chamar.',
-            'Disponha! 🤖 Estou aqui 24/7!',
-            'Que bom que ajudou! ✅ Qualquer dúvida, estou por aqui!'
+            'De nada! 😊 Se precisar de mais alguma ajuda com o sistema, é só perguntar!',
+            'Disponha! 🤖 Estou aqui 24/7 para ajudar com o Aluforce!',
+            'Que bom que ajudou! ✅ Lembre-se: a Central de Ajuda tem tutoriais detalhados em https://aluforce.api.br/ajuda'
         ];
         return thanks[Math.floor(Math.random() * thanks.length)];
     }
 
-    if (/ajuda|help|menu|opções|o que você faz|comandos/i.test(msg)) {
-        return `🤖 **Sou o BOB I.A.!** Posso ajudar com:\n\n🔐 Senha e Acesso\n🌐 Internet/Rede\n🖨️ Impressora\n📧 E-mail\n🖥️ PC Lento\n💿 Software\n🛡️ Segurança\n\nDigite sobre seu problema! 💡\n\n${tiIsOnline ? '✅ TI online para casos complexos.' : '⏰ TI offline — estou cobrindo!'}`;
+    // ── Menu de ajuda completo ──
+    if (/^(ajuda|help|menu|op[çc][oõ]es|o que voc[eê] faz|comandos|tudo|todos.*modulo)/i.test(msg)) {
+        return `🤖 **BOB I.A. — Assistente Aluforce ERP**\n\nPosso ajudar com **todos os módulos**:\n\n📋 **Guia Inicial** — Primeiro acesso, configurações\n🛒 **Vendas** — Pedidos, orçamentos, comissões, prospecção\n📦 **Compras** — Pedidos, cotações, fornecedores\n💰 **Financeiro** — Contas, fluxo de caixa, conciliação, PIX\n📄 **NF-e / NFS-e** — Emissão, cancelamento, carta de correção\n🏭 **PCP** — Ordens de produção, kanban, BOM\n👥 **RH** — Holerite, férias, ponto, treinamentos\n📦 **Estoque** — Saldos, movimentações, inventário\n📊 **Relatórios** — Todos os módulos\n🔒 **Segurança** — Permissões e acessos\n📱 **WhatsApp** — ERP pelo celular\n🔐 **TI** — Senha, rede, impressora, e-mail\n\n💡 Digite o assunto! Ex: *\"como criar pedido de venda\"*\n📖 Central de Ajuda: https://aluforce.api.br/ajuda`;
     }
 
-    return tiIsOnline
-        ? `🤖 Para essa questão, recomendo o **técnico do TI** que está online agora!\n\nDigite **"ajuda"** para ver tudo que posso fazer.`
-        : `🤖 O **TI está offline**.\n\n1. **Reinicie** o equipamento\n2. Verifique se outros colegas têm o mesmo problema\n3. Anote a **mensagem de erro**\n4. Anote **horário e frequência**\n\n💡 Digite **"ajuda"** para ver os temas que posso orientar.`;
+    // ── Buscar na base de conhecimento ──
+    for (const [key, topic] of Object.entries(BOB_KNOWLEDGE_BASE)) {
+        if (topic.keywords.test(msg)) {
+            // Tópicos com resposta estática (ERP)
+            if (topic.response) {
+                return topic.response;
+            }
+
+            // Tópicos de TI (resposta dinâmica baseada em tiOnline)
+            switch (key) {
+                case 'senha':
+                    return tiIsOnline
+                        ? `🔐 **Problemas com senha/acesso?**\n\nUm técnico do TI está **online agora**! Envie uma mensagem direta para ele.\n\n**Enquanto isso, tente:**\n• Verifique se o Caps Lock está desativado\n• Limpe o cache do navegador (Ctrl+Shift+Del)\n• Tente a opção "Esqueci minha senha"\n\n📖 [Primeiro Acesso](https://aluforce.api.br/ajuda/artigos/primeiro-acesso.html)`
+                        : `🔐 **Problemas com senha/acesso?**\n\n1. Verifique se o **Caps Lock** está desativado\n2. Tente **"Esqueci minha senha"** na tela de login\n3. Limpe o cache: **Ctrl+Shift+Del**\n4. Tente outro navegador (Chrome, Firefox, Edge)\n\n📖 [Primeiro Acesso](https://aluforce.api.br/ajuda/artigos/primeiro-acesso.html)\n\n⏰ TI disponível: Seg-Sex, 8h às 18h`;
+                case 'internet':
+                    return `🌐 **Problemas de conectividade?**\n\n1. **Reinicie** roteador/modem (desligue 30s)\n2. Reconecte o Wi-Fi\n3. CMD: \`ipconfig /release\` → \`ipconfig /renew\`\n4. Teste em outro dispositivo\n5. Tente cabo de rede\n\n${tiIsOnline ? '✅ TI online para ajudar!' : '⏰ TI offline — registre o problema.'}`;
+                case 'impressora':
+                    return `🖨️ **Problemas com impressora?**\n\n1. Verifique se está **ligada e conectada**\n2. Veja se há **papel preso**\n3. Reinicie a impressora\n4. **Painel de Controle → Dispositivos e Impressoras**\n5. Limpe a fila de impressão\n\n${tiIsOnline ? '✅ TI online!' : '⏰ Solicite ao TI quando retornar.'}`;
+                case 'email':
+                    return `📧 **Problemas com e-mail?**\n\n1. Verifique **conexão com internet**\n2. Tente acessar pelo **webmail**\n3. Outlook: **Arquivo → Configurações de Conta**\n4. Verifique pasta de **Spam/Lixo**\n5. Limite de anexo: 25MB\n\n${tiIsOnline ? '✅ TI online para verificar!' : '📝 Anote o erro e reporte ao TI.'}`;
+                case 'pcLento':
+                    return `🖥️ **Computador lento?**\n\n1. **Reinicie** (resolve 80% dos casos!)\n2. Feche programas: **Ctrl+Alt+Del → Gerenciador**\n3. Verifique espaço em disco (>10% livre)\n4. Desative programas na **Inicialização**\n5. **Limpeza de Disco** no menu Iniciar\n\n${tiIsOnline ? '✅ TI pode verificar remotamente!' : '⏰ Agende com TI.'}`;
+                case 'softwareInstalar':
+                    return `💿 **Instalação/Software?**\n\nPor segurança:\n• Instalações devem ser solicitadas ao **TI**\n• Não instale programas desconhecidos\n• Atualizações do Windows são automáticas\n\n${tiIsOnline ? '✅ Solicite ao TI online!' : '📝 Anote e solicite ao TI.\n⏰ Seg-Sex, 8h às 18h'}`;
+                case 'virusSeg':
+                    return `🛡️ **Alerta de Segurança!**\n\n⚠️ Se suspeita de vírus:\n1. **NÃO clique** em links suspeitos\n2. **Desconecte** da rede\n3. **NÃO desligue** o PC\n4. Execute verificação do **antivírus**\n5. Mude senhas de outro dispositivo\n\n${tiIsOnline ? '🚨 Contate o TI IMEDIATAMENTE!' : '🚨 Mantenha PC desconectado até o TI verificar!'}`;
+            }
+        }
+    }
+
+    // ── Fallback inteligente — tentar encontrar módulo mencionado ──
+    if (/como|onde|qual|quero|preciso|posso|consigo|fa[çc]o|fazer/i.test(msg)) {
+        return `🤖 Entendi! Vou tentar te ajudar.\n\nPara uma orientação mais precisa, me diga **em qual módulo** está sua dúvida:\n\n🛒 Vendas\n📦 Compras\n💰 Financeiro\n📄 NF-e\n🏭 PCP\n👥 RH\n📦 Estoque\n\nOu acesse a **Central de Ajuda** com tutoriais completos:\n📖 https://aluforce.api.br/ajuda\n\n💡 Dica: Seja específico! Ex: *"como emitir nota fiscal"* ou *"como consultar fluxo de caixa"*`;
+    }
+
+    // ── Fallback geral ──
+    return `🤖 Não encontrei uma resposta exata para isso, mas posso te orientar!\n\n**Opções:**\n• Digite **"ajuda"** para ver todos os tópicos\n• Acesse a Central de Ajuda: https://aluforce.api.br/ajuda\n• Acesse os Tutoriais: https://aluforce.api.br/ajuda/colecoes/tutoriais.html\n${tiIsOnline ? '\n✅ Ou fale com o **TI online** para questões técnicas!' : '\n⏰ TI disponível: Seg-Sex, 8h às 18h'}`;
 }
