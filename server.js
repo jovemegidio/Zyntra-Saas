@@ -943,7 +943,10 @@ const GLOBAL_INJECT_SCRIPTS = [
     '<!-- ALUFORCE: Report Viewer v1.0 - Relatorios inline -->',
     '<script src="/js/report-viewer.js?v=20260301"></script>',
     '<!-- ALUFORCE: PWA Manager v3.0 -->',
-    '<script src="/js/pwa-manager.js?v=20260301"></script>\n'
+    '<script src="/js/pwa-manager.js?v=20260301"></script>',
+    '<!-- ALUFORCE: Zyntra Chat Teams Widget v2.0 -->',
+    '<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260304">',
+    '<script src="/chat-teams/chat-widget.js?v=20260304" defer></script>\n'
 ].join('\n');
 
 // Paginas que NAO devem receber offline-sync (login precisa de rede)
@@ -967,17 +970,25 @@ app.use((req, res, next) => {
                         injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
                     }
                 } else {
-                    // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa)
+                    // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
                     if (!html.includes('offline-sync-manager.js')) {
                         injectTag = GLOBAL_INJECT_SCRIPTS;
-                    } else if (!html.includes('report-viewer.js')) {
-                        // Já tem offline-sync mas falta report-viewer
-                        injectTag = '\n<script src="/js/report-viewer.js?v=20260301"></script>\n';
+                    } else {
+                        // Já tem offline-sync, verificar componentes faltantes
+                        let missing = '';
                         if (!html.includes('confirm-dialog.js')) {
-                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>' + injectTag;
+                            missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
                         }
-                    } else if (!html.includes('confirm-dialog.js')) {
-                        injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
+                        if (!html.includes('report-viewer.js')) {
+                            missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
+                        }
+                        if (!html.includes('chat-widget.css')) {
+                            missing += '\n<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260304">';
+                        }
+                        if (!html.includes('chat-widget.js')) {
+                            missing += '\n<script src="/chat-teams/chat-widget.js?v=20260304" defer></script>';
+                        }
+                        injectTag = missing;
                     }
                 }
 

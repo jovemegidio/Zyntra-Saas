@@ -98,7 +98,18 @@
     // BUILD DOM
     // ═══════════════════════════════════════════════════════
 
+    function ensureCSSLoaded() {
+        // Auto-inject CSS se ainda não estiver presente na página
+        if (document.querySelector('link[href*="chat-widget.css"]')) return;
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/chat-teams/chat-widget.css?v=' + Date.now();
+        document.head.appendChild(link);
+    }
+
     function buildWidget() {
+        ensureCSSLoaded();
+
         // FAB
         const fab = document.createElement('button');
         fab.className = 'ct-fab'; fab.id = 'ct-fab'; fab.title = 'Zyntra Chat';
