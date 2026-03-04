@@ -27,6 +27,8 @@
     let recInterval = null;
     let recStartTime = 0;
     let myStatus = 'online';
+    let dmContactIds = [];  // IDs de usuários com conversa existente
+    let showAllUsers = false; // Toggle para mostrar todos os usuários
 
     const STATUS_LABELS = { online: 'Online', almoco: 'Em Almoço', reuniao: 'Em Reunião', offline: 'Offline' };
     const STATUS_ICONS = { online: '🟢', almoco: '🟡', reuniao: '🟠', offline: '⚫' };
@@ -43,6 +45,7 @@
     // ── Helpers ───────────────────────────────────────────
     function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
     function initials(name) { return (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
+    function getFirstName(name) { return (name || 'Usuário').trim().split(/\s+/)[0]; }
     function fmtTime(iso) { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
     function fmtDate(iso) {
         const d = new Date(iso), today = new Date(), y = new Date(today); y.setDate(y.getDate() - 1);
@@ -348,9 +351,11 @@
     async function loadCurrentUser() {
         try {
             const me = await apiFetch('/api/me');
+            const rawName = me.apelido || me.nome || me.name || me.email?.split('@')[0] || 'Usuário';
             currentUser = {
                 id: me.id || me.userId,
-                displayName: me.apelido || me.nome || me.name || me.email?.split('@')[0] || 'Usuário',
+                displayName: getFirstName(rawName),
+                fullName: rawName,
                 email: me.email,
                 department: me.departamento || me.setor || me.role || 'Geral',
                 avatarColor: ['#4F46E5','#0891B2','#059669','#D97706','#DC2626','#7C3AED','#DB2777','#2563EB'][(me.id||0)%8],
@@ -359,7 +364,7 @@
             };
             renderSidebarFooter();
             socket.emit('chat:online', { ...currentUser, status: myStatus });
-            await Promise.all([loadChannels(), loadUsers()]);
+            await Promise.all([loadChannels(), loadUsers(), loadContacts()]);
             if (channels.length > 0) selectChannel(channels.find(c => c.nome === 'geral') || channels[0]);
             checkUnread();
         } catch (err) { console.error('[CHAT] Erro ao carregar usuário:', err); }
@@ -403,6 +408,12 @@
 
         socket.on('chat:channel:message', msg => { if (activeView.type === 'channel' && activeView.id === msg.channelId) appendMessage(msg, 'channel'); });
         socket.on('chat:dm:message', msg => {
+            // Adicionar remetente aos contatos automaticamente
+            const senderId = msg.fromId === currentUser?.id ? msg.toId : msg.fromId;
+            if (senderId && senderId !== -1 && !dmContactIds.includes(senderId)) {
+                dmContactIds.push(senderId);
+                renderDMList();
+            }
             if (activeView.type === 'dm') {
                 const otherId = activeView.id;
                 if (msg.fromId === otherId || msg.fromId === currentUser?.id || msg.toId === currentUser?.id) { appendMessage(msg, 'dm'); return; }
@@ -599,6 +610,23 @@
         try { users = await apiFetch('/api/chat/usuarios'); renderDMList(); } catch (err) { console.error('[CHAT]', err); }
     }
 
+    async function loadContacts() {
+        try { dmContactIds = await apiFetch('/api/chat/contatos'); } catch (err) { dmContactIds = []; }
+    }
+
+    function renderDMItem(u) {
+        const isActive = activeView.type === 'dm' && activeView.id === u.id;
+        const status = getUserStatus(u.id);
+        const name = u.displayName || getFirstName(u.fullName);
+        const avatarInner = u.foto
+            ? `<img src="${u.foto.startsWith('/') ? u.foto : '/avatars/' + u.foto}" onerror="this.parentElement.textContent='${initials(name)}'" />`
+            : initials(name);
+        return `<div class="ct-dm-item ${isActive ? 'active' : ''}" data-user-id="${u.id}">
+            <div class="ct-dm-avatar" style="background:${u.avatarColor}">${avatarInner}<span class="ct-status-dot ${status}"></span></div>
+            <div class="ct-dm-info"><span class="ct-dm-name">${esc(name)}</span><span class="ct-dm-dept">${esc(u.department || 'Geral')}</span></div>
+        </div>`;
+    }
+
     function renderDMList() {
         const list = document.getElementById('ct-dm-list');
         const botList = document.getElementById('ct-bot-list');
@@ -606,7 +634,6 @@
 
         const bots = users.filter(u => u.isBot);
         const others = users.filter(u => u.id !== currentUser?.id && !u.isBot);
-        const filtered = searchQuery ? others.filter(u => u.displayName.toLowerCase().includes(searchQuery) || (u.department||'').toLowerCase().includes(searchQuery)) : others;
 
         // Bot
         botList.innerHTML = bots.map(u => {
@@ -617,18 +644,54 @@
             </div>`;
         }).join('');
 
-        // Users with photo, name, department
-        list.innerHTML = filtered.map(u => {
-            const isActive = activeView.type === 'dm' && activeView.id === u.id;
-            const status = getUserStatus(u.id);
-            const avatarInner = u.foto
-                ? `<img src="${u.foto.startsWith('/') ? u.foto : '/avatars/' + u.foto}" onerror="this.parentElement.textContent='${initials(u.displayName)}'" />`
-                : initials(u.displayName);
-            return `<div class="ct-dm-item ${isActive ? 'active' : ''}" data-user-id="${u.id}">
-                <div class="ct-dm-avatar" style="background:${u.avatarColor}">${avatarInner}<span class="ct-status-dot ${status}"></span></div>
-                <div class="ct-dm-info"><span class="ct-dm-name">${esc(u.displayName)}</span><span class="ct-dm-dept">${esc(u.department || 'Geral')}</span></div>
-            </div>`;
-        }).join('');
+        // Se buscando, mostrar todos que batem com a busca
+        if (searchQuery) {
+            const filtered = others.filter(u => (u.displayName||'').toLowerCase().includes(searchQuery) || (u.fullName||'').toLowerCase().includes(searchQuery) || (u.department||'').toLowerCase().includes(searchQuery));
+            list.innerHTML = filtered.map(u => renderDMItem(u)).join('') || '<div class="ct-dm-empty">Nenhum resultado</div>';
+        } else {
+            // Mostrar apenas contatos (quem já trocou mensagem) + quem está online
+            const contacts = others.filter(u => dmContactIds.includes(u.id));
+            const onlineNonContacts = others.filter(u => !dmContactIds.includes(u.id) && onlineUserIds.includes(u.id));
+            const restUsers = others.filter(u => !dmContactIds.includes(u.id) && !onlineUserIds.includes(u.id));
+
+            let html = '';
+
+            // Contatos recentes
+            if (contacts.length > 0) {
+                html += contacts.map(u => renderDMItem(u)).join('');
+            }
+
+            // Online (que não são contatos)
+            if (onlineNonContacts.length > 0) {
+                if (contacts.length > 0) html += '<div class="ct-dm-divider">Online</div>';
+                html += onlineNonContacts.map(u => renderDMItem(u)).join('');
+            }
+
+            // Botão para ver mais
+            if (restUsers.length > 0) {
+                if (showAllUsers) {
+                    html += '<div class="ct-dm-divider">Todos os Usuários</div>';
+                    html += restUsers.map(u => renderDMItem(u)).join('');
+                    html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>▲ Ocultar</button></div>`;
+                } else {
+                    html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>＋ Ver todos (${restUsers.length})</button></div>`;
+                }
+            }
+
+            // Se nenhum contato e ninguém online
+            if (!contacts.length && !onlineNonContacts.length && !showAllUsers) {
+                html += `<div class="ct-dm-empty">Nenhuma conversa ainda</div>`;
+                html += `<div class="ct-dm-toggle" id="ct-toggle-users"><button>＋ Iniciar conversa (${restUsers.length})</button></div>`;
+            }
+
+            list.innerHTML = html;
+        }
+
+        // Toggle button handler
+        const toggleBtn = document.getElementById('ct-toggle-users');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => { showAllUsers = !showAllUsers; renderDMList(); });
+        }
 
         // Click handlers
         [botList, list].forEach(el => el.querySelectorAll('.ct-dm-item').forEach(item => {
@@ -642,8 +705,11 @@
     function selectDM(user) {
         if (activeView.type === 'channel' && activeView.id) socket.emit('chat:channel:leave', activeView.id);
         activeView = { type: 'dm', id: user.id };
+        // Adicionar aos contatos quando iniciar conversa
+        if (!user.isBot && !dmContactIds.includes(user.id)) { dmContactIds.push(user.id); }
         updateChatHeader();
-        document.getElementById('ct-input').placeholder = user.isBot ? 'Descreva seu problema...' : `Mensagem para ${user.displayName}`;
+        const name = user.displayName || getFirstName(user.fullName);
+        document.getElementById('ct-input').placeholder = user.isBot ? 'Descreva seu problema...' : `Mensagem para ${name}`;
         renderChannelList(); renderDMList();
         loadDMMessages(user.id);
         unreadCount = Math.max(0, unreadCount - 1); updateFabBadge();

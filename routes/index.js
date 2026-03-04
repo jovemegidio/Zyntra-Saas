@@ -139,6 +139,19 @@ module.exports = function registerAllRoutes(app, deps) {
             app.use('/api/financeiro', require(path.join(__dirname, '..', 'api', 'conciliacao-bancaria'))({ pool, authenticateToken }));
         } catch (_) {}
 
+        // Integração Bancária (API, Boletos, CNAB)
+        try {
+            const createIntegracaoBancaria = require('./integracao-bancaria');
+            app.use('/api/financeiro/integracoes-bancarias', createIntegracaoBancaria({ pool, authenticateToken }));
+            // Webhook público (sem auth) - montado separadamente
+            app.post('/api/financeiro/webhook/banco/:bancoId', (req, res) => {
+                const router = createIntegracaoBancaria({ pool, authenticateToken });
+                router.handle(req, res);
+            });
+        } catch (integErr) {
+            console.warn('[ROUTES] ⚠️ Integração bancária não carregada:', integErr.message);
+        }
+
         console.log('[ROUTES] ✅ Financeiro routes mounted at /api/financeiro (consolidated)');
     } catch (err) {
         console.error('[ROUTES] ❌ Failed to load financeiro routes:', err.message);

@@ -1456,6 +1456,271 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* ========== INTEGRAÇÃO BANCÁRIA ========== */
+        .integracao-status-card {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+        }
+        .integracao-status-card.status-erro {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border-color: #fca5a5;
+        }
+        .integracao-status-card.status-conectado {
+            background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+            border-color: #4ade80;
+        }
+        .integracao-status-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #bbf7d0;
+            color: #15803d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+        .integracao-status-info {
+            flex: 1;
+        }
+        .integracao-status-info h4 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #14532d;
+            margin: 0;
+        }
+        .integracao-status-info p {
+            font-size: 12px;
+            color: #22c55e;
+            margin: 4px 0 0;
+        }
+        .integracao-test-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #84cc16, #65a30d);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .integracao-test-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(132,204,22,0.4);
+        }
+        .integracao-test-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .integracao-test-btn.testing {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        .integracao-test-btn.success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        .integracao-test-btn.error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .field-hint {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        .field-hint i { margin-right: 4px; }
+
+        .mbo-input-icon {
+            position: relative;
+        }
+        .mbo-input-icon input {
+            padding-right: 40px !important;
+        }
+        .mbo-input-icon i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            pointer-events: none;
+            font-size: 14px;
+        }
+
+        .integracao-upload-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+            font-size: 13px;
+        }
+        .integracao-upload-area:hover {
+            border-color: #84cc16;
+            background: #f7fee7;
+            color: #4d7c0f;
+        }
+        .integracao-upload-area i { font-size: 20px; }
+        .integracao-upload-area.has-file {
+            border-color: #22c55e;
+            background: #f0fdf4;
+            color: #15803d;
+            border-style: solid;
+        }
+
+        .integracao-webhook-url {
+            display: flex;
+            align-items: center;
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .webhook-readonly {
+            flex: 1;
+            padding: 10px 14px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 12px;
+            color: #22d3ee;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .webhook-copy-btn {
+            padding: 10px 14px;
+            background: #334155;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .webhook-copy-btn:hover {
+            background: #475569;
+            color: #fff;
+        }
+
+        .integracao-escopos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .escopo-check {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+        .escopo-check:hover { border-color: #84cc16; background: #f7fee7; }
+        .escopo-check input[type="checkbox"] {
+            accent-color: #84cc16;
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Toggle Switch */
+        .mbo-row-toggle {
+            padding: 10px 0;
+        }
+        .mbo-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #475569;
+        }
+        .mbo-toggle-slider {
+            width: 42px;
+            height: 24px;
+            background: #cbd5e1;
+            border-radius: 12px;
+            position: relative;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        .mbo-toggle-slider::after {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .mbo-toggle input:checked + .mbo-toggle-slider {
+            background: #84cc16;
+        }
+        .mbo-toggle input:checked + .mbo-toggle-slider::after {
+            left: 21px;
+        }
+        .mbo-toggle input { display: none; }
+
+        /* CNAB Action Cards */
+        .integracao-action-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 18px 20px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .integracao-action-card:hover {
+            border-color: #84cc16;
+            box-shadow: 0 4px 16px rgba(132,204,22,0.15);
+            transform: translateY(-2px);
+        }
+        .action-card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+        .action-card-info h5 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+        .action-card-info p {
+            font-size: 12px;
+            color: #64748b;
+            margin: 4px 0 0;
+        }
+
+        @media (max-width: 768px) {
+            .integracao-escopos { grid-template-columns: 1fr; }
+            .integracao-status-card { flex-direction: column; text-align: center; }
+        }
     </style>
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
@@ -1824,17 +2089,232 @@
 
                         <!-- INTEGRAÇÃO COM O BANCO -->
                         <div class="mbo-tab-pane" id="mbo-tab-integracao">
-                            <div class="mbo-empty">
-                                <p>=\</p>
-                                <p>Ainda não temos suporte para integração bancária automática para este banco.</p>
+                            <!-- Status da Integração -->
+                            <div class="integracao-status-card" id="integracaoStatusCard">
+                                <div class="integracao-status-icon" id="integracaoStatusIcon">
+                                    <i class="fas fa-plug"></i>
+                                </div>
+                                <div class="integracao-status-info">
+                                    <h4 id="integracaoStatusTitulo">Integração não configurada</h4>
+                                    <p id="integracaoStatusDesc">Configure as credenciais da API bancária para habilitar a integração automática</p>
+                                </div>
+                                <button class="integracao-test-btn" id="btnTestarIntegracao" onclick="testarIntegracaoBancaria()" disabled>
+                                    <i class="fas fa-vial"></i> Testar Conexão
+                                </button>
+                            </div>
+
+                            <!-- Ambiente -->
+                            <div class="mbo-row" style="margin-top: 20px;">
+                                <div class="mbo-field">
+                                    <label><i class="fas fa-server" style="color:#84cc16;margin-right:4px;"></i> Ambiente</label>
+                                    <select id="integracaoAmbiente">
+                                        <option value="sandbox">🧪 Sandbox (Homologação)</option>
+                                        <option value="producao">🟢 Produção</option>
+                                    </select>
+                                </div>
+                                <div class="mbo-field">
+                                    <label><i class="fas fa-code-branch" style="color:#84cc16;margin-right:4px;"></i> Provedor / API</label>
+                                    <select id="integracaoProvedor">
+                                        <option value="">Selecione o provedor...</option>
+                                        <optgroup label="Open Banking / Open Finance">
+                                            <option value="openbanking">Open Banking Brasil (PCM)</option>
+                                        </optgroup>
+                                        <optgroup label="APIs Bancárias Diretas">
+                                            <option value="bb">Banco do Brasil API</option>
+                                            <option value="itau">Itaú API (Iti/Empresas)</option>
+                                            <option value="bradesco">Bradesco API</option>
+                                            <option value="santander">Santander API</option>
+                                            <option value="caixa">Caixa Econômica API</option>
+                                            <option value="inter">Banco Inter API v2</option>
+                                            <option value="sicoob">Sicoob API</option>
+                                            <option value="sicredi">Sicredi API</option>
+                                            <option value="nubank">Nubank Empresas</option>
+                                            <option value="c6">C6 Bank API</option>
+                                        </optgroup>
+                                        <optgroup label="Gateway de Pagamentos">
+                                            <option value="asaas">Asaas</option>
+                                            <option value="gerencianet">Efí (Gerencianet)</option>
+                                            <option value="pagarme">Pagar.me</option>
+                                            <option value="stripe">Stripe</option>
+                                            <option value="mercadopago">Mercado Pago</option>
+                                        </optgroup>
+                                        <optgroup label="Outros">
+                                            <option value="custom">API Personalizada</option>
+                                        </optgroup>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Credenciais OAuth2 -->
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-lg">
+                                    <label><i class="fas fa-key" style="color:#f59e0b;margin-right:4px;"></i> Client ID <span style="color:#ef4444;">*</span></label>
+                                    <input type="text" id="integracaoClientId" placeholder="Insira o Client ID fornecido pelo banco">
+                                </div>
+                                <div class="mbo-field mbo-field-lg">
+                                    <label><i class="fas fa-lock" style="color:#ef4444;margin-right:4px;"></i> Client Secret <span style="color:#ef4444;">*</span></label>
+                                    <div class="mbo-input-icon">
+                                        <input type="password" id="integracaoClientSecret" placeholder="Insira o Client Secret">
+                                        <i class="fas fa-eye" style="cursor:pointer;pointer-events:auto;" onclick="toggleSecretVisibility(this)"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- URLs da API -->
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label><i class="fas fa-globe" style="color:#3b82f6;margin-right:4px;"></i> URL Base da API</label>
+                                    <input type="url" id="integracaoUrlBase" placeholder="https://api.banco.com.br/v2">
+                                    <span class="field-hint"><i class="fas fa-info-circle"></i> Preenchido automaticamente ao selecionar o provedor</span>
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label><i class="fas fa-shield-alt" style="color:#8b5cf6;margin-right:4px;"></i> URL de Autenticação (OAuth2)</label>
+                                    <input type="url" id="integracaoUrlAuth" placeholder="https://auth.banco.com.br/oauth/token">
+                                </div>
+                            </div>
+
+                            <!-- Certificado Digital -->
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-lg">
+                                    <label><i class="fas fa-certificate" style="color:#0d9488;margin-right:4px;"></i> Certificado Digital (.pem / .p12)</label>
+                                    <div class="integracao-upload-area" id="certUploadArea" onclick="document.getElementById('certFile').click()">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <span id="certFileName">Clique para enviar o certificado digital</span>
+                                        <input type="file" id="certFile" accept=".pem,.p12,.pfx,.crt,.key" style="display:none" onchange="onCertFileSelected(this)">
+                                    </div>
+                                    <span class="field-hint"><i class="fas fa-lock"></i> Certificado armazenado com criptografia AES-256</span>
+                                </div>
+                                <div class="mbo-field">
+                                    <label><i class="fas fa-key" style="color:#f97316;margin-right:4px;"></i> Senha do Certificado</label>
+                                    <input type="password" id="integracaoCertSenha" placeholder="Senha do .p12 / .pfx">
+                                </div>
+                            </div>
+
+                            <!-- Webhook -->
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label><i class="fas fa-satellite-dish" style="color:#6366f1;margin-right:4px;"></i> URL de Webhook (notificações automáticas)</label>
+                                    <div class="integracao-webhook-url">
+                                        <span class="webhook-readonly" id="webhookUrl">https://seu-dominio.com/api/financeiro/webhook/banco/{id}</span>
+                                        <button type="button" class="webhook-copy-btn" onclick="copiarWebhook()" title="Copiar URL">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                    <span class="field-hint"><i class="fas fa-info-circle"></i> Configure esta URL no painel do banco para receber notificações de pagamento/PIX</span>
+                                </div>
+                            </div>
+
+                            <!-- Permissões / Escopos -->
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label><i class="fas fa-check-double" style="color:#22c55e;margin-right:4px;"></i> Escopos / Permissões da API</label>
+                                    <div class="integracao-escopos">
+                                        <label class="escopo-check"><input type="checkbox" id="escopoExtrato" checked> <span>📄 Consultar Extrato</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoSaldo" checked> <span>💰 Consultar Saldo</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoPix" checked> <span>⚡ PIX (enviar/receber)</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoBoleto"> <span>🧾 Emitir Boletos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoTransferencia"> <span>🔄 Transferências (TED/DOC)</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoPagamento"> <span>💳 Pagamentos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoWebhook" checked> <span>📡 Webhooks</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoCNAB"> <span>📋 Remessa/Retorno CNAB</span></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sincronização Automática -->
+                            <div class="mbo-row mbo-row-toggle">
+                                <label class="mbo-toggle">
+                                    <input type="checkbox" id="integracaoSyncAuto">
+                                    <span class="mbo-toggle-slider"></span>
+                                    <span class="mbo-toggle-text">Sincronizar extrato automaticamente (a cada 30 minutos)</span>
+                                </label>
+                            </div>
+                            <div class="mbo-row mbo-row-toggle">
+                                <label class="mbo-toggle">
+                                    <input type="checkbox" id="integracaoWebhookAtivo">
+                                    <span class="mbo-toggle-slider"></span>
+                                    <span class="mbo-toggle-text">Receber notificações via webhook (PIX, boletos, pagamentos)</span>
+                                </label>
                             </div>
                         </div>
 
                         <!-- BOLETOS DE COBRANÇA -->
                         <div class="mbo-tab-pane" id="mbo-tab-boletos">
-                            <div class="mbo-empty">
-                                <p>=\(</p>
-                                <p>Ainda não temos suporte para geração de boletos de cobrança.</p>
+                            <div class="integracao-status-card" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047;">
+                                <div class="integracao-status-icon" style="background:#fef08a;color:#a16207;">
+                                    <i class="fas fa-barcode"></i>
+                                </div>
+                                <div class="integracao-status-info">
+                                    <h4 style="color:#854d0e;">Configuração de Boletos</h4>
+                                    <p style="color:#a16207;">Configure os dados para emissão de boletos registrados</p>
+                                </div>
+                            </div>
+
+                            <div class="mbo-row" style="margin-top:20px;">
+                                <div class="mbo-field">
+                                    <label>Carteira</label>
+                                    <input type="text" id="boletoCarteira" placeholder="Ex: 17, 09, RG">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Convênio / Código Beneficiário</label>
+                                    <input type="text" id="boletoConvenio" placeholder="Nº do convênio">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Variação da Carteira</label>
+                                    <input type="text" id="boletoVariacao" placeholder="Ex: 019">
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field">
+                                    <label>Nosso Número (Início)</label>
+                                    <input type="text" id="boletoNossoNumeroInicio" placeholder="Ex: 00000001">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Nosso Número (Próximo)</label>
+                                    <input type="text" id="boletoNossoNumeroProximo" placeholder="Auto-incremento">
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label>Instruções de Cobrança (linha 1)</label>
+                                    <input type="text" id="boletoInstrucao1" placeholder="Ex: Não receber após o vencimento">
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field mbo-field-full">
+                                    <label>Instruções de Cobrança (linha 2)</label>
+                                    <input type="text" id="boletoInstrucao2" placeholder="Ex: Cobrar multa de 2% após o vencimento">
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field">
+                                    <label>Multa (%)</label>
+                                    <input type="text" id="boletoMulta" placeholder="2,00">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Juros ao Mês (%)</label>
+                                    <input type="text" id="boletoJuros" placeholder="1,00">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Dias para Protesto</label>
+                                    <input type="number" id="boletoProtesto" placeholder="0" min="0">
+                                </div>
+                            </div>
+                            <div class="mbo-row mbo-row-toggle">
+                                <label class="mbo-toggle">
+                                    <input type="checkbox" id="boletoRegistrado" checked>
+                                    <span class="mbo-toggle-slider"></span>
+                                    <span class="mbo-toggle-text">Boleto registrado (envio automático ao banco via API)</span>
+                                </label>
+                            </div>
+                            <div class="mbo-row mbo-row-toggle">
+                                <label class="mbo-toggle">
+                                    <input type="checkbox" id="boletoPixQrcode">
+                                    <span class="mbo-toggle-slider"></span>
+                                    <span class="mbo-toggle-text">Incluir QR Code PIX no boleto (Boleto Híbrido)</span>
+                                </label>
                             </div>
                         </div>
 
@@ -1907,9 +2387,72 @@
 
                         <!-- PAGAMENTOS E CNAB -->
                         <div class="mbo-tab-pane" id="mbo-tab-pagamentos">
-                            <div class="mbo-empty">
-                                <p>😕</p>
-                                <p>Ainda não temos suporte para integração bancária de pagamentos.</p>
+                            <div class="integracao-status-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd;">
+                                <div class="integracao-status-icon" style="background:#bfdbfe;color:#1d4ed8;">
+                                    <i class="fas fa-file-invoice"></i>
+                                </div>
+                                <div class="integracao-status-info">
+                                    <h4 style="color:#1e3a5f;">Pagamentos e Remessa CNAB</h4>
+                                    <p style="color:#3b82f6;">Configure arquivos de remessa e retorno para integração bancária</p>
+                                </div>
+                            </div>
+
+                            <div class="mbo-row" style="margin-top:20px;">
+                                <div class="mbo-field">
+                                    <label>Layout CNAB</label>
+                                    <select id="cnabLayout">
+                                        <option value="">Selecione...</option>
+                                        <option value="cnab240">CNAB 240 (Padrão FEBRABAN)</option>
+                                        <option value="cnab400">CNAB 400 (Legado)</option>
+                                    </select>
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Tipo de Serviço</label>
+                                    <select id="cnabServico">
+                                        <option value="cobranca">Cobrança (Boletos)</option>
+                                        <option value="pagamento">Pagamento de Títulos</option>
+                                        <option value="salarios">Pagamento de Salários</option>
+                                        <option value="fornecedores">Pagamento de Fornecedores</option>
+                                        <option value="tributos">Pagamento de Tributos</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mbo-row">
+                                <div class="mbo-field">
+                                    <label>Código de Transmissão</label>
+                                    <input type="text" id="cnabCodTransmissao" placeholder="Código fornecido pelo banco">
+                                </div>
+                                <div class="mbo-field">
+                                    <label>Nº Sequencial de Remessa</label>
+                                    <input type="number" id="cnabSeqRemessa" placeholder="Auto-incremento" min="1">
+                                </div>
+                            </div>
+
+                            <!-- Ações de Remessa/Retorno -->
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
+                                <div class="integracao-action-card" onclick="gerarRemessaCNAB()">
+                                    <div class="action-card-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-file-export"></i></div>
+                                    <div class="action-card-info">
+                                        <h5>Gerar Remessa</h5>
+                                        <p>Exportar arquivo de remessa CNAB para envio ao banco</p>
+                                    </div>
+                                </div>
+                                <div class="integracao-action-card" onclick="document.getElementById('retornoFile').click()">
+                                    <div class="action-card-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-file-import"></i></div>
+                                    <div class="action-card-info">
+                                        <h5>Importar Retorno</h5>
+                                        <p>Processar arquivo de retorno CNAB do banco</p>
+                                    </div>
+                                    <input type="file" id="retornoFile" accept=".ret,.txt,.cnab" style="display:none" onchange="importarRetornoCNAB(this)">
+                                </div>
+                            </div>
+
+                            <div class="mbo-row mbo-row-toggle" style="margin-top:20px;">
+                                <label class="mbo-toggle">
+                                    <input type="checkbox" id="cnabAutoProcessar">
+                                    <span class="mbo-toggle-slider"></span>
+                                    <span class="mbo-toggle-text">Processar retorno automaticamente via API (sem necessidade de arquivo)</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -3267,6 +3810,7 @@
             document.getElementById('formBanco').reset();
             document.getElementById('bancoId').value = '';
             document.getElementById('modalBancoTitulo').textContent = 'Nova Conta Bancária';
+            limparIntegracao();
 
             if (id) {
                 const banco = bancos.find(b => b.id === id);
@@ -3279,6 +3823,11 @@
                     document.getElementById('apelido').value = banco.apelido || '';
                     document.getElementById('observacoes').value = banco.observacoes || '';
                     document.getElementById('modalBancoTitulo').textContent = 'Editar Conta Bancária';
+                    // Carregar dados da integração bancária
+                    carregarIntegracaoBancaria(banco.id);
+                    // Webhook URL com ID do banco
+                    document.getElementById('webhookUrl').textContent = 
+                        `${window.location.origin}/api/financeiro/webhook/banco/${banco.id}`;
                 }
             }
 
@@ -3370,6 +3919,28 @@
                 });
 
                 if (response.ok) {
+                    const resultado = await response.json().catch(() => ({}));
+                    const bancoIdSalvo = id || resultado.id;
+                    
+                    // Salvar dados da integração bancária
+                    if (bancoIdSalvo) {
+                        try {
+                            const integData = coletarDadosIntegracao();
+                            integData.banco_id = bancoIdSalvo;
+                            const token = localStorage.getItem('token');
+                            await fetch('/api/financeiro/integracoes-bancarias', {
+                                method: 'POST',
+                                headers: { 
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify(integData)
+                            });
+                        } catch (integErr) {
+                            console.warn('Aviso: Erro ao salvar integração:', integErr);
+                        }
+                    }
+                    
                     fecharModal('modalBanco');
                     await carregarBancos();
                     showToast('success', id ? 'Banco Atualizado!' : 'Banco Cadastrado!', id ? 'Os dados da conta bancária foram atualizados com sucesso.' : 'Nova conta bancária cadastrada com sucesso.');
@@ -3518,6 +4089,404 @@
                 fecharModal('modalExtrato');
             }
         });
+
+        // ========== INTEGRAÇÃO BANCÁRIA - API ==========
+
+        // URLs padrão por provedor
+        const provedorConfigs = {
+            bb:         { url: 'https://api.bb.com.br/cobrancas/v2', auth: 'https://oauth.bb.com.br/oauth/token' },
+            itau:       { url: 'https://sts.itau.com.br/api/v1', auth: 'https://sts.itau.com.br/seguranca/v1/token' },
+            bradesco:   { url: 'https://openapi.bradesco.com.br/v1', auth: 'https://openapi.bradesco.com.br/auth/server/v1.1/token' },
+            santander:  { url: 'https://trust-open.api.santander.com.br', auth: 'https://trust-open.api.santander.com.br/auth/oauth/v2/token' },
+            caixa:      { url: 'https://api-cobranca.caixa.gov.br/sicoob/cobranca-bancaria/v2', auth: 'https://api-cobranca.caixa.gov.br/auth/token' },
+            inter:      { url: 'https://cdpj.partners.bancointer.com.br', auth: 'https://cdpj.partners.bancointer.com.br/oauth/v2/token' },
+            sicoob:     { url: 'https://api.sicoob.com.br/cobranca-bancaria/v2', auth: 'https://auth.sicoob.com.br/auth/realms/cooperado/protocol/openid-connect/token' },
+            sicredi:    { url: 'https://api-parceiro.sicredi.com.br/sb/cobranca', auth: 'https://api-parceiro.sicredi.com.br/auth/openid-connect/token' },
+            nubank:     { url: 'https://api.nubank.com.br/api/v1', auth: 'https://api.nubank.com.br/api/v1/auth' },
+            c6:         { url: 'https://api.c6bank.com.br/v1', auth: 'https://api.c6bank.com.br/v1/oauth/token' },
+            asaas:      { url: 'https://api.asaas.com/v3', auth: '' },
+            gerencianet: { url: 'https://pix.api.efipay.com.br', auth: 'https://pix.api.efipay.com.br/oauth/token' },
+            pagarme:    { url: 'https://api.pagar.me/core/v5', auth: '' },
+            stripe:     { url: 'https://api.stripe.com/v1', auth: '' },
+            mercadopago:{ url: 'https://api.mercadopago.com/v1', auth: 'https://api.mercadopago.com/oauth/token' },
+            openbanking:{ url: 'https://openbanking.org.br', auth: '' },
+            custom:     { url: '', auth: '' }
+        };
+
+        // Auto-preencher URLs ao selecionar provedor
+        document.getElementById('integracaoProvedor')?.addEventListener('change', function() {
+            const config = provedorConfigs[this.value];
+            if (config) {
+                document.getElementById('integracaoUrlBase').value = config.url;
+                document.getElementById('integracaoUrlAuth').value = config.auth;
+            }
+            // Habilitar botão de teste
+            const btn = document.getElementById('btnTestarIntegracao');
+            if (btn) btn.disabled = !this.value;
+        });
+
+        // Toggle visibilidade do Client Secret
+        function toggleSecretVisibility(icon) {
+            const input = icon.parentElement.querySelector('input');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        // Upload de certificado digital
+        function onCertFileSelected(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const label = document.getElementById('certFileName');
+            const area = document.getElementById('certUploadArea');
+            label.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            area.classList.add('has-file');
+        }
+
+        // Copiar URL de webhook
+        function copiarWebhook() {
+            const url = document.getElementById('webhookUrl').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('URL do webhook copiada!', 'success');
+            }).catch(() => {
+                // Fallback
+                const ta = document.createElement('textarea');
+                ta.value = url;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                showToast('URL do webhook copiada!', 'success');
+            });
+        }
+
+        // Testar conexão com API bancária
+        async function testarIntegracaoBancaria() {
+            const btn = document.getElementById('btnTestarIntegracao');
+            const statusCard = document.getElementById('integracaoStatusCard');
+            const statusIcon = document.getElementById('integracaoStatusIcon');
+            const statusTitulo = document.getElementById('integracaoStatusTitulo');
+            const statusDesc = document.getElementById('integracaoStatusDesc');
+
+            const clientId = document.getElementById('integracaoClientId').value.trim();
+            const clientSecret = document.getElementById('integracaoClientSecret').value.trim();
+            const provedor = document.getElementById('integracaoProvedor').value;
+
+            if (!clientId || !clientSecret) {
+                showToast('Preencha o Client ID e Client Secret', 'warning');
+                return;
+            }
+
+            // Estado: testando
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testando...';
+            btn.classList.add('testing');
+            btn.disabled = true;
+
+            try {
+                const token = localStorage.getItem('token');
+                const bancoId = document.getElementById('bancoId')?.value || '';
+                
+                const resp = await fetch('/api/financeiro/integracoes-bancarias/testar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        banco_id: bancoId,
+                        provedor,
+                        client_id: clientId,
+                        client_secret: clientSecret,
+                        url_base: document.getElementById('integracaoUrlBase').value,
+                        url_auth: document.getElementById('integracaoUrlAuth').value,
+                        ambiente: document.getElementById('integracaoAmbiente').value
+                    })
+                });
+
+                const data = await resp.json();
+
+                if (data.success) {
+                    statusCard.className = 'integracao-status-card status-conectado';
+                    statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    statusTitulo.textContent = 'Conexão estabelecida com sucesso!';
+                    statusDesc.textContent = data.message || `Token válido • Provedor: ${provedor.toUpperCase()}`;
+                    btn.innerHTML = '<i class="fas fa-check"></i> Conectado';
+                    btn.classList.remove('testing');
+                    btn.classList.add('success');
+                    showToast('Integração bancária testada com sucesso!', 'success');
+                } else {
+                    throw new Error(data.error || 'Falha na conexão');
+                }
+            } catch (err) {
+                statusCard.className = 'integracao-status-card status-erro';
+                statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                statusTitulo.textContent = 'Falha na conexão';
+                statusDesc.textContent = err.message || 'Verifique as credenciais e tente novamente';
+                btn.innerHTML = '<i class="fas fa-times"></i> Falhou';
+                btn.classList.remove('testing');
+                btn.classList.add('error');
+                showToast('Erro ao testar integração: ' + err.message, 'error');
+            }
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.classList.remove('success', 'error', 'testing');
+                btn.innerHTML = '<i class="fas fa-vial"></i> Testar Conexão';
+            }, 4000);
+        }
+
+        // Carregar dados da integração quando abrir modal de edição
+        async function carregarIntegracaoBancaria(bancoId) {
+            if (!bancoId) return;
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch(`/api/financeiro/integracoes-bancarias/${bancoId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                if (data.success && data.integracao) {
+                    const i = data.integracao;
+                    document.getElementById('integracaoProvedor').value = i.provedor || '';
+                    document.getElementById('integracaoAmbiente').value = i.ambiente || 'sandbox';
+                    document.getElementById('integracaoClientId').value = i.client_id || '';
+                    document.getElementById('integracaoUrlBase').value = i.url_base || '';
+                    document.getElementById('integracaoUrlAuth').value = i.url_auth || '';
+                    document.getElementById('integracaoSyncAuto').checked = !!i.sync_automatico;
+                    document.getElementById('integracaoWebhookAtivo').checked = !!i.webhook_ativo;
+                    
+                    // Escopos
+                    if (i.escopos) {
+                        const escopos = typeof i.escopos === 'string' ? JSON.parse(i.escopos) : i.escopos;
+                        document.getElementById('escopoExtrato').checked = !!escopos.extrato;
+                        document.getElementById('escopoSaldo').checked = !!escopos.saldo;
+                        document.getElementById('escopoPix').checked = !!escopos.pix;
+                        document.getElementById('escopoBoleto').checked = !!escopos.boleto;
+                        document.getElementById('escopoTransferencia').checked = !!escopos.transferencia;
+                        document.getElementById('escopoPagamento').checked = !!escopos.pagamento;
+                        document.getElementById('escopoWebhook').checked = !!escopos.webhook;
+                        document.getElementById('escopoCNAB').checked = !!escopos.cnab;
+                    }
+
+                    // Boletos
+                    if (i.boleto_carteira) document.getElementById('boletoCarteira').value = i.boleto_carteira;
+                    if (i.boleto_convenio) document.getElementById('boletoConvenio').value = i.boleto_convenio;
+                    if (i.boleto_variacao) document.getElementById('boletoVariacao').value = i.boleto_variacao;
+                    if (i.boleto_nosso_numero_inicio) document.getElementById('boletoNossoNumeroInicio').value = i.boleto_nosso_numero_inicio;
+                    if (i.boleto_nosso_numero_proximo) document.getElementById('boletoNossoNumeroProximo').value = i.boleto_nosso_numero_proximo;
+                    if (i.boleto_instrucao1) document.getElementById('boletoInstrucao1').value = i.boleto_instrucao1;
+                    if (i.boleto_instrucao2) document.getElementById('boletoInstrucao2').value = i.boleto_instrucao2;
+                    if (i.boleto_multa) document.getElementById('boletoMulta').value = i.boleto_multa;
+                    if (i.boleto_juros) document.getElementById('boletoJuros').value = i.boleto_juros;
+                    if (i.boleto_protesto) document.getElementById('boletoProtesto').value = i.boleto_protesto;
+                    document.getElementById('boletoRegistrado').checked = i.boleto_registrado !== false;
+                    document.getElementById('boletoPixQrcode').checked = !!i.boleto_pix_qrcode;
+
+                    // CNAB
+                    if (i.cnab_layout) document.getElementById('cnabLayout').value = i.cnab_layout;
+                    if (i.cnab_servico) document.getElementById('cnabServico').value = i.cnab_servico;
+                    if (i.cnab_cod_transmissao) document.getElementById('cnabCodTransmissao').value = i.cnab_cod_transmissao;
+                    if (i.cnab_seq_remessa) document.getElementById('cnabSeqRemessa').value = i.cnab_seq_remessa;
+                    document.getElementById('cnabAutoProcessar').checked = !!i.cnab_auto_processar;
+
+                    // Status
+                    const statusCard = document.getElementById('integracaoStatusCard');
+                    const statusTitulo = document.getElementById('integracaoStatusTitulo');
+                    const statusDesc = document.getElementById('integracaoStatusDesc');
+                    const statusIcon = document.getElementById('integracaoStatusIcon');
+                    if (i.status === 'conectado') {
+                        statusCard.className = 'integracao-status-card status-conectado';
+                        statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                        statusTitulo.textContent = 'Integração ativa';
+                        statusDesc.textContent = `Última sincronização: ${i.ultima_sync ? new Date(i.ultima_sync).toLocaleString('pt-BR') : 'Nunca'}`;
+                    }
+
+                    // Webhook URL
+                    document.getElementById('webhookUrl').textContent = 
+                        `${window.location.origin}/api/financeiro/webhook/banco/${bancoId}`;
+
+                    // Habilitar botão de teste
+                    const btn = document.getElementById('btnTestarIntegracao');
+                    if (btn) btn.disabled = false;
+                }
+            } catch (err) {
+                console.error('Erro ao carregar integração:', err);
+            }
+        }
+
+        // Coletar dados de integração para salvar junto com o banco
+        function coletarDadosIntegracao() {
+            return {
+                provedor: document.getElementById('integracaoProvedor').value,
+                ambiente: document.getElementById('integracaoAmbiente').value,
+                client_id: document.getElementById('integracaoClientId').value.trim(),
+                client_secret: document.getElementById('integracaoClientSecret').value.trim(),
+                url_base: document.getElementById('integracaoUrlBase').value.trim(),
+                url_auth: document.getElementById('integracaoUrlAuth').value.trim(),
+                sync_automatico: document.getElementById('integracaoSyncAuto').checked,
+                webhook_ativo: document.getElementById('integracaoWebhookAtivo').checked,
+                escopos: JSON.stringify({
+                    extrato: document.getElementById('escopoExtrato').checked,
+                    saldo: document.getElementById('escopoSaldo').checked,
+                    pix: document.getElementById('escopoPix').checked,
+                    boleto: document.getElementById('escopoBoleto').checked,
+                    transferencia: document.getElementById('escopoTransferencia').checked,
+                    pagamento: document.getElementById('escopoPagamento').checked,
+                    webhook: document.getElementById('escopoWebhook').checked,
+                    cnab: document.getElementById('escopoCNAB').checked,
+                }),
+                // Boletos
+                boleto_carteira: document.getElementById('boletoCarteira').value,
+                boleto_convenio: document.getElementById('boletoConvenio').value,
+                boleto_variacao: document.getElementById('boletoVariacao').value,
+                boleto_nosso_numero_inicio: document.getElementById('boletoNossoNumeroInicio').value,
+                boleto_nosso_numero_proximo: document.getElementById('boletoNossoNumeroProximo').value,
+                boleto_instrucao1: document.getElementById('boletoInstrucao1').value,
+                boleto_instrucao2: document.getElementById('boletoInstrucao2').value,
+                boleto_multa: document.getElementById('boletoMulta').value,
+                boleto_juros: document.getElementById('boletoJuros').value,
+                boleto_protesto: document.getElementById('boletoProtesto').value,
+                boleto_registrado: document.getElementById('boletoRegistrado').checked,
+                boleto_pix_qrcode: document.getElementById('boletoPixQrcode').checked,
+                // CNAB
+                cnab_layout: document.getElementById('cnabLayout').value,
+                cnab_servico: document.getElementById('cnabServico').value,
+                cnab_cod_transmissao: document.getElementById('cnabCodTransmissao').value,
+                cnab_seq_remessa: document.getElementById('cnabSeqRemessa').value,
+                cnab_auto_processar: document.getElementById('cnabAutoProcessar').checked,
+            };
+        }
+
+        // Limpar campos de integração ao fechar modal
+        function limparIntegracao() {
+            ['integracaoProvedor', 'integracaoClientId', 'integracaoClientSecret', 
+             'integracaoUrlBase', 'integracaoUrlAuth', 'integracaoCertSenha',
+             'boletoCarteira', 'boletoConvenio', 'boletoVariacao',
+             'boletoNossoNumeroInicio', 'boletoNossoNumeroProximo',
+             'boletoInstrucao1', 'boletoInstrucao2', 'boletoMulta', 'boletoJuros', 'boletoProtesto',
+             'cnabCodTransmissao', 'cnabSeqRemessa'
+            ].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            document.getElementById('integracaoAmbiente').value = 'sandbox';
+            document.getElementById('cnabLayout').value = '';
+            document.getElementById('cnabServico').value = 'cobranca';
+            document.getElementById('integracaoSyncAuto').checked = false;
+            document.getElementById('integracaoWebhookAtivo').checked = false;
+            document.getElementById('cnabAutoProcessar').checked = false;
+            document.getElementById('boletoRegistrado').checked = true;
+            document.getElementById('boletoPixQrcode').checked = false;
+
+            // Reset escopos
+            document.getElementById('escopoExtrato').checked = true;
+            document.getElementById('escopoSaldo').checked = true;
+            document.getElementById('escopoPix').checked = true;
+            document.getElementById('escopoBoleto').checked = false;
+            document.getElementById('escopoTransferencia').checked = false;
+            document.getElementById('escopoPagamento').checked = false;
+            document.getElementById('escopoWebhook').checked = true;
+            document.getElementById('escopoCNAB').checked = false;
+
+            // Reset status card
+            const statusCard = document.getElementById('integracaoStatusCard');
+            if (statusCard) statusCard.className = 'integracao-status-card';
+            document.getElementById('integracaoStatusIcon').innerHTML = '<i class="fas fa-plug"></i>';
+            document.getElementById('integracaoStatusTitulo').textContent = 'Integração não configurada';
+            document.getElementById('integracaoStatusDesc').textContent = 'Configure as credenciais da API bancária para habilitar a integração automática';
+
+            // Reset cert upload
+            document.getElementById('certFileName').textContent = 'Clique para enviar o certificado digital';
+            document.getElementById('certUploadArea').classList.remove('has-file');
+            document.getElementById('certFile').value = '';
+
+            // Disable test button
+            const btn = document.getElementById('btnTestarIntegracao');
+            if (btn) btn.disabled = true;
+        }
+
+        // Gerar arquivo CNAB de remessa
+        async function gerarRemessaCNAB() {
+            const layout = document.getElementById('cnabLayout').value;
+            if (!layout) {
+                showToast('Selecione o layout CNAB primeiro', 'warning');
+                return;
+            }
+
+            const bancoId = document.getElementById('bancoId')?.value;
+            if (!bancoId) {
+                showToast('Salve o banco antes de gerar remessa', 'warning');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch(`/api/financeiro/integracoes-bancarias/${bancoId}/remessa`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ layout })
+                });
+
+                if (resp.ok) {
+                    const blob = await resp.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `REMESSA_${layout.toUpperCase()}_${new Date().toISOString().slice(0,10)}.txt`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    showToast('Arquivo de remessa gerado com sucesso!', 'success');
+                } else {
+                    const data = await resp.json();
+                    throw new Error(data.error || 'Erro ao gerar remessa');
+                }
+            } catch (err) {
+                showToast('Erro: ' + err.message, 'error');
+            }
+        }
+
+        // Importar arquivo de retorno CNAB
+        async function importarRetornoCNAB(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const bancoId = document.getElementById('bancoId')?.value;
+            if (!bancoId) {
+                showToast('Salve o banco antes de importar retorno', 'warning');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('arquivo', file);
+            formData.append('banco_id', bancoId);
+
+            try {
+                const token = localStorage.getItem('token');
+                const resp = await fetch('/api/financeiro/integracoes-bancarias/retorno', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await resp.json();
+                if (data.success) {
+                    showToast(`Retorno processado! ${data.processados || 0} títulos atualizados`, 'success');
+                } else {
+                    throw new Error(data.error || 'Erro ao processar retorno');
+                }
+            } catch (err) {
+                showToast('Erro: ' + err.message, 'error');
+            }
+
+            input.value = '';
+        }
     </script>
 
     <script src="financeiro.js"></script>

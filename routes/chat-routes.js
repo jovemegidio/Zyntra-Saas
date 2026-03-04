@@ -21,6 +21,12 @@
 
 const AVATAR_COLORS = ['#4F46E5', '#0891B2', '#059669', '#D97706', '#DC2626', '#7C3AED', '#DB2777', '#2563EB'];
 
+// Helper: extrair apenas o primeiro nome
+function firstName(fullName) {
+    if (!fullName) return 'Usuário';
+    return fullName.trim().split(/\s+/)[0];
+}
+
 // ── Estado em memória ─────────────────────────────────────
 const onlineUsers = new Map(); // userId -> { socketId, user }
 const userStatuses = new Map(); // userId -> 'online'|'almoco'|'reuniao'|'offline'
@@ -61,7 +67,8 @@ module.exports = function registerChatRoutes(app, deps) {
 
             const users = rows.map(u => ({
                 id: u.id,
-                displayName: u.apelido || u.nome || u.email.split('@')[0],
+                displayName: firstName(u.apelido || u.nome) || u.email.split('@')[0],
+                fullName: u.apelido || u.nome || u.email.split('@')[0],
                 email: u.email,
                 department: u.departamento || 'Geral',
                 avatarColor: AVATAR_COLORS[u.id % AVATAR_COLORS.length],
@@ -74,6 +81,7 @@ module.exports = function registerChatRoutes(app, deps) {
             users.unshift({
                 id: -1,
                 displayName: 'BOB I.A.',
+                fullName: 'BOB I.A.',
                 email: 'bot@aluforce.com',
                 department: 'TI',
                 avatarColor: '#A855F7',
@@ -86,6 +94,27 @@ module.exports = function registerChatRoutes(app, deps) {
         } catch (err) {
             console.error('[CHAT] Erro ao listar usuários:', err.message);
             res.status(500).json({ error: 'Erro ao listar usuários' });
+        }
+    });
+
+    /**
+     * GET /api/chat/contatos — Lista IDs de usuários com conversa existente
+     * Retorna apenas IDs dos usuários que já trocaram DM com o usuário logado
+     */
+    app.get('/api/chat/contatos', authenticateToken, async (req, res) => {
+        try {
+            const myId = req.user.id;
+            const [rows] = await pool.query(`
+                SELECT DISTINCT
+                    CASE WHEN de_usuario_id = ? THEN para_usuario_id ELSE de_usuario_id END as contact_id
+                FROM chat_mensagens_diretas
+                WHERE de_usuario_id = ? OR para_usuario_id = ?
+            `, [myId, myId, myId]);
+            const contactIds = rows.map(r => r.contact_id);
+            res.json(contactIds);
+        } catch (err) {
+            console.error('[CHAT] Erro ao listar contatos:', err.message);
+            res.json([]);
         }
     });
 
@@ -260,7 +289,7 @@ module.exports = function registerChatRoutes(app, deps) {
                 userId: r.usuario_id,
                 content: r.conteudo,
                 createdAt: r.criado_em,
-                displayName: r.apelido || r.nome || 'Desconhecido',
+                displayName: firstName(r.apelido || r.nome) || 'Desconhecido',
                 avatarColor: AVATAR_COLORS[r.usuario_id % AVATAR_COLORS.length],
                 foto: r.foto || r.avatar || null,
                 fileUrl: r.arquivo_url || null,
@@ -336,7 +365,7 @@ module.exports = function registerChatRoutes(app, deps) {
                 toId: r.para_usuario_id,
                 content: r.conteudo,
                 createdAt: r.criado_em,
-                displayName: r.apelido || r.nome || 'Desconhecido',
+                displayName: firstName(r.apelido || r.nome) || 'Desconhecido',
                 avatarColor: AVATAR_COLORS[r.de_usuario_id % AVATAR_COLORS.length],
                 foto: r.foto || r.avatar || null,
                 fileUrl: r.arquivo_url || null,
@@ -467,7 +496,7 @@ module.exports.setupChatTeamsSocket = function setupChatTeamsSocket(io, pool) {
                     userId,
                     content: content || '',
                     createdAt: new Date().toISOString(),
-                    displayName: user.apelido || user.nome || 'Desconhecido',
+                    displayName: firstName(user.apelido || user.nome) || 'Desconhecido',
                     avatarColor: AVATAR_COLORS[userId % AVATAR_COLORS.length],
                     foto: user.foto || user.avatar || null,
                     fileUrl: fileUrl || null,
@@ -522,7 +551,7 @@ module.exports.setupChatTeamsSocket = function setupChatTeamsSocket(io, pool) {
                     toId,
                     content: content || '',
                     createdAt: new Date().toISOString(),
-                    displayName: user.apelido || user.nome || 'Desconhecido',
+                    displayName: firstName(user.apelido || user.nome) || 'Desconhecido',
                     avatarColor: AVATAR_COLORS[fromId % AVATAR_COLORS.length],
                     foto: user.foto || user.avatar || null,
                     fileUrl: fileUrl || null,
