@@ -33,6 +33,30 @@
     const STATUS_LABELS = { online: 'Online', almoco: 'Em Almoço', reuniao: 'Em Reunião', offline: 'Offline' };
     const STATUS_ICONS = { online: '🟢', almoco: '🟡', reuniao: '🟠', offline: '⚫' };
 
+    // ── Notificação sonora ────────────────────────────────
+    let notifSound = null;
+    function playNotifSound() {
+        try {
+            if (!notifSound) {
+                // Gera um beep curto via AudioContext (sem dependência de arquivo externo)
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 note
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.3);
+                return;
+            }
+            notifSound.currentTime = 0;
+            notifSound.play().catch(() => {});
+        } catch(e) { /* AudioContext not available */ }
+    }
+
     // ── Emojis ────────────────────────────────────────────
     const EMOJI_DATA = {
         'Frequentes': ['😀','😂','❤️','👍','🔥','🎉','😎','🙏','💯','✅','👏','😍','🤝','💪','⭐'],
@@ -417,7 +441,10 @@
         socket = io('/chat-teams', { transports: ['websocket', 'polling'], withCredentials: true });
         socket.on('connect', () => { console.log('[CHAT] Socket conectado'); if (currentUser) socket.emit('chat:online', { ...currentUser, status: myStatus }); });
 
-        socket.on('chat:channel:message', msg => { if (activeView.type === 'channel' && activeView.id === msg.channelId) appendMessage(msg, 'channel'); });
+        socket.on('chat:channel:message', msg => {
+            if (activeView.type === 'channel' && activeView.id === msg.channelId) { appendMessage(msg, 'channel'); }
+            else if (msg.userId !== currentUser?.id) { playNotifSound(); }
+        });
         socket.on('chat:dm:message', msg => {
             // Adicionar remetente aos contatos automaticamente
             const senderId = msg.fromId === currentUser?.id ? msg.toId : msg.fromId;
@@ -429,9 +456,9 @@
                 const otherId = activeView.id;
                 if (msg.fromId === otherId || msg.fromId === currentUser?.id || msg.toId === currentUser?.id) { appendMessage(msg, 'dm'); return; }
             }
-            unreadCount++; updateFabBadge();
+            unreadCount++; updateFabBadge(); playNotifSound();
         });
-        socket.on('chat:dm:notification', data => { if (!isOpen || activeView.type !== 'dm' || activeView.id !== data.fromId) { unreadCount++; updateFabBadge(); } });
+        socket.on('chat:dm:notification', data => { if (!isOpen || activeView.type !== 'dm' || activeView.id !== data.fromId) { unreadCount++; updateFabBadge(); playNotifSound(); } });
         socket.on('chat:users:online', ids => { onlineUserIds = ids; renderDMList(); document.getElementById('ct-online-count').textContent = `${ids.length} online`; });
         socket.on('chat:users:statuses', statuses => { userStatuses = statuses; renderDMList(); updateChatHeader(); });
         socket.on('chat:user:status', data => { if (data.userId && data.status) { userStatuses[data.userId] = data.status; renderDMList(); updateChatHeader(); } });

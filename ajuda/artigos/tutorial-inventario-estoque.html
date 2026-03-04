@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALUFORCE: Tutorial — Inventário de Estoque</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/emulacao-tela.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/anti-copy-protection.js"></script>    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+</head>
+<body>
+    <header class="header"><div class="header-container"><a href="../index.html" class="logo"><img src="../Logo Monocromatico - Azul - Aluforce.webp" alt="Aluforce" class="logo-img"></a><div class="header-search"><i class="fas fa-search search-icon"></i><input type="text" placeholder="Pesquisar artigos..." class="search-input" id="header-search"></div></div></header>
+    <section class="page-header"><div class="page-header-container"><div class="breadcrumb"><a href="../index.html">Todas as coleções</a><i class="fas fa-chevron-right"></i><a href="../colecoes/tutoriais.html">Tutoriais</a><i class="fas fa-chevron-right"></i><span>Inventário de Estoque</span></div></div></section>
+
+    <section class="article-page">
+        <div class="article-page-container">
+            <div class="article-header">
+                <div class="article-meta">
+                    <span class="article-category">Estoque</span>
+                    <span class="article-reading-time"><i class="fas fa-clock"></i> 8 min de leitura</span>
+                    <span class="article-difficulty">Intermediário</span>
+                </div>
+                <h1 class="article-title">Como Fazer Inventário de Estoque</h1>
+                <p class="article-description">Aprenda a realizar contagem física de estoque, comparar com o saldo do sistema e aplicar ajustes.</p>
+            </div>
+            <div class="article-body">
+                <p>O inventário é o processo de contar fisicamente os produtos no estoque e comparar com os saldos registrados no sistema. Divergências são corrigidas por ajustes automáticos.</p>
+
+                <h2>Pré-requisitos</h2>
+                <ul>
+                    <li>Acesso ao módulo de Estoque com permissão de Inventário</li>
+                    <li>Estoque organizado por local e endereçamento</li>
+                    <li>Impressora para etiquetas de contagem (opcional)</li>
+                </ul>
+
+                <h2>Passo a passo</h2>
+
+                <!-- ════════ PASSO 1 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 1 — Criar novo inventário</h3>
+                <p>Acesse <strong>Estoque > Inventário</strong> e clique em <strong>+ Novo Inventário</strong>. Defina o local de estoque e os produtos que serão contados.</p>
+
+                <div class="tela-emulada">
+                    <div class="tela-layout">
+                        <div class="emu-sidebar">
+                            <div class="emu-sidebar-logo">A</div>
+                            <div class="emu-sidebar-nav">
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-pie"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-warehouse"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="emu-sidebar-btn active emu-destaque"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-box"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-bar"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-cog"></i></div>
+                            </div>
+                        </div>
+                        <div class="emu-main">
+                            <div class="emu-header">
+                                <div class="emu-header-left"><span class="emu-header-logo">ALUFORCE</span><span class="emu-header-divider">|</span><span class="emu-header-module">Estoque</span></div>
+                                <div class="emu-header-right"><div class="emu-header-bell"><i class="fas fa-bell"></i></div><div class="emu-header-user"><div class="emu-header-avatar">U</div></div></div>
+                            </div>
+                            <div class="emu-content">
+                                <div class="emu-action-bar">
+                                    <div class="emu-page-title"><i class="fas fa-clipboard-list"></i> Inventário</div>
+                                    <span class="emu-btn emu-btn-primary emu-destaque"><i class="fas fa-plus"></i> Novo Inventário</span>
+                                </div>
+                                <div class="emu-form-grid">
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-warehouse"></i> Local *</div>
+                                        <div class="emu-form-select">Depósito Principal</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-filter"></i> Filtro de Produtos</div>
+                                        <div class="emu-form-select">Todos os produtos</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="emu-legenda"><i class="fas fa-hand-pointer"></i> Clique em <strong>+ Novo Inventário</strong> e selecione o local</div>
+
+                <!-- ════════ PASSO 2 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 2 — Registrar contagem física</h3>
+                <p>O sistema exibe os produtos com saldo atual. Na coluna <strong>Contagem</strong>, informe a quantidade encontrada fisicamente.</p>
+
+                <div class="tela-emulada">
+                    <div class="tela-layout">
+                        <div class="emu-sidebar">
+                            <div class="emu-sidebar-logo">A</div>
+                            <div class="emu-sidebar-nav">
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-pie"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-warehouse"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="emu-sidebar-btn active"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-box"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-bar"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-cog"></i></div>
+                            </div>
+                        </div>
+                        <div class="emu-main">
+                            <div class="emu-header">
+                                <div class="emu-header-left"><span class="emu-header-logo">ALUFORCE</span><span class="emu-header-divider">|</span><span class="emu-header-module">Estoque</span></div>
+                                <div class="emu-header-right"><div class="emu-header-bell"><i class="fas fa-bell"></i></div><div class="emu-header-user"><div class="emu-header-avatar">U</div></div></div>
+                            </div>
+                            <div class="emu-content">
+                                <div class="emu-page-title"><i class="fas fa-clipboard-list"></i> Inventário #INV-0012 — Contagem</div>
+                                <div class="emu-card"><div class="emu-card-body" style="padding:6px 10px">
+                                    <table class="emu-table emu-destaque">
+                                        <thead><tr><th>Produto</th><th>Saldo Sistema</th><th>Contagem</th><th>Diferença</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>Vergalhão Alumínio 1350</td><td>12.500 kg</td><td><span style="color:#3b82f6">12.350 kg</span></td><td><span style="color:#ef4444">-150 kg</span></td></tr>
+                                            <tr><td>Fio Aço Galvanizado</td><td>3.800 kg</td><td><span style="color:#3b82f6">3.800 kg</span></td><td><span style="color:#22c55e">0 kg</span></td></tr>
+                                            <tr><td>Graxa para Cabos</td><td>30 L</td><td><span style="color:#3b82f6">28 L</span></td><td><span style="color:#ef4444">-2 L</span></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div></div>
+                                <div style="text-align:right;margin-top:10px">
+                                    <span class="emu-btn emu-btn-secondary emu-dim">Salvar Rascunho</span>
+                                    <span class="emu-btn emu-btn-primary emu-destaque"><i class="fas fa-check"></i> Finalizar Contagem</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="emu-legenda"><i class="fas fa-edit"></i> Informe a <strong>quantidade contada</strong> para cada produto — o sistema calcula a diferença automaticamente</div>
+
+                <!-- ════════ PASSO 3 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 3 — Aprovar e aplicar ajustes</h3>
+                <p>Ao finalizar, revise as divergências e clique em <strong>Aprovar Inventário</strong>. O sistema gera ajustes automáticos para corrigir os saldos.</p>
+
+                <div class="info-box">
+                    <div class="info-box-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="info-box-content">
+                        <h4>Atenção</h4>
+                        <p>Após aprovado, o inventário não pode ser desfeito. Os ajustes ficam registrados no histórico de movimentações como "Ajuste de Inventário".</p>
+                    </div>
+                </div>
+
+                <h2>Boas práticas de inventário</h2>
+                <ul>
+                    <li><strong>Periodicidade:</strong> Realize inventários mensais ou trimestrais</li>
+                    <li><strong>Paralisação:</strong> Idealmente, pause entradas/saídas durante a contagem</li>
+                    <li><strong>Dupla contagem:</strong> Para divergências, conte duas vezes antes de confirmar</li>
+                    <li><strong>Relatório:</strong> Gere o relatório de inventário para auditoria</li>
+                </ul>
+
+                <h2>Artigos relacionados</h2>
+                <ul>
+                    <li><a href="visao-geral-estoque.html">Visão Geral do Estoque</a></li>
+                    <li><a href="tutorial-movimentacao-estoque.html">Movimentação de Estoque</a></li>
+                    <li><a href="tutorial-ajuste-estoque.html">Ajuste Manual de Estoque</a></li>
+                </ul>
+            </div>
+
+            <div class="helpful-section">
+                <p class="helpful-text">Este artigo foi útil?</p>
+                <div class="helpful-buttons">
+                    <button class="helpful-btn" data-helpful="yes"><i class="fas fa-thumbs-up"></i> Sim</button>
+                    <button class="helpful-btn" data-helpful="no"><i class="fas fa-thumbs-down"></i> Não</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer"><div class="footer-container"><div class="footer-top"><div class="footer-brand"><img src="../Logo Monocromatico - Branco - Aluforce copy.webp" alt="Aluforce" class="footer-logo-img"><p class="footer-tagline">Conheça as nossas redes sociais:</p><div class="social-links"><a href="https://br.linkedin.com/company/aluforce-cabos-de-alum%C3%ADnio" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a><a href="https://www.instagram.com/aaluforce/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a></div></div><div class="footer-section"><h4 class="footer-title">Navegação Rápida</h4><ul class="footer-links"><li><a href="../index.html">Página Inicial</a></li><li><a href="../colecoes/guia-inicial.html">Guia Inicial</a></li><li><a href="../colecoes/tutoriais.html">Tutoriais</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Módulos</h4><ul class="footer-links"><li><a href="../colecoes/vendas.html">Vendas</a></li><li><a href="../colecoes/compras.html">Compras</a></li><li><a href="../colecoes/financas.html">Finanças</a></li><li><a href="../colecoes/estoque.html">Estoque</a></li><li><a href="../colecoes/notas-fiscais.html">NF-e</a></li><li><a href="../colecoes/rh.html">RH</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Recursos</h4><ul class="footer-links"><li><a href="../colecoes/faturamento.html">Faturamento</a></li><li><a href="../colecoes/relatorios.html">Relatórios</a></li><li><a href="../colecoes/seguranca.html">Segurança</a></li><li><a href="../colecoes/contabilidade.html">Contabilidade</a></li><li><a href="../colecoes/pcp.html">PCP</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2026 Aluforce. Todos os direitos reservados.</p></div></div></footer>
+
+    <script src="../js/main.js"></script>
+    <script src="/js/popup-confirmacao.js"></script></body>
+</html>

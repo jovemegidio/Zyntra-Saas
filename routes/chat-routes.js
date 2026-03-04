@@ -365,9 +365,10 @@ module.exports = function registerChatRoutes(app, deps) {
                 toId: r.para_usuario_id,
                 content: r.conteudo,
                 createdAt: r.criado_em,
-                displayName: firstName(r.apelido || r.nome) || 'Desconhecido',
-                avatarColor: AVATAR_COLORS[r.de_usuario_id % AVATAR_COLORS.length],
-                foto: r.foto || r.avatar || null,
+                displayName: r.de_usuario_id === -1 ? 'BOB I.A.' : (firstName(r.apelido || r.nome) || 'Desconhecido'),
+                avatarColor: r.de_usuario_id === -1 ? '#A855F7' : AVATAR_COLORS[r.de_usuario_id % AVATAR_COLORS.length],
+                foto: r.de_usuario_id === -1 ? null : (r.foto || r.avatar || null),
+                isBot: r.de_usuario_id === -1,
                 fileUrl: r.arquivo_url || null,
                 fileName: r.arquivo_nome || null,
                 fileSize: r.arquivo_tamanho || null,
@@ -519,9 +520,16 @@ module.exports.setupChatTeamsSocket = function setupChatTeamsSocket(io, pool) {
                 const { fromId, toId, content, fileUrl, fileName, fileSize, fileMime } = data;
                 if (!fromId || !toId || (!content && !fileUrl)) return;
 
-                // Se for mensagem para o bot (-1), responder com I.A.
+                // Se for mensagem para o bot (-1), persistir e responder com I.A.
                 if (toId === -1) {
-                    handleBotMessage(socket, chatNs, fromId, content || '');
+                    // Persistir a mensagem do usuário para o bot
+                    try {
+                        await pool.query(
+                            'INSERT INTO chat_mensagens_diretas (de_usuario_id, para_usuario_id, conteudo) VALUES (?, ?, ?)',
+                            [fromId, -1, content || '']
+                        );
+                    } catch(e) { /* bot user -1 may not exist as FK, ignore */ }
+                    handleBotMessage(socket, chatNs, pool, fromId, content || '');
                     return;
                 }
 
@@ -1294,7 +1302,7 @@ Plataforma que simplifica comunicação e gestão:
     }
 };
 
-function handleBotMessage(socket, chatNs, fromId, userMessage) {
+function handleBotMessage(socket, chatNs, pool, fromId, userMessage) {
     const botUser = {
         id: -1,
         displayName: 'BOB I.A.',
@@ -1309,7 +1317,7 @@ function handleBotMessage(socket, chatNs, fromId, userMessage) {
 
     // Gerar resposta com delay natural
     const delay = 1000 + Math.random() * 1500;
-    setTimeout(() => {
+    setTimeout(async () => {
         socket.emit('chat:typing:stop', { toId: fromId, user: 'BOB I.A.' });
 
         const tiOnline = Array.from(onlineUsers.values()).some(ou =>
@@ -1317,8 +1325,19 @@ function handleBotMessage(socket, chatNs, fromId, userMessage) {
         );
 
         const response = generateBotResponse(userMessage, tiOnline);
+
+        // Persistir resposta do bot no MySQL
+        let insertId = Date.now();
+        try {
+            const [result] = await pool.query(
+                'INSERT INTO chat_mensagens_diretas (de_usuario_id, para_usuario_id, conteudo) VALUES (?, ?, ?)',
+                [-1, fromId, response]
+            );
+            insertId = result.insertId;
+        } catch(e) { /* bot user -1 may not have FK, use timestamp as id */ }
+
         const botMsg = {
-            id: Date.now(),
+            id: insertId,
             fromId: -1,
             toId: fromId,
             content: response,

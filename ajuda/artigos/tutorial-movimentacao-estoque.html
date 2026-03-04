@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALUFORCE: Tutorial — Movimentação de Estoque</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/emulacao-tela.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/anti-copy-protection.js"></script>    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+</head>
+<body>
+    <header class="header"><div class="header-container"><a href="../index.html" class="logo"><img src="../Logo Monocromatico - Azul - Aluforce.webp" alt="Aluforce" class="logo-img"></a><div class="header-search"><i class="fas fa-search search-icon"></i><input type="text" placeholder="Pesquisar artigos..." class="search-input" id="header-search"></div></div></header>
+    <section class="page-header"><div class="page-header-container"><div class="breadcrumb"><a href="../index.html">Todas as coleções</a><i class="fas fa-chevron-right"></i><a href="../colecoes/tutoriais.html">Tutoriais</a><i class="fas fa-chevron-right"></i><span>Movimentação de Estoque</span></div></div></section>
+
+    <section class="article-page">
+        <div class="article-page-container">
+            <div class="article-header">
+                <div class="article-meta">
+                    <span class="article-category">Estoque</span>
+                    <span class="article-reading-time"><i class="fas fa-clock"></i> 7 min de leitura</span>
+                    <span class="article-difficulty">Básico</span>
+                </div>
+                <h1 class="article-title">Como Registrar Movimentação de Estoque</h1>
+                <p class="article-description">Aprenda a registrar entradas, saídas e transferências de produtos entre locais de estoque.</p>
+            </div>
+            <div class="article-body">
+                <p>A movimentação de estoque registra toda entrada e saída de produtos. O sistema mantém um histórico completo que garante rastreabilidade e precisão nos saldos.</p>
+
+                <h2>Pré-requisitos</h2>
+                <ul>
+                    <li>Acesso ao módulo de Estoque</li>
+                    <li>Produtos previamente cadastrados</li>
+                    <li>Locais de estoque configurados</li>
+                </ul>
+
+                <h2>Passo a passo</h2>
+
+                <!-- ════════ PASSO 1 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 1 — Acessar "Movimentações"</h3>
+                <p>No menu lateral do módulo Estoque, clique em <strong>Movimentações</strong>.</p>
+
+                <div class="tela-emulada">
+                    <div class="tela-layout">
+                        <div class="emu-sidebar">
+                            <div class="emu-sidebar-logo">A</div>
+                            <div class="emu-sidebar-nav">
+                                <div class="emu-sidebar-btn emu-dim" title="Dashboard"><i class="fas fa-chart-pie"></i></div>
+                                <div class="emu-sidebar-btn emu-dim" title="Posição"><i class="fas fa-warehouse"></i></div>
+                                <div class="emu-sidebar-btn active emu-destaque" title="Movimentações"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="emu-sidebar-btn emu-dim" title="Inventário"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="emu-sidebar-btn emu-dim" title="Produtos"><i class="fas fa-box"></i></div>
+                                <div class="emu-sidebar-btn emu-dim" title="Relatórios"><i class="fas fa-chart-bar"></i></div>
+                                <div class="emu-sidebar-btn emu-dim" title="Config"><i class="fas fa-cog"></i></div>
+                            </div>
+                        </div>
+                        <div class="emu-main">
+                            <div class="emu-header">
+                                <div class="emu-header-left"><span class="emu-header-logo">ALUFORCE</span><span class="emu-header-divider">|</span><span class="emu-header-module">Estoque</span></div>
+                                <div class="emu-header-right"><div class="emu-header-bell"><i class="fas fa-bell"></i></div><div class="emu-header-user"><div class="emu-header-avatar">U</div></div></div>
+                            </div>
+                            <div class="emu-content">
+                                <div class="emu-action-bar">
+                                    <div class="emu-page-title"><i class="fas fa-exchange-alt"></i> Movimentações</div>
+                                    <span class="emu-btn emu-btn-primary emu-destaque"><i class="fas fa-plus"></i> Nova Movimentação</span>
+                                </div>
+                                <div class="emu-card emu-dim"><div class="emu-card-body" style="padding:6px 10px">
+                                    <table class="emu-table">
+                                        <thead><tr><th>Data</th><th>Tipo</th><th>Produto</th><th>Qtd</th></tr></thead>
+                                        <tbody>
+                                            <tr><td>15/01/2026</td><td><span class="emu-status ativo">Entrada</span></td><td>Vergalhão Alumínio</td><td>+5.000 kg</td></tr>
+                                            <tr><td>14/01/2026</td><td><span class="emu-status pendente">Saída</span></td><td>CAA 336,4 MCM</td><td>-2.000 kg</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="emu-legenda"><i class="fas fa-hand-pointer"></i> Clique em <strong>Movimentações</strong> na barra lateral e depois em <strong>+ Nova Movimentação</strong></div>
+
+                <!-- ════════ PASSO 2 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 2 — Selecionar tipo de movimentação</h3>
+                <p>Escolha o tipo: <strong>Entrada</strong>, <strong>Saída</strong> ou <strong>Transferência</strong>.</p>
+
+                <div class="tela-emulada">
+                    <div class="tela-layout">
+                        <div class="emu-sidebar">
+                            <div class="emu-sidebar-logo">A</div>
+                            <div class="emu-sidebar-nav">
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-pie"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-warehouse"></i></div>
+                                <div class="emu-sidebar-btn active"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-box"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-bar"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-cog"></i></div>
+                            </div>
+                        </div>
+                        <div class="emu-main">
+                            <div class="emu-header">
+                                <div class="emu-header-left"><span class="emu-header-logo">ALUFORCE</span><span class="emu-header-divider">|</span><span class="emu-header-module">Estoque</span></div>
+                                <div class="emu-header-right"><div class="emu-header-bell"><i class="fas fa-bell"></i></div><div class="emu-header-user"><div class="emu-header-avatar">U</div></div></div>
+                            </div>
+                            <div class="emu-content">
+                                <div class="emu-page-title"><i class="fas fa-plus"></i> Nova Movimentação</div>
+                                <div class="emu-form-grid emu-destaque">
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-tag"></i> Tipo *</div>
+                                        <div class="emu-form-select">Entrada Manual</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-box"></i> Produto *</div>
+                                        <div class="emu-form-select">Vergalhão de Alumínio 1350</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-weight-hanging"></i> Quantidade *</div>
+                                        <div class="emu-form-input filled">3.500 kg</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-warehouse"></i> Local de Estoque *</div>
+                                        <div class="emu-form-select">Depósito Principal</div>
+                                    </div>
+                                </div>
+                                <div class="emu-form-grid" style="margin-top:8px">
+                                    <div class="emu-form-group" style="grid-column:1/-1">
+                                        <div class="emu-form-label"><i class="fas fa-comment"></i> Observação</div>
+                                        <div class="emu-form-input filled">Recebimento NF 45678 — Fornecedor Alcoa</div>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;margin-top:10px">
+                                    <span class="emu-btn emu-btn-secondary emu-dim">Cancelar</span>
+                                    <span class="emu-btn emu-btn-primary emu-destaque"><i class="fas fa-check"></i> Confirmar</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="emu-legenda"><i class="fas fa-edit"></i> Selecione o <strong>tipo</strong>, <strong>produto</strong>, <strong>quantidade</strong> e <strong>local</strong>, depois clique em <strong>Confirmar</strong></div>
+
+                <!-- ════════ PASSO 3 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 3 — Confirmar e verificar saldo</h3>
+                <p>Após confirmar, a movimentação é registrada e o saldo do produto é atualizado automaticamente. Confira na tela de <strong>Posição de Estoque</strong>.</p>
+
+                <div class="info-box">
+                    <div class="info-box-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="info-box-content">
+                        <h4>Dica</h4>
+                        <p>Movimentações originadas de compras (entrada de NF-e) e vendas (faturamento) são registradas automaticamente — não é necessário lançar manualmente.</p>
+                    </div>
+                </div>
+
+                <h2>Tipos de movimentação</h2>
+
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Tipo</th><th>Quando usar</th><th>Efeito no saldo</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Entrada Manual</td><td>Doação, bonificação, devolução</td><td>Aumenta</td></tr>
+                        <tr><td>Saída Manual</td><td>Perda, amostra, consumo interno</td><td>Diminui</td></tr>
+                        <tr><td>Transferência</td><td>Mover entre depósitos</td><td>Neutro (sai de um, entra em outro)</td></tr>
+                        <tr><td>Entrada por Compra</td><td>Recebimento de NF-e (automático)</td><td>Aumenta</td></tr>
+                        <tr><td>Saída por Venda</td><td>Faturamento de pedido (automático)</td><td>Diminui</td></tr>
+                    </tbody>
+                </table>
+
+                <h2>Artigos relacionados</h2>
+                <ul>
+                    <li><a href="visao-geral-estoque.html">Visão Geral do Estoque</a></li>
+                    <li><a href="inventario-estoque.html">Inventário de Estoque</a></li>
+                    <li><a href="ajuste-estoque.html">Ajuste de Estoque</a></li>
+                </ul>
+            </div>
+
+            <div class="helpful-section">
+                <p class="helpful-text">Este artigo foi útil?</p>
+                <div class="helpful-buttons">
+                    <button class="helpful-btn" data-helpful="yes"><i class="fas fa-thumbs-up"></i> Sim</button>
+                    <button class="helpful-btn" data-helpful="no"><i class="fas fa-thumbs-down"></i> Não</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer"><div class="footer-container"><div class="footer-top"><div class="footer-brand"><img src="../Logo Monocromatico - Branco - Aluforce copy.webp" alt="Aluforce" class="footer-logo-img"><p class="footer-tagline">Conheça as nossas redes sociais:</p><div class="social-links"><a href="https://br.linkedin.com/company/aluforce-cabos-de-alum%C3%ADnio" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a><a href="https://www.instagram.com/aaluforce/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a></div></div><div class="footer-section"><h4 class="footer-title">Navegação Rápida</h4><ul class="footer-links"><li><a href="../index.html">Página Inicial</a></li><li><a href="../colecoes/guia-inicial.html">Guia Inicial</a></li><li><a href="../colecoes/tutoriais.html">Tutoriais</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Módulos</h4><ul class="footer-links"><li><a href="../colecoes/vendas.html">Vendas</a></li><li><a href="../colecoes/compras.html">Compras</a></li><li><a href="../colecoes/financas.html">Finanças</a></li><li><a href="../colecoes/estoque.html">Estoque</a></li><li><a href="../colecoes/notas-fiscais.html">NF-e</a></li><li><a href="../colecoes/rh.html">RH</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Recursos</h4><ul class="footer-links"><li><a href="../colecoes/faturamento.html">Faturamento</a></li><li><a href="../colecoes/relatorios.html">Relatórios</a></li><li><a href="../colecoes/seguranca.html">Segurança</a></li><li><a href="../colecoes/contabilidade.html">Contabilidade</a></li><li><a href="../colecoes/pcp.html">PCP</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2026 Aluforce. Todos os direitos reservados.</p></div></div></footer>
+
+    <script src="../js/main.js"></script>
+    <script src="/js/popup-confirmacao.js"></script></body>
+</html>

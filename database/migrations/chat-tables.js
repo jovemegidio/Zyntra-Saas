@@ -86,15 +86,21 @@ async function createChatTables(pool) {
         // chat_canais — departamento e somente_admin
         "ALTER TABLE chat_canais ADD COLUMN IF NOT EXISTS departamento VARCHAR(100) DEFAULT 'todos'",
         "ALTER TABLE chat_canais ADD COLUMN IF NOT EXISTS somente_admin TINYINT(1) DEFAULT 0",
-        // chat_mensagens_canal — editado, editado_em, excluida
+        // chat_mensagens_canal — editado, editado_em, excluida, arquivos
         "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS editado TINYINT(1) DEFAULT 0",
         "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS editado_em DATETIME DEFAULT NULL",
         "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS excluida TINYINT(1) DEFAULT 0",
-        // chat_mensagens_diretas — editado, editado_em, excluida, excluida_para
+        "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS arquivo_url VARCHAR(500) DEFAULT NULL",
+        "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS arquivo_nome VARCHAR(255) DEFAULT NULL",
+        "ALTER TABLE chat_mensagens_canal ADD COLUMN IF NOT EXISTS arquivo_tamanho BIGINT DEFAULT NULL",
+        // chat_mensagens_diretas — editado, editado_em, excluida, excluida_para, arquivos
         "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS editado TINYINT(1) DEFAULT 0",
         "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS editado_em DATETIME DEFAULT NULL",
         "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS excluida TINYINT(1) DEFAULT 0",
         "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS excluida_para JSON DEFAULT NULL",
+        "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS arquivo_url VARCHAR(500) DEFAULT NULL",
+        "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS arquivo_nome VARCHAR(255) DEFAULT NULL",
+        "ALTER TABLE chat_mensagens_diretas ADD COLUMN IF NOT EXISTS arquivo_tamanho BIGINT DEFAULT NULL",
     ];
 
     for (const q of alterQueries) {

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALUFORCE: Tutorial — Ajuste Manual de Estoque</title>
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/emulacao-tela.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/js/anti-copy-protection.js"></script>    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+</head>
+<body>
+    <header class="header"><div class="header-container"><a href="../index.html" class="logo"><img src="../Logo Monocromatico - Azul - Aluforce.webp" alt="Aluforce" class="logo-img"></a><div class="header-search"><i class="fas fa-search search-icon"></i><input type="text" placeholder="Pesquisar artigos..." class="search-input" id="header-search"></div></div></header>
+    <section class="page-header"><div class="page-header-container"><div class="breadcrumb"><a href="../index.html">Todas as coleções</a><i class="fas fa-chevron-right"></i><a href="../colecoes/tutoriais.html">Tutoriais</a><i class="fas fa-chevron-right"></i><span>Ajuste Manual de Estoque</span></div></div></section>
+
+    <section class="article-page">
+        <div class="article-page-container">
+            <div class="article-header">
+                <div class="article-meta">
+                    <span class="article-category">Estoque</span>
+                    <span class="article-reading-time"><i class="fas fa-clock"></i> 5 min de leitura</span>
+                    <span class="article-difficulty">Básico</span>
+                </div>
+                <h1 class="article-title">Como Fazer Ajuste Manual de Estoque</h1>
+                <p class="article-description">Aprenda a corrigir divergências de estoque quando o saldo do sistema não corresponde ao físico.</p>
+            </div>
+            <div class="article-body">
+                <p>O ajuste manual de estoque permite corrigir o saldo de um produto diretamente, sem necessidade de um inventário completo. Ideal para correções pontuais de pequenas divergências.</p>
+
+                <h2>Pré-requisitos</h2>
+                <ul>
+                    <li>Acesso ao módulo de Estoque com permissão de Ajuste</li>
+                    <li>Identificação prévia da divergência</li>
+                    <li>Justificativa para o ajuste (obrigatória para auditoria)</li>
+                </ul>
+
+                <h2>Passo a passo</h2>
+
+                <!-- ════════ PASSO 1 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 1 — Acessar "Ajustes"</h3>
+                <p>No módulo Estoque, acesse <strong>Movimentações</strong> e clique em <strong>+ Nova Movimentação</strong>, selecionando o tipo <strong>Ajuste</strong>.</p>
+
+                <div class="tela-emulada">
+                    <div class="tela-layout">
+                        <div class="emu-sidebar">
+                            <div class="emu-sidebar-logo">A</div>
+                            <div class="emu-sidebar-nav">
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-pie"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-warehouse"></i></div>
+                                <div class="emu-sidebar-btn active emu-destaque"><i class="fas fa-exchange-alt"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-clipboard-list"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-box"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-chart-bar"></i></div>
+                                <div class="emu-sidebar-btn emu-dim"><i class="fas fa-cog"></i></div>
+                            </div>
+                        </div>
+                        <div class="emu-main">
+                            <div class="emu-header">
+                                <div class="emu-header-left"><span class="emu-header-logo">ALUFORCE</span><span class="emu-header-divider">|</span><span class="emu-header-module">Estoque</span></div>
+                                <div class="emu-header-right"><div class="emu-header-bell"><i class="fas fa-bell"></i></div><div class="emu-header-user"><div class="emu-header-avatar">U</div></div></div>
+                            </div>
+                            <div class="emu-content">
+                                <div class="emu-page-title"><i class="fas fa-exchange-alt"></i> Novo Ajuste de Estoque</div>
+                                <div class="emu-form-grid emu-destaque">
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-tag"></i> Tipo *</div>
+                                        <div class="emu-form-select">Ajuste Manual</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-box"></i> Produto *</div>
+                                        <div class="emu-form-select">Graxa para Cabos</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-warehouse"></i> Local *</div>
+                                        <div class="emu-form-select">Depósito Principal</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-balance-scale"></i> Saldo Atual</div>
+                                        <div class="emu-form-input" style="background:#f1f5f9">30 L</div>
+                                    </div>
+                                    <div class="emu-form-group">
+                                        <div class="emu-form-label"><i class="fas fa-edit"></i> Novo Saldo *</div>
+                                        <div class="emu-form-input filled">28 L</div>
+                                    </div>
+                                    <div class="emu-form-group" style="grid-column:1/-1">
+                                        <div class="emu-form-label"><i class="fas fa-comment"></i> Motivo do Ajuste *</div>
+                                        <div class="emu-form-input filled">Perda por evaporação — verificado em contagem física</div>
+                                    </div>
+                                </div>
+                                <div style="text-align:right;margin-top:10px">
+                                    <span class="emu-btn emu-btn-secondary emu-dim">Cancelar</span>
+                                    <span class="emu-btn emu-btn-primary emu-destaque"><i class="fas fa-check"></i> Confirmar Ajuste</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="emu-legenda"><i class="fas fa-edit"></i> Informe o <strong>novo saldo</strong> e o <strong>motivo</strong> do ajuste, depois confirme</div>
+
+                <!-- ════════ PASSO 2 ════════ -->
+                <h3><i class="fas fa-step-forward"></i> Passo 2 — Confirmar ajuste</h3>
+                <p>Ao confirmar, o sistema registra a movimentação de ajuste e atualiza o saldo imediatamente.</p>
+
+                <div class="info-box">
+                    <div class="info-box-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="info-box-content">
+                        <h4>Auditoria</h4>
+                        <p>Todo ajuste manual fica registrado com data, hora, usuário e motivo. Gestores podem consultar o relatório de ajustes para acompanhar divergências recorrentes.</p>
+                    </div>
+                </div>
+
+                <h2>Quando usar ajuste manual vs inventário</h2>
+
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Situação</th><th>Recomendação</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1-3 produtos com divergência pontual</td><td>Ajuste manual</td></tr>
+                        <tr><td>Contagem periódica de todo o estoque</td><td>Inventário completo</td></tr>
+                        <tr><td>Perda identificada durante operação</td><td>Ajuste manual</td></tr>
+                        <tr><td>Auditoria ou balanço anual</td><td>Inventário completo</td></tr>
+                    </tbody>
+                </table>
+
+                <h2>Artigos relacionados</h2>
+                <ul>
+                    <li><a href="visao-geral-estoque.html">Visão Geral do Estoque</a></li>
+                    <li><a href="tutorial-inventario-estoque.html">Inventário de Estoque</a></li>
+                    <li><a href="tutorial-movimentacao-estoque.html">Movimentação de Estoque</a></li>
+                </ul>
+            </div>
+
+            <div class="helpful-section">
+                <p class="helpful-text">Este artigo foi útil?</p>
+                <div class="helpful-buttons">
+                    <button class="helpful-btn" data-helpful="yes"><i class="fas fa-thumbs-up"></i> Sim</button>
+                    <button class="helpful-btn" data-helpful="no"><i class="fas fa-thumbs-down"></i> Não</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer"><div class="footer-container"><div class="footer-top"><div class="footer-brand"><img src="../Logo Monocromatico - Branco - Aluforce copy.webp" alt="Aluforce" class="footer-logo-img"><p class="footer-tagline">Conheça as nossas redes sociais:</p><div class="social-links"><a href="https://br.linkedin.com/company/aluforce-cabos-de-alum%C3%ADnio" class="social-link" aria-label="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a><a href="https://www.instagram.com/aaluforce/" class="social-link" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a></div></div><div class="footer-section"><h4 class="footer-title">Navegação Rápida</h4><ul class="footer-links"><li><a href="../index.html">Página Inicial</a></li><li><a href="../colecoes/guia-inicial.html">Guia Inicial</a></li><li><a href="../colecoes/tutoriais.html">Tutoriais</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Módulos</h4><ul class="footer-links"><li><a href="../colecoes/vendas.html">Vendas</a></li><li><a href="../colecoes/compras.html">Compras</a></li><li><a href="../colecoes/financas.html">Finanças</a></li><li><a href="../colecoes/estoque.html">Estoque</a></li><li><a href="../colecoes/notas-fiscais.html">NF-e</a></li><li><a href="../colecoes/rh.html">RH</a></li></ul></div><div class="footer-section"><h4 class="footer-title">Recursos</h4><ul class="footer-links"><li><a href="../colecoes/faturamento.html">Faturamento</a></li><li><a href="../colecoes/relatorios.html">Relatórios</a></li><li><a href="../colecoes/seguranca.html">Segurança</a></li><li><a href="../colecoes/contabilidade.html">Contabilidade</a></li><li><a href="../colecoes/pcp.html">PCP</a></li></ul></div></div><div class="footer-bottom"><p>&copy; 2026 Aluforce. Todos os direitos reservados.</p></div></div></footer>
+
+    <script src="../js/main.js"></script>
+    <script src="/js/popup-confirmacao.js"></script></body>
+</html>
