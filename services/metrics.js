@@ -9,6 +9,15 @@
 
 'use strict';
 
+// ── prom-client: Node.js runtime metrics (heap, GC, event loop lag) ──
+let promClient;
+try {
+    promClient = require('prom-client');
+    promClient.collectDefaultMetrics({ prefix: 'zyntra_' });
+} catch (e) {
+    // prom-client optional — custom metrics still work
+}
+
 // ── Metric Stores ──────────────────────────────────────────────
 const httpRequestsTotal = {};      // method:status:route → count
 const httpRequestDuration = [];     // { route, method, status, duration }
@@ -252,9 +261,16 @@ function generateMetrics(pool, cacheService) {
 
 // ── Create /metrics endpoint ───────────────────────────────────
 function createMetricsEndpoint(pool, cacheService) {
-    return (req, res) => {
+    return async (req, res) => {
         res.setHeader('Content-Type', 'text/plain; version=0.0.4; charset=utf-8');
-        res.send(generateMetrics(pool, cacheService));
+        let output = generateMetrics(pool, cacheService);
+        // Append prom-client default metrics (Node.js runtime: heap, GC, event loop)
+        if (promClient) {
+            try {
+                output += '\n' + await promClient.register.metrics();
+            } catch (_) { /* ignore */ }
+        }
+        res.send(output);
     };
 }
 

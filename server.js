@@ -38,6 +38,15 @@ const compression = require('compression'); // PERFORMANCE: Compressão gzip
 
 // Carrega variáveis de ambiente de um arquivo .env (se existir)
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// ⚡ VALIDAÇÃO DE VARIÁVEIS DE AMBIENTE NO STARTUP
+try {
+    const { validateEnv } = require('./config/env');
+    validateEnv();
+} catch (e) {
+    console.warn('[ENV] Validação não executada:', e.message);
+}
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -81,6 +90,9 @@ const { body, param, query, validationResult } = require('express-validator');
 
 // Importar UUID para gerar deviceId único (MULTI-DEVICE)
 const { v4: uuidv4 } = require('uuid');
+
+// Request-ID tracing middleware (observability)
+const { requestIdMiddleware } = require('./middleware/request-id');
 
 // ⚡ ENTERPRISE: Cache distribuído (Redis/Map) e Resiliência
 const cacheService = require('./services/cache');
@@ -558,6 +570,15 @@ try {
     wrapPoolWithTimeout(pool, parseInt(process.env.DB_QUERY_TIMEOUT) || 15000);
     console.log('⚡ Pool wrapeado com query timeout de ' + (parseInt(process.env.DB_QUERY_TIMEOUT) || 15000) + 'ms');
 
+    // ⚡ ENTERPRISE: MySQL Circuit Breaker — previne cascade failures
+    const { createMySQLBreaker } = require('./services/mysql-circuit-breaker');
+    const dbCircuitBreaker = createMySQLBreaker(pool, {
+        failureThreshold: parseInt(process.env.DB_CB_THRESHOLD) || 5,
+        resetTimeoutMs: parseInt(process.env.DB_CB_RESET_MS) || 30000
+    });
+    global.dbCircuitBreaker = dbCircuitBreaker;
+    console.log('⚡ MySQL Circuit Breaker ativo (threshold: ' + (parseInt(process.env.DB_CB_THRESHOLD) || 5) + ')');
+
     // ⚡ ENTERPRISE: Monitor pool health every 60s
     createPoolMonitor(pool, 60000);
 
@@ -762,7 +783,10 @@ app.use(compression({
     threshold: 1024 // Mínimo de 1KB para comprimir
 }));
 
-// 📊 ENTERPRISE: Prometheus metrics middleware — tracks request duration, status, active connections
+// � ENTERPRISE: Request-ID tracing — end-to-end observability
+app.use(requestIdMiddleware());
+
+// �📊 ENTERPRISE: Prometheus metrics middleware — tracks request duration, status, active connections
 app.use(metricsMiddleware);
 
 // Middleware para interpretar JSON no corpo das requisições
@@ -788,7 +812,15 @@ app.use((req, res, next) => {
 
 app.use(sanitizeInput);
 
-// 📊 N8N: Interceptor global — detecta automaticamente quando relatórios
+// � ENTERPRISE: Swagger/OpenAPI documentation at /api-docs
+try {
+    const { setupSwagger } = require('./config/swagger');
+    setupSwagger(app);
+} catch (e) {
+    logger.warn('Swagger docs not available: ' + e.message);
+}
+
+// �📊 N8N: Interceptor global — detecta automaticamente quando relatórios
 // (PDF, Excel, CSV, XML, ZIP) são gerados e notifica por email via n8n
 if (reportInterceptorMiddleware) {
     app.use(reportInterceptorMiddleware);
@@ -1183,8 +1215,8 @@ app.post('/api/chat/upload-audio', (req, res, next) => authenticateToken(req, re
     res.json({ url, originalName: req.file.originalname, size: req.file.size });
 });
 
-// Serve chat uploads
-app.use('/chat/uploads', require('express').static(chatPath.join(__dirname, 'chat', 'uploads')));
+// Serve chat uploads — protegido por autenticação JWT
+app.use('/chat/uploads', (req, res, next) => authenticateToken(req, res, next), require('express').static(chatPath.join(__dirname, 'chat', 'uploads')));
 
 // Serve chat static files (widget assets) - public/chat e Chat/public como fallback
 app.use('/chat', require('express').static(chatPath.join(__dirname, 'public', 'chat')));
@@ -2537,17 +2569,9 @@ app.get('/api/audit-log', authenticateToken, authorizeAdmin, async (req, res) =>
             });
         } catch (e) { console.log('[AUDIT-API] auditoria_logs skip:', e.message); }
 
-        // 2. audit_logs (Vendas module)
+        // 2. audit_logs (Vendas module) — reuses main pool (same database)
         try {
-            const vendasPool = require('mysql2/promise').createPool({
-                host: process.env.DB_HOST || 'localhost',
-                port: parseInt(process.env.DB_PORT) || 3306,
-                user: process.env.DB_USER || 'aluforce',
-                password: process.env.DB_PASSWORD || '',
-                database: process.env.VENDAS_DB_NAME || 'aluforce_vendas',
-                connectionLimit: 2
-            });
-            const [rows] = await vendasPool.query(
+            const [rows] = await pool.query(
                 `SELECT al.id, al.user_id, al.action, al.resource_type, al.resource_id, al.meta, al.created_at,
                         COALESCE(u.nome, CONCAT('Usuário #', al.user_id)) AS usuario_nome
                  FROM audit_logs al LEFT JOIN usuarios u ON al.user_id = u.id
@@ -2567,7 +2591,6 @@ app.get('/api/audit-log', authenticateToken, authorizeAdmin, async (req, res) =>
                     fonte: 'vendas'
                 });
             });
-            await vendasPool.end();
         } catch (e) { console.log('[AUDIT-API] audit_logs (vendas) skip:', e.message); }
 
         // 3. audit_log (PCP module)
@@ -2664,6 +2687,19 @@ app.get('/status', async (req, res) => {
     return res.json(info);
 });
 
+// Kubernetes readiness probe — checks if the app can serve traffic
+app.get('/readiness', async (req, res) => {
+    if (!DB_AVAILABLE) {
+        return res.status(503).json({ ready: false, reason: 'database_unavailable' });
+    }
+    try {
+        await pool.query('SELECT 1');
+        res.json({ ready: true });
+    } catch (err) {
+        res.status(503).json({ ready: false, reason: 'database_unreachable' });
+    }
+});
+
 // Circuit breaker status (admin-only)
 app.get('/api/admin/circuit-breakers', authenticateToken, (req, res) => {
     res.json(getAllBreakerStates());
@@ -2695,6 +2731,7 @@ app.use((err, req, res, next) => {
 
     // Structured error logging via logger
     const errorContext = {
+        requestId: req.requestId,
         method: req.method,
         path: req.path,
         ip: req.ip,
@@ -3320,6 +3357,26 @@ const startServer = async () => {
                 // Disponibilizar io globalmente para uso nas APIs
                 global.io = io;
 
+                // ⚡ SECURITY: Socket.IO JWT Authentication Middleware
+                // Verifica token JWT em cada conexão Socket.io
+                io.use((socket, next) => {
+                    const token = socket.handshake.auth?.token || 
+                                  socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
+                                  socket.handshake.query?.token;
+                    if (!token) {
+                        // Em desenvolvimento, permitir conexões sem token (backward compat)
+                        if (process.env.NODE_ENV === 'development') return next();
+                        return next(new Error('Autenticação necessária'));
+                    }
+                    try {
+                        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+                        socket.user = decoded;
+                        next();
+                    } catch (err) {
+                        next(new Error('Token inválido ou expirado'));
+                    }
+                });
+
 // ============================================================
 // CHAT BOB AI - Socket.IO Handler
 // ============================================================
@@ -3677,14 +3734,14 @@ async function stopServer() {
 
 // Captura erros globais não tratados
 process.on('uncaughtException', (err) => {
-    console.error('❌ ERRO NÃO TRATADO:', err?.stack || err?.message || err);
+    logger.error('Uncaught exception', { error: err?.message, stack: err?.stack, code: err?.code });
     // Apenas erros FATAIS (OOM, stack overflow) devem derrubar o servidor
     const fatalErrors = ['ERR_IPC_CHANNEL_CLOSED', 'ENOMEM'];
     if (fatalErrors.includes(err?.code)) {
-        console.log('🔄 Encerrando processo devido a erro fatal:', err.code);
+        logger.error('Fatal error — shutting down', { code: err.code });
         process.exit(1);
     }
-    console.log('🟡 Continuando execução apesar do erro não tratado (non-fatal)');
+    logger.warn('Continuing despite uncaught exception (non-fatal)');
 });
 
 process.on('unhandledRejection', (reason, promise) => {
@@ -3692,14 +3749,10 @@ process.on('unhandledRejection', (reason, promise) => {
     const reasonStr = reason instanceof Error
         ? reason.stack || reason.message
         : (typeof reason === 'object' ? JSON.stringify(reason, null, 2) : String(reason));
-    console.error('❌ PROMESSA NÃO TRATADA:', reasonStr);
-    console.error('❌ Tipo do reason:', typeof reason, reason?.constructor?.name);
-    if (reason instanceof Error) {
-        console.error('❌ Stack:', reason.stack);
-    }
+    logger.error('Unhandled rejection', { reason: reasonStr, type: typeof reason });
     // NÃO encerrar processo - apenas logar o erro
     // Unhandled rejections não-críticas não devem derrubar o servidor
-    console.log('🟡 Continuando execução apesar da promessa não tratada (non-fatal)');
+    logger.warn('Continuing despite unhandled rejection (non-fatal)');
 });
 
 // ======================================
