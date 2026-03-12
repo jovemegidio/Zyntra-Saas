@@ -845,7 +845,7 @@ function pdfFileFilter (req, file, cb) {
   cb(null, true)
 }
 
-const uploadHolerite = multer({ storage: holeriteStorage, fileFilter: pdfFileFilter, limits: { fileSize: 6 * 1024 * 1024 } })
+const uploadHolerite = multer({ storage: holeriteStorage, fileFilter: pdfFileFilter, limits: { fileSize: 20 * 1024 * 1024 } })
 
 // Endpoint for admin to upload holerite for a funcionario
 app.post('/api/funcionarios/:id/holerite', authMiddleware, uploadHolerite.single('holerite'), async (req, res) => {
@@ -3446,6 +3446,194 @@ app.put('/api/rh/folha/:id/fechar', authMiddleware, async (req, res) => {
   }
 });
 
+// =====================================================
+// FOLHA MANUAL (espelho da planilha Excel)
+// =====================================================
+
+// GET /api/rh/folha-manual/competencia - Buscar folhas por mês/ano
+app.get('/api/rh/folha-manual/competencia', authMiddleware, async (req, res) => {
+  const { mes, ano } = req.query;
+  if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
+  try {
+    const [folhas] = await pool.query(
+      'SELECT * FROM rh_folha_manual WHERE mes = ? AND ano = ? ORDER BY FIELD(tipo, "SALARIO", "ADIANTAMENTO")',
+      [parseInt(mes), parseInt(ano)]
+    );
+    // Para cada folha, buscar itens
+    for (const f of folhas) {
+      const [itens] = await pool.query('SELECT * FROM rh_folha_manual_itens WHERE folha_id = ? ORDER BY empresa, colaborador_nome', [f.id]);
+      f.itens = itens;
+    }
+    res.json(folhas);
+  } catch (error) {
+    logger.error('Erro ao buscar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
+  }
+});
+
+// GET /api/rh/folha-manual/listar - Listar todas as folhas manuais
+app.get('/api/rh/folha-manual/listar', authMiddleware, async (req, res) => {
+  const { ano } = req.query;
+  try {
+    let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
+    const params = [];
+    if (ano) { sql += ' WHERE fm.ano = ?'; params.push(parseInt(ano)); }
+    sql += ' ORDER BY fm.ano DESC, fm.mes DESC, FIELD(fm.tipo, "SALARIO", "ADIANTAMENTO")';
+    const [folhas] = await pool.query(sql, params);
+    res.json(folhas);
+  } catch (error) {
+    logger.error('Erro ao listar folhas manuais:', error);
+    res.status(500).json({ error: 'Erro ao listar folhas' });
+  }
+});
+
+// POST /api/rh/folha-manual/salvar - Criar ou atualizar folha com todos os itens
+app.post('/api/rh/folha-manual/salvar', authMiddleware, async (req, res) => {
+  if (!isAdminUser(req.user)) return res.status(403).json({ error: 'Apenas administradores podem gerenciar a folha.' });
+  const { mes, ano, tipo, itens } = req.body;
+  if (!mes || !ano || !tipo) return res.status(400).json({ error: 'mes, ano e tipo são obrigatórios' });
+  if (!Array.isArray(itens)) return res.status(400).json({ error: 'itens deve ser um array' });
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // Upsert folha
+    const [existing] = await conn.query(
+      'SELECT id, status FROM rh_folha_manual WHERE mes = ? AND ano = ? AND tipo = ?',
+      [parseInt(mes), parseInt(ano), tipo]
+    );
+
+    let folhaId;
+    if (existing.length > 0) {
+      if (existing[0].status === 'fechada') {
+        await conn.rollback();
+        return res.status(400).json({ error: 'Folha já fechada. Não é possível editar.' });
+      }
+      folhaId = existing[0].id;
+      // Remover itens antigos
+      await conn.query('DELETE FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+    } else {
+      const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const titulo = tipo === 'SALARIO'
+        ? `${MESES[parseInt(mes)]} - SALÁRIO, POR FORA E HORA EXTRAS`
+        : `${MESES[parseInt(mes)]} - ADIANTAMENTO`;
+      const [result] = await conn.query(
+        'INSERT INTO rh_folha_manual (mes, ano, tipo, titulo, criado_por) VALUES (?, ?, ?, ?, ?)',
+        [parseInt(mes), parseInt(ano), tipo, titulo, req.user.nome || req.user.email]
+      );
+      folhaId = result.insertId;
+    }
+
+    // Inserir itens
+    let totalGeral = 0;
+    for (const item of itens) {
+      if (!item.colaborador_nome || !item.colaborador_nome.trim()) continue;
+      const vb = parseFloat(item.valor_base) || 0;
+      const spf = parseFloat(item.salario_por_fora) || 0;
+      const h50 = parseFloat(item.he_50) || 0;
+      const h100 = parseFloat(item.he_100) || 0;
+      const desc = parseFloat(item.desconto_emprestimo) || 0;
+      const totalItem = vb + spf + h50 + h100 - desc;
+      totalGeral += totalItem;
+
+      await conn.query(
+        `INSERT INTO rh_folha_manual_itens (folha_id, empresa, colaborador_nome, funcionario_id, valor_base, salario_por_fora, he_50, he_100, desconto_emprestimo, total)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [folhaId, item.empresa || '', item.colaborador_nome.trim(), item.funcionario_id || null, vb, spf, h50, h100, desc, totalItem]
+      );
+    }
+
+    // Atualizar total geral
+    await conn.query('UPDATE rh_folha_manual SET total_geral = ? WHERE id = ?', [totalGeral, folhaId]);
+    await conn.commit();
+
+    res.json({ success: true, folha_id: folhaId, total_geral: totalGeral });
+  } catch (error) {
+    await conn.rollback();
+    logger.error('Erro ao salvar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// PUT /api/rh/folha-manual/:id/fechar - Fechar folha manual e enviar ao Contas a Pagar
+app.put('/api/rh/folha-manual/:id/fechar', authMiddleware, async (req, res) => {
+  if (!isAdminUser(req.user)) return res.status(403).json({ error: 'Apenas administradores podem fechar a folha.' });
+  const folhaId = req.params.id;
+  try {
+    const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
+    if (folhaRows.length === 0) return res.status(404).json({ error: 'Folha não encontrada' });
+    const folha = folhaRows[0];
+    if (folha.status === 'fechada') return res.status(400).json({ error: 'Folha já está fechada' });
+
+    // Calcular total
+    const [itens] = await pool.query('SELECT total FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+    const valorTotal = itens.reduce((acc, i) => acc + parseFloat(i.total || 0), 0);
+    if (valorTotal <= 0) return res.status(400).json({ error: 'Folha sem itens ou valor total zero' });
+
+    // Fechar
+    await pool.query("UPDATE rh_folha_manual SET status = 'fechada', fechado_em = NOW(), total_geral = ? WHERE id = ?", [valorTotal, folhaId]);
+
+    // Montar dados para Financeiro
+    const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const tipoLabel = folha.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
+    const descricao = `Folha ${tipoLabel} - ${MESES[folha.mes]} ${folha.ano}`;
+    const data_emissao = new Date().toISOString().slice(0, 10);
+    const vencimentoDate = new Date(folha.ano, folha.mes, 5);
+    const data_vencimento = vencimentoDate.toISOString().slice(0, 10);
+
+    const token = req.cookies?.authToken || req.cookies?.token || (req.headers['authorization'] ? req.headers['authorization'].replace('Bearer ', '') : null);
+    if (!token) return res.status(401).json({ error: 'Token de autenticação não encontrado.' });
+
+    const financeiroUrl = process.env.FINANCEIRO_URL || 'http://localhost:3006/api/financeiro/contas-pagar';
+    const payload = { descricao, valor_total: valorTotal, data_emissao, data_vencimento, observacoes: `Folha manual ${tipoLabel} integrada. ID: ${folhaId}` };
+    const headers = { Authorization: `Bearer ${token}` };
+    let financeiroResp;
+    try {
+      financeiroResp = await axios.post(financeiroUrl, payload, { headers });
+    } catch (err) {
+      logger.error('Erro ao integrar folha manual com Financeiro:', err?.response?.data || err.message);
+      return res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+    }
+
+    res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
+  } catch (error) {
+    logger.error('Erro ao fechar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
+  }
+});
+
+// PUT /api/rh/folha-manual/:id/reabrir - Reabrir folha fechada
+app.put('/api/rh/folha-manual/:id/reabrir', authMiddleware, async (req, res) => {
+  if (!isAdminUser(req.user)) return res.status(403).json({ error: 'Apenas administradores.' });
+  try {
+    await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ?", [req.params.id]);
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('Erro ao reabrir folha:', error);
+    res.status(500).json({ error: 'Erro ao reabrir folha' });
+  }
+});
+
+// GET /api/rh/funcionarios-empresas - Listar funcionários agrupados por empresa para importar na folha
+app.get('/api/rh/funcionarios-empresas', authMiddleware, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT f.id, f.nome_completo as nome, f.cargo, f.departamento, f.salario,
+             COALESCE(f.departamento, 'SEM EMPRESA') as empresa
+      FROM funcionarios f
+      WHERE f.status = 'Ativo' OR f.ativo = 1
+      ORDER BY f.departamento, f.nome_completo
+    `);
+    res.json(rows);
+  } catch (error) {
+    logger.error('Erro ao buscar funcionários:', error);
+    res.status(500).json({ error: 'Erro ao buscar funcionários' });
+  }
+});
+
 // GET /api/rh/holerite/:id - Buscar holerite específico
 app.get('/api/rh/holerite/:id', authMiddleware, async (req, res) => {
   try {
@@ -3840,30 +4028,160 @@ app.get('/api/rh/holerites/consentimentos', authMiddleware, async (req, res) => 
   }
 });
 
-// POST /api/rh/holerites/importar-pdf - Importar PDF de holerite
-app.post('/api/rh/holerites/importar-pdf', authMiddleware, uploadHolerite.single('arquivo'), async (req, res) => {
+// POST /api/rh/holerites/importar-pdf - Importar PDF de holerite (identificação automática por nome)
+const uploadHoleritePDF = multer({ storage: holeriteStorage, fileFilter: pdfFileFilter, limits: { fileSize: 20 * 1024 * 1024 } });
+app.post('/api/rh/holerites/importar-pdf', authMiddleware, uploadHoleritePDF.single('pdf'), async (req, res) => {
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado' });
   if (!req.file) return res.status(400).json({ error: 'Arquivo PDF é obrigatório' });
-  const { funcionario_id, mes, ano } = req.body;
-  if (!funcionario_id || !mes || !ano) return res.status(400).json({ error: 'funcionario_id, mes e ano são obrigatórios' });
+  const { mes, ano, tipo = 'salario', publicar_automaticamente } = req.body;
+  if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
+
+  let pdfParse;
+  try { pdfParse = require('pdf-parse'); } catch (e) {
+    return res.status(500).json({ error: 'Módulo pdf-parse não disponível. Instale com: npm install pdf-parse' });
+  }
+
+  // Normaliza string para comparação: remove acentos, lowercase, trim
+  function normalizarNome(s) {
+    if (!s) return '';
+    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  // Tenta identificar funcionário pelo texto extraído da página
+  function identificarFuncionario(textoPagina, funcionarios) {
+    const textoNorm = normalizarNome(textoPagina);
+    // 1. Correspondência exata do nome completo
+    for (const f of funcionarios) {
+      if (normalizarNome(f.nome) && textoNorm.includes(normalizarNome(f.nome))) {
+        return { funcionario: f, matchedBy: 'nome_completo' };
+      }
+    }
+    // 2. Correspondência por CPF (sem formatação)
+    for (const f of funcionarios) {
+      if (f.cpf) {
+        const cpfDigits = f.cpf.replace(/\D/g, '');
+        if (cpfDigits.length === 11 && textoPagina.replace(/\D/g,'').includes(cpfDigits)) {
+          return { funcionario: f, matchedBy: 'cpf' };
+        }
+      }
+    }
+    // 3. Correspondência por PIS/PASEP
+    for (const f of funcionarios) {
+      if (f.pis_pasep) {
+        const pis = f.pis_pasep.replace(/\D/g, '');
+        if (pis.length >= 9 && textoPagina.replace(/\D/g,'').includes(pis)) {
+          return { funcionario: f, matchedBy: 'pis_pasep' };
+        }
+      }
+    }
+    // 4. Correspondência por 2+ palavras do nome (mín. 4 chars cada)
+    for (const f of funcionarios) {
+      const palavrasNome = normalizarNome(f.nome).split(/\s+/).filter(p => p.length >= 4);
+      const matchCount = palavrasNome.filter(p => textoNorm.includes(p)).length;
+      if (matchCount >= 2) {
+        return { funcionario: f, matchedBy: 'nome_parcial' };
+      }
+    }
+    return null;
+  }
+
   try {
-    const arquivoUrl = `/uploads/holerites/${req.file.filename}`;
-    let [folhas] = await pool.query('SELECT id FROM rh_folhas_pagamento WHERE mes=? AND ano=? LIMIT 1', [mes, ano]);
+    // Buscar/criar folha de pagamento
+    let [folhas] = await pool.query('SELECT id FROM rh_folhas_pagamento WHERE mes=? AND ano=? AND tipo=? LIMIT 1', [mes, ano, tipo]);
     let folha_id;
     if (folhas.length > 0) {
       folha_id = folhas[0].id;
     } else {
-      const [result] = await pool.query('INSERT INTO rh_folhas_pagamento (mes, ano, tipo, status) VALUES (?, ?, ?, ?)', [mes, ano, 'salario', 'rascunho']);
+      const [result] = await pool.query('INSERT INTO rh_folhas_pagamento (mes, ano, tipo, status) VALUES (?, ?, ?, ?)', [mes, ano, tipo, 'rascunho']);
       folha_id = result.insertId;
     }
-    const [result] = await pool.query(
-      'INSERT INTO rh_holerites (folha_id, funcionario_id, arquivo_pdf, status) VALUES (?, ?, ?, ?)',
-      [folha_id, funcionario_id, arquivoUrl, 'rascunho']
-    );
-    res.json({ success: true, id: result.insertId, message: 'PDF importado com sucesso!' });
+
+    // Buscar todos os funcionários ativos
+    const [funcionarios] = await pool.query("SELECT id, nome, cpf, pis_pasep FROM funcionarios WHERE status = 'ativo' OR status IS NULL OR status = 'Ativo'");
+
+    // Parsear o PDF completo
+    const pdfBuffer = fs.readFileSync(req.file.path);
+    const pdfData = await pdfParse(pdfBuffer, { max: 0 });
+    const totalPaginas = pdfData.numpages;
+
+    // Processar página a página
+    // pdf-parse retorna texto único; para separar por página usamos renderPage callback
+    const pageTexts = [];
+    await pdfParse(pdfBuffer, {
+      pagerender: (pageData) => {
+        return pageData.getTextContent({ normalizeWhitespace: true }).then(tc => {
+          const text = tc.items.map(i => i.str).join(' ');
+          pageTexts.push(text);
+          return text;
+        });
+      }
+    }).catch(() => {});
+
+    // Se não conseguiu por pagerender, usa fallback por split de página
+    if (pageTexts.length === 0 && pdfData.text) {
+      const pageSep = /\f|\n{5,}/;
+      const partes = pdfData.text.split(pageSep);
+      partes.forEach(p => pageTexts.push(p));
+    }
+
+    const statusHolerite = publicar_automaticamente === 'true' ? 'publicado' : 'rascunho';
+    const detalhes = [];
+    let importados = 0;
+    let nao_identificados = 0;
+    const erros = [];
+
+    for (let i = 0; i < pageTexts.length; i++) {
+      const pagText = pageTexts[i];
+      const match = identificarFuncionario(pagText, funcionarios);
+
+      if (!match) {
+        nao_identificados++;
+        detalhes.push({ pagina: i + 1, funcionario: null, matchedBy: null, status: 'nao_identificado' });
+        continue;
+      }
+
+      const { funcionario, matchedBy } = match;
+      // Salvar arquivo separado por funcionário (reutiliza o mesmo PDF - URLs com #page= para referência)
+      const arquivoUrl = `/uploads/holerites/${req.file.filename}`;
+      try {
+        // Evitar duplicatas: verificar se já existe holerite para esse funcionário nessa folha
+        const [existing] = await pool.query(
+          'SELECT id FROM rh_holerites WHERE folha_id=? AND funcionario_id=? LIMIT 1',
+          [folha_id, funcionario.id]
+        );
+        if (existing.length > 0) {
+          await pool.query(
+            'UPDATE rh_holerites SET arquivo_pdf=?, status=?, updated_at=NOW() WHERE id=?',
+            [arquivoUrl, statusHolerite, existing[0].id]
+          );
+        } else {
+          await pool.query(
+            'INSERT INTO rh_holerites (folha_id, funcionario_id, arquivo_pdf, status) VALUES (?, ?, ?, ?)',
+            [folha_id, funcionario.id, arquivoUrl, statusHolerite]
+          );
+        }
+        importados++;
+        detalhes.push({ pagina: i + 1, funcionario: funcionario.nome, matchedBy, status: 'importado' });
+      } catch (dbErr) {
+        erros.push({ pagina: i + 1, erro: dbErr.message });
+        detalhes.push({ pagina: i + 1, funcionario: funcionario.nome, matchedBy, status: 'erro_db' });
+      }
+    }
+
+    res.json({
+      message: `Importação concluída: ${importados} importados, ${nao_identificados} não identificados de ${pageTexts.length} páginas`,
+      resultados: {
+        total_paginas: totalPaginas,
+        paginas_processadas: pageTexts.length,
+        importados,
+        nao_identificados,
+        detalhes,
+        erros
+      }
+    });
   } catch (error) {
-    logger.error('Erro ao importar PDF:', error);
-    res.status(500).json({ error: 'Erro ao importar PDF' });
+    logger.error('Erro ao importar PDF em lote:', error);
+    res.status(500).json({ error: 'Erro ao processar PDF: ' + error.message });
   }
 });
 

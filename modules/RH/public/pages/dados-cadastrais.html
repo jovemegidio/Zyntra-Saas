@@ -1,117 +1,20 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
-<head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+<head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="theme-color" content="#1a1a2e">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Aluforce: Meus Dados Cadastrais</title>
 
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
+    <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
 
     <style>
-        :root {
-            --sidebar-width: 48px;
-            --header-height: 42px;
-            --primary-orange: #f97316;
-            --primary-pink: #ec4899;
-            --primary-dark: #1a1a2e;
-            --bg-gray: #f5f5f5;
-            --border-color: #e5e5e5;
-            --text-primary: #1a1a1a;
-            --text-secondary: #666;
-            --success-green: #22c55e;
-            --warning-yellow: #eab308;
-            --danger-red: #ef4444;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #ffffff;
-            color: var(--text-primary);
-            overflow-x: hidden;
-        }
-
-        .app-container { display: flex; height: 100vh; }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: var(--primary-dark);
-            display: flex; flex-direction: column; align-items: center;
-            padding: 12px 0; z-index: 100;
-        }
-
-        .sidebar-logo {
-            width: 36px; height: 36px;
-            background: var(--primary-pink); border-radius: 8px;
-            display: flex; align-items: center; justify-content: center;
-            margin-bottom: 20px; cursor: pointer; text-decoration: none;
-        }
-
-        .sidebar-logo i { color: white; font-size: 18px; }
-        .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
-
-        .sidebar-btn {
-            width: 40px; height: 40px;
-            border: none; background: transparent;
-            color: #8b8b9a; border-radius: 10px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; transition: all 0.2s; text-decoration: none;
-        }
-
-        .sidebar-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-        .sidebar-btn.active { background: var(--primary-pink); color: white; }
-        .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
-
-        /* MAIN AREA */
-        .main-area { flex: 1; display: flex; flex-direction: column; /* overflow handled by global-header-sidebar.css */ }
-
-        /* HEADER */
-        .header {
-            height: var(--header-height);
-            background: var(--primary-dark);
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 16px;
-        }
-
-        .header-left { display: flex; align-items: center; gap: 24px; }
-        .header-brand { display: flex; align-items: center; gap: 8px; color: white; }
-        .header-brand img { height: 24px; }
-        .header-brand span { font-size: 14px; font-weight: 600; color: #8b8b9a; }
-        .header-right { display: flex; align-items: center; gap: 8px; }
-
-        .header-btn {
-            width: 36px; height: 36px;
-            border: none; background: transparent;
-            color: #8b8b9a; border-radius: 8px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; transition: all 0.2s;
-        }
-
-        .header-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-
-        .user-avatar {
-            width: 32px; height: 32px; border-radius: 50%;
-            background: linear-gradient(135deg, #ec4899, #db2777);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 14px; font-weight: 600;
-            cursor: pointer; margin-left: 8px; overflow: hidden;
-        }
-
-        .user-avatar img { width: 100%; height: 100%; object-fit: cover; display: none; }
-        .user-avatar img.visible { display: block; }
-
-        .user-greeting {
-            display: flex; align-items: center; gap: 12px;
-            margin-left: 16px; color: #8b8b9a; font-size: 13px;
-        }
-
-        .user-greeting strong { color: white; }
+        /* === DADOS CADASTRAIS - CSS ESPECÍFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #f8fafc; }
@@ -144,7 +47,7 @@
         }
 
         .btn-primary { background: var(--primary-pink); color: white; }
-        .btn-primary:hover { background: #db2777; }
+        .btn-primary:hover { background: #4f46e5; }
         .btn-warning { background: #f59e0b; color: white; }
         .btn-warning:hover { background: #d97706; }
         .btn-success { background: var(--success-green); color: white; }
@@ -236,7 +139,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             color: white;
             font-size: 3rem;
             font-weight: 700;
@@ -292,7 +195,8 @@
         .modal-overlay {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(15,23,42,0.7);
+            backdrop-filter: blur(4px);
         }
 
         .modal-content {
@@ -305,12 +209,20 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+            transform: scale(0.95) translateY(10px);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
         }
 
         .modal-header {
             padding: 20px 24px;
-            border-bottom: 1px solid #e2e8f0;
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -319,28 +231,28 @@
         .modal-header h3 {
             font-size: 1.25rem;
             font-weight: 700;
-            color: #1e293b;
+            color: white;
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .modal-header h3 i { color: var(--primary-pink); }
+        .modal-header h3 i { color: rgba(255,255,255,0.9); }
 
         .modal-close {
             width: 36px; height: 36px;
             border: none;
-            background: #f1f5f9;
+            background: rgba(255,255,255,0.15);
             border-radius: 8px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #64748b;
+            color: white;
             transition: all 0.2s;
         }
 
-        .modal-close:hover { background: #fee2e2; color: #ef4444; }
+        .modal-close:hover { background: rgba(255,255,255,0.25); color: white; }
 
         .modal-body { padding: 24px; overflow-y: auto; }
 
@@ -375,7 +287,7 @@
         .form-input:focus, .form-textarea:focus {
             outline: none;
             border-color: var(--primary-pink);
-            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
         .form-textarea { min-height: 120px; resize: vertical; }
@@ -413,7 +325,7 @@
             width: 40px;
             height: 40px;
             border-radius: 10px;
-            background: linear-gradient(135deg, var(--primary-pink), #f472b6);
+            background: linear-gradient(135deg, var(--primary-pink), #818cf8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -624,10 +536,6 @@
                                 <div class="data-value" id="dado-rg">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Data de Nascimento</span>
-                                <div class="data-value" id="dado-nascimento">-</div>
-                            </div>
-                            <div class="data-item">
                                 <span class="data-label">Telefone</span>
                                 <div class="data-value" id="dado-telefone">-</div>
                             </div>
@@ -647,10 +555,10 @@
                                 <span class="data-label">Naturalidade</span>
                                 <div class="data-value" id="dado-naturalidade">-</div>
                             </div>
-                            <div class="data-item">
-                                <span class="data-label">Nome da M²e</span>
-                                <div class="data-value" id="dado-mae">-</div>
-                            </div>
+                                <div class="data-item">
+                                    <span class="data-label">Nome da Mãe</span>
+                                    <div class="data-value" id="dado-mae">-</div>
+                                </div>
                             <div class="data-item">
                                 <span class="data-label">Nome do Pai</span>
                                 <div class="data-value" id="dado-pai">-</div>
@@ -794,23 +702,119 @@
                             <option value="Estado Civil">Estado Civil / Dependentes</option>
                             <option value="Dados Bancários">Dados Bancários</option>
                             <option value="Documentos">Documentos (PIS, CTPS, CNH, etc.)</option>
-                            <option value="Outros">Outros</option>
-                        </select>
+                <!-- Endereço -->
+                <div class="data-section">
+                    <div class="section-header">
+                        <i class="fas fa-map-marker-alt"></i>
+                        Endereço
                     </div>
-                    <div class="form-group">
-                        <label for="descricaoAlteracao">Descreva a alteração necessária <span style="color: #ef4444;">*</span></label>
-                        <textarea id="descricaoAlteracao" class="form-textarea" required
-                            placeholder="Ex: Preciso atualizar meu telefone para (XX) XXXXX-XXXX e meu endereço para Rua Exemplo, 123 - Bairro - Cidade/UF..."></textarea>
+                    <div class="section-body">
+                        <div class="data-grid">
+                            <div class="data-item full-width">
+                                <span class="data-label">Logradouro</span>
+                                <div class="data-value" id="dado-logradouro">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Bairro</span>
+                                <div class="data-value" id="dado-bairro">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Cidade / UF</span>
+                                <div class="data-value" id="dado-cidade-uf">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">CEP</span>
+                                <div class="data-value" id="dado-cep">-</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="anexoAlteracao">Anexo (opcional)</label>
-                        <div class="file-upload-wrapper">
-                            <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('anexoAlteracao').click()">
-                                <div class="file-upload-icon">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div class="file-upload-text">
-                                    <div class="main-text">Clique para selecionar um arquivo</div>
+                </div>
+
+                <!-- Salário e Benefícios -->
+                <div class="data-section" id="secao-salario">
+                    <div class="section-header" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Salário e Benefícios
+                    </div>
+                    <div class="section-body">
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <span class="data-label">Salário Base</span>
+                                <div class="data-value" id="dado-salario" style="color:#059669;font-weight:700;">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Data do Reajuste</span>
+                                <div class="data-value" id="dado-data-reajuste">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Último Reajuste</span>
+                                <div class="data-value" id="dado-ultimo-reajuste">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vale-Transporte (exibido apenas se ativo) -->
+                <div class="data-section" id="secao-vt" style="display:none;">
+                    <div class="section-header" style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 100%);">
+                        <i class="fas fa-bus"></i>
+                        Vale-Transporte
+                    </div>
+                    <div class="section-body">
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <span class="data-label">Status</span>
+                                <div class="data-value" id="dado-vt-status">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Tipo de Transporte</span>
+                                <div class="data-value" id="dado-vt-tipo">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Valor Diário</span>
+                                <div class="data-value" id="dado-vt-valor-diario">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Qtd. Passagens/Dia</span>
+                                <div class="data-value" id="dado-vt-qtd-passagens">-</div>
+                            </div>
+                            <div class="data-item full-width">
+                                <span class="data-label">Linhas Utilizadas</span>
+                                <div class="data-value" id="dado-vt-linhas">-</div>
+                            </div>
+                            <div class="data-item full-width" style="background:#eff6ff;border-radius:8px;padding:12px;display:flex;justify-content:space-between;align-items:center;">
+                                <span style="color:#1d4ed8;font-weight:600;"><i class="fas fa-calculator"></i> Estimativa Mensal (22 dias):</span>
+                                <span id="dado-vt-estimativa" style="font-size:1.1rem;font-weight:700;color:#1d4ed8;">R$ 0,00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contato de Emergência (exibido apenas se informado) -->
+                <div class="data-section" id="secao-emergencia" style="display:none;">
+                    <div class="section-header" style="background: linear-gradient(135deg, #78350f 0%, #92400e 100%);">
+                        <i class="fas fa-phone-alt"></i>
+                        Contato de Emergência
+                    </div>
+                    <div class="section-body">
+                        <div class="data-grid">
+                            <div class="data-item">
+                                <span class="data-label">Nome</span>
+                                <div class="data-value" id="dado-contato-emerg-nome">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Telefone</span>
+                                <div class="data-value" id="dado-contato-emerg-telefone">-</div>
+                            </div>
+                            <div class="data-item">
+                                <span class="data-label">Parentesco</span>
+                                <div class="data-value" id="dado-contato-emerg-parentesco">-</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dados para Pagamento -->
                                     <div class="sub-text">PDF, JPG ou PNG • Máx. 5MB</div>
                                 </div>
                             </div>
@@ -889,6 +893,43 @@
             }
         }
 
+
+        function formatarCPFDisplay(cpf) {
+            if (!cpf) return '-';
+            if (cpf.startsWith('ENC:') || cpf.includes('ENCRYPTED') || cpf.startsWith('$2')) return 'Protegido';
+            const d = cpf.replace(/\D/g, '');
+            if (d.length !== 11) return cpf;
+            return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+        }
+
+        function formatarTelefoneDisplay(tel) {
+            if (!tel) return '-';
+            const d = tel.replace(/\D/g, '');
+            if (d.length === 11) return d.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+            if (d.length === 10) return d.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+            return tel;
+        }
+
+        function formatarMoedaDisplay(valor) {
+            if (!valor && valor !== 0) return '-';
+            const num = parseFloat(valor);
+            if (isNaN(num)) return '-';
+            return 'R$ ' + num.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function formatarTipoChavePix(tipo) {
+            const tipos = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave Aleatória' };
+            return tipos[tipo] || tipo || '-';
+        }
+
+        function formatarTipoTransporte(tipo) {
+            const tipos = {
+                'onibus': 'Ônibus Urbano', 'metro': 'Metrô', 'trem': 'Trem',
+                'integracao': 'Integração (Ônibus + Metrô/Trem)', 'brt': 'BRT',
+                'vlt': 'VLT', 'intermunicipal': 'Intermunicipal', 'misto': 'Misto (Outros)'
+            };
+            return tipos[tipo] || tipo || '-';
+        }
         function setValor(id, valor) {
             const el = document.getElementById(id);
             if (el) {
@@ -1063,10 +1104,10 @@
             statusEl.className = 'employee-status status-' + status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
             setValor('dado-nome', f.nome_completo);
-            setValor('dado-cpf', f.cpf);
+            setValor('dado-cpf', formatarCPFDisplay(f.cpf));
             setValor('dado-rg', f.rg);
             setValor('dado-nascimento', formatarData(f.data_nascimento));
-            setValor('dado-telefone', f.telefone);
+            setValor('dado-telefone', formatarTelefoneDisplay(f.telefone));
             setValor('dado-email', f.email);
             setValor('dado-estado-civil', f.estado_civil);
             setValor('dado-nacionalidade', f.nacionalidade);
@@ -1087,14 +1128,70 @@
             setValor('dado-cnh', f.cnh);
             setValor('dado-reservista', f.certificado_reservista);
 
-            setValor('dado-endereco', f.endereco);
+            // Endereço — campos separados
+            const _tc = (s) => s ? s.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '';
+            if (f.endereco) {
+                const cepMatch = f.endereco.match(/(\d{5}-?\d{3})\s*$/);
+                const cepFromEnd = cepMatch ? cepMatch[1] : null;
+                let endSemCep = cepFromEnd ? f.endereco.replace(cepMatch[0], '').trim() : f.endereco;
+                if (endSemCep.endsWith(',')) endSemCep = endSemCep.slice(0, -1).trim();
+                const bairro = f.bairro || '';
+                const cidade = f.cidade || '';
+                const estado = f.estado || '';
+                const cep = f.cep || cepFromEnd || '';
+                let logradouro = endSemCep;
+                if (bairro && logradouro.toUpperCase().includes(bairro.toUpperCase())) {
+                    logradouro = logradouro.replace(new RegExp(bairro.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').replace(/,\s*$/, '').trim();
+                }
+                if (cidade && logradouro.toUpperCase().includes(cidade.toUpperCase())) {
+                    logradouro = logradouro.replace(new RegExp(cidade.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').replace(/,\s*$/, '').trim();
+                }
+                setValor('dado-logradouro', _tc(logradouro) || '-');
+                setValor('dado-bairro', _tc(bairro) || '-');
+                setValor('dado-cidade-uf', (cidade || estado) ? (_tc(cidade) + (estado ? ' - ' + estado.toUpperCase() : '')) : '-');
+                setValor('dado-cep', cep ? cep.replace(/^(\d{5})-?(\d{3})$/, '$1-$2') : '-');
+            } else {
+                setValor('dado-logradouro', '-');
+                setValor('dado-bairro', '-');
+                setValor('dado-cidade-uf', '-');
+                setValor('dado-cep', '-');
+            }
 
             document.getElementById('dado-banco').textContent = f.banco || 'Não informado';
-            
-            // Tipo Chave PIX formatado
-            const tiposPix = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave Aleatória' };
-            document.getElementById('dado-tipo-pix').textContent = tiposPix[f.tipo_chave_pix] || f.tipo_chave_pix || 'Não informado';
+            document.getElementById('dado-tipo-pix').textContent = formatarTipoChavePix(f.tipo_chave_pix);
             document.getElementById('dado-chave-pix').textContent = f.chave_pix || 'Não informado';
+
+            // Salário e Benefícios
+            setValor('dado-salario', f.salario ? formatarMoedaDisplay(f.salario) : '-');
+            setValor('dado-data-reajuste', formatarData(f.data_reajuste));
+            setValor('dado-ultimo-reajuste', f.ultimo_reajuste ? f.ultimo_reajuste + '%' : '-');
+
+            // Vale-Transporte
+            const secaoVT = document.getElementById('secao-vt');
+            if (f.vt_ativo && secaoVT) {
+                secaoVT.style.display = 'block';
+                document.getElementById('dado-vt-status').innerHTML = '<span style="color:#16a34a;background:#dcfce7;padding:4px 10px;border-radius:4px;font-weight:600;"><i class="fas fa-check"></i> Ativo</span>';
+                setValor('dado-vt-tipo', formatarTipoTransporte(f.vt_tipo_transporte));
+                setValor('dado-vt-valor-diario', f.vt_valor_diario ? formatarMoedaDisplay(f.vt_valor_diario) : '-');
+                setValor('dado-vt-qtd-passagens', f.vt_qtd_passagens !== undefined ? String(f.vt_qtd_passagens) : '2');
+                setValor('dado-vt-linhas', f.vt_linhas || '-');
+                const estimativa = (parseFloat(f.vt_valor_diario) || 0) * (parseInt(f.vt_qtd_passagens) || 2) * 22;
+                const estimativaEl = document.getElementById('dado-vt-estimativa');
+                if (estimativaEl) estimativaEl.textContent = formatarMoedaDisplay(estimativa);
+            } else if (secaoVT) {
+                secaoVT.style.display = 'none';
+            }
+
+            // Contato de Emergência
+            const secaoEmerg = document.getElementById('secao-emergencia');
+            if ((f.contato_emergencia_nome || f.contato_emergencia_telefone) && secaoEmerg) {
+                secaoEmerg.style.display = 'block';
+                setValor('dado-contato-emerg-nome', f.contato_emergencia_nome);
+                setValor('dado-contato-emerg-telefone', formatarTelefoneDisplay(f.contato_emergencia_telefone));
+                setValor('dado-contato-emerg-parentesco', f.contato_emergencia_parentesco);
+            } else if (secaoEmerg) {
+                secaoEmerg.style.display = 'none';
+            }
         }
 
         function handleFileSelect(input) {
@@ -1205,6 +1302,7 @@
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
     <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
         <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
