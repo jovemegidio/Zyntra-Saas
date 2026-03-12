@@ -1371,255 +1371,25 @@ try {
 }
 
 // =================================================================
-// 📄 NFe API — Endpoints para emissão manual de NFe (emitir.html)
+// 4. MIDDLEWARES DE AUTENTICAÇÃO E AUTORIZAÇÃO
+// [REFACTORED 10/03/2026] Delegado para middleware/auth-central.js
 // =================================================================
-// POST /api/nfe/preview — Gerar preview XML a partir dos dados do formulário
-app.post('/api/nfe/preview', (req, res, next) => authenticateToken(req, res, next), async (req, res) => {
-    try {
-        const nfeData = req.body;
-        if (!nfeData || !nfeData.itens || !nfeData.itens.length) {
-            return res.status(400).json({ success: false, message: 'Dados da NFe inválidos. Adicione ao menos um item.' });
-        }
+const authenticateToken = authCentral.authenticateToken;
 
-        // Gerar XML preview a partir dos dados do formulário
-        const dest = nfeData.destinatario || {};
-        const totalValue = nfeData.totais?.valorTotal || nfeData.itens.reduce((s, i) => s + (i.valorTotal || 0), 0);
-        const now = new Date().toISOString();
-
-        let itensXml = '';
-        (nfeData.itens || []).forEach((item, idx) => {
-            itensXml += `
-    <det nItem="${item.numero || idx + 1}">
-      <prod>
-        <cProd>${item.codigo || ''}</cProd>
-        <xProd>${item.descricao || ''}</xProd>
-        <NCM>${item.ncm || ''}</NCM>
-        <CFOP>${item.cfop || '5102'}</CFOP>
-        <uCom>${item.unidade || 'UN'}</uCom>
-        <qCom>${item.quantidade || 0}</qCom>
-        <vUnCom>${(item.valorUnitario || 0).toFixed(2)}</vUnCom>
-        <vProd>${(item.valorTotal || 0).toFixed(2)}</vProd>
-      </prod>
-      <imposto>
-        <ICMS><ICMS00><orig>0</orig><CST>00</CST></ICMS00></ICMS>
-      </imposto>
-    </det>`;
-        });
-
-        const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<NFe xmlns="http://www.portalfiscal.inf.br/nfe">
-  <infNFe versao="4.00">
-    <ide>
-      <natOp>${nfeData.naturezaOperacao || 'Venda de mercadoria'}</natOp>
-      <tpNF>${nfeData.tipoOperacao || '1'}</tpNF>
-      <dhEmi>${nfeData.dataEmissao || now}</dhEmi>
-      <tpAmb>2</tpAmb>
-    </ide>
-    <dest>
-      <${dest.tipoDocumento || 'CNPJ'}>${dest.documento || ''}</${dest.tipoDocumento || 'CNPJ'}>
-      <xNome>${dest.nome || ''}</xNome>
-      <enderDest>
-        <xLgr>${dest.endereco || ''}</xLgr>
-        <nro>${dest.numero || ''}</nro>
-        <xCpl>${dest.complemento || ''}</xCpl>
-        <xBairro>${dest.bairro || ''}</xBairro>
-        <cMun>${dest.codigoMunicipio || ''}</cMun>
-        <xMun>${dest.municipio || ''}</xMun>
-        <UF>${dest.uf || ''}</UF>
-        <CEP>${(dest.cep || '').replace(/\D/g, '')}</CEP>
-      </enderDest>
-      <email>${dest.email || ''}</email>
-    </dest>${itensXml}
-    <total>
-      <ICMSTot>
-        <vProd>${(nfeData.totais?.totalProdutos || totalValue).toFixed(2)}</vProd>
-        <vDesc>${(nfeData.totais?.totalDesconto || 0).toFixed(2)}</vDesc>
-        <vFrete>${(nfeData.totais?.totalFrete || 0).toFixed(2)}</vFrete>
-        <vNF>${totalValue.toFixed(2)}</vNF>
-      </ICMSTot>
-    </total>
-  </infNFe>
-</NFe>`;
-
-        res.json({ success: true, xml });
-    } catch (err) {
-        console.error('[NFe Preview] Erro:', err);
-        res.status(500).json({ success: false, message: 'Erro interno ao gerar preview da NFe.' });
+// Middleware para autorizar admin ou comercial para Vendas/CRM
+const authorizeAdminOrComercial = (req, res, next) => {
+    if (req.user?.role === 'admin' || req.user?.role === 'comercial') {
+        return next();
     }
-});
+    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador ou comercial.' });
+};
 
-// POST /api/nfe/emitir — Emitir NFe (envio para SEFAZ via Faturamento)
-app.post('/api/nfe/emitir', (req, res, next) => authenticateToken(req, res, next), async (req, res) => {
-    try {
-        const nfeData = req.body;
-        if (!nfeData || !nfeData.itens || !nfeData.itens.length) {
-            return res.status(400).json({ success: false, message: 'Dados da NFe inválidos. Adicione ao menos um item.' });
-        }
-
-        // Tentar encaminhar para o serviço de Faturamento (porta 3003)
-        try {
-            const http = require('http');
-            const payload = JSON.stringify(nfeData);
-            const faturamentoReq = http.request({
-                hostname: 'localhost',
-                port: 3003,
-                path: '/api/faturamento/enviar-sefaz',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Content-Length': Buffer.byteLength(payload),
-                    'Authorization': req.headers['authorization'] || ''
-                },
-                timeout: 30000
-            }, (faturamentoRes) => {
-                let body = '';
-                faturamentoRes.on('data', chunk => body += chunk);
-                faturamentoRes.on('end', () => {
-                    try {
-                        const result = JSON.parse(body);
-                        res.status(faturamentoRes.statusCode).json(result);
-                    } catch {
-                        res.status(502).json({ success: false, message: 'Resposta inválida do serviço de faturamento.' });
-                    }
-                });
-            });
-            faturamentoReq.on('error', () => {
-                // Faturamento não disponível — retornar erro informativo
-                res.status(503).json({
-                    success: false,
-                    message: 'Serviço de faturamento (SEFAZ) não está disponível no momento. Verifique se o módulo de Faturamento está em execução (porta 3003) e tente novamente.',
-                    code: 'FATURAMENTO_OFFLINE'
-                });
-            });
-            faturamentoReq.on('timeout', () => {
-                faturamentoReq.destroy();
-                res.status(504).json({ success: false, message: 'Timeout ao conectar com serviço de faturamento.' });
-            });
-            faturamentoReq.write(payload);
-            faturamentoReq.end();
-        } catch (proxyErr) {
-            console.error('[NFe Emitir] Erro de proxy:', proxyErr);
-            res.status(503).json({
-                success: false,
-                message: 'Serviço de faturamento indisponível. Configure o módulo de Faturamento para emissão de NFe.',
-                code: 'FATURAMENTO_OFFLINE'
-            });
-        }
-    } catch (err) {
-        console.error('[NFe Emitir] Erro:', err);
-        res.status(500).json({ success: false, message: 'Erro interno ao emitir NFe.' });
-    }
-});
-
-// POST /api/nfe/validar — Validar dados da NFe antes de emitir
-app.post('/api/nfe/validar', (req, res, next) => authenticateToken(req, res, next), async (req, res) => {
-    try {
-        const nfeData = req.body;
-        const erros = [];
-
-        if (!nfeData) {
-            return res.status(400).json({ valid: false, errors: ['Dados da NFe não fornecidos.'] });
-        }
-
-        // Validações básicas
-        if (!nfeData.naturezaOperacao) erros.push('Natureza da operação é obrigatória.');
-        if (!nfeData.dataEmissao) erros.push('Data de emissão é obrigatória.');
-
-        // Validar destinatário
-        const dest = nfeData.destinatario || {};
-        if (!dest.documento) erros.push('Documento do destinatário (CNPJ/CPF) é obrigatório.');
-        if (!dest.nome) erros.push('Nome/Razão Social do destinatário é obrigatório.');
-        if (!dest.endereco) erros.push('Endereço do destinatário é obrigatório.');
-        if (!dest.numero) erros.push('Número do endereço é obrigatório.');
-        if (!dest.bairro) erros.push('Bairro é obrigatório.');
-        if (!dest.municipio) erros.push('Município é obrigatório.');
-        if (!dest.uf) erros.push('UF é obrigatória.');
-        if (!dest.cep) erros.push('CEP é obrigatório.');
-
-        // Validar documento (CNPJ ou CPF)
-        if (dest.documento) {
-            const doc = dest.documento.replace(/\D/g, '');
-            if (dest.tipoDocumento === 'CNPJ' && doc.length !== 14) erros.push('CNPJ inválido (deve ter 14 dígitos).');
-            if (dest.tipoDocumento === 'CPF' && doc.length !== 11) erros.push('CPF inválido (deve ter 11 dígitos).');
-        }
-
-        // Validar itens
-        if (!nfeData.itens || !nfeData.itens.length) {
-            erros.push('Adicione ao menos um item à NFe.');
-        } else {
-            nfeData.itens.forEach((item, idx) => {
-                const n = idx + 1;
-                if (!item.descricao) erros.push(`Item ${n}: descrição é obrigatória.`);
-                if (!item.ncm) erros.push(`Item ${n}: NCM é obrigatório.`);
-                if (!item.cfop) erros.push(`Item ${n}: CFOP é obrigatório.`);
-                if (!item.quantidade || item.quantidade <= 0) erros.push(`Item ${n}: quantidade deve ser maior que zero.`);
-                if (!item.valorUnitario || item.valorUnitario <= 0) erros.push(`Item ${n}: valor unitário deve ser maior que zero.`);
-            });
-        }
-
-        if (erros.length > 0) {
-            return res.json({ valid: false, success: false, errors: erros });
-        }
-
-        res.json({ valid: true, success: true, message: 'XML validado com sucesso! Nenhum erro encontrado.' });
-    } catch (err) {
-        console.error('[NFe Validar] Erro:', err);
-        res.status(500).json({ valid: false, errors: ['Erro interno ao validar NFe.'] });
-    }
-});
-
-// GET /api/nfe/configuracoes — Retornar configurações do emitente
-app.get('/api/nfe/configuracoes', (req, res, next) => authenticateToken(req, res, next), async (req, res) => {
-    try {
-        // Tentar buscar configurações do banco de dados
-        let emitente = {};
-        try {
-            const [rows] = await pool.query(
-                "SELECT * FROM configuracoes_nfe WHERE ativo = 1 ORDER BY id DESC LIMIT 1"
-            );
-            if (rows && rows.length > 0) {
-                emitente = rows[0];
-            }
-        } catch (dbErr) {
-            // Tabela pode não existir ainda — usar fallback
-            console.warn('[NFe Config] Tabela configuracoes_nfe não encontrada, usando fallback.');
-        }
-
-        // Fallback: buscar dados da empresa da tabela empresa
-        if (!emitente.cnpj) {
-            try {
-                const [empresaRows] = await pool.query(
-                    "SELECT * FROM empresa ORDER BY id LIMIT 1"
-                );
-                if (empresaRows && empresaRows.length > 0) {
-                    const emp = empresaRows[0];
-                    emitente = {
-                        cnpj: emp.cnpj || '',
-                        razao_social: emp.razao_social || emp.nome || '',
-                        nome_fantasia: emp.nome_fantasia || emp.fantasia || '',
-                        inscricao_estadual: emp.inscricao_estadual || emp.ie || '',
-                        endereco: emp.endereco || emp.logradouro || '',
-                        numero: emp.numero || '',
-                        bairro: emp.bairro || '',
-                        municipio: emp.municipio || emp.cidade || '',
-                        uf: emp.uf || emp.estado || '',
-                        cep: emp.cep || '',
-                        ambiente: 2 // Homologação por padrão
-                    };
-                }
-            } catch {
-                console.warn('[NFe Config] Tabela empresa não encontrada.');
-            }
-        }
-
-        res.json({ success: true, emitente });
-    } catch (err) {
-        console.error('[NFe Config] Erro:', err);
-        res.status(500).json({ success: false, message: 'Erro ao carregar configurações NFe.' });
-    }
-});
-
-console.log('✅ Rotas NFe API carregadas: /api/nfe/preview, /api/nfe/emitir, /api/nfe/validar, /api/nfe/configuracoes');
+// =================================================================
+// 📄 NFe API — Extracted to routes/nfe-api.js
+// =================================================================
+const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
+app.use('/api/nfe', nfeApiRouter);
+console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // 📊 ENTERPRISE: Prometheus /metrics endpoint (protected at app level + nginx)
 app.get('/metrics', (req, res, next) => {
@@ -1740,406 +1510,11 @@ function authenticatePage(req, res, next) {
     });
 }
 
-// Rota condicional para Recursos Humanos baseada no perfil do usuário
-app.get('/RecursosHumanos', authenticatePage, (req, res) => {
-    // Redirecionamento inteligente baseado no tipo de usuário
-    if (req.user && (req.user.nome || req.user.email)) {
-        const firstName = req.user.nome ? req.user.nome.split(' ')[0].toLowerCase() : '';
-        const emailPrefix = req.user.email ? req.user.email.split('@')[0].toLowerCase() : '';
-
-        // Se for admin, redireciona para área administrativa
-        if (userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)) {
-            console.log('[RH] Usuário admin detectado - Redirecionando para areaadm.html');
-            return res.redirect('/RH/areaadm.html');
-        }
-    }
-
-    // Se não for admin, redireciona para página do funcionário
-    console.log('[RH] Usuário funcionário - Redirecionando para funcionario.html');
-    return res.redirect('/RH/funcionario.html');
-});
-
-// Rota principal /RH/ - Redirecionamento inteligente baseado no perfil
-app.get('/RH/', authenticatePage, (req, res) => {
-    if (req.user && (req.user.nome || req.user.email)) {
-        const firstName = req.user.nome ? req.user.nome.split(' ')[0].toLowerCase() : '';
-        const emailPrefix = req.user.email ? req.user.email.split('@')[0].toLowerCase() : '';
-
-        if (userPermissions.hasAccess(firstName, 'rh') || userPermissions.hasAccess(emailPrefix, 'rh')) {
-            // Se for admin, redireciona para área administrativa
-            if (userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)) {
-                return res.redirect('/RH/areaadm.html');
-            }
-            // Se não for admin, redireciona para área do funcionário
-            return res.redirect('/RH/funcionario.html');
-        } else {
-            return res.status(403).send('<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de RH.</p>');
-        }
-    } else {
-        return res.redirect('/login.html');
-    }
-});
-
-// Rotas diretas para os arquivos HTML do RH (para compatibilidade)
-app.get('/RH/areaadm.html', authenticatePage, (req, res) => {
-    if (req.user && (req.user.nome || req.user.email)) {
-        // Verificar por nome e também por email (prefixo antes do @)
-        const firstName = req.user.nome ? req.user.nome.split(' ')[0].toLowerCase() : '';
-        const emailPrefix = req.user.email ? req.user.email.split('@')[0].toLowerCase() : '';
-
-        if (userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)) {
-            res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'areaadm.html'));
-        } else {
-            res.status(403).send('<h1>Acesso Negado</h1><p>Esta área é restrita a administradores.</p>');
-        }
-    } else {
-        res.redirect('/login.html');
-    }
-});
-
-app.get('/RH/area.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'area.html'));
-});
-
-app.get('/RH/funcionario.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'funcionario.html'));
-});
-
-// Rotas específicas para páginas individuais do RH
-app.get('/RH/dashboard.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'pages', 'dashboard.html'));
-});
-
-app.get('/RH/dados-pessoais.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'dados-pessoais.html'));
-});
-
-app.get('/RH/holerites.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'holerites.html'));
-});
-
-app.get('/RH/solicitacoes.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'solicitacoes.html'));
-});
-
-// Rotas para páginas do colaborador RH (em /rh/pages/)
-app.get('/rh/pages/:page', authenticatePage, (req, res) => {
-    const page = req.params.page;
-    // Remove .html se vier na URL
-    const fileName = page.endsWith('.html') ? page : `${page}.html`;
-    const filePath = path.join(__dirname, 'modules', 'RH', 'public', 'pages', fileName);
-
-    // Verifica se o arquivo existe
-    if (require('fs').existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        console.log(`[RH] Arquivo não encontrado: ${filePath}`);
-        res.status(404).send('<h1>Página não encontrada</h1>');
-    }
-});
-
-// Rota para solicitações do RH (sem .html)
-app.get('/rh/solicitacoes', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'solicitacoes.html'));
-});
-
-// Rota para área administrativa do RH (minúsculo)
-app.get('/rh/areaadm', authenticatePage, (req, res) => {
-    if (req.user && (req.user.nome || req.user.email)) {
-        // Verificar por nome e também por email (prefixo antes do @)
-        const firstName = req.user.nome ? req.user.nome.split(' ')[0].toLowerCase() : '';
-        const emailPrefix = req.user.email ? req.user.email.split('@')[0].toLowerCase() : '';
-
-        if (userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)) {
-            res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'areaadm.html'));
-        } else {
-            res.status(403).send('<h1>Acesso Negado</h1><p>Esta área é restrita a administradores.</p>');
-        }
-    } else {
-        res.redirect('/login.html');
-    }
-});
-
-// Rota para funcionário/dashboard colaborador (minúsculo)
-app.get('/rh/funcionario', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'funcionario.html'));
-});
-
-// Rotas para área administrativa do RH
-app.get('/RH/admin-dashboard.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'admin-dashboard.html'));
-});
-
-app.get('/RH/admin-funcionarios.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'admin-funcionarios.html'));
-});
-
-app.get('/RH/admin-folha-pagamento.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'admin-folha-pagamento.html'));
-});
-
-app.get('/RH/admin-ponto.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'admin-ponto.html'));
-});
-
-app.get('/RH/gestao-ponto.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'pages', 'gestao-ponto.html'));
-});
-
-app.get('/RH/admin-beneficios.html', authenticatePage, (req, res) => {
-    res.sendFile(path.join(__dirname, 'modules', 'RH', 'public', 'admin-beneficios.html'));
-});
-
-// ===== FACTORY: Rota protegida por módulo (DRY) =====
-function modulePageHandler(moduleName, filePath, opts = {}) {
-    return (req, res) => {
-        if (req.user && (req.user.nome || req.user.email)) {
-            const firstName = req.user.nome
-                ? req.user.nome.split(' ')[0].toLowerCase()
-                : (req.user.email || '').split('@')[0].toLowerCase();
-            if (userPermissions.hasAccess(firstName, moduleName)) {
-                if (opts.noCache) {
-                    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-                    res.setHeader('Pragma', 'no-cache');
-                    res.setHeader('Expires', '0');
-                }
-                res.sendFile(path.join(__dirname, filePath));
-            } else {
-                res.status(403).send(`<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de ${moduleName}.</p>`);
-            }
-        } else {
-            res.redirect('/login.html');
-        }
-    };
-}
-
-function adminPageHandler(filePath) {
-    return (req, res) => {
-        if (req.user && (req.user.nome || req.user.email)) {
-            const firstName = req.user.nome ? req.user.nome.split(' ')[0].toLowerCase() : '';
-            const emailPrefix = (req.user.email || '').split('@')[0].toLowerCase();
-            if (userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)) {
-                res.sendFile(path.join(__dirname, filePath));
-            } else {
-                res.status(403).send('<h1>Acesso Negado</h1><p>Esta página é restrita a administradores.</p>');
-            }
-        } else {
-            res.redirect('/login.html');
-        }
-    };
-}
-
-// ===== ROTAS DO MÓDULO DE VENDAS (via factory) =====
-app.get('/Vendas/', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/index.html'));
-
-// Redirects
-app.get('/Vendas/kanban.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-app.get('/Vendas/index.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-app.get('/Vendas/vendas.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-
-// Páginas de Vendas
-app.get('/Vendas/pedidos.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/pedidos.html'));
-app.get('/Vendas/clientes.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/clientes.html'));
-app.get('/Vendas/dashboard.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/dashboard.html'));
-app.get('/Vendas/dashboard-admin.html', authenticatePage, adminPageHandler('modules/Vendas/public/dashboard-admin.html'));
-app.get('/Vendas/relatorios.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/relatorios.html'));
-app.get('/Vendas/prospeccao.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/prospeccao.html'));
-app.get('/Vendas/estoque.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/estoque.html'));
-app.get('/Vendas/comissoes.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/comissoes.html'));
-app.get('/Vendas/cte.html', authenticatePage, modulePageHandler('vendas', 'modules/Vendas/public/cte.html'));
-
-// Rota /modules/Vendas/ - redireciona para /Vendas/
-app.get('/modules/Vendas/', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-app.get('/modules/Vendas/index.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-
-// Rotas protegidas para PCP (via factory)
-app.get('/PCP/index.html', authenticatePage, modulePageHandler('pcp', 'modules/PCP/index.html', { noCache: true }));
-app.get('/modules/PCP/index.html', authenticatePage, modulePageHandler('pcp', 'modules/PCP/index.html'));
-
-// Rotas protegidas para CRM (via factory)
-app.get('/CRM/crm.html', authenticatePage, modulePageHandler('crm', 'modules/CRM/crm.html'));
-
-// Rotas protegidas para NFe (via factory)
-app.get('/NFe/nfe.html', authenticatePage, modulePageHandler('nfe', 'modules/NFe/index.html'));
-
-// Rotas protegidas para Compras (via factory)
-app.get('/Compras/compras.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-app.get('/Compras', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-app.get('/Compras/:page', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-
-// Rotas de acesso direto aos módulos (redirecionam para login se não autenticado)
-app.get('/modules/RH/public/areaadm.html', authenticatePage, (req, res) => {
-    res.redirect('/RH/areaadm.html');
-});
-
-app.get('/modules/RH/public/area.html', authenticatePage, (req, res) => {
-    res.redirect('/RH/funcionario.html');
-});
-
-app.get('/modules/RH/public/funcionario.html', authenticatePage, (req, res) => {
-    res.redirect('/RH/funcionario.html');
-});
-
-// Rota para página de teste de sincronização de estoque
-app.get('/teste-sincronizacao-estoque.html', authenticatePage, (req, res) => {
-    console.log('[TESTE] Acesso à página de teste de sincronização por:', req.user?.email);
-    res.sendFile(path.join(__dirname, 'teste-sincronizacao-estoque.html'));
-});
-
-// Rota para Dashboard de Integração
-app.get('/dashboard-integracao.html', authenticatePage, (req, res) => {
-    console.log('[INTEGRACAO] Acesso ao dashboard de integração por:', req.user?.email);
-    res.sendFile(path.join(__dirname, 'dashboard-integracao.html'));
-});
-
-app.get('/integracao', authenticatePage, (req, res) => {
-    res.redirect('/dashboard-integracao.html');
-});
-
-// Rotas antigas de Vendas redirecionam para /Vendas/
-app.get('/modules/Vendas/public/vendas.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-app.get('/modules/Vendas/public/', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-app.get('/modules/Vendas/public/index.html', authenticatePage, (req, res) => res.redirect('/Vendas/'));
-
-// Rotas para Compras (COM autenticação)
-app.get('/modules/Compras/', authenticatePage, (req, res) => {
-    res.redirect('/Compras/compras.html');
-});
-
-app.get('/modules/Compras/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-
-app.get('/modules/Compras/public/', authenticatePage, (req, res) => {
-    res.redirect('/Compras/compras.html');
-});
-
-app.get('/modules/Compras/public/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-
-// Rotas para Financeiro (COM autenticação)
-app.get('/modules/Financeiro/', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/index.html');
-});
-
-app.get('/modules/Financeiro/public/', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/index.html');
-});
-
-app.get('/modules/Financeiro/public/index.html', authenticatePage, (req, res) => {
-    // Redireciona para a versão nova na raiz
-    res.redirect('/modules/Financeiro/index.html');
-});
-
-// Redirecionamentos das subpáginas do Financeiro (public -> raiz)
-app.get('/modules/Financeiro/public/contas_pagar.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/contas-pagar.html');
-});
-
-app.get('/modules/Financeiro/public/contas_receber.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/contas-receber.html');
-});
-
-app.get('/modules/Financeiro/public/fluxo_caixa.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/fluxo-caixa.html');
-});
-
-app.get('/modules/Financeiro/public/contas_bancarias.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/bancos.html');
-});
-
-app.get('/modules/Financeiro/public/relatorios.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/relatorios.html');
-});
-
-app.get('/modules/Financeiro/index.html', authenticatePage, modulePageHandler('financeiro', 'modules/Financeiro/index.html'));
-
-// Rota curinga para redirecionar qualquer arquivo .html da pasta public do Financeiro
-app.get('/modules/Financeiro/public/*.html', authenticatePage, (req, res) => {
-    // Pegar o nome do arquivo da URL
-    const fileName = req.path.split('/').pop();
-    // Mapear nomes de arquivo antigos para novos
-    const fileMapping = {
-        'index.html': 'index.html',
-        'contas_pagar.html': 'contas-pagar.html',
-        'contas_receber.html': 'contas-receber.html',
-        'fluxo_caixa.html': 'fluxo-caixa.html',
-        'contas_bancarias.html': 'bancos.html',
-        'relatorios.html': 'relatorios.html'
-    };
-    const newFileName = fileMapping[fileName] || fileName.replace(/_/g, '-');
-    res.redirect(`/modules/Financeiro/${newFileName}`);
-});
-
-// Rotas para NFe (COM autenticação)
-app.get('/modules/NFe/', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-app.get('/modules/NFe/public/', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-app.get('/modules/NFe/index.html', authenticatePage, modulePageHandler('nfe', 'modules/NFe/index.html'));
-
-app.get('/modules/PCP/index.html', authenticatePage, (req, res) => {
-    res.redirect('/PCP/index.html');
-});
-
-app.get('/modules/NFe/nfe.html', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-app.get('/NFe/', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-app.get('/modules/Compras/compras.html', authenticatePage, (req, res) => {
-    res.redirect('/Compras/compras.html');
-});
-
-app.get('/Compras/', authenticatePage, (req, res) => {
-    res.redirect('/Compras/compras.html');
-});
-
-app.get('/modules/Financeiro/financeiro.html', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/index.html');
-});
-
-app.get('/modules/Faturamento/index.html', authenticatePage, (req, res) => {
-    if (req.user && req.user.permissoes && req.user.permissoes.includes('nfe')) {
-        res.sendFile(path.join(__dirname, 'modules', 'Faturamento', 'public', 'index.html'));
-    } else {
-        res.status(403).send('<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de Faturamento.</p>');
-    }
-});
-
-app.get('/Faturamento/', authenticatePage, (req, res) => {
-    res.redirect('/modules/Faturamento/index.html');
-});
-
-app.get('/Financeiro/', authenticatePage, (req, res) => {
-    res.redirect('/modules/Financeiro/index.html');
-});
-
-// Redirecionamento para URLs antigas do NFe
-app.get('/e-Nf-e/nfe.html', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-app.get('/modules/e-Nf-e/nfe.html', authenticatePage, (req, res) => {
-    res.redirect('/NFe/nfe.html');
-});
-
-// Força qualquer acesso a rotas de login de módulos para a tela de login central
-// NOTA: /Vendas/ e /Vendas/public/ NÃO estão aqui - são tratadas com autenticação nas rotas específicas
-app.get([
-    '/Vendas/login.html', '/Vendas/login', '/Vendas/public/login.html', '/Vendas/public/login',
-    '/PCP/login', '/PCP/login.html',
-    '/CRM/login', '/CRM/login.html',
-    '/Financeiro/login', '/Financeiro/login.html',
-    '/NFe/login', '/NFe/login.html',
-    '/Compras/login', '/Compras/login.html'
-], (req, res) => {
-    return res.redirect('/login.html');
-});
+// =================================================================
+// PAGE ROUTES — Extracted to routes/page-auth-routes.js
+// =================================================================
+require('./routes/page-auth-routes')(app, { authenticatePage, userPermissions });
+console.log('✅ Page auth routes carregadas (modular)');
 
 // =================== AUTOMAÇÃO DE TAREFAS (NODE-CRON) ===================
 // AUDIT-FIX ARCH-002: Cron jobs extracted to services/scheduler.service.js
@@ -2153,20 +1528,6 @@ const initCronJobs = () => {
         emailTransporter: typeof emailTransporter !== 'undefined' ? emailTransporter : null,
         DB_AVAILABLE_FN: () => DB_AVAILABLE
     });
-};
-
-// =================================================================
-// 4. MIDDLEWARES DE AUTENTICAÇÃO E AUTORIZAÇÃO
-// [REFACTORED 10/03/2026] Delegado para middleware/auth-central.js
-// =================================================================
-const authenticateToken = authCentral.authenticateToken;
-
-// Middleware para autorizar admin ou comercial para Vendas/CRM
-const authorizeAdminOrComercial = (req, res, next) => {
-    if (req.user?.role === 'admin' || req.user?.role === 'comercial') {
-        return next();
-    }
-    return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador ou comercial.' });
 };
 
 // =================================================================
@@ -2347,169 +1708,422 @@ registerAllRoutes(app, {
 console.log('[SERVER]  All modular routes registered');
 
 // =================================================================
-// AUDIT LOG API — Unified endpoint for Histórico de Alterações
-// Reads from all 3 audit tables: auditoria_logs, audit_logs, audit_log
+// AUDIT LOG API — Extracted to routes/audit-api.js
 // =================================================================
-app.get('/api/audit-log', authenticateToken, authorizeAdmin, async (req, res) => {
+const auditApiRouter = require('./routes/audit-api')({ authenticateToken, authorizeAdmin, pool, writeAuditLog });
+app.use('/api/audit-log', auditApiRouter);
+console.log('✅ Audit API carregada (modular)');
+
+// =================================================================
+// HEALTH & STATUS — Extracted to routes/health-api.js
+// =================================================================
+const healthRouter = require('./routes/health-api')({
+    authenticateToken, pool,
+    getDbAvailable: () => DB_AVAILABLE,
+    getAllBreakerStates
+});
+app.use(healthRouter);
+console.log('✅ Health/Status endpoints carregados (modular)');
+
+// ─── FOLHA DE PAGAMENTO MANUAL (RH) ───────────────────────────────
+const axios = require('axios');
+
+// GET /api/rh/folha-manual/competencia - Buscar folhas por mês/ano
+app.get('/api/rh/folha-manual/competencia', authenticateToken, async (req, res) => {
+  const mes = parseInt(req.query.mes);
+  const ano = parseInt(req.query.ano);
+  if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
+  try {
+    const [folhas] = await pool.query(
+      'SELECT * FROM rh_folha_manual WHERE mes = ? AND ano = ? ORDER BY FIELD(tipo, "SALARIO", "ADIANTAMENTO")',
+      [mes, ano]
+    );
+    for (const f of folhas) {
+      const [itens] = await pool.query('SELECT * FROM rh_folha_manual_itens WHERE folha_id = ? ORDER BY empresa, colaborador_nome', [f.id]);
+      f.itens = itens;
+    }
+    res.json(folhas);
+  } catch (error) {
+    logger.error('Erro ao buscar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
+  }
+});
+
+// GET /api/rh/folha-manual/listar - Listar todas as folhas manuais
+app.get('/api/rh/folha-manual/listar', authenticateToken, async (req, res) => {
+  const { ano } = req.query;
+  try {
+    let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
+    const params = [];
+    if (ano) { sql += ' WHERE fm.ano = ?'; params.push(parseInt(ano)); }
+    sql += ' ORDER BY fm.ano DESC, fm.mes DESC, FIELD(fm.tipo, "SALARIO", "ADIANTAMENTO")';
+    const [folhas] = await pool.query(sql, params);
+    res.json(folhas);
+  } catch (error) {
+    logger.error('Erro ao listar folhas manuais:', error);
+    res.status(500).json({ error: 'Erro ao listar folhas' });
+  }
+});
+
+// POST /api/rh/folha-manual/salvar - Criar ou atualizar folha com todos os itens
+app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async (req, res) => {
+  const mes = parseInt(req.body.mes);
+  const ano = parseInt(req.body.ano);
+  const tipo = req.body.tipo;
+  const itens = req.body.itens;
+  if (!mes || !ano || !tipo) return res.status(400).json({ error: 'mes, ano e tipo são obrigatórios' });
+  if (!Array.isArray(itens)) return res.status(400).json({ error: 'itens deve ser um array' });
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+    const [existing] = await conn.query(
+      'SELECT id, status FROM rh_folha_manual WHERE mes = ? AND ano = ? AND tipo = ?',
+      [mes, ano, tipo]
+    );
+    let folhaId;
+    if (existing.length > 0) {
+      if (existing[0].status === 'fechada') {
+        await conn.rollback();
+        return res.status(400).json({ error: 'Folha já fechada. Não é possível editar.' });
+      }
+      folhaId = existing[0].id;
+      await conn.query('DELETE FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+    } else {
+      const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+      const titulo = tipo === 'SALARIO'
+        ? `${MESES[mes]} - SALÁRIO, POR FORA E HORA EXTRAS`
+        : `${MESES[mes]} - ADIANTAMENTO`;
+      const [result] = await conn.query(
+        'INSERT INTO rh_folha_manual (mes, ano, tipo, titulo, criado_por) VALUES (?, ?, ?, ?, ?)',
+        [mes, ano, tipo, titulo, req.user.nome || req.user.email]
+      );
+      folhaId = result.insertId;
+    }
+
+    let totalGeral = 0;
+    for (const item of itens) {
+      if (!item.colaborador_nome || !item.colaborador_nome.trim()) continue;
+      const vb = parseFloat(item.valor_base) || 0;
+      const spf = parseFloat(item.salario_por_fora) || 0;
+      const h50 = parseFloat(item.he_50) || 0;
+      const h100 = parseFloat(item.he_100) || 0;
+      const desc = parseFloat(item.desconto_emprestimo) || 0;
+      const totalItem = vb + spf + h50 + h100 - desc;
+      totalGeral += totalItem;
+      await conn.query(
+        `INSERT INTO rh_folha_manual_itens (folha_id, empresa, colaborador_nome, funcionario_id, valor_base, salario_por_fora, he_50, he_100, desconto_emprestimo, total)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [folhaId, item.empresa || '', item.colaborador_nome.trim(), item.funcionario_id || null, vb, spf, h50, h100, desc, totalItem]
+      );
+    }
+    await conn.query('UPDATE rh_folha_manual SET total_geral = ? WHERE id = ?', [totalGeral, folhaId]);
+    await conn.commit();
+    res.json({ success: true, folha_id: folhaId, total_geral: totalGeral });
+  } catch (error) {
+    await conn.rollback();
+    logger.error('Erro ao salvar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
+  } finally {
+    conn.release();
+  }
+});
+
+// PUT /api/rh/folha-manual/:id/fechar - Fechar folha manual e enviar ao Contas a Pagar
+app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, async (req, res) => {
+  const folhaId = parseInt(req.params.id);
+  try {
+    const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
+    if (folhaRows.length === 0) return res.status(404).json({ error: 'Folha não encontrada' });
+    const folha = folhaRows[0];
+    if (folha.status === 'fechada') return res.status(400).json({ error: 'Folha já está fechada' });
+
+    const [itens] = await pool.query('SELECT total FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+    const valorTotal = itens.reduce((acc, i) => acc + parseFloat(i.total || 0), 0);
+    if (valorTotal <= 0) return res.status(400).json({ error: 'Folha sem itens ou valor total zero' });
+
+    await pool.query("UPDATE rh_folha_manual SET status = 'fechada', fechado_em = NOW(), total_geral = ? WHERE id = ?", [valorTotal, folhaId]);
+
+    const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const tipoLabel = folha.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
+    const descricao = `Folha ${tipoLabel} - ${MESES[folha.mes]} ${folha.ano}`;
+    const data_emissao = new Date().toISOString().slice(0, 10);
+    const vencimentoDate = new Date(folha.ano, folha.mes, 5);
+    const data_vencimento = vencimentoDate.toISOString().slice(0, 10);
+
+    const token = req.cookies?.authToken || req.cookies?.token || (req.headers['authorization'] ? req.headers['authorization'].replace('Bearer ', '') : null);
+    if (!token) return res.status(401).json({ error: 'Token de autenticação não encontrado.' });
+
+    const financeiroUrl = process.env.FINANCEIRO_URL || 'http://localhost:3006/api/financeiro/contas-pagar';
+    const payload = { descricao, valor_total: valorTotal, data_emissao, data_vencimento, observacoes: `Folha manual ${tipoLabel} integrada. ID: ${folhaId}` };
     try {
-        const limite = Math.min(parseInt(req.query.limite) || 500, 2000);
-        const allLogs = [];
+      const financeiroResp = await axios.post(financeiroUrl, payload, { headers: { Authorization: `Bearer ${token}` } });
+      res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
+    } catch (err) {
+      logger.error('Erro ao integrar folha com Financeiro:', err?.response?.data || err.message);
+      res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+    }
+  } catch (error) {
+    logger.error('Erro ao fechar folha manual:', error);
+    res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
+  }
+});
 
-        // 1. auditoria_logs (main server)
-        try {
-            const [rows] = await pool.query(
-                `SELECT id, usuario_id, acao, modulo, descricao, ip_address AS ip, user_agent, created_at AS data
-                 FROM auditoria_logs ORDER BY created_at DESC LIMIT ?`, [limite]
-            );
-            rows.forEach(r => {
-                allLogs.push({
-                    id: 'main-' + r.id,
-                    usuario: r.usuario_id ? ('Usuário #' + r.usuario_id) : 'Sistema',
-                    acao: r.acao || 'info',
-                    modulo: r.modulo || 'sistema',
-                    descricao: r.descricao || 'Ação registrada',
-                    ip: r.ip || '',
-                    data: r.data,
-                    fonte: 'principal'
-                });
-            });
-        } catch (e) { console.log('[AUDIT-API] auditoria_logs skip:', e.message); }
+// PUT /api/rh/folha-manual/:id/reabrir - Reabrir folha fechada
+app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, async (req, res) => {
+  try {
+    await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ?", [parseInt(req.params.id)]);
+    res.json({ success: true });
+  } catch (error) {
+    logger.error('Erro ao reabrir folha:', error);
+    res.status(500).json({ error: 'Erro ao reabrir folha' });
+  }
+});
 
-        // 2. audit_logs (Vendas module) — reuses main pool (same database)
-        try {
-            const [rows] = await pool.query(
-                `SELECT al.id, al.user_id, al.action, al.resource_type, al.resource_id, al.meta, al.created_at,
-                        COALESCE(u.nome, CONCAT('Usuário #', al.user_id)) AS usuario_nome
-                 FROM audit_logs al LEFT JOIN usuarios u ON al.user_id = u.id
-                 ORDER BY al.created_at DESC LIMIT ?`, [limite]
-            );
-            rows.forEach(r => {
-                let meta = {};
-                try { meta = r.meta ? JSON.parse(r.meta) : {}; } catch {}
-                allLogs.push({
-                    id: 'vendas-' + r.id,
-                    usuario: r.usuario_nome || 'Sistema',
-                    acao: r.action || 'info',
-                    modulo: 'vendas',
-                    descricao: `${r.action || ''} ${r.resource_type || ''} ${r.resource_id ? '#' + r.resource_id : ''}`.trim() || 'Ação registrada',
-                    ip: meta.ip || '',
-                    data: r.created_at,
-                    fonte: 'vendas'
-                });
-            });
-        } catch (e) { console.log('[AUDIT-API] audit_logs (vendas) skip:', e.message); }
+// GET /api/rh/funcionarios-empresas - Listar funcionários agrupados por empresa
+app.get('/api/rh/funcionarios-empresas', authenticateToken, async (req, res) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT f.id, f.nome_completo as nome, f.cargo, f.departamento, f.salario,
+             COALESCE(f.departamento, 'SEM EMPRESA') as empresa
+      FROM funcionarios f
+      WHERE f.status = 'Ativo' OR f.ativo = 1
+      ORDER BY f.departamento, f.nome_completo
+    `);
+    res.json(rows);
+  } catch (error) {
+    logger.error('Erro ao buscar funcionários:', error);
+    res.status(500).json({ error: 'Erro ao buscar funcionários' });
+  }
+});
 
-        // 3. audit_log (PCP module)
-        try {
-            const [rows] = await pool.query(
-                `SELECT id, user_id, action, entity_type, entity_id, details, user_name, created_at
-                 FROM audit_log ORDER BY created_at DESC LIMIT ?`, [limite]
-            );
-            rows.forEach(r => {
-                allLogs.push({
-                    id: 'pcp-' + r.id,
-                    usuario: r.user_name || ('Usuário #' + r.user_id),
-                    acao: r.action || 'info',
-                    modulo: 'pcp',
-                    descricao: `${r.action || ''} ${r.entity_type || ''} ${r.entity_id ? '#' + r.entity_id : ''} ${r.details || ''}`.trim() || 'Ação registrada',
-                    ip: '',
-                    data: r.created_at,
-                    fonte: 'pcp'
-                });
-            });
-        } catch (e) { console.log('[AUDIT-API] audit_log (pcp) skip:', e.message); }
+// =====================================================
+// HOLERITES (COLABORADOR) - CONSENTIMENTO E VISUALIZAÇÃO
+// =====================================================
 
-        // Sort all by date descending and limit
-        allLogs.sort((a, b) => new Date(b.data) - new Date(a.data));
-        const finalLogs = allLogs.slice(0, limite);
+const isAdminRHUser = (user) => {
+    return user?.role === 'admin' || user?.is_admin === true || user?.rh_admin === true;
+};
 
-        // Enrich with user names from usuarios table
-        try {
-            const [usuarios] = await pool.query('SELECT id, nome FROM usuarios');
-            const userMap = {};
-            usuarios.forEach(u => { userMap[u.id] = u.nome; });
-            finalLogs.forEach(log => {
-                const match = log.usuario.match(/^Usuário #(\d+)$/);
-                if (match && userMap[parseInt(match[1])]) {
-                    log.usuario = userMap[parseInt(match[1])];
-                }
-            });
-        } catch (e) { /* skip */ }
+const getUserFuncionarioId = (user) => {
+    const id = Number(user?.funcionario_id || user?.id);
+    return Number.isFinite(id) && id > 0 ? id : null;
+};
 
-        res.json({ logs: finalLogs, total: finalLogs.length });
-    } catch (error) {
-        console.error('[AUDIT-API] Erro:', error);
-        res.status(500).json({ error: 'Erro ao carregar histórico', logs: [] });
+const ensureHoleritesColumns = `
+    ALTER TABLE rh_holerites
+        ADD COLUMN IF NOT EXISTS visualizado TINYINT(1) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS total_visualizacoes INT DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS confirmado_recebimento TINYINT(1) DEFAULT 0,
+        ADD COLUMN IF NOT EXISTS data_confirmacao DATETIME NULL,
+        ADD COLUMN IF NOT EXISTS arquivo_pdf VARCHAR(255),
+        ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'rascunho',
+        ADD COLUMN IF NOT EXISTS tipo VARCHAR(30) DEFAULT 'salario'
+`;
+pool.query(ensureHoleritesColumns).catch((e) => {
+    if (e && !String(e.message || '').includes('Duplicate')) {
+        logger.warn('Aviso ao ajustar colunas rh_holerites:', e.message);
     }
 });
 
-// POST /api/audit-log — register frontend actions
-app.post('/api/audit-log', authenticateToken, async (req, res) => {
-    try {
-        const { usuario, acao, modulo, descricao } = req.body;
-        const ip = req.ip || req.headers['x-forwarded-for'] || '';
-        const userAgent = req.headers['user-agent'] || '';
-        const userId = req.user?.id || req.user?.userId || null;
+const ensureHoleritesConsentTable = `
+    CREATE TABLE IF NOT EXISTS rh_holerites_consentimentos (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        funcionario_id INT NOT NULL,
+        assinatura_digital VARCHAR(255) NOT NULL,
+        aceito TINYINT(1) DEFAULT 1,
+        ip_address VARCHAR(64) NULL,
+        user_agent VARCHAR(255) NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_holerites_consentimento_funcionario (funcionario_id)
+    )
+`;
+pool.query(ensureHoleritesConsentTable).catch((e) => {
+    logger.warn('Aviso ao criar tabela rh_holerites_consentimentos:', e.message);
+});
 
-        await writeAuditLog({
-            userId,
-            action: acao,
-            module: modulo,
-            description: descricao || `${usuario}: ${acao} em ${modulo}`,
-            ip,
-            userAgent
+// GET /api/rh/holerites/consentimento - Verificar consentimento digital do usuário logado
+app.get('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+    try {
+        if (isAdminRHUser(req.user)) {
+            return res.json({ consentimento: true, admin: true });
+        }
+
+        const funcionarioId = getUserFuncionarioId(req.user);
+        if (!funcionarioId) {
+            return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
+        }
+
+        const [rows] = await pool.query(
+            'SELECT id, assinatura_digital, created_at, updated_at FROM rh_holerites_consentimentos WHERE funcionario_id = ? AND aceito = 1 LIMIT 1',
+            [funcionarioId]
+        );
+
+        const consent = rows.length > 0;
+        res.json({
+            consentimento: consent,
+            admin: false,
+            registro: consent ? rows[0] : null
         });
-
-        res.json({ success: true });
     } catch (error) {
-        console.error('[AUDIT-API] POST erro:', error);
-        res.status(500).json({ error: 'Erro ao registrar' });
+        logger.error('Erro ao verificar consentimento digital de holerites:', error);
+        res.status(500).json({ error: 'Erro ao verificar consentimento digital' });
     }
 });
 
-// Endpoint de status/health (deve ficar ANTES do 404 e error handlers)
-app.get('/status', async (req, res) => {
-    const info = {
-        status: 'ok',
-        uptime_seconds: Math.floor(process.uptime()),
-        dbAvailable: !!DB_AVAILABLE,
-        timestamp: new Date().toISOString()
-    };
+// POST /api/rh/holerites/consentimento - Registrar/atualizar consentimento digital
+app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+    try {
+        if (isAdminRHUser(req.user)) {
+            return res.json({ success: true, admin: true, message: 'Usuário admin não precisa de consentimento.' });
+        }
 
-    if (DB_AVAILABLE) {
-        try {
-            await pool.query('SELECT 1');
-            info.dbPing = true;
-        } catch (err) {
-            info.dbPing = false;
-            // Security: don't leak full error details in production
-            if (process.env.NODE_ENV === 'development') {
-                info.dbError = String(err && err.message ? err.message : err).slice(0, 200);
+        const assinatura = String(req.body?.assinatura_digital || '').trim();
+        if (assinatura.length < 3) {
+            return res.status(400).json({ message: 'assinatura_digital é obrigatória e deve ter ao menos 3 caracteres.' });
+        }
+
+        const funcionarioId = getUserFuncionarioId(req.user);
+        if (!funcionarioId) {
+            return res.status(400).json({ message: 'Funcionário não identificado para o usuário logado.' });
+        }
+
+        const ipAddress = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || req.ip || null;
+        const userAgent = req.headers['user-agent'] || null;
+
+        await pool.query(
+            `INSERT INTO rh_holerites_consentimentos
+                (funcionario_id, assinatura_digital, aceito, ip_address, user_agent)
+             VALUES (?, ?, 1, ?, ?)
+             ON DUPLICATE KEY UPDATE
+                 assinatura_digital = VALUES(assinatura_digital),
+                 aceito = 1,
+                 ip_address = VALUES(ip_address),
+                 user_agent = VALUES(user_agent),
+                 updated_at = CURRENT_TIMESTAMP`,
+            [funcionarioId, assinatura, ipAddress, userAgent]
+        );
+
+        res.json({ success: true, message: 'Consentimento digital registrado com sucesso.' });
+    } catch (error) {
+        logger.error('Erro ao registrar consentimento digital de holerites:', error);
+        res.status(500).json({ error: 'Erro ao registrar consentimento digital' });
+    }
+});
+
+// GET /api/rh/holerites/meus - Listar holerites publicados do funcionário logado
+app.get('/api/rh/holerites/meus', authenticateToken, async (req, res) => {
+    try {
+        const funcionarioId = getUserFuncionarioId(req.user);
+        if (!funcionarioId) {
+            return res.status(400).json({ error: 'Funcionário não identificado para o usuário logado.' });
+        }
+
+        const { mes, ano } = req.query;
+        let query = `
+            SELECT h.*, f.nome AS funcionario_nome, f.cargo, f.departamento, f.cpf,
+                COALESCE(h.tipo, fp.tipo, 'salario') AS tipo,
+                COALESCE(h.status, fp.status, 'rascunho') AS status_holerite,
+                fp.mes, fp.ano
+            FROM rh_holerites h
+            LEFT JOIN funcionarios f ON h.funcionario_id = f.id
+            LEFT JOIN rh_folhas_pagamento fp ON h.folha_id = fp.id
+            WHERE h.funcionario_id = ? AND (h.status = 'publicado' OR fp.status = 'publicado')
+        `;
+        const params = [funcionarioId];
+        if (ano) { query += ' AND fp.ano = ?'; params.push(parseInt(ano)); }
+        if (mes) { query += ' AND fp.mes = ?'; params.push(parseInt(mes)); }
+        query += ' ORDER BY fp.ano DESC, fp.mes DESC';
+
+        const [holerites] = await pool.query(query, params);
+        res.json({ holerites });
+    } catch (error) {
+        logger.error('Erro ao listar holerites do funcionário:', error);
+        res.status(500).json({ error: 'Erro ao listar holerites' });
+    }
+});
+
+// GET /api/rh/holerites/:id - Buscar holerite por id (restrito ao dono/admin)
+app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
+    if (!/^\d+$/.test(req.params.id)) return next();
+    try {
+        const [holerite] = await pool.query(`
+            SELECT h.*, f.nome AS funcionario_nome, f.cargo, f.departamento, f.cpf, fp.mes, fp.ano,
+                COALESCE(h.tipo, fp.tipo, 'salario') AS tipo,
+                COALESCE(h.status, fp.status, 'rascunho') AS status
+            FROM rh_holerites h
+            LEFT JOIN funcionarios f ON h.funcionario_id = f.id
+            LEFT JOIN rh_folhas_pagamento fp ON h.folha_id = fp.id
+            WHERE h.id = ?
+        `, [req.params.id]);
+        if (holerite.length === 0) return res.status(404).json({ error: 'Holerite não encontrado' });
+
+        const userFuncId = getUserFuncionarioId(req.user);
+        if (userFuncId && Number(holerite[0].funcionario_id) !== userFuncId && !isAdminRHUser(req.user)) {
+            return res.status(403).json({ message: 'Acesso negado. Você só pode visualizar seus próprios holerites.' });
+        }
+
+        const [itens] = await pool.query('SELECT * FROM rh_holerite_itens WHERE holerite_id = ?', [req.params.id]);
+        const proventos = itens.filter(i => i.tipo === 'provento');
+        const descontos = itens.filter(i => i.tipo === 'desconto');
+
+        res.json({ ...holerite[0], proventos, descontos, itens });
+    } catch (error) {
+        logger.error('Erro ao buscar holerite:', error);
+        res.status(500).json({ error: 'Erro ao buscar holerite' });
+    }
+});
+
+// POST /api/rh/holerites/:id/visualizar - Registrar visualização
+app.post('/api/rh/holerites/:id/visualizar', authenticateToken, async (req, res) => {
+    try {
+        const holeriteId = req.params.id;
+        const userFuncId = getUserFuncionarioId(req.user);
+
+        if (userFuncId && !isAdminRHUser(req.user)) {
+            const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
+            if (rows.length > 0 && Number(rows[0].funcionario_id) !== userFuncId) {
+                return res.status(403).json({ message: 'Acesso negado.' });
             }
         }
-    }
 
-    res.setHeader('X-DB-Available', DB_AVAILABLE ? '1' : '0');
-    return res.json(info);
+        await pool.query(
+            'UPDATE rh_holerites SET visualizado = 1, total_visualizacoes = COALESCE(total_visualizacoes, 0) + 1 WHERE id = ?',
+            [holeriteId]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao registrar visualização:', error);
+        res.status(500).json({ error: 'Erro ao registrar visualização' });
+    }
 });
 
-// Kubernetes readiness probe — checks if the app can serve traffic
-app.get('/readiness', async (req, res) => {
-    if (!DB_AVAILABLE) {
-        return res.status(503).json({ ready: false, reason: 'database_unavailable' });
-    }
+// POST /api/rh/holerites/:id/confirmar - Confirmar recebimento
+app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) => {
     try {
-        await pool.query('SELECT 1');
-        res.json({ ready: true });
-    } catch (err) {
-        res.status(503).json({ ready: false, reason: 'database_unreachable' });
+        const holeriteId = req.params.id;
+        const userFuncId = getUserFuncionarioId(req.user);
+
+        if (userFuncId && !isAdminRHUser(req.user)) {
+            const [rows] = await pool.query('SELECT funcionario_id FROM rh_holerites WHERE id = ? LIMIT 1', [holeriteId]);
+            if (rows.length > 0 && Number(rows[0].funcionario_id) !== userFuncId) {
+                return res.status(403).json({ message: 'Acesso negado.' });
+            }
+        }
+
+        await pool.query(
+            'UPDATE rh_holerites SET confirmado_recebimento = 1, data_confirmacao = NOW() WHERE id = ?',
+            [holeriteId]
+        );
+        res.json({ success: true, message: 'Recebimento confirmado com sucesso!' });
+    } catch (error) {
+        logger.error('Erro ao confirmar recebimento:', error);
+        res.status(500).json({ error: 'Erro ao confirmar recebimento' });
     }
 });
 
-// Circuit breaker status (admin-only)
-app.get('/api/admin/circuit-breakers', authenticateToken, (req, res) => {
-    res.json(getAllBreakerStates());
-});
+console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 
 // 7. TRATAMENTO DE ERROS E INICIALIZAÇÁO DO SERVIDOR
 // =================================================================
@@ -2617,455 +2231,9 @@ const startServer = async () => {
                     console.log('🔄 Executando verificações de schema...');
                     console.log('💡 Defina SKIP_MIGRATIONS=1 no .env para inicialização mais rápida\n');
 
-                // Tentar criar apenas tabela nfe se não existir (crítica para módulo NFe)
-                try {
-                    await pool.query(`CREATE TABLE IF NOT EXISTS nfe (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        numero VARCHAR(20) UNIQUE NOT NULL,
-                        cliente_id INT NOT NULL,
-                        cliente_nome VARCHAR(100),
-                        descricao_servico TEXT NOT NULL,
-                        valor DECIMAL(10,2) NOT NULL,
-                        iss DECIMAL(10,2) DEFAULT 0,
-                        pis DECIMAL(10,2) DEFAULT 0,
-                        cofins DECIMAL(10,2) DEFAULT 0,
-                        irrf DECIMAL(10,2) DEFAULT 0,
-                        csll DECIMAL(10,2) DEFAULT 0,
-                        status ENUM('pendente', 'autorizada', 'cancelada', 'rejeitada') DEFAULT 'pendente',
-                        data_emissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        observacoes TEXT,
-                        email_enviado BOOLEAN DEFAULT FALSE,
-                        data_envio_email TIMESTAMP NULL,
-                        usuario_id INT,
-                        xml_arquivo LONGTEXT,
-                        FOREIGN KEY (usuario_id) REFERENCES funcionarios(id) ON DELETE SET NULL
-                    )`);
-
-                    // Garantir que as colunas de impostos existem (para tabelas antigas)
-                    try {
-                        await pool.query(`ALTER TABLE nfe ADD COLUMN iss DECIMAL(10,2) DEFAULT 0`);
-                        console.log('✅ Coluna iss adicionada a nfe');
-                    } catch (e) {
-                        // Coluna já existe - silencioso
-                    }
-
-                    try {
-                        await pool.query(`ALTER TABLE nfe ADD COLUMN pis DECIMAL(10,2) DEFAULT 0`);
-                        console.log('✅ Coluna pis adicionada a nfe');
-                    } catch (e) {
-                        // Coluna já existe - silencioso
-                    }
-
-                    try {
-                        await pool.query(`ALTER TABLE nfe ADD COLUMN cofins DECIMAL(10,2) DEFAULT 0`);
-                        console.log('✅ Coluna cofins adicionada a nfe');
-                    } catch (e) {
-                        // Coluna já existe - silencioso
-                    }
-
-                    try {
-                        await pool.query(`ALTER TABLE nfe ADD COLUMN irrf DECIMAL(10,2) DEFAULT 0`);
-                        console.log('✅ Coluna irrf adicionada a nfe');
-                    } catch (e) {
-                        // Coluna já existe - silencioso
-                    }
-
-                    try {
-                        await pool.query(`ALTER TABLE nfe ADD COLUMN csll DECIMAL(10,2) DEFAULT 0`);
-                        console.log('✅ Coluna csll adicionada a nfe');
-                    } catch (e) {
-                        console.log('⚠️ Coluna csll já existe em nfe');
-                    }
-
-                    console.log('✅ Tabela nfe verificada/criada.');
-                } catch (e) {
-                    console.warn('⚠️ Falha ao criar/verificar tabela nfe:', e.message || e);
-                }
-
-                try {
-                    await pool.query(`CREATE TABLE IF NOT EXISTS clientes (
-                        id INT AUTO_INCREMENT PRIMARY KEY,
-                        nome VARCHAR(100) NOT NULL,
-                        cnpj VARCHAR(18) UNIQUE,
-                        cpf VARCHAR(14) UNIQUE,
-                        email VARCHAR(100),
-                        telefone VARCHAR(20),
-                        endereco TEXT,
-                        inscricao_municipal VARCHAR(20),
-                        ativo BOOLEAN DEFAULT TRUE,
-                        data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-                    )`);
-
-                    // Garantir que as colunas existem (para tabelas antigas)
-                    try {
-                        await pool.query(`ALTER TABLE clientes ADD COLUMN cnpj VARCHAR(18) UNIQUE`);
-                        console.log('✅ Coluna cnpj adicionada a clientes');
-                    } catch (e) {
-                        // Coluna já existe
-                        console.log('⚠️ Coluna cnpj já existe em clientes');
-                    }
-
-                    try {
-                        await pool.query(`ALTER TABLE clientes ADD COLUMN cpf VARCHAR(14) UNIQUE`);
-                        console.log('✅ Coluna cpf adicionada a clientes');
-                    } catch (e) {
-                        // Coluna já existe
-                        console.log('⚠️ Coluna cpf já existe em clientes');
-                    }
-
-                    console.log('✅ Tabela clientes verificada/criada.');
-                } catch (e) {
-                    console.warn('⚠️ Falha ao criar/verificar tabela clientes:', e.message || e);
-                }
-
-                // Adicionar colunas de permissões de módulos na tabela usuarios
-                const permissionColumns = ['permissoes_rh', 'permissoes_vendas', 'permissoes_compras', 'permissoes_financeiro', 'permissoes_nfe'];
-                for (const col of permissionColumns) {
-                    try {
-                        await pool.query(`ALTER TABLE usuarios ADD COLUMN ${col} JSON DEFAULT NULL`);
-                        console.log(`✅ Coluna ${col} adicionada com sucesso`);
-                    } catch (e) {
-                        if (e.code === 'ER_DUP_FIELDNAME') {
-                            // Coluna já existe, tudo bem
-                        } else {
-                            console.warn(`⚠️ Erro ao adicionar coluna ${col}:`, e.message);
-                        }
-                    }
-                }
-
-                // Verifica se existe funcionário id=6, se não existir cria um exemplo
-                try {
-                    const [rows] = await pool.query('SELECT COUNT(*) as count FROM funcionarios WHERE id = 6');
-                    if (rows[0].count === 0) {
-                        // Inserir funcionário exemplo com senha hash e cpf obrigatórios usando INSERT IGNORE para evitar duplicação
-                        const bcryptAdmin = require('bcryptjs');
-                        const exemploHash = await bcryptAdmin.hash('aluvendas01', 10);
-                        await pool.query(`INSERT IGNORE INTO funcionarios (id, nome_completo, email, senha, senha_hash, departamento, cargo, data_nascimento, cpf) VALUES (6, 'Funcionário Exemplo', 'exemplo@aluforce.ind.br', '', ?, 'comercial', 'vendedor', '1990-01-01', '00000000000')`, [exemploHash]);
-                        console.log('✅ Funcionário id=6 criado automaticamente.');
-
-                        // Inserir usuário admin para testes
-                        const adminHash = await bcryptAdmin.hash('admin123', 10);
-                        await pool.query(`INSERT IGNORE INTO funcionarios (id, nome_completo, email, senha, senha_hash, departamento, cargo, data_nascimento, cpf, role, is_admin) VALUES (1, 'Administrador', 'admin@aluforce.com', '', ?, 'ti', 'administrador', '1985-01-01', '11111111111', 'admin', 1)`, [adminHash]);
-                        console.log('✅ Usuário admin criado automaticamente.');
-
-                        // Inserir usuários de teste adicionais
-                        const testHash = await bcryptAdmin.hash('123456', 10);
-                        await pool.query(`INSERT IGNORE INTO funcionarios (id, nome_completo, email, senha, senha_hash, departamento, cargo, data_nascimento, cpf, role, is_admin) VALUES (2, 'Thiago Scarcella', 'thiago@aluforce.com', '', ?, 'gestao', 'gerente', '1990-05-15', '22222222222', 'user', 0)`, [testHash]);
-                        await pool.query(`INSERT IGNORE INTO funcionarios (id, nome_completo, email, senha, senha_hash, departamento, cargo, data_nascimento, cpf, role, is_admin) VALUES (3, 'Guilherme Silva', 'guilherme@aluforce.com', '', ?, 'pcp', 'analista', '1992-08-20', '33333333333', 'user', 0)`, [testHash]);
-                        console.log('✅ Usuários de teste criados automaticamente.');
-                    } else {
-                        console.log('✅ Funcionário id=6 já existe (verificado).');
-                    }
-                } catch (e) {
-                    // Tenta criar com INSERT IGNORE como fallback
-                    try {
-                        const bcryptFallback = require('bcryptjs');
-                        const fallbackHash = await bcryptFallback.hash('aluvendas01', 10);
-                        await pool.query(`INSERT IGNORE INTO funcionarios (id, nome_completo, email, senha, senha_hash, departamento, cargo, data_nascimento, cpf) VALUES (6, 'Funcionário Exemplo', 'exemplo@aluforce.ind.br', '', ?, 'comercial', 'vendedor', '1990-01-01', '00000000000')`, [fallbackHash]);
-                        console.log('✅ Funcionário id=6 criado com INSERT IGNORE.');
-                    } catch (e2) {
-                        console.warn('⚠️ Falha ao verificar/inserir funcionário id=6:', e2.message || e2);
-                    }
-                }
-
-                // ============================================================
-                // MIGRAÇÃO: Adicionar colunas necessárias para o módulo PCP
-                // ============================================================
-                console.log('\n🔄 Verificando estrutura da tabela produtos...');
-
-                const produtosColumns = [
-                    { name: 'categoria', sql: "ALTER TABLE produtos ADD COLUMN categoria VARCHAR(100) DEFAULT 'GERAL' AFTER descricao" },
-                    { name: 'gtin', sql: "ALTER TABLE produtos ADD COLUMN gtin VARCHAR(20) DEFAULT NULL AFTER categoria" },
-                    { name: 'ncm', sql: "ALTER TABLE produtos ADD COLUMN ncm VARCHAR(20) DEFAULT NULL AFTER sku" },
-                    { name: 'estoque_atual', sql: "ALTER TABLE produtos ADD COLUMN estoque_atual DECIMAL(10,2) DEFAULT 0 AFTER ncm" },
-                    { name: 'estoque_minimo', sql: "ALTER TABLE produtos ADD COLUMN estoque_minimo DECIMAL(10,2) DEFAULT 0 AFTER estoque_atual" },
-                    { name: 'preco_custo', sql: "ALTER TABLE produtos ADD COLUMN preco_custo DECIMAL(10,2) DEFAULT 0 AFTER estoque_minimo" },
-                    { name: 'preco_venda', sql: "ALTER TABLE produtos ADD COLUMN preco_venda DECIMAL(10,2) DEFAULT 0 AFTER preco_custo" },
-                    { name: 'unidade_medida', sql: "ALTER TABLE produtos ADD COLUMN unidade_medida VARCHAR(10) DEFAULT 'UN' AFTER preco_venda" },
-                    { name: 'embalagem', sql: "ALTER TABLE produtos ADD COLUMN embalagem VARCHAR(50) DEFAULT NULL AFTER unidade_medida" },
-                    { name: 'imagem_url', sql: "ALTER TABLE produtos ADD COLUMN imagem_url VARCHAR(255) DEFAULT NULL AFTER embalagem" },
-                    { name: 'status', sql: "ALTER TABLE produtos ADD COLUMN status VARCHAR(20) DEFAULT 'ativo' AFTER imagem_url" },
-                    { name: 'data_criacao', sql: "ALTER TABLE produtos ADD COLUMN data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER status" }
-                ];
-
-                for (const column of produtosColumns) {
-                    try {
-                        await pool.query(column.sql);
-                        console.log(`✅ Coluna '${column.name}' adicionada à tabela produtos`);
-                    } catch (e) {
-                        if (e.code === 'ER_DUP_FIELDNAME') {
-                            // Coluna já existe, tudo bem
-                        } else {
-                            console.warn(`⚠️ Erro ao adicionar coluna '${column.name}':`, e.message);
-                        }
-                    }
-                }
-
-                // Atualizar produtos existentes com valores padrão
-                try {
-                    await pool.query("UPDATE produtos SET categoria = 'GERAL' WHERE categoria IS NULL OR categoria = ''");
-                    await pool.query("UPDATE produtos SET unidade_medida = 'UN' WHERE unidade_medida IS NULL OR unidade_medida = ''");
-                    await pool.query("UPDATE produtos SET status = 'ativo' WHERE status IS NULL OR status = ''");
-                    console.log('✅ Valores padrão aplicados aos produtos existentes');
-                } catch (e) {
-                    console.warn('⚠️ Erro ao atualizar valores padrão:', e.message);
-                }
-
-                // Criar índices para melhor performance
-                const produtosIndexes = [
-                    { name: 'idx_produtos_categoria', sql: 'CREATE INDEX idx_produtos_categoria ON produtos(categoria)' },
-                    { name: 'idx_produtos_gtin', sql: 'CREATE INDEX idx_produtos_gtin ON produtos(gtin)' },
-                    { name: 'idx_produtos_sku', sql: 'CREATE INDEX idx_produtos_sku ON produtos(sku)' },
-                    { name: 'idx_produtos_ncm', sql: 'CREATE INDEX idx_produtos_ncm ON produtos(ncm)' },
-                    { name: 'idx_produtos_status', sql: 'CREATE INDEX idx_produtos_status ON produtos(status)' },
-                    { name: 'idx_produtos_estoque', sql: 'CREATE INDEX idx_produtos_estoque ON produtos(estoque_atual)' }
-                ];
-
-                for (const index of produtosIndexes) {
-                    try {
-                        await pool.query(index.sql);
-                        console.log(`✅ Índice '${index.name}' criado`);
-                    } catch (e) {
-                        if (e.code === 'ER_DUP_KEYNAME') {
-                            // Índice já existe, tudo bem
-                        } else {
-                            console.warn(`⚠️ Erro ao criar índice '${index.name}':`, e.message);
-                        }
-                    }
-                }
-
-                // Adicionar coluna ativo à tabela clientes se não existir
-                try {
-                    await pool.query("ALTER TABLE clientes ADD COLUMN ativo TINYINT(1) DEFAULT 1");
-                    console.log('✅ Coluna ativo adicionada à tabela clientes');
-                } catch (e) {
-                    if (e.code === 'ER_DUP_FIELDNAME') {
-                        // Coluna já existe, tudo bem
-                    } else {
-                        console.warn('⚠️ Erro ao adicionar coluna ativo:', e.message);
-                    }
-                }
-
-                console.log('✅ Migração da tabela produtos concluída!\n');
-
-                // ============================================================
-                // MIGRAÇÃO: Criar tabela de reset de senha
-                // ============================================================
-                console.log('🔄 Verificando tabela password_reset_tokens...');
-
-                try {
-                    await pool.query(`
-                        CREATE TABLE IF NOT EXISTS password_reset_tokens (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            email VARCHAR(255) NOT NULL,
-                            token VARCHAR(255) NOT NULL UNIQUE,
-                            expira_em DATETIME NOT NULL,
-                            usado TINYINT(1) DEFAULT 0,
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            INDEX idx_token (token),
-                            INDEX idx_email (email),
-                            INDEX idx_expira_em (expira_em)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                    `);
-                    console.log('✅ Tabela password_reset_tokens verificada/criada');
-                } catch (e) {
-                    console.warn('⚠️ Erro ao criar tabela password_reset_tokens:', e.message);
-                }
-
-                // ========== MIGRAÇÃO: INTEGRAÇÃO COMPRAS-PCP ==========
-                console.log('\n🔄 Verificando integração Compras-PCP...');
-
-                try {
-                    // Adicionar campos em pedidos_compras
-                    await pool.query(`
-                        ALTER TABLE pedidos_compras
-                        ADD COLUMN IF NOT EXISTS origem ENUM('manual', 'pcp', 'estoque_minimo') DEFAULT 'manual' AFTER usuario_id
-                    `);
-                    console.log('✅ Campo origem adicionado em pedidos_compras');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna origem já existe em pedidos_compras');
-                    }
-                }
-
-                try {
-                    await pool.query(`
-                        ALTER TABLE pedidos_compras
-                        ADD COLUMN IF NOT EXISTS origem_id INT NULL COMMENT 'ID da ordem de produção ou outro registro de origem' AFTER origem
-                    `);
-                    console.log('✅ Campo origem_id adicionado em pedidos_compras');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna origem_id já existe em pedidos_compras');
-                    }
-                }
-
-                try {
-                    await pool.query(`
-                        ALTER TABLE pedidos_compras
-                        ADD COLUMN IF NOT EXISTS prioridade ENUM('baixa', 'media', 'alta', 'urgente') DEFAULT 'media' AFTER origem_id
-                    `);
-                    console.log('✅ Campo prioridade adicionado em pedidos_compras');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna prioridade já existe em pedidos_compras');
-                    }
-                }
-
-                try {
-                    // Adicionar campo em itens_pedido_compras
-                    await pool.query(`
-                        ALTER TABLE itens_pedido_compras
-                        ADD COLUMN IF NOT EXISTS produto_id INT NULL COMMENT 'Referência ao produtos (materiais PCP)' AFTER pedido_id
-                    `);
-                    console.log('✅ Campo produto_id adicionado em itens_pedido_compras');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna produto_id já existe em itens_pedido_compras');
-                    }
-                }
-
-                try {
-                    // Adicionar campos em ordens_producao
-                    await pool.query(`
-                        ALTER TABLE ordens_producao
-                        ADD COLUMN IF NOT EXISTS pedidos_compra_vinculados JSON NULL COMMENT 'Array de IDs de pedidos de compra relacionados' AFTER arquivo_xlsx
-                    `);
-                    console.log('✅ Campo pedidos_compra_vinculados adicionado em ordens_producao');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna pedidos_compra_vinculados já existe');
-                    }
-                }
-
-                try {
-                    await pool.query(`
-                        ALTER TABLE ordens_producao
-                        ADD COLUMN IF NOT EXISTS materiais_pendentes JSON NULL COMMENT 'Materiais aguardando compra' AFTER pedidos_compra_vinculados
-                    `);
-                    console.log('✅ Campo materiais_pendentes adicionado em ordens_producao');
-                } catch (e) {
-                    if (!e.message.includes('Duplicate column')) {
-                        console.warn('⚠️ Coluna materiais_pendentes já existe');
-                    }
-                }
-
-                try {
-                    // Criar tabela de notificações de estoque
-                    await pool.query(`
-                        CREATE TABLE IF NOT EXISTS notificacoes_estoque (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            produto_id INT NOT NULL,
-                            tipo ENUM('estoque_baixo', 'estoque_critico', 'estoque_zero') NOT NULL,
-                            quantidade_atual DECIMAL(10,2) NOT NULL,
-                            quantidade_minima DECIMAL(10,2) NOT NULL,
-                            ordem_producao_id INT NULL COMMENT 'Ordem que gerou a necessidade',
-                            pedido_compra_id INT NULL COMMENT 'Pedido de compra gerado',
-                            status ENUM('pendente', 'em_compra', 'resolvido', 'ignorado') DEFAULT 'pendente',
-                            criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            resolvido_em TIMESTAMP NULL,
-                            resolvido_por INT NULL,
-                            observacoes TEXT,
-                            FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE,
-                            FOREIGN KEY (ordem_producao_id) REFERENCES ordens_producao(id) ON DELETE SET NULL,
-                            FOREIGN KEY (pedido_compra_id) REFERENCES pedidos_compras(id) ON DELETE SET NULL,
-                            FOREIGN KEY (resolvido_por) REFERENCES funcionarios(id) ON DELETE SET NULL,
-                            INDEX idx_status_tipo (status, tipo),
-                            INDEX idx_produto_status (produto_id, status)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                    `);
-                    console.log('✅ Tabela notificacoes_estoque verificada/criada');
-                } catch (e) {
-                    console.warn('⚠️ Erro ao criar tabela notificacoes_estoque:', e.message);
-                }
-
-                // Criar tabela de notificações gerais do sistema
-                try {
-                    await pool.query(`
-                        CREATE TABLE IF NOT EXISTS notificacoes (
-                            id INT AUTO_INCREMENT PRIMARY KEY,
-                            usuario_id INT NULL COMMENT 'NULL = broadcast para todos',
-                            titulo VARCHAR(255) NOT NULL DEFAULT '',
-                            mensagem TEXT NOT NULL,
-                            tipo VARCHAR(50) DEFAULT 'info',
-                            modulo VARCHAR(50) DEFAULT 'sistema',
-                            link VARCHAR(500) NULL,
-                            prioridade INT DEFAULT 3 COMMENT '1=alta, 2=média, 3=normal',
-                            entidade_tipo VARCHAR(50) NULL COMMENT 'pedido, ordem, conta, etc',
-                            entidade_id INT NULL,
-                            lida TINYINT(1) DEFAULT 0,
-                            lida_em TIMESTAMP NULL,
-                            criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
-                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                            INDEX idx_usuario_lida (usuario_id, lida),
-                            INDEX idx_modulo (modulo)
-                        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-                    `);
-                    // Migrar tabela existente: adicionar colunas faltantes
-                    const colunasNotif = [
-                        { nome: 'titulo', def: "VARCHAR(255) NOT NULL DEFAULT '' AFTER usuario_id" },
-                        { nome: 'modulo', def: "VARCHAR(50) DEFAULT 'sistema' AFTER tipo" },
-                        { nome: 'link', def: "VARCHAR(500) NULL AFTER modulo" },
-                        { nome: 'prioridade', def: "INT DEFAULT 3 AFTER link" },
-                        { nome: 'entidade_tipo', def: "VARCHAR(50) NULL AFTER prioridade" },
-                        { nome: 'entidade_id', def: "INT NULL AFTER entidade_tipo" },
-                        { nome: 'lida_em', def: "TIMESTAMP NULL AFTER lida" },
-                        { nome: 'created_at', def: "TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER lida_em" }
-                    ];
-                    for (const col of colunasNotif) {
-                        try {
-                            const [exists] = await pool.query(`SHOW COLUMNS FROM notificacoes LIKE '${col.nome}'`);
-                            if (exists.length === 0) {
-                                await pool.query(`ALTER TABLE notificacoes ADD COLUMN ${col.nome} ${col.def}`);
-                                console.log(`  ✅ Coluna notificacoes.${col.nome} adicionada`);
-                            }
-                        } catch(ce) { /* coluna já existe ou outro erro */ }
-                    }
-                    // Se tem criado_em mas não created_at preenchido, copiar valores
-                    try {
-                        await pool.query(`UPDATE notificacoes SET created_at = criado_em WHERE created_at IS NULL AND criado_em IS NOT NULL`);
-                    } catch(ce) { /* ignore */ }
-                    console.log('✅ Tabela notificacoes verificada/criada');
-                } catch (e) {
-                    console.warn('⚠️ Erro ao criar tabela notificacoes:', e.message);
-                }
-
-                try {
-                    // Criar view de materiais críticos (versão simplificada sem produto_id)
-                    await pool.query(`
-                        CREATE OR REPLACE VIEW vw_materiais_criticos AS
-                        SELECT
-                            p.id,
-                            p.codigo,
-                            p.descricao,
-                            p.estoque_atual,
-                            p.estoque_minimo,
-                            (p.estoque_minimo - p.estoque_atual) as deficit,
-                            CASE
-                                WHEN p.estoque_atual = 0 THEN 'zero'
-                                WHEN p.estoque_atual < (p.estoque_minimo * 0.5) THEN 'critico'
-                                WHEN p.estoque_atual < p.estoque_minimo THEN 'baixo'
-                                ELSE 'normal'
-                            END as nivel_criticidade,
-                            (SELECT COUNT(*) FROM notificacoes_estoque WHERE produto_id = p.id AND status = 'pendente') as notificacoes_pendentes
-                        FROM produtos p
-                        WHERE p.estoque_atual < p.estoque_minimo
-                        ORDER BY
-                            CASE
-                                WHEN p.estoque_atual = 0 THEN 1
-                                WHEN p.estoque_atual < (p.estoque_minimo * 0.5) THEN 2
-                                WHEN p.estoque_atual < p.estoque_minimo THEN 3
-                                ELSE 4
-                            END,
-                            p.estoque_atual ASC
-                    `);
-                    console.log('✅ View vw_materiais_criticos criada/atualizada');
-                } catch (e) {
-                    console.warn('⚠️ Erro ao criar view vw_materiais_criticos:', e.message);
-                }
-
-                console.log('✅ Migração Compras-PCP concluída!\n');
+                // Inline migrations extracted to database/migrations/startup-inline-migrations.js
+                const { runInlineMigrations } = require('./database/migrations/startup-inline-migrations');
+                await runInlineMigrations(pool);
 
                 } // ⚡ Fim do bloco SKIP_MIGRATIONS
 
@@ -3119,269 +2287,19 @@ const startServer = async () => {
                     httpServer = http.createServer(app);
                 }
 
-                // Configurar Socket.io (SECURITY FIX: CORS restrito a origens autorizadas)
-                const io = new Server(httpServer, {
-                    cors: {
-                        origin: function(origin, callback) {
-                            // AUDIT-FIX: No-origin only in dev; prod requires valid origin
-                            if (!origin) {
-                                if (process.env.NODE_ENV === 'development') return callback(null, true);
-                                return callback(null, false);
-                            }
-                            if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
-                                callback(null, true);
-                            } else {
-                                console.warn(`⚠️ Socket.IO CORS bloqueado: ${origin}`);
-                                callback(new Error('Origem não permitida'));
-                            }
-                        },
-                        credentials: true,
-                        methods: ['GET', 'POST']
-                    }
-                });
-
-                // 🔄 ENTERPRISE: Socket.IO Redis Adapter — multi-node horizontal scaling
-                // When REDIS_URL is set, all Socket.IO instances share events via Redis pub/sub
-                try {
-                    const redisUrl = process.env.REDIS_URL || process.env.REDIS_HOST;
-                    if (redisUrl) {
-                        const { createAdapter } = require('@socket.io/redis-adapter');
-                        const { createClient } = require('redis');
-                        const pubClient = createClient({ url: redisUrl.startsWith('redis://') ? redisUrl : `redis://${redisUrl}` });
-                        const subClient = pubClient.duplicate();
-                        Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
-                            io.adapter(createAdapter(pubClient, subClient));
-                            console.log('🔄 Socket.IO Redis Adapter: multi-node broadcasting ativo');
-                        }).catch(e => {
-                            console.warn('⚠️  Socket.IO Redis Adapter connection failed (fallback: single-node):', e.message);
-                        });
-                    }
-                } catch (adapterErr) {
-                    console.warn('⚠️  Socket.IO Redis Adapter indisponível (fallback: single-node):', adapterErr.message);
-                }
-
-                // Disponibilizar io globalmente para uso nas APIs
-                global.io = io;
-
-                // ⚡ SECURITY: Socket.IO JWT Authentication Middleware
-                // Verifica token JWT em cada conexão Socket.io
-                io.use((socket, next) => {
-                    const token = socket.handshake.auth?.token || 
-                                  socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
-                                  socket.handshake.query?.token;
-                    if (!token) {
-                        // Em desenvolvimento, permitir conexões sem token (backward compat)
-                        if (process.env.NODE_ENV === 'development') return next();
-                        return next(new Error('Autenticação necessária'));
-                    }
-                    try {
-                        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-                        socket.user = decoded;
-                        next();
-                    } catch (err) {
-                        next(new Error('Token inválido ou expirado'));
-                    }
-                });
-
-// ============================================================
-// CHAT BOB AI - Socket.IO Handler
-// ============================================================
-try {
-    const { setupChatSocket } = require('./chat/chat-handler');
-    setupChatSocket(io, pool);
-    console.log('💬 Chat BOB AI: Handler Socket.IO inicializado');
-} catch (chatErr) {
-    console.error('⚠️  Erro ao carregar Chat handler:', chatErr.message);
-}
-
-// ============================================================
-// CHAT CORPORATIVO (Teams) - Socket.IO Handler + Migração
-// ============================================================
-try {
-    const { setupChatTeamsSocket } = require('./routes/chat-routes');
-    setupChatTeamsSocket(io, pool);
-    console.log('💬 Chat Teams: Socket.IO namespace /chat-teams inicializado');
-} catch (chatTeamsErr) {
-    console.error('⚠️  Erro ao carregar Chat Teams handler:', chatTeamsErr.message);
-}
-
-// Chat Teams — Migração automática das tabelas
-try {
-    const { createChatTables } = require('./database/migrations/chat-tables');
-    createChatTables(pool).then(() => {
-        console.log('💬 Chat Teams: Tabelas MySQL verificadas/criadas');
-    }).catch(migErr => {
-        console.warn('⚠️  Chat Tables migration:', migErr.message);
-    });
-} catch (chatMigErr) {
-    console.warn('⚠️  Chat Tables migration load error:', chatMigErr.message);
-}
-
-
-                // Socket.io - Conexões em tempo real
-                io.on('connection', (socket) => {
-                    console.log('🔌 Cliente Socket.io conectado:', socket.id);
-
-                    // Evento de desconexão
-                    socket.on('disconnect', () => {
-                        console.log('🔌 Cliente Socket.io desconectado:', socket.id);
-                    });
-
-                    // Eventos customizados podem ser adicionados aqui
-                    socket.on('chat-message', (msg) => {
-                        io.emit('chat-message', msg);
-                    });
-
-                    socket.on('notification', (data) => {
-                        io.emit('notification', data);
-                    });
-
-                    // Eventos do Chat Bob AI com transferência para humanos
-                    socket.on('transfer-to-human', (data) => {
-                        console.log('🤝 Transferência para atendente humano:', data);
-                        // Notifica agentes disponíveis sobre nova transferência
-                        socket.broadcast.to('support-agents').emit('new-chat-transfer', {
-                            userId: data.userId,
-                            conversationHistory: data.conversationHistory,
-                            timestamp: new Date().toISOString()
-                        });
-                        // Confirma transferência para o cliente
-                        socket.emit('transfer-confirmed', {
-                            message: 'Um atendente será conectado em breve'
-                        });
-                    });
-
-                    socket.on('user-message', (data) => {
-                        console.log('💬 Mensagem do usuário:', data);
-                        // Roteia mensagem para o agente atribuído
-                        socket.broadcast.to('support-agents').emit('user-message-received', {
-                            userId: data.userId,
-                            userName: data.userName,
-                            message: data.message,
-                            timestamp: new Date().toISOString()
-                        });
-                    });
-
-                    // Eventos para agentes humanos
-                    socket.on('join-support-team', (agentData) => {
-                        socket.join('support-agents');
-                        console.log('👤 Agente entrou na equipe de suporte:', agentData);
-                        socket.emit('agent-connected', { status: 'online' });
-                    });
-
-                    socket.on('agent-typing', (data) => {
-                        // Envia indicador de digitação para o usuário específico
-                        io.emit('agent-typing', { userId: data.userId, isTyping: data.isTyping });
-                    });
-
-                    socket.on('agent-message', (data) => {
-                        console.log('📨 Mensagem do agente:', data);
-                        // Envia mensagem do agente para o usuário específico
-                        io.emit('agent-message', {
-                            agentName: data.agentName,
-                            message: data.message,
-                            timestamp: new Date().toISOString()
-                        });
-                    });
-
-                    // Eventos específicos para gestão de estoque
-                    socket.on('join-stock-room', (data) => {
-                        socket.join('stock-management');
-                        console.log(`👤 Cliente ${socket.id} entrou na sala de gestão de estoque`);
-                    });
-
-                    socket.on('leave-stock-room', (data) => {
-                        socket.leave('stock-management');
-                        console.log(`👤 Cliente ${socket.id} saiu da sala de gestão de estoque`);
-                    });
-
-                    // Evento para solicitar dados atualizados
-                    socket.on('request-products-update', () => {
-                        socket.emit('products-update-requested');
-                        console.log(`🔄 Cliente ${socket.id} solicitou atualização de produtos`);
-                    });
-                });
-
-                // Tornar io disponível globalmente
+                // Socket.IO setup extracted to config/socket-setup.js
+                const { setupSocketIO } = require('./config/socket-setup');
+                const io = setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool });
                 app.set('io', io);
 
-// ============================================================
-// ENDPOINT TEMPORÁRIO DE MIGRATION - FINANCEIRO
-// ============================================================
-app.post('/api/admin/describe-tabelas-financeiro', authenticateToken, async (req, res) => {
-    try {
-        const [pagar] = await pool.query('DESCRIBE contas_pagar');
-        const [receber] = await pool.query('DESCRIBE contas_receber');
-        const [bancos] = await pool.query('DESCRIBE contas_bancarias');
-
-        res.json({
-            contas_pagar: pagar.map(c => c.Field),
-            contas_receber: receber.map(c => c.Field),
-            contas_bancarias: bancos.map(c => c.Field)
-        });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar estrutura', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
-    }
-});
-
-app.post('/api/admin/migration-financeiro', authenticateToken, async (req, res) => {
-    if (req.user?.role !== 'admin' && req.user?.is_admin !== 1) {
-        return res.status(403).json({ error: 'Apenas administradores' });
-    }
-
-    try {
-        const results = [];
-
-        // contas_pagar
-        try {
-            await pool.query('ALTER TABLE contas_pagar ADD COLUMN valor_pago DECIMAL(15,2) DEFAULT 0');
-            results.push('✅ contas_pagar.valor_pago');
-        } catch (err) { results.push(`⚠️ contas_pagar.valor_pago: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        try {
-            await pool.query('ALTER TABLE contas_pagar ADD COLUMN data_recebimento DATE NULL');
-            results.push('✅ contas_pagar.data_recebimento');
-        } catch (err) { results.push(`⚠️ contas_pagar.data_recebimento: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        try {
-            await pool.query('ALTER TABLE contas_pagar ADD COLUMN observacoes TEXT');
-            results.push('✅ contas_pagar.observacoes');
-        } catch (err) { results.push(`⚠️ contas_pagar.observacoes: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        // contas_receber
-        try {
-            await pool.query('ALTER TABLE contas_receber ADD COLUMN valor_recebido DECIMAL(15,2) DEFAULT 0');
-            results.push('✅ contas_receber.valor_recebido');
-        } catch (err) { results.push(`⚠️ contas_receber.valor_recebido: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        try {
-            await pool.query('ALTER TABLE contas_receber ADD COLUMN data_recebimento DATE NULL');
-            results.push('✅ contas_receber.data_recebimento');
-        } catch (err) { results.push(`⚠️ contas_receber.data_recebimento: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        try {
-            await pool.query('ALTER TABLE contas_receber ADD COLUMN observacoes TEXT');
-            results.push('✅ contas_receber.observacoes');
-        } catch (err) { results.push(`⚠️ contas_receber.observacoes: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        // contas_bancarias
-        try {
-            await pool.query('ALTER TABLE contas_bancarias ADD COLUMN observacoes TEXT');
-            results.push('✅ contas_bancarias.observacoes');
-        } catch (err) { results.push(`⚠️ contas_bancarias.observacoes: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        try {
-            await pool.query('ALTER TABLE contas_bancarias ADD COLUMN descricao TEXT');
-            results.push('✅ contas_bancarias.descricao');
-        } catch (err) { results.push(`⚠️ contas_bancarias.descricao: ${err.code === 'ER_DUP_FIELDNAME' ? 'já existe' : err.message}`); }
-
-        res.json({ success: true, results });
-
-    } catch (error) {
-        console.error('[MIGRATION] Erro:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
+                // Chat Teams — REST routes (Socket.IO is handled in config/socket-setup.js)
+                try {
+                    const registerChatRoutes = require('./routes/chat-routes');
+                    registerChatRoutes(app, { pool, authenticateToken });
+                    console.log('[SERVER] ✅ Chat Teams REST routes registradas');
+                } catch (chatErr) {
+                    console.warn('[SERVER] ⚠️ Chat Teams routes não carregadas:', chatErr.message);
+                }
 
                 httpServer.listen(portToTry, HOST)
                     .on('listening', () => {
@@ -3422,6 +2340,11 @@ app.post('/api/admin/migration-financeiro', authenticateToken, async (req, res) 
 
                 console.log('='.repeat(60));
                 console.log('\n💡 Dica: Pressione Ctrl+C para encerrar o servidor\n');
+
+                // Notificar PM2 que o app está pronto (para wait_ready: true)
+                if (typeof process.send === 'function') {
+                    process.send('ready');
+                }
 
                 // Inicializar cron jobs após servidor estar online
                 if (DB_AVAILABLE) {
