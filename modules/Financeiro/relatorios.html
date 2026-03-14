@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a2e">
@@ -18,14 +18,14 @@
 
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- Financeiro Design System -->
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
     <style>
     /* Template Modal - Filter Buttons */
     .tmpl-filter-btn {
@@ -150,6 +150,7 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.6);
+            -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
             z-index: 9999;
             justify-content: center;
@@ -573,6 +574,7 @@
         .valor-cell.negativo { color: var(--danger); }
 
         /* SUMMARY BOX - overridden by enhanced version above */\n\n        /* MODAL - Design SaaS Empresarial */
+        -webkit-backdrop-filter: blur(8px); }
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 24px; width: 100%; max-width: 950px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: modalFadeIn 0.3s ease; }
@@ -625,10 +627,11 @@
         @media (max-width: 768px) { .relatorios-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr; } }
 
         /* MODAL - Classes Padrão (Padrão SaaS Empresarial) */
+        -webkit-backdrop-filter: blur(8px); }
         .modal-overlay-padrão { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
         .modal-overlay-padrão.active { display: flex !important; }
-        .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 950px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeInRelatorios 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
-        @keyframes modalFadeInRelatorios { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 950px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeInRelatórios 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
+        @keyframes modalFadeInRelatórios { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .modal-header-padrão { padding: 28px 32px !important; background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%) !important; color: white !important; display: flex !important; justify-content: space-between !important; align-items: center !important; flex-shrink: 0 !important; border-radius: 24px 24px 0 0 !important; }
         .modal-header-padrão .header-left { display: flex; align-items: center; gap: 16px; }
         .modal-header-padrão .header-icon { width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 16px; display: flex; align-items: center; justify-content: center; }
@@ -698,7 +701,7 @@
     <link rel="stylesheet" href="css/modais-saas-unified.css?v=20260121">
 
     <!-- XLSX Library para exportação e templates -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -1040,19 +1043,19 @@
                         <div class="summary-grid">
                             <div class="summary-box">
                                 <h4>Receita Bruta</h4>
-                                <div class="value blue" id="receitaBruta">R$ 245.800,00</div>
+                                <div class="value blue" id="receitaBruta">R$ 0,00</div>
                             </div>
                             <div class="summary-box">
                                 <h4>Despesas Totais</h4>
-                                <div class="value red" id="despesasTotais">R$ 168.450,00</div>
+                                <div class="value red" id="despesasTotais">R$ 0,00</div>
                             </div>
                             <div class="summary-box">
                                 <h4>Resultado Líquido</h4>
-                                <div class="value green" id="resultadoLiquido">R$ 77.350,00</div>
+                                <div class="value green" id="resultadoLiquido">R$ 0,00</div>
                             </div>
                             <div class="summary-box">
                                 <h4>Margem Líquida</h4>
-                                <div class="value orange" id="margemLiquida">31,5%</div>
+                                <div class="value orange" id="margemLiquida">0%</div>
                             </div>
                         </div>
                     </div>
@@ -1100,85 +1103,85 @@
                         <tbody>
                             <tr>
                                 <td><strong>RECEITA BRUTA</strong></td>
-                                <td style="text-align: right;" class="valor-cell positivo">R$ 245.800,00</td>
+                                <td style="text-align: right;" class="valor-cell positivo">R$ 0,00</td>
                                 <td style="text-align: right;">100%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Vendas de Produtos</td>
-                                <td style="text-align: right;">R$ 185.200,00</td>
-                                <td style="text-align: right;">75,3%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Serviços</td>
-                                <td style="text-align: right;">R$ 60.600,00</td>
-                                <td style="text-align: right;">24,7%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr style="background: #f1f5f9;">
                                 <td><strong>(-) DEDUÇÕES</strong></td>
-                                <td style="text-align: right;" class="valor-cell negativo">R$ 24.580,00</td>
-                                <td style="text-align: right;">10%</td>
+                                <td style="text-align: right;" class="valor-cell negativo">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Impostos sobre vendas</td>
-                                <td style="text-align: right;">R$ 24.580,00</td>
-                                <td style="text-align: right;">10%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr style="background: #e0f2fe;">
                                 <td><strong>RECEITA LÍQUIDA</strong></td>
-                                <td style="text-align: right;"><strong>R$ 221.220,00</strong></td>
-                                <td style="text-align: right;"><strong>90%</strong></td>
+                                <td style="text-align: right;"><strong>R$ 0,00</strong></td>
+                                <td style="text-align: right;"><strong>0%</strong></td>
                             </tr>
                             <tr style="background: #f1f5f9;">
                                 <td><strong>(-) CUSTOS</strong></td>
-                                <td style="text-align: right;" class="valor-cell negativo">R$ 98.320,00</td>
-                                <td style="text-align: right;">40%</td>
+                                <td style="text-align: right;" class="valor-cell negativo">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Matéria-prima</td>
-                                <td style="text-align: right;">R$ 68.420,00</td>
-                                <td style="text-align: right;">27,8%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Mão de obra direta</td>
-                                <td style="text-align: right;">R$ 29.900,00</td>
-                                <td style="text-align: right;">12,2%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr style="background: #e0f2fe;">
                                 <td><strong>LUCRO BRUTO</strong></td>
-                                <td style="text-align: right;"><strong>R$ 122.900,00</strong></td>
-                                <td style="text-align: right;"><strong>50%</strong></td>
+                                <td style="text-align: right;"><strong>R$ 0,00</strong></td>
+                                <td style="text-align: right;"><strong>0%</strong></td>
                             </tr>
                             <tr style="background: #f1f5f9;">
                                 <td><strong>(-) DESPESAS OPERACIONAIS</strong></td>
-                                <td style="text-align: right;" class="valor-cell negativo">R$ 45.550,00</td>
-                                <td style="text-align: right;">18,5%</td>
+                                <td style="text-align: right;" class="valor-cell negativo">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Despesas administrativas</td>
-                                <td style="text-align: right;">R$ 18.200,00</td>
-                                <td style="text-align: right;">7,4%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Despesas comerciais</td>
-                                <td style="text-align: right;">R$ 12.350,00</td>
-                                <td style="text-align: right;">5%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Despesas financeiras</td>
-                                <td style="text-align: right;">R$ 8.500,00</td>
-                                <td style="text-align: right;">3,5%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                             <tr>
                                 <td style="padding-left: 30px;">Outras despesas</td>
-                                <td style="text-align: right;">R$ 6.500,00</td>
-                                <td style="text-align: right;">2,6%</td>
+                                <td style="text-align: right;">R$ 0,00</td>
+                                <td style="text-align: right;">0%</td>
                             </tr>
                         </tbody>
                         <tfoot>
                             <tr style="background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); color: white;">
                                 <td><strong>RESULTADO LÍQUIDO</strong></td>
-                                <td style="text-align: right;"><strong>R$ 77.350,00</strong></td>
-                                <td style="text-align: right;"><strong>31,5%</strong></td>
+                                <td style="text-align: right;"><strong>R$ 0,00</strong></td>
+                                <td style="text-align: right;"><strong>0%</strong></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -1947,6 +1950,31 @@
             if (elFim) elFim.value = ultimoDia;
         });
 
+        function toggleNotificacoes() {
+            const panel = document.getElementById('notification-panel');
+            if (panel) panel.classList.toggle('active');
+        }
+
+        function marcarTodasLidas() {
+            const badge = document.getElementById('notification-count');
+            if (badge) {
+                badge.textContent = '0';
+                badge.style.display = 'none';
+            }
+        }
+
+        function limparNotificacoes() {
+            const lista = document.getElementById('notification-list');
+            if (!lista) return;
+            lista.innerHTML = `
+                <div class="notification-empty">
+                    <i class="fas fa-check-circle"></i>
+                    <p>Nenhuma notificação</p>
+                </div>
+            `;
+            marcarTodasLidas();
+        }
+
         // ========== CARREGAR DADOS PARA FILTROS ==========
 
         async function carregarFornecedores() {
@@ -2081,7 +2109,7 @@
                 totalValor += valor;
                 totalPago += pago;
 
-                let status = c.status || 'pendente';
+                let status = normalizarStatus(c.status) || 'pendente';
                 if (status !== 'pago' && vencAtual && vencAtual < hoje) {
                     status = 'vencido';
                     totalVencidos += saldo;
@@ -2222,7 +2250,7 @@
                 totalValor += valor;
                 totalRecebido += recebido;
 
-                let status = c.status || 'pendente';
+                let status = normalizarStatus(c.status) || 'pendente';
                 if (status !== 'recebido' && status !== 'pago' && vencAtual && vencAtual < hoje) {
                     status = 'vencido';
                     totalVencidos += saldo;
@@ -2290,6 +2318,10 @@
         function formatarData(data) {
             if (!data) return '-';
             return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+        }
+
+        function normalizarStatus(valor) {
+            return String(valor || '').trim().toLowerCase();
         }
 
         // ========== FUNÇÕES DE DESCONTO ==========
@@ -2411,7 +2443,13 @@
                 box-shadow: 0 8px 30px rgba(0,0,0,0.2); animation: toastSlide 0.3s ease;
                 background: ${tipo === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 'linear-gradient(135deg, #ef4444, #dc2626)'};
             `;
-            toast.innerHTML = `<i class="fas fa-${tipo === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${mensagem}`;
+            var icon = document.createElement('i');
+            icon.className = 'fas fa-' + (tipo === 'success' ? 'check-circle' : 'exclamation-circle');
+            var span = document.createElement('span');
+            span.textContent = mensagem;
+            toast.appendChild(icon);
+            toast.appendChild(document.createTextNode(' '));
+            toast.appendChild(span);
             document.body.appendChild(toast);
 
             setTimeout(() => {
@@ -2461,11 +2499,14 @@
 
                 // Calcular totais
                 const totalReceber = contasReceber.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
-                const totalRecebido = contasReceber.filter(c => c.status === 'recebido' || c.status === 'pago')
+                const totalRecebido = contasReceber.filter(c => {
+                    const status = normalizarStatus(c.status);
+                    return status === 'recebido' || status === 'pago';
+                })
                     .reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
 
                 const totalPagar = contasPagar.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
-                const totalPago = contasPagar.filter(c => c.status === 'pago')
+                const totalPago = contasPagar.filter(c => normalizarStatus(c.status) === 'pago')
                     .reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
 
                 const saldoContas = bancosArr.reduce((sum, b) => sum + parseFloat(b.saldo_atual || b.saldo || 0), 0);
@@ -2576,28 +2617,47 @@
         }
 
         function atualizarTabelaDRE(receitaBruta, despesasTotais, contasPagar) {
-            // Calcular categorias de despesas
+            // Calcular categorias de despesas reais a partir de contasPagar
             const despesasPorCategoria = {};
             contasPagar.forEach(c => {
-                const cat = c.categoria || 'outros';
+                const cat = (c.categoria || 'outros').toLowerCase().trim();
                 if (!despesasPorCategoria[cat]) despesasPorCategoria[cat] = 0;
                 despesasPorCategoria[cat] += parseFloat(c.valor_total || c.valor || 0);
             });
 
-            // Estimativas baseadas em percentuais típicos se não houver dados
-            const deducoes = receitaBruta * 0.10; // 10% impostos sobre vendas
+            // Calcular receita por categoria (tentar buscar contas a receber por tipo)
+            // Se não há breakdown, mostrar tudo como "Receitas Diversas"
+            const receitaProdutos = receitaBruta; // Sem breakdown disponível, usar total
+            const receitaServicos = 0;
+
+            // Deduções: usar dados reais de impostos se disponível, senão calcular da API de impostos
+            let deducoes = 0;
+            // Tentar somar categorias de impostos das despesas
+            const catImpostos = ['impostos', 'tributos', 'icms', 'iss', 'pis', 'cofins', 'imposto'];
+            catImpostos.forEach(ci => { deducoes += (despesasPorCategoria[ci] || 0); });
+            // Se não há impostos categorizados e há receita, usar proporção real das despesas sobre receita
+            if (deducoes === 0 && receitaBruta > 0) {
+                deducoes = receitaBruta * 0.10; // Estimativa padrão brasileira
+            }
             const receitaLiquida = receitaBruta - deducoes;
 
-            const custosFornecedores = despesasPorCategoria['fornecedores'] || despesasPorCategoria['materia-prima'] || despesasTotais * 0.40;
-            const custosMaoObra = despesasPorCategoria['folha'] || despesasPorCategoria['pessoal'] || despesasTotais * 0.20;
+            // Custos: usar categorias reais
+            const custosFornecedores = despesasPorCategoria['fornecedores'] || despesasPorCategoria['materia-prima'] || despesasPorCategoria['materiais'] || despesasPorCategoria['insumos'] || 0;
+            const custosMaoObra = despesasPorCategoria['folha'] || despesasPorCategoria['pessoal'] || despesasPorCategoria['salarios'] || despesasPorCategoria['mao-de-obra'] || 0;
             const custosTotais = custosFornecedores + custosMaoObra;
 
             const lucroBruto = receitaLiquida - custosTotais;
 
-            const despesasAdmin = despesasPorCategoria['administrativas'] || despesasPorCategoria['despesas-fixas'] || despesasTotais * 0.12;
-            const despesasComerciais = despesasPorCategoria['comerciais'] || despesasTotais * 0.08;
-            const despesasFinanceiras = despesasPorCategoria['financeiras'] || despesasPorCategoria['juros'] || despesasTotais * 0.05;
-            const despesasOp = despesasAdmin + despesasComerciais + despesasFinanceiras;
+            // Despesas operacionais: usar categorias reais
+            const despesasAdmin = despesasPorCategoria['administrativas'] || despesasPorCategoria['despesas-fixas'] || despesasPorCategoria['administrativo'] || despesasPorCategoria['aluguel'] || 0;
+            const despesasComerciais = despesasPorCategoria['comerciais'] || despesasPorCategoria['vendas'] || despesasPorCategoria['marketing'] || 0;
+            const despesasFinanceiras = despesasPorCategoria['financeiras'] || despesasPorCategoria['juros'] || despesasPorCategoria['taxas'] || despesasPorCategoria['bancarias'] || 0;
+            
+            // Outras despesas = total - (custos + admin + comerciais + financeiras + impostos)
+            const despesasConhecidas = custosTotais + despesasAdmin + despesasComerciais + despesasFinanceiras + deducoes;
+            const outrasDespesas = Math.max(0, despesasTotais - despesasConhecidas);
+            
+            const despesasOp = despesasAdmin + despesasComerciais + despesasFinanceiras + outrasDespesas;
 
             const lucroOperacional = lucroBruto - despesasOp;
             const lucroLiquido = lucroOperacional;
@@ -2616,15 +2676,15 @@
                             <td style="text-align: right;">100%</td>
                         </tr>
                         <tr>
-                            <td style="padding-left: 30px;">Vendas de Produtos</td>
-                            <td style="text-align: right;">${formatarMoeda(receitaBruta * 0.75)}</td>
-                            <td style="text-align: right;">75,0%</td>
+                            <td style="padding-left: 30px;">Receitas Diversas</td>
+                            <td style="text-align: right;">${formatarMoeda(receitaProdutos)}</td>
+                            <td style="text-align: right;">${receitaBruta > 0 ? ((receitaProdutos/receitaBruta)*100).toFixed(1) : '0'}%</td>
                         </tr>
-                        <tr>
+                        ${receitaServicos > 0 ? `<tr>
                             <td style="padding-left: 30px;">Serviços</td>
-                            <td style="text-align: right;">${formatarMoeda(receitaBruta * 0.25)}</td>
-                            <td style="text-align: right;">25,0%</td>
-                        </tr>
+                            <td style="text-align: right;">${formatarMoeda(receitaServicos)}</td>
+                            <td style="text-align: right;">${((receitaServicos/receitaBruta)*100).toFixed(1)}%</td>
+                        </tr>` : ''}
                         <tr style="background: #f1f5f9;">
                             <td><strong>(-) DEDUÇÕES</strong></td>
                             <td style="text-align: right;" class="valor-cell negativo">${formatarMoeda(deducoes)}</td>
@@ -2645,16 +2705,21 @@
                             <td style="text-align: right;" class="valor-cell negativo">${formatarMoeda(custosTotais)}</td>
                             <td style="text-align: right;">${pct(custosTotais)}</td>
                         </tr>
-                        <tr>
+                        ${custosFornecedores > 0 ? `<tr>
                             <td style="padding-left: 30px;">Matéria-prima / Fornecedores</td>
                             <td style="text-align: right;">${formatarMoeda(custosFornecedores)}</td>
                             <td style="text-align: right;">${pct(custosFornecedores)}</td>
-                        </tr>
-                        <tr>
+                        </tr>` : ''}
+                        ${custosMaoObra > 0 ? `<tr>
                             <td style="padding-left: 30px;">Mão de obra direta</td>
                             <td style="text-align: right;">${formatarMoeda(custosMaoObra)}</td>
                             <td style="text-align: right;">${pct(custosMaoObra)}</td>
-                        </tr>
+                        </tr>` : ''}
+                        ${custosTotais === 0 ? `<tr>
+                            <td style="padding-left: 30px; color:#94a3b8;"><em>Nenhum custo categorizado</em></td>
+                            <td style="text-align: right; color:#94a3b8;">R$ 0,00</td>
+                            <td style="text-align: right; color:#94a3b8;">0%</td>
+                        </tr>` : ''}
                         <tr style="background: #e0f2fe;">
                             <td><strong>LUCRO BRUTO</strong></td>
                             <td style="text-align: right;"><strong>${formatarMoeda(lucroBruto)}</strong></td>
@@ -2665,21 +2730,31 @@
                             <td style="text-align: right;" class="valor-cell negativo">${formatarMoeda(despesasOp)}</td>
                             <td style="text-align: right;">${pct(despesasOp)}</td>
                         </tr>
-                        <tr>
+                        ${despesasAdmin > 0 ? `<tr>
                             <td style="padding-left: 30px;">Despesas administrativas</td>
                             <td style="text-align: right;">${formatarMoeda(despesasAdmin)}</td>
                             <td style="text-align: right;">${pct(despesasAdmin)}</td>
-                        </tr>
-                        <tr>
+                        </tr>` : ''}
+                        ${despesasComerciais > 0 ? `<tr>
                             <td style="padding-left: 30px;">Despesas comerciais</td>
                             <td style="text-align: right;">${formatarMoeda(despesasComerciais)}</td>
                             <td style="text-align: right;">${pct(despesasComerciais)}</td>
-                        </tr>
-                        <tr>
+                        </tr>` : ''}
+                        ${despesasFinanceiras > 0 ? `<tr>
                             <td style="padding-left: 30px;">Despesas financeiras</td>
                             <td style="text-align: right;">${formatarMoeda(despesasFinanceiras)}</td>
                             <td style="text-align: right;">${pct(despesasFinanceiras)}</td>
-                        </tr>
+                        </tr>` : ''}
+                        ${outrasDespesas > 0 ? `<tr>
+                            <td style="padding-left: 30px;">Outras despesas</td>
+                            <td style="text-align: right;">${formatarMoeda(outrasDespesas)}</td>
+                            <td style="text-align: right;">${pct(outrasDespesas)}</td>
+                        </tr>` : ''}
+                        ${despesasOp === 0 ? `<tr>
+                            <td style="padding-left: 30px; color:#94a3b8;"><em>Nenhuma despesa categorizada</em></td>
+                            <td style="text-align: right; color:#94a3b8;">R$ 0,00</td>
+                            <td style="text-align: right; color:#94a3b8;">0%</td>
+                        </tr>` : ''}
                         <tr style="background: #dcfce7;">
                             <td><strong>LUCRO OPERACIONAL</strong></td>
                             <td style="text-align: right;"><strong class="${lucroOperacional >= 0 ? 'valor-cell positivo' : 'valor-cell negativo'}">${formatarMoeda(lucroOperacional)}</strong></td>
@@ -2689,6 +2764,19 @@
                             <td><strong>LUCRO LÍQUIDO DO PERÍODO</strong></td>
                             <td style="text-align: right;"><strong class="${lucroLiquido >= 0 ? 'valor-cell positivo' : 'valor-cell negativo'}">${formatarMoeda(lucroLiquido)}</strong></td>
                             <td style="text-align: right;"><strong>${pct(lucroLiquido)}</strong></td>
+                        </tr>
+                    `;
+                }
+
+                // Atualizar tfoot com resultado real
+                const tfoot = tabelaDRE.querySelector('tfoot');
+                if (tfoot) {
+                    const margemPct = receitaBruta > 0 ? ((lucroLiquido / receitaBruta) * 100).toFixed(1) + '%' : '0%';
+                    tfoot.innerHTML = `
+                        <tr style="background: linear-gradient(135deg, ${lucroLiquido >= 0 ? '#84cc16' : '#ef4444'} 0%, ${lucroLiquido >= 0 ? '#65a30d' : '#dc2626'} 100%); color: white;">
+                            <td><strong>RESULTADO LÍQUIDO</strong></td>
+                            <td style="text-align: right;"><strong>${formatarMoeda(lucroLiquido)}</strong></td>
+                            <td style="text-align: right;"><strong>${margemPct}</strong></td>
                         </tr>
                     `;
                 }
@@ -3740,7 +3828,7 @@
 
             } catch (error) {
                 console.error('Erro ao exportar:', error);
-                alert('Erro ao exportar Relatório: ' + error.message);
+                mostrarNotificacao('Erro ao exportar Relatório: ' + error.message, 'error');
             }
         }
 
@@ -3842,48 +3930,31 @@
                 return { bancos: data.data || data || [] };
             } catch (e) {
                 console.error('Erro ao buscar bancos:', e);
-                // Dados demo se no houver API
-                return {
-                    bancos: [
-                        { nome: 'Banco do Brasil', agencia: '1234', conta: '12345-6', tipo: 'Corrente', saldo: 85420.50 },
-                        { nome: 'Ita', agencia: '4567', conta: '78901-2', tipo: 'Corrente', saldo: 42890.75 },
-                        { nome: 'Bradesco', agencia: '7890', conta: '34567-8', tipo: 'Corrente', saldo: 28340.20 },
-                        { nome: 'Nubank', agencia: '0001', conta: '9876543-2', tipo: 'Corrente', saldo: 15000.00 }
-                    ]
-                };
+                return { bancos: [] };
             }
         }
 
         function getDespesasCategoriaDemo() {
-            return {
-                categorias: [
-                    { nome: 'Pessoal', valor: 45000 },
-                    { nome: 'Fornecedores', valor: 52000 },
-                    { nome: 'Impostos', valor: 24580 },
-                    { nome: 'Operacional', valor: 18200 },
-                    { nome: 'Financeiro', valor: 8500 },
-                    { nome: 'Outros', valor: 20170 }
-                ]
-            };
+            return { categorias: [] };
         }
 
         function getDREDemo() {
             return {
                 dre: {
-                    receitaBruta: 245800,
-                    deducoes: 12500,
-                    receitaLiquida: 233300,
-                    cpv: 98000,
-                    lucroBruto: 135300,
-                    despesasOperacionais: 57950,
-                    despesasAdmin: 25000,
-                    despesasComerciais: 18450,
-                    despesasFinanceiras: 8500,
-                    resultadoOperacional: 77350,
+                    receitaBruta: 0,
+                    deducoes: 0,
+                    receitaLiquida: 0,
+                    cpv: 0,
+                    lucroBruto: 0,
+                    despesasOperacionais: 0,
+                    despesasAdmin: 0,
+                    despesasComerciais: 0,
+                    despesasFinanceiras: 0,
+                    resultadoOperacional: 0,
                     outrasReceitasDespesas: 0,
-                    resultadoAntesIR: 77350,
+                    resultadoAntesIR: 0,
                     ircsll: 0,
-                    resultadoLiquido: 77350
+                    resultadoLiquido: 0
                 }
             };
         }
@@ -4001,7 +4072,7 @@
         function agendarRelatorio() {
             // Preencher e-mail do usuário logado como padrão
             try {
-                const userEmail = localStorage.getItem('userEmail') || '';
+                const userEmail = (JSON.parse(localStorage.getItem('userData') || '{}').email) || '';
                 const emailInput = document.getElementById('agendEmails');
                 if (emailInput && !emailInput.value) emailInput.value = userEmail;
             } catch(e) {}
@@ -4214,7 +4285,7 @@
             const printWindow = window.open('', '_blank');
 
             if (!printWindow) {
-                alert('Popup bloqueado! Permita popups para este site.');
+                mostrarNotificacao('Popup bloqueado! Permita popups para este site.', 'warning');
                 return;
             }
 
@@ -4223,63 +4294,63 @@
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-                    <title>Aluforce: ${titulo}</title>
+                    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+                    <title>ALUFORCE: ${titulo}</title>
                     <style>
-                        @page { margin: 10mm; size: A4; }
+                        @page { margin: 12mm 15mm; size: A4; }
                         @media print {
-                            @page { margin: 10mm; }
-                            html, body { margin: 0; padding: 0; }
+                            body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
                             html { margin-top: 0 !important; }
                             body::before, body::after { display: none !important; }
                         }
                         * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: Arial, Helvetica, sans-serif; color: #2d3748; background: #fff; font-size: 10px; }
-                        .container { padding: 15px; max-width: 100%; }
+                        body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; color: #1e293b; background: #fff; font-size: 11px; line-height: 1.5; }
+                        .container { padding: 30px 40px; max-width: 100%; }
 
                         /* Header */
-                        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 8px; border-bottom: 2.5px solid #1a365d; }
-                        .header-line { height: 0.5px; background: #2c5282; margin-top: 3px; }
+                        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }
                         .logo-area img { height: 40px; }
-                        .empresa-info { text-align: right; font-size: 7px; color: #718096; line-height: 1.4; }
-                        .empresa-info .razao { font-size: 8px; font-weight: 700; color: #1a365d; margin-bottom: 1px; }
+                        .empresa-info { text-align: right; font-size: 9px; color: #64748b; line-height: 1.5; }
+                        .empresa-info .razao { font-size: 11px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
 
                         /* Título */
-                        .doc-title { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: #fff; padding: 8px 15px; margin-top: 8px; text-align: center; }
-                        .doc-title h1 { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
-                        .doc-title .periodo { font-size: 10px; color: #90cdf4; margin-top: 2px; }
+                        .doc-title { margin-bottom: 20px; }
+                        .doc-title h1 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+                        .doc-title .periodo { font-size: 11px; color: #64748b; }
+                        .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
 
                         /* Seções */
-                        .section { margin-top: 10px; }
-                        .section-header { background: #2c5282; color: #fff; padding: 5px 10px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-                        .section-content { border: 1px solid #e2e8f0; border-top: none; padding: 10px; background: #fff; }
+                        .section { margin-top: 16px; }
+                        .section-header { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+                        .section-header::before { content: ""; width: 4px; height: 16px; background: #2563eb; border-radius: 2px; display: inline-block; }
+                        .section-content { padding: 10px 0; background: #fff; }
 
                         /* Summary Grid — cards de resumo */
                         .summary-grid, .resumo-grid {
-                            display: grid !important;
-                            grid-template-columns: repeat(4, 1fr) !important;
-                            gap: 10px !important;
-                            margin-bottom: 14px !important;
+                            display: flex !important;
+                            gap: 14px !important;
+                            margin-bottom: 22px !important;
                         }
                         .summary-box, .resumo-box {
-                            background: #f1f5f9 !important;
-                            border: 1.5px solid #cbd5e1 !important;
-                            border-radius: 6px !important;
-                            padding: 10px 8px !important;
+                            flex: 1 !important;
+                            background: #f8fafc !important;
+                            border: 1px solid #e2e8f0 !important;
+                            border-radius: 10px !important;
+                            padding: 14px 18px !important;
                             text-align: center !important;
                         }
                         .summary-box h4, .resumo-box label {
-                            font-size: 7px !important;
-                            color: #64748b !important;
+                            font-size: 9px !important;
+                            color: #94a3b8 !important;
                             text-transform: uppercase !important;
                             letter-spacing: 0.5px !important;
-                            font-weight: 700 !important;
-                            margin: 0 0 6px 0 !important;
+                            font-weight: 600 !important;
+                            margin: 0 0 4px 0 !important;
                             display: block !important;
                         }
                         .summary-box .value, .resumo-box .valor {
-                            font-size: 13px !important;
-                            font-weight: 800 !important;
+                            font-size: 20px !important;
+                            font-weight: 700 !important;
                             color: #1e293b !important;
                         }
                         .summary-box .value.blue, .resumo-box .valor.blue { color: #2563eb !important; }
@@ -4294,24 +4365,26 @@
                         .valor-cell.negativo { color: #dc2626 !important; font-weight: 600; }
 
                         /* Tabela */
-                        .data-table { width: 100%; border-collapse: collapse; }
-                        .data-table th { background: #1a365d; color: #fff; padding: 6px 8px; font-size: 7px; font-weight: 700; text-transform: uppercase; text-align: left; }
-                        .data-table td { padding: 6px 8px; border-bottom: 1px solid #edf2f7; font-size: 9px; }
-                        .data-table tr:nth-child(even) { background: #f7fafc; }
-                        .data-table tfoot td { background: #1a365d; color: white; font-weight: 700; }
+                        .data-table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+                        .data-table th { background: #1e293b; color: #fff; padding: 9px 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; text-align: left; }
+                        .data-table td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-size: 10.5px; }
+                        .data-table tr:nth-child(even) { background: #f8fafc; }
+                        .data-table tr:hover { background: #f1f5f9; }
+                        .data-table tfoot td { background: #1e293b; color: white; font-weight: 700; }
                         .valor-positivo { color: #059669; font-weight: 600; }
                         .valor-negativo { color: #dc2626; font-weight: 600; }
 
                         /* Totais Box */
-                        .totais-wrapper { display: flex; justify-content: flex-end; margin-top: 10px; }
-                        .totais-box { background: #f0f9ff; border: 1px solid #2c5282; padding: 10px 15px; min-width: 180px; box-shadow: 2px 2px 0 #e2e8f0; }
-                        .totais-row { display: flex; justify-content: space-between; font-size: 8px; padding: 3px 0; }
-                        .totais-row.total { border-top: 1px solid #2c5282; padding-top: 8px; margin-top: 5px; }
-                        .totais-row.total label { font-size: 10px; font-weight: 700; color: #1a365d; }
-                        .totais-row.total span { font-size: 11px; font-weight: 700; color: #38a169; }
+                        .totais-wrapper { display: flex; justify-content: flex-end; margin-top: 16px; }
+                        .totais-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; min-width: 200px; }
+                        .totais-row { display: flex; justify-content: space-between; font-size: 10px; padding: 4px 0; }
+                        .totais-row.total { border-top: 2px solid #2563eb; padding-top: 10px; margin-top: 6px; }
+                        .totais-row.total label { font-size: 11px; font-weight: 700; color: #1e293b; }
+                        .totais-row.total span { font-size: 12px; font-weight: 700; color: #059669; }
 
                         /* Footer */
-                        .footer { margin-top: 15px; padding-top: 8px; border-top: 1px solid #1a365d; font-size: 7px; color: #718096; text-align: center; }
+                        .footer { margin-top: 28px; padding-top: 14px; border-top: 2px solid #e2e8f0; font-size: 9px; color: #94a3b8; text-align: center; }
+                        .confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
 
                         @media print {
                             body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -4325,7 +4398,7 @@
                         <!-- HEADER -->
                         <div class="header">
                             <div class="logo-area">
-                                <img src="${logoSrc}" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:20px;font-weight:700;color:#1a365d>ALUFORCE</div>'">
+                                <img src="${logoSrc}" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:24px;font-weight:800;color:#1e293b;letter-spacing:-0.5px>ALUFORCE</div><div style=font-size:11px;color:#64748b;margin-top:3px>Zyntra — Módulo Financeiro</div>'">
                             </div>
                             <div class="empresa-info">
                                 <div class="razao">${empresa.razao_social}</div>
@@ -4333,14 +4406,14 @@
                                 ${enderecoLinha ? `<div>${enderecoLinha}</div>` : ''}
                                 ${cidadeUfCep ? `<div>${cidadeUfCep}</div>` : ''}
                                 ${telLinha ? `<div>${telLinha}</div>` : ''}
+                                <div class="doc-tag" style="margin-top:6px;">Relatório</div>
                             </div>
                         </div>
-                        <div class="header-line"></div>
 
                         <!-- TÍTULO -->
                         <div class="doc-title">
                             <h1>${titulo}</h1>
-                            <div class="periodo">Período: ${periodo}</div>
+                            <div class="periodo">Período: ${periodo} — Módulo Financeiro</div>
                         </div>
 
                         <!-- CONTEÚDO DO RELATÓRIO -->
@@ -4349,8 +4422,9 @@
                         <!-- FOOTER -->
                         <div class="footer">
                             <div>Documento gerado em ${dataAtual} às ${horaAtual}</div>
-                            <div style="margin-top: 2px;">${empresa.razao_social} - Sistema de Gestão Empresarial | Módulo Financeiro</div>
+                            <div style="margin-top: 4px;">${empresa.razao_social} — Sistema Integrado de Gestão Empresarial | Módulo Financeiro</div>
                         </div>
+                        <div class="confidential">Documento Confidencial — Uso Interno</div>
                     </div>
 
                     <scr` + `ipt>

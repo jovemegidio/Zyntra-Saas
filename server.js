@@ -1159,6 +1159,14 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'Vendas', 'pu
 // Isso garante que o middleware de inject funcione para express.static também
 // ========================================
 
+// Scripts injetados automaticamente em todas as páginas HTML dos módulos
+const AUTO_INJECT_SCRIPTS = `
+<!-- Auto-injected: Report Viewer + Chat Teams -->
+<script src="/js/report-viewer.js?v=20260615" defer></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+`;
+
 // SECURITY FIX C-06: Helper para sanitizar path e prevenir Path Traversal (CWE-22)
 function safeSendModuleHtml(req, res, next, moduleDir) {
     const rawParam = req.params[0];
@@ -1176,7 +1184,28 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
         return res.status(400).json({ error: 'Caminho fora do diretório permitido' });
     }
     if (fs.existsSync(htmlPath)) {
-        res.sendFile(htmlPath);
+        // Ler HTML, injetar scripts automáticos e enviar
+        let html = fs.readFileSync(htmlPath, 'utf8');
+        // Evitar duplicação: só injetar se report-viewer não estiver presente
+        if (!html.includes('report-viewer.js')) {
+            if (html.includes('</body>')) {
+                html = html.replace('</body>', AUTO_INJECT_SCRIPTS + '</body>');
+            } else {
+                html += AUTO_INJECT_SCRIPTS;
+            }
+        }
+        // Evitar duplicação do chat-widget
+        if (!html.includes('chat-widget.js') && html.includes('report-viewer.js')) {
+            // report-viewer já presente, mas chat-widget não — injetar só o chat
+            if (!html.includes('chat-widget.js')) {
+                const chatScripts = `<script src="/socket.io/socket.io.js"></script>\n<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>\n`;
+                if (html.includes('</body>')) {
+                    html = html.replace('</body>', chatScripts + '</body>');
+                }
+            }
+        }
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
     } else {
         next();
     }
@@ -1321,7 +1350,9 @@ app.use('/modules', express.static(path.join(__dirname, 'modules'), { dotfiles: 
 // =================================================================
 // ENDPOINT DE HEALTH CHECK — Enterprise Monitoring
 // =================================================================
-app.get('/api/health', createHealthEndpoint(pool, cacheService));
+const healthEndpoint = createHealthEndpoint(pool, cacheService);
+app.get('/api/health', healthEndpoint);
+app.get('/health', healthEndpoint);
 
 // =================================================================
 // 🤖 DISCORD — Rotas de notificação em tempo real
@@ -1718,7 +1749,9 @@ console.log('✅ Audit API carregada (modular)');
 // HEALTH & STATUS — Extracted to routes/health-api.js
 // =================================================================
 const healthRouter = require('./routes/health-api')({
-    authenticateToken, pool,
+    authenticateToken,
+    authorizeAdmin,
+    pool,
     getDbAvailable: () => DB_AVAILABLE,
     getAllBreakerStates
 });

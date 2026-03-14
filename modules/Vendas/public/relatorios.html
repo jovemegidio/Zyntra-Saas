@@ -1,12 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1a2744">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -25,10 +25,10 @@
     <script src="/js/csp-fix.js" defer></script>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1" integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
     <style>
         :root {
             --sidebar-width: 48px;
@@ -1547,6 +1547,7 @@
             right: 0;
             bottom: 0;
             background: rgba(15, 23, 42, 0.6);
+            -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
@@ -2033,7 +2034,8 @@
             // Toast de loading
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10001;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
-            toast.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:#6366f1;"></i> Gerando PDF de ${titulo}...`;
+            toast.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#6366f1;"></i> ';
+            toast.appendChild(document.createTextNode('Gerando PDF de ' + titulo + '...'));
             document.body.appendChild(toast);
             
             try {
@@ -2152,7 +2154,8 @@
 
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10001;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
-            toast.innerHTML = `<i class="fas fa-eye" style="color:#6366f1;"></i> Pré-visualizando ${titulo}...`;
+            toast.innerHTML = '<i class="fas fa-eye" style="color:#6366f1;"></i> ';
+            toast.appendChild(document.createTextNode('Pré-visualizando ' + titulo + '...'));
             document.body.appendChild(toast);
 
             try {
@@ -2379,6 +2382,25 @@
             }
             return null;
         }
+
+        // ==================== DADOS DA EMPRESA (dinâmico) ====================
+        let dadosEmpresa = null;
+        async function carregarDadosEmpresa() {
+            try {
+                const resp = await fetchAutenticado('/api/configuracoes/empresa');
+                if (resp.ok) {
+                    const d = await resp.json();
+                    dadosEmpresa = d.empresa || d;
+                    console.log('🏢 Dados empresa carregados:', dadosEmpresa.razao_social);
+                }
+            } catch(e) { console.warn('⚠️ Erro ao carregar dados empresa:', e); }
+        }
+        function getEmpresaRazao() { return dadosEmpresa?.razao_social || 'ALUFORCE'; }
+        function getEmpresaCnpj()  { return dadosEmpresa?.cnpj || ''; }
+        function getEmpresaIe()    { return dadosEmpresa?.ie || ''; }
+        function getEmpresaEndereco() { return dadosEmpresa?.endereco || ''; }
+        function getEmpresaCidade() { return dadosEmpresa?.cidade ? `${dadosEmpresa.cidade} - ${dadosEmpresa.uf || 'SP'}` : ''; }
+        function getEmpresaCep()   { return dadosEmpresa?.cep || ''; }
 
         async function carregarUsuario() {
             try {
@@ -3004,14 +3026,6 @@
         }
 
         function exportarPDF() {
-            // Coletar dados reais da página
-            
-            // Mostrar toast de loading
-            const toast = document.createElement('div');
-            toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10000;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
-            toast.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
-            document.body.appendChild(toast);
-            
             // Pegar dados dos stats pelos IDs reais
             const totalVendas = document.getElementById('faturamentoTotal')?.textContent || 'R$ 0,00';
             const totalPedidos = document.getElementById('totalPedidos')?.textContent || '0';
@@ -3026,196 +3040,129 @@
                 ? `${new Date(dataInicio).toLocaleDateString('pt-BR')} a ${new Date(dataFim).toLocaleDateString('pt-BR')}`
                 : 'Período completo';
             
-            setTimeout(() => {
-                // Criar iframe para impressão
-                const iframe = document.createElement('iframe');
-                iframe.style.position = 'fixed';
-                iframe.style.right = '0';
-                iframe.style.bottom = '0';
-                iframe.style.width = '0';
-                iframe.style.height = '0';
-                iframe.style.border = '0';
-                document.body.appendChild(iframe);
-                
-                const doc = iframe.contentWindow.document;
-                doc.open();
-                doc.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <meta charset="UTF-8">
-                        <title>Aluforce: Relatório de Vendas</title>
-                        <style>
-                            @page { size: A4 portrait; margin: 10mm 12mm; }
-                            * { margin: 0; padding: 0; box-sizing: border-box; }
-                            body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 10px; color: #1a1a1a; background: #fff; }
-                            
-                            .container { max-width: 100%; padding: 0; }
-                            
-                            /* Header */
-                            .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; }
-                            .logo-area img { height: 40px; width: auto; }
-                            .empresa-info { text-align: right; font-size: 8px; color: #4a5568; line-height: 1.4; }
-                            .empresa-info .razao { font-weight: 700; color: #1a365d; font-size: 10px; margin-bottom: 2px; }
-                            .header-line { height: 3px; background: linear-gradient(90deg, #1a365d, #2c5282, #3182ce); margin-bottom: 10px; }
-                            
-                            /* Título */
-                            .doc-title { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: #fff; padding: 10px 15px; margin-top: 8px; text-align: center; }
-                            .doc-title h1 { font-size: 14px; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
-                            .doc-title .periodo { font-size: 10px; color: #90cdf4; margin-top: 3px; }
-                            
-                            /* KPIs */
-                            .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 15px 0; }
-                            .kpi-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; text-align: center; }
-                            .kpi-card.orange { border-top: 3px solid #f97316; }
-                            .kpi-card.blue { border-top: 3px solid #3b82f6; }
-                            .kpi-card.green { border-top: 3px solid #10b981; }
-                            .kpi-card.purple { border-top: 3px solid #8b5cf6; }
-                            .kpi-value { font-size: 18px; font-weight: 700; color: #1a365d; }
-                            .kpi-label { font-size: 9px; color: #64748b; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-                            
-                            /* Seções */
-                            .section { margin-top: 15px; }
-                            .section-header { background: #2c5282; color: #fff; padding: 6px 12px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-                            .section-content { border: 1px solid #e2e8f0; border-top: none; padding: 12px; background: #fff; }
-                            
-                            /* Tabela */
-                            table { width: 100%; border-collapse: collapse; }
-                            th { background: #1a365d; color: #fff; padding: 8px 10px; font-size: 8px; font-weight: 700; text-transform: uppercase; text-align: left; }
-                            td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 9px; }
-                            tr:nth-child(even) { background: #f8fafc; }
-                            tr:hover { background: #f0f9ff; }
-                            
-                            /* Info adicional */
-                            .info-box { background: #fff; border: 1px solid #e2e8f0; padding: 10px 12px; font-size: 9px; margin-top: 10px; }
-                            .info-row { margin: 4px 0; }
-                            .info-row strong { color: #64748b; }
-                            
-                            /* Footer */
-                            .footer { margin-top: 20px; padding-top: 10px; border-top: 2px solid #1a365d; font-size: 8px; color: #64748b; text-align: center; }
-                            .footer-logo { font-weight: 700; color: #1a365d; font-size: 10px; }
-                            
-                            @media print { 
-                                body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                                html { margin-top: 0 !important; }
-                                body::before, body::after { display: none !important; }
-                            }
-                        </style>
+            const dataEmissao = new Date().toLocaleDateString('pt-BR');
+            const horaEmissao = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+
+            // Coletar dados das tabelas
+            const topVendedoresHtml = (() => {
+                const rows = document.querySelectorAll('#topVendedoresBody tr');
+                let html = '';
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        html += '<tr>';
+                        cells.forEach(c => html += '<td>' + c.textContent.trim() + '</td>');
+                        html += '</tr>';
+                    }
+                });
+                return html || '<tr><td colspan="4" style="text-align:center;padding:24px;color:#94a3b8;font-style:italic;">Sem dados</td></tr>';
+            })();
+
+            const topProdutosHtml = (() => {
+                const rows = document.querySelectorAll('#topProdutosBody tr');
+                let html = '';
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length >= 4) {
+                        html += '<tr>';
+                        cells.forEach(c => html += '<td>' + c.textContent.trim() + '</td>');
+                        html += '</tr>';
+                    }
+                });
+                return html || '<tr><td colspan="4" style="text-align:center;padding:24px;color:#94a3b8;font-style:italic;">Sem dados</td></tr>';
+            })();
+
+            // Usar window.open para que o ReportViewer intercepte
+            const win = window.open('', '_blank');
+            if (!win) { alert('Pop-up bloqueado. Permita pop-ups.'); return; }
+
+            win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Relatório de Vendas - ALUFORCE</title>
+<style>
+@page { margin: 12mm 15mm; size: A4; }
+@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; color: #1e293b; font-size: 11px; line-height: 1.5; background: #fff; padding: 30px 40px; }
+.print-bar { position: sticky; top: 0; z-index: 100; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.print-bar button { border: none; padding: 10px 28px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+.print-bar .btn-print { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
+.print-bar .btn-close { background: #f1f5f9; color: #475569; }
+.rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }
+.brand-name { font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+.brand-sub { font-size: 11px; color: #64748b; font-weight: 400; margin-top: 3px; }
+.rpt-meta { text-align: right; }
+.doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+.meta-line { font-size: 10px; color: #64748b; margin-top: 3px; }
+.rpt-title { margin-bottom: 20px; }
+.rpt-title h1 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+.rpt-title .subtitle { font-size: 11px; color: #64748b; }
+.summary-row { display: flex; gap: 14px; margin-bottom: 22px; }
+.summary-card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; }
+.summary-card .s-value { font-size: 20px; font-weight: 700; color: #1e293b; }
+.summary-card .s-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-top: 3px; }
+.data-section { margin-bottom: 22px; }
+.data-section h2 { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+.data-section h2::before { content: ''; width: 4px; height: 16px; background: #2563eb; border-radius: 2px; }
+table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }
+thead th { background: #1e293b; color: #fff; padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+tbody td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-size: 10.5px; }
+tbody tr:nth-child(even) { background: #f8fafc; }
+.rpt-footer { margin-top: 28px; padding-top: 14px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.rpt-footer span { font-size: 9px; color: #94a3b8; }
+.confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
+</style>
 </head>
-                    <body>
-                        <div class="container">
-                            <!-- HEADER -->
-                            <div class="header">
-                                <div class="logo-area">
-                                    <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:20px;font-weight:700;color:#1a365d>ALUFORCE</div>'">
-                                </div>
-                                <div class="empresa-info">
-                                    <div class="razao">I. M. DOS REIS INDÚSTRIA E COMÉRCIO DE CONDUTORES</div>
-                                    <div>CNPJ: 08.192.479/0001-60 | IE: 103.385.861-110</div>
-                                    <div>RUA ERNESTINA, 270 - VILA SÃO JOÃO</div>
-                                    <div>Ferraz de Vasconcelos - SP | CEP: 08527-400</div>
-                                </div>
-                            </div>
-                            <div class="header-line"></div>
-                            
-                            <!-- TÍTULO -->
-                            <div class="doc-title">
-                                <h1>RELATÓRIO DE VENDAS</h1>
-                                <div class="periodo">${periodoTexto} | ${vendedorSelecionado}</div>
-                            </div>
-                            
-                            <!-- KPIs -->
-                            <div class="kpi-grid">
-                                <div class="kpi-card orange">
-                                    <div class="kpi-value">${totalVendas}</div>
-                                    <div class="kpi-label">Total em Vendas</div>
-                                </div>
-                                <div class="kpi-card blue">
-                                    <div class="kpi-value">${totalPedidos}</div>
-                                    <div class="kpi-label">Total de Pedidos</div>
-                                </div>
-                                <div class="kpi-card green">
-                                    <div class="kpi-value">${ticketMedio}</div>
-                                    <div class="kpi-label">Ticket Médio</div>
-                                </div>
-                                <div class="kpi-card purple">
-                                    <div class="kpi-value">${vendedoresAtivos}</div>
-                                    <div class="kpi-label">Vendedores Ativos</div>
-                                </div>
-                            </div>
-                            
-                            <!-- TOP VENDEDORES -->
-                            <div class="section">
-                                <div class="section-header">Top Vendedores</div>
-                                <div class="section-content">
-                                    <table>
-                                        <thead><tr><th>#</th><th>Vendedor</th><th>Vendas</th><th>Valor Total</th></tr></thead>
-                                        <tbody>${(() => {
-                                            const rows = document.querySelectorAll('#topVendedoresBody tr');
-                                            let html = '';
-                                            rows.forEach(row => {
-                                                const cells = row.querySelectorAll('td');
-                                                if (cells.length >= 4) {
-                                                    html += '<tr>';
-                                                    cells.forEach(c => html += '<td>' + c.textContent.trim() + '</td>');
-                                                    html += '</tr>';
-                                                }
-                                            });
-                                            return html || '<tr><td colspan="4" style="text-align:center;padding:12px;">Sem dados</td></tr>';
-                                        })()}</tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            
-                            <!-- TOP PRODUTOS -->
-                            <div class="section">
-                                <div class="section-header">Produtos Mais Vendidos</div>
-                                <div class="section-content">
-                                    <table>
-                                        <thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Valor</th></tr></thead>
-                                        <tbody>${(() => {
-                                            const rows = document.querySelectorAll('#topProdutosBody tr');
-                                            let html = '';
-                                            rows.forEach(row => {
-                                                const cells = row.querySelectorAll('td');
-                                                if (cells.length >= 4) {
-                                                    html += '<tr>';
-                                                    cells.forEach(c => html += '<td>' + c.textContent.trim() + '</td>');
-                                                    html += '</tr>';
-                                                }
-                                            });
-                                            return html || '<tr><td colspan="4" style="text-align:center;padding:12px;">Sem dados</td></tr>';
-                                        })()}</tbody>
-                                    </table>
-                                </div>
-                            </div>
-                            
-                            <!-- INFO -->
-                            <div class="info-box">
-                                <div class="info-row"><strong>Gerado em:</strong> ${new Date().toLocaleString('pt-BR')}</div>
-                                <div class="info-row"><strong>Filtros aplicados:</strong> Período: ${periodoTexto} | Vendedor: ${vendedorSelecionado}</div>
-                            </div>
-                            
-                            <!-- FOOTER -->
-                            <div class="footer">
-                                <div class="footer-logo">ALUFORCE - Sistema de Gestão Empresarial</div>
-                                <div style="margin-top: 3px;">Este documento foi gerado automaticamente pelo sistema ALUFORCE ERP</div>
-                            </div>
-                        </div>
-                    </html>
-                `);
-                doc.close();
-                
-                setTimeout(() => {
-                    iframe.contentWindow.focus();
-                    iframe.contentWindow.print();
-                    toast.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> PDF pronto para impressão!';
-                    setTimeout(() => {
-                        toast.remove();
-                        iframe.remove();
-                    }, 3000);
-                }, 500);
-            }, 500);
+<body>
+<div class="print-bar">
+    <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+</div>
+<div class="rpt-header">
+    <div>
+        <div class="brand-name">ALUFORCE</div>
+        <div class="brand-sub">Zyntra — Módulo de Vendas</div>
+    </div>
+    <div class="rpt-meta">
+        <div class="doc-tag">Relatório</div>
+        <div class="meta-line">Emitido em: ${dataEmissao} às ${horaEmissao}</div>
+        <div class="meta-line">${periodoTexto} | ${vendedorSelecionado}</div>
+    </div>
+</div>
+<div class="rpt-title">
+    <h1>Relatório de Vendas</h1>
+    <div class="subtitle">Módulo Vendas — Análise de desempenho e faturamento</div>
+</div>
+<div class="summary-row">
+    <div class="summary-card"><div class="s-value">${totalVendas}</div><div class="s-label">Total em Vendas</div></div>
+    <div class="summary-card"><div class="s-value">${totalPedidos}</div><div class="s-label">Total de Pedidos</div></div>
+    <div class="summary-card"><div class="s-value">${ticketMedio}</div><div class="s-label">Ticket Médio</div></div>
+    <div class="summary-card"><div class="s-value">${vendedoresAtivos}</div><div class="s-label">Vendedores Ativos</div></div>
+</div>
+<div class="data-section">
+    <h2>Top Vendedores</h2>
+    <table>
+        <thead><tr><th>#</th><th>Vendedor</th><th>Vendas</th><th>Valor Total</th></tr></thead>
+        <tbody>${topVendedoresHtml}</tbody>
+    </table>
+</div>
+<div class="data-section">
+    <h2>Produtos Mais Vendidos</h2>
+    <table>
+        <thead><tr><th>#</th><th>Produto</th><th>Qtd</th><th>Valor</th></tr></thead>
+        <tbody>${topProdutosHtml}</tbody>
+    </table>
+</div>
+<div class="rpt-footer">
+    <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
+    <span>Documento gerado automaticamente pelo Zyntra ERP</span>
+</div>
+<div class="confidential">Documento Confidencial — Uso Interno</div>
+</body>
+</html>`);
+            win.document.close();
         }
         
         function exportarExcel() {
@@ -3293,7 +3240,7 @@
 `;
             // Título
             xml += `  <Row ss:Height="35"><Cell ss:StyleID="titulo" ss:MergeAcross="3"><Data ss:Type="String">ALUFORCE  |  Relatório de Vendas</Data></Cell></Row>
-  <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">I. M. DOS REIS INDÚSTRIA E COMÉRCIO DE CONDUTORES | CNPJ: 08.192.479/0001-60</Data></Cell></Row>
+  <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">${escXml(getEmpresaRazao())} | CNPJ: ${escXml(getEmpresaCnpj())}</Data></Cell></Row>
   <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">Período: ${escXml(periodoTexto)} | Vendedor: ${escXml(vendedorSelecionado)} | Gerado em ${dataHoje} às ${horaAtual}</Data></Cell></Row>
   <Row ss:Height="10"></Row>
 `;
@@ -3383,7 +3330,8 @@
             // Mostrar toast de loading
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10000;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
-            toast.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Gerando ${titulo}...`;
+            toast.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ';
+            toast.appendChild(document.createTextNode('Gerando ' + titulo + '...'));
             document.body.appendChild(toast);
             
             try {
@@ -3524,13 +3472,15 @@
                 link.click();
                 URL.revokeObjectURL(link.href);
                 
-                toast.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e;"></i> ${titulo} gerado com sucesso!`;
+                toast.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> ';
+                toast.appendChild(document.createTextNode(titulo + ' gerado com sucesso!'));
                 setTimeout(() => toast.remove(), 3000);
                 console.log(`✅ Relatório ${tipo} gerado e baixado: ${filename}`);
                 
             } catch (error) {
                 console.error(`❌ Erro ao gerar relatório ${tipo}:`, error);
-                toast.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Erro ao gerar ${titulo}`;
+                toast.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> ';
+                toast.appendChild(document.createTextNode('Erro ao gerar ' + titulo));
                 setTimeout(() => toast.remove(), 4000);
             }
         }
@@ -3563,11 +3513,14 @@
                 if (isAutenticado) {
                     console.log('🔑 Usuário autenticado - carregando dados reais...');
                     
-                    // Carregar dados do usuário
+                    // Carregar dados do usuário e empresa em paralelo
                     try {
-                        await carregarUsuario();
+                        await Promise.all([
+                            carregarUsuario(),
+                            carregarDadosEmpresa()
+                        ]);
                     } catch (e) {
-                        console.warn('⚠️ Erro ao carregar usuário:', e);
+                        console.warn('⚠️ Erro ao carregar dados iniciais:', e);
                     }
                     
                     // Carregar lista de vendedores
@@ -3782,7 +3735,7 @@
 
             // Legenda de intensidade
             const legendaHTML = `
-                <div style="position:absolute;bottom:8px;left:12px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.92);padding:6px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);backdrop-filter:blur(4px);">
+                <div style="position:absolute;bottom:8px;left:12px;display:flex;align-items:center;gap:4px;background:rgba(255,255,255,0.92);padding:6px 10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);-webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);">
                     <span style="font-size:9px;color:#94a3b8;margin-right:4px;">Menor</span>
                     <div style="width:14px;height:10px;background:#e2e8f0;border-radius:2px;"></div>
                     <div style="width:14px;height:10px;background:#bfdbfe;border-radius:2px;"></div>

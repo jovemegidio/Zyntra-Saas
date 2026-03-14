@@ -1,12 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1a2744">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -22,7 +22,7 @@
     <script src="/js/csp-fix.js" defer></script>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
     
@@ -1179,6 +1179,7 @@
             align-items: center;
             justify-content: center;
             z-index: 3000;
+            -webkit-backdrop-filter: blur(2px);
             backdrop-filter: blur(2px);
         }
         .modal-alerta-overlay.show { display: flex; }
@@ -1783,7 +1784,7 @@
         async function verPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
             if (!pedido) {
-                alert('Pedido não encontrado');
+                showToast('Pedido não encontrado', 'error');
                 return;
             }
             
@@ -1999,13 +2000,13 @@
                 if (response.ok) {
                     const historico = await response.json();
                     if (historico.length > 0) {
-                        alert('Histórico:\n' + historico.map(h => `${new Date(h.created_at).toLocaleString('pt-BR')} - ${h.descricao || h.acao}`).join('\n'));
+                        showToast('Histórico do pedido carregado', 'info');
                     } else {
-                        alert('Nenhum histórico registrado para este pedido.');
+                        showToast('Nenhum histórico registrado para este pedido', 'info');
                     }
                 }
             } catch (e) {
-                alert('Erro ao carregar histórico.');
+                showToast('Erro ao carregar histórico', 'error');
             }
         }
         
@@ -2013,7 +2014,7 @@
         async function editarPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
             if (!pedido) {
-                alert('Pedido não encontrado');
+                showToast('Pedido não encontrado', 'error');
                 return;
             }
             
@@ -2027,9 +2028,9 @@
                 // Mostrar alerta de que não pode editar
                 const isSupervisor = perms.isSupervisor || false;
                 if (isSupervisor) {
-                    alert('⚠️ Como supervisor, você pode VISUALIZAR pedidos de outros vendedores, mas não pode EDITAR.\n\nApenas visualização e impressão estão disponíveis.');
+                    showToast('Como supervisor, você pode visualizar mas não editar pedidos de outros vendedores', 'warning');
                 } else {
-                    alert('⚠️ Você não tem permissão para editar este pedido.\n\nApenas o vendedor responsável pode editar.');
+                    showToast('Você não tem permissão para editar este pedido', 'warning');
                 }
                 return; // Bloquear abertura do modal de edição
             }
@@ -2949,7 +2950,7 @@
         
         async function duplicarPedidoModal() {
             if (!pedidoAtualModal) {
-                alert('Nenhum pedido selecionado');
+                showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
             
@@ -2987,7 +2988,7 @@
             .then(res => res.json())
             .then(result => {
                 if (result.success || result.id) {
-                    alert(`✅ Pedido duplicado com sucesso!\n\nNovo pedido: #${result.numero || result.id}`);
+                    showToast('Pedido duplicado com sucesso!', 'success');
                     fecharModalEditar();
                     carregarPedidos(); // Recarregar lista
                 } else {
@@ -2996,23 +2997,23 @@
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao duplicar pedido: ' + error.message);
+                showToast('Erro ao duplicar pedido: ' + error.message, 'error');
             });
         }
         
         async function faturarPedidoModal() {
             if (!pedidoAtualModal) {
-                alert('Nenhum pedido selecionado');
+                showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
             
             if (pedidoAtualModal.status === 'faturado') {
-                alert('Este pedido já está faturado!');
+                showToast('Este pedido já está faturado!', 'warning');
                 return;
             }
             
             if (pedidoAtualModal.status === 'cancelado') {
-                alert('Não é possível faturar um pedido cancelado!');
+                showToast('Não é possível faturar um pedido cancelado!', 'warning');
                 return;
             }
             
@@ -3059,9 +3060,7 @@
             })
             .then(res => res.json())
             .then(result => {
-                alert(`✅ Pedido faturado com sucesso!\n\n` +
-                    `Pedido: #${pedidoAtualModal.numero || pedidoAtualModal.id}\n` +
-                    `Data: ${new Date().toLocaleDateString('pt-BR')}`);
+                showToast('Pedido faturado com sucesso!', 'success');
                 
                 // Atualizar UI
                 document.getElementById('edit-status').value = 'faturado';
@@ -3072,13 +3071,13 @@
             })
             .catch(error => {
                 console.error('Erro:', error);
-                alert('Erro ao faturar pedido. Tente novamente.');
+                showToast('Erro ao faturar pedido. Tente novamente', 'error');
             });
         }
         
         function verHistoricoPedido() {
             if (!pedidoAtualModal) {
-                alert('Nenhum pedido selecionado');
+                showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
             
@@ -3119,15 +3118,11 @@
                 historicoHtml += '━'.repeat(40) + '\n';
                 historicoHtml += `Status atual: ${pedidoAtualModal.status?.toUpperCase() || 'N/A'}`;
                 
-                alert(historicoHtml);
+                showToast('Histórico do pedido carregado', 'info');
             })
             .catch(error => {
                 // Fallback: mostrar informações básicas
-                const criacao = pedidoAtualModal.created_at || pedidoAtualModal.data_criacao;
-                alert(`📋 HISTÓRICO DO PEDIDO #${pedidoAtualModal.numero || pedidoAtualModal.id}\n\n` +
-                    `📅 Criação: ${criacao ? new Date(criacao).toLocaleString('pt-BR') : 'N/A'}\n` +
-                    `📦 Status: ${pedidoAtualModal.status || 'N/A'}\n` +
-                    `💰 Valor: R$ ${(parseFloat(pedidoAtualModal.valor_total) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`);
+                showToast('Histórico do pedido carregado', 'info');
             });
         }
         
@@ -3196,45 +3191,65 @@
         function imprimirPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
             if (!pedido) {
-                alert('Pedido não encontrado');
+                showToast('Pedido não encontrado', 'error');
                 return;
             }
             
             // Abrir janela de impressão com os dados do pedido
-            const printWindow = window.open('', '_blank', 'width=800,height=600');
+            const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
-                <html>
+                <html lang="pt-BR">
                 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-                    <title>Pedido #${pedido.numero || pedido.id}</title>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+                    <title>Pedido #${pedido.numero || pedido.id} - ALUFORCE</title>
                     <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
-                        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
-                        .header h1 { margin: 0; color: #333; }
-                        .header p { margin: 5px 0; color: #666; }
-                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
-                        .info-section { background: #f5f5f5; padding: 15px; border-radius: 8px; }
-                        .info-section h3 { margin: 0 0 10px 0; color: #333; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-                        .info-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 13px; }
-                        .info-row .label { color: #666; }
-                        .info-row .value { font-weight: bold; color: #333; }
-                        .valor-destaque { font-size: 18px; color: #22c55e; }
-                        .footer { margin-top: 40px; text-align: center; color: #999; font-size: 11px; border-top: 1px solid #ddd; padding-top: 20px; }
-                        .status { padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+                        @page { margin: 12mm 15mm; size: A4; }
+                        @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }
+                        * { margin: 0; padding: 0; box-sizing: border-box; }
+                        body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; padding: 30px 40px; max-width: 800px; margin: 0 auto; color: #1e293b; font-size: 11px; line-height: 1.5; }
+                        .print-bar { position: sticky; top: 0; z-index: 100; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+                        .print-bar button { border: none; padding: 10px 28px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+                        .print-bar .btn-print { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
+                        .print-bar .btn-close { background: #f1f5f9; color: #475569; }
+                        .rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }
+                        .brand-name { font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+                        .brand-sub { font-size: 11px; color: #64748b; font-weight: 400; margin-top: 3px; }
+                        .rpt-meta { text-align: right; }
+                        .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
+                        .meta-line { font-size: 10px; color: #64748b; margin-top: 3px; }
+                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+                        .info-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
+                        .info-section h3 { margin: 0 0 10px 0; color: #1e293b; font-size: 12px; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+                        .info-section h3::before { content: ''; width: 4px; height: 14px; background: #2563eb; border-radius: 2px; }
+                        .info-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 11px; }
+                        .info-row .label { color: #64748b; }
+                        .info-row .value { font-weight: 600; color: #1e293b; }
+                        .valor-destaque { font-size: 20px; font-weight: 700; color: #059669; }
+                        .status { padding: 4px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; }
                         .status.orcamento { background: #dbeafe; color: #1e40af; }
                         .status.aprovado { background: #dcfce7; color: #166534; }
                         .status.faturado { background: #f3e8ff; color: #7e22ce; }
-                        @media print { body { padding: 0; } }
+                        .rpt-footer { margin-top: 28px; padding-top: 14px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+                        .rpt-footer span { font-size: 9px; color: #94a3b8; }
+                        .confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
                     </style>
-                    <scr` + `ipt src="/js/anti-copy-protection.js"></scr` + `ipt>
-                    <link rel="stylesheet" href="/css/popup-confirmacao.css">
 </head>
                 <body>
-                    <div class="header">
-                        <h1>ALUFORCE</h1>
-                        <p>Pedido #${pedido.numero || pedido.id}</p>
-                        <p>Emitido em: ${new Date().toLocaleString('pt-BR')}</p>
+                    <div class="print-bar">
+                        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+                        <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+                    </div>
+                    <div class="rpt-header">
+                        <div>
+                            <div class="brand-name">ALUFORCE</div>
+                            <div class="brand-sub">Zyntra — Módulo de Vendas</div>
+                        </div>
+                        <div class="rpt-meta">
+                            <div class="doc-tag">Pedido</div>
+                            <div class="meta-line">Pedido #${pedido.numero || pedido.id}</div>
+                            <div class="meta-line">Emitido em: ${new Date().toLocaleString('pt-BR')}</div>
+                        </div>
                     </div>
                     
                     <div class="info-grid">
@@ -3258,21 +3273,13 @@
                         <div class="info-row"><span class="label">Frete:</span><span class="value">${pedido.frete ? formatarValor(pedido.frete) : 'R$ 0,00'}</span></div>
                     </div>
                     
-                    ${pedido.observacao ? `<div class="info-section" style="margin-top: 20px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 13px; color: #666;">${pedido.observacao}</p></div>` : ''}
+                    ${pedido.observacao ? `<div class="info-section" style="margin-top: 16px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 11px; color: #64748b;">${pedido.observacao}</p></div>` : ''}
                     
-                    <div class="footer">
-                        <p>ALUFORCE - Sistema de Gestão de Pedidos</p>
-                        <p>Documento gerado automaticamente em ${new Date().toLocaleString('pt-BR')}</p>
+                    <div class="rpt-footer">
+                        <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
+                        <span>Documento gerado automaticamente pelo Zyntra ERP</span>
                     </div>
-                    
-                    <scr` + `ipt>
-                        window.onload = function() { window.print(); }
-                    <\/script>
-                    <scr` + `ipt src="/js/mobile-auto-enhance.js?v=20260202" defer><\/scr` + `ipt>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+                    <div class="confidential">Documento Confidencial — Uso Interno</div>
 </body>
                 </html>
             `);
@@ -3812,7 +3819,7 @@
         
         async function faturarPedidoModalComOpcoes() {
             if (!pedidoAtualModal) {
-                alert('Nenhum pedido selecionado');
+                showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
             
