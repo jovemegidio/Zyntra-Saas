@@ -320,4 +320,24 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+// Rota POST para cancelar (usada pelo frontend)
+router.post('/:id/cancelar', async (req, res) => {
+    try {
+        const db = getDatabase();
+        
+        await db.execute(
+            "UPDATE pedidos_compra SET status = 'cancelado' WHERE id = ?",
+            [req.params.id]
+        );
+        
+        res.json({
+            success: true,
+            message: 'Pedido cancelado com sucesso'
+        });
+    } catch (error) {
+        console.error('Erro ao cancelar pedido:', error);
+        res.status(500).json({ error: 'Erro ao cancelar pedido', message: error.message });
+    }
+});
+
 module.exports = router;

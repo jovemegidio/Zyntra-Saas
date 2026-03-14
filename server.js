@@ -1422,6 +1422,40 @@ const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
 app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
+// =================================================================
+// 🛒 COMPRAS API — Módulo de Compras (fornecedores, pedidos, etc.)
+// =================================================================
+try {
+    const comprasDb = require('./modules/Compras/database');
+    comprasDb.initMySQLPool().then(() => {
+        console.log('✅ Pool MySQL Compras inicializado');
+    }).catch(err => {
+        console.error('❌ Erro ao inicializar pool Compras:', err.message);
+    });
+
+    const comprasFornecedoresRoutes = require('./modules/Compras/api/fornecedores');
+    const comprasPedidosRoutes = require('./modules/Compras/api/pedidos');
+    const comprasCotacoesRoutes = require('./modules/Compras/api/cotacoes');
+    const comprasEstoqueRoutes = require('./modules/Compras/api/estoque');
+    const comprasMateriaisRoutes = require('./modules/Compras/api/materiais');
+    const comprasRequisicoesRoutes = require('./modules/Compras/api/requisicoes');
+    const comprasRecebimentoRoutes = require('./modules/Compras/api/recebimento');
+    const comprasRelatoriosRoutes = require('./modules/Compras/api/relatorios');
+
+    app.use('/api/compras/fornecedores', authenticateToken, comprasFornecedoresRoutes);
+    app.use('/api/compras/pedidos', authenticateToken, comprasPedidosRoutes);
+    app.use('/api/compras/cotacoes', authenticateToken, comprasCotacoesRoutes);
+    app.use('/api/compras/estoque', authenticateToken, comprasEstoqueRoutes);
+    app.use('/api/compras/materiais', authenticateToken, comprasMateriaisRoutes);
+    app.use('/api/compras/requisicoes', authenticateToken, comprasRequisicoesRoutes);
+    app.use('/api/compras/recebimento', authenticateToken, comprasRecebimentoRoutes);
+    app.use('/api/compras/relatorios', authenticateToken, comprasRelatoriosRoutes);
+
+    console.log('✅ Rotas Compras API carregadas: /api/compras/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Compras:', err.message);
+}
+
 // 📊 ENTERPRISE: Prometheus /metrics endpoint (protected at app level + nginx)
 app.get('/metrics', (req, res, next) => {
     // In production, require metrics auth token or localhost
