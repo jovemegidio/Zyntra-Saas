@@ -820,17 +820,7 @@ var NotificationManager = {
                     this.socket = window._aluforceSocket;
                     console.log('[NotificationManager] ✅ Usando socket compartilhado existente');
                 } else {
-                    // Obter token JWT para autenticação Socket.IO
-                    const authToken = (function() {
-                        const cookies = document.cookie.split(';');
-                        for (const c of cookies) {
-                            const [key, val] = c.trim().split('=');
-                            if (key === 'authToken' || key === 'token') return val;
-                        }
-                        return localStorage.getItem('authToken') || null;
-                    })();
-
-                    // Criar nova conexão com configurações otimizadas
+                    // Criar nova conexão — autenticação via httpOnly cookie (enviado automaticamente pelo browser)
                     const socket = io({
                         path: '/socket.io',
                         transports: ['websocket', 'polling'],
@@ -841,7 +831,6 @@ var NotificationManager = {
                         timeout: 30000,
                         forceNew: false,
                         autoConnect: true,
-                        auth: authToken ? { token: authToken } : {},
                         withCredentials: true
                     });
                     
