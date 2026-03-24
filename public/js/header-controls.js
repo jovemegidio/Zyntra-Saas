@@ -155,7 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headerSearchResults.innerHTML = `
                     <div class="search-loading">
                         <div class="search-spinner"></div>
-                        <span>Buscando "${query}"...</span>
+                        <span>Buscando &#8220;${escapeHtml(query)}&#8221;...</span>
                     </div>
                 `;
             }
@@ -194,7 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 headerSearchResults.innerHTML = `
                     <div class="search-no-results">
                         <i class="fas fa-search"></i>
-                        <span>Nenhum resultado para "${query}"</span>
+                        <span>Nenhum resultado para &#8220;${escapeHtml(query)}&#8221;</span>
                         <p>Tente termos diferentes ou navegue pelos módulos abaixo</p>
                     </div>
                     <div class="search-modules-grid compact">
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', function() {
             };
 
             let html = `<div class="search-results-header">
-                <span>${total} resultado${total > 1 ? 's' : ''} para "${query}"</span>
+                <span>${total} resultado${total > 1 ? 's' : ''} para &#8220;${escapeHtml(query)}&#8221;</span>
             </div>`;
 
             for (const [tipo, items] of Object.entries(grupos)) {
@@ -256,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             </div>
                             <div class="result-info">
                                 <div class="result-title">${highlightText(item.titulo || item.nome || 'Item', query)}</div>
-                                <div class="result-subtitle">${item.subtitulo || item.descricao || ''}</div>
+                                <div class="result-subtitle">${escapeHtml(item.subtitulo || item.descricao || '')}</div>
                             </div>
                             ${item.valor ? `<div class="result-value">R$ ${formatCurrency(item.valor)}</div>` : ''}
                         </div>
@@ -293,11 +293,24 @@ document.addEventListener('DOMContentLoaded', function() {
             return links[tipo] || item.url || null;
         }
 
-        // Destacar texto encontrado
+        // Escapar HTML para prevenir XSS (SEC-XSS-01)
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#x27;');
+        }
+
+        // Destacar texto encontrado (texto escapado antes de marcar)
         function highlightText(text, query) {
-            if (!text || !query) return text || '';
-            const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-            return String(text).replace(regex, '<mark>$1</mark>');
+            if (!text || !query) return escapeHtml(text) || '';
+            const safe = escapeHtml(String(text));
+            const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(`(${safeQuery})`, 'gi');
+            return safe.replace(regex, '<mark>$1</mark>');
         }
 
         // Formatar moeda
