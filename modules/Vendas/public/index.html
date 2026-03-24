@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -8,13 +8,13 @@
     <meta name="theme-color" content="#1a2744">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ALUFORCE">
+    <meta name="apple-mobile-web-app-title" content="Zyntra">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="ALUFORCE">
+    <meta name="application-name" content="Zyntra">
     <meta name="msapplication-TileColor" content="#1a2744">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Vendas e NF-e</title>
+    <title>Zyntra: Vendas e NF-e</title>
 
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
@@ -8836,11 +8836,8 @@
                     <p style="font-size: 13px; color: rgba(255,255,255,0.85); margin: 0;">Utilize uma das opções de
                         pesquisa abaixo para cadastrar rapidamente</p>
                 </div>
-                <button class="close-btn" onclick="verificarAlteracoesCliente()"
-                    style="color: white; background: rgba(255,255,255,0.15); border: none; font-size: 13px; padding: 8px 16px; border-radius: 8px; cursor: pointer; transition: all 0.2s;"
-                    onmouseover="this.style.background='rgba(255,255,255,0.25)'"
-                    onmouseout="this.style.background='rgba(255,255,255,0.15)'">
-                    Fechar <i class="fas fa-times" style="margin-left: 6px;"></i>
+                <button class="close-btn" onclick="verificarAlteracoesCliente()">
+                    Fechar <i class="fas fa-times"></i>
                 </button>
             </div>
 
@@ -16271,32 +16268,43 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
         async function buscarClientesEditAPI(query) {
             try {
-                const resp = await fetch(`/api/vendas/empresas/buscar?termo=${encodeURIComponent(query)}&limit=15`, {
+                // Busca unificada: clientes + empresas (por nome, nome_fantasia, razão social, CNPJ, CPF)
+                const resp = await fetch(`/api/vendas/clientes-empresas/search?q=${encodeURIComponent(query)}`, {
                     credentials: 'include',
                     headers: getAuthHeaders()
                 });
                 if (!resp.ok) throw new Error('Erro na busca');
 
-                const empresas = await resp.json();
+                const resultados = await resp.json();
                 const dropdown = document.getElementById('dropdown-edit-clientes');
 
                 if (!dropdown) return;
 
-                if (!empresas || empresas.length === 0) {
-                    dropdown.innerHTML = '<div style="padding: 15px; color: #999; text-align: center; font-size: 13px;"><i class="fas fa-search" style="margin-right: 8px;"></i>Nenhuma empresa encontrada</div>';
+                if (!resultados || resultados.length === 0) {
+                    dropdown.innerHTML = '<div style="padding: 15px; color: #999; text-align: center; font-size: 13px;"><i class="fas fa-search" style="margin-right: 8px;"></i>Nenhum cliente/empresa encontrado</div>';
                 } else {
-                    dropdown.innerHTML = empresas.map(emp => `
-                        <div class="dropdown-item-edit" onclick="selecionarClienteEdit(${emp.id}, '${(emp.nome_fantasia || emp.razao_social || emp.nome || '').replace(/'/g, "\\'")}', '${emp.cnpj || ''}')"
+                    dropdown.innerHTML = resultados.map(item => {
+                        const nome = (item.nome || 'Sem nome').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const cnpjVal = item.cnpj || '';
+                        const tipoIcon = item.tipo === 'empresa' ? 'fa-building' : 'fa-user';
+                        const tipoCor = item.tipo === 'empresa' ? '#f97316' : '#3b82f6';
+                        const tipoLabel = item.tipo === 'empresa' ? 'Empresa' : 'Cliente';
+                        const subtitulo = item.subtitulo || '';
+                        return `
+                        <div class="dropdown-item-edit" onclick="selecionarClienteEdit(${item.empresa_id || item.id}, '${nome}', '${cnpjVal}', '${item.tipo}', ${item.id})"
                              style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <div>
-                                    <div style="font-weight: 500; color: #333;">${emp.nome_fantasia || emp.razao_social || emp.nome || 'Sem nome'}</div>
-                                    ${emp.razao_social && emp.razao_social !== emp.nome_fantasia ? `<div style="font-size: 11px; color: #888;">${emp.razao_social}</div>` : ''}
+                                <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                                    <i class="fas ${tipoIcon}" style="color: ${tipoCor}; font-size: 14px; flex-shrink: 0;"></i>
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.nome || 'Sem nome'}</div>
+                                        ${subtitulo ? `<div style="font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${subtitulo}</div>` : ''}
+                                    </div>
                                 </div>
-                                <span style="font-size: 11px; color: #3b82f6; background: #eff6ff; padding: 3px 8px; border-radius: 4px;">${emp.cnpj || 'CPF/CNPJ não informado'}</span>
+                                <span style="font-size: 10px; color: ${tipoCor}; background: ${item.tipo === 'empresa' ? '#fff7ed' : '#eff6ff'}; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-left: 8px; flex-shrink: 0;">${tipoLabel}</span>
                             </div>
-                        </div>
-                    `).join('');
+                        </div>`;
+                    }).join('');
                 }
 
                 dropdown.style.display = 'block';
@@ -16315,10 +16323,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             }
         }
 
-        function selecionarClienteEdit(id, nome, cnpj) {
+        function selecionarClienteEdit(empresaId, nome, cnpj, tipo, itemId) {
             document.getElementById('edit-cliente').value = nome;
-            document.getElementById('edit-cliente-id').value = id;
-            editClienteSelecionadoId = id;
+            document.getElementById('edit-cliente-id').value = empresaId || itemId;
+            editClienteSelecionadoId = empresaId || itemId;
             document.getElementById('dropdown-edit-clientes').style.display = 'none';
 
             // Atualizar avatar com iniciais
@@ -16328,7 +16336,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 avatar.textContent = iniciais;
             }
 
-            showNotification('Cliente selecionado: ' + nome, 'success');
+            const tipoLabel = tipo === 'empresa' ? 'Empresa' : 'Cliente';
+            showNotification(`${tipoLabel} selecionado: ${nome}`, 'success');
         }
 
         // Fechar dropdown ao clicar fora
@@ -16612,26 +16621,43 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
         async function buscarClientesAPI(query) {
             try {
-                const resp = await fetch(`/api/vendas/empresas/search?q=${encodeURIComponent(query)}`, {
+                // Busca unificada: clientes + empresas (por nome, nome_fantasia, razão social, CNPJ, CPF)
+                const resp = await fetch(`/api/vendas/clientes-empresas/search?q=${encodeURIComponent(query)}`, {
                     credentials: 'include',
                     headers: getAuthHeaders()
                 });
                 if (!resp.ok) throw new Error('Erro na busca');
 
-                const empresas = await resp.json();
+                const resultados = await resp.json();
                 const dropdown = document.getElementById('dropdown-clientes');
 
-                if (empresas.length === 0) {
-                    dropdown.innerHTML = '<div style="padding: 12px; color: #999; text-align: center;">Nenhuma empresa encontrada</div>';
+                if (resultados.length === 0) {
+                    dropdown.innerHTML = '<div style="padding: 15px; color: #999; text-align: center; font-size: 13px;"><i class="fas fa-search" style="margin-right: 8px;"></i>Nenhum cliente/empresa encontrado para "' + query.replace(/</g, '&lt;') + '"</div>';
                 } else {
-                    dropdown.innerHTML = empresas.map(emp => `
-                        <div class="dropdown-item" onclick="selecionarCliente(${emp.id}, '${emp.nome_fantasia.replace(/'/g, "\\'")}', '${emp.cnpj || ''}')"
-                             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;"
-                             onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
-                            <span style="font-weight: 500;">${emp.nome_fantasia}</span>
-                            <span style="font-size: 11px; color: #888;">${emp.cnpj || ''}</span>
-                        </div>
-                    `).join('');
+                    dropdown.innerHTML = resultados.map(item => {
+                        const nomeDisplay = (item.nome || 'Sem nome');
+                        const safeName = nomeDisplay.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                        const cnpjVal = item.cnpj || '';
+                        const subtitulo = item.subtitulo || '';
+                        const tipoIcon = item.tipo === 'empresa' ? 'fa-building' : 'fa-user';
+                        const tipoCor = item.tipo === 'empresa' ? '#f97316' : '#3b82f6';
+                        const tipoLabel = item.tipo === 'empresa' ? 'Empresa' : 'Cliente';
+                        return `
+                        <div class="dropdown-item" onclick="selecionarCliente(${item.empresa_id || item.id}, '${safeName}', '${cnpjVal}', '${item.tipo}', ${item.id})"
+                             style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: background 0.15s;"
+                             onmouseover="this.style.background='#f0f7ff'" onmouseout="this.style.background='#fff'">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
+                                    <i class="fas ${tipoIcon}" style="color: ${tipoCor}; font-size: 14px; flex-shrink: 0;"></i>
+                                    <div style="min-width: 0;">
+                                        <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nomeDisplay}</div>
+                                        ${subtitulo ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${subtitulo}</div>` : ''}
+                                    </div>
+                                </div>
+                                <span style="font-size: 10px; color: ${tipoCor}; background: ${item.tipo === 'empresa' ? '#fff7ed' : '#eff6ff'}; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-left: 8px; flex-shrink: 0;">${tipoLabel}</span>
+                            </div>
+                        </div>`;
+                    }).join('');
                 }
 
                 dropdown.style.display = 'block';
@@ -16640,17 +16666,17 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             }
         }
 
-        function selecionarCliente(id, nome, cnpj) {
+        function selecionarCliente(empresaId, nome, cnpj, tipo, itemId) {
             document.getElementById('novo-cliente').value = nome;
-            document.getElementById('novo-cliente-id').value = id;
-            clienteSelecionadoId = id;
+            document.getElementById('novo-cliente-id').value = empresaId || itemId;
+            clienteSelecionadoId = empresaId || itemId;
             document.getElementById('dropdown-clientes').style.display = 'none';
 
-            // Atualizar avatar com primeira letra
+            // Atualizar avatar com ícone adequado
             const avatar = document.querySelector('.orcamento-cliente-avatar i');
             if (avatar) {
-                avatar.className = 'fas fa-building';
-                avatar.style.color = '#f97316';
+                avatar.className = tipo === 'empresa' ? 'fas fa-building' : 'fas fa-user';
+                avatar.style.color = tipo === 'empresa' ? '#f97316' : '#3b82f6';
             }
         }
 
@@ -21582,7 +21608,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 <html>
                 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-                    <title>Aluforce: Relatório de Vendas</title>
+                    <title>Zyntra: Relatório de Vendas</title>
                     <style>
                         body { font-family: Arial, sans-serif; padding: 20px; }
                         h1 { color: #f97316; }
@@ -21889,7 +21915,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 <head>
                     <meta charset="UTF-8">
                     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-                    <title>Aluforce: ${título}</title>
+                    <title>Zyntra: ${título}</title>
                     <style>
                         @page { margin: 10mm; size: A4; }
                         @media print {
