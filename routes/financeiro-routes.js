@@ -239,6 +239,13 @@ module.exports = function createFinanceiroRoutes(deps) {
             }
 
             res.json({ success: true, message: `${conciliadas} lançamento(s) conciliado(s)`, conciliadas });
+            // Registrar no audit log
+            if (writeAuditLog && conciliadas > 0) {
+                try {
+                    await writeAuditLog({ userId: usuario_id, action: 'conciliacao.criada', module: 'FINANCEIRO',
+                        description: `Conciliou ${conciliadas} lançamento(s) na conta ${conta_id}`, ip: req.ip });
+                } catch (_) {}
+            }
         } catch (error) {
             console.error('[Conciliação] Erro ao salvar:', error);
             next(error);

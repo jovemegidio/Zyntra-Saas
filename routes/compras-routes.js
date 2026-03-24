@@ -100,7 +100,8 @@ module.exports = function createComprasRoutes(deps) {
     // Listar Pedidos para Recebimento
     router.get('/recebimento/pedidos', async (req, res, next) => {
         try {
-            const { status = 'pendente', limit = 50, offset = 0, busca } = req.query;
+            const { status = 'pendente', offset = 0, busca } = req.query;
+            const limit = Math.min(parseInt(req.query.limit) || 50, 500); // cap em 500
             const hoje = new Date().toISOString().split('T')[0];
 
             let sql = `
