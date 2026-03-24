@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -14,7 +14,8 @@
     <title>Aluforce: Bancos</title>
 
     <!-- Autenticacao -->
-    <script src="/js/auth-unified.js?v=20260211" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -41,10 +42,10 @@
         --info: #3b82f6;
     }
 
-        /* Bot√£o Importar - usa classe padr√£o .btn.btn-success do fin-components.css */
+        /* Bot„o Importar - usa classe padr„o .btn.btn-success do fin-components.css */
 
-        /* Bot√£o Nova Movimenta√ß√£o - Azul Financeiro */
-        .btn-movimenta√ß√£o {
+        /* Bot„o Nova MovimentaÁ„o - Azul Financeiro */
+        .btn-movimentaÁ„o {
             background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
             color: white;
             border: none;
@@ -59,16 +60,16 @@
             transition: all 0.3s ease;
             box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
         }
-        .btn-movimenta√ß√£o:hover {
+        .btn-movimentaÁ„o:hover {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
         }
-        .btn-movimenta√ß√£o:active {
+        .btn-movimentaÁ„o:active {
             transform: translateY(0);
         }
 
-        /* Bot√£o Transfer√™ncia - Indigo */
+        /* Bot„o TransferÍncia - Indigo */
         .btn-transferencia {
             background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
             color: white;
@@ -93,7 +94,7 @@
             transform: translateY(0);
         }
 
-        /* Bot√£o Novo Banco - Teal Gradiente */
+        /* Bot„o Novo Banco - Teal Gradiente */
         .btn-novo-banco {
             background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             color: white;
@@ -125,7 +126,7 @@
         /* PAGE - .page-content, .page-header, .page-title, .page-actions definidos em fin-layout.css + fin-components.css */
 /* BUTTONS - .btn, .btn-primary, .btn-secondary, .btn-success, .btn-danger, .btn-sm definidos em fin-components.css */
 
-        /* Page Header com espa√ßamento correto */
+        /* Page Header com espaÁamento correto */
         .page-header {
             display: flex;
             align-items: center;
@@ -139,7 +140,7 @@
             flex-wrap: wrap;
         }
 
-        /* KPI CARDS - Padr√£o Compras */
+        /* KPI CARDS - Padr„o Compras */
         .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
         .kpi-card { background: white; border-radius: 20px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); position: relative; overflow: hidden; transition: all 0.3s ease; }
         .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
@@ -297,57 +298,57 @@
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
         .modal-overlay.active { display: flex !important; }
 
-        /* MODAL PADR√çO - Corrigido para classes com encoding */
+        /* MODAL PADRÕO - Corrigido para classes com encoding */
         -webkit-backdrop-filter: blur(6px); }
-        .modal-overlay-padr√£o { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
-        .modal-overlay-padr√£o.active { display: flex !important; }
-        .modal-padr√£o { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 720px !important; min-height: 580px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
-        .modal-padr√£o.modal-extrato-lg { max-width: 900px !important; }
-        .modal-header-padr√£o { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); padding: 0; color: white; position: relative; overflow: hidden; border-bottom: none; flex-shrink: 0; }
-        .modal-header-content-padr√£o { display: flex; align-items: center; gap: 16px; padding: 24px 28px; position: relative; z-index: 1; }
-        .modal-header-icon-padr√£o { width: 52px; height: 52px; min-width: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-        .modal-header-icon-padr√£o i { color: white; font-size: 22px; }
-        .modal-header-text-padr√£o { flex: 1; }
-        .modal-header-text-padr√£o h2, .modal-header-text h2 { margin: 0; font-size: 20px; font-weight: 700; color: white; }
-        .modal-header-text-padr√£o p, .modal-header-text p { margin: 4px 0 0; font-size: 14px; color: rgba(255,255,255,0.85); }
-        .modal-close-padr√£o { width: 40px; height: 40px; min-width: 40px; border: none; background: rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: auto; }
-        .modal-close-padr√£o:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
-        .modal-close-padr√£o i { color: white; font-size: 16px; }
-        .modal-progress-padr√£o { display: flex; gap: 8px; padding: 16px 28px; background: rgba(0,0,0,0.1); }
-        .modal-step-padr√£o { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.2s; }
-        .modal-step-padr√£o.active { background: rgba(255,255,255,0.25); }
-        .modal-step-number-padr√£o { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
-        .modal-step-padr√£o.active .modal-step-number-padr√£o { background: white; color: #65a30d; }
-        .modal-step-padr√£o span { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
-        .modal-body-padr√£o { padding: 28px; background: #f8fafc; overflow-y: auto; flex: 1; min-height: 0; }
-        .modal-footer-padr√£o { padding: 20px 28px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px; background: #ffffff; flex-shrink: 0; }
-        .form-section-padr√£o { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .form-section-padr√£o:last-child { margin-bottom: 0; }
-        .form-section-title-padr√£o { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
-        .form-section-title-padr√£o i { width: 40px; height: 40px; background: linear-gradient(135deg, #84cc16, #65a30d); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .form-section-title-padr√£o span { font-size: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .section-badge-padr√£o { margin-left: auto; font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 600; background: #fee2e2; color: #dc2626; }
-        .form-grid-padr√£o { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .form-group-padr√£o { margin-bottom: 16px; }
-        .form-group-padr√£o:last-child { margin-bottom: 0; }
-        .form-group-padr√£o label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
-        .form-group-padr√£o label .required { color: #dc2626; }
-        .form-group-padr√£o input, .form-group-padr√£o select, .form-group-padr√£o textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; font-family: inherit; transition: all 0.2s; background: #ffffff; }
-        .form-group-padr√£o input:focus, .form-group-padr√£o select:focus, .form-group-padr√£o textarea:focus { outline: none; border-color: #84cc16; box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.15); }
+        .modal-overlay-padr„o { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+        .modal-overlay-padr„o.active { display: flex !important; }
+        .modal-padr„o { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 720px !important; min-height: 580px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
+        .modal-padr„o.modal-extrato-lg { max-width: 900px !important; }
+        .modal-header-padr„o { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); padding: 0; color: white; position: relative; overflow: hidden; border-bottom: none; flex-shrink: 0; }
+        .modal-header-content-padr„o { display: flex; align-items: center; gap: 16px; padding: 24px 28px; position: relative; z-index: 1; }
+        .modal-header-icon-padr„o { width: 52px; height: 52px; min-width: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        .modal-header-icon-padr„o i { color: white; font-size: 22px; }
+        .modal-header-text-padr„o { flex: 1; }
+        .modal-header-text-padr„o h2, .modal-header-text h2 { margin: 0; font-size: 20px; font-weight: 700; color: white; }
+        .modal-header-text-padr„o p, .modal-header-text p { margin: 4px 0 0; font-size: 14px; color: rgba(255,255,255,0.85); }
+        .modal-close-padr„o { width: 40px; height: 40px; min-width: 40px; border: none; background: rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: auto; }
+        .modal-close-padr„o:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
+        .modal-close-padr„o i { color: white; font-size: 16px; }
+        .modal-progress-padr„o { display: flex; gap: 8px; padding: 16px 28px; background: rgba(0,0,0,0.1); }
+        .modal-step-padr„o { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.2s; }
+        .modal-step-padr„o.active { background: rgba(255,255,255,0.25); }
+        .modal-step-number-padr„o { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
+        .modal-step-padr„o.active .modal-step-number-padr„o { background: white; color: #65a30d; }
+        .modal-step-padr„o span { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
+        .modal-body-padr„o { padding: 28px; background: #f8fafc; overflow-y: auto; flex: 1; min-height: 0; }
+        .modal-footer-padr„o { padding: 20px 28px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px; background: #ffffff; flex-shrink: 0; }
+        .form-section-padr„o { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .form-section-padr„o:last-child { margin-bottom: 0; }
+        .form-section-title-padr„o { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
+        .form-section-title-padr„o i { width: 40px; height: 40px; background: linear-gradient(135deg, #84cc16, #65a30d); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .form-section-title-padr„o span { font-size: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-badge-padr„o { margin-left: auto; font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 600; background: #fee2e2; color: #dc2626; }
+        .form-grid-padr„o { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-group-padr„o { margin-bottom: 16px; }
+        .form-group-padr„o:last-child { margin-bottom: 0; }
+        .form-group-padr„o label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .form-group-padr„o label .required { color: #dc2626; }
+        .form-group-padr„o input, .form-group-padr„o select, .form-group-padr„o textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; font-family: inherit; transition: all 0.2s; background: #ffffff; }
+        .form-group-padr„o input:focus, .form-group-padr„o select:focus, .form-group-padr„o textarea:focus { outline: none; border-color: #84cc16; box-shadow: 0 0 0 4px rgba(132, 204, 22, 0.15); }
         .field-hint { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; margin-top: 6px; }
         .field-hint i { font-size: 11px; }
-        .valor-destaque-padr√£o { display: flex; align-items: center; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #86efac; border-radius: 12px; padding: 4px 16px; }
-        .valor-destaque-padr√£o .currency-symbol { font-size: 18px; font-weight: 700; color: #22c55e; margin-right: 8px; }
-        .valor-destaque-padr√£o input { border: none !important; background: transparent !important; font-size: 24px !important; font-weight: 700 !important; color: #166534 !important; padding: 12px 0 !important; box-shadow: none !important; }
-        .valor-destaque-padr√£o input:focus { box-shadow: none !important; }
-        .btn-padrao-ghost, .btn-padr√£o-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
-        .btn-padrao-ghost:hover, .btn-padr√£o-ghost:hover { background: #f3f4f6; }
-        .btn-padrao-primary, .btn-padr√£o-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); color: white; box-shadow: 0 4px 14px rgba(132, 204, 22, 0.4); }
-        .btn-padrao-primary:hover, .btn-padr√£o-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(132, 204, 22, 0.5); }
-        .modal-footer-left-padr√£o { display: flex; align-items: center; }
-        .modal-footer-left-padr√£o .footer-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; }
-        .modal-footer-left-padr√£o .footer-info i { color: #84cc16; }
-        .modal-footer-right-padr√£o { display: flex; gap: 12px; margin-left: auto; }
+        .valor-destaque-padr„o { display: flex; align-items: center; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #86efac; border-radius: 12px; padding: 4px 16px; }
+        .valor-destaque-padr„o .currency-symbol { font-size: 18px; font-weight: 700; color: #22c55e; margin-right: 8px; }
+        .valor-destaque-padr„o input { border: none !important; background: transparent !important; font-size: 24px !important; font-weight: 700 !important; color: #166534 !important; padding: 12px 0 !important; box-shadow: none !important; }
+        .valor-destaque-padr„o input:focus { box-shadow: none !important; }
+        .btn-padrao-ghost, .btn-padr„o-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
+        .btn-padrao-ghost:hover, .btn-padr„o-ghost:hover { background: #f3f4f6; }
+        .btn-padrao-primary, .btn-padr„o-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); color: white; box-shadow: 0 4px 14px rgba(132, 204, 22, 0.4); }
+        .btn-padrao-primary:hover, .btn-padr„o-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(132, 204, 22, 0.5); }
+        .modal-footer-left-padr„o { display: flex; align-items: center; }
+        .modal-footer-left-padr„o .footer-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; }
+        .modal-footer-left-padr„o .footer-info i { color: #84cc16; }
+        .modal-footer-right-padr„o { display: flex; gap: 12px; margin-left: auto; }
         .modal { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 600px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; inset: auto !important; height: auto !important; margin: 16px !important; }
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(-10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .modal-header-saas { background: #ffffff; padding: 28px 32px; border-bottom: 1px solid #e5e7eb; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
@@ -393,7 +394,7 @@
         .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 14px; font-family: inherit; transition: all 0.2s; }
         .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(132,204,22,0.1); }
 
-        /* SE√á√ÉO T√çTULO INSTITUCIONAL SAAS */
+        /* SE«√O TÕTULO INSTITUCIONAL SAAS */
         .page-section-header {
             background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
             border-radius: 16px;
@@ -1012,7 +1013,7 @@
         .valor-destaque-pro-purple .currency-symbol { color: #4d7c0f; }
         .valor-destaque-pro-green .currency-symbol { color: #4d7c0f; }
 
-        /* TRANSFER√äNCIA - VISUAL CARD */
+        /* TRANSFER NCIA - VISUAL CARD */
         .transferencia-visual-card {
             display: grid;
             grid-template-columns: 1fr auto 1fr;
@@ -1364,7 +1365,7 @@
             max-height: calc(90vh - 400px) !important;
         }
 
-        /* Lista de Movimenta√ß√µes do Extrato */
+        /* Lista de MovimentaÁıes do Extrato */
         .extrato-movimentacoes-list {
             max-height: 350px;
             overflow-y: auto;
@@ -1393,7 +1394,7 @@
             color: #3b82f6;
         }
 
-        /* Item de Movimenta√ß√£o */
+        /* Item de MovimentaÁ„o */
         .mov-item {
             display: flex;
             align-items: center;
@@ -1428,7 +1429,7 @@
         .mov-info {
             flex: 1;
         }
-        .mov-descri√ß√£o {
+        .mov-descriÁ„o {
             font-size: 14px;
             font-weight: 600;
             color: #1e293b;
@@ -1453,7 +1454,7 @@
             margin-top: 2px;
         }
 
-        /* Responsive para Transfer√™ncia */
+        /* Responsive para TransferÍncia */
         @media (max-width: 700px) {
             .transferencia-visual-card {
                 grid-template-columns: 1fr;
@@ -1479,8 +1480,8 @@
             }
         }
 
-        /* ========== INTEGRA√á√ÉO BANC√ÅRIA ========== */
-        .integra√ß√£o-status-card {
+        /* ========== INTEGRA«√O BANC¡RIA ========== */
+        .integraÁ„o-status-card {
             display: flex;
             align-items: center;
             gap: 16px;
@@ -1489,15 +1490,15 @@
             border: 1px solid #86efac;
             border-radius: 12px;
         }
-        .integra√ß√£o-status-card.status-erro {
+        .integraÁ„o-status-card.status-erro {
             background: linear-gradient(135deg, #fef2f2, #fee2e2);
             border-color: #fca5a5;
         }
-        .integra√ß√£o-status-card.status-conectado {
+        .integraÁ„o-status-card.status-conectado {
             background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
             border-color: #4ade80;
         }
-        .integra√ß√£o-status-icon {
+        .integraÁ„o-status-icon {
             width: 48px;
             height: 48px;
             border-radius: 12px;
@@ -1509,21 +1510,21 @@
             font-size: 20px;
             flex-shrink: 0;
         }
-        .integra√ß√£o-status-info {
+        .integraÁ„o-status-info {
             flex: 1;
         }
-        .integra√ß√£o-status-info h4 {
+        .integraÁ„o-status-info h4 {
             font-size: 14px;
             font-weight: 700;
             color: #14532d;
             margin: 0;
         }
-        .integra√ß√£o-status-info p {
+        .integraÁ„o-status-info p {
             font-size: 12px;
             color: #22c55e;
             margin: 4px 0 0;
         }
-        .integra√ß√£o-test-btn {
+        .integraÁ„o-test-btn {
             padding: 10px 20px;
             background: linear-gradient(135deg, #84cc16, #65a30d);
             color: #fff;
@@ -1538,21 +1539,21 @@
             transition: all 0.2s;
             white-space: nowrap;
         }
-        .integra√ß√£o-test-btn:hover:not(:disabled) {
+        .integraÁ„o-test-btn:hover:not(:disabled) {
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(132,204,22,0.4);
         }
-        .integra√ß√£o-test-btn:disabled {
+        .integraÁ„o-test-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .integra√ß√£o-test-btn.testing {
+        .integraÁ„o-test-btn.testing {
             background: linear-gradient(135deg, #f59e0b, #d97706);
         }
-        .integra√ß√£o-test-btn.success {
+        .integraÁ„o-test-btn.success {
             background: linear-gradient(135deg, #22c55e, #16a34a);
         }
-        .integra√ß√£o-test-btn.error {
+        .integraÁ„o-test-btn.error {
             background: linear-gradient(135deg, #ef4444, #dc2626);
         }
 
@@ -1580,7 +1581,7 @@
             font-size: 14px;
         }
 
-        .integra√ß√£o-upload-area {
+        .integraÁ„o-upload-area {
             display: flex;
             align-items: center;
             gap: 10px;
@@ -1592,20 +1593,20 @@
             color: #64748b;
             font-size: 13px;
         }
-        .integra√ß√£o-upload-area:hover {
+        .integraÁ„o-upload-area:hover {
             border-color: #84cc16;
             background: #f7fee7;
             color: #4d7c0f;
         }
-        .integra√ß√£o-upload-area i { font-size: 20px; }
-        .integra√ß√£o-upload-area.has-file {
+        .integraÁ„o-upload-area i { font-size: 20px; }
+        .integraÁ„o-upload-area.has-file {
             border-color: #22c55e;
             background: #f0fdf4;
             color: #15803d;
             border-style: solid;
         }
 
-        .integra√ß√£o-webhook-url {
+        .integraÁ„o-webhook-url {
             display: flex;
             align-items: center;
             background: #1e293b;
@@ -1635,7 +1636,7 @@
             color: #fff;
         }
 
-        .integra√ß√£o-escopos {
+        .integraÁ„o-escopos {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
             gap: 10px;
@@ -1701,7 +1702,7 @@
         .mbo-toggle input { display: none; }
 
         /* CNAB Action Cards */
-        .integra√ß√£o-action-card {
+        .integraÁ„o-action-card {
             display: flex;
             align-items: center;
             gap: 14px;
@@ -1712,7 +1713,7 @@
             cursor: pointer;
             transition: all 0.25s;
         }
-        .integra√ß√£o-action-card:hover {
+        .integraÁ„o-action-card:hover {
             border-color: #84cc16;
             box-shadow: 0 4px 16px rgba(132,204,22,0.15);
             transform: translateY(-2px);
@@ -1740,8 +1741,8 @@
         }
 
         @media (max-width: 768px) {
-            .integra√ß√£o-escopos { grid-template-columns: 1fr; }
-            .integra√ß√£o-status-card { flex-direction: column; text-align: center; }
+            .integraÁ„o-escopos { grid-template-columns: 1fr; }
+            .integraÁ„o-status-card { flex-direction: column; text-align: center; }
         }
     </style>
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
@@ -1795,13 +1796,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Or√ßamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÁamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia√ß√£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÁ„o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat√≥rios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÛrios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -1813,7 +1814,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configura√ß√µes" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÁıes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -1840,13 +1841,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica√ß√µes" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="NotificaÁıes" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notifica√ß√µes</h3>
+                                <h3><i class="fas fa-bell"></i> NotificaÁıes</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -1859,15 +1860,15 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notifica√ß√£o</p>
+                                    <p>Nenhuma notificaÁ„o</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu√°rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu·rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usu√°rio" id="user-photo" style="display:none">
+                            <img alt="Foto do usu·rio" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -1882,8 +1883,8 @@
                 <div class="page-header" style="justify-content: flex-end;">
                     <div class="page-actions">
                         <button class="btn btn-success" onclick="abrirModalImportar('bancos')"><i class="fas fa-file-excel"></i> Importar XLSX</button>
-                        <button class="btn-movimenta√ß√£o" onclick="abrirModalMovimento()"><i class="fas fa-plus-circle"></i> Nova Movimenta√ß√£o</button>
-                        <button class="btn-transferencia" onclick="abrirModalTransferencia()"><i class="fas fa-exchange-alt"></i> Transfer√™ncia</button>
+                        <button class="btn-movimentaÁ„o" onclick="abrirModalMovimento()"><i class="fas fa-plus-circle"></i> Nova MovimentaÁ„o</button>
+                        <button class="btn-transferencia" onclick="abrirModalTransferencia()"><i class="fas fa-exchange-alt"></i> TransferÍncia</button>
                         <button class="btn-novo-banco" onclick="abrirModalBanco()"><i class="fas fa-university"></i> Novo Banco</button>
                     </div>
                 </div>
@@ -1914,7 +1915,7 @@
                         </div>
                         <div class="kpi-content">
                             <div class="kpi-value" id="entradasMes" style="color: #059669;">R$ 0,00</div>
-                            <h3>Entradas do M√™s</h3>
+                            <h3>Entradas do MÍs</h3>
                         </div>
                     </div>
                     <div class="kpi-card accent-orange">
@@ -1923,36 +1924,36 @@
                         </div>
                         <div class="kpi-content">
                             <div class="kpi-value" id="saidasMes" style="color: #dc2626;">R$ 0,00</div>
-                            <h3>Sa√≠das do M√™s</h3>
+                            <h3>SaÌdas do MÍs</h3>
                         </div>
                     </div>
                 </div>
 
-                <!-- Se√ß√£o T√≠tulo da P√°gina -->
+                <!-- SeÁ„o TÌtulo da P·gina -->
                 <div class="page-section-header">
                     <div class="section-title-group">
-                        <h2><i class="fas fa-university"></i> Minhas Contas Banc√°rias</h2>
-                        <p>Gerencie suas contas banc√°rias, saldos e movimenta√ß√µes</p>
+                        <h2><i class="fas fa-university"></i> Minhas Contas Banc·rias</h2>
+                        <p>Gerencie suas contas banc·rias, saldos e movimentaÁıes</p>
                     </div>
                 </div>
 
                 <!-- Bancos Grid -->
                 <div class="bancos-grid" id="bancosGrid"></div>
 
-                <!-- √öltimas Movimenta√ß√µes (REMOVIDO CONFORME SOLICITA√á√ÅO) -->
-                <!-- Se√ß√£o de movimenta√ß√µes oculta -->
+                <!-- ⁄ltimas MovimentaÁıes (REMOVIDO CONFORME SOLICITA«¡O) -->
+                <!-- SeÁ„o de movimentaÁıes oculta -->
                 <div id="movimentacoesSection" style="display: none;">
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-history"></i> √öltimas Movimenta√ß√µes</h3>
-                            <button class="btn btn-secondary btn-sm" onclick="abrirModalMovimento()"><i class="fas fa-plus"></i> Nova Movimenta√ß√£o</button>
+                            <h3><i class="fas fa-history"></i> ⁄ltimas MovimentaÁıes</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="abrirModalMovimento()"><i class="fas fa-plus"></i> Nova MovimentaÁ„o</button>
                         </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
                                     <th>Data</th>
                                     <th>Banco</th>
-                                    <th>Descri√ß√£o</th>
+                                    <th>DescriÁ„o</th>
                                     <th>Tipo</th>
                                     <th>Valor</th>
                                     <th>Saldo</th>
@@ -1971,7 +1972,7 @@
     <!-- -------------------------------------------------------------------------------
          MODAL NOVO/EDITAR BANCO - DESIGN COM ABAS (TABS) ESTILO OMIE
          ------------------------------------------------------------------------------- -->
-    <div class="modal-overlay-padr√£o" id="modalBanco" onclick="fecharModal('modalBanco')">
+    <div class="modal-overlay-padr„o" id="modalBanco" onclick="fecharModal('modalBanco')">
         <div class="modal-banco-omie" onclick="event.stopPropagation()">
             <!-- HEADER -->
             <div class="mbo-header">
@@ -1979,7 +1980,7 @@
                     <div class="mbo-avatar">
                         <i class="fas fa-university"></i>
                     </div>
-                    <h2 class="mbo-t√≠tulo" id="modalBancoT√≠tulo">Nova Conta Banc√°ria</h2>
+                    <h2 class="mbo-tÌtulo" id="modalBancoTÌtulo">Nova Conta Banc·ria</h2>
                 </div>
                 <button class="mbo-fechar" type="button" onclick="fecharModal('modalBanco')">
                     Fechar <i class="fas fa-times"></i>
@@ -1998,21 +1999,21 @@
                                 <label>Tipo de Conta Corrente</label>
                                 <select id="tipoConta">
                                     <option value="corrente">Conta Corrente</option>
-                                    <option value="poupanca">Poupan√ßa</option>
+                                    <option value="poupanca">PoupanÁa</option>
                                     <option value="investimento">Investimento</option>
                                     <option value="pagamentos">Conta de Pagamentos</option>
                                 </select>
                             </div>
                             <div class="mbo-field mbo-field-lg">
-                                <label>Institui√ß√£o</label>
+                                <label>InstituiÁ„o</label>
                                 <select id="bancoCodigo" required>
-                                    <option value="">Selecione a institui√ß√£o...</option>
+                                    <option value="">Selecione a instituiÁ„o...</option>
                                     <optgroup label="Bancos Tradicionais">
                                         <option value="001">001 - Banco do Brasil</option>
                                         <option value="237">237 - Bradesco</option>
-                                        <option value="341">341 - Ita√∫ Unibanco</option>
+                                        <option value="341">341 - Ita˙ Unibanco</option>
                                         <option value="033">033 - Santander</option>
-                                        <option value="104">104 - Caixa Econ√¥mica</option>
+                                        <option value="104">104 - Caixa EconÙmica</option>
                                     </optgroup>
                                     <optgroup label="Bancos Digitais">
                                         <option value="260">260 - Nubank</option>
@@ -2032,11 +2033,11 @@
                                 <input type="text" id="apelido" placeholder="Ex: Conta Principal">
                             </div>
                             <div class="mbo-field mbo-field-sm">
-                                <label>Ag√™ncia</label>
+                                <label>AgÍncia</label>
                                 <input type="text" id="agencia" placeholder="0000" maxlength="10">
                             </div>
                             <div class="mbo-field mbo-field-md">
-                                <label>Conta Corrente (com d√≠gito)</label>
+                                <label>Conta Corrente (com dÌgito)</label>
                                 <input type="text" id="conta" placeholder="00000-0" maxlength="15">
                             </div>
                         </div>
@@ -2044,11 +2045,11 @@
 
                     <!-- ABAS -->
                     <div class="mbo-tabs">
-                        <button type="button" class="mbo-tab" data-tab="integra√ß√£o">
-                            <i class="fas fa-link"></i> Integra√ß√£o com o Banco
+                        <button type="button" class="mbo-tab" data-tab="integraÁ„o">
+                            <i class="fas fa-link"></i> IntegraÁ„o com o Banco
                         </button>
-                        <button type="button" class="mbo-tab" data-tab="boletos">Boletos de Cobran√ßa</button>
-                        <button type="button" class="mbo-tab" data-tab="agencia">Sobre a Ag√™ncia</button>
+                        <button type="button" class="mbo-tab" data-tab="boletos">Boletos de CobranÁa</button>
+                        <button type="button" class="mbo-tab" data-tab="agencia">Sobre a AgÍncia</button>
                         <button type="button" class="mbo-tab" data-tab="pagamentos">Pagamentos e CNAB</button>
                     </div>
 
@@ -2059,9 +2060,9 @@
                         </div>
                     </div>
 
-                    <!-- CONTE√öDO DAS ABAS (OUTRAS INFORMA√á√ïES - PADR√ÉO) -->
+                    <!-- CONTE⁄DO DAS ABAS (OUTRAS INFORMA«’ES - PADR√O) -->
                     <div class="mbo-tab-content">
-                        <!-- OUTRAS INFORMA√á√ïES (SEMPRE VIS√çVEL QUANDO NENHUMA ABA SELECIONADA) -->
+                        <!-- OUTRAS INFORMA«’ES (SEMPRE VISÕVEL QUANDO NENHUMA ABA SELECIONADA) -->
                         <div class="mbo-tab-pane active" id="mbo-tab-default">
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-sm">
@@ -2076,7 +2077,7 @@
                                     </div>
                                 </div>
                                 <div class="mbo-field mbo-field-md">
-                                    <label>Valor do Limite de Cr√©dito <i class="fas fa-info-circle mbo-info" title="Limite de cr√©dito dispon√≠vel"></i></label>
+                                    <label>Valor do Limite de CrÈdito <i class="fas fa-info-circle mbo-info" title="Limite de crÈdito disponÌvel"></i></label>
                                     <input type="text" id="limiteCredito" placeholder="0,00" oninput="formatarMoedaBanco(this)">
                                 </div>
                                 <div class="mbo-field">
@@ -2092,7 +2093,7 @@
                                     <select id="categoriaConta">
                                         <option value="conta_corrente">Conta Corrente</option>
                                         <option value="garantida">Garantida</option>
-                                        <option value="emprestimo">Empr√©stimo</option>
+                                        <option value="emprestimo">EmprÈstimo</option>
                                     </select>
                                 </div>
                             </div>
@@ -2100,30 +2101,30 @@
                                 <label class="mbo-toggle">
                                     <input type="checkbox" id="naoConsiderarResumo">
                                     <span class="mbo-toggle-slider"></span>
-                                    <span class="mbo-toggle-text">N√£o considerar esta conta no "Resumo", no "Fluxo de Caixa" e no "Or√ßamento de Caixa"</span>
+                                    <span class="mbo-toggle-text">N„o considerar esta conta no "Resumo", no "Fluxo de Caixa" e no "OrÁamento de Caixa"</span>
                                 </label>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label>Observa√ß√£o</label>
-                                    <textarea id="observacoes" rows="3" placeholder="Anota√ß√µes sobre esta conta banc√°ria..."></textarea>
+                                    <label>ObservaÁ„o</label>
+                                    <textarea id="observacoes" rows="3" placeholder="AnotaÁıes sobre esta conta banc·ria..."></textarea>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- INTEGRA√á√ÉO COM O BANCO -->
-                        <div class="mbo-tab-pane" id="mbo-tab-integra√ß√£o">
-                            <!-- Status da Integra√ß√£o -->
-                            <div class="integra√ß√£o-status-card" id="integra√ß√£oStatusCard">
-                                <div class="integra√ß√£o-status-icon" id="integra√ß√£oStatusIcon">
+                        <!-- INTEGRA«√O COM O BANCO -->
+                        <div class="mbo-tab-pane" id="mbo-tab-integraÁ„o">
+                            <!-- Status da IntegraÁ„o -->
+                            <div class="integraÁ„o-status-card" id="integraÁ„oStatusCard">
+                                <div class="integraÁ„o-status-icon" id="integraÁ„oStatusIcon">
                                     <i class="fas fa-plug"></i>
                                 </div>
-                                <div class="integra√ß√£o-status-info">
-                                    <h4 id="integra√ß√£oStatusT√≠tulo">Integra√ß√£o n√£o configurada</h4>
-                                    <p id="integra√ß√£oStatusDesc">Configure as credenciais da API banc√°ria para habilitar a integra√ß√£o autom√°tica</p>
+                                <div class="integraÁ„o-status-info">
+                                    <h4 id="integraÁ„oStatusTÌtulo">IntegraÁ„o n„o configurada</h4>
+                                    <p id="integraÁ„oStatusDesc">Configure as credenciais da API banc·ria para habilitar a integraÁ„o autom·tica</p>
                                 </div>
-                                <button class="integra√ß√£o-test-btn" id="btnTestarIntegracao" onclick="testarIntegracaoBancaria()" disabled>
-                                    <i class="fas fa-vial"></i> Testar Conex√£o
+                                <button class="integraÁ„o-test-btn" id="btnTestarIntegracao" onclick="testarIntegracaoBancaria()" disabled>
+                                    <i class="fas fa-vial"></i> Testar Conex„o
                                 </button>
                             </div>
 
@@ -2131,24 +2132,24 @@
                             <div class="mbo-row" style="margin-top: 20px;">
                                 <div class="mbo-field">
                                     <label><i class="fas fa-server" style="color:#84cc16;margin-right:4px;"></i> Ambiente</label>
-                                    <select id="integra√ß√£oAmbiente">
-                                        <option value="sandbox">üß™ Sandbox (Homologa√ß√£o)</option>
-                                        <option value="produ√ß√£o">üü¢ Produ√ß√£o</option>
+                                    <select id="integraÁ„oAmbiente">
+                                        <option value="sandbox">?? Sandbox (HomologaÁ„o)</option>
+                                        <option value="produÁ„o">?? ProduÁ„o</option>
                                     </select>
                                 </div>
                                 <div class="mbo-field">
                                     <label><i class="fas fa-code-branch" style="color:#84cc16;margin-right:4px;"></i> Provedor / API</label>
-                                    <select id="integra√ß√£oProvedor">
+                                    <select id="integraÁ„oProvedor">
                                         <option value="">Selecione o provedor...</option>
                                         <optgroup label="Open Banking / Open Finance">
                                             <option value="openbanking">Open Banking Brasil (PCM)</option>
                                         </optgroup>
-                                        <optgroup label="APIs Banc√°rias Diretas">
+                                        <optgroup label="APIs Banc·rias Diretas">
                                             <option value="bb">Banco do Brasil API</option>
-                                            <option value="itau">Ita√∫ API (Iti/Empresas)</option>
+                                            <option value="itau">Ita˙ API (Iti/Empresas)</option>
                                             <option value="bradesco">Bradesco API</option>
                                             <option value="santander">Santander API</option>
-                                            <option value="caixa">Caixa Econ√¥mica API</option>
+                                            <option value="caixa">Caixa EconÙmica API</option>
                                             <option value="inter">Banco Inter API v2</option>
                                             <option value="sicoob">Sicoob API</option>
                                             <option value="sicredi">Sicredi API</option>
@@ -2157,7 +2158,7 @@
                                         </optgroup>
                                         <optgroup label="Gateway de Pagamentos">
                                             <option value="asaas">Asaas</option>
-                                            <option value="gerencianet">Ef√≠ (Gerencianet)</option>
+                                            <option value="gerencianet">EfÌ (Gerencianet)</option>
                                             <option value="pagarme">Pagar.me</option>
                                             <option value="stripe">Stripe</option>
                                             <option value="mercadopago">Mercado Pago</option>
@@ -2173,12 +2174,12 @@
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-lg">
                                     <label><i class="fas fa-key" style="color:#f59e0b;margin-right:4px;"></i> Client ID <span style="color:#ef4444;">*</span></label>
-                                    <input type="text" id="integra√ß√£oClientId" placeholder="Insira o Client ID fornecido pelo banco">
+                                    <input type="text" id="integraÁ„oClientId" placeholder="Insira o Client ID fornecido pelo banco">
                                 </div>
                                 <div class="mbo-field mbo-field-lg">
                                     <label><i class="fas fa-lock" style="color:#ef4444;margin-right:4px;"></i> Client Secret <span style="color:#ef4444;">*</span></label>
                                     <div class="mbo-input-icon">
-                                        <input type="password" id="integra√ß√£oClientSecret" placeholder="Insira o Client Secret">
+                                        <input type="password" id="integraÁ„oClientSecret" placeholder="Insira o Client Secret">
                                         <i class="fas fa-eye" style="cursor:pointer;pointer-events:auto;" onclick="toggleSecretVisibility(this)"></i>
                                     </div>
                                 </div>
@@ -2188,14 +2189,14 @@
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
                                     <label><i class="fas fa-globe" style="color:#3b82f6;margin-right:4px;"></i> URL Base da API</label>
-                                    <input type="url" id="integra√ß√£oUrlBase" placeholder="https://api.banco.com.br/v2">
+                                    <input type="url" id="integraÁ„oUrlBase" placeholder="https://api.banco.com.br/v2">
                                     <span class="field-hint"><i class="fas fa-info-circle"></i> Preenchido automaticamente ao selecionar o provedor</span>
                                 </div>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label><i class="fas fa-shield-alt" style="color:#8b5cf6;margin-right:4px;"></i> URL de Autentica√ß√£o (OAuth2)</label>
-                                    <input type="url" id="integra√ß√£oUrlAuth" placeholder="https://auth.banco.com.br/oauth/token">
+                                    <label><i class="fas fa-shield-alt" style="color:#8b5cf6;margin-right:4px;"></i> URL de AutenticaÁ„o (OAuth2)</label>
+                                    <input type="url" id="integraÁ„oUrlAuth" placeholder="https://auth.banco.com.br/oauth/token">
                                 </div>
                             </div>
 
@@ -2203,7 +2204,7 @@
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-lg">
                                     <label><i class="fas fa-certificate" style="color:#0d9488;margin-right:4px;"></i> Certificado Digital (.pem / .p12)</label>
-                                    <div class="integra√ß√£o-upload-area" id="certUploadArea" onclick="document.getElementById('certFile').click()">
+                                    <div class="integraÁ„o-upload-area" id="certUploadArea" onclick="document.getElementById('certFile').click()">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                         <span id="certFileName">Clique para enviar o certificado digital</span>
                                         <input type="file" id="certFile" accept=".pem,.p12,.pfx,.crt,.key" style="display:none" onchange="onCertFileSelected(this)">
@@ -2219,60 +2220,60 @@
                             <!-- Webhook -->
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label><i class="fas fa-satellite-dish" style="color:#6366f1;margin-right:4px;"></i> URL de Webhook (notifica√ß√µes autom√°ticas)</label>
-                                    <div class="integra√ß√£o-webhook-url">
+                                    <label><i class="fas fa-satellite-dish" style="color:#6366f1;margin-right:4px;"></i> URL de Webhook (notificaÁıes autom·ticas)</label>
+                                    <div class="integraÁ„o-webhook-url">
                                         <span class="webhook-readonly" id="webhookUrl">https://seu-dominio.com/api/financeiro/webhook/banco/{id}</span>
                                         <button type="button" class="webhook-copy-btn" onclick="copiarWebhook()" title="Copiar URL">
                                             <i class="fas fa-copy"></i>
                                         </button>
                                     </div>
-                                    <span class="field-hint"><i class="fas fa-info-circle"></i> Configure esta URL no painel do banco para receber notifica√ß√µes de pagamento/PIX</span>
+                                    <span class="field-hint"><i class="fas fa-info-circle"></i> Configure esta URL no painel do banco para receber notificaÁıes de pagamento/PIX</span>
                                 </div>
                             </div>
 
-                            <!-- Permiss√µes / Escopos -->
+                            <!-- Permissıes / Escopos -->
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label><i class="fas fa-check-double" style="color:#22c55e;margin-right:4px;"></i> Escopos / Permiss√µes da API</label>
-                                    <div class="integra√ß√£o-escopos">
-                                        <label class="escopo-check"><input type="checkbox" id="escopoExtrato" checked> <span>üìÑ Consultar Extrato</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoSaldo" checked> <span>üí∞ Consultar Saldo</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoPix" checked> <span>‚ö° PIX (enviar/receber)</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoBoleto"> <span>üßæ Emitir Boletos</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoTransferencia"> <span>üîÑ Transfer√™ncias (TED/DOC)</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoPagamento"> <span>üí≥ Pagamentos</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoWebhook" checked> <span>üì° Webhooks</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoCNAB"> <span>üìã Remessa/Retorno CNAB</span></label>
+                                    <label><i class="fas fa-check-double" style="color:#22c55e;margin-right:4px;"></i> Escopos / Permissıes da API</label>
+                                    <div class="integraÁ„o-escopos">
+                                        <label class="escopo-check"><input type="checkbox" id="escopoExtrato" checked> <span>?? Consultar Extrato</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoSaldo" checked> <span>?? Consultar Saldo</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoPix" checked> <span>? PIX (enviar/receber)</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoBoleto"> <span>?? Emitir Boletos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoTransferencia"> <span>?? TransferÍncias (TED/DOC)</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoPagamento"> <span>?? Pagamentos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoWebhook" checked> <span>?? Webhooks</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoCNAB"> <span>?? Remessa/Retorno CNAB</span></label>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Sincroniza√ß√£o Autom√°tica -->
+                            <!-- SincronizaÁ„o Autom·tica -->
                             <div class="mbo-row mbo-row-toggle">
                                 <label class="mbo-toggle">
-                                    <input type="checkbox" id="integra√ß√£oSyncAuto">
+                                    <input type="checkbox" id="integraÁ„oSyncAuto">
                                     <span class="mbo-toggle-slider"></span>
                                     <span class="mbo-toggle-text">Sincronizar extrato automaticamente (a cada 30 minutos)</span>
                                 </label>
                             </div>
                             <div class="mbo-row mbo-row-toggle">
                                 <label class="mbo-toggle">
-                                    <input type="checkbox" id="integra√ß√£oWebhookAtivo">
+                                    <input type="checkbox" id="integraÁ„oWebhookAtivo">
                                     <span class="mbo-toggle-slider"></span>
-                                    <span class="mbo-toggle-text">Receber notifica√ß√µes via webhook (PIX, boletos, pagamentos)</span>
+                                    <span class="mbo-toggle-text">Receber notificaÁıes via webhook (PIX, boletos, pagamentos)</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- BOLETOS DE COBRAN√áA -->
+                        <!-- BOLETOS DE COBRAN«A -->
                         <div class="mbo-tab-pane" id="mbo-tab-boletos">
-                            <div class="integra√ß√£o-status-card" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047;">
-                                <div class="integra√ß√£o-status-icon" style="background:#fef08a;color:#a16207;">
+                            <div class="integraÁ„o-status-card" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#fde047;">
+                                <div class="integraÁ„o-status-icon" style="background:#fef08a;color:#a16207;">
                                     <i class="fas fa-barcode"></i>
                                 </div>
-                                <div class="integra√ß√£o-status-info">
-                                    <h4 style="color:#854d0e;">Configura√ß√£o de Boletos</h4>
-                                    <p style="color:#a16207;">Configure os dados para emiss√£o de boletos registrados</p>
+                                <div class="integraÁ„o-status-info">
+                                    <h4 style="color:#854d0e;">ConfiguraÁ„o de Boletos</h4>
+                                    <p style="color:#a16207;">Configure os dados para emiss„o de boletos registrados</p>
                                 </div>
                             </div>
 
@@ -2282,34 +2283,34 @@
                                     <input type="text" id="boletoCarteira" placeholder="Ex: 17, 09, RG">
                                 </div>
                                 <div class="mbo-field">
-                                    <label>Conv√™nio / C√≥digo Benefici√°rio</label>
-                                    <input type="text" id="boletoConvenio" placeholder="N¬∫ do conv√™nio">
+                                    <label>ConvÍnio / CÛdigo Benefici·rio</label>
+                                    <input type="text" id="boletoConvenio" placeholder="N∫ do convÍnio">
                                 </div>
                                 <div class="mbo-field">
-                                    <label>Varia√ß√£o da Carteira</label>
+                                    <label>VariaÁ„o da Carteira</label>
                                     <input type="text" id="boletoVariacao" placeholder="Ex: 019">
                                 </div>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field">
-                                    <label>Nosso N√∫mero (In√≠cio)</label>
+                                    <label>Nosso N˙mero (InÌcio)</label>
                                     <input type="text" id="boletoNossoNumeroInicio" placeholder="Ex: 00000001">
                                 </div>
                                 <div class="mbo-field">
-                                    <label>Nosso N√∫mero (Pr√≥ximo)</label>
+                                    <label>Nosso N˙mero (PrÛximo)</label>
                                     <input type="text" id="boletoNossoNumeroProximo" placeholder="Auto-incremento">
                                 </div>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label>Instru√ß√µes de Cobran√ßa (linha 1)</label>
-                                    <input type="text" id="boletoInstrucao1" placeholder="Ex: N√£o receber ap√≥s o vencimento">
+                                    <label>InstruÁıes de CobranÁa (linha 1)</label>
+                                    <input type="text" id="boletoInstrucao1" placeholder="Ex: N„o receber apÛs o vencimento">
                                 </div>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-full">
-                                    <label>Instru√ß√µes de Cobran√ßa (linha 2)</label>
-                                    <input type="text" id="boletoInstrucao2" placeholder="Ex: Cobrar multa de 2% ap√≥s o vencimento">
+                                    <label>InstruÁıes de CobranÁa (linha 2)</label>
+                                    <input type="text" id="boletoInstrucao2" placeholder="Ex: Cobrar multa de 2% apÛs o vencimento">
                                 </div>
                             </div>
                             <div class="mbo-row">
@@ -2318,7 +2319,7 @@
                                     <input type="text" id="boletoMulta" placeholder="2,00">
                                 </div>
                                 <div class="mbo-field">
-                                    <label>Juros ao M√™s (%)</label>
+                                    <label>Juros ao MÍs (%)</label>
                                     <input type="text" id="boletoJuros" placeholder="1,00">
                                 </div>
                                 <div class="mbo-field">
@@ -2330,19 +2331,19 @@
                                 <label class="mbo-toggle">
                                     <input type="checkbox" id="boletoRegistrado" checked>
                                     <span class="mbo-toggle-slider"></span>
-                                    <span class="mbo-toggle-text">Boleto registrado (envio autom√°tico ao banco via API)</span>
+                                    <span class="mbo-toggle-text">Boleto registrado (envio autom·tico ao banco via API)</span>
                                 </label>
                             </div>
                             <div class="mbo-row mbo-row-toggle">
                                 <label class="mbo-toggle">
                                     <input type="checkbox" id="boletoPixQrcode">
                                     <span class="mbo-toggle-slider"></span>
-                                    <span class="mbo-toggle-text">Incluir QR Code PIX no boleto (Boleto H√≠brido)</span>
+                                    <span class="mbo-toggle-text">Incluir QR Code PIX no boleto (Boleto HÌbrido)</span>
                                 </label>
                             </div>
                         </div>
 
-                        <!-- SOBRE A AG√äNCIA -->
+                        <!-- SOBRE A AG NCIA -->
                         <div class="mbo-tab-pane" id="mbo-tab-agencia">
                             <div class="mbo-row">
                                 <div class="mbo-field">
@@ -2364,12 +2365,12 @@
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field mbo-field-lg">
-                                    <label>Endere√ßo</label>
+                                    <label>EndereÁo</label>
                                     <input type="text" id="enderecoAgencia" placeholder="Rua, Avenida...">
                                 </div>
                                 <div class="mbo-field mbo-field-xs">
-                                    <label>N√∫mero</label>
-                                    <input type="text" id="n√∫meroAgencia" placeholder="N¬∫">
+                                    <label>N˙mero</label>
+                                    <input type="text" id="n˙meroAgencia" placeholder="N∫">
                                 </div>
                             </div>
                             <div class="mbo-row">
@@ -2411,13 +2412,13 @@
 
                         <!-- PAGAMENTOS E CNAB -->
                         <div class="mbo-tab-pane" id="mbo-tab-pagamentos">
-                            <div class="integra√ß√£o-status-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd;">
-                                <div class="integra√ß√£o-status-icon" style="background:#bfdbfe;color:#1d4ed8;">
+                            <div class="integraÁ„o-status-card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#93c5fd;">
+                                <div class="integraÁ„o-status-icon" style="background:#bfdbfe;color:#1d4ed8;">
                                     <i class="fas fa-file-invoice"></i>
                                 </div>
-                                <div class="integra√ß√£o-status-info">
+                                <div class="integraÁ„o-status-info">
                                     <h4 style="color:#1e3a5f;">Pagamentos e Remessa CNAB</h4>
-                                    <p style="color:#3b82f6;">Configure arquivos de remessa e retorno para integra√ß√£o banc√°ria</p>
+                                    <p style="color:#3b82f6;">Configure arquivos de remessa e retorno para integraÁ„o banc·ria</p>
                                 </div>
                             </div>
 
@@ -2426,16 +2427,16 @@
                                     <label>Layout CNAB</label>
                                     <select id="cnabLayout">
                                         <option value="">Selecione...</option>
-                                        <option value="cnab240">CNAB 240 (Padr√£o FEBRABAN)</option>
+                                        <option value="cnab240">CNAB 240 (Padr„o FEBRABAN)</option>
                                         <option value="cnab400">CNAB 400 (Legado)</option>
                                     </select>
                                 </div>
                                 <div class="mbo-field">
-                                    <label>Tipo de Servi√ßo</label>
+                                    <label>Tipo de ServiÁo</label>
                                     <select id="cnabServico">
-                                        <option value="cobranca">Cobran√ßa (Boletos)</option>
-                                        <option value="pagamento">Pagamento de T√≠tulos</option>
-                                        <option value="salarios">Pagamento de Sal√°rios</option>
+                                        <option value="cobranca">CobranÁa (Boletos)</option>
+                                        <option value="pagamento">Pagamento de TÌtulos</option>
+                                        <option value="salarios">Pagamento de Sal·rios</option>
                                         <option value="fornecedores">Pagamento de Fornecedores</option>
                                         <option value="tributos">Pagamento de Tributos</option>
                                     </select>
@@ -2443,25 +2444,25 @@
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field">
-                                    <label>C√≥digo de Transmiss√£o</label>
-                                    <input type="text" id="cnabCodTransmissao" placeholder="C√≥digo fornecido pelo banco">
+                                    <label>CÛdigo de Transmiss„o</label>
+                                    <input type="text" id="cnabCodTransmissao" placeholder="CÛdigo fornecido pelo banco">
                                 </div>
                                 <div class="mbo-field">
-                                    <label>N¬∫ Sequencial de Remessa</label>
+                                    <label>N∫ Sequencial de Remessa</label>
                                     <input type="number" id="cnabSeqRemessa" placeholder="Auto-incremento" min="1">
                                 </div>
                             </div>
 
-                            <!-- A√ß√µes de Remessa/Retorno -->
+                            <!-- AÁıes de Remessa/Retorno -->
                             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px;">
-                                <div class="integra√ß√£o-action-card" onclick="gerarRemessaCNAB()">
+                                <div class="integraÁ„o-action-card" onclick="gerarRemessaCNAB()">
                                     <div class="action-card-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-file-export"></i></div>
                                     <div class="action-card-info">
                                         <h5>Gerar Remessa</h5>
                                         <p>Exportar arquivo de remessa CNAB para envio ao banco</p>
                                     </div>
                                 </div>
-                                <div class="integra√ß√£o-action-card" onclick="document.getElementById('retornoFile').click()">
+                                <div class="integraÁ„o-action-card" onclick="document.getElementById('retornoFile').click()">
                                     <div class="action-card-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-file-import"></i></div>
                                     <div class="action-card-info">
                                         <h5>Importar Retorno</h5>
@@ -2494,7 +2495,7 @@
 
     <!-- CSS DO MODAL BANCO OMIE -->
     <style>
-        /* ========== MODAL BANCO OMIE - VERS√ÉO 2 ========== */
+        /* ========== MODAL BANCO OMIE - VERS√O 2 ========== */
         .modal-banco-omie {
             background: #fff;
             width: 90vw;
@@ -2539,7 +2540,7 @@
             font-size: 20px;
             border: 2px solid #bbf7d0;
         }
-        .mbo-t√≠tulo {
+        .mbo-tÌtulo {
             font-size: 18px;
             font-weight: 700;
             color: #84cc16;
@@ -2647,7 +2648,7 @@
             height: auto;
         }
 
-        /* INPUT COM √çCONE */
+        /* INPUT COM ÕCONE */
         .mbo-input-icon {
             position: relative;
         }
@@ -2908,53 +2909,53 @@
     </script>
 
     <!-- -------------------------------------------------------------------------------
-         MODAL TRANSFER√äNCIA - DESIGN PROFISSIONAL SAAS EMPRESARIAL
+         MODAL TRANSFER NCIA - DESIGN PROFISSIONAL SAAS EMPRESARIAL
          ------------------------------------------------------------------------------- -->
-    <div class="modal-overlay-padr√£o" id="modalTransferencia" onclick="fecharModal('modalTransferencia')">
-        <div class="modal-padr√£o" onclick="event.stopPropagation()">
+    <div class="modal-overlay-padr„o" id="modalTransferencia" onclick="fecharModal('modalTransferencia')">
+        <div class="modal-padr„o" onclick="event.stopPropagation()">
             <!-- HEADER PROFISSIONAL COM GRADIENT VERDE LIMA -->
-            <div class="modal-header-padr√£o">
-                <div class="modal-header-content-padr√£o">
-                    <div class="modal-header-icon-padr√£o">
+            <div class="modal-header-padr„o">
+                <div class="modal-header-content-padr„o">
+                    <div class="modal-header-icon-padr„o">
                         <i class="fas fa-exchange-alt"></i>
                     </div>
-                    <div class="modal-header-text-padr√£o">
-                        <h2>Transfer√™ncia entre Contas</h2>
-                        <p>Movimente valores entre suas contas banc√°rias</p>
+                    <div class="modal-header-text-padr„o">
+                        <h2>TransferÍncia entre Contas</h2>
+                        <p>Movimente valores entre suas contas banc·rias</p>
                     </div>
-                    <button class="modal-close-padr√£o" type="button" onclick="fecharModal('modalTransferencia')" title="Fechar">
+                    <button class="modal-close-padr„o" type="button" onclick="fecharModal('modalTransferencia')" title="Fechar">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <!-- STEPS/PROGRESS -->
-                <div class="modal-progress-padr√£o">
-                    <div class="modal-step-padr√£o active" data-step="1">
-                        <div class="modal-step-number-padr√£o">1</div>
+                <div class="modal-progress-padr„o">
+                    <div class="modal-step-padr„o active" data-step="1">
+                        <div class="modal-step-number-padr„o">1</div>
                         <span>Contas</span>
                     </div>
-                    <div class="modal-step-padr√£o" data-step="2">
-                        <div class="modal-step-number-padr√£o">2</div>
+                    <div class="modal-step-padr„o" data-step="2">
+                        <div class="modal-step-number-padr„o">2</div>
                         <span>Valor</span>
                     </div>
-                    <div class="modal-step-padr√£o" data-step="3">
-                        <div class="modal-step-number-padr√£o">3</div>
+                    <div class="modal-step-padr„o" data-step="3">
+                        <div class="modal-step-number-padr„o">3</div>
                         <span>Confirmar</span>
                     </div>
                 </div>
             </div>
 
             <!-- BODY -->
-            <div class="modal-body-padr√£o">
+            <div class="modal-body-padr„o">
                 <form id="formTransferencia">
-                    <!-- Se√ß√£o: Sele√ß√£o de Contas -->
-                    <div class="form-section-padr√£o">
-                        <div class="form-section-title-padr√£o">
+                    <!-- SeÁ„o: SeleÁ„o de Contas -->
+                    <div class="form-section-padr„o">
+                        <div class="form-section-title-padr„o">
                             <i class="fas fa-route"></i>
                             <span>Origem e Destino</span>
-                            <span class="section-badge-padr√£o">Obrigat√≥rio</span>
+                            <span class="section-badge-padr„o">ObrigatÛrio</span>
                         </div>
 
-                        <!-- Card Visual de Transfer√™ncia -->
+                        <!-- Card Visual de TransferÍncia -->
                         <div class="transferencia-visual-card">
                             <div class="transferencia-conta origem">
                                 <div class="conta-label">
@@ -2978,28 +2979,28 @@
                         </div>
                     </div>
 
-                    <!-- Se√ß√£o: Valor e Data -->
-                    <div class="form-section-padr√£o">
-                        <div class="form-section-title-padr√£o">
+                    <!-- SeÁ„o: Valor e Data -->
+                    <div class="form-section-padr„o">
+                        <div class="form-section-title-padr„o">
                             <i class="fas fa-dollar-sign"></i>
-                            <span>Detalhes da Transfer√™ncia</span>
+                            <span>Detalhes da TransferÍncia</span>
                         </div>
-                        <div class="form-grid-padr√£o">
-                            <div class="form-group-padr√£o">
+                        <div class="form-grid-padr„o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-money-bill-wave"></i>
-                                    Valor da Transfer√™ncia
+                                    Valor da TransferÍncia
                                     <span class="required">*</span>
                                 </label>
-                                <div class="valor-destaque-padr√£o">
+                                <div class="valor-destaque-padr„o">
                                     <span class="currency-symbol">R$</span>
                                     <input type="text" id="valorTransferencia" placeholder="0,00" required oninput="formatarMoedaBanco(this)">
                                 </div>
                             </div>
-                            <div class="form-group-padr√£o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-calendar-alt"></i>
-                                    Data da Transfer√™ncia
+                                    Data da TransferÍncia
                                     <span class="required">*</span>
                                 </label>
                                 <input type="date" id="dataTransferencia" required>
@@ -3008,9 +3009,9 @@
                         <div class="form-group-padrao">
                             <label>
                                 <i class="fas fa-comment-alt"></i>
-                                Descri√ß√£o / Motivo
+                                DescriÁ„o / Motivo
                             </label>
-                            <input type="text" id="descri√ß√£oTransferencia" placeholder="Ex: Transfer√™ncia para pagamento de fornecedores...">
+                            <input type="text" id="descriÁ„oTransferencia" placeholder="Ex: TransferÍncia para pagamento de fornecedores...">
                         </div>
                     </div>
                 </form>
@@ -3019,13 +3020,13 @@
             <!-- FOOTER PROFISSIONAL -->
             <div class="modal-footer-padrao">
                 <div class="modal-footer-left-padrao">
-                    <span class="footer-info"><i class="fas fa-lock"></i> Opera√ß√£o segura</span>
+                    <span class="footer-info"><i class="fas fa-lock"></i> OperaÁ„o segura</span>
                 </div>
                 <div class="modal-footer-right-padrao">
-                    <button class="btn-padr√£o-ghost" type="button" onclick="fecharModal('modalTransferencia')">
+                    <button class="btn-padr„o-ghost" type="button" onclick="fecharModal('modalTransferencia')">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button class="btn-padr√£o-primary" type="button" onclick="realizarTransferencia()">
+                    <button class="btn-padr„o-primary" type="button" onclick="realizarTransferencia()">
                         <i class="fas fa-paper-plane"></i> Transferir
                     </button>
                 </div>
@@ -3034,9 +3035,9 @@
     </div>
 
     <!-- -------------------------------------------------------------------------------
-         MODAL NOVA MOVIMENTA√á√ÉO - DESIGN ESTILO OMIE (IGUAL AO MODAL DE BANCO)
+         MODAL NOVA MOVIMENTA«√O - DESIGN ESTILO OMIE (IGUAL AO MODAL DE BANCO)
          ------------------------------------------------------------------------------- -->
-    <div class="modal-overlay-padr√£o" id="modalMovimento" onclick="fecharModal('modalMovimento')">
+    <div class="modal-overlay-padr„o" id="modalMovimento" onclick="fecharModal('modalMovimento')">
         <div class="modal-banco-omie" onclick="event.stopPropagation()">
             <!-- HEADER -->
             <div class="mbo-header">
@@ -3044,7 +3045,7 @@
                     <div class="mbo-avatar">
                         <i class="fas fa-plus-circle"></i>
                     </div>
-                    <h2 class="mbo-t√≠tulo">Nova Movimenta√ß√£o</h2>
+                    <h2 class="mbo-tÌtulo">Nova MovimentaÁ„o</h2>
                 </div>
                 <button class="mbo-fechar" type="button" onclick="fecharModal('modalMovimento')">
                     Fechar <i class="fas fa-times"></i>
@@ -3058,16 +3059,16 @@
                     <div class="mbo-campos-principais">
                         <div class="mbo-row">
                             <div class="mbo-field mbo-field-lg">
-                                <label>Conta Banc√°ria</label>
+                                <label>Conta Banc·ria</label>
                                 <select id="contaMovimento" required>
                                     <option value="">Selecione a conta...</option>
                                 </select>
                             </div>
                             <div class="mbo-field">
-                                <label>Tipo de Movimenta√ß√£o</label>
+                                <label>Tipo de MovimentaÁ„o</label>
                                 <select id="tipoMovimento" required>
                                     <option value="entrada">Entrada</option>
-                                    <option value="saida">Sa√≠da</option>
+                                    <option value="saida">SaÌda</option>
                                 </select>
                             </div>
                         </div>
@@ -3089,8 +3090,8 @@
                                     <option value="">Selecione...</option>
                                     <optgroup label="Receitas">
                                         <option value="vendas">Vendas</option>
-                                        <option value="servicos">Servi√ßos</option>
-                                        <option value="comissoes">Comiss√µes</option>
+                                        <option value="servicos">ServiÁos</option>
+                                        <option value="comissoes">Comissıes</option>
                                         <option value="juros">Juros/Rendimentos</option>
                                     </optgroup>
                                     <optgroup label="Despesas">
@@ -3101,7 +3102,7 @@
                                         <option value="aluguel">Aluguel</option>
                                     </optgroup>
                                     <optgroup label="Outros">
-                                        <option value="transferencia">Transfer√™ncia</option>
+                                        <option value="transferencia">TransferÍncia</option>
                                         <option value="outros">Outros</option>
                                     </optgroup>
                                 </select>
@@ -3116,19 +3117,19 @@
                         </div>
                     </div>
 
-                    <!-- OUTRAS INFORMA√á√ïES -->
+                    <!-- OUTRAS INFORMA«’ES -->
                     <div class="mbo-tab-content">
                         <div class="mbo-tab-pane active">
                             <div class="mbo-row">
                                 <div class="mbo-field" style="flex: 1;">
-                                    <label>Descri√ß√£o <span style="color: #ef4444;">*</span></label>
-                                    <input type="text" id="descri√ß√£oMovimento" placeholder="Ex: Recebimento de vendas, Pagamento de fornecedor..." required>
+                                    <label>DescriÁ„o <span style="color: #ef4444;">*</span></label>
+                                    <input type="text" id="descriÁ„oMovimento" placeholder="Ex: Recebimento de vendas, Pagamento de fornecedor..." required>
                                 </div>
                             </div>
                             <div class="mbo-row">
                                 <div class="mbo-field" style="flex: 1;">
-                                    <label>Observa√ß√µes</label>
-                                    <textarea id="observacaoMovimento" rows="3" placeholder="Anota√ß√µes adicionais sobre esta movimenta√ß√£o..." style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
+                                    <label>ObservaÁıes</label>
+                                    <textarea id="observacaoMovimento" rows="3" placeholder="AnotaÁıes adicionais sobre esta movimentaÁ„o..." style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-family: inherit; font-size: 14px; resize: vertical;"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -3139,28 +3140,28 @@
             <!-- FOOTER -->
             <div class="mbo-footer">
                 <button class="mbo-btn-salvar" type="button" onclick="salvarMovimento()">
-                    <i class="fas fa-save"></i> Registrar Movimenta√ß√£o
+                    <i class="fas fa-save"></i> Registrar MovimentaÁ„o
                 </button>
             </div>
         </div>
     </div>
 
     <!-- -------------------------------------------------------------------------------
-         MODAL EXTRATO BANC√ÅRIO - DESIGN PROFISSIONAL SAAS EMPRESARIAL
+         MODAL EXTRATO BANC¡RIO - DESIGN PROFISSIONAL SAAS EMPRESARIAL
          ------------------------------------------------------------------------------- -->
-    <div class="modal-overlay-padr√£o" id="modalExtrato" onclick="fecharModal('modalExtrato')">
-        <div class="modal-padr√£o modal-extrato-lg" onclick="event.stopPropagation()">
+    <div class="modal-overlay-padr„o" id="modalExtrato" onclick="fecharModal('modalExtrato')">
+        <div class="modal-padr„o modal-extrato-lg" onclick="event.stopPropagation()">
             <!-- HEADER PROFISSIONAL COM GRADIENT VERDE LIMA -->
-            <div class="modal-header-padr√£o modal-header-extrato">
-                <div class="modal-header-content-padr√£o">
-                    <div class="modal-header-icon-padr√£o">
+            <div class="modal-header-padr„o modal-header-extrato">
+                <div class="modal-header-content-padr„o">
+                    <div class="modal-header-icon-padr„o">
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
-                    <div class="modal-header-text-padr√£o">
-                        <h2 id="extratoT√≠tulo">Extrato Banc√°rio</h2>
-                        <p>Visualize todas as movimenta√ß√µes da conta</p>
+                    <div class="modal-header-text-padr„o">
+                        <h2 id="extratoTÌtulo">Extrato Banc·rio</h2>
+                        <p>Visualize todas as movimentaÁıes da conta</p>
                     </div>
-                    <button class="modal-close-padr√£o" type="button" onclick="fecharModal('modalExtrato')" title="Fechar">
+                    <button class="modal-close-padr„o" type="button" onclick="fecharModal('modalExtrato')" title="Fechar">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -3188,14 +3189,14 @@
                 <div class="extrato-kpi entrada">
                     <div class="kpi-icon-mini" style="background: #f0fdf4; color: #22c55e;"><i class="fas fa-arrow-down"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Entradas (M√™s)</span>
+                        <span class="kpi-label">Entradas (MÍs)</span>
                         <span id="extratoEntradas" class="kpi-valor">R$ 0,00</span>
                     </div>
                 </div>
                 <div class="extrato-kpi saida">
                     <div class="kpi-icon-mini" style="background: #fef2f2; color: #ef4444;"><i class="fas fa-arrow-up"></i></div>
                     <div class="kpi-info">
-                        <span class="kpi-label">Sa√≠das (M√™s)</span>
+                        <span class="kpi-label">SaÌdas (MÍs)</span>
                         <span id="extratoSaidas" class="kpi-valor">R$ 0,00</span>
                     </div>
                 </div>
@@ -3209,16 +3210,16 @@
             </div>
 
             <!-- BODY -->
-            <div class="modal-body-padr√£o extrato-body">
-                <!-- Informa√ß√µes Detalhadas da Conta -->
-                <div class="form-section-padr√£o">
-                    <div class="form-section-title-padr√£o">
+            <div class="modal-body-padr„o extrato-body">
+                <!-- InformaÁıes Detalhadas da Conta -->
+                <div class="form-section-padr„o">
+                    <div class="form-section-title-padr„o">
                         <i class="fas fa-info-circle"></i>
-                        <span>Informa√ß√µes da Conta</span>
+                        <span>InformaÁıes da Conta</span>
                     </div>
                     <div class="extrato-detalhes-grid">
                         <div class="extrato-detalhe">
-                            <span class="detalhe-label">C√≥digo Banco</span>
+                            <span class="detalhe-label">CÛdigo Banco</span>
                             <span id="extratoCodigo" class="detalhe-valor">001</span>
                         </div>
                         <div class="extrato-detalhe">
@@ -3236,32 +3237,32 @@
                     </div>
                 </div>
 
-                <!-- Lista de Movimenta√ß√µes -->
-                <div class="form-section-padr√£o">
-                    <div class="form-section-title-padr√£o">
+                <!-- Lista de MovimentaÁıes -->
+                <div class="form-section-padr„o">
+                    <div class="form-section-title-padr„o">
                         <i class="fas fa-history"></i>
-                        <span>√öltimas Movimenta√ß√µes</span>
-                        <span class="section-badge-padr√£o">Hist√≥rico</span>
+                        <span>⁄ltimas MovimentaÁıes</span>
+                        <span class="section-badge-padr„o">HistÛrico</span>
                     </div>
                     <div id="extratoMovimentacoes" class="extrato-movimentacoes-list">
                         <div class="extrato-loading">
                             <i class="fas fa-spinner fa-spin"></i>
-                            <span>Carregando movimenta√ß√µes...</span>
+                            <span>Carregando movimentaÁıes...</span>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- FOOTER PROFISSIONAL -->
-            <div class="modal-footer-padr√£o">
+            <div class="modal-footer-padr„o">
                 <div class="modal-footer-left">
                     <span class="footer-info"><i class="fas fa-clock" style="color: #84cc16;"></i> Atualizado agora</span>
                 </div>
                 <div class="modal-footer-right">
-                    <button class="btn-padr√£o-ghost" type="button" onclick="fecharModal('modalExtrato')">
+                    <button class="btn-padr„o-ghost" type="button" onclick="fecharModal('modalExtrato')">
                         <i class="fas fa-times"></i> Fechar
                     </button>
-                    <button class="btn-padr√£o-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizaca√ß√£o()">
+                    <button class="btn-padr„o-primary" type="button" id="btnEditarExtrato" onclick="editarDaVisualizacaÁ„o()">
                         <i class="fas fa-edit"></i> Editar Conta
                     </button>
                 </div>
@@ -3285,7 +3286,7 @@
             input.value = valor;
         }
 
-        // Funo para atualizar visual do tipo de movimenta√ß√£o
+        // Funo para atualizar visual do tipo de movimentaÁ„o
         function atualizarVisualTipo() {
             const tipo = document.getElementById('tipoMovimento').value;
             const container = document.getElementById('valorMovimentoContainer');
@@ -3310,7 +3311,7 @@
         const bancosConfig = {
             '001': { nome: 'Banco do Brasil', classe: 'bb', sigla: 'BB', logo: null },
             '237': { nome: 'Bradesco', classe: 'bradesco', sigla: 'BR', logo: null },
-            '341': { nome: 'Ita√∫', classe: 'itau', sigla: 'Ita√∫', logo: 'itau' },
+            '341': { nome: 'Ita˙', classe: 'itau', sigla: 'Ita˙', logo: 'itau' },
             '033': { nome: 'Santander', classe: 'santander', sigla: 'SA', logo: null },
             '104': { nome: 'Caixa', classe: 'caixa', sigla: 'CX', logo: null },
             '260': { nome: 'Nubank', classe: 'nubank', sigla: 'Nu', logo: 'nubank' },
@@ -3416,7 +3417,7 @@
             document.getElementById('dataTransferencia').valueAsDate = new Date();
             document.getElementById('dataMovimento').valueAsDate = new Date();
 
-            // Fechar modal a√ß√£o clicar no overlay (fora do modal)
+            // Fechar modal aÁ„o clicar no overlay (fora do modal)
             document.querySelectorAll('.modal-overlay').forEach(overlay => {
                 overlay.addEventListener('click', function(e) {
                     if (e.target === this) {
@@ -3432,7 +3433,7 @@
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu√°rio');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu·rio');
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -3453,7 +3454,7 @@
                         foto.onerror = () => { foto.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.log('Erro ao carregar usu√°rio'); }
+            } catch (e) { console.log('Erro ao carregar usu·rio'); }
         }
 
         async function carregarBancos() {
@@ -3511,7 +3512,7 @@
             }
         }
 
-        // Funo para encontrar c√≥digo do banco pelo nome
+        // Funo para encontrar cÛdigo do banco pelo nome
         function encontrarCodigoBanco(nome) {
             if (!nome) return 'default';
             const nomeUpper = nome.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -3556,7 +3557,7 @@
                 'adiantamento': { bg: '#d1fae5', color: '#047857', icon: 'fa-hand-holding-usd' },
                 'caixinha': { bg: '#fce7f3', color: '#be185d', icon: 'fa-piggy-bank' },
                 'mutuo': { bg: '#e0e7ff', color: '#4338ca', icon: 'fa-handshake' },
-                'm√∫tuo': { bg: '#e0e7ff', color: '#4338ca', icon: 'fa-handshake' },
+                'm˙tuo': { bg: '#e0e7ff', color: '#4338ca', icon: 'fa-handshake' },
                 'default': { bg: '#f1f5f9', color: '#475569', icon: 'fa-wallet' }
             };
             return tiposConfig[(tipo || '').toLowerCase()] || tiposConfig['default'];
@@ -3573,7 +3574,7 @@
                         data: m.data,
                         bancoId: m.banco_id,
                         bancoNome: m.banco_apelido || m.banco_nome,
-                        descri√ß√£o: m.descri√ß√£o || m.descri√ß√£o,
+                        descriÁ„o: m.descriÁ„o || m.descriÁ„o,
                         tipo: m.tipo,
                         valor: parseFloat(m.valor) || 0,
                         saldo: parseFloat(m.saldo_apos) || 0,
@@ -3582,8 +3583,8 @@
                 } else {
                     // Dados demo
                     movimentacoes = [
-                        { id: 1, data: new Date().toISOString().split('T')[0], bancoId: 1, bancoNome: 'Conta Principal', descri√ß√£o: 'Recebimento Cliente ABC', tipo: 'entrada', valor: 15000, saldo: 85420.50 },
-                        { id: 2, data: new Date().toISOString().split('T')[0], bancoId: 2, bancoNome: 'Fornecedores', descri√ß√£o: 'Pagamento Fornecedor', tipo: 'saida', valor: 8500, saldo: 42890.75 },
+                        { id: 1, data: new Date().toISOString().split('T')[0], bancoId: 1, bancoNome: 'Conta Principal', descriÁ„o: 'Recebimento Cliente ABC', tipo: 'entrada', valor: 15000, saldo: 85420.50 },
+                        { id: 2, data: new Date().toISOString().split('T')[0], bancoId: 2, bancoNome: 'Fornecedores', descriÁ„o: 'Pagamento Fornecedor', tipo: 'saida', valor: 8500, saldo: 42890.75 },
                     ];
                 }
 
@@ -3631,8 +3632,8 @@
                         <div style="width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 20px; display: flex; align-items: center; justify-content: center;">
                             <i class="fas fa-university" style="font-size: 32px; color: #84cc16;"></i>
                         </div>
-                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Nenhuma conta banc√°ria cadastrada</h3>
-                        <p style="font-size: 14px; color: #64748b; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">Cadastre suas contas banc√°rias para gerenciar saldos, movimenta√ß√µes e transfer√™ncias.</p>
+                        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px;">Nenhuma conta banc·ria cadastrada</h3>
+                        <p style="font-size: 14px; color: #64748b; margin-bottom: 24px; max-width: 400px; margin-left: auto; margin-right: auto;">Cadastre suas contas banc·rias para gerenciar saldos, movimentaÁıes e transferÍncias.</p>
                         <button class="btn btn-primary" onclick="abrirModalBanco()" style="padding: 14px 28px; border-radius: 12px; font-size: 15px;">
                             <i class="fas fa-plus"></i> Cadastrar Primeira Conta
                         </button>
@@ -3645,17 +3646,17 @@
                 const config = bancosConfig[banco.codigo] || bancosConfig['default'];
                 const tipoConfig = obterCorTipoConta(banco.tipo_conta);
 
-                // Determinar sigla baseada no tipo de conta ou institui√ß√£o
+                // Determinar sigla baseada no tipo de conta ou instituiÁ„o
                 let logoContent;
                 if (config.logo && bancosLogos[config.logo]) {
                     logoContent = `<img src="${bancosLogos[config.logo]}" alt="${config.nome}">`;
                 } else {
-                    // Usar sigla baseada na institui√ß√£o ou tipo
+                    // Usar sigla baseada na instituiÁ„o ou tipo
                     const sigla = banco.instituicao ? banco.instituicao.substring(0, 2).toUpperCase() : config.sigla;
                     logoContent = sigla;
                 }
 
-                // Informa√ß√£o secund√°ria
+                // InformaÁ„o secund·ria
                 let subInfo = '';
                 if (banco.agencia && banco.agencia !== '-' && banco.conta && banco.conta !== '-') {
                     subInfo = `Ag: ${banco.agencia} | Cc: ${banco.conta}`;
@@ -3688,7 +3689,7 @@
                                     <span style="color: ${tipoConfig.color};">${banco.tipo_conta || 'Conta Corrente'}</span>
                                 </div>
                                 <div class="banco-detail">
-                                    <label>Limite de Cr√©dito</label>
+                                    <label>Limite de CrÈdito</label>
                                     <span>${formatarMoeda(banco.limite)}</span>
                                 </div>
                             </div>
@@ -3710,7 +3711,7 @@
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
                             <i class="fas fa-exchange-alt" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>
-                            Nenhuma movimenta√ß√£o encontrada
+                            Nenhuma movimentaÁ„o encontrada
                         </td>
                     </tr>
                 `;
@@ -3724,7 +3725,7 @@
                     <tr>
                         <td>${formatarData(mov.data)}</td>
                         <td><strong>${bancoNome}</strong></td>
-                        <td>${mov.descri√ß√£o}</td>
+                        <td>${mov.descriÁ„o}</td>
                         <td>
                             <span class="tipo-badge ${mov.tipo}">
                                 <i class="fas fa-arrow-${mov.tipo === 'entrada' ? 'down' : mov.tipo === 'saida' ? 'up' : 'right-left'}"></i>
@@ -3740,7 +3741,7 @@
             }).join('');
         }
 
-        // Modal Extrato / Visualiza√ß√£o
+        // Modal Extrato / VisualizaÁ„o
         async function verExtrato(id) {
             const banco = bancos.find(b => b.id === id);
             if (!banco) return;
@@ -3748,8 +3749,8 @@
             bancoVisualizando = banco;
             const config = bancosConfig[banco.codigo] || { nome: banco.nome, classe: 'bb', sigla: '??' };
 
-            // Preencher informa√ß√µes
-            document.getElementById('extratoT√≠tulo').textContent = `Extrato - ${banco.apelido || config.nome}`;
+            // Preencher informaÁıes
+            document.getElementById('extratoTÌtulo').textContent = `Extrato - ${banco.apelido || config.nome}`;
 
             // Logo do banco com classe correta
             const logoEl = document.getElementById('extratoBancoLogo');
@@ -3772,14 +3773,14 @@
 
             document.getElementById('extratoCadastro').textContent = formatarData(banco.created_at);
 
-            // Carregar movimenta√ß√µes do banco
+            // Carregar movimentaÁıes do banco
             const movDiv = document.getElementById('extratoMovimentacoes');
-            movDiv.innerHTML = '<div class="extrato-loading"><i class="fas fa-spinner fa-spin"></i><span>Carregando movimenta√ß√µes...</span></div>';
+            movDiv.innerHTML = '<div class="extrato-loading"><i class="fas fa-spinner fa-spin"></i><span>Carregando movimentaÁıes...</span></div>';
 
             document.getElementById('modalExtrato').classList.add('active');
             console.log('[Modal Extrato] Aberto com classe active');
 
-            // Buscar movimenta√ß√µes especficas do banco
+            // Buscar movimentaÁıes especficas do banco
             try {
                 const response = await fetch(`/api/financeiro/bancos/${id}/movimentacoes?limit=20`, { credentials: 'include' });
                 const data = await response.json();
@@ -3791,7 +3792,7 @@
                                 <i class="fas fa-arrow-${m.tipo === 'entrada' ? 'down' : 'up'}"></i>
                             </div>
                             <div class="mov-info">
-                                <div class="mov-descri√ß√£o">${m.descri√ß√£o}</div>
+                                <div class="mov-descriÁ„o">${m.descriÁ„o}</div>
                                 <div class="mov-data">${formatarData(m.data)} ${m.categoria ? ' ' + m.categoria : ''}</div>
                             </div>
                             <div class="mov-valores">
@@ -3812,7 +3813,7 @@
                                     <i class="fas fa-arrow-${m.tipo === 'entrada' ? 'down' : 'up'}"></i>
                                 </div>
                                 <div class="mov-info">
-                                    <div class="mov-descri√ß√£o">${m.descri√ß√£o}</div>
+                                    <div class="mov-descriÁ„o">${m.descriÁ„o}</div>
                                     <div class="mov-data">${formatarData(m.data)}</div>
                                 </div>
                                 <div class="mov-valores">
@@ -3824,16 +3825,16 @@
                             </div>
                         `).join('');
                     } else {
-                        movDiv.innerHTML = '<div class="extrato-loading" style="color: #94a3b8;"><i class="fas fa-inbox" style="color: #cbd5e1;"></i><span>Nenhuma movimenta√ß√£o encontrada para esta conta</span></div>';
+                        movDiv.innerHTML = '<div class="extrato-loading" style="color: #94a3b8;"><i class="fas fa-inbox" style="color: #cbd5e1;"></i><span>Nenhuma movimentaÁ„o encontrada para esta conta</span></div>';
                     }
                 }
             } catch (e) {
-                console.error('Erro ao carregar movimenta√ß√µes:', e);
-                movDiv.innerHTML = '<div class="extrato-loading" style="color: #94a3b8;"><i class="fas fa-inbox" style="color: #cbd5e1;"></i><span>Nenhuma movimenta√ß√£o encontrada</span></div>';
+                console.error('Erro ao carregar movimentaÁıes:', e);
+                movDiv.innerHTML = '<div class="extrato-loading" style="color: #94a3b8;"><i class="fas fa-inbox" style="color: #cbd5e1;"></i><span>Nenhuma movimentaÁ„o encontrada</span></div>';
             }
         }
 
-        function editarDaVisualizaca√ß√£o() {
+        function editarDaVisualizacaÁ„o() {
             if (bancoVisualizando) {
                 fecharModal('modalExtrato');
                 editarBanco(bancoVisualizando.id);
@@ -3843,7 +3844,7 @@
         function abrirModalBanco(id = null) {
             document.getElementById('formBanco').reset();
             document.getElementById('bancoId').value = '';
-            document.getElementById('modalBancoT√≠tulo').textContent = 'Nova Conta Banc√°ria';
+            document.getElementById('modalBancoTÌtulo').textContent = 'Nova Conta Banc·ria';
             limparIntegracao();
 
             if (id) {
@@ -3856,8 +3857,8 @@
                     document.getElementById('conta').value = banco.conta;
                     document.getElementById('apelido').value = banco.apelido || '';
                     document.getElementById('observacoes').value = banco.observacoes || '';
-                    document.getElementById('modalBancoTitulo').textContent = 'Editar Conta Banc√°ria';
-                    // Carregar dados da integra√ß√£o banc√°ria
+                    document.getElementById('modalBancoTitulo').textContent = 'Editar Conta Banc·ria';
+                    // Carregar dados da integraÁ„o banc·ria
                     carregarIntegracaoBancaria(banco.id);
                     // Webhook URL com ID do banco
                     document.getElementById('webhookUrl').textContent = 
@@ -3873,7 +3874,7 @@
             document.getElementById('formTransferencia').reset();
 
             const options = bancos.filter(b => b.status === 'ativo').map(b =>
-                `<option value="${b.id}">${b.apelido || bancosConfig[b.c√≥digo]?.nome} - ${formatarMoeda(b.saldo)}</option>`
+                `<option value="${b.id}">${b.apelido || bancosConfig[b.cÛdigo]?.nome} - ${formatarMoeda(b.saldo)}</option>`
             ).join('');
 
             document.getElementById('contaOrigem').innerHTML = '<option value="">Selecione...</option>' + options;
@@ -3887,7 +3888,7 @@
             document.getElementById('formMovimento').reset();
 
             const options = bancos.filter(b => b.status === 'ativo').map(b =>
-                `<option value="${b.id}">${b.apelido || bancosConfig[b.c√≥digo]?.nome}</option>`
+                `<option value="${b.id}">${b.apelido || bancosConfig[b.cÛdigo]?.nome}</option>`
             ).join('');
 
             document.getElementById('contaMovimento').innerHTML = '<option value="">Selecione...</option>' + options;
@@ -3926,13 +3927,13 @@
                 conta_vinculada: document.getElementById('contaVinculada').value || null,
                 nao_considerar_resumo: document.getElementById('naoConsiderarResumo').checked,
                 observacoes: document.getElementById('observacoes').value || null,
-                // Dados da ag√™ncia
+                // Dados da agÍncia
                 gerente_conta: document.getElementById('gerenteConta')?.value || null,
                 email_gerente: document.getElementById('emailGerente')?.value || null,
                 ddd_agencia: document.getElementById('dddAgencia')?.value || null,
                 telefone_agencia: document.getElementById('telefoneAgencia')?.value || null,
                 endereco_agencia: document.getElementById('enderecoAgencia')?.value || null,
-                n√∫mero_agencia: document.getElementById('n√∫meroAgencia')?.value || null,
+                n˙mero_agencia: document.getElementById('n˙meroAgencia')?.value || null,
                 bairro_agencia: document.getElementById('bairroAgencia')?.value || null,
                 complemento_agencia: document.getElementById('complementoAgencia')?.value || null,
                 estado_agencia: document.getElementById('estadoAgencia')?.value || null,
@@ -3958,7 +3959,7 @@
                     const resultado = await response.json().catch(() => ({}));
                     const bancoIdSalvo = id || resultado.id;
                     
-                    // Salvar dados da integra√ß√£o banc√°ria
+                    // Salvar dados da integraÁ„o banc·ria
                     if (bancoIdSalvo) {
                         try {
                             const integData = coletarDadosIntegracao();
@@ -3969,20 +3970,20 @@
                                 body: JSON.stringify(integData)
                             });
                         } catch (integErr) {
-                            console.warn('Aviso: Erro ao salvar integra√ß√£o:', integErr);
+                            console.warn('Aviso: Erro ao salvar integraÁ„o:', integErr);
                         }
                     }
                     
                     fecharModal('modalBanco');
                     await carregarBancos();
-                    showToast('success', id ? 'Banco Atualizado!' : 'Banco Cadastrado!', id ? 'Os dados da conta banc√°ria foram atualizados com sucesso.' : 'Nova conta banc√°ria cadastrada com sucesso.');
+                    showToast('success', id ? 'Banco Atualizado!' : 'Banco Cadastrado!', id ? 'Os dados da conta banc·ria foram atualizados com sucesso.' : 'Nova conta banc·ria cadastrada com sucesso.');
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast('error', 'Erro ao Salvar', err.error || 'N√£o foi poss√≠vel salvar os dados do banco.');
+                    showToast('error', 'Erro ao Salvar', err.error || 'N„o foi possÌvel salvar os dados do banco.');
                 }
             } catch (e) {
                 console.error('Erro ao salvar banco:', e);
-                showToast('error', 'Erro de Conex√£o', 'N√£o foi poss√≠vel conectar ao servidor.');
+                showToast('error', 'Erro de Conex„o', 'N„o foi possÌvel conectar ao servidor.');
             }
         }
 
@@ -3995,15 +3996,15 @@
             const destino = parseInt(document.getElementById('contaDestino').value);
             const valor = parseFloat(document.getElementById('valorTransferencia').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
             const data = document.getElementById('dataTransferencia').value;
-            const descri√ß√£o = document.getElementById('descri√ß√£oTransferencia').value;
+            const descriÁ„o = document.getElementById('descriÁ„oTransferencia').value;
 
             if (!origem || !destino || origem === destino) {
-                showToast('warning', 'Aten√ß√£o', 'Selecione contas diferentes para origem e destino.');
+                showToast('warning', 'AtenÁ„o', 'Selecione contas diferentes para origem e destino.');
                 return;
             }
 
             if (valor <= 0) {
-                showToast('warning', 'Valor Inv√°lido', 'Informe um valor maior que zero para a transfer√™ncia.');
+                showToast('warning', 'Valor Inv·lido', 'Informe um valor maior que zero para a transferÍncia.');
                 return;
             }
 
@@ -4016,7 +4017,7 @@
                         conta_destino: destino,
                         valor: valor,
                         data: data,
-                        descri√ß√£o: descri√ß√£o
+                        descriÁ„o: descriÁ„o
                     })
                 });
 
@@ -4024,14 +4025,14 @@
                     fecharModal('modalTransferencia');
                     await carregarBancos();
                     await carregarMovimentacoes();
-                    showToast('success', 'Transfer√™ncia Realizada!', 'A transfer√™ncia entre contas foi conclu√≠da com sucesso.');
+                    showToast('success', 'TransferÍncia Realizada!', 'A transferÍncia entre contas foi concluÌda com sucesso.');
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast('error', 'Erro na Transfer√™ncia', err.error || 'N√£o foi poss√≠vel realizar a transfer√™ncia. Tente novamente.');
+                    showToast('error', 'Erro na TransferÍncia', err.error || 'N„o foi possÌvel realizar a transferÍncia. Tente novamente.');
                 }
             } catch (e) {
                 console.error('Erro na transferencia:', e);
-                showToast('error', 'Erro de Conex√£o', 'N√£o foi poss√≠vel conectar ao servidor. Verifique sua conex√£o.');
+                showToast('error', 'Erro de Conex„o', 'N„o foi possÌvel conectar ao servidor. Verifique sua conex„o.');
             }
         }
 
@@ -4040,11 +4041,11 @@
             const tipo = document.getElementById('tipoMovimento').value;
             const valor = parseFloat(document.getElementById('valorMovimento').value.replace(/[^\d,-]/g, '').replace(',', '.')) || 0;
             const data = document.getElementById('dataMovimento').value;
-            const descri√ß√£o = document.getElementById('descri√ß√£oMovimento').value;
+            const descriÁ„o = document.getElementById('descriÁ„oMovimento').value;
             const categoria = document.getElementById('categoriaMovimento').value;
 
-            if (!bancoId || valor <= 0 || !descri√ß√£o) {
-                showToast('warning', 'Campos Obrigat√≥rios', 'Preencha todos os campos obrigat√≥rios para continuar.');
+            if (!bancoId || valor <= 0 || !descriÁ„o) {
+                showToast('warning', 'Campos ObrigatÛrios', 'Preencha todos os campos obrigatÛrios para continuar.');
                 return;
             }
 
@@ -4057,7 +4058,7 @@
                         tipo: tipo,
                         valor: valor,
                         data: data,
-                        descri√ß√£o: descri√ß√£o,
+                        descriÁ„o: descriÁ„o,
                         categoria: categoria || null
                     })
                 });
@@ -4066,18 +4067,18 @@
                     fecharModal('modalMovimento');
                     await carregarBancos();
                     await carregarMovimentacoes();
-                    showToast('success', 'Movimenta√ß√£o Registrada!', `${tipo === 'entrada' ? 'Entrada' : 'Sa√≠da'} de R$ ${valor.toFixed(2).replace('.', ',')} registrada com sucesso.`);
+                    showToast('success', 'MovimentaÁ„o Registrada!', `${tipo === 'entrada' ? 'Entrada' : 'SaÌda'} de R$ ${valor.toFixed(2).replace('.', ',')} registrada com sucesso.`);
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast('error', 'Erro ao Registrar', err.error || 'N√£o foi poss√≠vel registrar a movimenta√ß√£o.');
+                    showToast('error', 'Erro ao Registrar', err.error || 'N„o foi possÌvel registrar a movimentaÁ„o.');
                 }
             } catch (e) {
-                console.error('Erro ao salvar movimenta√ß√£o:', e);
-                showToast('error', 'Erro de Conex√£o', 'N√£o foi poss√≠vel conectar ao servidor.');
+                console.error('Erro ao salvar movimentaÁ„o:', e);
+                showToast('error', 'Erro de Conex„o', 'N„o foi possÌvel conectar ao servidor.');
             }
         }
 
-        // Sistema de Notifica√ß√µes
+        // Sistema de NotificaÁıes
         function toggleNotificacoes() {
             const panel = document.getElementById('notification-panel');
             panel.classList.toggle('active');
@@ -4099,7 +4100,7 @@
                     <div class="notification-icon info"><i class="fas fa-university"></i></div>
                     <div class="notification-content">
                         <div class="notification-title">Saldo atualizado</div>
-                        <div class="notification-message">Os saldos banc√°rios foram atualizados</div>
+                        <div class="notification-message">Os saldos banc·rios foram atualizados</div>
                         <div class="notification-time"><i class="fas fa-clock"></i> Agora</div>
                     </div>
                 </div>
@@ -4120,9 +4121,9 @@
             }
         });
 
-        // ========== INTEGRA√á√ÉO BANC√ÅRIA - API ==========
+        // ========== INTEGRA«√O BANC¡RIA - API ==========
 
-        // URLs padr√£o por provedor
+        // URLs padr„o por provedor
         const provedorConfigs = {
             bb:         { url: 'https://api.bb.com.br/cobrancas/v2', auth: 'https://oauth.bb.com.br/oauth/token' },
             itau:       { url: 'https://sts.itau.com.br/api/v1', auth: 'https://sts.itau.com.br/seguranca/v1/token' },
@@ -4144,13 +4145,13 @@
         };
 
         // Auto-preencher URLs ao selecionar provedor
-        document.getElementById('integra√ß√£oProvedor')?.addEventListener('change', function() {
+        document.getElementById('integraÁ„oProvedor')?.addEventListener('change', function() {
             const config = provedorConfigs[this.value];
             if (config) {
-                document.getElementById('integra√ß√£oUrlBase').value = config.url;
-                document.getElementById('integra√ß√£oUrlAuth').value = config.auth;
+                document.getElementById('integraÁ„oUrlBase').value = config.url;
+                document.getElementById('integraÁ„oUrlAuth').value = config.auth;
             }
-            // Habilitar bot√£o de teste
+            // Habilitar bot„o de teste
             const btn = document.getElementById('btnTestarIntegracao');
             if (btn) btn.disabled = !this.value;
         });
@@ -4173,7 +4174,7 @@
             if (!file) return;
             const label = document.getElementById('certFileName');
             const area = document.getElementById('certUploadArea');
-            label.textContent = `üìé ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            label.textContent = `?? ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
             area.classList.add('has-file');
         }
 
@@ -4194,17 +4195,17 @@
             });
         }
 
-        // Testar conex√£o com API banc√°ria
+        // Testar conex„o com API banc·ria
         async function testarIntegracaoBancaria() {
             const btn = document.getElementById('btnTestarIntegracao');
-            const statusCard = document.getElementById('integra√ß√£oStatusCard');
-            const statusIcon = document.getElementById('integra√ß√£oStatusIcon');
-            const statusT√≠tulo = document.getElementById('integra√ß√£oStatusT√≠tulo');
-            const statusDesc = document.getElementById('integra√ß√£oStatusDesc');
+            const statusCard = document.getElementById('integraÁ„oStatusCard');
+            const statusIcon = document.getElementById('integraÁ„oStatusIcon');
+            const statusTÌtulo = document.getElementById('integraÁ„oStatusTÌtulo');
+            const statusDesc = document.getElementById('integraÁ„oStatusDesc');
 
-            const clientId = document.getElementById('integra√ß√£oClientId').value.trim();
-            const clientSecret = document.getElementById('integra√ß√£oClientSecret').value.trim();
-            const provedor = document.getElementById('integra√ß√£oProvedor').value;
+            const clientId = document.getElementById('integraÁ„oClientId').value.trim();
+            const clientSecret = document.getElementById('integraÁ„oClientSecret').value.trim();
+            const provedor = document.getElementById('integraÁ„oProvedor').value;
 
             if (!clientId || !clientSecret) {
                 showToast('Preencha o Client ID e Client Secret', 'warning');
@@ -4227,45 +4228,45 @@
                         provedor,
                         client_id: clientId,
                         client_secret: clientSecret,
-                        url_base: document.getElementById('integra√ß√£oUrlBase').value,
-                        url_auth: document.getElementById('integra√ß√£oUrlAuth').value,
-                        ambiente: document.getElementById('integra√ß√£oAmbiente').value
+                        url_base: document.getElementById('integraÁ„oUrlBase').value,
+                        url_auth: document.getElementById('integraÁ„oUrlAuth').value,
+                        ambiente: document.getElementById('integraÁ„oAmbiente').value
                     })
                 });
 
                 const data = await resp.json();
 
                 if (data.success) {
-                    statusCard.className = 'integra√ß√£o-status-card status-conectado';
+                    statusCard.className = 'integraÁ„o-status-card status-conectado';
                     statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
-                    statusT√≠tulo.textContent = 'Conex√£o estabelecida com sucesso!';
-                    statusDesc.textContent = data.message || `Token v√°lido ‚Ä¢ Provedor: ${provedor.toUpperCase()}`;
+                    statusTÌtulo.textContent = 'Conex„o estabelecida com sucesso!';
+                    statusDesc.textContent = data.message || `Token v·lido ï Provedor: ${provedor.toUpperCase()}`;
                     btn.innerHTML = '<i class="fas fa-check"></i> Conectado';
                     btn.classList.remove('testing');
                     btn.classList.add('success');
-                    showToast('Integra√ß√£o banc√°ria testada com sucesso!', 'success');
+                    showToast('IntegraÁ„o banc·ria testada com sucesso!', 'success');
                 } else {
-                    throw new Error(data.error || 'Falha na conex√£o');
+                    throw new Error(data.error || 'Falha na conex„o');
                 }
             } catch (err) {
-                statusCard.className = 'integra√ß√£o-status-card status-erro';
+                statusCard.className = 'integraÁ„o-status-card status-erro';
                 statusIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
-                statusT√≠tulo.textContent = 'Falha na conex√£o';
+                statusTÌtulo.textContent = 'Falha na conex„o';
                 statusDesc.textContent = err.message || 'Verifique as credenciais e tente novamente';
                 btn.innerHTML = '<i class="fas fa-times"></i> Falhou';
                 btn.classList.remove('testing');
                 btn.classList.add('error');
-                showToast('Erro ao testar integra√ß√£o: ' + err.message, 'error');
+                showToast('Erro ao testar integraÁ„o: ' + err.message, 'error');
             }
 
             setTimeout(() => {
                 btn.disabled = false;
                 btn.classList.remove('success', 'error', 'testing');
-                btn.innerHTML = '<i class="fas fa-vial"></i> Testar Conex√£o';
+                btn.innerHTML = '<i class="fas fa-vial"></i> Testar Conex„o';
             }, 4000);
         }
 
-        // Carregar dados da integra√ß√£o quando abrir modal de edi√ß√£o
+        // Carregar dados da integraÁ„o quando abrir modal de ediÁ„o
         async function carregarIntegracaoBancaria(bancoId) {
             if (!bancoId) return;
             try {
@@ -4274,15 +4275,15 @@
                 });
                 if (!resp.ok) return;
                 const data = await resp.json();
-                if (data.success && data.integra√ß√£o) {
-                    const i = data.integra√ß√£o;
-                    document.getElementById('integra√ß√£oProvedor').value = i.provedor || '';
-                    document.getElementById('integra√ß√£oAmbiente').value = i.ambiente || 'sandbox';
-                    document.getElementById('integra√ß√£oClientId').value = i.client_id || '';
-                    document.getElementById('integra√ß√£oUrlBase').value = i.url_base || '';
-                    document.getElementById('integra√ß√£oUrlAuth').value = i.url_auth || '';
-                    document.getElementById('integra√ß√£oSyncAuto').checked = !!i.sync_automatico;
-                    document.getElementById('integra√ß√£oWebhookAtivo').checked = !!i.webhook_ativo;
+                if (data.success && data.integraÁ„o) {
+                    const i = data.integraÁ„o;
+                    document.getElementById('integraÁ„oProvedor').value = i.provedor || '';
+                    document.getElementById('integraÁ„oAmbiente').value = i.ambiente || 'sandbox';
+                    document.getElementById('integraÁ„oClientId').value = i.client_id || '';
+                    document.getElementById('integraÁ„oUrlBase').value = i.url_base || '';
+                    document.getElementById('integraÁ„oUrlAuth').value = i.url_auth || '';
+                    document.getElementById('integraÁ„oSyncAuto').checked = !!i.sync_automatico;
+                    document.getElementById('integraÁ„oWebhookAtivo').checked = !!i.webhook_ativo;
                     
                     // Escopos
                     if (i.escopos) {
@@ -4301,8 +4302,8 @@
                     if (i.boleto_carteira) document.getElementById('boletoCarteira').value = i.boleto_carteira;
                     if (i.boleto_convenio) document.getElementById('boletoConvenio').value = i.boleto_convenio;
                     if (i.boleto_variacao) document.getElementById('boletoVariacao').value = i.boleto_variacao;
-                    if (i.boleto_nosso_n√∫mero_inicio) document.getElementById('boletoNossoNumeroInicio').value = i.boleto_nosso_n√∫mero_inicio;
-                    if (i.boleto_nosso_n√∫mero_proximo) document.getElementById('boletoNossoNumeroProximo').value = i.boleto_nosso_n√∫mero_proximo;
+                    if (i.boleto_nosso_n˙mero_inicio) document.getElementById('boletoNossoNumeroInicio').value = i.boleto_nosso_n˙mero_inicio;
+                    if (i.boleto_nosso_n˙mero_proximo) document.getElementById('boletoNossoNumeroProximo').value = i.boleto_nosso_n˙mero_proximo;
                     if (i.boleto_instrucao1) document.getElementById('boletoInstrucao1').value = i.boleto_instrucao1;
                     if (i.boleto_instrucao2) document.getElementById('boletoInstrucao2').value = i.boleto_instrucao2;
                     if (i.boleto_multa) document.getElementById('boletoMulta').value = i.boleto_multa;
@@ -4319,41 +4320,41 @@
                     document.getElementById('cnabAutoProcessar').checked = !!i.cnab_auto_processar;
 
                     // Status
-                    const statusCard = document.getElementById('integra√ß√£oStatusCard');
-                    const statusT√≠tulo = document.getElementById('integra√ß√£oStatusT√≠tulo');
-                    const statusDesc = document.getElementById('integra√ß√£oStatusDesc');
-                    const statusIcon = document.getElementById('integra√ß√£oStatusIcon');
+                    const statusCard = document.getElementById('integraÁ„oStatusCard');
+                    const statusTÌtulo = document.getElementById('integraÁ„oStatusTÌtulo');
+                    const statusDesc = document.getElementById('integraÁ„oStatusDesc');
+                    const statusIcon = document.getElementById('integraÁ„oStatusIcon');
                     if (i.status === 'conectado') {
-                        statusCard.className = 'integra√ß√£o-status-card status-conectado';
+                        statusCard.className = 'integraÁ„o-status-card status-conectado';
                         statusIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
-                        statusT√≠tulo.textContent = 'Integra√ß√£o ativa';
-                        statusDesc.textContent = `√öltima sincroniza√ß√£o: ${i.ultima_sync ? new Date(i.ultima_sync).toLocaleString('pt-BR') : 'Nunca'}`;
+                        statusTÌtulo.textContent = 'IntegraÁ„o ativa';
+                        statusDesc.textContent = `⁄ltima sincronizaÁ„o: ${i.ultima_sync ? new Date(i.ultima_sync).toLocaleString('pt-BR') : 'Nunca'}`;
                     }
 
                     // Webhook URL
                     document.getElementById('webhookUrl').textContent = 
                         `${window.location.origin}/api/financeiro/webhook/banco/${bancoId}`;
 
-                    // Habilitar bot√£o de teste
+                    // Habilitar bot„o de teste
                     const btn = document.getElementById('btnTestarIntegracao');
                     if (btn) btn.disabled = false;
                 }
             } catch (err) {
-                console.error('Erro ao carregar integra√ß√£o:', err);
+                console.error('Erro ao carregar integraÁ„o:', err);
             }
         }
 
-        // Coletar dados de integra√ß√£o para salvar junto com o banco
+        // Coletar dados de integraÁ„o para salvar junto com o banco
         function coletarDadosIntegracao() {
             return {
-                provedor: document.getElementById('integra√ß√£oProvedor').value,
-                ambiente: document.getElementById('integra√ß√£oAmbiente').value,
-                client_id: document.getElementById('integra√ß√£oClientId').value.trim(),
-                client_secret: document.getElementById('integra√ß√£oClientSecret').value.trim(),
-                url_base: document.getElementById('integra√ß√£oUrlBase').value.trim(),
-                url_auth: document.getElementById('integra√ß√£oUrlAuth').value.trim(),
-                sync_automatico: document.getElementById('integra√ß√£oSyncAuto').checked,
-                webhook_ativo: document.getElementById('integra√ß√£oWebhookAtivo').checked,
+                provedor: document.getElementById('integraÁ„oProvedor').value,
+                ambiente: document.getElementById('integraÁ„oAmbiente').value,
+                client_id: document.getElementById('integraÁ„oClientId').value.trim(),
+                client_secret: document.getElementById('integraÁ„oClientSecret').value.trim(),
+                url_base: document.getElementById('integraÁ„oUrlBase').value.trim(),
+                url_auth: document.getElementById('integraÁ„oUrlAuth').value.trim(),
+                sync_automatico: document.getElementById('integraÁ„oSyncAuto').checked,
+                webhook_ativo: document.getElementById('integraÁ„oWebhookAtivo').checked,
                 escopos: JSON.stringify({
                     extrato: document.getElementById('escopoExtrato').checked,
                     saldo: document.getElementById('escopoSaldo').checked,
@@ -4368,8 +4369,8 @@
                 boleto_carteira: document.getElementById('boletoCarteira').value,
                 boleto_convenio: document.getElementById('boletoConvenio').value,
                 boleto_variacao: document.getElementById('boletoVariacao').value,
-                boleto_nosso_n√∫mero_inicio: document.getElementById('boletoNossoNumeroInicio').value,
-                boleto_nosso_n√∫mero_proximo: document.getElementById('boletoNossoNumeroProximo').value,
+                boleto_nosso_n˙mero_inicio: document.getElementById('boletoNossoNumeroInicio').value,
+                boleto_nosso_n˙mero_proximo: document.getElementById('boletoNossoNumeroProximo').value,
                 boleto_instrucao1: document.getElementById('boletoInstrucao1').value,
                 boleto_instrucao2: document.getElementById('boletoInstrucao2').value,
                 boleto_multa: document.getElementById('boletoMulta').value,
@@ -4386,10 +4387,10 @@
             };
         }
 
-        // Limpar campos de integra√ß√£o ao fechar modal
+        // Limpar campos de integraÁ„o ao fechar modal
         function limparIntegracao() {
-            ['integra√ß√£oProvedor', 'integra√ß√£oClientId', 'integra√ß√£oClientSecret', 
-             'integra√ß√£oUrlBase', 'integra√ß√£oUrlAuth', 'integra√ß√£oCertSenha',
+            ['integraÁ„oProvedor', 'integraÁ„oClientId', 'integraÁ„oClientSecret', 
+             'integraÁ„oUrlBase', 'integraÁ„oUrlAuth', 'integraÁ„oCertSenha',
              'boletoCarteira', 'boletoConvenio', 'boletoVariacao',
              'boletoNossoNumeroInicio', 'boletoNossoNumeroProximo',
              'boletoInstrucao1', 'boletoInstrucao2', 'boletoMulta', 'boletoJuros', 'boletoProtesto',
@@ -4398,11 +4399,11 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
-            document.getElementById('integra√ß√£oAmbiente').value = 'sandbox';
+            document.getElementById('integraÁ„oAmbiente').value = 'sandbox';
             document.getElementById('cnabLayout').value = '';
             document.getElementById('cnabServico').value = 'cobranca';
-            document.getElementById('integra√ß√£oSyncAuto').checked = false;
-            document.getElementById('integra√ß√£oWebhookAtivo').checked = false;
+            document.getElementById('integraÁ„oSyncAuto').checked = false;
+            document.getElementById('integraÁ„oWebhookAtivo').checked = false;
             document.getElementById('cnabAutoProcessar').checked = false;
             document.getElementById('boletoRegistrado').checked = true;
             document.getElementById('boletoPixQrcode').checked = false;
@@ -4418,11 +4419,11 @@
             document.getElementById('escopoCNAB').checked = false;
 
             // Reset status card
-            const statusCard = document.getElementById('integra√ß√£oStatusCard');
-            if (statusCard) statusCard.className = 'integra√ß√£o-status-card';
-            document.getElementById('integra√ß√£oStatusIcon').innerHTML = '<i class="fas fa-plug"></i>';
-            document.getElementById('integra√ß√£oStatusT√≠tulo').textContent = 'Integra√ß√£o n√£o configurada';
-            document.getElementById('integra√ß√£oStatusDesc').textContent = 'Configure as credenciais da API banc√°ria para habilitar a integra√ß√£o autom√°tica';
+            const statusCard = document.getElementById('integraÁ„oStatusCard');
+            if (statusCard) statusCard.className = 'integraÁ„o-status-card';
+            document.getElementById('integraÁ„oStatusIcon').innerHTML = '<i class="fas fa-plug"></i>';
+            document.getElementById('integraÁ„oStatusTÌtulo').textContent = 'IntegraÁ„o n„o configurada';
+            document.getElementById('integraÁ„oStatusDesc').textContent = 'Configure as credenciais da API banc·ria para habilitar a integraÁ„o autom·tica';
 
             // Reset cert upload
             document.getElementById('certFileName').textContent = 'Clique para enviar o certificado digital';
@@ -4496,7 +4497,7 @@
 
                 const data = await resp.json();
                 if (data.success) {
-                    showToast(`Retorno processado! ${data.processados || 0} t√≠tulos atualizados`, 'success');
+                    showToast(`Retorno processado! ${data.processados || 0} tÌtulos atualizados`, 'success');
                 } else {
                     throw new Error(data.error || 'Erro ao processar retorno');
                 }
@@ -4511,19 +4512,19 @@
     <script src="financeiro.js"></script>
     <script src="public/js/financeiro-user-loader.js?v=20251222"></script>
 
-    <!-- Sistema de Notifica√ß√µes Global -->
+    <!-- Sistema de NotificaÁıes Global -->
     <script src="/js/notifications-manager.js?v=20251223"></script>
     <script src="/js/notification-button.js?v=20251223"></script>
 
     <!-- Sistema de Chat e Suporte -->
     <script src="/js/chat-suporte-widgets.js?v=20260103"></script>
 
-    <!-- Sistema de MonitOr√ßamento de Conexo -->
+    <!-- Sistema de MonitOrÁamento de Conexo -->
     <script src="../_shared/connection-monitor.js?v=20251223"></script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/modal-fix-global.js?v=20260110"></script>
 
-    <!-- Sistema de Importa√ß√£o XLSX -->
+    <!-- Sistema de ImportaÁ„o XLSX -->
     <script src="public/js/importar-xlsx.js?v=20260131"></script>
     <script src="public/js/financeiro-shared.js?v=20260217"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>

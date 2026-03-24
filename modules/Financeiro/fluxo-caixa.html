@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -14,7 +14,8 @@
     <title>Aluforce: Fluxo de Caixa</title>
 
     <!-- Autenticacao -->
-    <script src="/js/auth-unified.js?v=20260211" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -41,7 +42,7 @@
         --info: #3b82f6;
     }
 
-        /* Bot√£o Importar - usa classe padr√£o .btn.btn-success do fin-components.css */
+        /* Bot„o Importar - usa classe padr„o .btn.btn-success do fin-components.css */
 /* SIDEBAR + HEADER - estilos definidos em fin-layout.css */
 .user-avatar img.visible { display: block; }
         .user-avatar .user-initial { display: block; }
@@ -166,13 +167,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Or√ßamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÁamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia√ß√£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÁ„o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat√≥rios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÛrios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -184,7 +185,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configura√ß√µes" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÁıes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -212,13 +213,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica√ß√µes" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="NotificaÁıes" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notifica√ß√µes</h3>
+                                <h3><i class="fas fa-bell"></i> NotificaÁıes</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -231,15 +232,15 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notifica√ß√£o</p>
+                                    <p>Nenhuma notificaÁ„o</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu√°rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu·rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usu√°rio" id="user-photo" style="display:none">
+                            <img alt="Foto do usu·rio" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -255,7 +256,7 @@
                 <div class="page-header">
                     <div class="period-selector">
                         <button class="period-btn" onclick="setPeriod('semana', this)">Semana</button>
-                        <button class="period-btn active" onclick="setPeriod('mes', this)">M√™s</button>
+                        <button class="period-btn active" onclick="setPeriod('mes', this)">MÍs</button>
                         <button class="period-btn" onclick="setPeriod('trimestre', this)">Trimestre</button>
                         <button class="period-btn" onclick="setPeriod('ano', this)">Ano</button>
                     </div>
@@ -266,22 +267,22 @@
                     <div class="stat-card entradas">
                         <h3><i class="fas fa-arrow-down green"></i> Total de Entradas</h3>
                         <div class="value green" id="total-entradas">R$ 0,00</div>
-                        <div class="change up" id="change-entradas"><i class="fas fa-arrow-up"></i> 0% vs per√≠odo anterior</div>
+                        <div class="change up" id="change-entradas"><i class="fas fa-arrow-up"></i> 0% vs perÌodo anterior</div>
                     </div>
                     <div class="stat-card saidas">
-                        <h3><i class="fas fa-arrow-up red"></i> Total de Sa√≠das</h3>
+                        <h3><i class="fas fa-arrow-up red"></i> Total de SaÌdas</h3>
                         <div class="value red" id="total-saidas">R$ 0,00</div>
-                        <div class="change down" id="change-saidas"><i class="fas fa-arrow-up"></i> 0% vs per√≠odo anterior</div>
+                        <div class="change down" id="change-saidas"><i class="fas fa-arrow-up"></i> 0% vs perÌodo anterior</div>
                     </div>
                     <div class="stat-card saldo">
-                        <h3><i class="fas fa-wallet blue"></i> Saldo do Per√≠odo</h3>
-                        <div class="value blue" id="saldo-per√≠odo">R$ 0,00</div>
-                        <div class="change up" id="change-saldo"><i class="fas fa-arrow-up"></i> 0% vs per√≠odo anterior</div>
+                        <h3><i class="fas fa-wallet blue"></i> Saldo do PerÌodo</h3>
+                        <div class="value blue" id="saldo-perÌodo">R$ 0,00</div>
+                        <div class="change up" id="change-saldo"><i class="fas fa-arrow-up"></i> 0% vs perÌodo anterior</div>
                     </div>
                     <div class="stat-card projecao">
-                        <h3><i class="fas fa-chart-line purple"></i> Proje√ß√£o 30 dias</h3>
+                        <h3><i class="fas fa-chart-line purple"></i> ProjeÁ„o 30 dias</h3>
                         <div class="value purple" id="projecao-30d">R$ 0,00</div>
-                        <div class="change" id="change-projecao">Baseado nas previs√µes</div>
+                        <div class="change" id="change-projecao">Baseado nas previsıes</div>
                     </div>
                 </div>
 
@@ -289,7 +290,7 @@
                 <div class="chart-grid">
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-chart-bar"></i> Movimenta√ß√£o Di√°ria</h3>
+                            <h3><i class="fas fa-chart-bar"></i> MovimentaÁ„o Di·ria</h3>
                             <div class="page-actions">
                                 <button class="btn btn-secondary" onclick="exportarGrafico()"><i class="fas fa-download"></i> Exportar</button>
                             </div>
@@ -303,7 +304,7 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-list"></i> Pr√≥ximas Movimenta√ß√µes</h3>
+                            <h3><i class="fas fa-list"></i> PrÛximas MovimentaÁıes</h3>
                         </div>
                         <div class="card-body" style="padding: 0 24px;">
                             <div id="lista-movimentacoes">
@@ -331,10 +332,10 @@
                             <thead>
                                 <tr>
                                     <th>Data</th>
-                                    <th>Descri√ß√£o</th>
+                                    <th>DescriÁ„o</th>
                                     <th>Categoria</th>
                                     <th>Entradas</th>
-                                    <th>Sa√≠das</th>
+                                    <th>SaÌdas</th>
                                     <th>Saldo Dia</th>
                                     <th>Saldo Acumulado</th>
                                 </tr>
@@ -362,7 +363,7 @@
         // VARIAVEIS GLOBAIS
         // ========================================
         let chartFluxo = null;
-        let per√≠odoAtual = 'mes';
+        let perÌodoAtual = 'mes';
         let dadosFluxo = { entradas: [], saidas: [] };
 
         // ========================================
@@ -436,9 +437,9 @@
                 // Atualizar KPIs
                 document.getElementById('total-entradas').textContent = formatarMoeda(totalEntradas);
                 document.getElementById('total-saidas').textContent = formatarMoeda(totalSaidas);
-                document.getElementById('saldo-per√≠odo').textContent = formatarMoeda(saldo);
+                document.getElementById('saldo-perÌodo').textContent = formatarMoeda(saldo);
 
-                // Proje√ß√£o baseada em m√©dia dos √∫ltimos 30 dias
+                // ProjeÁ„o baseada em mÈdia dos ˙ltimos 30 dias
                 const hoje = new Date();
                 const limite30d = new Date(hoje);
                 limite30d.setDate(limite30d.getDate() - 30);
@@ -455,7 +456,7 @@
                 document.getElementById('change-saidas').innerHTML = '<i class="fas fa-file-invoice-dollar"></i> ' + saiCount + ' conta' + (saiCount !== 1 ? 's' : '') + ' a pagar';
                 const margem = totalEntradas > 0 ? ((saldo / totalEntradas) * 100).toFixed(1) : '0.0';
                 document.getElementById('change-saldo').innerHTML = '<i class="fas fa-percentage"></i> Margem: ' + margem + '% sobre entradas';
-                document.getElementById('change-projecao').innerHTML = '<i class="fas fa-calculator"></i> Baseado nos √∫ltimos 30 dias';
+                document.getElementById('change-projecao').innerHTML = '<i class="fas fa-calculator"></i> Baseado nos ˙ltimos 30 dias';
 
                 // Armazenar dados globalmente para exportacao
                 dadosFluxo.entradas = contasReceber;
@@ -513,25 +514,25 @@
                 return;
             }
 
-            // Filtrar pelo per√≠odo selecionado
+            // Filtrar pelo perÌodo selecionado
             const hoje = new Date();
             const diasMap = { semana: 7, mes: 30, trimestre: 90, ano: 365 };
-            const dias = diasMap[per√≠odoAtual] || 30;
+            const dias = diasMap[perÌodoAtual] || 30;
             const limiteDate = new Date(hoje);
             limiteDate.setDate(limiteDate.getDate() - dias);
             const limiteStr = normDate(limiteDate);
 
             let datasVisiveis = todasDatas.filter(d => d >= limiteStr);
 
-            // Fallback: se n√£o h√° dados no per√≠odo, mostra os mais recentes
+            // Fallback: se n„o h· dados no perÌodo, mostra os mais recentes
             if (datasVisiveis.length === 0) {
                 datasVisiveis = todasDatas.slice(-20);
             }
 
-            // Agregar por m√™s se ano, por semana se trimestre, sen√£o por dia
+            // Agregar por mÍs se ano, por semana se trimestre, sen„o por dia
             let labels, dataEnt, dataSai;
 
-            if (per√≠odoAtual === 'ano' && datasVisiveis.length > 31) {
+            if (perÌodoAtual === 'ano' && datasVisiveis.length > 31) {
                 const porMes = {};
                 datasVisiveis.forEach(d => {
                     const mesKey = d.substring(0, 7);
@@ -543,7 +544,7 @@
                 labels = meses.map(m => { const [y,mo] = m.split('-'); return new Date(parseInt(y), parseInt(mo)-1, 1).toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }); });
                 dataEnt = meses.map(m => porMes[m].ent);
                 dataSai = meses.map(m => porMes[m].sai);
-            } else if (per√≠odoAtual === 'trimestre' && datasVisiveis.length > 20) {
+            } else if (perÌodoAtual === 'trimestre' && datasVisiveis.length > 20) {
                 const porSemana = {};
                 datasVisiveis.forEach(d => {
                     const dt = new Date(d + 'T12:00:00');
@@ -579,7 +580,7 @@
                             borderSkipped: false
                         },
                         {
-                            label: 'Sa√≠das',
+                            label: 'SaÌdas',
                             data: dataSai,
                             backgroundColor: 'rgba(220, 38, 38, 0.75)',
                             borderRadius: 4,
@@ -643,13 +644,13 @@
             hoje.setHours(0, 0, 0, 0);
 
             // Status considerados como pagos/quitados
-            const statusPagos = ['pago', 'recebido', 'liquidado', 'baixado', 'quitado', 'concluido', 'conclu√≠do'];
+            const statusPagos = ['pago', 'recebido', 'liquidado', 'baixado', 'quitado', 'concluido', 'concluÌdo'];
             const isPendente = (item) => {
                 if (!item.status) return true;
                 return !statusPagos.includes(item.status.toLowerCase().trim());
             };
 
-            // Buscar vencidos (at√© 30 dias atr√°s) + pr√≥ximos (14 dias √† frente)
+            // Buscar vencidos (atÈ 30 dias atr·s) + prÛximos (14 dias ‡ frente)
             const filtrar = (arr, tipo) => arr.filter(item => {
                 if (!item.data_vencimento) return false;
                 const venc = new Date(String(item.data_vencimento).slice(0,10) + 'T00:00:00');
@@ -668,7 +669,7 @@
                     <div class="empty-state" style="padding: 40px;">
                         <i class="fas fa-calendar-check"></i>
                         <h4>Tudo em dia!</h4>
-                        <p>Nenhuma movimenta√ß√£o pendente</p>
+                        <p>Nenhuma movimentaÁ„o pendente</p>
                     </div>
                 `;
                 return;
@@ -680,13 +681,13 @@
                 const diff = Math.ceil((venc - hoje) / (1000 * 60 * 60 * 24));
                 let descVenc, descStyle = '';
                 if (diff < 0) {
-                    descVenc = 'Vencido h√° ' + Math.abs(diff) + ' dia' + (Math.abs(diff) > 1 ? 's' : '');
+                    descVenc = 'Vencido h· ' + Math.abs(diff) + ' dia' + (Math.abs(diff) > 1 ? 's' : '');
                     descStyle = 'style="color:#dc2626;font-weight:600"';
                 } else if (diff === 0) {
                     descVenc = 'Vence hoje';
                     descStyle = 'style="color:#f59e0b;font-weight:600"';
                 } else if (diff === 1) {
-                    descVenc = 'Vence amanh√£';
+                    descVenc = 'Vence amanh„';
                 } else {
                     descVenc = 'Vence em ' + diff + ' dias';
                 }
@@ -698,7 +699,7 @@
                                 <i class="fas fa-arrow-${m.tipo === 'entrada' ? 'down' : 'up'}"></i>
                             </div>
                             <div>
-                                <div class="list-item-title">${m.descri√ß√£o || m.cliente || m.fornecedor || 'Sem descri√ß√£o'}</div>
+                                <div class="list-item-title">${m.descriÁ„o || m.cliente || m.fornecedor || 'Sem descriÁ„o'}</div>
                                 <div class="list-item-desc" ${descStyle}>${descVenc}</div>
                             </div>
                         </div>
@@ -726,7 +727,7 @@
                     <tr>
                         <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
                             <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
-                            Nenhuma movimenta√ß√£o encontrada
+                            Nenhuma movimentaÁ„o encontrada
                         </td>
                     </tr>
                 `;
@@ -742,7 +743,7 @@
                 return `
                     <tr>
                         <td class="data">${formatarData(m.data)}</td>
-                        <td>${m.descri√ß√£o || m.cliente || m.fornecedor || '-'}</td>
+                        <td>${m.descriÁ„o || m.cliente || m.fornecedor || '-'}</td>
                         <td>${m.categoria || '-'}</td>
                         <td class="valor ${m.tipo === 'entrada' ? 'entrada' : ''}">${m.tipo === 'entrada' ? formatarMoeda(valor) : '-'}</td>
                         <td class="valor ${m.tipo === 'saida' ? 'saida' : ''}">${m.tipo === 'saida' ? formatarMoeda(valor) : '-'}</td>
@@ -756,8 +757,8 @@
         // ========================================
         // PERIODO
         // ========================================
-        function setPeriod(per√≠odo, btnEl) {
-            per√≠odoAtual = per√≠odo;
+        function setPeriod(perÌodo, btnEl) {
+            perÌodoAtual = perÌodo;
             document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
             if (btnEl) btnEl.classList.add('active');
             carregarDados();
@@ -788,14 +789,14 @@
             const movimentacoes = [
                 ...entradas.map(e => ({
                     data: e.data_vencimento,
-                    descri√ß√£o: e.descri√ß√£o || e.cliente || '-',
+                    descriÁ„o: e.descriÁ„o || e.cliente || '-',
                     categoria: e.categoria || '-',
                     tipo: 'Entrada',
                     valor: parseFloat(e.valor) || 0
                 })),
                 ...saidas.map(s => ({
                     data: s.data_vencimento,
-                    descri√ß√£o: s.descri√ß√£o || s.fornecedor || '-',
+                    descriÁ„o: s.descriÁ„o || s.fornecedor || '-',
                     categoria: s.categoria || '-',
                     tipo: 'Sa\u00edda',
                     valor: parseFloat(s.valor) || 0
@@ -814,7 +815,7 @@
                 saldoAcumulado += saldoDia;
                 linhas.push([
                     formatarData(m.data),
-                    '"' + m.descri√ß√£o.replace(/"/g, '""') + '"',
+                    '"' + m.descriÁ„o.replace(/"/g, '""') + '"',
                     '"' + m.categoria.replace(/"/g, '""') + '"',
                     m.tipo,
                     m.valor.toFixed(2).replace('.', ',')
@@ -851,8 +852,8 @@
 
             // Combinar e ordenar
             const movimentacoes = [
-                ...entradas.map(e => ({ data: e.data_vencimento, descri√ß√£o: e.descri√ß√£o || e.cliente || '-', categoria: e.categoria || '-', tipo: 'entrada', valor: parseFloat(e.valor) || 0 })),
-                ...saidas.map(s => ({ data: s.data_vencimento, descri√ß√£o: s.descri√ß√£o || s.fornecedor || '-', categoria: s.categoria || '-', tipo: 'saida', valor: parseFloat(s.valor) || 0 }))
+                ...entradas.map(e => ({ data: e.data_vencimento, descriÁ„o: e.descriÁ„o || e.cliente || '-', categoria: e.categoria || '-', tipo: 'entrada', valor: parseFloat(e.valor) || 0 })),
+                ...saidas.map(s => ({ data: s.data_vencimento, descriÁ„o: s.descriÁ„o || s.fornecedor || '-', categoria: s.categoria || '-', tipo: 'saida', valor: parseFloat(s.valor) || 0 }))
             ].sort((a, b) => new Date(a.data) - new Date(b.data));
 
             const totalEnt = entradas.reduce((s, e) => s + (parseFloat(e.valor) || 0), 0);
@@ -865,7 +866,7 @@
                 saldoAcumulado += saldoDia;
                 return `<tr>
                     <td>${formatarData(m.data)}</td>
-                    <td>${m.descri√ß√£o}</td>
+                    <td>${m.descriÁ„o}</td>
                     <td>${m.categoria}</td>
                     <td style="color:${m.tipo === 'entrada' ? '#16a34a' : '#999'}">${m.tipo === 'entrada' ? formatarMoeda(m.valor) : '-'}</td>
                     <td style="color:${m.tipo === 'saida' ? '#dc2626' : '#999'}">${m.tipo === 'saida' ? formatarMoeda(m.valor) : '-'}</td>
@@ -903,7 +904,7 @@
 </head>
 <body>
     <h1>&#128202; Fluxo de Caixa</h1>
-    <div class="subtitle">Gerado em ${new Date().toLocaleDateString('pt-BR')} \u00e0s ${new Date().toLocaleTimeString('pt-BR')} | Per\u00edodo: ${per√≠odoAtual}</div>
+    <div class="subtitle">Gerado em ${new Date().toLocaleDateString('pt-BR')} \u00e0s ${new Date().toLocaleTimeString('pt-BR')} | Per\u00edodo: ${perÌodoAtual}</div>
     <div class="kpis">
         <div class="kpi entradas"><div class="label">Total Entradas</div><div class="value">${formatarMoeda(totalEnt)}</div></div>
         <div class="kpi saidas"><div class="label">Total Sa\u00eddas</div><div class="value">${formatarMoeda(totalSai)}</div></div>
@@ -939,8 +940,8 @@
                 });
                 if (response.ok) {
                     const user = await response.json();
-                    const userName = user.apelido || user.nome || 'Usu√°rio';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu√°rio');
+                    const userName = user.apelido || user.nome || 'Usu·rio';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu·rio');
 
                     document.getElementById('user-name').textContent = primeiroNome;
 
@@ -972,7 +973,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usu√°rio:', error);
+                console.error('Erro ao carregar usu·rio:', error);
             }
         }
 
@@ -987,7 +988,7 @@
 
     <script src="/js/chat-suporte-widgets.js?v=20251217"></script>
 
-    <!-- Sistema de Importa√ß√£o XLSX -->
+    <!-- Sistema de ImportaÁ„o XLSX -->
     <script src="public/js/importar-xlsx.js?v=20260131"></script>
     <script src="public/js/financeiro-shared.js?v=20260217"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>

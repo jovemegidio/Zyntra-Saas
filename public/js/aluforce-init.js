@@ -54,48 +54,66 @@
     }
 
     // ============================================================
-    // 3. AUTENTICAÇÍO
+    // 3. AUTENTICAÇÃO
+    // Usa dados já validados pelo auth-unified.js (via sessionStorage).
+    // Evita race condition e dupla chamada a /api/me.
     // ============================================================
-    
+
     async function checkAuthentication() {
-        // IMPORTANTE: Sempre buscar dados frescos do servidor para garantir
-        // que os dados exibidos são do usuário correto (evitar dados de outro usuário)
-        console.log('⏳ Verificando autenticação no servidor...');
+        // 1. Usar dados que o auth-unified.js já validou e salvou nesta aba
         try {
-            const response = await fetch('/api/me', { 
-                credentials: 'include',
-                cache: 'no-cache'
-            });
-            
-            if (!response.ok) {
-                throw new Error('Não autenticado');
+            const tabData = sessionStorage.getItem('tabUserData');
+            if (tabData) {
+                const user = JSON.parse(tabData);
+                if (user && user.id && user.email) {
+                    console.log('✅ Usuário autenticado (sessionStorage):', user.nome);
+                    setCachedUser(user);
+                    return user;
+                }
             }
-            
-            const user = await response.json();
-            
-            // Verificar se dados do cache são do mesmo usuário
-            const cachedUser = getCachedUser();
-            if (cachedUser && cachedUser.email !== user.email) {
-                console.log('⚠️ Cache tem dados de outro usuário - limpando...');
-                localStorage.removeItem('userData');
-                localStorage.removeItem('userData_timestamp');
-            }
-            
-            // Salvar dados frescos
-            setCachedUser(user);
-            console.log('✅ Autenticado como:', user.nome, '- Email:', user.email);
-            return user;
-        } catch (error) {
-            console.error('❌ Erro de autenticação:', error);
-            // Limpar dados
-            localStorage.removeItem('userData');
-            localStorage.removeItem('userData_timestamp');
-            localStorage.removeItem('authToken');
-            sessionStorage.clear();
-            // Redirecionar para login
-            window.location.href = '/login.html';
-            throw error;
+        } catch (e) {
+            console.warn('[INIT] Erro ao ler sessionStorage:', e);
         }
+
+        // 2. Fallback: aguardar evento authSuccess do auth-unified (até 3s)
+        const waitForAuth = () => new Promise((resolve) => {
+            const handler = (e) => {
+                window.removeEventListener('authSuccess', handler);
+                resolve(e.detail && e.detail.user);
+            };
+            window.addEventListener('authSuccess', handler);
+            // Timeout de segurança
+            setTimeout(() => {
+                window.removeEventListener('authSuccess', handler);
+                resolve(null);
+            }, 3000);
+        });
+
+        // Se AluforceAuth já está disponível, verificar diretamente
+        if (window.AluforceAuth && typeof window.AluforceAuth.getUserData === 'function') {
+            try {
+                const user = await window.AluforceAuth.getUserData();
+                if (user) {
+                    console.log('✅ Usuário autenticado (AluforceAuth):', user.nome);
+                    setCachedUser(user);
+                    return user;
+                }
+            } catch (e) {
+                console.warn('[INIT] AluforceAuth.getUserData falhou:', e);
+            }
+        }
+
+        // Aguardar evento authSuccess
+        const user = await waitForAuth();
+        if (user) {
+            console.log('✅ Usuário autenticado (authSuccess event):', user.nome);
+            setCachedUser(user);
+            return user;
+        }
+
+        // Sem dados — o auth-unified.js já vai redirecionar se necessário
+        console.warn('[INIT] Nenhum dado de usuário disponível — auth-unified irá redirecionar.');
+        throw new Error('Sem dados de autenticação');
     }
 
     // ============================================================

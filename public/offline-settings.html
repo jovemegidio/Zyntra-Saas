@@ -1,10 +1,10 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1a2744">
-    <title>Aluforce: Configura√ß√µes Offline</title>
+    <title>Aluforce: ConfiguraÁıes Offline</title>
     
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -387,7 +387,7 @@
             </div>
         </div>
         
-        <!-- Status de Conex√£o -->
+        <!-- Status de Conex„o -->
         <div class="status-card">
             <div class="status-header">
                 <div class="status-icon" id="connection-status-icon">
@@ -408,7 +408,7 @@
             </div>
         </div>
         
-        <!-- Informa√ß√µes -->
+        <!-- InformaÁıes -->
         <div class="info-cards">
             <div class="info-card">
                 <div class="label">Assets em Cache</div>
@@ -420,8 +420,8 @@
             </div>
         </div>
         
-        <!-- A√ß√µes -->
-        <div class="section-title">A√ß√µes</div>
+        <!-- AÁıes -->
+        <div class="section-title">AÁıes</div>
         
         <div class="action-card" onclick="downloadAll()">
             <div class="action-icon blue">
@@ -429,7 +429,7 @@
             </div>
             <div class="action-content">
                 <h3>Baixar Todos os Dados</h3>
-                <p>Baixa p√°ginas, imagens e dados para uso offline</p>
+                <p>Baixa p·ginas, imagens e dados para uso offline</p>
             </div>
             <i class="fas fa-chevron-right action-arrow"></i>
         </div>
@@ -450,8 +450,8 @@
                 <i class="fas fa-clock"></i>
             </div>
             <div class="action-content">
-                <h3>Altera√ß√µes Pendentes</h3>
-                <p>Mudan√ßas aguardando sincroniza√ß√£o</p>
+                <h3>AlteraÁıes Pendentes</h3>
+                <p>MudanÁas aguardando sincronizaÁ„o</p>
             </div>
             <span class="pending-badge" id="pending-badge" style="display: none;">
                 <i class="fas fa-exclamation-circle"></i>
@@ -471,7 +471,7 @@
         </div>
         
         <div class="last-sync" id="last-sync">
-            √öltima sincroniza√ß√£o: --
+            ⁄ltima sincronizaÁ„o: --
         </div>
     </div>
     
@@ -492,19 +492,19 @@
     
     <script src="/js/offline-sync-manager.js"></script>
     <script>
-        // Inicializa√ß√£o
+        // InicializaÁ„o
         document.addEventListener('DOMContentLoaded', async () => {
             await updateUI();
             
             // Atualiza a cada 5 segundos
             setInterval(updateUI, 5000);
             
-            // Listener de conex√£o
+            // Listener de conex„o
             window.addEventListener('connectionChange', updateUI);
         });
         
         async function updateUI() {
-            // Status de conex√£o
+            // Status de conex„o
             const isOnline = navigator.onLine;
             const statusIcon = document.getElementById('connection-status-icon');
             const statusTitle = document.getElementById('connection-status-title');
@@ -514,7 +514,7 @@
                 statusIcon.className = 'status-icon online';
                 statusIcon.innerHTML = '<i class="fas fa-wifi"></i>';
                 statusTitle.textContent = 'Conectado';
-                statusText.textContent = 'Sincroniza√ß√£o ativa com o servidor';
+                statusText.textContent = 'SincronizaÁ„o ativa com o servidor';
             } else {
                 statusIcon.className = 'status-icon offline';
                 statusIcon.innerHTML = '<i class="fas fa-wifi-slash"></i>';
@@ -545,12 +545,12 @@
                 }
             }
             
-            // √öltima sincroniza√ß√£o
+            // ⁄ltima sincronizaÁ„o
             const lastSync = localStorage.getItem('lastDataSync');
             if (lastSync) {
                 const date = new Date(parseInt(lastSync));
                 document.getElementById('last-sync').textContent = 
-                    `√öltima sincroniza√ß√£o: ${date.toLocaleString('pt-BR')}`;
+                    `⁄ltima sincronizaÁ„o: ${date.toLocaleString('pt-BR')}`;
             }
         }
         
@@ -566,7 +566,7 @@
                 // Simula progresso inicial
                 fill.style.width = '10%';
                 percent.textContent = '10%';
-                text.textContent = 'Baixando p√°ginas...';
+                text.textContent = 'Baixando p·ginas...';
                 
                 if (window.OfflineSyncManager) {
                     // Download de assets
@@ -583,23 +583,23 @@
                     
                     fill.style.width = '100%';
                     percent.textContent = '100%';
-                    text.textContent = 'Download conclu√≠do!';
+                    text.textContent = 'Download concluÌdo!';
                     
                     setTimeout(() => {
                         modal.classList.remove('active');
                         updateUI();
-                        alert('‚úÖ Dados baixados com sucesso! Agora voc√™ pode usar o sistema offline.');
+                        alert('? Dados baixados com sucesso! Agora vocÍ pode usar o sistema offline.');
                     }, 1000);
                 }
             } catch (error) {
                 modal.classList.remove('active');
-                alert('‚ùå Erro ao baixar dados: ' + error.message);
+                alert('? Erro ao baixar dados: ' + error.message);
             }
         }
         
         async function syncNow() {
             if (!navigator.onLine) {
-                alert('‚ö†Ô∏è Voc√™ est√° offline. Conecte-se √† internet para sincronizar.');
+                alert('?? VocÍ est· offline. Conecte-se ‡ internet para sincronizar.');
                 return;
             }
             
@@ -607,7 +607,7 @@
                 await OfflineSyncManager.syncChanges();
                 await OfflineSyncManager.downloadData();
                 updateUI();
-                alert('‚úÖ Sincroniza√ß√£o conclu√≠da!');
+                alert('? SincronizaÁ„o concluÌda!');
             }
         }
         
@@ -617,19 +617,19 @@
                 const count = state.pendingChanges?.length || 0;
                 
                 if (count === 0) {
-                    alert('‚úÖ Nenhuma altera√ß√£o pendente.');
+                    alert('? Nenhuma alteraÁ„o pendente.');
                 } else {
-                    alert(`üìù ${count} altera√ß√£o(√µes) aguardando sincroniza√ß√£o.Conecte-se √† internet para enviar ao servidor.`);
+                    alert(`?? ${count} alteraÁ„o(ıes) aguardando sincronizaÁ„o.Conecte-se ‡ internet para enviar ao servidor.`);
                 }
             }
         }
         
         async function clearCache() {
-            if (confirm('‚ö†Ô∏è Isso remover√° todos os dados locais. Deseja continuar?')) {
+            if (confirm('?? Isso remover· todos os dados locais. Deseja continuar?')) {
                 if (window.OfflineSyncManager) {
                     await OfflineSyncManager.clearCache();
                     updateUI();
-                    alert('üóëÔ∏è Cache limpo com sucesso!');
+                    alert('??? Cache limpo com sucesso!');
                 }
             }
         }

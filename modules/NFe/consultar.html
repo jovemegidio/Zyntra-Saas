@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -16,8 +16,9 @@
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Consultar NFe</title>
 
-    <!-- Sistema de AutenticaÃ§Ã£o Unificado â€” DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260301" defer></script>
+    <!-- Sistema de Autenticação Unificado — DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,16 +31,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- Design System â€” Faturamento Layout -->
+    <!-- Design System — Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
 
-    <!-- Global Header & Sidebar â€” PadrÃ£o Institucional -->
+    <!-- Global Header & Sidebar — Padrão Institucional -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
 
-    <!-- Popup ConfirmaÃ§Ã£o -->
+    <!-- Popup Confirmação -->
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
     <!-- Anti-Copy Protection -->
@@ -63,13 +64,13 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn active" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="LogÃ­stica"><i class="fas fa-truck"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="InutilizaÃ§Ã£o"><i class="fas fa-ban"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -80,15 +81,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">â€”</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Consultar NFe</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="NotificaÃ§Ãµes" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -106,7 +107,7 @@
                                 <div class="page-icon"><i class="fas fa-search"></i></div>
                                 <div>
                                     <h1 class="page-title">Consultar NFe</h1>
-                                    <p class="page-subtitle">Pesquise e gerencie suas notas fiscais eletrÃ´nicas</p>
+                                    <p class="page-subtitle">Pesquise e gerencie suas notas fiscais eletrônicas</p>
                                 </div>
                             </div>
                             <div class="page-actions">
@@ -126,23 +127,23 @@
                         <div class="card-body">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>NÃºmero NFe</label>
+                                    <label>Número NFe</label>
                                     <input type="text" class="form-control" id="filtroNumero" placeholder="Ex: 000001234">
                                 </div>
                                 <div class="form-group">
-                                    <label>SÃ©rie</label>
+                                    <label>Série</label>
                                     <input type="text" class="form-control" id="filtroSerie" placeholder="Ex: 1">
                                 </div>
                                 <div class="form-group">
                                     <label>Chave de Acesso</label>
-                                    <input type="text" class="form-control" id="filtroChave" placeholder="44 dÃ­gitos">
+                                    <input type="text" class="form-control" id="filtroChave" placeholder="44 dígitos">
                                 </div>
                                 <div class="form-group">
                                     <label>Cliente</label>
                                     <input type="text" class="form-control" id="filtroCliente" placeholder="Nome ou CNPJ">
                                 </div>
                                 <div class="form-group">
-                                    <label>Data InÃ­cio</label>
+                                    <label>Data Início</label>
                                     <input type="date" class="form-control" id="filtroDataInicio">
                                 </div>
                                 <div class="form-group">
@@ -182,13 +183,13 @@
                                 <table class="data-table" id="nfesTable">
                                     <thead>
                                         <tr>
-                                            <th>NÃºmero</th>
-                                            <th>SÃ©rie</th>
+                                            <th>Número</th>
+                                            <th>Série</th>
                                             <th>Cliente</th>
                                             <th>Data/Hora</th>
                                             <th>Valor</th>
                                             <th>Status</th>
-                                            <th style="text-align:center;">AÃ§Ãµes</th>
+                                            <th style="text-align:center;">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="nfesTableBody">
@@ -211,7 +212,7 @@
     <!-- Alert Container -->
     <div id="alertContainer" style="position:fixed;top:20px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px;"></div>
 
-    <!-- â•â•â• Modal: Visualizar NFe â•â•â• -->
+    <!-- --- Modal: Visualizar NFe --- -->
     <div class="modal-overlay" id="modalVisualizarNFe">
         <div class="modal modal-lg" style="max-width:680px;">
             <div class="modal-header">
@@ -229,7 +230,7 @@
         </div>
     </div>
 
-    <!-- â•â•â• Modal: Enviar Email â•â•â• -->
+    <!-- --- Modal: Enviar Email --- -->
     <div class="modal-overlay" id="modalEnviarEmail">
         <div class="modal" style="max-width:520px;">
             <div class="modal-header">
@@ -247,12 +248,12 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Email do DestinatÃ¡rio *</label>
+                    <label>Email do Destinatário *</label>
                     <input type="email" class="form-control" id="emailDestinatario" placeholder="exemplo@email.com">
                 </div>
                 <div class="form-group">
                     <label>Assunto</label>
-                    <input type="text" class="form-control" id="emailAssunto" placeholder="NFe - Nota Fiscal EletrÃ´nica">
+                    <input type="text" class="form-control" id="emailAssunto" placeholder="NFe - Nota Fiscal Eletrônica">
                 </div>
                 <div class="form-group">
                     <label>Mensagem <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
@@ -293,13 +294,13 @@
             'renata':'RN','fabiano':'FB','fabiola':'FL'
         };
 
-        // == Carregar UsuÃ¡rio ==
+        // == Carregar Usuário ==
         function carregarUsuario() {
             fetch('/api/me', { credentials:'include' })
             .then(r => r.json())
             .then(user => {
                 const d = user.dados || user;
-                const nome = (d.nome || d.name || 'UsuÃ¡rio').split(' ')[0];
+                const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
                 document.getElementById('user-name').textContent = nome;
                 const h = new Date().getHours();
                 document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -342,7 +343,7 @@
             .catch(() => {
                 loading.style.display = 'none';
                 nfesCarregadas = [];
-                showAlert('Erro ao carregar NFe. Verifique sua conexÃ£o.', 'danger');
+                showAlert('Erro ao carregar NFe. Verifique sua conexão.', 'danger');
                 filtrarEExibir();
             });
         }
@@ -386,7 +387,7 @@
                 const stLabel = st.charAt(0).toUpperCase() + st.slice(1);
                 const chaveEsc = escapeHtml(nfe.chave||'');
                 return `<tr>
-                    <td><strong>${escapeHtml(nfe.nÃºmero||'-')}</strong></td>
+                    <td><strong>${escapeHtml(nfe.número||'-')}</strong></td>
                     <td>${escapeHtml(nfe.serie||'1')}</td>
                     <td>${escapeHtml(nfe.cliente||nfe.destinatario||'-')}</td>
                     <td>${escapeHtml(dt)}</td>
@@ -404,7 +405,7 @@
 
         // == Actions ==
         function baixarXML(chave) {
-            if (!chave) { showAlert('Chave de acesso nÃ£o disponÃ­vel', 'warning'); return; }
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
             fetch('/api/nfe/' + encodeURIComponent(chave) + '/xml', { credentials:'include' })
             .then(function(r) {
                 if (!r.ok) throw new Error('Erro ao baixar XML. Verifique se a NFe existe.');
@@ -464,7 +465,7 @@
         }
 
         function visualizarNFe(chave) {
-            if (!chave) { showAlert('Chave de acesso nÃ£o disponÃ­vel', 'warning'); return; }
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
             _currentModalChave = chave;
             var body = document.getElementById('nfeDetalhesBody');
             body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p>Carregando...</p></div>';
@@ -482,7 +483,7 @@
                 if (local) {
                     renderNFeDetalhes(local, chave);
                 } else {
-                    body.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:var(--warning);"></i><p>NÃ£o foi possÃ­vel carregar os detalhes desta NFe</p></div>';
+                    body.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:var(--warning);"></i><p>Não foi possível carregar os detalhes desta NFe</p></div>';
                 }
             });
         }
@@ -497,14 +498,14 @@
 
             document.getElementById('nfeDetalhesBody').innerHTML =
                 '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">' +
-                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">NÃºmero</label><p style="font-size:18px;font-weight:700;color:var(--primary-600);margin:0;">' + esc(nfe.numero || nfe.numero_nfe || '-') + '</p></div>' +
-                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">SÃ©rie</label><p style="font-size:18px;font-weight:700;color:var(--text-primary);margin:0;">' + esc(nfe.serie || '1') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Número</label><p style="font-size:18px;font-weight:700;color:var(--primary-600);margin:0;">' + esc(nfe.numero || nfe.numero_nfe || '-') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Série</label><p style="font-size:18px;font-weight:700;color:var(--text-primary);margin:0;">' + esc(nfe.serie || '1') + '</p></div>' +
                     '<div style="grid-column:1/-1;"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Chave de Acesso</label><p style="font-size:13px;font-weight:600;color:var(--text-primary);margin:0;font-family:monospace;word-break:break-all;background:var(--bg-secondary);padding:8px 12px;border-radius:var(--radius-md);border:1px solid var(--border-color);">' + esc(chave) + '</p></div>' +
-                    '<div style="grid-column:1/-1;"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Cliente / DestinatÃ¡rio</label><p style="font-size:15px;font-weight:600;color:var(--text-primary);margin:0;">' + esc(nfe.cliente || nfe.destinatario || nfe.dest_nome || '-') + '</p></div>' +
-                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Data de EmissÃ£o</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(dt) + '</p></div>' +
+                    '<div style="grid-column:1/-1;"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Cliente / Destinatário</label><p style="font-size:15px;font-weight:600;color:var(--text-primary);margin:0;">' + esc(nfe.cliente || nfe.destinatario || nfe.dest_nome || '-') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Data de Emissão</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(dt) + '</p></div>' +
                     '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Valor Total</label><p style="font-size:18px;font-weight:700;color:var(--success);margin:0;">' + valor + '</p></div>' +
                     '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Status</label><p style="margin:0;"><span class="badge ' + stClass + '">' + stLabel + '</span></p></div>' +
-                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Natureza da OperaÃ§Ã£o</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(nfe.natureza_operacao || nfe.nat_op || 'Venda de mercadoria') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Natureza da Operação</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(nfe.natureza_operacao || nfe.nat_op || 'Venda de mercadoria') + '</p></div>' +
                 '</div>';
         }
 
@@ -518,12 +519,12 @@
         }
 
         function enviarEmail(chave) {
-            if (!chave) { showAlert('Chave de acesso nÃ£o disponÃ­vel', 'warning'); return; }
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
             _currentModalChave = chave;
             var nfe = nfesCarregadas.find(function(n) { return n.chave === chave; });
             document.getElementById('emailNfeLabel').textContent = nfe ? (nfe.numero || chave.slice(-10)) : chave.slice(-10);
             document.getElementById('emailDestinatario').value = '';
-            document.getElementById('emailAssunto').value = 'NFe ' + (nfe ? nfe.numero : '') + ' - Nota Fiscal EletrÃ´nica';
+            document.getElementById('emailAssunto').value = 'NFe ' + (nfe ? nfe.numero : '') + ' - Nota Fiscal Eletrônica';
             document.getElementById('emailMensagem').value = '';
             document.getElementById('emailAnexarXML').checked = true;
             document.getElementById('emailAnexarDANFE').checked = true;
@@ -532,8 +533,8 @@
 
         async function confirmarEnvioEmail() {
             var email = document.getElementById('emailDestinatario').value.trim();
-            if (!email) { showAlert('Informe o email do destinatÃ¡rio', 'warning'); return; }
-            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('Email invÃ¡lido', 'warning'); return; }
+            if (!email) { showAlert('Informe o email do destinatário', 'warning'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('Email inválido', 'warning'); return; }
 
             try {
                 var response = await fetch('/api/nfe/' + encodeURIComponent(_currentModalChave) + '/email', {
@@ -574,9 +575,9 @@
 
         function exportarResultados() {
             if (nfesCarregadas.length === 0) { showAlert('Nenhum dado para exportar', 'warning'); return; }
-            let csv = 'NÃºmero;SÃ©rie;Cliente;Data;Valor;Status\n';
+            let csv = 'Número;Série;Cliente;Data;Valor;Status\n';
             nfesCarregadas.forEach(nfe => {
-                csv += `${nfe.nÃºmero||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
+                csv += `${nfe.número||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' });
             const a = document.createElement('a');
@@ -587,7 +588,7 @@
 
         // == Modal placeholder ==
         function abrirModalConfiguracoes() {
-            showAlert('ConfiguraÃ§Ãµes â€” Em desenvolvimento', 'info');
+            showAlert('Configurações — Em desenvolvimento', 'info');
         }
 
         // == Init ==
@@ -597,12 +598,12 @@
         });
     </script>
 
-    <!-- Sistema de NotificaÃ§Ãµes Global -->
+    <!-- Sistema de Notificações Global -->
     <script src="/js/notification-manager.js?v=20260301"></script>
     <script src="/_shared/connection-monitor.js?v=20260301"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
 
-    <!-- UtilitÃ¡rios Compartilhados -->
+    <!-- Utilitários Compartilhados -->
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 

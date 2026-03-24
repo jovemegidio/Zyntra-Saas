@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -14,7 +14,8 @@
     <title>Aluforce: Plano de Contas</title>
 
     <!-- Autenticacao -->
-    <script src="/js/auth-unified.js?v=20260211" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -103,50 +104,50 @@
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex !important; }
 
-        /* MODAL PADR√çO - Classes com encoding especial */
+        /* MODAL PADRÕO - Classes com encoding especial */
         -webkit-backdrop-filter: blur(8px); }
-        .modal-overlay-padr√£o { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
-        .modal-overlay-padr√£o.active { display: flex !important; }
-        .modal-padr√£o { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 650px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
-        .modal-header-padr√£o { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); padding: 0; color: white; position: relative; overflow: hidden; border-bottom: none; flex-shrink: 0; }
-        .modal-header-content-padr√£o { display: flex; align-items: center; gap: 16px; padding: 24px 28px; position: relative; z-index: 1; }
-        .modal-header-icon-padr√£o { width: 52px; height: 52px; min-width: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
-        .modal-header-icon-padr√£o i { color: white; font-size: 22px; }
-        .modal-header-text-padr√£o { flex: 1; }
-        .modal-header-text-padr√£o h2 { margin: 0; font-size: 20px; font-weight: 700; color: white; }
-        .modal-header-text-padr√£o p { margin: 4px 0 0; font-size: 14px; color: rgba(255,255,255,0.85); }
-        .modal-close-padr√£o { width: 40px; height: 40px; min-width: 40px; border: none; background: rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: auto; }
-        .modal-close-padr√£o:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
-        .modal-close-padr√£o i { color: white; font-size: 16px; }
-        .modal-progress-padr√£o { display: flex; gap: 8px; padding: 16px 28px; background: rgba(0,0,0,0.1); }
-        .modal-step-padr√£o { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.2s; }
-        .modal-step-padr√£o.active { background: rgba(255,255,255,0.25); }
-        .modal-step-number-padr√£o { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
-        .modal-step-padr√£o.active .modal-step-number-padr√£o { background: white; color: #0d9488; }
-        .modal-step-padr√£o span { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
-        .modal-body-padr√£o { padding: 28px; background: #f8fafc; overflow-y: auto; flex: 1; min-height: 0; }
-        .modal-footer-padr√£o { padding: 20px 28px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #ffffff; flex-shrink: 0; }
-        .modal-footer-left-padr√£o { display: flex; align-items: center; }
-        .modal-footer-left-padr√£o .footer-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; }
-        .modal-footer-left-padr√£o .footer-info i { color: #14b8a6; }
-        .modal-footer-right-padr√£o { display: flex; gap: 12px; margin-left: auto; }
-        .form-section-padr√£o { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
-        .form-section-padr√£o:last-child { margin-bottom: 0; }
-        .form-section-title-padr√£o { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
-        .form-section-title-padr√£o i { width: 40px; height: 40px; background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-        .form-section-title-padr√£o span { font-size: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; }
-        .section-badge-padr√£o { margin-left: auto; font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 600; background: #fee2e2; color: #dc2626; }
-        .form-grid-padr√£o { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-        .form-group-padr√£o { margin-bottom: 16px; }
-        .form-group-padr√£o:last-child { margin-bottom: 0; }
-        .form-group-padr√£o label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
-        .form-group-padr√£o label .required { color: #dc2626; }
-        .form-group-padr√£o input, .form-group-padr√£o select, .form-group-padr√£o textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; font-family: inherit; transition: all 0.2s; background: #ffffff; }
-        .form-group-padr√£o input:focus, .form-group-padr√£o select:focus, .form-group-padr√£o textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15); }
-        .btn-padr√£o-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
-        .btn-padr√£o-ghost:hover { background: #f3f4f6; }
-        .btn-padr√£o-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4); }
-        .btn-padr√£o-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5); }
+        .modal-overlay-padr„o { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
+        .modal-overlay-padr„o.active { display: flex !important; }
+        .modal-padr„o { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 650px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
+        .modal-header-padr„o { background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); padding: 0; color: white; position: relative; overflow: hidden; border-bottom: none; flex-shrink: 0; }
+        .modal-header-content-padr„o { display: flex; align-items: center; gap: 16px; padding: 24px 28px; position: relative; z-index: 1; }
+        .modal-header-icon-padr„o { width: 52px; height: 52px; min-width: 52px; background: rgba(255,255,255,0.2); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+        .modal-header-icon-padr„o i { color: white; font-size: 22px; }
+        .modal-header-text-padr„o { flex: 1; }
+        .modal-header-text-padr„o h2 { margin: 0; font-size: 20px; font-weight: 700; color: white; }
+        .modal-header-text-padr„o p { margin: 4px 0 0; font-size: 14px; color: rgba(255,255,255,0.85); }
+        .modal-close-padr„o { width: 40px; height: 40px; min-width: 40px; border: none; background: rgba(255,255,255,0.15); border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; margin-left: auto; }
+        .modal-close-padr„o:hover { background: rgba(255,255,255,0.25); transform: rotate(90deg); }
+        .modal-close-padr„o i { color: white; font-size: 16px; }
+        .modal-progress-padr„o { display: flex; gap: 8px; padding: 16px 28px; background: rgba(0,0,0,0.1); }
+        .modal-step-padr„o { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.1); border-radius: 10px; transition: all 0.2s; }
+        .modal-step-padr„o.active { background: rgba(255,255,255,0.25); }
+        .modal-step-number-padr„o { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; }
+        .modal-step-padr„o.active .modal-step-number-padr„o { background: white; color: #0d9488; }
+        .modal-step-padr„o span { font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.9); }
+        .modal-body-padr„o { padding: 28px; background: #f8fafc; overflow-y: auto; flex: 1; min-height: 0; }
+        .modal-footer-padr„o { padding: 20px 28px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; align-items: center; gap: 12px; background: #ffffff; flex-shrink: 0; }
+        .modal-footer-left-padr„o { display: flex; align-items: center; }
+        .modal-footer-left-padr„o .footer-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #9ca3af; }
+        .modal-footer-left-padr„o .footer-info i { color: #14b8a6; }
+        .modal-footer-right-padr„o { display: flex; gap: 12px; margin-left: auto; }
+        .form-section-padr„o { background: white; border-radius: 16px; padding: 24px; margin-bottom: 20px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .form-section-padr„o:last-child { margin-bottom: 0; }
+        .form-section-title-padr„o { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #f1f5f9; }
+        .form-section-title-padr„o i { width: 40px; height: 40px; background: linear-gradient(135deg, #14b8a6, #0d9488); color: white; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .form-section-title-padr„o span { font-size: 15px; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-badge-padr„o { margin-left: auto; font-size: 11px; padding: 5px 12px; border-radius: 20px; font-weight: 600; background: #fee2e2; color: #dc2626; }
+        .form-grid-padr„o { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+        .form-group-padr„o { margin-bottom: 16px; }
+        .form-group-padr„o:last-child { margin-bottom: 0; }
+        .form-group-padr„o label { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+        .form-group-padr„o label .required { color: #dc2626; }
+        .form-group-padr„o input, .form-group-padr„o select, .form-group-padr„o textarea { width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; font-family: inherit; transition: all 0.2s; background: #ffffff; }
+        .form-group-padr„o input:focus, .form-group-padr„o select:focus, .form-group-padr„o textarea:focus { outline: none; border-color: #14b8a6; box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.15); }
+        .btn-padr„o-ghost { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: 1px solid #e5e7eb; background: #ffffff; color: #6b7280; }
+        .btn-padr„o-ghost:hover { background: #f3f4f6; }
+        .btn-padr„o-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%); color: white; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.4); }
+        .btn-padr„o-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(20, 184, 166, 0.5); }
 
         .modal { display: flex !important; flex-direction: column !important; position: relative !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 600px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25) !important; animation: modalFadeIn 0.3s ease-out !important; inset: auto !important; height: auto !important; margin: 16px !important; }
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -317,7 +318,7 @@
             color: rgba(255,255,255,0.9);
         }
 
-        /* Bot√£o Fechar Profissional */
+        /* Bot„o Fechar Profissional */
         .modal-close-pro {
             width: 44px;
             height: 44px;
@@ -639,7 +640,7 @@
             gap: 12px;
         }
 
-        /* BOT√ïES PROFISSIONAIS (Verde Lima) */
+        /* BOT’ES PROFISSIONAIS (Verde Lima) */
         .btn-pro {
             padding: 14px 24px;
             border-radius: 12px;
@@ -720,13 +721,13 @@
                 <a href="plano-contas.html" class="sidebar-btn active" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Or√ßamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÁamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia√ß√£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÁ„o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat√≥rios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÛrios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -738,7 +739,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configura√ß√µes" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="ConfiguraÁıes" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -766,13 +767,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica√ß√µes" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="NotificaÁıes" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notifica√ß√µes</h3>
+                                <h3><i class="fas fa-bell"></i> NotificaÁıes</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -785,15 +786,15 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notifica√ß√£o</p>
+                                    <p>Nenhuma notificaÁ„o</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu√°rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu·rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usu√°rio" id="user-photo" style="display:none">
+                            <img alt="Foto do usu·rio" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -856,53 +857,53 @@
     </div>
 
     <!-- Modal Nova Conta - Design SaaS Empresarial Profissional -->
-    <div class="modal-overlay-padr√£o" id="modal-conta" onclick="fecharModal()">
-        <div class="modal-padr√£o" onclick="event.stopPropagation()">
+    <div class="modal-overlay-padr„o" id="modal-conta" onclick="fecharModal()">
+        <div class="modal-padr„o" onclick="event.stopPropagation()">
             <!-- HEADER PROFISSIONAL COM GRADIENT TEAL -->
-            <div class="modal-header-padr√£o">
-                <div class="modal-header-content-padr√£o">
-                    <div class="modal-header-icon-padr√£o">
+            <div class="modal-header-padr„o">
+                <div class="modal-header-content-padr„o">
+                    <div class="modal-header-icon-padr„o">
                         <i class="fas fa-sitemap"></i>
                     </div>
-                    <div class="modal-header-text-padr√£o">
-                        <h2 id="modal-t√≠tulo">Nova Conta</h2>
+                    <div class="modal-header-text-padr„o">
+                        <h2 id="modal-tÌtulo">Nova Conta</h2>
                         <p>Configure a conta para o plano de contas</p>
                     </div>
-                    <button class="modal-close-padr√£o" type="button" onclick="fecharModal()" title="Fechar">
+                    <button class="modal-close-padr„o" type="button" onclick="fecharModal()" title="Fechar">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <!-- STEPS/PROGRESS TABS -->
-                <div class="modal-progress-padr√£o">
-                    <div class="modal-step-padr√£o active" data-step="1">
-                        <div class="modal-step-number-padr√£o">1</div>
-                        <span>Classifica√ß√£o</span>
+                <div class="modal-progress-padr„o">
+                    <div class="modal-step-padr„o active" data-step="1">
+                        <div class="modal-step-number-padr„o">1</div>
+                        <span>ClassificaÁ„o</span>
                     </div>
-                    <div class="modal-step-padr√£o" data-step="2">
-                        <div class="modal-step-number-padr√£o">2</div>
+                    <div class="modal-step-padr„o" data-step="2">
+                        <div class="modal-step-number-padr„o">2</div>
                         <span>Detalhes</span>
                     </div>
-                    <div class="modal-step-padr√£o" data-step="3">
-                        <div class="modal-step-number-padr√£o">3</div>
-                        <span>Personaliza√ß√£o</span>
+                    <div class="modal-step-padr„o" data-step="3">
+                        <div class="modal-step-number-padr„o">3</div>
+                        <span>PersonalizaÁ„o</span>
                     </div>
                 </div>
             </div>
 
             <!-- BODY -->
-            <div class="modal-body-padr√£o">
+            <div class="modal-body-padr„o">
                 <form id="form-conta">
                     <input type="hidden" id="conta-id">
 
-                    <!-- Se√ß√£o 1: Classifica√ß√£o -->
-                    <div class="form-section-padr√£o">
-                        <div class="form-section-title-padr√£o">
+                    <!-- SeÁ„o 1: ClassificaÁ„o -->
+                    <div class="form-section-padr„o">
+                        <div class="form-section-title-padr„o">
                             <i class="fas fa-layer-group"></i>
-                            <span>Classifica√ß√£o</span>
-                            <span class="section-badge-padr√£o">Obrigat√≥rio</span>
+                            <span>ClassificaÁ„o</span>
+                            <span class="section-badge-padr„o">ObrigatÛrio</span>
                         </div>
-                        <div class="form-grid-padr√£o">
-                            <div class="form-group-padr√£o">
+                        <div class="form-grid-padr„o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-exchange-alt"></i>
                                     Tipo de Conta
@@ -912,9 +913,9 @@
                                     <option value="receita">&#128200; Receita</option>
                                     <option value="despesa">&#128201; Despesa</option>
                                 </select>
-                                <span class="field-hint"><i class="fas fa-info-circle"></i> Define se √© entrada ou sa√≠da de recursos</span>
+                                <span class="field-hint"><i class="fas fa-info-circle"></i> Define se È entrada ou saÌda de recursos</span>
                             </div>
-                            <div class="form-group-padr√£o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-folder-tree"></i>
                                     Conta Pai
@@ -927,14 +928,14 @@
                         </div>
                     </div>
 
-                    <!-- Se√ß√£o 2: Informa√ß√µes da Conta -->
-                    <div class="form-section-padr√£o">
-                        <div class="form-section-title-padr√£o">
+                    <!-- SeÁ„o 2: InformaÁıes da Conta -->
+                    <div class="form-section-padr„o">
+                        <div class="form-section-title-padr„o">
                             <i class="fas fa-file-alt"></i>
-                            <span>Informa√ß√µes da Conta</span>
-                            <span class="section-badge-padr√£o">Obrigat√≥rio</span>
+                            <span>InformaÁıes da Conta</span>
+                            <span class="section-badge-padr„o">ObrigatÛrio</span>
                         </div>
-                        <div class="form-group-padr√£o">
+                        <div class="form-group-padr„o">
                             <label>
                                 <i class="fas fa-tag"></i>
                                 Nome da Conta
@@ -943,56 +944,56 @@
                             <input type="text" id="conta-nome" placeholder="Ex: Vendas de Produtos, Despesas Administrativas..." required>
                             <span class="field-hint"><i class="fas fa-lightbulb"></i> Um nome claro e descritivo para a conta</span>
                         </div>
-                        <div class="form-grid-padr√£o">
-                            <div class="form-group-padr√£o">
+                        <div class="form-grid-padr„o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-align-left"></i>
-                                    Descri√ß√£o
+                                    DescriÁ„o
                                 </label>
-                                <input type="text" id="conta-descri√ß√£o" placeholder="Descri√ß√£o detalhada (opcional)">
+                                <input type="text" id="conta-descriÁ„o" placeholder="DescriÁ„o detalhada (opcional)">
                             </div>
-                            <div class="form-group-padr√£o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-dollar-sign"></i>
-                                    Or√ßamento Mensal
+                                    OrÁamento Mensal
                                 </label>
-                                <div class="valor-destaque-padr√£o">
+                                <div class="valor-destaque-padr„o">
                                     <span class="currency-symbol">R$</span>
-                                    <input type="text" id="conta-or√ßamento" placeholder="0,00" oninput="formatarMoeda(this)">
+                                    <input type="text" id="conta-orÁamento" placeholder="0,00" oninput="formatarMoeda(this)">
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Se√ß√£o 3: Personaliza√ß√£o -->
-                    <div class="form-section-padr√£o">
-                        <div class="form-section-title-padr√£o">
+                    <!-- SeÁ„o 3: PersonalizaÁ„o -->
+                    <div class="form-section-padr„o">
+                        <div class="form-section-title-padr„o">
                             <i class="fas fa-palette"></i>
-                            <span>Personaliza√ß√£o</span>
-                            <span class="section-badge-padr√£o" style="background: rgba(107, 114, 128, 0.1); color: #6b7280;">Opcional</span>
+                            <span>PersonalizaÁ„o</span>
+                            <span class="section-badge-padr„o" style="background: rgba(107, 114, 128, 0.1); color: #6b7280;">Opcional</span>
                         </div>
-                        <div class="form-grid-padr√£o">
-                            <div class="form-group-padr√£o">
+                        <div class="form-grid-padr„o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-icons"></i>
-                                    √çcone
+                                    Õcone
                                 </label>
                                 <select id="conta-icone">
                                     <option value="fa-folder">&#128193; Pasta</option>
                                     <option value="fa-money-bill">&#128181; Dinheiro</option>
-                                    <option value="fa-credit-card">&#128179; Cart√£o</option>
+                                    <option value="fa-credit-card">&#128179; Cart„o</option>
                                     <option value="fa-building">&#127970; Empresa</option>
                                     <option value="fa-users">&#128101; Pessoas</option>
                                     <option value="fa-truck">&#128666; Transporte</option>
-                                    <option value="fa-tools">&#128295; Manuten√ß√£o</option>
+                                    <option value="fa-tools">&#128295; ManutenÁ„o</option>
                                     <option value="fa-bolt">&#9889; Energia</option>
                                     <option value="fa-shopping-cart">&#128722; Compras</option>
                                     <option value="fa-chart-line">&#128200; Vendas</option>
-                                    <option value="fa-handshake">&#129309; Servi√ßos</option>
+                                    <option value="fa-handshake">&#129309; ServiÁos</option>
                                     <option value="fa-file-invoice">&#128196; Documentos</option>
                                 </select>
                             </div>
-                            <div class="form-group-padr√£o">
+                            <div class="form-group-padr„o">
                                 <label>
                                     <i class="fas fa-toggle-on"></i>
                                     Status
@@ -1003,10 +1004,10 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group-padr√£o">
+                        <div class="form-group-padr„o">
                             <label>
                                 <i class="fas fa-swatchbook"></i>
-                                Cor de Identifica√ß√£o
+                                Cor de IdentificaÁ„o
                             </label>
                             <div class="color-picker-pro" id="color-picker">
                                 <div class="color-option selected" data-color="#84cc16" style="background: linear-gradient(135deg, #84cc16, #65a30d);" title="Verde Lima"></div>
@@ -1024,15 +1025,15 @@
             </div>
 
             <!-- FOOTER PROFISSIONAL -->
-            <div class="modal-footer-padr√£o">
-                <div class="modal-footer-left-padr√£o">
-                    <span class="footer-info"><i class="fas fa-info-circle"></i> Conta ser√° salva no plano de contas</span>
+            <div class="modal-footer-padr„o">
+                <div class="modal-footer-left-padr„o">
+                    <span class="footer-info"><i class="fas fa-info-circle"></i> Conta ser· salva no plano de contas</span>
                 </div>
-                <div class="modal-footer-right-padr√£o">
-                    <button class="btn-padr√£o-ghost" type="button" onclick="fecharModal()">
+                <div class="modal-footer-right-padr„o">
+                    <button class="btn-padr„o-ghost" type="button" onclick="fecharModal()">
                         <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button class="btn-padr√£o-primary" type="button" onclick="salvarConta()">
+                    <button class="btn-padr„o-primary" type="button" onclick="salvarConta()">
                         <i class="fas fa-save"></i> Salvar Conta
                     </button>
                 </div>
@@ -1050,7 +1051,7 @@
         let corSelecionada = '#22c55e';
         let filtroAtual = 'todos';
 
-        // Inicializa√ß√£o
+        // InicializaÁ„o
         // ========================================
         // AUTH HELPERS
         // ========================================
@@ -1077,15 +1078,15 @@
             setupColorPicker();
         });
 
-        // Carregar usu√°rio
+        // Carregar usu·rio
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { headers: getAuthHeaders(), credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu√°rio');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu·rio');
 
-                    // Sauda√ß√£o din√¢mica baseada na hora
+                    // SaudaÁ„o din‚mica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -1107,7 +1108,7 @@
                     }
                 }
             } catch (e) {
-                console.error('Erro ao carregar usu√°rio:', e);
+                console.error('Erro ao carregar usu·rio:', e);
             }
         }
 
@@ -1132,7 +1133,7 @@
             }
         }
 
-        // Renderizar √°rvore
+        // Renderizar ·rvore
         function renderizarArvore() {
             const container = document.getElementById('tree-contas');
             const contasFiltradas = filtroAtual === 'todos'
@@ -1155,7 +1156,7 @@
             container.innerHTML = contasRaiz.map(conta => renderizarItem(conta, 1)).join('');
         }
 
-        // Renderizar item da √°rvore
+        // Renderizar item da ·rvore
         function renderizarItem(conta, nivel) {
             const filhos = planoContas.filter(c => c.pai_id === conta.id);
             const temFilhos = filhos.length > 0;
@@ -1172,7 +1173,7 @@
                             <i class="fas ${conta.icone || 'fa-folder'}"></i>
                         </div>
                         <div class="tree-info">
-                            <div class="c√≥digo">${conta.id.toString().padStart(3, '0')}</div>
+                            <div class="cÛdigo">${conta.id.toString().padStart(3, '0')}</div>
                             <div class="nome">${conta.nome}</div>
                         </div>
                         <span class="tree-badge ${conta.tipo}">${conta.tipo === 'receita' ? 'Receita' : 'Despesa'}</span>
@@ -1270,7 +1271,7 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-t√≠tulo').textContent = 'Nova Conta';
+            document.getElementById('modal-tÌtulo').textContent = 'Nova Conta';
             document.getElementById('form-conta').reset();
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
             document.querySelector('.color-option[data-color="#22c55e"]').classList.add('selected');
@@ -1300,14 +1301,14 @@
             if (!conta) return;
 
             editandoId = id;
-            document.getElementById('modal-t√≠tulo').textContent = 'Editar Conta';
+            document.getElementById('modal-tÌtulo').textContent = 'Editar Conta';
             document.getElementById('conta-id').value = conta.id;
             document.getElementById('conta-tipo').value = conta.tipo;
             document.getElementById('conta-pai').value = conta.pai_id || '';
             document.getElementById('conta-nome').value = conta.nome;
-            document.getElementById('conta-descri√ß√£o').value = conta.descri√ß√£o || conta.descri√ß√£o || '';
+            document.getElementById('conta-descriÁ„o').value = conta.descriÁ„o || conta.descriÁ„o || '';
             document.getElementById('conta-icone').value = conta.icone || 'fa-folder';
-            document.getElementById('conta-or√ßamento').value = conta.or√ßamento_mensal ? (conta.or√ßamento_mensal / 1).toFixed(2).replace('.', ',') : '';
+            document.getElementById('conta-orÁamento').value = conta.orÁamento_mensal ? (conta.orÁamento_mensal / 1).toFixed(2).replace('.', ',') : '';
             document.getElementById('conta-status').value = conta.ativo ? '1' : '0';
 
             // Selecionar cor
@@ -1326,9 +1327,9 @@
             const nome = document.getElementById('conta-nome').value.trim();
             const tipo = document.getElementById('conta-tipo').value;
             const pai_id = document.getElementById('conta-pai').value || null;
-            const descri√ß√£o = document.getElementById('conta-descri√ß√£o').value.trim();
+            const descriÁ„o = document.getElementById('conta-descriÁ„o').value.trim();
             const icone = document.getElementById('conta-icone').value;
-            const or√ßamento = parseFloat(document.getElementById('conta-or√ßamento').value.replace(',', '.')) || 0;
+            const orÁamento = parseFloat(document.getElementById('conta-orÁamento').value.replace(',', '.')) || 0;
             const ativo = document.getElementById('conta-status').value === '1';
 
             if (!nome) {
@@ -1336,7 +1337,7 @@
                 return;
             }
 
-            const dados = { nome, tipo, pai_id: pai_id ? parseInt(pai_id) : null, descri√ß√£o: descri√ß√£o, icone, cor: corSelecionada, or√ßamento_mensal: or√ßamento, ativo };
+            const dados = { nome, tipo, pai_id: pai_id ? parseInt(pai_id) : null, descriÁ„o: descriÁ„o, icone, cor: corSelecionada, orÁamento_mensal: orÁamento, ativo };
 
             try {
                 const url = editandoId
@@ -1371,15 +1372,15 @@
             const temFilhos = planoContas.some(c => c.pai_id === id);
 
             if (temFilhos) {
-                showToast('N√£o √© poss√≠vel excluir conta com subcontas', 'error');
+                showToast('N„o È possÌvel excluir conta com subcontas', 'error');
                 return;
             }
 
-            // Modal de confirma√ß√£o profissional
+            // Modal de confirmaÁ„o profissional
             const confirmado = await showConfirmModal({
                 type: 'danger',
                 title: 'Excluir Conta',
-                message: `Deseja realmente excluir a conta "${conta?.nome}"? Esta a√ß√£o n√£o pode ser desfeita.`,
+                message: `Deseja realmente excluir a conta "${conta?.nome}"? Esta aÁ„o n„o pode ser desfeita.`,
                 confirmText: 'Excluir',
                 cancelText: 'Cancelar'
             });
@@ -1393,14 +1394,14 @@
                 });
 
                 if (response.ok) {
-                    showToast('Conta exclu√≠da!', 'success');
+                    showToast('Conta excluÌda!', 'success');
                     await carregarPlanoContas();
                 } else {
                     planoContas = planoContas.filter(c => c.id !== id);
                     renderizarArvore();
                     atualizarContadores();
                     atualizarSelectPai();
-                    showToast('Conta exclu√≠da!', 'success');
+                    showToast('Conta excluÌda!', 'success');
                 }
             } catch (e) {
                 console.error('Erro ao excluir:', e);

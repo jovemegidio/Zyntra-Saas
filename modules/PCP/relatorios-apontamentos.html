@@ -1,14 +1,15 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Relat√≥rios de Apontamentos</title>
+    <title>Aluforce: RelatÛrios de Apontamentos</title>
 
-    <!-- Sistema de Autentica√ß√£o Unificado - DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <!-- Sistema de AutenticaÁ„o Unificado - DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -135,7 +136,7 @@
             margin-bottom: 20px;
         }
 
-        /* ==================== CARD gen√©rico ==================== */
+        /* ==================== CARD genÈrico ==================== */
         .card {
             background: white;
             border-radius: 14px;
@@ -256,8 +257,8 @@
         /* ==================== SIDEBAR CARDS ==================== */
         .sidebar-stack { display: flex; flex-direction: column; gap: 20px; }
 
-        /* Funcion√°rio cards */
-        .funcion√°rio-card {
+        /* Funcion·rio cards */
+        .funcion·rio-card {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -267,12 +268,12 @@
             margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .funcion√°rio-card:last-child { margin-bottom: 0; }
-        .funcion√°rio-card:hover {
+        .funcion·rio-card:last-child { margin-bottom: 0; }
+        .funcion·rio-card:hover {
             border-color: var(--accent-indigo);
             box-shadow: 0 2px 8px rgba(99,102,241,0.1);
         }
-        .funcion√°rio-avatar {
+        .funcion·rio-avatar {
             width: 42px; height: 42px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-indigo), #8b5cf6);
@@ -280,15 +281,15 @@
             color: white; font-weight: 700; font-size: 15px;
             flex-shrink: 0;
         }
-        .funcion√°rio-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .funcion√°rio-info { flex: 1; min-width: 0; }
-        .funcion√°rio-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .funcion√°rio-cargo { font-size: 11px; color: var(--text-secondary); }
-        .funcion√°rio-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
-        .funcion√°rio-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
-        .funcion√°rio-stat-label { font-size: 10px; color: var(--text-secondary); }
+        .funcion·rio-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .funcion·rio-info { flex: 1; min-width: 0; }
+        .funcion·rio-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .funcion·rio-cargo { font-size: 11px; color: var(--text-secondary); }
+        .funcion·rio-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
+        .funcion·rio-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
+        .funcion·rio-stat-label { font-size: 10px; color: var(--text-secondary); }
 
-        /* Efici√™ncia Grid */
+        /* EficiÍncia Grid */
         .eficiencia-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -367,7 +368,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
-    <!-- PCP Header & Sidebar  Design Institucional Refinado (DEVE SER O √öLTIMO) -->
+    <!-- PCP Header & Sidebar  Design Institucional Refinado (DEVE SER O ⁄LTIMO) -->
     <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260224">
 </head>
 <body>
@@ -392,10 +393,10 @@
                 <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
-                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produ√ß√£o">
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de ProduÁ„o">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gest√£o de Produ√ß√£o">
+                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gest„o de ProduÁ„o">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -404,15 +405,15 @@
                 <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
-                <a href="relatorios-apontamentos.html" class="sidebar-btn active" title="Relat√≥rios">
+                <a href="relatorios-apontamentos.html" class="sidebar-btn active" title="RelatÛrios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de Relat√≥rios">
+                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de RelatÛrios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configura√ß√µes" id="btn-config">
+                <button class="sidebar-btn" title="ConfiguraÁıes" id="btn-config">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -428,8 +429,8 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">‚Äî</span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relat√≥rios de Apontamentos</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ó</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">RelatÛrios de Apontamentos</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -455,7 +456,7 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-chart-bar"></i>
-                        Relat√≥rios de Produ√ß√£o
+                        RelatÛrios de ProduÁ„o
                     </h1>
                     <div class="header-actions">
                         <button class="btn btn-success" onclick="atualizarDados()">
@@ -473,7 +474,7 @@
                         <div class="stat-icon blue"><i class="fas fa-users"></i></div>
                         <div>
                             <div class="stat-value" id="totalFuncionarios">0</div>
-                            <div class="stat-label">Funcion√°rios Ativos</div>
+                            <div class="stat-label">Funcion·rios Ativos</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -487,7 +488,7 @@
                         <div class="stat-icon yellow"><i class="fas fa-industry"></i></div>
                         <div>
                             <div class="stat-value" id="horasProducao">0h</div>
-                            <div class="stat-label">Horas em Produ√ß√£o</div>
+                            <div class="stat-label">Horas em ProduÁ„o</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -501,7 +502,7 @@
                         <div class="stat-icon indigo"><i class="fas fa-percentage"></i></div>
                         <div>
                             <div class="stat-value" id="eficienciaGeral">0%</div>
-                            <div class="stat-label">Efici√™ncia Geral</div>
+                            <div class="stat-label">EficiÍncia Geral</div>
                         </div>
                     </div>
                 </div>
@@ -509,7 +510,7 @@
                 <!-- Filtros -->
                 <div class="filters-section">
                     <div class="filter-group">
-                        <label class="filter-label">Data In√≠cio</label>
+                        <label class="filter-label">Data InÌcio</label>
                         <input type="date" id="dataInicio" class="filter-input">
                     </div>
                     <div class="filter-group">
@@ -517,7 +518,7 @@
                         <input type="date" id="dataFim" class="filter-input">
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Funcion√°rio</label>
+                        <label class="filter-label">Funcion·rio</label>
                         <select id="filtroFuncionario" class="filter-select">
                             <option value="">Todos</option>
                         </select>
@@ -527,13 +528,13 @@
                         <select id="filtroAtividade" class="filter-select">
                             <option value="">Todas</option>
                             <option value="ST">Setup</option>
-                            <option value="1">In√≠cio Produ√ß√£o</option>
-                            <option value="1A">Produ√ß√£o Irregular</option>
-                            <option value="PR">Parada Refei√ß√£o</option>
-                            <option value="PM">Parada Manuten√ß√£o</option>
+                            <option value="1">InÌcio ProduÁ„o</option>
+                            <option value="1A">ProduÁ„o Irregular</option>
+                            <option value="PR">Parada RefeiÁ„o</option>
+                            <option value="PM">Parada ManutenÁ„o</option>
                             <option value="FM">Falta Mat. Prima</option>
-                            <option value="ME">Manut. El√©trica</option>
-                            <option value="MM">Manut. Mec√¢nica</option>
+                            <option value="ME">Manut. ElÈtrica</option>
+                            <option value="MM">Manut. Mec‚nica</option>
                             <option value="PCM">Parada Corretiva</option>
                             <option value="TT">Troca de Turno</option>
                             <option value="MP">Manut. Preventiva</option>
@@ -542,12 +543,12 @@
                             <option value="TM">Troca Material</option>
                             <option value="QL">Quebra de Lance</option>
                             <option value="QE">Queda Energia</option>
-                            <option value="AM">Aquec. M√°quina</option>
+                            <option value="AM">Aquec. M·quina</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Pedido</label>
-                        <input type="text" id="filtroPedido" class="filter-input" placeholder="N¬∫ do pedido" style="min-width:120px;">
+                        <input type="text" id="filtroPedido" class="filter-input" placeholder="N∫ do pedido" style="min-width:120px;">
                     </div>
                     <button class="btn btn-primary" onclick="aplicarFiltros()">
                         <i class="fas fa-filter"></i> Filtrar
@@ -566,15 +567,15 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Funcion√°rio</th>
+                                        <th>Funcion·rio</th>
                                         <th>Atividade</th>
                                         <th>Data</th>
-                                        <th>In√≠cio</th>
+                                        <th>InÌcio</th>
                                         <th>Fim</th>
-                                        <th>Dura√ß√£o</th>
+                                        <th>DuraÁ„o</th>
                                         <th>OP</th>
                                         <th>Pedido</th>
-                                        <th>Observa√ß√µes</th>
+                                        <th>ObservaÁıes</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaApontamentos">
@@ -589,12 +590,12 @@
                         </div>
                     </div>
 
-                    <!-- Sidebar: Funcion√°rios + Atividades + Efici√™ncia -->
+                    <!-- Sidebar: Funcion·rios + Atividades + EficiÍncia -->
                     <div class="sidebar-stack">
-                        <!-- Resumo por Funcion√°rio -->
+                        <!-- Resumo por Funcion·rio -->
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-users"></i> Por Funcion√°rio</h3>
+                                <h3><i class="fas fa-users"></i> Por Funcion·rio</h3>
                             </div>
                             <div class="card-body" id="resumoFuncionarios">
                                 <div class="empty-state">
@@ -604,7 +605,7 @@
                             </div>
                         </div>
 
-                        <!-- Distribui√ß√£o por Atividade -->
+                        <!-- DistribuiÁ„o por Atividade -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="fas fa-chart-pie"></i> Por Atividade</h3>
@@ -616,7 +617,7 @@
                             </div>
                         </div>
 
-                        <!-- Indicadores de Efici√™ncia -->
+                        <!-- Indicadores de EficiÍncia -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="fas fa-tachometer-alt"></i> Indicadores</h3>
@@ -633,11 +634,11 @@
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efManutencao" style="color: #f59e0b;">0%</div>
-                                        <div class="eficiencia-label">Manuten√ß√£o</div>
+                                        <div class="eficiencia-label">ManutenÁ„o</div>
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efMediaDia" style="color: #6366f1;">0h</div>
-                                        <div class="eficiencia-label">M√©dia/Dia</div>
+                                        <div class="eficiencia-label">MÈdia/Dia</div>
                                     </div>
                                 </div>
                             </div>
@@ -652,13 +653,13 @@
         // Cores das atividades - Alinhado com apontamentos.html
         const coresAtividades = {
             'ST': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'In√≠cio Produ√ß√£o' },
-            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'Produ√ß√£o Irregular' },
-            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refei√ß√£o' },
-            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manuten√ß√£o' },
+            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'InÌcio ProduÁ„o' },
+            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'ProduÁ„o Irregular' },
+            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada RefeiÁ„o' },
+            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada ManutenÁ„o' },
             'FM': { bg: '#ffedd5', color: '#ea580c', icon: 'fa-box-open', nome: 'Falta Mat. Prima' },
-            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. El√©trica' },
-            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mec√¢nica' },
+            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. ElÈtrica' },
+            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mec‚nica' },
             'PCM': { bg: '#fee2e2', color: '#b91c1c', icon: 'fa-times-circle', nome: 'Parada Corretiva' },
             'TT': { bg: '#e0e7ff', color: '#4f46e5', icon: 'fa-exchange-alt', nome: 'Troca de Turno' },
             'MP': { bg: '#d1fae5', color: '#059669', icon: 'fa-clipboard-check', nome: 'Manut. Preventiva' },
@@ -667,10 +668,10 @@
             'TM': { bg: '#f3e8ff', color: '#9333ea', icon: 'fa-sync-alt', nome: 'Troca Material' },
             'QL': { bg: '#fce7f3', color: '#db2777', icon: 'fa-unlink', nome: 'Quebra de Lance' },
             'QE': { bg: '#f5f5f4', color: '#57534e', icon: 'fa-plug', nome: 'Queda Energia' },
-            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. M√°quina' },
+            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. M·quina' },
             'setup': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            'produ√ß√£o': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'Produ√ß√£o' },
-            'manutencao': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-wrench', nome: 'Manuten√ß√£o' },
+            'produÁ„o': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'ProduÁ„o' },
+            'manutencao': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-wrench', nome: 'ManutenÁ„o' },
             'aquecimento': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquecimento' },
             'limpeza': { bg: '#cffafe', color: '#0891b2', icon: 'fa-broom', nome: 'Limpeza' },
             'intervalo': { bg: '#f1f5f9', color: '#475569', icon: 'fa-coffee', nome: 'Intervalo' },
@@ -678,14 +679,14 @@
             'outros': { bg: '#f8fafc', color: '#64748b', icon: 'fa-ellipsis-h', nome: 'Outros' }
         };
 
-        // Classifica√ß√£o de tipos
-        const TIPOS_PRODUTIVOS = ['1', '1A', 'produ√ß√£o'];
+        // ClassificaÁ„o de tipos
+        const TIPOS_PRODUTIVOS = ['1', '1A', 'produÁ„o'];
         const TIPOS_MANUTENCAO = ['PM', 'ME', 'MM', 'PCM', 'MP', 'MC', 'manutencao'];
         const TIPOS_PARADA = ['PR', 'FM', 'TT', 'QE', 'TB', 'TM', 'QL', 'intervalo'];
 
         // Dados
         let apontamentos = [];
-        let funcion√°rios = [];
+        let funcion·rios = [];
 
         // Mapeamento de avatares
         const avatarNameMap = {
@@ -700,9 +701,9 @@
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
-            'ant√¥nio': '/avatars/Antonio.webp',
+            'antÙnio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
-            'andr√©ia': '/avatars/Andreia.webp',
+            'andrÈia': '/avatars/Andreia.webp',
             'guilherme': '/avatars/Guilherme.webp',
             'marcelo': '/avatars/Marcelo.webp'
         };
@@ -726,7 +727,7 @@
             return 'Boa noite';
         }
 
-        // Inicializa√ß√£o
+        // InicializaÁ„o
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
             setDatasIniciais();
@@ -756,7 +757,7 @@
                     const email = (user.email || '').toLowerCase();
                     const permissoesPcp = user.permissoes_pcp || '';
                     const rolesPermitidas = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'consultoria'];
-                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administra√ß√£o', 'ger√™ncia'];
+                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administraÁ„o', 'gerÍncia'];
 
                     const temRole = rolesPermitidas.some(r => role.includes(r));
                     const temDept = deptPermitidos.some(d => departamento.includes(d));
@@ -787,7 +788,7 @@
                     }
                 }
             } catch (e) {
-                console.log('Erro ao carregar usu√°rio:', e);
+                console.log('Erro ao carregar usu·rio:', e);
             }
         }
 
@@ -801,13 +802,13 @@
         async function carregarDados() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            const funcion√°rio = document.getElementById('filtroFuncionario').value;
+            const funcion·rio = document.getElementById('filtroFuncionario').value;
             const atividade = document.getElementById('filtroAtividade').value;
             const pedido = document.getElementById('filtroPedido').value;
 
             try {
                 let url = `/api/pcp/apontamentos/relatorio?dataInicio=${dataInicio}&dataFim=${dataFim}`;
-                if (funcion√°rio) url += `&usuario=${funcion√°rio}`;
+                if (funcion·rio) url += `&usuario=${funcion·rio}`;
                 if (atividade) url += `&atividade=${atividade}`;
                 if (pedido) url += `&pedido=${pedido}`;
 
@@ -817,10 +818,10 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     apontamentos = data.apontamentos || [];
-                    funcion√°rios = data.funcion√°rios || [];
+                    funcion·rios = data.funcion·rios || [];
 
                     atualizarStats(data);
-                    popularSelectFuncionarios(funcion√°rios);
+                    popularSelectFuncionarios(funcion·rios);
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
                     renderizarTabela();
@@ -829,7 +830,7 @@
                     window.location.href = '/login';
                 } else {
                     apontamentos = [];
-                    funcion√°rios = [];
+                    funcion·rios = [];
                     atualizarStats({});
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
@@ -839,7 +840,7 @@
             } catch (e) {
                 console.error('Erro ao carregar dados:', e);
                 apontamentos = [];
-                funcion√°rios = [];
+                funcion·rios = [];
                 atualizarStats({});
                 renderizarResumoFuncionarios();
                 renderizarDistribuicaoAtividades();
@@ -856,7 +857,7 @@
         }
 
         function atualizarStats(data) {
-            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcion√°rios.length;
+            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcion·rios.length;
             document.getElementById('totalHoras').textContent = (data.totalHoras || calcularTotalHoras()) + 'h';
             document.getElementById('horasProducao').textContent = (data.horasProducao || calcularHorasProducao()) + 'h';
             document.getElementById('totalApontamentos').textContent = data.totalApontamentos || apontamentos.length;
@@ -907,17 +908,17 @@
             const container = document.getElementById('resumoFuncionarios');
             const resumo = {};
             const fotoMap = {};
-            funcion√°rios.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
+            funcion·rios.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
 
             apontamentos.forEach(a => {
-                const key = a.usu√°rio_id || a.usu√°rio_nome;
+                const key = a.usu·rio_id || a.usu·rio_nome;
                 if (!resumo[key]) {
-                    resumo[key] = { nome: a.usu√°rio_nome, foto: a.usu√°rio_foto || fotoMap[a.usu√°rio_id] || '', totalSegundos: 0, produ√ß√£oSegundos: 0, apontamentos: 0 };
+                    resumo[key] = { nome: a.usu·rio_nome, foto: a.usu·rio_foto || fotoMap[a.usu·rio_id] || '', totalSegundos: 0, produÁ„oSegundos: 0, apontamentos: 0 };
                 }
                 resumo[key].totalSegundos += a.duracao || 0;
                 resumo[key].apontamentos++;
                 if (TIPOS_PRODUTIVOS.includes(a.tipo)) {
-                    resumo[key].produ√ß√£oSegundos += a.duracao || 0;
+                    resumo[key].produÁ„oSegundos += a.duracao || 0;
                 }
             });
 
@@ -929,7 +930,7 @@
             let idx = 0;
             container.innerHTML = Object.values(resumo).map(f => {
                 const horasTotais = formatarDuracaoHoras(f.totalSegundos);
-                const horasProducao = formatarDuracaoHoras(f.produ√ß√£oSegundos);
+                const horasProducao = formatarDuracaoHoras(f.produÁ„oSegundos);
                 const primeiraLetra = f.nome ? f.nome[0].toUpperCase() : '?';
                 const primeiroNome = f.nome ? f.nome.split(' ')[0] : 'Desconhecido';
                 const avatarId = 'avatar-func-' + (idx++);
@@ -948,14 +949,14 @@
                             </div>
                             <div>
                                 <div class="funcionario-stat-value" style="color:#16a34a;">${horasProducao}</div>
-                                <div class="funcionario-stat-label">Produ√ß√£o</div>
+                                <div class="funcionario-stat-label">ProduÁ„o</div>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            document.querySelectorAll('.funcion√°rio-avatar[data-foto]').forEach(avatarEl => {
+            document.querySelectorAll('.funcion·rio-avatar[data-foto]').forEach(avatarEl => {
                 const foto = avatarEl.dataset.foto;
                 const nome = avatarEl.dataset.nome;
                 const inicial = avatarEl.textContent.trim();
@@ -1036,25 +1037,25 @@
 
             tbody.innerHTML = apontamentos.map(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                const primeiroNome = a.usu√°rio_nome ? a.usu√°rio_nome.split(' ')[0] : 'N/A';
+                const primeiroNome = a.usu·rio_nome ? a.usu·rio_nome.split(' ')[0] : 'N/A';
                 const primeiraLetra = primeiroNome[0]?.toUpperCase() || '?';
-                const fotoUrl = a.usu√°rio_foto || '';
+                const fotoUrl = a.usu·rio_foto || '';
                 const avatarHtml = fotoUrl
                     ? `<img src="${fotoUrl}" alt="${primeiroNome}" onerror="this.parentElement.innerHTML='${primeiraLetra}'">`
                     : primeiraLetra;
 
                 const opHtml = a.op_codigo
                     ? `<span class="op-badge"><i class="fas fa-clipboard-list"></i> ${a.op_codigo}</span>`
-                    : '<span style="color:#cbd5e1;">‚Äî</span>';
+                    : '<span style="color:#cbd5e1;">ó</span>';
 
-                const pedidoHtml = a.pedido_n√∫mero
-                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_n√∫mero}</span>`
-                    : '<span style="color:#cbd5e1;">‚Äî</span>';
+                const pedidoHtml = a.pedido_n˙mero
+                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_n˙mero}</span>`
+                    : '<span style="color:#cbd5e1;">ó</span>';
 
                 const obsText = a.observacoes || '';
                 const obsHtml = obsText
                     ? `<span class="obs-cell" title="${obsText.replace(/"/g, '&quot;')}">${obsText}</span>`
-                    : '<span style="color:#cbd5e1;">‚Äî</span>';
+                    : '<span style="color:#cbd5e1;">ó</span>';
 
                 return `
                     <tr>
@@ -1099,18 +1100,18 @@
         function atualizarDados() { carregarDados(); mostrarToast('Dados atualizados!', 'success'); }
 
         function exportarRelatorio() {
-            let csv = 'Funcion√°rio,Atividade,Data,In√≠cio,Fim,Dura√ß√£o,OP,Pedido,Observa√ß√µes\n';
+            let csv = 'Funcion·rio,Atividade,Data,InÌcio,Fim,DuraÁ„o,OP,Pedido,ObservaÁıes\n';
             apontamentos.forEach(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                csv += `"${a.usu√°rio_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_n√∫mero || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
+                csv += `"${a.usu·rio_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_n˙mero || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `relat√≥rio_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `relatÛrio_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
-            mostrarToast('Relat√≥rio exportado!', 'success');
+            mostrarToast('RelatÛrio exportado!', 'success');
         }
 
         function mostrarToast(msg, tipo = 'success') {

@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -7,8 +7,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Aluforce: Apontamentos</title>
 
-    <!-- Sistema de AutenticaÃ§Ã£o Unificado - DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +33,7 @@
 
         /* Reset e body gerenciados por pcp-layout.css */
 
-        /* Sidebar, Header, Mobile Â— gerenciado por global-header-sidebar.css */
+        /* Sidebar, Header, Mobile ? gerenciado por global-header-sidebar.css */
 
         .header-title {
             color: white;
@@ -171,7 +172,7 @@
             font-weight: 600;
         }
         .status-badge.ativa { background: #dbeafe; color: #3b82f6; }
-        .status-badge.em_produÃ§Ã£o { background: #fef3c7; color: #d97706; }
+        .status-badge.em_produção { background: #fef3c7; color: #d97706; }
         .status-badge.concluida { background: #dcfce7; color: #16a34a; }
         .status-badge.pendente { background: #f1f5f9; color: #64748b; }
 
@@ -231,7 +232,7 @@
         .etapa-info { display: flex; gap: 24px; font-size: 13px; color: var(--text-secondary); }
         .etapa-info span { display: flex; align-items: center; gap: 6px; }
 
-        /* FormulÃ¡rio de Apontamento */
+        /* Formulário de Apontamento */
         .form-apontamento {
             background: #f8fafc;
             border-radius: 12px;
@@ -346,7 +347,7 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
-    <!-- PCP Header & Sidebar Â— Design Institucional Refinado (DEVE SER O ÃšLTIMO) -->
+    <!-- PCP Header & Sidebar ? Design Institucional Refinado (DEVE SER O ÚLTIMO) -->
     <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260224">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -355,7 +356,7 @@
     <div class="app-container">
         <!-- Overlay Mobile -->
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
-        <!-- Sidebar - SerÃ¡ atualizada dinamicamente baseado na role do usuÃ¡rio -->
+        <!-- Sidebar - Será atualizada dinamicamente baseado na role do usuário -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -373,10 +374,10 @@
                 <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
-                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de ProduÃ§Ã£o">
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="GestÃ£o de ProduÃ§Ã£o">
+                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -385,15 +386,15 @@
                 <a href="apontamentos.html" class="sidebar-btn active" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
-                <a href="relatorios-apontamentos.html" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios-apontamentos.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de RelatÃ³rios">
+                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="ConfiguraÃ§Ãµes" id="btn-config">
+                <button class="sidebar-btn" title="Configurações" id="btn-config">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -409,7 +410,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">Â—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">?</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Apontamentos</span>
                     </div>
                 </div>
@@ -458,7 +459,7 @@
                 <div class="atividades-section">
                     <h3><i class="fas fa-tasks"></i> Selecione o Apontamento</h3>
                     <div class="atividades-grid" id="atividadesGrid">
-                        <!-- Linha 1: Setup e ProduÃ§Ã£o -->
+                        <!-- Linha 1: Setup e Produção -->
                         <div class="atividade-card" data-atividade="ST" onclick="iniciarAtividade('ST', 'Setup', '#8b5cf6')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #f3e8ff, #e9d5ff); color: #7c3aed;">
                                 <i class="fas fa-tools"></i>
@@ -466,60 +467,60 @@
                             <span class="atividade-nome">ST</span>
                             <span class="atividade-desc">Setup</span>
                         </div>
-                        <div class="atividade-card" data-atividade="1" onclick="iniciarAtividade('1', 'InÃ­cio de ProduÃ§Ã£o', '#22c55e')">
+                        <div class="atividade-card" data-atividade="1" onclick="iniciarAtividade('1', 'Início de Produção', '#22c55e')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #16a34a;">
                                 <i class="fas fa-play"></i>
                             </div>
                             <span class="atividade-nome">1</span>
-                            <span class="atividade-desc">InÃ­cio ProduÃ§Ã£o</span>
+                            <span class="atividade-desc">Início Produção</span>
                         </div>
-                        <div class="atividade-card" data-atividade="1A" onclick="iniciarAtividade('1A', 'ProduÃ§Ã£o Irregular', '#f59e0b')">
+                        <div class="atividade-card" data-atividade="1A" onclick="iniciarAtividade('1A', 'Produção Irregular', '#f59e0b')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706;">
                                 <i class="fas fa-exclamation-triangle"></i>
                             </div>
                             <span class="atividade-nome">1A</span>
-                            <span class="atividade-desc">ProduÃ§Ã£o Irregular</span>
+                            <span class="atividade-desc">Produção Irregular</span>
                         </div>
-                        <div class="atividade-card" data-atividade="PR" onclick="iniciarAtividade('PR', 'Parada RefeiÃ§Ã£o', '#64748b')">
+                        <div class="atividade-card" data-atividade="PR" onclick="iniciarAtividade('PR', 'Parada Refeição', '#64748b')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569;">
                                 <i class="fas fa-utensils"></i>
                             </div>
                             <span class="atividade-nome">PR</span>
-                            <span class="atividade-desc">Parada RefeiÃ§Ã£o</span>
+                            <span class="atividade-desc">Parada Refeição</span>
                         </div>
 
-                        <!-- Linha 2: ManutenÃ§Ãµes -->
-                        <div class="atividade-card" data-atividade="PM" onclick="iniciarAtividade('PM', 'Parada de ManutenÃ§Ã£o', '#ef4444')">
+                        <!-- Linha 2: Manutenções -->
+                        <div class="atividade-card" data-atividade="PM" onclick="iniciarAtividade('PM', 'Parada de Manutenção', '#ef4444')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;">
                                 <i class="fas fa-pause-circle"></i>
                             </div>
                             <span class="atividade-nome">PM</span>
-                            <span class="atividade-desc">Parada ManutenÃ§Ã£o</span>
+                            <span class="atividade-desc">Parada Manutenção</span>
                         </div>
-                        <div class="atividade-card" data-atividade="FM" onclick="iniciarAtividade('FM', 'Falta de MatÃ©ria Prima', '#f97316')">
+                        <div class="atividade-card" data-atividade="FM" onclick="iniciarAtividade('FM', 'Falta de Matéria Prima', '#f97316')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #ea580c;">
                                 <i class="fas fa-box-open"></i>
                             </div>
                             <span class="atividade-nome">FM</span>
                             <span class="atividade-desc">Falta Mat. Prima</span>
                         </div>
-                        <div class="atividade-card" data-atividade="ME" onclick="iniciarAtividade('ME', 'ManutenÃ§Ã£o ElÃ©trica', '#eab308')">
+                        <div class="atividade-card" data-atividade="ME" onclick="iniciarAtividade('ME', 'Manutenção Elétrica', '#eab308')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fef9c3, #fef08a); color: #ca8a04;">
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <span class="atividade-nome">ME</span>
-                            <span class="atividade-desc">Manut. ElÃ©trica</span>
+                            <span class="atividade-desc">Manut. Elétrica</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MM" onclick="iniciarAtividade('MM', 'ManutenÃ§Ã£o MecÃ¢nica', '#0ea5e9')">
+                        <div class="atividade-card" data-atividade="MM" onclick="iniciarAtividade('MM', 'Manutenção Mecânica', '#0ea5e9')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;">
                                 <i class="fas fa-cogs"></i>
                             </div>
                             <span class="atividade-nome">MM</span>
-                            <span class="atividade-desc">Manut. MecÃ¢nica</span>
+                            <span class="atividade-desc">Manut. Mecânica</span>
                         </div>
 
                         <!-- Linha 3: Paradas e Trocas -->
-                        <div class="atividade-card" data-atividade="PCM" onclick="iniciarAtividade('PCM', 'Parada Corretiva de MÃ¡quina', '#dc2626')">
+                        <div class="atividade-card" data-atividade="PCM" onclick="iniciarAtividade('PCM', 'Parada Corretiva de Máquina', '#dc2626')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #b91c1c;">
                                 <i class="fas fa-times-circle"></i>
                             </div>
@@ -533,14 +534,14 @@
                             <span class="atividade-nome">TT</span>
                             <span class="atividade-desc">Troca de Turno</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MP" onclick="iniciarAtividade('MP', 'ManutenÃ§Ã£o Preventiva', '#10b981')">
+                        <div class="atividade-card" data-atividade="MP" onclick="iniciarAtividade('MP', 'Manutenção Preventiva', '#10b981')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669;">
                                 <i class="fas fa-clipboard-check"></i>
                             </div>
                             <span class="atividade-nome">MP</span>
                             <span class="atividade-desc">Manut. Preventiva</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MC" onclick="iniciarAtividade('MC', 'ManutenÃ§Ã£o Corretiva', '#f43f5e')">
+                        <div class="atividade-card" data-atividade="MC" onclick="iniciarAtividade('MC', 'Manutenção Corretiva', '#f43f5e')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #e11d48;">
                                 <i class="fas fa-wrench"></i>
                             </div>
@@ -579,17 +580,17 @@
                         </div>
 
                         <!-- Linha 5: Aquecimento -->
-                        <div class="atividade-card" data-atividade="AM" onclick="iniciarAtividade('AM', 'Aquecimento de MÃ¡quina', '#f59e0b')">
+                        <div class="atividade-card" data-atividade="AM" onclick="iniciarAtividade('AM', 'Aquecimento de Máquina', '#f59e0b')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706;">
                                 <i class="fas fa-fire"></i>
                             </div>
                             <span class="atividade-nome">AM</span>
-                            <span class="atividade-desc">Aquec. MÃ¡quina</span>
+                            <span class="atividade-desc">Aquec. Máquina</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Contexto do Apontamento (Pedido + ObservaÃ§Ãµes) -->
+                <!-- Contexto do Apontamento (Pedido + Observações) -->
                 <div class="contexto-apontamento" id="contextoApontamento" style="display: none;">
                     <div class="contexto-card">
                         <div class="contexto-header">
@@ -598,23 +599,23 @@
                         <div class="contexto-body">
                             <div class="contexto-grid">
                                 <div class="contexto-field">
-                                    <label>NÂº do Pedido</label>
+                                    <label>Nº do Pedido</label>
                                     <input type="text" id="inputPedidoNumero" placeholder="Ex: 298" autocomplete="off">
                                 </div>
                                 <div class="contexto-field">
-                                    <label>Produto / DescriÃ§Ã£o</label>
+                                    <label>Produto / Descrição</label>
                                     <input type="text" id="inputProdutoDescricao" placeholder="Ex: Cabo PP 3x2.5mm amarelo">
                                 </div>
                             </div>
                             <div class="contexto-field" style="margin-top:10px;">
-                                <label>ObservaÃ§Ãµes</label>
+                                <label>Observações</label>
                                 <textarea id="inputObservacoes" rows="2" placeholder="Ex: Torcendo veia amarela do cabo PP 3x2.5mm"></textarea>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- BotÃµes de AÃ§Ã£o -->
+                <!-- Botões de Ação -->
                 <div class="acoes-timer" id="acoesTimer" style="display: none;">
                     <button class="btn-acao pausar" id="btnPausar" onclick="pausarAtividade()">
                         <i class="fas fa-pause"></i>
@@ -626,16 +627,16 @@
                     </button>
                 </div>
 
-                <!-- HistÃ³rico do Dia -->
+                <!-- Histórico do Dia -->
                 <div class="historico-section">
                     <div class="historico-header">
-                        <h3><i class="fas fa-history"></i> HistÃ³rico de Hoje</h3>
+                        <h3><i class="fas fa-history"></i> Histórico de Hoje</h3>
                         <div class="historico-resumo">
                             <span id="totalTempo">00:00:00</span>
                             <span class="resumo-label">Total trabalhado</span>
                         </div>
                     </div>
-                    <div class="historico-lista" id="histÃ³ricoLista">
+                    <div class="historico-lista" id="históricoLista">
                         <div class="empty-state-mini">
                             <i class="fas fa-clock"></i>
                             <p>Nenhum registro hoje</p>
@@ -763,26 +764,26 @@
             font-weight: 600;
             font-size: 13px;
             color: var(--text-primary);
-            order: 1; /* TÃ­tulo aparece primeiro (apÃ³s Ã­cone) */
+            order: 1; /* Título aparece primeiro (após ícone) */
             line-height: 1.3;
         }
         .atividade-nome {
             font-size: 20px;
             font-weight: 800;
             color: var(--text-secondary);
-            order: 2; /* CÃ³digo aparece depois do tÃ­tulo */
+            order: 2; /* Código aparece depois do título */
             opacity: 0.5;
             letter-spacing: 1px;
         }
 
-        /* BotÃµes de AÃ§Ã£o */
-        .aÃ§Ãµes-timer {
+        /* Botões de Ação */
+        .ações-timer {
             display: flex;
             justify-content: center;
             gap: 16px;
             margin-bottom: 24px;
         }
-        .btn-aÃ§Ã£o {
+        .btn-ação {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -796,48 +797,48 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .btn-aÃ§Ã£o.pausar {
+        .btn-ação.pausar {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
-        .btn-aÃ§Ã£o.pausar:hover {
+        .btn-ação.pausar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
         }
-        .btn-aÃ§Ã£o.continuar {
+        .btn-ação.continuar {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-        .btn-aÃ§Ã£o.finalizar {
+        .btn-ação.finalizar {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-        .btn-aÃ§Ã£o.finalizar:hover {
+        .btn-ação.finalizar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
-        .btn-aÃ§Ã£o i {
+        .btn-ação i {
             font-size: 20px;
         }
 
-        /* HistÃ³rico */
-        .histÃ³rico-section {
+        /* Histórico */
+        .histórico-section {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .histÃ³rico-header {
+        .histórico-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .histÃ³rico-header h3 {
+        .histórico-header h3 {
             font-size: 16px;
             font-weight: 600;
             display: flex;
@@ -845,15 +846,15 @@
             gap: 10px;
             margin: 0;
         }
-        .histÃ³rico-header h3 i {
+        .histórico-header h3 i {
             color: var(--primary-color);
         }
-        .histÃ³rico-resumo {
+        .histórico-resumo {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        .histÃ³rico-resumo span:first-child {
+        .histórico-resumo span:first-child {
             font-size: 24px;
             font-weight: 700;
             color: var(--primary-color);
@@ -863,11 +864,11 @@
             font-size: 12px;
             color: var(--text-secondary);
         }
-        .histÃ³rico-lista {
+        .histórico-lista {
             max-height: 400px;
             overflow-y: auto;
         }
-        .histÃ³rico-item {
+        .histórico-item {
             display: flex;
             align-items: center;
             gap: 16px;
@@ -875,10 +876,10 @@
             border-bottom: 1px solid #f1f5f9;
             transition: background 0.2s;
         }
-        .histÃ³rico-item:hover {
+        .histórico-item:hover {
             background: #f8fafc;
         }
-        .histÃ³rico-icon {
+        .histórico-icon {
             width: 44px;
             height: 44px;
             border-radius: 12px;
@@ -887,20 +888,20 @@
             justify-content: center;
             font-size: 18px;
         }
-        .histÃ³rico-info {
+        .histórico-info {
             flex: 1;
         }
-        .histÃ³rico-atividade {
+        .histórico-atividade {
             font-weight: 600;
             font-size: 14px;
             color: var(--text-primary);
         }
-        .histÃ³rico-horarios {
+        .histórico-horarios {
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 2px;
         }
-        .histÃ³rico-duracao {
+        .histórico-duracao {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
@@ -936,7 +937,7 @@
             .timer-display-grande {
                 font-size: 48px;
             }
-            .btn-aÃ§Ã£o {
+            .btn-ação {
                 padding: 14px 24px;
                 font-size: 14px;
             }
@@ -945,7 +946,7 @@
             }
         }
 
-        /* Contexto do Apontamento (Pedido + ObservaÃ§Ãµes) */
+        /* Contexto do Apontamento (Pedido + Observações) */
         .contexto-apontamento {
             margin-bottom: 24px;
             animation: fadeIn 0.3s ease;
@@ -1015,18 +1016,18 @@
         let timerRunning = false;
         let timerPausado = false;
         let horaInicio = null;
-        let histÃ³ricoHoje = [];
+        let históricoHoje = [];
 
         // Cores das atividades
         const coresAtividades = {
             'ST': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'InÃ­cio ProduÃ§Ã£o' },
-            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'ProduÃ§Ã£o Irregular' },
-            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada RefeiÃ§Ã£o' },
-            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada ManutenÃ§Ã£o' },
+            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'Início Produção' },
+            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'Produção Irregular' },
+            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refeição' },
+            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manutenção' },
             'FM': { bg: '#ffedd5', color: '#ea580c', icon: 'fa-box-open', nome: 'Falta Mat. Prima' },
-            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. ElÃ©trica' },
-            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. MecÃ¢nica' },
+            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. Elétrica' },
+            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mecânica' },
             'PCM': { bg: '#fee2e2', color: '#b91c1c', icon: 'fa-times-circle', nome: 'Parada Corretiva' },
             'TT': { bg: '#e0e7ff', color: '#4f46e5', icon: 'fa-exchange-alt', nome: 'Troca de Turno' },
             'MP': { bg: '#d1fae5', color: '#059669', icon: 'fa-clipboard-check', nome: 'Manut. Preventiva' },
@@ -1035,11 +1036,11 @@
             'TM': { bg: '#f3e8ff', color: '#9333ea', icon: 'fa-sync-alt', nome: 'Troca Material' },
             'QL': { bg: '#fce7f3', color: '#db2777', icon: 'fa-unlink', nome: 'Quebra de Lance' },
             'QE': { bg: '#f5f5f4', color: '#57534e', icon: 'fa-plug', nome: 'Queda Energia' },
-            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. MÃ¡quina' },
+            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. Máquina' },
             'outros': { bg: '#f8fafc', color: '#64748b', icon: 'fa-ellipsis-h', nome: 'Outros' }
         };
 
-        // InicializaÃ§Ã£o
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
             atualizarDataHoje();
@@ -1053,11 +1054,11 @@
             const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('dataHoje').innerHTML = `
                 <i class="fas fa-calendar"></i>
-                ${hoje.toLocaleDateString('pt-BR', opÃ§Ãµes)}
+                ${hoje.toLocaleDateString('pt-BR', opções)}
             `;
         }
 
-        // FunÃ§Ã£o para obter saudaÃ§Ã£o baseada na hora
+        // Função para obter saudação baseada na hora
         function getSaudacao() {
             const hora = new Date().getHours();
             if (hora >= 5 && hora < 12) return 'Bom dia';
@@ -1065,7 +1066,7 @@
             return 'Boa noite';
         }
 
-        // Mapeamento de avatares por nome de usuÃ¡rio
+        // Mapeamento de avatares por nome de usuário
         const avatarNameMap = {
             'clemerson': '/avatars/Clemerson.png',
             'isabela': '/avatars/Isabela.png', 'isabella': '/avatars/Isabela.png',
@@ -1078,9 +1079,9 @@
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
-            'antÃ´nio': '/avatars/Antonio.webp',
+            'antônio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
-            'andrÃ©ia': '/avatars/Andreia.webp',
+            'andréia': '/avatars/Andreia.webp',
             'guilherme': '/avatars/GuilhermeBastos.png',
             'marcelo': '/avatars/Marcelo.webp',
             'augusto': '/avatars/Augusto.png', 'renata': '/avatars/Renata.png',
@@ -1092,7 +1093,7 @@
             'felipesimoes': '/avatars/FelipeSimoes.png', 'felipe': '/avatars/FelipeSimoes.png',
             'hellen': '/avatars/Hellen.webp', 'jamesson': '/avatars/jamerson.svg',
             'sergio': '/avatars/Sergio.png', 'lucas': '/avatars/Lucas.png',
-            'miqueias': '/avatars/Miqueias.png', 'lucio': '/avatars/Lucio.png', 'lÃºcio': '/avatars/Lucio.png'
+            'miqueias': '/avatars/Miqueias.png', 'lucio': '/avatars/Lucio.png', 'lúcio': '/avatars/Lucio.png'
         };
 
         function getAvatarFromEmail(email, nome) {
@@ -1110,17 +1111,17 @@
         async function carregarUsuario() {
             try {
 
-                // Preparar headers - usar credentials: 'include' para sessÃ£o via cookie
+                // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                console.log('?? Carregando dados do usuÃ¡rio...');
+                console.log('?? Carregando dados do usuário...');
                 const resp = await fetch('/api/me', {
                     credentials: 'include',
                     headers: headers
                 });
 
                 if (resp.status === 401) {
-                    // Token invÃ¡lido ou expirado - deixar auth-unified.js cuidar
-                    console.log('Token invÃ¡lido, aguardando redirecionamento...');
+                    // Token inválido ou expirado - deixar auth-unified.js cuidar
+                    console.log('Token inválido, aguardando redirecionamento...');
                     return;
                 }
 
@@ -1130,7 +1131,7 @@
                     const nome = user.nome || 'Operador';
                     const primeiroNome = user.apelido || nome.split(' ')[0];
 
-                    // Atualizar saudaÃ§Ã£o e nome separadamente
+                    // Atualizar saudação e nome separadamente
                     const saudacaoEl = document.getElementById('saudacao');
                     const userNameEl = document.getElementById('userName');
                     if (saudacaoEl) saudacaoEl.textContent = getSaudacao() + ',';
@@ -1159,17 +1160,17 @@
                         mostrarIniciaisAvatarApontamentos(primeiroNome, avatarEl);
                     }
 
-                    console.log('UsuÃ¡rio carregado:', primeiroNome, 'Avatar:', avatarPath || 'Iniciais');
+                    console.log('Usuário carregado:', primeiroNome, 'Avatar:', avatarPath || 'Iniciais');
 
                     // Verificar role e configurar sidebar
                     configurarSidebarPorRole(user);
                 }
             } catch (e) {
-                console.log('UsuÃ¡rio nÃ£o identificado:', e);
+                console.log('Usuário não identificado:', e);
             }
         }
 
-        // FunÃ§Ã£o para mostrar iniciais coloridas no avatar
+        // Função para mostrar iniciais coloridas no avatar
         function mostrarIniciaisAvatarApontamentos(nome, avatarEl) {
             const inicial = nome ? nome[0].toUpperCase() : 'U';
             const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
@@ -1178,11 +1179,11 @@
             avatarEl.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:${cor};color:white;font-weight:600;border-radius:50%;">${inicial}</span>`;
         }
 
-        // Configurar sidebar baseado na role do usuÃ¡rio
-        // NOTA: Todos os usuÃ¡rios veem todas as pÃ¡ginas do PCP na sidebar
+        // Configurar sidebar baseado na role do usuário
+        // NOTA: Todos os usuários veem todas as páginas do PCP na sidebar
         // Apenas destacar o item ativo (Apontamentos)
         function configurarSidebarPorRole(user) {
-            // Garantir que todos os itens da sidebar estejam visÃ­veis
+            // Garantir que todos os itens da sidebar estejam visíveis
             const sidebarNav = document.querySelector('.sidebar-nav');
             if (!sidebarNav) return;
 
@@ -1200,10 +1201,10 @@
                 <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
-                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de ProduÃ§Ã£o">
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="GestÃ£o de ProduÃ§Ã£o">
+                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -1212,10 +1213,10 @@
                 <a href="apontamentos.html" class="sidebar-btn active" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
-                <a href="relatorios-apontamentos.html" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios-apontamentos.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de RelatÃ³rios">
+                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de Relatórios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             `;
@@ -1223,7 +1224,7 @@
             console.log('[SIDEBAR] Sidebar configurada com todos os 10 itens');
         }
 
-        // FunÃ§Ã£o de logout
+        // Função de logout
         function fazerLogout() {
             if (confirm('Deseja realmente sair?')) {
                 // Salvar atividade em andamento antes de sair
@@ -1245,7 +1246,7 @@
             sidebar.classList.toggle('open');
         }
 
-        // SaudaÃ§Ã£o dinÃ¢mica
+        // Saudação dinâmica
         function atualizarSaudacao() {
             const hora = new Date().getHours();
             let saudacao = 'Bom dia';
@@ -1257,7 +1258,7 @@
         }
 
         function iniciarAtividade(tipo, nome, cor) {
-            // Se jÃ¡ tem uma atividade em andamento, finaliza ela primeiro
+            // Se já tem uma atividade em andamento, finaliza ela primeiro
             if (atividadeAtual && timerRunning) {
                 finalizarAtividadeAutomatica();
             }
@@ -1284,15 +1285,15 @@
                 }
             });
 
-            // Mostrar botÃµes de aÃ§Ã£o
+            // Mostrar botões de ação
             document.getElementById('acoesTimer').style.display = 'flex';
 
-            // Mostrar seÃ§Ã£o de contexto (pedido + observaÃ§Ãµes)
+            // Mostrar seção de contexto (pedido + observações)
             document.getElementById('contextoApontamento').style.display = 'block';
 
             mostrarToast(`${nome} iniciado!`, 'success');
 
-            // === NOTIFICAÃ‡ÃƒO PUSH: Avisar todos os usuÃ¡rios PCP ===
+            // === NOTIFICAÇÃO PUSH: Avisar todos os usuários PCP ===
             notificarInicioPCP(tipo, nome);
         }
 
@@ -1302,28 +1303,28 @@
             return el ? el.textContent.trim() : 'Operador';
         }
 
-        // Enviar notificaÃ§Ã£o push de inÃ­cio de atividade para o servidor
+        // Enviar notificação push de início de atividade para o servidor
         async function notificarInicioPCP(tipo, nome) {
             notificarAcaoPCP('iniciou', tipo, nome);
         }
 
-        // Enviar notificaÃ§Ã£o push genÃ©rica (inÃ­cio, pausa, retomada, finalizaÃ§Ã£o)
-        async function notificarAcaoPCP(aÃ§Ã£o, tipo, nome, duracao) {
+        // Enviar notificação push genérica (início, pausa, retomada, finalização)
+        async function notificarAcaoPCP(ação, tipo, nome, duracao) {
             const headers = { 'Content-Type': 'application/json' };
             const operador = getOperadorNome();
             const body = {
                 tipo_atividade: tipo,
                 nome_atividade: nome,
                 operador: operador,
-                aÃ§Ã£o: aÃ§Ã£o,
+                ação: ação,
                 duracao: duracao || null
             };
 
             // Se offline, enfileirar
             if (!navigator.onLine && window.OfflineSyncManager) {
                 await window.OfflineSyncManager.enqueue('/api/pcp/notificar-atividade', 'POST', body, {
-                    module: 'pcp-notificaÃ§Ãµes',
-                    description: 'NotificaÃ§Ã£o PCP: ' + aÃ§Ã£o,
+                    module: 'pcp-notificações',
+                    description: 'Notificação PCP: ' + ação,
                     priority: 3
                 });
                 return;
@@ -1336,11 +1337,11 @@
                     body: JSON.stringify(body)
                 });
             } catch (e) {
-                console.warn('Erro ao enviar notificaÃ§Ã£o PCP:', e);
+                console.warn('Erro ao enviar notificação PCP:', e);
                 if (window.OfflineSyncManager) {
                     await window.OfflineSyncManager.enqueue('/api/pcp/notificar-atividade', 'POST', body, {
-                        module: 'pcp-notificaÃ§Ãµes',
-                        description: 'NotificaÃ§Ã£o PCP (offline): ' + aÃ§Ã£o,
+                        module: 'pcp-notificações',
+                        description: 'Notificação PCP (offline): ' + ação,
                         priority: 3
                     });
                 }
@@ -1370,21 +1371,21 @@
             if (atividadeAtual) {
                 atividade.textContent = atividadeAtual.nome;
                 atividade.style.color = atividadeAtual.cor;
-                inicio.textContent = `InÃ­cio: ${horaInicio.toLocaleTimeString('pt-BR')}`;
+                inicio.textContent = `Início: ${horaInicio.toLocaleTimeString('pt-BR')}`;
             } else {
                 atividade.textContent = 'Clique em uma atividade para iniciar';
                 atividade.style.color = '#94a3b8';
                 inicio.textContent = '';
             }
 
-            // Atualizar botÃ£o pausar/continuar
+            // Atualizar botão pausar/continuar
             const btnPausar = document.getElementById('btnPausar');
             if (timerPausado) {
-                btnPausar.className = 'btn-aÃ§Ã£o continuar';
+                btnPausar.className = 'btn-ação continuar';
                 btnPausar.innerHTML = '<i class="fas fa-play"></i><span>CONTINUAR</span>';
                 btnPausar.onclick = continuarAtividade;
             } else {
-                btnPausar.className = 'btn-aÃ§Ã£o pausar';
+                btnPausar.className = 'btn-ação pausar';
                 btnPausar.innerHTML = '<i class="fas fa-pause"></i><span>PAUSAR</span>';
                 btnPausar.onclick = pausarAtividade;
             }
@@ -1397,7 +1398,7 @@
                 if (timerRunning && !timerPausado) {
                     timerSeconds++;
                     atualizarDisplayTimer();
-                    // Salvar estado a cada 30 segundos para recuperaÃ§Ã£o em caso de crash
+                    // Salvar estado a cada 30 segundos para recuperação em caso de crash
                     if (timerSeconds % 30 === 0 && atividadeAtual) {
                         salvarAtividadeEmAndamento();
                     }
@@ -1418,7 +1419,7 @@
             salvarAtividadeEmAndamento();
             atualizarUITimer();
             mostrarToast('Atividade pausada', 'info');
-            // NotificaÃ§Ã£o push: atividade pausada
+            // Notificação push: atividade pausada
             if (atividadeAtual) {
                 notificarAcaoPCP('pausou', atividadeAtual.tipo, atividadeAtual.nome);
             }
@@ -1429,7 +1430,7 @@
             salvarAtividadeEmAndamento();
             atualizarUITimer();
             mostrarToast('Atividade retomada', 'success');
-            // NotificaÃ§Ã£o push: atividade retomada
+            // Notificação push: atividade retomada
             if (atividadeAtual) {
                 notificarAcaoPCP('retomou', atividadeAtual.tipo, atividadeAtual.nome);
             }
@@ -1456,8 +1457,8 @@
                 observacoes: observacoes
             };
 
-            // Adicionar ao histÃ³rico
-            histÃ³ricoHoje.unshift(registro);
+            // Adicionar ao histórico
+            históricoHoje.unshift(registro);
             salvarHistoricoLocal();
             renderizarHistorico();
 
@@ -1467,8 +1468,8 @@
             // Resetar timer
             resetarTimer();
 
-            mostrarToast(`${registro.nome} finalizado! DuraÃ§Ã£o: ${formatarDuracao(registro.duracao)}`, 'success');
-            // NotificaÃ§Ã£o push: atividade finalizada com duraÃ§Ã£o
+            mostrarToast(`${registro.nome} finalizado! Duração: ${formatarDuracao(registro.duracao)}`, 'success');
+            // Notificação push: atividade finalizada com duração
             notificarAcaoPCP('finalizou', registro.tipo, registro.nome, formatarDuracao(registro.duracao));
         }
 
@@ -1486,7 +1487,7 @@
                 data: new Date().toISOString().split('T')[0]
             };
 
-            histÃ³ricoHoje.unshift(registro);
+            históricoHoje.unshift(registro);
             salvarHistoricoLocal();
             salvarRegistroServidor(registro);
         }
@@ -1506,7 +1507,7 @@
             atualizarDisplayTimer();
             atualizarUITimer();
 
-            // Esconder botÃµes e remover destaque
+            // Esconder botões e remover destaque
             document.getElementById('acoesTimer').style.display = 'none';
             document.getElementById('contextoApontamento').style.display = 'none';
             // Limpar campos de contexto
@@ -1553,7 +1554,7 @@
                     // Se estava pausado, manter os segundos acumulados
                     timerSeconds = atividade.timerSeconds || 0;
                 } else {
-                    // Se estava rodando, somar delta desde Ãºltimo save aos segundos acumulados
+                    // Se estava rodando, somar delta desde último save aos segundos acumulados
                     const savedAt = atividade.savedAt ? new Date(atividade.savedAt) : inicio;
                     const deltaSinceLastSave = Math.floor((agora - savedAt) / 1000);
                     timerSeconds = (atividade.timerSeconds || 0) + deltaSinceLastSave;
@@ -1585,18 +1586,18 @@
         }
 
         function salvarHistoricoLocal() {
-            localStorage.setItem('histÃ³rico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(histÃ³ricoHoje));
+            localStorage.setItem('histórico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(históricoHoje));
         }
 
         function carregarHistoricoLocal() {
             const hoje = new Date().toISOString().split('T')[0];
-            const dados = localStorage.getItem('histÃ³rico_apontamentos_' + hoje);
+            const dados = localStorage.getItem('histórico_apontamentos_' + hoje);
             if (dados) {
-                histÃ³ricoHoje = JSON.parse(dados);
+                históricoHoje = JSON.parse(dados);
             }
             renderizarHistorico();
 
-            // TambÃ©m carregar do servidor para ter dados completos
+            // Também carregar do servidor para ter dados completos
             carregarHistoricoServidor(hoje);
         }
 
@@ -1611,11 +1612,11 @@
                     const data = await resp.json();
                     const serverApontamentos = data.apontamentos || [];
                     if (serverApontamentos.length > 0) {
-                        // Mesclar: IDs do servidor que nÃ£o existem no local
-                        const localIds = new Set(histÃ³ricoHoje.map(h => h.id));
+                        // Mesclar: IDs do servidor que não existem no local
+                        const localIds = new Set(históricoHoje.map(h => h.id));
                         serverApontamentos.forEach(sa => {
                             if (!localIds.has(sa.id)) {
-                                histÃ³ricoHoje.push({
+                                históricoHoje.push({
                                     id: sa.id,
                                     tipo: sa.tipo,
                                     nome: sa.nome || sa.tipo,
@@ -1627,14 +1628,14 @@
                                 });
                             }
                         });
-                        // Ordenar por hora de inÃ­cio (mais recente primeiro)
-                        histÃ³ricoHoje.sort((a, b) => new Date(b.horaInicio) - new Date(a.horaInicio));
+                        // Ordenar por hora de início (mais recente primeiro)
+                        históricoHoje.sort((a, b) => new Date(b.horaInicio) - new Date(a.horaInicio));
                         salvarHistoricoLocal();
                         renderizarHistorico();
                     }
                 }
             } catch (e) {
-                console.log('Servidor indisponÃ­vel para histÃ³rico, usando dados locais');
+                console.log('Servidor indisponível para histórico, usando dados locais');
             }
         }
 
@@ -1658,7 +1659,7 @@
                     description: 'Apontamento: ' + registro.nome,
                     priority: 1 // Alta prioridade
                 });
-                mostrarToast('Sem conexÃ£o â€” apontamento salvo localmente. SerÃ¡ sincronizado automaticamente!', 'warning');
+                mostrarToast('Sem conexão — apontamento salvo localmente. Será sincronizado automaticamente!', 'warning');
                 console.log('[APONTAMENTOS] Enfileirado para sync offline');
                 return;
             }
@@ -1677,29 +1678,29 @@
                             description: 'Apontamento (retry): ' + registro.nome,
                             priority: 1
                         });
-                        mostrarToast('Erro no servidor â€” apontamento salvo para retry automÃ¡tico', 'warning');
+                        mostrarToast('Erro no servidor — apontamento salvo para retry automático', 'warning');
                     }
                 } else {
                     console.log('[APONTAMENTOS] Salvo no servidor com sucesso');
                 }
             } catch (e) {
                 console.error('Erro ao salvar no servidor:', e);
-                // Rede caiu â€” enfileirar
+                // Rede caiu — enfileirar
                 if (window.OfflineSyncManager) {
                     await window.OfflineSyncManager.enqueue('/api/pcp/apontamentos/chao', 'POST', body, {
                         module: 'pcp-apontamentos',
                         description: 'Apontamento (offline): ' + registro.nome,
                         priority: 1
                     });
-                    mostrarToast('ConexÃ£o perdida â€” apontamento salvo localmente!', 'warning');
+                    mostrarToast('Conexão perdida — apontamento salvo localmente!', 'warning');
                 }
             }
         }
 
         function renderizarHistorico() {
-            const container = document.getElementById('histÃ³ricoLista');
+            const container = document.getElementById('históricoLista');
 
-            if (!histÃ³ricoHoje.length) {
+            if (!históricoHoje.length) {
                 container.innerHTML = `
                     <div class="empty-state-mini">
                         <i class="fas fa-clock"></i>
@@ -1711,10 +1712,10 @@
             }
 
             // Calcular tempo total
-            const totalSegundos = histÃ³ricoHoje.reduce((acc, r) => acc + r.duracao, 0);
+            const totalSegundos = históricoHoje.reduce((acc, r) => acc + r.duracao, 0);
             document.getElementById('totalTempo').textContent = formatarDuracao(totalSegundos);
 
-            container.innerHTML = histÃ³ricoHoje.map(registro => {
+            container.innerHTML = históricoHoje.map(registro => {
                 const cores = coresAtividades[registro.tipo] || coresAtividades.outros;
                 const inicio = new Date(registro.horaInicio);
                 const fim = new Date(registro.horaFim);
@@ -1729,7 +1730,7 @@
                             <div class="historico-horarios">
                                 ${inicio.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} -
                                 ${fim.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
-                                ${registro.pedido_nÃºmero ? ` Â· <span style="color:#4338ca;font-weight:600;">Pedido #${registro.pedido_nÃºmero}</span>` : ''}
+                                ${registro.pedido_número ? ` · <span style="color:#4338ca;font-weight:600;">Pedido #${registro.pedido_número}</span>` : ''}
                             </div>
                             ${registro.observacoes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${registro.observacoes}">${registro.observacoes}</div>` : ''}
                         </div>

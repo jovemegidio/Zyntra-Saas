@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -12,8 +12,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Aluforce: Inutiliza√ß√£o</title>
-    <script src="/js/auth-unified.js?v=20260301" defer></script>
+    <title>Aluforce: InutilizaÁ„o</title>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/csp-fix.js" defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,7 +97,7 @@
             font-weight: 600;
         }
         .ambiente-homologacao { background: var(--warning-bg); color: #92400e; }
-        .ambiente-produ√ß√£o { background: var(--danger-bg); color: #991b1b; }
+        .ambiente-produÁ„o { background: var(--danger-bg); color: #991b1b; }
 
         .required-mark { color: var(--danger); }
 
@@ -114,13 +115,13 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat√≥rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÛrios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="Log√≠stica"><i class="fas fa-truck"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn active" title="Inutiliza√ß√£o"><i class="fas fa-ban"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="LogÌstica"><i class="fas fa-truck"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn active" title="InutilizaÁ„o"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configura√ß√µes" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="ConfiguraÁıes" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -131,15 +132,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">‚Äî</span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Inutiliza√ß√£o</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ó</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">InutilizaÁ„o</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="Notifica√ß√µes" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="NotificaÁıes" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu√°rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu·rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -157,8 +158,8 @@
                             <div class="page-title-wrapper">
                                 <div class="page-icon red"><i class="fas fa-ban"></i></div>
                                 <div>
-                                    <h2 class="page-title">Inutiliza√ß√£o de Numera√ß√£o</h2>
-                                    <p class="page-subtitle">Inutilize faixas de numera√ß√£o de NF-e n√£o utilizadas</p>
+                                    <h2 class="page-title">InutilizaÁ„o de NumeraÁ„o</h2>
+                                    <p class="page-subtitle">Inutilize faixas de numeraÁ„o de NF-e n„o utilizadas</p>
                                 </div>
                             </div>
                         </div>
@@ -166,19 +167,19 @@
 
                     <!-- Warning Banner -->
                     <div class="danger-banner">
-                        <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> OPERA√á√ÉO IRREVERS√çVEL</div>
-                        <p>A inutiliza√ß√£o de numera√ß√£o √© uma opera√ß√£o definitiva e n√£o pode ser desfeita. Utilize quando houver quebra de sequ√™ncia na numera√ß√£o das NF-e.</p>
+                        <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> OPERA«√O IRREVERSÕVEL</div>
+                        <p>A inutilizaÁ„o de numeraÁ„o È uma operaÁ„o definitiva e n„o pode ser desfeita. Utilize quando houver quebra de sequÍncia na numeraÁ„o das NF-e.</p>
                         <ul>
-                            <li>N√∫meros inutilizados n√£o poder√£o ser utilizados para emitir novas NF-e</li>
-                            <li>A inutiliza√ß√£o deve ser feita at√© o 10¬∫ dia do m√™s subsequente</li>
-                            <li>A SEFAZ validar√° os dados de s√©rie, CNPJ e UF do emitente</li>
+                            <li>N˙meros inutilizados n„o poder„o ser utilizados para emitir novas NF-e</li>
+                            <li>A inutilizaÁ„o deve ser feita atÈ o 10∫ dia do mÍs subsequente</li>
+                            <li>A SEFAZ validar· os dados de sÈrie, CNPJ e UF do emitente</li>
                         </ul>
                     </div>
 
                     <!-- Form Card -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-file-signature"></i> Dados para Inutiliza√ß√£o</span>
+                            <span class="card-title"><i class="fas fa-file-signature"></i> Dados para InutilizaÁ„o</span>
                         </div>
                         <div class="card-body">
                             <div id="suggestionBox" class="suggestion-box">
@@ -188,33 +189,33 @@
                             <form id="inutilizacaoForm" onsubmit="return false;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label>S√©rie <span class="required-mark">*</span></label>
+                                        <label>SÈrie <span class="required-mark">*</span></label>
                                         <input type="text" id="serie" class="form-control" value="1" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Ano <span class="required-mark">*</span></label>
                                         <input type="text" id="ano" class="form-control" required>
-                                        <span class="form-help">Formato: 2 d√≠gitos (ex: 26)</span>
+                                        <span class="form-help">Formato: 2 dÌgitos (ex: 26)</span>
                                     </div>
                                     <div class="form-group">
                                         <label>Ambiente</label>
                                         <select id="ambiente" class="form-control">
-                                            <option value="2">Homologa√ß√£o</option>
-                                            <option value="1">Produ√ß√£o</option>
+                                            <option value="2">HomologaÁ„o</option>
+                                            <option value="1">ProduÁ„o</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Faixa de Numera√ß√£o <span class="required-mark">*</span></label>
+                                    <label>Faixa de NumeraÁ„o <span class="required-mark">*</span></label>
                                     <div class="range-row">
                                         <div class="form-group" style="margin-bottom:0;">
-                                            <label>N√∫mero Inicial</label>
+                                            <label>N˙mero Inicial</label>
                                             <input type="number" id="numInicial" class="form-control" min="1" required placeholder="Ex: 100">
                                         </div>
-                                        <div class="range-separator">at√©</div>
+                                        <div class="range-separator">atÈ</div>
                                         <div class="form-group" style="margin-bottom:0;">
-                                            <label>N√∫mero Final</label>
+                                            <label>N˙mero Final</label>
                                             <input type="number" id="numFinal" class="form-control" min="1" required placeholder="Ex: 105">
                                         </div>
                                     </div>
@@ -244,29 +245,29 @@
 
                                 <div class="form-group">
                                     <label>Justificativa <span class="required-mark">*</span></label>
-                                    <textarea id="justificativa" class="form-control" rows="3" placeholder="M√≠nimo 15 caracteres" minlength="15" maxlength="255" oninput="atualizarContador()" required></textarea>
-                                    <div class="char-count"><span id="charCount">0</span>/255 caracteres (m√≠nimo 15)</div>
+                                    <textarea id="justificativa" class="form-control" rows="3" placeholder="MÌnimo 15 caracteres" minlength="15" maxlength="255" oninput="atualizarContador()" required></textarea>
+                                    <div class="char-count"><span id="charCount">0</span>/255 caracteres (mÌnimo 15)</div>
                                 </div>
 
                                 <div class="actions">
-                                    <button type="button" class="btn btn-primary" onclick="buscarSugestao()"><i class="fas fa-lightbulb"></i> Buscar Sugest√£o</button>
-                                    <button type="button" class="btn btn-danger" onclick="inutilizar()"><i class="fas fa-ban"></i> Inutilizar Numera√ß√£o</button>
+                                    <button type="button" class="btn btn-primary" onclick="buscarSugestao()"><i class="fas fa-lightbulb"></i> Buscar Sugest„o</button>
+                                    <button type="button" class="btn btn-danger" onclick="inutilizar()"><i class="fas fa-ban"></i> Inutilizar NumeraÁ„o</button>
                                 </div>
                             </form>
                         </div>
                     </div>
 
-                    <!-- Hist√≥rico -->
+                    <!-- HistÛrico -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-list"></i> Hist√≥rico de Inutiliza√ß√µes</span>
+                            <span class="card-title"><i class="fas fa-list"></i> HistÛrico de InutilizaÁıes</span>
                         </div>
                         <div class="card-body" style="padding:0;">
                             <div style="overflow-x:auto;">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>S√©rie</th>
+                                            <th>SÈrie</th>
                                             <th>Faixa</th>
                                             <th>Ano</th>
                                             <th>Data</th>
@@ -279,8 +280,8 @@
                             </div>
                             <div id="historicoEmpty" class="empty-state">
                                 <i class="fas fa-ban"></i>
-                                <h3>Nenhuma inutiliza√ß√£o registrada</h3>
-                                <p>As inutiliza√ß√µes realizadas aparecer√£o aqui</p>
+                                <h3>Nenhuma inutilizaÁ„o registrada</h3>
+                                <p>As inutilizaÁıes realizadas aparecer„o aqui</p>
                             </div>
                         </div>
                     </div>
@@ -309,7 +310,7 @@
             .then(r => r.json())
             .then(user => {
                 const d = user.dados || user;
-                const nome = (d.nome || d.name || 'Usu√°rio').split(' ')[0];
+                const nome = (d.nome || d.name || 'Usu·rio').split(' ')[0];
                 document.getElementById('user-name').textContent = nome;
                 const h = new Date().getHours();
                 document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -338,18 +339,18 @@
                 const box = document.getElementById('suggestionBox');
                 const text = document.getElementById('suggestionText');
                 if (data.sugestao || data.proximo) {
-                    text.textContent = 'Sugest√£o: inutilizar de ' + (data.inicio || data.de || '?') + ' at√© ' + (data.fim || data.ate || data.proximo || '?');
+                    text.textContent = 'Sugest„o: inutilizar de ' + (data.inicio || data.de || '?') + ' atÈ ' + (data.fim || data.ate || data.proximo || '?');
                     if (data.inicio || data.de) document.getElementById('numInicial').value = data.inicio || data.de;
                     if (data.fim || data.ate) document.getElementById('numFinal').value = data.fim || data.ate;
                     box.style.display = 'block';
                 } else {
-                    text.textContent = 'Nenhuma sugest√£o dispon√≠vel para esta s√©rie';
+                    text.textContent = 'Nenhuma sugest„o disponÌvel para esta sÈrie';
                     box.style.display = 'block';
                 }
             })
             .catch(() => {
                 document.getElementById('suggestionBox').style.display = 'block';
-                document.getElementById('suggestionText').textContent = 'N√£o foi poss√≠vel obter sugest√£o do servidor';
+                document.getElementById('suggestionText').textContent = 'N„o foi possÌvel obter sugest„o do servidor';
             });
         }
 
@@ -364,17 +365,17 @@
             const ambiente = document.getElementById('ambiente').value;
 
             if (!serie || !ano || !numInicial || !numFinal || !cnpj || !uf || !justificativa) {
-                return showAlert('Preencha todos os campos obrigat√≥rios', 'warning');
+                return showAlert('Preencha todos os campos obrigatÛrios', 'warning');
             }
             if (justificativa.length < 15) {
-                return showAlert('Justificativa deve ter no m√≠nimo 15 caracteres', 'warning');
+                return showAlert('Justificativa deve ter no mÌnimo 15 caracteres', 'warning');
             }
             if (parseInt(numFinal) < parseInt(numInicial)) {
-                return showAlert('N√∫mero final deve ser maior ou igual ao inicial', 'warning');
+                return showAlert('N˙mero final deve ser maior ou igual ao inicial', 'warning');
             }
 
             const qtd = parseInt(numFinal) - parseInt(numInicial) + 1;
-            if (!confirm('ATEN√á√ÉO: Voc√™ est√° prestes a inutilizar ' + qtd + ' n√∫mero(s) de NFe (de ' + numInicial + ' a ' + numFinal + ').\n\nEsta opera√ß√£o √© IRREVERS√çVEL.\n\nDeseja continuar?')) return;
+            if (!confirm('ATEN«√O: VocÍ est· prestes a inutilizar ' + qtd + ' n˙mero(s) de NFe (de ' + numInicial + ' a ' + numFinal + ').\n\nEsta operaÁ„o È IRREVERSÕVEL.\n\nDeseja continuar?')) return;
 
             fetch('/api/nfe/inutilizar', {
                 method:'POST',
@@ -387,7 +388,7 @@
                 return r.json();
             })
             .then(data => {
-                showAlert('Inutiliza√ß√£o realizada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
+                showAlert('InutilizaÁ„o realizada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
                 carregarHistorico();
                 // Reset form
                 document.getElementById('numInicial').value = '';
@@ -395,7 +396,7 @@
                 document.getElementById('justificativa').value = '';
                 atualizarContador();
             })
-            .catch(e => showAlert(e.message || 'Erro ao processar inutiliza√ß√£o', 'danger'));
+            .catch(e => showAlert(e.message || 'Erro ao processar inutilizaÁ„o', 'danger'));
         }
 
         function carregarHistorico() {
@@ -443,7 +444,7 @@
             setTimeout(() => d.remove(), 5000);
         }
 
-        function abrirModalConfiguracoes() { alert('Configura√ß√µes - Em desenvolvimento'); }
+        function abrirModalConfiguracoes() { alert('ConfiguraÁıes - Em desenvolvimento'); }
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();

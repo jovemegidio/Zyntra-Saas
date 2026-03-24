@@ -387,37 +387,18 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         const user = rows[0];
 
         // ========================================
-        // VALIDAÇÃO: BLOQUEAR USUÁRIOS DEMITIDOS
+        // VALIDAÇÃO: BLOQUEAR USUÁRIOS INATIVOS/DEMITIDOS
+        // A fonte primária de verdade é o campo `status` no banco de dados.
+        // A lista hardcoded foi removida — gerenciar status via painel admin.
         // ========================================
-        const usuariosDemitidos = [
-            'ariel.leandro',
-            'felipe.santos',
-            'flavio.bezerra',
-            'lais.luna',
-            'nicolas.santana',
-            'thaina.freitas',
-            'kissia',
-            'sarah'
-        ];
 
-        // Verificar se o usuário está demitido (por nome ou email)
-        const nomeUsuario = (user.nome || user.name || '').toLowerCase().trim();
-        const emailUsuario = (user.email || '').toLowerCase().trim();
-
-        const estaDemitido = usuariosDemitidos.some(demitido => {
-            // Verificar se o nome contém o nome do demitido
-            if (nomeUsuario.includes(demitido)) return true;
-            // Verificar se o email contém o nome do demitido
-            if (emailUsuario.includes(demitido)) return true;
-            return false;
-        });
-
-        // Também verificar campo de status se existir (ativo, inativo, demitido)
-        const statusUsuario = (user.status || '').toLowerCase();
+        // Verificar campo de status no banco (ativo, inativo, demitido, desativado, bloqueado)
+        const statusUsuario = (user.status || '').toLowerCase().trim();
         const statusInativo = ['demitido', 'inativo', 'desativado', 'bloqueado'].includes(statusUsuario);
 
-        if (estaDemitido || statusInativo) {
-            console.log(`🚫 Login bloqueado - Usuário demitido: ${user.email} (${user.nome})`);
+        if (statusInativo) {
+            await auditLog('login_blocked_inactive', user.id, `Login bloqueado - status=${statusUsuario}: ${user.email}`, req);
+            console.log(`🚫 Login bloqueado - Usuário inativo (status=${statusUsuario}): ${user.email}`);
             return res.status(403).json({
                 message: 'Acesso negado. Seu usuário foi desativado. Entre em contato com o departamento de TI.'
             });
