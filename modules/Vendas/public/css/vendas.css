@@ -669,28 +669,41 @@ body {
 
 .modal-close,
 .close-btn {
-    background: none;
-    border: none;
-    color: #8b8b9a;
-    font-size: 14px;
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 500;
     cursor: pointer;
-    padding: 8px 14px;
-    border-radius: 6px;
+    padding: 6px 14px;
+    border-radius: 20px;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s;
+    transition: all 0.2s ease;
+    white-space: nowrap;
 }
 
 .modal-close:hover,
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
 }
 
-.modal-header-omie .close-btn:hover {
-    background: #f5f5f5;
-    color: #333;
+/* Close btn on dark headers (gradient backgrounds) */
+.modal-header .close-btn,
+.modal-header .modal-close {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.modal-header .close-btn:hover,
+.modal-header .modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
 }
 
 .modal-body {
