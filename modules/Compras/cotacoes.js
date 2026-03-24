@@ -40,13 +40,18 @@ class CotacoesManager {
         };
     }
 
+    escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
     async carregarDependencias() {
         try {
             // Carregar fornecedores da API
             const respForn = await fetch('/api/compras/fornecedores', {
                     credentials: 'include',
                     headers: this.getAuthHeaders()
-                }));
+                });
             if (respForn.ok) {
                 const data = await respForn.json();
                 this.fornecedores = Array.isArray(data) ? data : (data.fornecedores || []);
@@ -61,7 +66,7 @@ class CotacoesManager {
             const respMat = await fetch('/api/pcp/materiais', {
                     credentials: 'include',
                     headers: this.getAuthHeaders()
-                }));
+                });
             if (respMat.ok) {
                 const data = await respMat.json();
                 this.materiais = Array.isArray(data) ? data : (data.materiais || []);
@@ -78,7 +83,7 @@ class CotacoesManager {
             const response = await fetch('/api/compras/cotacoes', {
                     credentials: 'include',
                     headers: this.getAuthHeaders()
-                }));
+                });
 
             if (response.ok) {
                 const data = await response.json();
@@ -317,9 +322,9 @@ class CotacoesManager {
 
             tr.innerHTML = `
                 <td><input type="checkbox" class="cotacao-checkbox" data-id="${cotacao.id}"></td>
-                <td><strong>${cotacao.numero || '-'}</strong></td>
+                <td><strong>${this.escapeHtml(cotacao.numero) || '-'}</strong></td>
                 <td>${this.formatarData(cotacao.data)}</td>
-                <td>${cotacao.solicitante || '-'}</td>
+                <td>${this.escapeHtml(cotacao.solicitante) || '-'}</td>
                 <td>
                     <span class="badge badge-info">${numMateriais} ${numMateriais === 1 ? 'material' : 'materiais'}</span>
                 </td>
@@ -443,7 +448,7 @@ class CotacoesManager {
     }
 
     abrirModalNova() {
-        document.getElementById('modalTitle').textContent = 'Nova Cotação';
+        document.getElementById('modalCotacaoTitulo').textContent = 'Nova Cotação';
         document.getElementById('formCotacao').reset();
         document.getElementById('cotacaoId').value = '';
 
@@ -464,7 +469,7 @@ class CotacoesManager {
         // Renderizar checkboxes de fornecedores
         this.renderizarFornecedoresCheckbox();
 
-        document.getElementById('modalCotacao').style.display = 'flex';
+        document.getElementById('modalNovaCotacao').classList.add('active');
     }
 
     renderizarFornecedoresCheckbox() {
@@ -477,7 +482,7 @@ class CotacoesManager {
             div.innerHTML = `
                 <label>
                     <input type="checkbox" class="fornecedor-checkbox" value="${fornecedor.id}">
-                    ${fornecedor.nome}
+                    ${this.escapeHtml(fornecedor.nome)}
                 </label>
             `;
             container.appendChild(div);
@@ -523,7 +528,7 @@ class CotacoesManager {
             return;
         }
 
-        document.getElementById('modalTitle').textContent = 'Editar Cotação';
+        document.getElementById('modalCotacaoTitulo').textContent = 'Editar Cotação';
         document.getElementById('cotacaoId').value = cotacao.id;
         document.getElementById('cotacaoNumero').value = cotacao.numero;
         document.getElementById('cotacaoData').value = cotacao.data;
@@ -563,7 +568,7 @@ class CotacoesManager {
             if (checkbox) checkbox.checked = true;
         });
 
-        document.getElementById('modalCotacao').style.display = 'flex';
+        document.getElementById('modalNovaCotacao').classList.add('active');
     }
 
     visualizar(id) {
@@ -612,12 +617,12 @@ class CotacoesManager {
         const body = document.getElementById('viewCotacaoBody');
         body.innerHTML =
             '<div class="view-section"><h4><i class="fas fa-info-circle"></i> Informações Gerais</h4><div class="view-grid">' +
-                '<div class="view-item"><label>Número</label><p>' + (cotacao.numero || '-') + '</p></div>' +
+                '<div class="view-item"><label>Número</label><p>' + this.escapeHtml(cotacao.numero || '-') + '</p></div>' +
                 '<div class="view-item"><label>Data</label><p>' + this.formatarData(cotacao.data) + '</p></div>' +
-                '<div class="view-item"><label>Solicitante</label><p>' + (cotacao.solicitante || '-') + '</p></div>' +
-                '<div class="view-item"><label>Status</label><p><span class="badge badge-' + statusClass + '">' + (cotacao.status || '-') + '</span></p></div>' +
+                '<div class="view-item"><label>Solicitante</label><p>' + this.escapeHtml(cotacao.solicitante || '-') + '</p></div>' +
+                '<div class="view-item"><label>Status</label><p><span class="badge badge-' + statusClass + '">' + this.escapeHtml(cotacao.status || '-') + '</span></p></div>' +
                 '<div class="view-item"><label>Melhor Oferta</label><p style="font-weight:700;color:#059669;">' + melhorOferta + '</p></div>' +
-                '<div class="view-item"><label>Observações</label><p>' + (cotacao.observacoes || '-') + '</p></div>' +
+                '<div class="view-item"><label>Observações</label><p>' + this.escapeHtml(cotacao.observacoes || '-') + '</p></div>' +
             '</div></div>' +
             '<div class="view-section"><h4><i class="fas fa-boxes"></i> Materiais (' + materiais.length + ')</h4>' + materiaisHtml + '</div>' +
             '<div class="view-section"><h4><i class="fas fa-file-invoice-dollar"></i> Propostas (' + propostas.length + ')</h4>' + propostasHtml + '</div>';
@@ -793,7 +798,6 @@ class CotacoesManager {
         try {
             const response = await fetch(`/api/compras/cotacoes/${cotacao.id}/aprovar-proposta`, { credentials: 'include', method: 'POST',
                 headers: this.getAuthHeaders(),
-                credentials: 'include',
                 body: JSON.stringify({
                     proposta_id: cotacao.melhorProposta.id || null,
                     fornecedor_id: cotacao.melhorProposta.fornecedorId,
@@ -949,7 +953,6 @@ class CotacoesManager {
             // Chamar API para aprovar e gerar pedido
             const response = await fetch(`/api/compras/cotacoes/${cotacao.id}/aprovar-proposta`, { credentials: 'include', method: 'POST',
                 headers: this.getAuthHeaders(),
-                credentials: 'include',
                 body: JSON.stringify({
                     proposta_id: cotacao.melhorProposta.id || null,
                     fornecedor_id: cotacao.melhorProposta.fornecedorId,
@@ -1131,7 +1134,7 @@ class CotacoesManager {
     }
 
     fecharModal() {
-        document.getElementById('modalCotacao').style.display = 'none';
+        document.getElementById('modalNovaCotacao').classList.remove('active');
     }
 
     fecharModalComparacao() {

@@ -6,6 +6,9 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const { auditTrail } = require('../middleware/audit-trail');
+const { tenantScope } = require('../middleware/rls-tenant');
+const { validate: joiValidate, schemas: joiSchemas } = require('../middleware/schema-validation');
 
 module.exports = function createVendasRoutes(deps) {
     const { pool, authenticateToken, authorizeArea, authorizeAdmin, authorizeAdminOrComercial, writeAuditLog, cacheMiddleware, CACHE_CONFIG, checkOwnership, writeGuard } = deps;
@@ -24,7 +27,9 @@ module.exports = function createVendasRoutes(deps) {
     const path = require('path');
     const multer = require('multer');
     const fs = require('fs');
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
     const validate = (req, res, next) => {
         const errors = validationResult(req);
@@ -35,10 +40,19 @@ module.exports = function createVendasRoutes(deps) {
     // AUDIT-FIX SEC-001: IDOR protection for pedidos (owner = vendedor_id)
     const pedidoOwnership = checkOwnership ? checkOwnership(pool, 'pedidos', 'vendedor_id') : (req, res, next) => next();
 
+    // LGPD-FIX: Criptografar PII (CNPJ/CPF) antes de gravar no banco
+    let lgpdCrypto = null;
+    try { lgpdCrypto = require('../lgpd-crypto'); } catch (_) {}
+    const _enc = (val) => (lgpdCrypto && lgpdCrypto.encryptPII) ? lgpdCrypto.encryptPII(val) : val;
+
     router.use(authenticateToken);
     router.use(authorizeArea('vendas'));
     // AUDIT-FIX PERM-004: Block mutations for consultoria/restricted roles
     router.use(writeGuard || ((req, res, next) => next()));
+    // Audit trail for mutation operations
+    router.use(auditTrail('vendas'));
+    // Multi-tenant isolation
+    router.use(tenantScope());
 
     // Garantir que tabela notificacoes existe (inicialização única)
     pool.query(`
@@ -186,7 +200,9 @@ module.exports = function createVendasRoutes(deps) {
     router.get('/pedidos', cacheMiddleware('vendas_pedidos', 60000), async (req, res, next) => {
         try {
             const { period, page = 1, limit = 1000 } = req.query;
-            const rows = await repos.pedido.list({ period, page, limit });
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            const rows = await repos.pedido.list({ period, page, limit, userId: user.id, isAdmin });
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -256,6 +272,9 @@ module.exports = function createVendasRoutes(deps) {
                     await repairConn.commit();
                     const [rows2] = await pool.query('SELECT id, pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto, subtotal FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]);
                     itensDB = rows2;
+                    // Sprint 4.7: Limpar produtos_preview após migração bem-sucedida para pedido_itens
+                    await pool.query('UPDATE pedidos SET produtos_preview = NULL WHERE id = ?', [id]);
+                    console.log(`[VENDAS] Sprint 4.7: produtos_preview limpo para pedido #${id} após migração (${rows2.length} itens migrados)`);
                 } catch (e) {
                     await repairConn.rollback();
                     console.log('[VENDAS] Erro no auto-repair router (rollback):', e.message);
@@ -457,7 +476,7 @@ module.exports = function createVendasRoutes(deps) {
                 pedidoOriginal.vendedor_id,
                 pedidoOriginal.vendedor,
                 `[CÓPIA DO PEDIDO #${id}] ${pedidoOriginal.observacoes || ''}`,
-                pedidoOriginal.empresa_id || 1,
+                req.user.empresa_id,
                 pedidoOriginal.frete || 0,
                 pedidoOriginal.desconto || 0,
                 pedidoOriginal.cenario_fiscal || 'Venda Normal',
@@ -508,8 +527,11 @@ module.exports = function createVendasRoutes(deps) {
     });
     
     // PATCH /pedidos/:id - Atualização parcial do pedido (para o Kanban)
+    // Sprint E2E-S1 (RC-HIGH-01 fix): Wrapped in transaction for atomicity
     router.patch('/pedidos/:id', async (req, res, next) => {
+        const patchConn = await pool.getConnection();
         try {
+            await patchConn.beginTransaction();
             const { id } = req.params;
             let updates = req.body;
     
@@ -532,8 +554,8 @@ module.exports = function createVendasRoutes(deps) {
     
             console.log(`📝 PATCH /pedidos/${id} - Dados recebidos:`, updates);
     
-            // Verificar se pedido existe
-            const [existingRows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+            // Verificar se pedido existe — Sprint E2E-S1: usa patchConn (transação)
+            const [existingRows] = await patchConn.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (existingRows.length === 0) {
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
@@ -547,17 +569,46 @@ module.exports = function createVendasRoutes(deps) {
                 return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável ou admin podem editar este pedido.' });
             }
     
+            // Sprint 1 (K-05 fix): Bloquear alteração de status via PATCH
+            // Toda mudança de status DEVE usar PUT /pedidos/:id/status (com máquina de estados + FOR UPDATE)
+            if (updates.status !== undefined) {
+                console.log(`🚫 PATCH bloqueado: tentativa de alterar status do pedido #${id} via PATCH. Use PUT /pedidos/${id}/status.`);
+                return res.status(400).json({
+                    message: 'Alteração de status não é permitida via PATCH. Use o endpoint PUT /pedidos/:id/status.',
+                    endpoint_correto: `PUT /api/vendas/pedidos/${id}/status`
+                });
+            }
+
             // AUDIT-FIX: Block financial field changes on faturado/finalizado pedidos
             const statusAtual = (existing.status || '').toLowerCase().trim();
             const isFaturado = ['faturado', 'finalizado', 'entregue', 'recibo'].includes(statusAtual);
             const financialFields = ['valor', 'frete', 'desconto', 'valor_seguro', 'outras_despesas', 'parcelas', 'condicao_pagamento'];
+            // Sprint E2E-S1 (E4-HIGH-07 fix): Block address/transport fields after faturamento too
+            const deliveryFields = ['endereco_entrega', 'municipio_entrega', 'tipo_frete', 'transportadora_nome', 'transportadora', 'transportadora_id', 'metodo_envio', 'tipo_entrega'];
     
             if (isFaturado && !isAdmin) {
-                const blockedFields = financialFields.filter(f => updates[f] !== undefined);
+                const blockedFields = [...financialFields, ...deliveryFields].filter(f => updates[f] !== undefined);
                 if (blockedFields.length > 0) {
-                    console.log(`🚫 PATCH bloqueado: pedido #${id} status=${statusAtual}, campos financeiros: ${blockedFields.join(', ')}`);
+                    console.log(`🚫 PATCH bloqueado: pedido #${id} status=${statusAtual}, campos protegidos: ${blockedFields.join(', ')}`);
                     return res.status(403).json({
-                        message: `Pedido com status "${statusAtual}" não permite alteração de campos financeiros (${blockedFields.join(', ')}). Contate um administrador.`
+                        message: `Pedido com status "${statusAtual}" não permite alteração de campos financeiros/entrega (${blockedFields.join(', ')}). Contate um administrador.`
+                    });
+                }
+            }
+
+            // Sprint 2 (P-03): Bloquear edição de campos críticos quando há OP ativa vinculada
+            const camposCriticos = ['valor', 'frete', 'desconto', 'parcelas', 'condicao_pagamento', 'cliente_id', 'cliente_nome'];
+            const camposCriticosAlterados = camposCriticos.filter(f => updates[f] !== undefined);
+            if (camposCriticosAlterados.length > 0) {
+                const [opAtiva] = await patchConn.query(
+                    'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
+                    [id]
+                );
+                if (opAtiva.length > 0 && !isAdmin) {
+                    console.log(`🚫 PATCH bloqueado: pedido #${id} tem OP ativa ${opAtiva[0].codigo}, campos: ${camposCriticosAlterados.join(', ')}`);
+                    return res.status(403).json({
+                        message: `Pedido com ordem de produção ativa (${opAtiva[0].codigo}) não permite alteração de ${camposCriticosAlterados.join(', ')}. Cancele a OP primeiro ou contate um administrador.`,
+                        op_ativa: opAtiva[0]
                     });
                 }
             }
@@ -568,7 +619,7 @@ module.exports = function createVendasRoutes(deps) {
     
             // Atualizar vendedor_id se vendedor_nome foi fornecido
             if (updates.vendedor_nome !== undefined && updates.vendedor_nome !== '') {
-                const [vendedorRows] = await pool.query(
+                const [vendedorRows] = await patchConn.query(
                     'SELECT id, nome FROM usuarios WHERE nome LIKE ? OR apelido LIKE ? LIMIT 1',
                     [`%${updates.vendedor_nome}%`, `%${updates.vendedor_nome}%`]
                 );
@@ -588,11 +639,7 @@ module.exports = function createVendasRoutes(deps) {
                 values.push(updates.observacao);
             }
     
-            // Status existe na tabela
-            if (updates.status !== undefined) {
-                fieldsToUpdate.push('status = ?');
-                values.push(updates.status);
-            }
+            // Status NÃO aceito via PATCH (Sprint 1 K-05) — bloqueado acima
     
             // Valor existe na tabela (campo numérico)
             if (updates.valor !== undefined) {
@@ -856,7 +903,7 @@ module.exports = function createVendasRoutes(deps) {
             console.log(`📝 Query: ${query}`);
             console.log(`📝 Values:`, values);
     
-            const [result] = await pool.query(query, values);
+            const [result] = await patchConn.query(query, values);
     
             if (result.affectedRows === 0) {
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
@@ -864,95 +911,64 @@ module.exports = function createVendasRoutes(deps) {
     
             console.log(`✅ Pedido ${id} atualizado com sucesso! (${result.affectedRows} linha(s) afetada(s))`);
 
+            // Sprint 4.3: Recalcular valor server-side a partir de pedido_itens
+            // Sempre que campos financeiros mudam (frete, desconto, valor direto), recalcula se itens existem
+            const camposFinanceirosAlterados = ['frete', 'desconto', 'valor', 'valor_seguro', 'outras_despesas'].some(f => updates[f] !== undefined);
+            if (camposFinanceirosAlterados) {
+                try {
+                    const [itensAgg] = await patchConn.query(
+                        `SELECT COUNT(*) as count,
+                                COALESCE(SUM(subtotal), 0) as total_subtotais,
+                                COALESCE(SUM(valor_ipi), 0) as total_ipi,
+                                COALESCE(SUM(valor_icms_st), 0) as total_icms_st
+                         FROM pedido_itens WHERE pedido_id = ?`, [id]
+                    );
+                    if (itensAgg[0].count > 0) {
+                        const [pedAtual] = await patchConn.query('SELECT COALESCE(frete, 0) as frete FROM pedidos WHERE id = ?', [id]);
+                        const novoValor = parseFloat(itensAgg[0].total_subtotais) + parseFloat(itensAgg[0].total_ipi) + parseFloat(itensAgg[0].total_icms_st) + parseFloat(pedAtual[0]?.frete || 0);
+                        await patchConn.query('UPDATE pedidos SET valor = ?, total_ipi = ?, total_icms_st = ? WHERE id = ?',
+                            [novoValor, itensAgg[0].total_ipi, itensAgg[0].total_icms_st, id]);
+                        console.log(`🔄 [Sprint 4.3] Valor recalculado pedido #${id}: R$${novoValor.toFixed(2)} (${itensAgg[0].count} itens, subtotais: ${itensAgg[0].total_subtotais}, IPI: ${itensAgg[0].total_ipi}, ICMS-ST: ${itensAgg[0].total_icms_st}, frete: ${pedAtual[0]?.frete || 0})`);
+                    }
+                } catch (recalcErr) {
+                    console.error(`[Sprint 4.3] Erro ao recalcular valor pedido #${id} (não-bloqueante):`, recalcErr.message);
+                }
+            }
+
             // Registrar histórico da alteração via PATCH
             try {
                 const camposAlterados = Object.keys(updates).filter(k => updates[k] !== undefined).join(', ');
-                await pool.query(
+
+                // Sprint E2E-S2 (E1-HIGH-02): Auditoria delta — registrar valor anterior vs novo
+                let deltaInfo = {};
+                const camposAuditaveis = ['valor', 'frete', 'desconto', 'valor_seguro', 'outras_despesas', 'condicao_pagamento'];
+                camposAuditaveis.forEach(campo => {
+                    if (updates[campo] !== undefined && existing[campo] !== undefined) {
+                        deltaInfo[campo] = { anterior: existing[campo], novo: updates[campo] };
+                    }
+                });
+
+                await patchConn.query(
                     'INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
                     [id, user.id || null, user.nome || user.email || 'Sistema', 'edicao',
                      `Atualização via PATCH: ${camposAlterados}`,
-                     JSON.stringify({ campos: Object.keys(updates), status_anterior: statusAtual, status_novo: updates.status || statusAtual })]
+                     JSON.stringify({ campos: Object.keys(updates), status_anterior: statusAtual, status_novo: updates.status || statusAtual, delta: deltaInfo })]
                 ).catch(() => {
                     // Fallback para colunas alternativas
-                    return pool.query(
+                    return patchConn.query(
                         'INSERT INTO pedido_historico (pedido_id, descricao, acao, meta) VALUES (?, ?, ?, ?)',
                         [id, `${user.nome || 'Sistema'}: Atualização PATCH - ${camposAlterados}`, 'edicao',
-                         JSON.stringify({ campos: Object.keys(updates) })]
+                         JSON.stringify({ campos: Object.keys(updates), delta: deltaInfo })]
                     );
                 });
             } catch (histErr) {
                 console.error(`[HISTORICO] Erro ao registrar histórico PATCH pedido #${id}:`, histErr.message);
             }
     
-            // ========================================
-            // ESTORNO DE ESTOQUE AO CANCELAR (PATCH/Kanban)
-            // ========================================
-            let estornoEstoque = [];
-            if (updates.status === 'cancelado' && ['analise-credito', 'pedido-aprovado', 'aprovado', 'faturar'].includes(statusAtual)) {
-                try {
-                    console.log(`[ESTORNO_ESTOQUE] PATCH - Cancelamento do pedido #${id} a partir de "${statusAtual}"`);
-                    
-                    const [movimentacoes] = await pool.query(`
-                        SELECT id, codigo_material, quantidade, quantidade_anterior, quantidade_atual
-                        FROM estoque_movimentacoes
-                        WHERE documento_tipo = 'pedido' AND documento_id = ? AND tipo_movimento = 'saida'
-                        ORDER BY id ASC
-                    `, [id]);
-                    
-                    if (movimentacoes.length > 0) {
-                        for (const mov of movimentacoes) {
-                            const [produtos] = await pool.query(
-                                'SELECT id, codigo, descricao, estoque_atual, estoque_cancelado FROM produtos WHERE codigo = ? LIMIT 1',
-                                [mov.codigo_material]
-                            );
-                            if (produtos.length > 0) {
-                                const produto = produtos[0];
-                                const estoqueAnterior = parseFloat(produto.estoque_atual || 0);
-                                const qtdEstorno = parseFloat(mov.quantidade);
-                                const novoEstoque = estoqueAnterior + qtdEstorno;
-                                await pool.query('UPDATE produtos SET estoque_atual = ?, estoque_cancelado = COALESCE(estoque_cancelado, 0) + ? WHERE id = ?', [novoEstoque, qtdEstorno, produto.id]);
-                                await pool.query(`
-                                    INSERT INTO estoque_movimentacoes
-                                    (codigo_material, tipo_movimento, origem, quantidade, quantidade_anterior, quantidade_atual,
-                                     documento_tipo, documento_id, usuario_id, observacao, data_movimento)
-                                    VALUES (?, 'entrada', 'estorno', ?, ?, ?, 'pedido_cancelado', ?, ?, ?, NOW())
-                                `, [mov.codigo_material, qtdEstorno, estoqueAnterior, novoEstoque, id, user.id || null,
-                                    `Estorno PATCH - Cancelamento Pedido #${id} - ${qtdEstorno} devolvido ao estoque disponivel`]);
-                                estornoEstoque.push({ produto: produto.codigo, quantidade_devolvida: qtdEstorno, tipo: 'estorno_disponivel' });
-                                console.log(`[ESTORNO_ESTOQUE] ${produto.codigo} - ${qtdEstorno} devolvido ao estoque_atual (${estoqueAnterior} -> ${novoEstoque})`);
-                            }
-                        }
-                    } else {
-                        const [itensEstorno] = await pool.query('SELECT codigo, descricao, quantidade, unidade FROM pedido_itens WHERE pedido_id = ?', [id]);
-                        for (const item of itensEstorno) {
-                            if (!item.codigo) continue;
-                            const [produtos] = await pool.query('SELECT id, codigo, descricao, estoque_atual, estoque_cancelado FROM produtos WHERE codigo = ? OR sku = ? LIMIT 1', [item.codigo, item.codigo]);
-                            if (produtos.length > 0) {
-                                const produto = produtos[0];
-                                const qtd = parseFloat(item.quantidade || 0);
-                                if (qtd <= 0) continue;
-                                const estoqueAnterior = parseFloat(produto.estoque_atual || 0);
-                                const novoEstoque = estoqueAnterior + qtd;
-                                await pool.query('UPDATE produtos SET estoque_atual = ?, estoque_cancelado = COALESCE(estoque_cancelado, 0) + ? WHERE id = ?', [novoEstoque, qtd, produto.id]);
-                                await pool.query(`
-                                    INSERT INTO estoque_movimentacoes
-                                    (codigo_material, tipo_movimento, origem, quantidade, quantidade_anterior, quantidade_atual,
-                                     documento_tipo, documento_id, usuario_id, observacao, data_movimento)
-                                    VALUES (?, 'entrada', 'estorno', ?, ?, ?, 'pedido_cancelado', ?, ?, ?, NOW())
-                                `, [produto.codigo, qtd, estoqueAnterior, novoEstoque, id, user.id || null,
-                                    `Estorno PATCH - Cancelamento Pedido #${id} - ${qtd}${item.unidade || 'UN'} devolvido ao estoque`]);
-                                estornoEstoque.push({ produto: produto.codigo, quantidade_devolvida: qtd, tipo: 'estorno_disponivel' });
-                            }
-                        }
-                    }
-                    if (estornoEstoque.length > 0) console.log(`[ESTORNO_ESTOQUE] PATCH: ${estornoEstoque.length} produto(s) estornados`);
-                } catch (estornoErr) {
-                    console.error(`[ESTORNO_ESTOQUE] Erro PATCH pedido #${id}:`, estornoErr.message);
-                }
-            }
+            // Sprint 1 (K-05): Estorno de estoque removido do PATCH — cancelamento agora DEVE usar PUT /pedidos/:id/status
 
             // Buscar pedido atualizado para retornar
-            const [updatedRows] = await pool.query(`
+            const [updatedRows] = await patchConn.query(`
                 SELECT p.*,
                        c.nome as cliente_nome,
                        u.nome as vendedor_nome
@@ -961,16 +977,18 @@ module.exports = function createVendasRoutes(deps) {
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
                 WHERE p.id = ?
             `, [id]);
-    
+
+            await patchConn.commit();
             res.json({
                 message: 'Pedido atualizado com sucesso.',
-                pedido: updatedRows[0] || null,
-                estoque_estornado: estornoEstoque.length > 0,
-                estorno_estoque: estornoEstoque
+                pedido: updatedRows[0] || null
             });
         } catch (error) {
+            await patchConn.rollback().catch(() => {});
             console.error('❌ Erro ao atualizar pedido (PATCH):', error);
             next(error);
+        } finally {
+            patchConn.release();
         }
     });
     
@@ -1050,21 +1068,25 @@ module.exports = function createVendasRoutes(deps) {
     }
 
     // ============================================================
-    // SISTEMA DE PERMISSÕES DE STATUS POR USUÁRIO
-    // Define quais status cada perfil de usuário pode acessar
+    // SISTEMA DE PERMISSÕES DE STATUS POR ROLE/CARGO (Sprint 1 - K-01 fix)
+    // Usa role do JWT (admin/comercial/user) ao invés de primeiro nome
     // ============================================================
     const userPermissions = {
-        // Mapa de permissões por primeiro nome (lowercase, sem acentos)
+        // Mapa de permissões por role do banco (usuarios.role)
         statusPermissions: {
-            // Vendedores podem mover até analise e cancelar
+            // Vendedores (role=user/comercial) podem mover até analise e cancelar
             'default': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
-            // Perfis com acesso ampliado (gerentes, supervisores)
-            'gerente': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo', 'cancelado'],
-            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo', 'cancelado']
+            'user': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
+            'comercial': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
+            // Sprint E2E-S2 (E2-CRIT-02): Roles intermediários — supervisor aprova, aprovador fatura
+            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'cancelado'],
+            'aprovador': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
+            // Admin tem acesso total (redundante pois admin bypassa, mas documenta)
+            'admin': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo', 'cancelado']
         },
-        canMoveToStatus(firstName, status) {
-            // Verificar se o usuário tem permissão específica
-            const perms = this.statusPermissions[firstName] || this.statusPermissions['default'];
+        canMoveToStatus(userRole, status) {
+            const role = (userRole || 'default').toLowerCase();
+            const perms = this.statusPermissions[role] || this.statusPermissions['default'];
             return perms.includes(status);
         }
     };
@@ -1099,9 +1121,11 @@ module.exports = function createVendasRoutes(deps) {
                 return res.status(400).json({ message: 'Status inválido.' });
             }
     
-            // Buscar status atual do pedido para validar transição
-            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id FROM pedidos WHERE id = ?', [id]);
+            // Sprint 1 (K-03/RC-01 fix): SELECT ... FOR UPDATE para atomicidade
+            await connection.beginTransaction();
+            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id, cliente_id, cliente_nome, valor, condicao_pagamento FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (pedidoAtual.length === 0) {
+                await connection.rollback();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
     
@@ -1113,37 +1137,44 @@ module.exports = function createVendasRoutes(deps) {
     
             // Validar transição de status (admin pode forçar)
             const transicoesValidas = VALID_STATUS_TRANSITIONS[statusAtual] || [];
-            if (!transicoesValidas.includes(status) && !forceTransition) {
+            // Sprint E2E-S2 (E2-CRIT-03): forceTransition só permitido para admin
+            const canForce = forceTransition && isAdmin;
+            if (!transicoesValidas.includes(status) && !canForce) {
                 if (!isAdmin) {
                     console.log(`❌ Transição inválida: ${statusAtual} -> ${status}`);
+                    await connection.rollback();
                     return res.status(400).json({
                         message: `Transição de status inválida: "${statusAtual}" → "${status}". Transições válidas: ${transicoesValidas.join(', ') || 'nenhuma'}`
                     });
                 }
-                console.log(`⚠️ Admin ${user.nome || user.email} forçando transição: ${statusAtual} -> ${status}`);
+                // Admin sem forceTransition: bloquear também
+                console.log(`❌ Admin ${user.nome || user.email} tentou transição inválida sem forceTransition: ${statusAtual} -> ${status}`);
+                await connection.rollback();
+                return res.status(400).json({
+                    message: `Transição de status inválida: "${statusAtual}" → "${status}". Use forceTransition=true para forçar (somente admin).`
+                });
+            }
+            if (canForce && !transicoesValidas.includes(status)) {
+                console.log(`⚠️ [AUDIT] Admin ${user.nome || user.email} (id=${user.id}) FORÇOU transição: ${statusAtual} -> ${status} (forceTransition=true)`);
             }
     
             console.log(`🔐 Verificação de permissão - Usuário: ${user.nome || user.email} | Admin: ${isAdmin} | Status desejado: ${status}`);
     
-            // ===== VERIFICAÇÃO GRANULAR DE PERMISSÕES (Sistema de Permissões v2) =====
+// ===== VERIFICAÇÃO GRANULAR DE PERMISSÕES (Sprint 1 - K-01 fix: usa role, não nome) =====
             if (!isAdmin) {
-                let firstName = 'unknown';
-                if (user.nome) {
-                    firstName = user.nome.split(' ')[0].toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-                } else if (user.email) {
-                    firstName = user.email.split('@')[0].split('.')[0].toLowerCase();
-                }
-    
-                // Verificar se o usuário pode mover para este status específico
-                if (!userPermissions.canMoveToStatus(firstName, status)) {
-                    console.log(`[PERMISSOES] Usuário ${firstName} não tem permissão para mover para status: ${status}`);
+                const userRole = user.role || 'user';
+
+                // Verificar se o role do usuário pode mover para este status específico
+                if (!userPermissions.canMoveToStatus(userRole, status)) {
+                    console.log(`[PERMISSOES] Usuário ${user.nome || user.email} (role=${userRole}) não tem permissão para mover para status: ${status}`);
+                    await connection.rollback();
                     return res.status(403).json({
                         message: `Você não tem permissão para mover pedidos para o status "${status}".`,
                         status_negado: status,
-                        usuario: firstName
+                        role: userRole
                     });
                 }
-                console.log(`[PERMISSOES] Usuário ${firstName} autorizado para mover para: ${status}`);
+                console.log(`[PERMISSOES] Usuário ${user.nome || user.email} (role=${userRole}) autorizado para mover para: ${status}`);
             }
     
     
@@ -1153,17 +1184,90 @@ module.exports = function createVendasRoutes(deps) {
                 const pedido = pedidoAtual[0];
                 if (pedido.vendedor_id && user.id && pedido.vendedor_id !== user.id) {
                     console.log(`❌ Usuário ${user.id} não é dono do pedido ${id}`);
+                    await connection.rollback();
                     return res.status(403).json({ message: 'Você só pode mover seus próprios pedidos.' });
                 }
-    
+
+                // Sprint E2E-S2 (E2-HIGH-03): Vendedor/comercial não pode cancelar pedido já aprovado+
+                const userRole = (user.role || 'user').toLowerCase();
+                if (status === 'cancelado' && ['user', 'comercial', 'default'].includes(userRole)) {
+                    const statusAvancados = ['aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo'];
+                    if (statusAvancados.includes(statusAtual)) {
+                        console.log(`🚫 [PERMISSOES] Vendedor ${user.nome || user.email} tentou cancelar pedido #${id} em status "${statusAtual}" — bloqueado`);
+                        await connection.rollback();
+                        return res.status(403).json({
+                            message: `Vendedores não podem cancelar pedidos com status "${statusAtual}". Solicite o cancelamento a um supervisor ou admin.`
+                        });
+                    }
+                }
+
                 // Permissão já verificada pelo sistema userPermissions acima
             }
     
-            await connection.beginTransaction();
-    
             // Atualiza status e registra histórico (usando updated_at se existir)
             const [result] = await connection.query('UPDATE pedidos SET status = ?, updated_at = NOW() WHERE id = ?', [status, id]);
-    
+
+            // ========================================
+            // Sprint 3 (Gap-1 fix): FILA AUTOMÁTICA VENDAS → PCP
+            // Quando pedido chega em "pedido-aprovado", gerar OP automaticamente
+            // com vínculo real (pedido_id) para eliminar gap manual
+            // ========================================
+            let opAutoCriada = null;
+            if (status === 'pedido-aprovado' && statusAtual !== 'pedido-aprovado') {
+                try {
+                    // Verificar se já existe OP para este pedido
+                    const [opExistente] = await connection.query(
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
+                    );
+                    if (opExistente.length === 0) {
+                        // Buscar itens do pedido para nome do produto
+                        const [itensOP] = await connection.query(
+                            'SELECT codigo, descricao, quantidade, unidade FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC LIMIT 1', [id]
+                        );
+                        // Gerar código sequencial da OP (com FOR UPDATE para evitar race condition)
+                        const [ultimaOrdem] = await connection.query(`
+                            SELECT codigo FROM ordens_producao
+                            WHERE codigo LIKE 'OP N° %'
+                            ORDER BY id DESC LIMIT 1
+                            FOR UPDATE
+                        `);
+                        let proximoNumero = 1;
+                        if (ultimaOrdem.length > 0 && ultimaOrdem[0].codigo) {
+                            const matchNum = ultimaOrdem[0].codigo.match(/(\d+)$/);
+                            if (matchNum) proximoNumero = parseInt(matchNum[1]) + 1;
+                        }
+                        const ano = new Date().getFullYear();
+                        const codigoOP = `OP N° ${ano}/${String(proximoNumero).padStart(5, '0')}`;
+
+                        const pedidoData = pedidoAtual[0];
+                        const descProduto = itensOP.length > 0
+                            ? `${itensOP[0].descricao}${itensOP[0].codigo ? ' - ' + itensOP[0].codigo : ''}`
+                            : `Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`;
+                        const qtdOP = itensOP.length > 0 ? itensOP[0].quantidade : 1;
+                        const undOP = itensOP.length > 0 ? itensOP[0].unidade : 'UN';
+
+                        const [opResult] = await connection.query(`
+                            INSERT INTO ordens_producao (
+                                codigo, produto_nome, quantidade, unidade,
+                                status, prioridade, data_prevista, responsavel, observacoes,
+                                progresso, quantidade_produzida, pedido_id, created_at, updated_at
+                            ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?, NOW(), NOW())
+                        `, [codigoOP, descProduto, qtdOP, undOP, `Auto-gerada a partir do Pedido #${id}`, id]);
+
+                        // Marcar pedido com produção iniciada
+                        await connection.query('UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [id]);
+
+                        opAutoCriada = { id: opResult.insertId, codigo: codigoOP };
+                        console.log(`[PIPELINE_AUTO] OP ${codigoOP} criada automaticamente para Pedido #${id}`);
+                    } else {
+                        console.log(`[PIPELINE_AUTO] OP já existe para Pedido #${id}: ${opExistente[0].codigo}`);
+                    }
+                } catch (opError) {
+                    console.error(`[PIPELINE_AUTO] Erro ao criar OP para pedido #${id}:`, opError.message);
+                    // Não falha a operação principal
+                }
+            }
+
             // ========================================
             // BAIXA AUTOMÁTICA DE ESTOQUE
             // Quando pedido vai para "faturar" ou "faturado", baixar estoque automaticamente
@@ -1188,6 +1292,54 @@ module.exports = function createVendasRoutes(deps) {
                 } catch (estoqueError) {
                     console.error('[ESTOQUE_AUTO] Erro (não crítico):', estoqueError.message);
                     // Não falha a operação principal se a baixa de estoque falhar
+                }
+            }
+
+            // ========================================
+            // Sprint 1 (F-01 fix): GERAÇÃO DE CONTAS A RECEBER NO FATURAMENTO NORMAL
+            // Quando pedido muda para 'faturar' ou 'faturado' pelo fluxo normal (Kanban),
+            // gerar título financeiro automaticamente via serviço centralizado
+            // ========================================
+            let contaReceberGerada = null;
+            if (['faturar', 'faturado'].includes(status) && !['faturar', 'faturado', 'parcial'].includes(statusAtual)) {
+                try {
+                    const pedidoData = pedidoAtual[0];
+                    const valorPedido = parseFloat(pedidoData.valor || 0);
+
+                    // Sprint E2E-S1 (E5-CRIT-06 fix): Preferir SUM(itens) sobre pedido.valor livre
+                    let valorFaturamento = valorPedido;
+                    const [itensSum] = await connection.query(
+                        `SELECT COUNT(*) as count, COALESCE(SUM(subtotal), 0) as total_itens FROM pedido_itens WHERE pedido_id = ?`, [id]
+                    );
+                    if (itensSum[0].count > 0 && parseFloat(itensSum[0].total_itens) > 0) {
+                        valorFaturamento = parseFloat(itensSum[0].total_itens);
+                        if (Math.abs(valorFaturamento - valorPedido) > 0.01) {
+                            console.log(`[FINANCEIRO_AUTO] ALERTA: pedido #${id} valor (R$${valorPedido}) difere de SUM(itens) (R$${valorFaturamento}). Usando SUM(itens).`);
+                        }
+                    }
+
+                    if (valorFaturamento > 0) {
+                        // Verificar se já existe conta a receber para este pedido (evita duplicação)
+                        const [existingCR] = await connection.query(
+                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
+                        );
+                        if (existingCR.length === 0) {
+                            contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
+                                pedido_id: parseInt(id),
+                                cliente_id: pedidoData.cliente_id || null,
+                                descricao: `Faturamento Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`,
+                                valor: valorFaturamento,
+                                tipo: 'faturamento',
+                                pedido: pedidoData
+                            });
+                            console.log(`[FINANCEIRO_AUTO] Conta a receber #${contaReceberGerada.insertId} gerada para pedido #${id} (R$${valorFaturamento}, venc. ${contaReceberGerada.data_vencimento_dias} dias)`);
+                        } else {
+                            console.log(`[FINANCEIRO_AUTO] Conta a receber já existe para pedido #${id} (id=${existingCR[0].id}), pulando`);
+                        }
+                    }
+                } catch (financeiroError) {
+                    console.error(`[FINANCEIRO_AUTO] Erro ao gerar conta a receber pedido #${id}:`, financeiroError.message);
+                    // Não falha a operação principal
                 }
             }
     
@@ -1326,6 +1478,8 @@ module.exports = function createVendasRoutes(deps) {
                 transicao: { de: statusAtual, para: status },
                 estoque_baixado: movimentacoesEstoque.length > 0,
                 movimentacoes_estoque: movimentacoesEstoque,
+                conta_receber_gerada: contaReceberGerada ? { id: contaReceberGerada.insertId, vencimento_dias: contaReceberGerada.data_vencimento_dias } : null,
+                op_auto_criada: opAutoCriada || null,
                 estoque_estornado: estornoEstoque.length > 0,
                 estorno_estoque: estornoEstoque
             });
@@ -1444,8 +1598,8 @@ module.exports = function createVendasRoutes(deps) {
             }
 
             if (!isAdmin && req.user && req.user.id) {
-                query += ' AND (vendedor_id = ? OR vendedor_id IS NULL)';
-                params.push(req.user.id);
+                // Vendedores podem buscar todas empresas para criar pedidos
+                // Filtro de vendedor_id removido para não restringir busca
             }
 
             query += ` ORDER BY nome_fantasia LIMIT ?`;
@@ -1523,6 +1677,68 @@ module.exports = function createVendasRoutes(deps) {
             res.json(cliente);
         } catch (error) { next(error); }
     });
+    // Resumo/inteligência do cliente (KPIs, pedidos recentes, financeiro)
+    router.get('/clientes/:id/resumo', async (req, res, next) => {
+        try {
+            const clienteId = parseInt(req.params.id);
+            const [clienteRows] = await pool.query('SELECT id, data_cadastro, created_at FROM clientes WHERE id = ?', [clienteId]);
+            if (clienteRows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+            const dataInicio = clienteRows[0].data_cadastro || clienteRows[0].created_at;
+            let tempo_cliente = null;
+            if (dataInicio) {
+                const inicio = new Date(dataInicio);
+                const agora = new Date();
+                const diffMs = agora - inicio;
+                const totalDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const anos = Math.floor(totalDias / 365);
+                const meses = Math.floor((totalDias % 365) / 30);
+                const dias = totalDias % 30;
+                tempo_cliente = { anos, meses, dias, total_dias: totalDias, data_inicio: dataInicio };
+            }
+
+            const [stats] = await pool.query(
+                `SELECT COUNT(*) as total_pedidos, COALESCE(SUM(valor_total),0) as valor_total,
+                        COALESCE(AVG(valor_total),0) as ticket_medio, COALESCE(MAX(valor_total),0) as maior_pedido,
+                        SUM(CASE WHEN status IN ('entregue','faturado') THEN 1 ELSE 0 END) as pedidos_concluidos,
+                        SUM(CASE WHEN status = 'aprovado' OR status = 'pedido-aprovado' THEN 1 ELSE 0 END) as pedidos_aprovados,
+                        SUM(CASE WHEN status IN ('orcamento','analise','analise-credito') THEN 1 ELSE 0 END) as pedidos_em_aberto,
+                        SUM(CASE WHEN status = 'cancelado' THEN 1 ELSE 0 END) as pedidos_cancelados
+                 FROM pedidos WHERE cliente_id = ?`, [clienteId]
+            );
+
+            const [pedidosRecentes] = await pool.query(
+                `SELECT id, created_at, valor_total as valor, status FROM pedidos WHERE cliente_id = ? ORDER BY created_at DESC LIMIT 5`, [clienteId]
+            );
+
+            const [produtosMais] = await pool.query(
+                `SELECT p.nome, SUM(pi.quantidade) as quantidade
+                 FROM pedido_itens pi JOIN produtos p ON pi.produto_id = p.id
+                 JOIN pedidos ped ON pi.pedido_id = ped.id
+                 WHERE ped.cliente_id = ? GROUP BY p.id, p.nome ORDER BY quantidade DESC LIMIT 5`, [clienteId]
+            );
+
+            let financeiro = { valor_pago: 0, valor_pendente: 0, valor_vencido: 0, total_títulos: 0 };
+            try {
+                const [fin] = await pool.query(
+                    `SELECT COUNT(*) as total_títulos,
+                            COALESCE(SUM(CASE WHEN status = 'pago' THEN valor ELSE 0 END),0) as valor_pago,
+                            COALESCE(SUM(CASE WHEN status = 'pendente' AND data_vencimento >= CURDATE() THEN valor ELSE 0 END),0) as valor_pendente,
+                            COALESCE(SUM(CASE WHEN status = 'pendente' AND data_vencimento < CURDATE() THEN valor ELSE 0 END),0) as valor_vencido
+                     FROM contas_receber WHERE cliente_id = ?`, [clienteId]
+                );
+                if (fin[0]) financeiro = fin[0];
+            } catch (_) { /* contas_receber may not exist */ }
+
+            res.json({
+                estatisticas: stats[0],
+                tempo_cliente,
+                pedidos_recentes: pedidosRecentes,
+                produtos_mais_comprados: produtosMais,
+                financeiro
+            });
+        } catch (error) { next(error); }
+    });
     router.post('/clientes', [
         body('nome').trim().notEmpty().withMessage('Nome é obrigatório')
             .isLength({ max: 255 }).withMessage('Nome muito longo'),
@@ -1533,23 +1749,22 @@ module.exports = function createVendasRoutes(deps) {
             const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
                     endereco, numero, complemento, bairro, cidade, uf, cep,
                     inscricao_estadual, inscricao_municipal, limite_credito, ativo, empresa_id } = req.body;
-    
-            // Montar endereço completo se tiver numero/complemento
-            let enderecoFinal = endereco || null;
-            if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-            if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
+            if (!nome) {
+                return res.status(400).json({ message: 'Nome é obrigatório.' });
+            }
 
             const [result] = await pool.query(
-                `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, email, 
-                 endereco, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal, 
+                `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
+                 endereco, numero, complemento, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal, 
                  credito_total, ativo, empresa_id, data_cadastro, incluido_por)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
                 [nome, nome_fantasia || null, nome || null, cnpj || null, contato || null,
-                 telefone || null, email || null, enderecoFinal, bairro || null,
+                 telefone || null, celular || null, email || null, website || null,
+                 endereco || null, numero || null, complemento || null, bairro || null,
                  cidade || null, uf || null, cep || null, inscricao_estadual || null,
                  inscricao_municipal || null, limite_credito ? parseFloat(limite_credito) : 0,
                  ativo !== undefined ? (ativo ? 1 : 0) : 1,
-                 empresa_id || 1, req.user ? req.user.nome : 'Sistema']
+                 req.user.empresa_id, req.user ? req.user.nome : 'Sistema']
             );
             res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
         } catch (error) { next(error); }
@@ -1575,26 +1790,21 @@ module.exports = function createVendasRoutes(deps) {
             
             if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
-            // Montar endereço completo se tiver numero/complemento
-            let enderecoFinal = endereco || null;
-            if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-            if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
-
             const [result] = await pool.query(
-                `UPDATE clientes SET nome = ?, nome_fantasia = ?, cnpj = ?, contato = ?, 
-                 telefone = ?, email = ?, endereco = ?, bairro = ?, cidade = ?, 
+                `UPDATE clientes SET nome = ?, nome_fantasia = ?, razao_social = ?, cnpj = ?, contato = ?, 
+                 telefone = ?, celular = ?, email = ?, website = ?,
+                 endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?, 
                  estado = ?, cep = ?, inscricao_estadual = ?, inscricao_municipal = ?,
-                 credito_total = ?, ativo = ?, empresa_id = ?,
-                 data_ultima_alteracao = NOW(), alterado_por = ?
+                 credito_total = ?, ativo = ?, empresa_id = ?
                  WHERE id = ?`,
-                [nome, nome_fantasia || null, cnpj || null, contato || null,
-                 telefone || null, email || null, enderecoFinal, bairro || null,
+                [nome, nome_fantasia || null, nome, cnpj || null, contato || null,
+                 telefone || null, celular || null, email || null, website || null,
+                 endereco || null, numero || null, complemento || null, bairro || null,
                  cidade || null, uf || null, cep || null, inscricao_estadual || null,
                  inscricao_municipal || null, 
                  limite_credito ? parseFloat(limite_credito) : 0,
                  body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
-                 empresa_id || 1,
-                 req.user ? req.user.nome : 'Sistema', id]
+                 empresa_id || req.user.empresa_id, id]
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
             res.json({ message: 'Cliente atualizado com sucesso.' });
@@ -2141,9 +2351,49 @@ module.exports = function createVendasRoutes(deps) {
             const qtyParcial = parseFloat(quantidade_parcial) || 0;
             const preco = parseFloat(preco_unitario) || 0;
             const desc = parseFloat(desconto) || 0;
-            const vIPI = parseFloat(valor_ipi) || 0;
-            const vICMSST = parseFloat(valor_icms_st) || 0;
+            let vIPI = parseFloat(valor_ipi) || 0;
+            let vICMSST = parseFloat(valor_icms_st) || 0;
+            let aliqIPI = parseFloat(aliquota_ipi) || 0;
+            let aliqICMS_local = parseFloat(aliquota_icms) || 0;
+            let mvaST_local = parseFloat(mva_st) || 0;
             const total = (qty * preco) - desc;
+
+            // Sprint 4.6: Auto-calcular impostos a partir dos dados fiscais do produto
+            if (vIPI === 0 && vICMSST === 0 && (produto_id || codigo)) {
+                try {
+                    let produtoFiscal = null;
+                    if (produto_id) {
+                        const [pf] = await pool.query(
+                            'SELECT aliquota_ipi, calcular_ipi, aliquota_icms, calcular_icms_st, mva_st FROM produtos WHERE id = ?', [produto_id]
+                        );
+                        if (pf.length > 0) produtoFiscal = pf[0];
+                    }
+                    if (!produtoFiscal && codigo) {
+                        const [pf] = await pool.query(
+                            'SELECT aliquota_ipi, calcular_ipi, aliquota_icms, calcular_icms_st, mva_st FROM produtos WHERE codigo = ?', [codigo]
+                        );
+                        if (pf.length > 0) produtoFiscal = pf[0];
+                    }
+                    if (produtoFiscal) {
+                        aliqIPI = parseFloat(produtoFiscal.aliquota_ipi) || 0;
+                        if (aliqIPI > 0) {
+                            vIPI = total * (aliqIPI / 100);
+                        }
+                        const calcST = parseInt(produtoFiscal.calcular_icms_st) || 0;
+                        mvaST_local = parseFloat(produtoFiscal.mva_st) || 0;
+                        aliqICMS_local = parseFloat(produtoFiscal.aliquota_icms) || 0;
+                        if (calcST && mvaST_local > 0 && aliqICMS_local > 0) {
+                            const baseICMSST = total * (1 + mvaST_local / 100);
+                            vICMSST = Math.max(0, (baseICMSST * aliqICMS_local / 100) - (total * aliqICMS_local / 100));
+                        }
+                        if (vIPI > 0 || vICMSST > 0) {
+                            console.log(`[Sprint 4.6] Auto-cálculo fiscal item ${codigo}: IPI=${vIPI.toFixed(2)} ICMS-ST=${vICMSST.toFixed(2)}`);
+                        }
+                    }
+                } catch (fiscalErr) {
+                    console.error(`[Sprint 4.6] Erro auto-cálculo fiscal (não-bloqueante):`, fiscalErr.message);
+                }
+            }
     
             const [result] = await pool.query(
                 `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, 
@@ -2151,7 +2401,7 @@ module.exports = function createVendasRoutes(deps) {
                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [id, codigo, descricao, qty, qtyParcial, unidade || 'UN', local_estoque || 'PADRAO - Local de Estoque Padrão', 
                  preco, desc, total, produto_id || null, vIPI, vICMSST, 
-                 parseFloat(aliquota_ipi) || 0, parseFloat(aliquota_icms) || 0, parseFloat(mva_st) || 0,
+                 aliqIPI, aliqICMS_local, mvaST_local,
                  cfop || null, cenario_fiscal || null, observacoes || null, parseFloat(preco_custo) || 0]
             );
 
@@ -2769,10 +3019,10 @@ module.exports = function createVendasRoutes(deps) {
     });
 
     // ========================================
-    // ROTAS DE HISTÓRICO (SEM AUTENTICAÇÃO OBRIGATÓRIA)
+    // ROTAS DE HISTÓRICO
     // Definidas ANTES do apiVendasRouter para ter prioridade
     // ========================================
-    router.get('/pedidos/:id/historico', async (req, res) => {
+    router.get('/pedidos/:id/historico', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
     
@@ -2823,7 +3073,7 @@ module.exports = function createVendasRoutes(deps) {
         }
     });
     
-    router.post('/pedidos/:id/historico', async (req, res) => {
+    router.post('/pedidos/:id/historico', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
             const { action, descricao, meta, usuario } = req.body;
@@ -2925,7 +3175,226 @@ module.exports = function createVendasRoutes(deps) {
             });
         } catch (error) { next(error); }
     });
-    
+
+    // =============================================================
+    // FATURAMENTO NORMAL (100%) - Frontend chama POST /pedidos/:id/faturar
+    // Usado por executarFaturamentoNormalKanban() e executarFaturamentoNormal()
+    // Inclui: NF sequencial atômica, baixa de estoque, conta a receber, logística
+    // =============================================================
+    router.post('/pedidos/:id/faturar', async (req, res, next) => {
+        const connection = await pool.getConnection();
+        try {
+            const { id } = req.params;
+            const { gerarNFe = true } = req.body;
+            const user = req.user || {};
+
+            // TRANSAÇÃO ATÔMICA — tudo dentro da transaction com FOR UPDATE para evitar race condition
+            await connection.beginTransaction();
+
+            // 1. Buscar pedido com dados do cliente via JOIN + FOR UPDATE lock
+            const [pedidoRows] = await connection.query(
+                `SELECT p.*, c.nome as cliente_nome_join, c.cpf_cnpj, c.cnpj,
+                        c.email as cliente_email, c.telefone as cliente_telefone,
+                        c.endereco, c.numero as num_endereco, c.complemento,
+                        c.bairro, c.cidade, c.uf, c.cep
+                 FROM pedidos p
+                 LEFT JOIN clientes c ON c.id = p.cliente_id
+                 WHERE p.id = ? FOR UPDATE`,
+                [id]
+            );
+            if (pedidoRows.length === 0) {
+                await connection.rollback();
+                connection.release();
+                return res.status(404).json({ message: 'Pedido não encontrado.' });
+            }
+
+            const pedido = pedidoRows[0];
+
+            // Validar: pedido já faturado não pode ser faturado novamente
+            if (['faturado', 'entregue', 'cancelado'].includes(pedido.status)) {
+                await connection.rollback();
+                connection.release();
+                return res.status(400).json({ message: `Pedido já está com status "${pedido.status}" e não pode ser faturado novamente.` });
+            }
+
+            // 2. Buscar itens
+            const [itensRows] = await connection.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+
+            let novaNf = null;
+            let nfeData = null;
+
+            // 3. Tentar gerar NFe via módulo externo (não bloqueia o faturamento se falhar)
+            if (gerarNFe && itensRows.length > 0) {
+                try {
+                    const nfePayload = {
+                        pedido_id: id,
+                        cliente: {
+                            nome: pedido.cliente_nome_join || pedido.cliente,
+                            cpf_cnpj: pedido.cpf_cnpj || pedido.cnpj,
+                            email: pedido.cliente_email,
+                            telefone: pedido.cliente_telefone,
+                            endereco: pedido.endereco,
+                            numero: pedido.num_endereco,
+                            complemento: pedido.complemento,
+                            bairro: pedido.bairro,
+                            cidade: pedido.cidade,
+                            uf: pedido.uf,
+                            cep: pedido.cep
+                        },
+                        produtos: itensRows.map(item => ({
+                            codigo: item.codigo_produto || item.codigo,
+                            descricao: item.descricao || item.produto,
+                            ncm: item.ncm || '00000000',
+                            quantidade: item.quantidade,
+                            valor_unitario: item.preco_unitario || item.valor_unitario,
+                            valor_total: parseFloat(item.quantidade) * parseFloat(item.preco_unitario || item.valor_unitario || 0)
+                        })),
+                        valor_total: pedido.valor,
+                        observacoes: pedido.observacoes || ''
+                    };
+                    const axios = require('axios');
+                    const nfeResponse = await axios.post('http://localhost:3003/api/nfe/gerar', nfePayload, {
+                        timeout: 30000,
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    if (nfeResponse.data && nfeResponse.data.numero) {
+                        novaNf = nfeResponse.data.numero;
+                        nfeData = {
+                            numero: nfeResponse.data.numero,
+                            chave: nfeResponse.data.chave,
+                            protocolo: nfeResponse.data.protocolo,
+                            danfe_url: nfeResponse.data.danfe_url
+                        };
+                        console.log(`[FATURAR] NFe ${novaNf} gerada para pedido #${id}`);
+                    }
+                } catch (nfeError) {
+                    console.error('[FATURAR] Erro ao gerar NFe (não crítico):', nfeError.message);
+                }
+            }
+
+            try {
+                // 4a. NF sequencial via serviço compartilhado (usa colunas reais: nf, numero_nf)
+                if (!novaNf) {
+                    const nfData = await faturamentoShared.gerarProximoNumeroNFe(connection);
+                    novaNf = nfData.numero;
+                }
+
+                const statusAnterior = pedido.status;
+
+                // 4b. Atualizar pedido para faturado — salva em AMBOS os campos nf e numero_nf
+                await connection.query(
+                    'UPDATE pedidos SET status = ?, nf = ?, numero_nf = ?, data_faturamento = COALESCE(data_faturamento, NOW()), nfe_chave = ?, nfe_protocolo = ?, updated_at = NOW() WHERE id = ?',
+                    ['faturado', novaNf, novaNf, nfeData?.chave || null, nfeData?.protocolo || null, id]
+                );
+
+                // 4c. Baixar estoque automaticamente
+                let movimentacoesEstoque = [];
+                try {
+                    if (itensRows.length > 0) {
+                        movimentacoesEstoque = await baixarEstoqueAutomatico(connection, id, itensRows, user?.id);
+                        console.log(`[FATURAR] Estoque baixado: ${movimentacoesEstoque.length} item(s) para pedido #${id}`);
+                    }
+                } catch (estoqueError) {
+                    console.error('[FATURAR] Erro ao baixar estoque (não crítico):', estoqueError.message);
+                }
+
+                // 4d. Gerar conta a receber (evita duplicação)
+                let contaReceberGerada = null;
+                try {
+                    const valorPedido = parseFloat(pedido.valor || 0);
+                    let valorFaturamento = valorPedido;
+
+                    // Preferir SUM(itens.subtotal) sobre pedido.valor para precisão
+                    const [itensSum] = await connection.query(
+                        'SELECT COUNT(*) as count, COALESCE(SUM(subtotal), 0) as total_itens FROM pedido_itens WHERE pedido_id = ?',
+                        [id]
+                    );
+                    if (itensSum[0].count > 0 && parseFloat(itensSum[0].total_itens) > 0) {
+                        valorFaturamento = parseFloat(itensSum[0].total_itens);
+                    }
+
+                    if (valorFaturamento > 0) {
+                        const [existingCR] = await connection.query(
+                            'SELECT id FROM contas_receber WHERE pedido_id = ? LIMIT 1', [id]
+                        );
+                        if (existingCR.length === 0) {
+                            contaReceberGerada = await faturamentoShared.gerarContaReceber(connection, {
+                                pedido_id: parseInt(id),
+                                cliente_id: pedido.cliente_id || null,
+                                descricao: `Faturamento Pedido #${id} - ${pedido.cliente || 'Cliente'}`,
+                                valor: valorFaturamento,
+                                tipo: 'faturamento',
+                                pedido
+                            });
+                            console.log(`[FATURAR] Conta a receber #${contaReceberGerada?.insertId} gerada para pedido #${id} (R$${valorFaturamento})`);
+                        } else {
+                            console.log(`[FATURAR] Conta a receber já existe para pedido #${id} — pulando`);
+                        }
+                    }
+                } catch (financeiroError) {
+                    console.error('[FATURAR] Erro ao gerar conta a receber (não crítico):', financeiroError.message);
+                }
+
+                // 4e. Inicializar status_logistica para fila de logística
+                try {
+                    await connection.query(
+                        `UPDATE pedidos SET status_logistica = 'pendente'
+                         WHERE id = ? AND (status_logistica IS NULL OR status_logistica = '')`,
+                        [id]
+                    );
+                } catch (logisticaError) {
+                    console.error('[FATURAR] Erro ao inicializar status_logistica (não crítico):', logisticaError.message);
+                }
+
+                // 4f. Registrar histórico
+                await connection.query(
+                    'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
+                    [
+                        id, user.id || null, user.nome || user.name || 'Usuário', 'faturamento',
+                        nfeData ? `Pedido faturado - NFe ${novaNf} emitida` : `Pedido faturado - NF ${novaNf}`,
+                        JSON.stringify({ nf_numero: novaNf, valor: pedido.valor, nfe_gerada: !!nfeData, status_anterior: statusAnterior })
+                    ]
+                );
+
+                await connection.commit();
+            } catch (txError) {
+                await connection.rollback();
+                throw txError;
+            }
+
+            // 5. Notificação (fora da transação)
+            if (global.createNotification) {
+                const nomeUsuario = user.nome || user.name || user.email || 'Usuário';
+                const valorFormatado = (parseFloat(pedido.valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                global.createNotification(
+                    'payment',
+                    `Pedido #${id} → Faturado`,
+                    `${nomeUsuario} faturou pedido - ${nfeData ? 'NFe' : 'NF'} ${novaNf} - ${valorFormatado}`,
+                    {
+                        pedido_id: id, nf_numero: novaNf, valor: pedido.valor,
+                        nfe_data: nfeData, user_id: user.id || null, user_nome: nomeUsuario,
+                        vendedor_id: pedido.vendedor_id || null,
+                        status: 'faturado', status_label: 'Faturado', tipo: 'movimentacao_status'
+                    }
+                );
+            }
+
+            console.log(`[FATURAR] ✅ Pedido #${id} faturado — NF: ${novaNf} | por: ${user.nome || user.email || 'Usuário'}`);
+            res.json({
+                message: nfeData ? 'Pedido faturado e NFe gerada com sucesso!' : 'Pedido faturado com sucesso!',
+                nf_numero: novaNf,
+                nfe_gerada: !!nfeData,
+                nfe_data: nfeData
+            });
+
+        } catch (error) {
+            console.error('[FATURAR] Erro:', error);
+            next(error);
+        } finally {
+            connection.release();
+        }
+    });
+
     router.post('/pedidos/:id/faturamento-parcial', async (req, res, next) => {
         // AUDIT-FIX R-07 + R-11: Transação completa com lock para evitar NF-e duplicada
         // FIX-2026-02-24: gerarNFe=true, faturamento por item, numeração unificada, validação estoque, CFOP inteligente
