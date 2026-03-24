@@ -16,7 +16,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Gerar DANFE</title>
 
-    <!-- Sistema de Autenticação Unificado — DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado ï¿½ DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -31,16 +31,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- Design System — Faturamento Layout -->
+    <!-- Design System ï¿½ Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
 
-    <!-- Global Header & Sidebar — Padrão Institucional -->
+    <!-- Global Header & Sidebar ï¿½ Padrï¿½o Institucional -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
 
-    <!-- Popup Confirmação -->
+    <!-- Popup Confirmaï¿½ï¿½o -->
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
     <!-- Anti-Copy Protection -->
@@ -231,7 +231,7 @@
             align-items: center;
             text-align: center;
         }
-        .danfe-header-right .nfe-número {
+        .danfe-header-right .nfe-nï¿½mero {
             font-size: 10px;
             font-weight: 700;
         }
@@ -416,6 +416,8 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -427,14 +429,14 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="nfse.html" class="sidebar-btn" title="NFSe Serviï¿½os"><i class="fas fa-file-contract"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatï¿½rios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logï¿½stica"><i class="fas fa-truck"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilizaï¿½ï¿½o"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configuraï¿½ï¿½es" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
 
@@ -448,15 +450,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gerar DANFE</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="Notificaï¿½ï¿½es" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -481,15 +483,15 @@
                             <div class="form-row">
                                 <div class="form-group" style="grid-column: 1 / -1;">
                                     <label for="chaveAcesso">Chave de Acesso</label>
-                                    <input type="text" id="chaveAcesso" class="form-control" placeholder="Informe a chave de acesso (44 dígitos)" maxlength="44">
+                                    <input type="text" id="chaveAcesso" class="form-control" placeholder="Informe a chave de acesso (44 dï¿½gitos)" maxlength="44">
                                 </div>
                                 <div class="form-group">
-                                    <label for="numeroNFe">Número da NFe</label>
-                                    <input type="text" id="numeroNFe" class="form-control" placeholder="Número">
+                                    <label for="numeroNFe">Nï¿½mero da NFe</label>
+                                    <input type="text" id="numeroNFe" class="form-control" placeholder="Nï¿½mero">
                                 </div>
                                 <div class="form-group">
-                                    <label for="serieNFe">Série</label>
-                                    <input type="text" id="serieNFe" class="form-control" placeholder="Série">
+                                    <label for="serieNFe">Sï¿½rie</label>
+                                    <input type="text" id="serieNFe" class="form-control" placeholder="Sï¿½rie">
                                 </div>
                             </div>
                             <div class="form-actions">
@@ -499,17 +501,17 @@
                         </div>
                     </div>
 
-                    <!-- SECTION: FORMATO DE IMPRESSÃO -->
+                    <!-- SECTION: FORMATO DE IMPRESSï¿½O -->
                     <div class="card hidden-section" id="formatoSection">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-print"></i> Formato de Impressão</h3>
+                            <h3 class="card-title"><i class="fas fa-print"></i> Formato de Impressï¿½o</h3>
                         </div>
                         <div class="card-body">
                             <div class="formato-grid">
                                 <div class="formato-card selected" onclick="selecionarFormato('retrato', this)" data-formato="retrato">
                                     <i class="fas fa-file-alt"></i>
                                     <h4>DANFE Retrato</h4>
-                                    <p>Formato padrão A4 retrato</p>
+                                    <p>Formato padrï¿½o A4 retrato</p>
                                 </div>
                                 <div class="formato-card" onclick="selecionarFormato('paisagem', this)" data-formato="paisagem">
                                     <i class="fas fa-file"></i>
@@ -519,7 +521,7 @@
                                 <div class="formato-card" onclick="selecionarFormato('simplificado', this)" data-formato="simplificado">
                                     <i class="fas fa-file-contract"></i>
                                     <h4>DANFE Simplificado</h4>
-                                    <p>Versão resumida</p>
+                                    <p>Versï¿½o resumida</p>
                                 </div>
                             </div>
                         </div>
@@ -535,68 +537,68 @@
                                 <!-- DANFE HEADER -->
                                 <div class="danfe-header">
                                     <div class="danfe-header-left">
-                                        <div class="empresa-nome" id="danfeEmpresa">—</div>
-                                        <div class="empresa-cnpj" id="danfeCNPJ">CNPJ: —</div>
-                                        <div class="empresa-endereco" id="danfeEndereco">—</div>
+                                        <div class="empresa-nome" id="danfeEmpresa">ï¿½</div>
+                                        <div class="empresa-cnpj" id="danfeCNPJ">CNPJ: ï¿½</div>
+                                        <div class="empresa-endereco" id="danfeEndereco">ï¿½</div>
                                     </div>
                                     <div class="danfe-header-center">
                                         <div class="danfe-title">DANFE</div>
-                                        <div class="danfe-subtitle">Documento Auxiliar da Nota Fiscal Eletrônica</div>
-                                        <div class="danfe-tipo">0 - ENTRADA &nbsp;/&nbsp; 1 - SAÍDA</div>
+                                        <div class="danfe-subtitle">Documento Auxiliar da Nota Fiscal Eletrï¿½nica</div>
+                                        <div class="danfe-tipo">0 - ENTRADA &nbsp;/&nbsp; 1 - SAï¿½DA</div>
                                     </div>
                                     <div class="danfe-header-right">
-                                        <div class="nfe-número" id="danfeNumero">Nº —</div>
-                                        <div class="nfe-serie" id="danfeSerie">Série —</div>
+                                        <div class="nfe-nï¿½mero" id="danfeNumero">Nï¿½ ï¿½</div>
+                                        <div class="nfe-serie" id="danfeSerie">Sï¿½rie ï¿½</div>
                                     </div>
                                 </div>
 
                                 <!-- CHAVE DE ACESSO -->
                                 <div class="danfe-chave-section">
                                     <div class="danfe-chave-label">Chave de Acesso</div>
-                                    <div class="danfe-chave-value" id="danfeChave">— — — — — — — — — — —</div>
+                                    <div class="danfe-chave-value" id="danfeChave">ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½ ï¿½</div>
                                 </div>
 
                                 <!-- NATUREZA / PROTOCOLO -->
                                 <div class="danfe-section-grid cols-2">
                                     <div class="danfe-field">
-                                        <div class="danfe-label">Natureza da Operação</div>
-                                        <div class="danfe-value" id="danfeNatureza">—</div>
+                                        <div class="danfe-label">Natureza da Operaï¿½ï¿½o</div>
+                                        <div class="danfe-value" id="danfeNatureza">ï¿½</div>
                                     </div>
                                     <div class="danfe-field">
-                                        <div class="danfe-label">Protocolo de Autorização</div>
-                                        <div class="danfe-value" id="danfeProtocolo">—</div>
+                                        <div class="danfe-label">Protocolo de Autorizaï¿½ï¿½o</div>
+                                        <div class="danfe-value" id="danfeProtocolo">ï¿½</div>
                                     </div>
                                 </div>
 
-                                <!-- DESTINATÁRIO -->
+                                <!-- DESTINATï¿½RIO -->
                                 <div class="danfe-section" style="margin-top:-1px;">
-                                    <div class="danfe-label" style="margin-bottom:4px;font-weight:600;font-size:10px;color:#000;">DESTINATÁRIO / REMETENTE</div>
+                                    <div class="danfe-label" style="margin-bottom:4px;font-weight:600;font-size:10px;color:#000;">DESTINATï¿½RIO / REMETENTE</div>
                                 </div>
                                 <div class="danfe-section-grid cols-3">
                                     <div class="danfe-field" style="grid-column: 1 / 3;">
-                                        <div class="danfe-label">Nome / Razão Social</div>
-                                        <div class="danfe-value" id="danfeDestinatario">—</div>
+                                        <div class="danfe-label">Nome / Razï¿½o Social</div>
+                                        <div class="danfe-value" id="danfeDestinatario">ï¿½</div>
                                     </div>
                                     <div class="danfe-field">
                                         <div class="danfe-label">CNPJ/CPF</div>
-                                        <div class="danfe-value" id="danfeDocDest">—</div>
+                                        <div class="danfe-value" id="danfeDocDest">ï¿½</div>
                                     </div>
                                 </div>
                                 <div class="danfe-section-grid cols-2" style="margin-top:-1px;">
                                     <div class="danfe-field" style="grid-column: 1 / -1;">
-                                        <div class="danfe-label">Endereço</div>
-                                        <div class="danfe-value" id="danfeEnderecoDest">—</div>
+                                        <div class="danfe-label">Endereï¿½o</div>
+                                        <div class="danfe-value" id="danfeEnderecoDest">ï¿½</div>
                                     </div>
                                 </div>
 
                                 <!-- ITENS -->
                                 <div class="danfe-section" style="margin-top:8px;">
-                                    <div class="danfe-label" style="font-weight:600;font-size:10px;color:#000;">DADOS DOS PRODUTOS / SERVIÇOS</div>
+                                    <div class="danfe-label" style="font-weight:600;font-size:10px;color:#000;">DADOS DOS PRODUTOS / SERVIï¿½OS</div>
                                 </div>
                                 <table class="danfe-table">
                                     <thead>
                                         <tr>
-                                            <th style="width:50%;">Descrição</th>
+                                            <th style="width:50%;">Descriï¿½ï¿½o</th>
                                             <th style="width:12%;" class="text-right">Qtd</th>
                                             <th style="width:19%;" class="text-right">Valor Unit.</th>
                                             <th style="width:19%;" class="text-right">Valor Total</th>
@@ -638,7 +640,7 @@
     </div>
 
     <script>
-        // ===== SIDEBAR/HEADER — FUNÇÕES PADRÃO =====
+        // ===== SIDEBAR/HEADER ï¿½ FUNï¿½ï¿½ES PADRï¿½O =====
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('mobile-sidebar');
             const overlay = document.getElementById('sidebar-overlay');
@@ -678,14 +680,14 @@
             'fabiola': '/avatars/Fabiola.webp'
         };
 
-        // ===== CARREGAR USUÁRIO =====
+        // ===== CARREGAR USUï¿½RIO =====
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const userName = user.apelido || user.nome || user.name || 'Usuário';
-                    const primeiroNome = user.apelido || (userName ? userName.split(' ')[0] : 'Usuário');
+                    const userName = user.apelido || user.nome || user.name || 'Usuï¿½rio';
+                    const primeiroNome = user.apelido || (userName ? userName.split(' ')[0] : 'Usuï¿½rio');
 
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
@@ -734,11 +736,11 @@
                     }
                 }
             } catch (error) {
-                console.warn('[DANFE] Erro ao carregar usuário:', error);
+                console.warn('[DANFE] Erro ao carregar usuï¿½rio:', error);
             }
         }
 
-        // ===== ESTADO DA PÁGINA =====
+        // ===== ESTADO DA Pï¿½GINA =====
         let formatoSelecionado = 'retrato';
         let nfeData = null;
 
@@ -761,7 +763,7 @@
             const serie = document.getElementById('serieNFe').value.trim();
 
             if (!chave && !numero) {
-                showAlert('Informe a chave de acesso ou o número da NFe.', 'warning');
+                showAlert('Informe a chave de acesso ou o nï¿½mero da NFe.', 'warning');
                 return;
             }
 
@@ -774,20 +776,20 @@
                 if (chave) {
                     url = `/api/nfe/${encodeURIComponent(chave)}`;
                 } else {
-                    url = `/api/nfe/buscar?numero=${encodeURIComponent(número)}&serie=${encodeURIComponent(serie)}`;
+                    url = `/api/nfe/buscar?numero=${encodeURIComponent(nï¿½mero)}&serie=${encodeURIComponent(serie)}`;
                 }
 
                 const response = await fetch(url, { credentials: 'include' });
 
                 if (!response.ok) {
                     const errData = await response.json().catch(() => ({}));
-                    throw new Error(errData.message || errData.error || `Erro ${response.status}: Nota fiscal não encontrada`);
+                    throw new Error(errData.message || errData.error || `Erro ${response.status}: Nota fiscal nï¿½o encontrada`);
                 }
 
                 nfeData = await response.json();
                 preencherPreview();
 
-                // Mostrar seções
+                // Mostrar seï¿½ï¿½es
                 document.getElementById('formatoSection').classList.remove('hidden-section');
                 document.getElementById('previewSection').classList.remove('hidden-section');
 
@@ -811,8 +813,8 @@
 
             // Emitente
             const emit = nfeData.emitente || nfeData.emit || {};
-            document.getElementById('danfeEmpresa').textContent = emit.razaoSocial || emit.xNome || emit.nome || '—';
-            document.getElementById('danfeCNPJ').textContent = 'CNPJ: ' + (emit.cnpj || emit.CNPJ || '—');
+            document.getElementById('danfeEmpresa').textContent = emit.razaoSocial || emit.xNome || emit.nome || 'ï¿½';
+            document.getElementById('danfeCNPJ').textContent = 'CNPJ: ' + (emit.cnpj || emit.CNPJ || 'ï¿½');
             const endEmit = emit.endereco || emit.enderEmit || {};
             document.getElementById('danfeEndereco').textContent = [
                 endEmit.logradouro || endEmit.xLgr || '',
@@ -820,24 +822,24 @@
                 endEmit.bairro || endEmit.xBairro || '',
                 endEmit.cidade || endEmit.xMun || '',
                 endEmit.uf || endEmit.UF || ''
-            ].filter(Boolean).join(', ') || '—';
+            ].filter(Boolean).join(', ') || 'ï¿½';
 
-            // Número e série
-            document.getElementById('danfeNumero').textContent = 'Nº ' + (nfeData.numero || nfeData.nNF || '—');
-            document.getElementById('danfeSerie').textContent = 'Série ' + (nfeData.serie || '—');
+            // Nï¿½mero e sï¿½rie
+            document.getElementById('danfeNumero').textContent = 'Nï¿½ ' + (nfeData.numero || nfeData.nNF || 'ï¿½');
+            document.getElementById('danfeSerie').textContent = 'Sï¿½rie ' + (nfeData.serie || 'ï¿½');
 
             // Chave de acesso
-            const chave = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || '—';
+            const chave = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || 'ï¿½';
             document.getElementById('danfeChave').textContent = chave.replace(/(\d{4})/g, '$1 ').trim();
 
             // Natureza e protocolo
-            document.getElementById('danfeNatureza').textContent = nfeData.naturezaOperacao || nfeData.natOp || '—';
-            document.getElementById('danfeProtocolo').textContent = nfeData.protocolo || nfeData.nProt || '—';
+            document.getElementById('danfeNatureza').textContent = nfeData.naturezaOperacao || nfeData.natOp || 'ï¿½';
+            document.getElementById('danfeProtocolo').textContent = nfeData.protocolo || nfeData.nProt || 'ï¿½';
 
-            // Destinatário
+            // Destinatï¿½rio
             const dest = nfeData.destinatario || nfeData.dest || {};
-            document.getElementById('danfeDestinatario').textContent = dest.razaoSocial || dest.xNome || dest.nome || '—';
-            document.getElementById('danfeDocDest').textContent = dest.cnpj || dest.cpf || dest.CNPJ || dest.CPF || '—';
+            document.getElementById('danfeDestinatario').textContent = dest.razaoSocial || dest.xNome || dest.nome || 'ï¿½';
+            document.getElementById('danfeDocDest').textContent = dest.cnpj || dest.cpf || dest.CNPJ || dest.CPF || 'ï¿½';
             const endDest = dest.endereco || dest.enderDest || {};
             document.getElementById('danfeEnderecoDest').textContent = [
                 endDest.logradouro || endDest.xLgr || '',
@@ -845,7 +847,7 @@
                 endDest.bairro || endDest.xBairro || '',
                 endDest.cidade || endDest.xMun || '',
                 endDest.uf || endDest.UF || ''
-            ].filter(Boolean).join(', ') || '—';
+            ].filter(Boolean).join(', ') || 'ï¿½';
 
             // Itens
             const itens = nfeData.itens || nfeData.det || nfeData.produtos || [];
@@ -857,7 +859,7 @@
             } else {
                 itens.forEach(item => {
                     const prod = item.prod || item;
-                    const desc = prod.descricao || prod.xProd || prod.nome || '—';
+                    const desc = prod.descricao || prod.xProd || prod.nome || 'ï¿½';
                     const qtd = prod.quantidade || prod.qCom || prod.qtd || 0;
                     const vUnit = prod.valorUnitario || prod.vUnCom || prod.vlrUnit || 0;
                     const vTotal = prod.valorTotal || prod.vProd || (parseFloat(qtd) * parseFloat(vUnit)) || 0;
@@ -910,12 +912,12 @@
                 return;
             }
 
-            const email = prompt('Informe o e-mail do destinatário:');
+            const email = prompt('Informe o e-mail do destinatï¿½rio:');
             if (!email || !email.trim()) return;
 
             const chave = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe;
             if (!chave) {
-                showAlert('Chave de acesso não disponível.', 'error');
+                showAlert('Chave de acesso nï¿½o disponï¿½vel.', 'error');
                 return;
             }
 
@@ -946,7 +948,7 @@
                 return;
             }
 
-            const telefone = prompt('Informe o número do WhatsApp (com DDD):');
+            const telefone = prompt('Informe o nï¿½mero do WhatsApp (com DDD):');
             if (!telefone || !telefone.trim()) return;
 
             const numero = telefone.replace(/\D/g, '');
@@ -955,14 +957,14 @@
             const empresa = (nfeData.emitente || nfeData.emit || {}).razaoSocial || 'Aluforce';
 
             const mensagem = encodeURIComponent(
-                `?? *DANFE - Nota Fiscal Eletrônica*\n\n` +
+                `?? *DANFE - Nota Fiscal Eletrï¿½nica*\n\n` +
                 `Empresa: ${empresa}\n` +
-                `NF-e Nº: ${nfNumero}\n` +
+                `NF-e Nï¿½: ${nfNumero}\n` +
                 `Chave: ${chave}\n\n` +
                 `Consulte em: https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx`
             );
 
-            const whatsappUrl = `https://wa.me/55${número}?text=${mensagem}`;
+            const whatsappUrl = `https://wa.me/55${nï¿½mero}?text=${mensagem}`;
             window.open(whatsappUrl, '_blank');
         }
 
@@ -1002,9 +1004,9 @@
             }, 4000);
         }
 
-        // ===== MODAL CONFIGURAÇÕES (STUB) =====
+        // ===== MODAL CONFIGURAï¿½ï¿½ES (STUB) =====
         function abrirModalConfiguracoes() {
-            showAlert('Módulo de configurações em desenvolvimento.', 'info');
+            showAlert('Mï¿½dulo de configuraï¿½ï¿½es em desenvolvimento.', 'info');
         }
 
         // ===== UTIL: FORMAT =====
@@ -1041,12 +1043,12 @@
         });
     </script>
 
-    <!-- Sistema de Notificações Global -->
+    <!-- Sistema de Notificaï¿½ï¿½es Global -->
     <script src="/js/notification-manager.js?v=20260301"></script>
     <script src="/_shared/connection-monitor.js?v=20260301"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
 
-    <!-- Utilitários Compartilhados -->
+    <!-- Utilitï¿½rios Compartilhados -->
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 

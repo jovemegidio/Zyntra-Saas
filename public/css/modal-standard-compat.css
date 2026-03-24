@@ -202,3 +202,213 @@
     background: rgba(255, 255, 255, 0.22);
     color: #ffffff;
 }
+
+/* ============================================================
+   8. FAMÍLIA: .modal-content-omie (Vendas pedidos/clientes)
+   Padroniza headers/footers para visual escuro Compras.
+   ============================================================ */
+.modal-content-omie {
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.modal-content-omie .modal-header-omie {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+    color: #ffffff;
+    padding: 16px 24px;
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-content-omie .modal-header-omie h2,
+.modal-content-omie .modal-header-omie h3 {
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-content-omie .modal-header-omie .close-btn,
+.modal-content-omie .modal-header-omie .modal-close,
+.modal-content-omie .modal-header-omie button[class*="close"] {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.modal-content-omie .modal-header-omie .close-btn:hover,
+.modal-content-omie .modal-header-omie .modal-close:hover,
+.modal-content-omie .modal-header-omie button[class*="close"]:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+.modal-content-omie .modal-body-omie,
+.modal-content-omie .modal-body {
+    background: #f8fafc;
+    padding: 24px;
+}
+
+.modal-content-omie .modal-footer,
+.modal-content-omie .modal-footer-omie {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* ============================================================
+   9. FAMÍLIA: .modal-container (Vendas faturamento parcial)
+   ============================================================ */
+.modal-container {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.modal-container .modal-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+    color: #ffffff;
+}
+
+.modal-container .modal-header h2,
+.modal-container .modal-header h3 {
+    color: #ffffff;
+}
+
+/* ============================================================
+   10. GLOBAL: Override inline gradient styles on .modal-header
+   Ensures ALL modal headers use the dark Compras gradient
+   ============================================================ */
+.modal-header[style*="background"] {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    color: #ffffff !important;
+}
+
+.modal-header[style*="background"] h2,
+.modal-header[style*="background"] h3,
+.modal-header[style*="background"] h4 {
+    color: #ffffff !important;
+}
+
+/* ============================================================
+   11. GLOBAL: Standardize modal footer buttons
+   ============================================================ */
+.modal-footer .btn-primary,
+.modal-footer-omie .btn-primary,
+.modal-footer .btn.btn-primary {
+    background: linear-gradient(135deg, #10b981, #059669);
+    border: none;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer-omie .btn-primary:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.modal-footer .btn-secondary,
+.modal-footer-omie .btn-secondary,
+.modal-footer .btn.btn-secondary {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #475569;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-footer .btn-secondary:hover,
+.modal-footer-omie .btn-secondary:hover {
+    background: #e2e8f0;
+}
+
+/* ============================================================
+   12. GLOBAL: Form controls inside modals
+   ============================================================ */
+.modal-body .form-control,
+.modal-body-omie .form-control,
+.modal-body input[type="text"],
+.modal-body input[type="number"],
+.modal-body input[type="email"],
+.modal-body input[type="date"],
+.modal-body select,
+.modal-body textarea,
+.modal-body-omie input[type="text"],
+.modal-body-omie input[type="number"],
+.modal-body-omie input[type="email"],
+.modal-body-omie input[type="date"],
+.modal-body-omie select,
+.modal-body-omie textarea {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: #ffffff;
+}
+
+.modal-body .form-control:focus,
+.modal-body-omie .form-control:focus,
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus,
+.modal-body-omie input:focus,
+.modal-body-omie select:focus,
+.modal-body-omie textarea:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* ============================================================
+   13. ANIMATION: Unified modal animation
+   ============================================================ */
+@keyframes aluforceModalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-overlay.active > *:first-child,
+.modal-overlay.active .modal,
+.modal-overlay.active .modal-content,
+.modal-overlay.active .modal-content-omie,
+.modal-overlay.active .modal-omie,
+.modal-overlay.active .modal-container {
+    animation: aluforceModalSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}

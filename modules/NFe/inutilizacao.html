@@ -12,7 +12,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Aluforce: Inutilização</title>
+    <title>Aluforce: Inutilizaï¿½ï¿½o</title>
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/csp-fix.js" defer></script>
@@ -97,7 +97,7 @@
             font-weight: 600;
         }
         .ambiente-homologacao { background: var(--warning-bg); color: #92400e; }
-        .ambiente-produção { background: var(--danger-bg); color: #991b1b; }
+        .ambiente-produï¿½ï¿½o { background: var(--danger-bg); color: #991b1b; }
 
         .required-mark { color: var(--danger); }
 
@@ -106,6 +106,8 @@
             .range-row .range-separator { display: none; }
         }
     </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -115,13 +117,13 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatï¿½rios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn active" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logï¿½stica"><i class="fas fa-truck"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn active" title="Inutilizaï¿½ï¿½o"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configuraï¿½ï¿½es" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -132,15 +134,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Inutilização</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Inutilizaï¿½ï¿½o</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="Notificaï¿½ï¿½es" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -158,8 +160,8 @@
                             <div class="page-title-wrapper">
                                 <div class="page-icon red"><i class="fas fa-ban"></i></div>
                                 <div>
-                                    <h2 class="page-title">Inutilização de Numeração</h2>
-                                    <p class="page-subtitle">Inutilize faixas de numeração de NF-e não utilizadas</p>
+                                    <h2 class="page-title">Inutilizaï¿½ï¿½o de Numeraï¿½ï¿½o</h2>
+                                    <p class="page-subtitle">Inutilize faixas de numeraï¿½ï¿½o de NF-e nï¿½o utilizadas</p>
                                 </div>
                             </div>
                         </div>
@@ -167,19 +169,19 @@
 
                     <!-- Warning Banner -->
                     <div class="danger-banner">
-                        <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> OPERAÇÃO IRREVERSÍVEL</div>
-                        <p>A inutilização de numeração é uma operação definitiva e não pode ser desfeita. Utilize quando houver quebra de sequência na numeração das NF-e.</p>
+                        <div class="danger-title"><i class="fas fa-exclamation-triangle"></i> OPERAï¿½ï¿½O IRREVERSï¿½VEL</div>
+                        <p>A inutilizaï¿½ï¿½o de numeraï¿½ï¿½o ï¿½ uma operaï¿½ï¿½o definitiva e nï¿½o pode ser desfeita. Utilize quando houver quebra de sequï¿½ncia na numeraï¿½ï¿½o das NF-e.</p>
                         <ul>
-                            <li>Números inutilizados não poderão ser utilizados para emitir novas NF-e</li>
-                            <li>A inutilização deve ser feita até o 10º dia do mês subsequente</li>
-                            <li>A SEFAZ validará os dados de série, CNPJ e UF do emitente</li>
+                            <li>Nï¿½meros inutilizados nï¿½o poderï¿½o ser utilizados para emitir novas NF-e</li>
+                            <li>A inutilizaï¿½ï¿½o deve ser feita atï¿½ o 10ï¿½ dia do mï¿½s subsequente</li>
+                            <li>A SEFAZ validarï¿½ os dados de sï¿½rie, CNPJ e UF do emitente</li>
                         </ul>
                     </div>
 
                     <!-- Form Card -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-file-signature"></i> Dados para Inutilização</span>
+                            <span class="card-title"><i class="fas fa-file-signature"></i> Dados para Inutilizaï¿½ï¿½o</span>
                         </div>
                         <div class="card-body">
                             <div id="suggestionBox" class="suggestion-box">
@@ -189,33 +191,33 @@
                             <form id="inutilizacaoForm" onsubmit="return false;">
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <label>Série <span class="required-mark">*</span></label>
+                                        <label>Sï¿½rie <span class="required-mark">*</span></label>
                                         <input type="text" id="serie" class="form-control" value="1" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Ano <span class="required-mark">*</span></label>
                                         <input type="text" id="ano" class="form-control" required>
-                                        <span class="form-help">Formato: 2 dígitos (ex: 26)</span>
+                                        <span class="form-help">Formato: 2 dï¿½gitos (ex: 26)</span>
                                     </div>
                                     <div class="form-group">
                                         <label>Ambiente</label>
                                         <select id="ambiente" class="form-control">
-                                            <option value="2">Homologação</option>
-                                            <option value="1">Produção</option>
+                                            <option value="2">Homologaï¿½ï¿½o</option>
+                                            <option value="1">Produï¿½ï¿½o</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Faixa de Numeração <span class="required-mark">*</span></label>
+                                    <label>Faixa de Numeraï¿½ï¿½o <span class="required-mark">*</span></label>
                                     <div class="range-row">
                                         <div class="form-group" style="margin-bottom:0;">
-                                            <label>Número Inicial</label>
+                                            <label>Nï¿½mero Inicial</label>
                                             <input type="number" id="numInicial" class="form-control" min="1" required placeholder="Ex: 100">
                                         </div>
-                                        <div class="range-separator">até</div>
+                                        <div class="range-separator">atï¿½</div>
                                         <div class="form-group" style="margin-bottom:0;">
-                                            <label>Número Final</label>
+                                            <label>Nï¿½mero Final</label>
                                             <input type="number" id="numFinal" class="form-control" min="1" required placeholder="Ex: 105">
                                         </div>
                                     </div>
@@ -245,29 +247,29 @@
 
                                 <div class="form-group">
                                     <label>Justificativa <span class="required-mark">*</span></label>
-                                    <textarea id="justificativa" class="form-control" rows="3" placeholder="Mínimo 15 caracteres" minlength="15" maxlength="255" oninput="atualizarContador()" required></textarea>
-                                    <div class="char-count"><span id="charCount">0</span>/255 caracteres (mínimo 15)</div>
+                                    <textarea id="justificativa" class="form-control" rows="3" placeholder="Mï¿½nimo 15 caracteres" minlength="15" maxlength="255" oninput="atualizarContador()" required></textarea>
+                                    <div class="char-count"><span id="charCount">0</span>/255 caracteres (mï¿½nimo 15)</div>
                                 </div>
 
                                 <div class="actions">
-                                    <button type="button" class="btn btn-primary" onclick="buscarSugestao()"><i class="fas fa-lightbulb"></i> Buscar Sugestão</button>
-                                    <button type="button" class="btn btn-danger" onclick="inutilizar()"><i class="fas fa-ban"></i> Inutilizar Numeração</button>
+                                    <button type="button" class="btn btn-primary" onclick="buscarSugestao()"><i class="fas fa-lightbulb"></i> Buscar Sugestï¿½o</button>
+                                    <button type="button" class="btn btn-danger" onclick="inutilizar()"><i class="fas fa-ban"></i> Inutilizar Numeraï¿½ï¿½o</button>
                                 </div>
                             </form>
                         </div>
                     </div>
 
-                    <!-- Histórico -->
+                    <!-- Histï¿½rico -->
                     <div class="card">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-list"></i> Histórico de Inutilizações</span>
+                            <span class="card-title"><i class="fas fa-list"></i> Histï¿½rico de Inutilizaï¿½ï¿½es</span>
                         </div>
                         <div class="card-body" style="padding:0;">
                             <div style="overflow-x:auto;">
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>Série</th>
+                                            <th>Sï¿½rie</th>
                                             <th>Faixa</th>
                                             <th>Ano</th>
                                             <th>Data</th>
@@ -280,8 +282,8 @@
                             </div>
                             <div id="historicoEmpty" class="empty-state">
                                 <i class="fas fa-ban"></i>
-                                <h3>Nenhuma inutilização registrada</h3>
-                                <p>As inutilizações realizadas aparecerão aqui</p>
+                                <h3>Nenhuma inutilizaï¿½ï¿½o registrada</h3>
+                                <p>As inutilizaï¿½ï¿½es realizadas aparecerï¿½o aqui</p>
                             </div>
                         </div>
                     </div>
@@ -310,7 +312,7 @@
             .then(r => r.json())
             .then(user => {
                 const d = user.dados || user;
-                const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
+                const nome = (d.nome || d.name || 'Usuï¿½rio').split(' ')[0];
                 document.getElementById('user-name').textContent = nome;
                 const h = new Date().getHours();
                 document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -339,18 +341,18 @@
                 const box = document.getElementById('suggestionBox');
                 const text = document.getElementById('suggestionText');
                 if (data.sugestao || data.proximo) {
-                    text.textContent = 'Sugestão: inutilizar de ' + (data.inicio || data.de || '?') + ' até ' + (data.fim || data.ate || data.proximo || '?');
+                    text.textContent = 'Sugestï¿½o: inutilizar de ' + (data.inicio || data.de || '?') + ' atï¿½ ' + (data.fim || data.ate || data.proximo || '?');
                     if (data.inicio || data.de) document.getElementById('numInicial').value = data.inicio || data.de;
                     if (data.fim || data.ate) document.getElementById('numFinal').value = data.fim || data.ate;
                     box.style.display = 'block';
                 } else {
-                    text.textContent = 'Nenhuma sugestão disponível para esta série';
+                    text.textContent = 'Nenhuma sugestï¿½o disponï¿½vel para esta sï¿½rie';
                     box.style.display = 'block';
                 }
             })
             .catch(() => {
                 document.getElementById('suggestionBox').style.display = 'block';
-                document.getElementById('suggestionText').textContent = 'Não foi possível obter sugestão do servidor';
+                document.getElementById('suggestionText').textContent = 'Nï¿½o foi possï¿½vel obter sugestï¿½o do servidor';
             });
         }
 
@@ -365,17 +367,17 @@
             const ambiente = document.getElementById('ambiente').value;
 
             if (!serie || !ano || !numInicial || !numFinal || !cnpj || !uf || !justificativa) {
-                return showAlert('Preencha todos os campos obrigatórios', 'warning');
+                return showAlert('Preencha todos os campos obrigatï¿½rios', 'warning');
             }
             if (justificativa.length < 15) {
-                return showAlert('Justificativa deve ter no mínimo 15 caracteres', 'warning');
+                return showAlert('Justificativa deve ter no mï¿½nimo 15 caracteres', 'warning');
             }
             if (parseInt(numFinal) < parseInt(numInicial)) {
-                return showAlert('Número final deve ser maior ou igual ao inicial', 'warning');
+                return showAlert('Nï¿½mero final deve ser maior ou igual ao inicial', 'warning');
             }
 
             const qtd = parseInt(numFinal) - parseInt(numInicial) + 1;
-            if (!confirm('ATENÇÃO: Você está prestes a inutilizar ' + qtd + ' número(s) de NFe (de ' + numInicial + ' a ' + numFinal + ').\n\nEsta operação é IRREVERSÍVEL.\n\nDeseja continuar?')) return;
+            if (!confirm('ATENï¿½ï¿½O: Vocï¿½ estï¿½ prestes a inutilizar ' + qtd + ' nï¿½mero(s) de NFe (de ' + numInicial + ' a ' + numFinal + ').\n\nEsta operaï¿½ï¿½o ï¿½ IRREVERSï¿½VEL.\n\nDeseja continuar?')) return;
 
             fetch('/api/nfe/inutilizar', {
                 method:'POST',
@@ -388,7 +390,7 @@
                 return r.json();
             })
             .then(data => {
-                showAlert('Inutilização realizada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
+                showAlert('Inutilizaï¿½ï¿½o realizada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
                 carregarHistorico();
                 // Reset form
                 document.getElementById('numInicial').value = '';
@@ -396,7 +398,7 @@
                 document.getElementById('justificativa').value = '';
                 atualizarContador();
             })
-            .catch(e => showAlert(e.message || 'Erro ao processar inutilização', 'danger'));
+            .catch(e => showAlert(e.message || 'Erro ao processar inutilizaï¿½ï¿½o', 'danger'));
         }
 
         function carregarHistorico() {
@@ -444,7 +446,7 @@
             setTimeout(() => d.remove(), 5000);
         }
 
-        function abrirModalConfiguracoes() { alert('Configurações - Em desenvolvimento'); }
+        function abrirModalConfiguracoes() { alert('Configuraï¿½ï¿½es - Em desenvolvimento'); }
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();

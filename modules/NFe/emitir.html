@@ -16,7 +16,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Emitir NFe</title>
 
-    <!-- Sistema de Autenticação Unificado — DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado ï¿½ DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -31,17 +31,19 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-    <!-- Design System — Faturamento Layout -->
+    <!-- Design System ï¿½ Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
 
-    <!-- Global Header & Sidebar — Padrão Institucional -->
+    <!-- Global Header & Sidebar ï¿½ Padrï¿½o Institucional -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
 
-    <!-- Popup Confirmação -->
+    <!-- Popup Confirmaï¿½ï¿½o -->
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260324">
 
     <!-- Anti-Copy Protection -->
     <script src="/js/anti-copy-protection.js" defer></script>
@@ -155,7 +157,7 @@
             color: #0f172a;
         }
 
-        /* ===== Destinatário section title ===== */
+        /* ===== Destinatï¿½rio section title ===== */
         #section-dados h4 {
             font-size: 13px !important;
             font-weight: 600 !important;
@@ -206,7 +208,7 @@
         }
         .data-table td { vertical-align: middle; }
 
-        /* ===== Totals Cards — Compras Pattern ===== */
+        /* ===== Totals Cards ï¿½ Compras Pattern ===== */
         #section-itens .stat-card.blue::before { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
         #section-itens .stat-card.amber::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
         #section-itens .stat-card.purple::before { background: linear-gradient(180deg, #8b5cf6, #a78bfa); }
@@ -285,14 +287,14 @@
         <nav class="sidebar-nav">
             <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
             <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-            <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-            <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+            <a href="nfse.html" class="sidebar-btn" title="NFSe Serviï¿½os"><i class="fas fa-file-contract"></i></a>
+            <a href="relatorios.html" class="sidebar-btn" title="Relatï¿½rios"><i class="fas fa-chart-bar"></i></a>
             <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-            <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
-            <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+            <a href="logistica.html" class="sidebar-btn" title="Logï¿½stica"><i class="fas fa-truck"></i></a>
+            <a href="inutilizacao.html" class="sidebar-btn" title="Inutilizaï¿½ï¿½o"><i class="fas fa-ban"></i></a>
         </nav>
         <div class="sidebar-bottom">
-            <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+            <button class="sidebar-btn" title="Configuraï¿½ï¿½es" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
         </div>
     </aside>
 
@@ -307,15 +309,15 @@
                 <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                 <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                 <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
                 <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Emitir NFe</span>
             </div>
         </div>
         <div class="header-right">
             <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-            <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+            <button class="header-btn" title="Notificaï¿½ï¿½es" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
             <div class="user-greeting">
-                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                 <div class="user-avatar" id="user-avatar">
                     <img alt="Foto" id="user-photo" style="display:none">
                     <span id="user-initials">U</span>
@@ -333,7 +335,7 @@
                         <div class="wizard-number">1</div>
                         <div>
                             <div class="wizard-title">Dados da NFe</div>
-                            <div class="wizard-desc">Informações gerais e destinatário</div>
+                            <div class="wizard-desc">Informaï¿½ï¿½es gerais e destinatï¿½rio</div>
                         </div>
                     </div>
                     <div class="wizard-separator"></div>
@@ -341,7 +343,7 @@
                         <div class="wizard-number">2</div>
                         <div>
                             <div class="wizard-title">Itens</div>
-                            <div class="wizard-desc">Produtos e serviços</div>
+                            <div class="wizard-desc">Produtos e serviï¿½os</div>
                         </div>
                     </div>
                     <div class="wizard-separator"></div>
@@ -382,25 +384,25 @@
                         <div class="card-body">
                             <div class="form-row">
                                 <div class="form-group" style="grid-column: span 2;">
-                                    <label for="naturezaOperacao">Natureza da Operação</label>
+                                    <label for="naturezaOperacao">Natureza da Operaï¿½ï¿½o</label>
                                     <input type="text" class="form-control" id="naturezaOperacao" name="naturezaOperacao" value="Venda de mercadoria" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="tipoOperacao">Tipo de Operação</label>
+                                    <label for="tipoOperacao">Tipo de Operaï¿½ï¿½o</label>
                                     <select class="form-control" id="tipoOperacao" name="tipoOperacao" required>
-                                        <option value="1">Saída</option>
+                                        <option value="1">Saï¿½da</option>
                                         <option value="0">Entrada</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
-                                    <label for="dataEmissao">Data de Emissão</label>
+                                    <label for="dataEmissao">Data de Emissï¿½o</label>
                                     <input type="datetime-local" class="form-control" id="dataEmissao" name="dataEmissao" required>
                                 </div>
                             </div>
 
-                            <!-- Destinatário -->
+                            <!-- Destinatï¿½rio -->
                             <h4 style="font-size:13px;font-weight:600;color:#6b7280;margin:20px 0 14px;padding-bottom:8px;border-bottom:1px solid #e5e7eb;">
-                                <i class="fas fa-user"></i> Destinatário
+                                <i class="fas fa-user"></i> Destinatï¿½rio
                             </h4>
 
                             <div class="form-row">
@@ -416,18 +418,18 @@
                                     <input type="text" class="form-control" id="destinatarioDoc" name="destinatarioDoc" placeholder="00.000.000/0000-00" required>
                                 </div>
                                 <div class="form-group" style="grid-column: span 2;">
-                                    <label for="destinatarioNome">Razão Social / Nome</label>
+                                    <label for="destinatarioNome">Razï¿½o Social / Nome</label>
                                     <input type="text" class="form-control" id="destinatarioNome" name="destinatarioNome" required>
                                 </div>
                             </div>
 
                             <div class="form-row">
                                 <div class="form-group" style="grid-column: span 2;">
-                                    <label for="destinatarioEndereco">Endereço (Logradouro)</label>
+                                    <label for="destinatarioEndereco">Endereï¿½o (Logradouro)</label>
                                     <input type="text" class="form-control" id="destinatarioEndereco" name="destinatarioEndereco" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="destinatarioNumero">Número</label>
+                                    <label for="destinatarioNumero">Nï¿½mero</label>
                                     <input type="text" class="form-control" id="destinatarioNumero" name="destinatarioNumero" required>
                                 </div>
                                 <div class="form-group">
@@ -442,11 +444,11 @@
                                     <input type="text" class="form-control" id="destinatarioBairro" name="destinatarioBairro" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="destinatarioMunicipio">Município</label>
+                                    <label for="destinatarioMunicipio">Municï¿½pio</label>
                                     <input type="text" class="form-control" id="destinatarioMunicipio" name="destinatarioMunicipio" required>
                                 </div>
                                 <div class="form-group">
-                                    <label for="destinatarioCodigoMunicipio">Código IBGE Município</label>
+                                    <label for="destinatarioCodigoMunicipio">Cï¿½digo IBGE Municï¿½pio</label>
                                     <input type="text" class="form-control" id="destinatarioCodigoMunicipio" name="destinatarioCodigoMunicipio" placeholder="0000000">
                                 </div>
                                 <div class="form-group">
@@ -508,15 +510,15 @@
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>Código</th>
-                                            <th>Descrição</th>
+                                            <th>Cï¿½digo</th>
+                                            <th>Descriï¿½ï¿½o</th>
                                             <th>NCM</th>
                                             <th>CFOP</th>
                                             <th>Unid.</th>
                                             <th>Qtd</th>
                                             <th>Valor Unit.</th>
                                             <th>Total</th>
-                                            <th style="text-align:center;width:60px;">Ações</th>
+                                            <th style="text-align:center;width:60px;">Aï¿½ï¿½es</th>
                                         </tr>
                                     </thead>
                                     <tbody id="itensTableBody">
@@ -620,11 +622,11 @@
         }
 
         function abrirModalConfiguracoes() {
-            // Redirecionar para o dashboard NFe que possui o modal de configurações completo
+            // Redirecionar para o dashboard NFe que possui o modal de configuraï¿½ï¿½es completo
             window.location.href = 'index.html?openConfig=true';
         }
 
-        // -- Helper: obter headers de autenticação --
+        // -- Helper: obter headers de autenticaï¿½ï¿½o --
         function getAuthHeaders() {
             const headers = { 'Content-Type': 'application/json' };
             // CSRF token do cookie
@@ -639,7 +641,7 @@
         const avatarNameMap = {
             'clemerson': 'Clemerson',
             'isabela': 'Isabela',
-            'thaina': 'Thainá',
+            'thaina': 'Thainï¿½',
             'thiago': 'Thiago',
             'nicolas': 'Nicolas',
             'nicolasdaniel': 'Nicolas Daniel',
@@ -647,26 +649,26 @@
             'admin': 'Administrador',
             'ti': 'TI',
             'tialuforce': 'TI Aluforce',
-            'antonio': 'Antônio',
-            'andreia': 'Andréia',
+            'antonio': 'Antï¿½nio',
+            'andreia': 'Andrï¿½ia',
             'guilherme': 'Guilherme',
             'marcelo': 'Marcelo',
             'financeiro': 'Financeiro',
             'douglas': 'Douglas',
             'hellen': 'Hellen',
             'helen': 'Helen',
-            'marcia': 'Márcia',
+            'marcia': 'Mï¿½rcia',
             'augusto': 'Augusto',
             'renata': 'Renata',
             'fabiano': 'Fabiano',
-            'fabiola': 'Fabíola'
+            'fabiola': 'Fabï¿½ola'
         };
 
-        // -- Carregar Usuário --
+        // -- Carregar Usuï¿½rio --
         async function carregarUsuario() {
             try {
                 const resp = await fetch('/api/me', { credentials: 'include' });
-                if (!resp.ok) throw new Error('Não autenticado');
+                if (!resp.ok) throw new Error('Nï¿½o autenticado');
                 const user = await resp.json();
 
                 // Greeting based on hour
@@ -678,8 +680,8 @@
 
                 // User name
                 const nameEl = document.getElementById('user-name');
-                const username = (user.username || user.nome || user.login || 'Usuário').toLowerCase();
-                const displayName = avatarNameMap[username] || user.nome || user.username || 'Usuário';
+                const username = (user.username || user.nome || user.login || 'Usuï¿½rio').toLowerCase();
+                const displayName = avatarNameMap[username] || user.nome || user.username || 'Usuï¿½rio';
                 if (nameEl) nameEl.textContent = displayName.split(' ')[0];
 
                 // Initials
@@ -700,7 +702,7 @@
                     if (initialsEl) initialsEl.style.display = 'none';
                 }
             } catch (e) {
-                console.warn('Erro ao carregar usuário:', e);
+                console.warn('Erro ao carregar usuï¿½rio:', e);
             }
         }
 
@@ -729,8 +731,8 @@
             itens.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${item.código}" onchange="atualizarItem(${index},'código',this.value)" placeholder="Código"></td>
-                    <td><input type="text" value="${item.descrição}" onchange="atualizarItem(${index},'descrição',this.value)" placeholder="Descrição do produto"></td>
+                    <td><input type="text" value="${item.cï¿½digo}" onchange="atualizarItem(${index},'cï¿½digo',this.value)" placeholder="Cï¿½digo"></td>
+                    <td><input type="text" value="${item.descriï¿½ï¿½o}" onchange="atualizarItem(${index},'descriï¿½ï¿½o',this.value)" placeholder="Descriï¿½ï¿½o do produto"></td>
                     <td><input type="text" value="${item.ncm}" onchange="atualizarItem(${index},'ncm',this.value)" placeholder="00000000" style="width:100px;"></td>
                     <td><input type="text" value="${item.cfop}" onchange="atualizarItem(${index},'cfop',this.value)" placeholder="5102" style="width:80px;"></td>
                     <td><input type="text" value="${item.unidade}" onchange="atualizarItem(${index},'unidade',this.value)" placeholder="UN" style="width:60px;"></td>
@@ -821,7 +823,7 @@
             try {
                 const nfeData = construirNFeData();
                 if (!nfeData.itens.length) {
-                    showAlert('Adicione ao menos um item à NFe.', 'warning');
+                    showAlert('Adicione ao menos um item ï¿½ NFe.', 'warning');
                     return;
                 }
 
@@ -847,7 +849,7 @@
                 }
             } catch (e) {
                 console.error('Erro ao gerar preview:', e);
-                showAlert('Erro de conexão ao gerar preview.', 'danger');
+                showAlert('Erro de conexï¿½o ao gerar preview.', 'danger');
             }
         }
 
@@ -856,7 +858,7 @@
             try {
                 const nfeData = construirNFeData();
                 if (!nfeData.itens.length) {
-                    showAlert('Adicione ao menos um item à NFe.', 'warning');
+                    showAlert('Adicione ao menos um item ï¿½ NFe.', 'warning');
                     return;
                 }
 
@@ -874,11 +876,11 @@
                     showAlert('XML validado com sucesso! Nenhum erro encontrado.', 'success');
                 } else {
                     const erros = result.errors || result.erros || [];
-                    showAlert('Erros de validação: ' + (erros.join(', ') || result.message || 'Verifique os dados.'), 'danger');
+                    showAlert('Erros de validaï¿½ï¿½o: ' + (erros.join(', ') || result.message || 'Verifique os dados.'), 'danger');
                 }
             } catch (e) {
                 console.error('Erro ao validar XML:', e);
-                showAlert('Erro de conexão ao validar XML.', 'danger');
+                showAlert('Erro de conexï¿½o ao validar XML.', 'danger');
             }
         }
 
@@ -887,7 +889,7 @@
             try {
                 const nfeData = construirNFeData();
                 if (!nfeData.itens.length) {
-                    showAlert('Adicione ao menos um item à NFe.', 'warning');
+                    showAlert('Adicione ao menos um item ï¿½ NFe.', 'warning');
                     return;
                 }
 
@@ -913,8 +915,8 @@
                         <div class="success-icon"><i class="fas fa-check-circle"></i></div>
                         <h3 style="margin-bottom:8px;color:#059669;">NFe Emitida com Sucesso!</h3>
                         <p style="color:#6b7280;margin-bottom:12px;">Chave de acesso:</p>
-                        <p style="font-family:monospace;font-size:14px;font-weight:600;word-break:break-all;">${result.chave || result.chaveAcesso || '—'}</p>
-                        <p style="margin-top:8px;color:#9ca3af;font-size:12px;">Protocolo: ${result.protocolo || result.nProtocolo || '—'}</p>
+                        <p style="font-family:monospace;font-size:14px;font-weight:600;word-break:break-all;">${result.chave || result.chaveAcesso || 'ï¿½'}</p>
+                        <p style="margin-top:8px;color:#9ca3af;font-size:12px;">Protocolo: ${result.protocolo || result.nProtocolo || 'ï¿½'}</p>
                         <div style="margin-top:20px;">
                             <a href="consultar.html" class="btn btn-primary"><i class="fas fa-search"></i> Consultar NFe</a>
                             <button type="button" class="btn btn-secondary" onclick="location.reload()" style="margin-left:8px;">
@@ -928,7 +930,7 @@
                 }
             } catch (e) {
                 console.error('Erro ao emitir NFe:', e);
-                showAlert('Erro de conexão ao emitir NFe.', 'danger');
+                showAlert('Erro de conexï¿½o ao emitir NFe.', 'danger');
             } finally {
                 const btnEmitir = document.getElementById('btnEmitir');
                 if (btnEmitir) {
@@ -987,7 +989,7 @@
                 const config = await resp.json();
                 console.log('Emitente carregado:', config.emitente || config);
             } catch (e) {
-                console.warn('Usando dados de emitente padrão (fallback).');
+                console.warn('Usando dados de emitente padrï¿½o (fallback).');
             }
         }
 
@@ -1020,7 +1022,7 @@
     <script src="/_shared/connection-monitor.js?v=20260301"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
 
-    <!-- Utilitários Compartilhados -->
+    <!-- Utilitï¿½rios Compartilhados -->
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 

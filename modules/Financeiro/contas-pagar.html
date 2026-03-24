@@ -42,7 +42,7 @@
         --info: #3b82f6;
     }
 
-        /* Botão Importar - usa classe padrão .btn.btn-success do fin-components.css */
+        /* Botï¿½o Importar - usa classe padrï¿½o .btn.btn-success do fin-components.css */
 /* SIDEBAR - estilos definidos em fin-layout.css */
 /* HEADER - estilos definidos em fin-layout.css */
 .user-avatar img.visible { display: block; }
@@ -50,14 +50,14 @@
         .user-avatar img.visible + .user-initial { display: none; }
 
         /* PAGE CONTENT - definido em fin-layout.css */
-/* Animação de entrada */
+/* Animaï¿½ï¿½o de entrada */
         @keyframes fadeInContent {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .page-content { animation: fadeInContent 0.4s ease-out; }
 
-        /* Animação escalonada para KPIs e Cards */
+        /* Animaï¿½ï¿½o escalonada para KPIs e Cards */
         .kpi-grid .kpi-card { animation: slideInUp 0.5s ease-out backwards; }
         .kpi-grid .kpi-card:nth-child(1) { animation-delay: 0.05s; }
         .kpi-grid .kpi-card:nth-child(2) { animation-delay: 0.1s; }
@@ -77,7 +77,7 @@
         .btn-primary { background: linear-gradient(135deg, var(--danger), #dc2626); color: white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
 
-        /* KPI CARDS - Padrão Compras */
+        /* KPI CARDS - Padrï¿½o Compras */
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
         .stat-card {
             background: white; border-radius: 16px; padding: 24px;
@@ -263,6 +263,7 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
 </head>
 <body>
     <div class="app-container">
@@ -294,13 +295,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orï¿½amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliaï¿½ï¿½o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatï¿½rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -312,7 +313,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configuraï¿½ï¿½es" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -339,13 +340,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="Notificaï¿½ï¿½es" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
+                                <h3><i class="fas fa-bell"></i> Notificaï¿½ï¿½es</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -358,15 +359,15 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
+                                    <p>Nenhuma notificaï¿½ï¿½o</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usuário" id="user-photo" style="display:none">
+                            <img alt="Foto do usuï¿½rio" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -401,7 +402,7 @@
                         <div class="stat-content">
                             <div class="stat-label">Vence Hoje</div>
                             <div class="stat-value" id="stat-hoje">R$ 0,00</div>
-                            <div class="stat-trend"><i class="fas fa-calendar-day"></i> Atenção</div>
+                            <div class="stat-trend"><i class="fas fa-calendar-day"></i> Atenï¿½ï¿½o</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -415,7 +416,7 @@
                     <div class="stat-card">
                         <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
                         <div class="stat-content">
-                            <div class="stat-label">Pago no Mês</div>
+                            <div class="stat-label">Pago no Mï¿½s</div>
                             <div class="stat-value" id="stat-pago">R$ 0,00</div>
                             <div class="stat-trend positive"><i class="fas fa-check"></i> Liquidado</div>
                         </div>
@@ -425,19 +426,19 @@
                 <!-- Filters -->
                 <div class="filters-bar">
                     <div class="filter-group">
-                        <label>Período</label>
-                        <select id="filter-período" onchange="filtrarDados()">
-                            <option value="mes-atual" selected>Mês Atual</option>
-                            <option value="mes-anterior">Mês Anterior</option>
-                            <option value="proximos-30">Próximos 30 dias</option>
-                            <option value="proximos-60">Próximos 60 dias</option>
-                            <option value="proximos-90">Próximos 90 dias</option>
-                            <option value="ultimos-30">Últimos 30 dias</option>
-                            <option value="ultimos-60">Últimos 60 dias</option>
-                            <option value="ultimos-90">Últimos 90 dias</option>
+                        <label>Perï¿½odo</label>
+                        <select id="filter-perï¿½odo" onchange="filtrarDados()">
+                            <option value="mes-atual" selected>Mï¿½s Atual</option>
+                            <option value="mes-anterior">Mï¿½s Anterior</option>
+                            <option value="proximos-30">Prï¿½ximos 30 dias</option>
+                            <option value="proximos-60">Prï¿½ximos 60 dias</option>
+                            <option value="proximos-90">Prï¿½ximos 90 dias</option>
+                            <option value="ultimos-30">ï¿½ltimos 30 dias</option>
+                            <option value="ultimos-60">ï¿½ltimos 60 dias</option>
+                            <option value="ultimos-90">ï¿½ltimos 90 dias</option>
                             <option value="2026-01">Janeiro/2026</option>
                             <option value="2026-02">Fevereiro/2026</option>
-                            <option value="2026-03">Março/2026</option>
+                            <option value="2026-03">Marï¿½o/2026</option>
                             <option value="2026-04">Abril/2026</option>
                             <option value="2026-05">Maio/2026</option>
                             <option value="2026-06">Junho/2026</option>
@@ -497,7 +498,7 @@
                                     <th>Pago</th>
                                     <th>Saldo</th>
                                     <th>Status</th>
-                                    <th>Ações</th>
+                                    <th>Aï¿½ï¿½es</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-contas">
@@ -517,7 +518,7 @@
     </div>
 
     <!-- ================================================================================
-         MODAL INICIAL - INCLUIR CONTA A PAGAR (ESCOLHA DO MÉTODO)
+         MODAL INICIAL - INCLUIR CONTA A PAGAR (ESCOLHA DO Mï¿½TODO)
          ================================================================================ -->
     <div class="modal-overlay-omie" id="modalEscolhaMetodo" onclick="if(event.target === this) fecharModalEscolha()">
         <div class="modal-omie modal-escolha">
@@ -526,22 +527,22 @@
                 <button class="btn-fechar-omie" onclick="fecharModalEscolha()">Fechar <i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-omie">
-                <!-- Opção 1: Nota Fiscal Eletrônica -->
+                <!-- Opï¿½ï¿½o 1: Nota Fiscal Eletrï¿½nica -->
                 <div class="opcao-metodo" onclick="abrirModalNFe()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Nota Fiscal Eletrônica</div>
-                        <p>Importe o arquivo XML de uma Nota Fiscal Eletrônica (NF-e) com os movimentos de estoque e as informações para Contas a Pagar. Válido para a NF-e âmbito nacional.</p>
+                        <div class="opcao-tï¿½tulo">Nota Fiscal Eletrï¿½nica</div>
+                        <p>Importe o arquivo XML de uma Nota Fiscal Eletrï¿½nica (NF-e) com os movimentos de estoque e as informaï¿½ï¿½es para Contas a Pagar. Vï¿½lido para a NF-e ï¿½mbito nacional.</p>
                     </div>
                     <div class="opcao-icone">
                         <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='80' fill='%2384cc16' opacity='0.3'%3E??%3C/text%3E%3C/svg%3E" alt="NF-e" style="width: 80px; opacity: 0.5;">
                     </div>
                 </div>
 
-                <!-- Opção 2: Código de Barras -->
+                <!-- Opï¿½ï¿½o 2: Cï¿½digo de Barras -->
                 <div class="opcao-metodo" onclick="abrirModalCodigoBarras()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Código de Barras</div>
-                        <p>Informe boletos de cobrança de qualquer banco, conta de água, luz, telefone, gás e de outras empresas conveniadas, impostos, tributos e pagamentos do Detran.</p>
+                        <div class="opcao-tï¿½tulo">Cï¿½digo de Barras</div>
+                        <p>Informe boletos de cobranï¿½a de qualquer banco, conta de ï¿½gua, luz, telefone, gï¿½s e de outras empresas conveniadas, impostos, tributos e pagamentos do Detran.</p>
                     </div>
                     <div class="opcao-icone">
                         <svg width="80" height="50" style="opacity: 0.3;">
@@ -566,10 +567,10 @@
                     </div>
                 </div>
 
-                <!-- Opção 3: Inserção Manual -->
+                <!-- Opï¿½ï¿½o 3: Inserï¿½ï¿½o Manual -->
                 <div class="opcao-metodo" onclick="abrirModalManual()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Inserção Manual</div>
+                        <div class="opcao-tï¿½tulo">Inserï¿½ï¿½o Manual</div>
                         <p>Digite manualmente a Conta a Pagar</p>
                     </div>
                     <div class="opcao-icone">
@@ -586,14 +587,14 @@
     <div class="modal-overlay-omie" id="modalNFe" onclick="if(event.target === this) fecharModalNFe()">
         <div class="modal-omie modal-nfe">
             <div class="modal-header-omie">
-                <h2>Importar Nota Fiscal Eletrônica</h2>
+                <h2>Importar Nota Fiscal Eletrï¿½nica</h2>
                 <button class="btn-fechar-omie" onclick="fecharModalNFe()">Fechar <i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-omie" style="padding: 24px;">
                 <div class="nfe-input-section">
-                    <label>Digite aqui a chave de acesso da Nota Fiscal Eletrônica (NF-e)</label>
+                    <label>Digite aqui a chave de acesso da Nota Fiscal Eletrï¿½nica (NF-e)</label>
                     <div class="nfe-input-row">
-                        <input type="text" id="chaveNFe" placeholder="Chave de 44 dígitos" maxlength="44">
+                        <input type="text" id="chaveNFe" placeholder="Chave de 44 dï¿½gitos" maxlength="44">
                         <button class="btn-pesquisar-nfe" onclick="pesquisarNFe()">
                             <i class="fas fa-search"></i> Pesquisar NF-e
                         </button>
@@ -616,7 +617,7 @@
                             <small style="color: #ef4444; font-weight: bold;">CHAVE DE ACESSO</small>
                             <p style="font-family: monospace; font-size: 11px; color: #ef4444;">0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000</p>
                         </div>
-                        <p style="text-align: center; font-size: 11px; color: #666; margin-top: 10px;">(Identificação da chave de acesso no DANFE)</p>
+                        <p style="text-align: center; font-size: 11px; color: #666; margin-top: 10px;">(Identificaï¿½ï¿½o da chave de acesso no DANFE)</p>
                     </div>
                 </div>
                 <div style="text-align: center; margin-top: 20px;">
@@ -630,22 +631,22 @@
     </div>
 
     <!-- ================================================================================
-         MODAL CÓDIGO DE BARRAS
+         MODAL Cï¿½DIGO DE BARRAS
          ================================================================================ -->
     <div class="modal-overlay-omie" id="modalCodigoBarras" onclick="if(event.target === this) fecharModalCodigoBarras()">
-        <div class="modal-omie modal-código-barras">
+        <div class="modal-omie modal-cï¿½digo-barras">
             <div class="modal-header-omie">
-                <h2>Informar o Código de Barras</h2>
+                <h2>Informar o Cï¿½digo de Barras</h2>
                 <button class="btn-fechar-omie" onclick="fecharModalCodigoBarras()">Fechar <i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-omie" style="padding: 40px; text-align: center;">
                 <div style="margin-bottom: 20px;">
-                    <label style="display: block; text-align: left; margin-bottom: 8px; color: #666;">Digite o código de barras aqui</label>
+                    <label style="display: block; text-align: left; margin-bottom: 8px; color: #666;">Digite o cï¿½digo de barras aqui</label>
                     <input type="text" id="codigoBarrasInput" style="width: 100%; max-width: 400px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;" placeholder="">
                 </div>
                 <div style="margin-bottom: 30px;">
                     <a href="#" class="link-upload-boleto" onclick="uploadBoleto()">
-                        <i class="fas fa-camera"></i> Ou clique aqui para fazer o <strong>upload do boleto bancário</strong>
+                        <i class="fas fa-camera"></i> Ou clique aqui para fazer o <strong>upload do boleto bancï¿½rio</strong>
                     </a>
                     <input type="file" id="inputBoleto" accept="image/*,.pdf" style="display: none;" onchange="processarBoleto(this)">
                 </div>
@@ -657,7 +658,7 @@
     </div>
 
     <!-- ================================================================================
-         MODAL NOVA CONTA A PAGAR - INSERÇÃO MANUAL (ESTILO OMIE COM ABAS)
+         MODAL NOVA CONTA A PAGAR - INSERï¿½ï¿½O MANUAL (ESTILO OMIE COM ABAS)
          ================================================================================ -->
     <div class="modal-overlay-omie" id="modalConta" onclick="if(event.target === this) fecharModal()">
         <div class="modal-omie modal-conta-pagar">
@@ -667,8 +668,8 @@
                     <div class="modal-avatar-conta">
                         <i class="fas fa-user"></i>
                     </div>
-                    <div class="modal-título-conta">
-                        <h2 id="modal-título">Nova Conta a Pagar</h2>
+                    <div class="modal-tï¿½tulo-conta">
+                        <h2 id="modal-tï¿½tulo">Nova Conta a Pagar</h2>
                     </div>
                 </div>
                 <div class="modal-header-right-conta">
@@ -683,7 +684,7 @@
                 <form id="formConta">
                     <input type="hidden" id="conta-id">
 
-                    <!-- SEÇÃO PRINCIPAL (SEMPRE VISÍVEL) -->
+                    <!-- SEï¿½ï¿½O PRINCIPAL (SEMPRE VISï¿½VEL) -->
                     <div class="form-principal-conta">
                         <div class="form-row-conta">
                             <div class="form-group-conta" style="flex: 2;">
@@ -714,13 +715,13 @@
                                     <option value="despesas-fixas">Despesas Fixas</option>
                                     <option value="impostos">Impostos e Tributos</option>
                                     <option value="folha">Folha de Pagamento</option>
-                                    <option value="servicos">Serviços</option>
+                                    <option value="servicos">Serviï¿½os</option>
                                     <option value="materiais">Materiais</option>
                                     <option value="outros">Outros</option>
                                 </select>
                             </div>
                             <div class="form-group-conta">
-                                <label>Previsão de Pagamento</label>
+                                <label>Previsï¿½o de Pagamento</label>
                                 <div class="input-icon-conta">
                                     <input type="date" id="conta-vencimento">
                                     <i class="fas fa-calendar"></i>
@@ -740,15 +741,15 @@
                         <button type="button" class="tab-conta active" data-tab="detalhes">Detalhes</button>
                         <button type="button" class="tab-conta" data-tab="impostos">Impostos Retidos</button>
                         <button type="button" class="tab-conta" data-tab="departamentos">Departamentos</button>
-                        <button type="button" class="tab-conta" data-tab="repetição">Repetição</button>
+                        <button type="button" class="tab-conta" data-tab="repetiï¿½ï¿½o">Repetiï¿½ï¿½o</button>
                         <button type="button" class="tab-conta" data-tab="pagamentos">Pagamentos</button>
-                        <button type="button" class="tab-conta" data-tab="integração">
-                            <i class="fas fa-link" style="margin-right: 4px; opacity: 0.5;"></i> Integração Bancária e CNAB
+                        <button type="button" class="tab-conta" data-tab="integraï¿½ï¿½o">
+                            <i class="fas fa-link" style="margin-right: 4px; opacity: 0.5;"></i> Integraï¿½ï¿½o Bancï¿½ria e CNAB
                         </button>
                         <button type="button" class="tab-conta" data-tab="diversos">Diversos</button>
                     </div>
 
-                    <!-- CONTEÚDO DAS ABAS -->
+                    <!-- CONTEï¿½DO DAS ABAS -->
                     <div class="tab-content-conta">
                         <!-- ABA: DETALHES -->
                         <div class="tab-pane-conta active" id="tab-detalhes">
@@ -758,9 +759,9 @@
                                     <input type="text" id="conta-documento" placeholder="">
                                 </div>
                                 <div class="form-group-conta">
-                                    <label>Data de Emissão</label>
+                                    <label>Data de Emissï¿½o</label>
                                     <div class="input-icon-conta">
-                                        <input type="date" id="conta-emissão">
+                                        <input type="date" id="conta-emissï¿½o">
                                         <i class="fas fa-calendar"></i>
                                     </div>
                                 </div>
@@ -781,7 +782,7 @@
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta" style="flex: 1;">
-                                    <label>Observações</label>
+                                    <label>Observaï¿½ï¿½es</label>
                                     <textarea id="conta-observacoes" rows="4" placeholder=""></textarea>
                                 </div>
                             </div>
@@ -874,7 +875,7 @@
                             <div class="departamentos-section">
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                                     <h4 style="margin:0;font-size:14px;color:#374151;font-weight:600;">
-                                        <i class="fas fa-sitemap" style="margin-right:6px;color:#6366f1;"></i> Distribuição por Centro de Custo
+                                        <i class="fas fa-sitemap" style="margin-right:6px;color:#6366f1;"></i> Distribuiï¿½ï¿½o por Centro de Custo
                                     </h4>
                                     <button type="button" class="btn-add-depto" onclick="adicionarLinhaDistribuicao()" style="background:#6366f1;color:white;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
                                         <i class="fas fa-plus"></i> Adicionar
@@ -900,28 +901,28 @@
                                     </table>
                                 </div>
                                 <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
-                                    <span style="font-size:12px;font-weight:600;color:#166534;"><i class="fas fa-calculator" style="margin-right:6px;"></i> Total Distribuído</span>
+                                    <span style="font-size:12px;font-weight:600;color:#166534;"><i class="fas fa-calculator" style="margin-right:6px;"></i> Total Distribuï¿½do</span>
                                     <span style="font-size:13px;font-weight:700;color:#166534;" id="dist-total-perc">0%</span>
                                     <span style="font-size:13px;font-weight:700;color:#166534;" id="dist-total-valor">R$ 0,00</span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- ABA: REPETIÇÃO -->
-                        <div class="tab-pane-conta" id="tab-repetição">
+                        <!-- ABA: REPETIï¿½ï¿½O -->
+                        <div class="tab-pane-conta" id="tab-repetiï¿½ï¿½o">
                             <div class="repeticao-section">
                                 <div style="margin-bottom:18px;">
                                     <h4 style="margin:0 0 4px;font-size:14px;color:#374151;font-weight:600;">
-                                        <i class="fas fa-redo" style="margin-right:6px;color:#f59e0b;"></i> Repetição / Recorrência Automática
+                                        <i class="fas fa-redo" style="margin-right:6px;color:#f59e0b;"></i> Repetiï¿½ï¿½o / Recorrï¿½ncia Automï¿½tica
                                     </h4>
                                     <p style="margin:0;font-size:12px;color:#9ca3af;">Configure para gerar automaticamente novas parcelas a partir desta conta.</p>
                                 </div>
 
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
                                     <div>
-                                        <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Frequência</label>
+                                        <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Frequï¿½ncia</label>
                                         <select id="rep-frequencia" onchange="atualizarPreviewRepeticao()" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#374151;background:white;">
-                                            <option value="">Não repetir</option>
+                                            <option value="">Nï¿½o repetir</option>
                                             <option value="semanal">Semanal</option>
                                             <option value="quinzenal">Quinzenal</option>
                                             <option value="mensal">Mensal</option>
@@ -932,7 +933,7 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Nº de Repetições</label>
+                                        <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Nï¿½ de Repetiï¿½ï¿½es</label>
                                         <input type="number" id="rep-quantidade" min="1" max="60" value="12" onchange="atualizarPreviewRepeticao()" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#374151;">
                                     </div>
                                 </div>
@@ -946,7 +947,7 @@
                                         <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Manter dia do vencimento</label>
                                         <select id="rep-dia-fixo" onchange="atualizarPreviewRepeticao()" style="width:100%;padding:9px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#374151;">
                                             <option value="original">Mesmo dia do vencimento original</option>
-                                            <option value="ultimo">Último dia do mês</option>
+                                            <option value="ultimo">ï¿½ltimo dia do mï¿½s</option>
                                             <option value="5">Dia 5</option>
                                             <option value="10">Dia 10</option>
                                             <option value="15">Dia 15</option>
@@ -958,10 +959,10 @@
 
                                 <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px;margin-bottom:14px;">
                                     <div style="font-size:12px;font-weight:600;color:#92400e;margin-bottom:8px;">
-                                        <i class="fas fa-eye" style="margin-right:6px;"></i> Prévia das Parcelas
+                                        <i class="fas fa-eye" style="margin-right:6px;"></i> Prï¿½via das Parcelas
                                     </div>
                                     <div id="rep-preview" style="max-height:180px;overflow-y:auto;font-size:12px;color:#78350f;">
-                                        <span style="color:#b45309;">Selecione a frequência para visualizar as datas.</span>
+                                        <span style="color:#b45309;">Selecione a frequï¿½ncia para visualizar as datas.</span>
                                     </div>
                                 </div>
 
@@ -991,7 +992,7 @@
                                                 <th>Juros <i class="fas fa-sort"></i></th>
                                                 <th>Multa <i class="fas fa-sort"></i></th>
                                                 <th>Banco <i class="fas fa-sort"></i></th>
-                                                <th>Data de Déb... <i class="fas fa-sort"></i></th>
+                                                <th>Data de Dï¿½b... <i class="fas fa-sort"></i></th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -1005,7 +1006,7 @@
                                     <div class="pagamentos-pagination" id="paginacaoPagamentos" style="display: none;">
                                         <span>|&#9664;</span> <span>&#9664; anterior</span>
                                         <span class="page-number">1</span>
-                                        <span>próxima &#9654;</span> <span>&#9654;|</span>
+                                        <span>prï¿½xima &#9654;</span> <span>&#9654;|</span>
                                     </div>
                                     <div class="pagamentos-botoes">
                                         <button type="button" class="btn-cancelar-pagamento">
@@ -1018,7 +1019,7 @@
                                 </div>
                                 <div class="pagamentos-resumo">
                                     <div class="resumo-item">
-                                        <label>Total já Pago da Conta</label>
+                                        <label>Total jï¿½ Pago da Conta</label>
                                         <input type="text" value="0,00" readonly>
                                     </div>
                                     <div class="resumo-item">
@@ -1037,11 +1038,11 @@
                             </div>
                         </div>
 
-                        <!-- ABA: INTEGRAÇÃO BANCÁRIA E CNAB -->
-                        <div class="tab-pane-conta" id="tab-integração">
+                        <!-- ABA: INTEGRAï¿½ï¿½O BANCï¿½RIA E CNAB -->
+                        <div class="tab-pane-conta" id="tab-integraï¿½ï¿½o">
                             <div class="empty-state-conta">
                                 <span>??</span>
-                                <p>Ainda não temos suporte para integração bancária CNAB para esta conta.</p>
+                                <p>Ainda nï¿½o temos suporte para integraï¿½ï¿½o bancï¿½ria CNAB para esta conta.</p>
                             </div>
                         </div>
 
@@ -1049,7 +1050,7 @@
                         <div class="tab-pane-conta" id="tab-diversos">
                             <div class="form-row-conta">
                                 <div class="form-group-conta" style="max-width: 150px;">
-                                    <label>Número do Pedido</label>
+                                    <label>Nï¿½mero do Pedido</label>
                                     <input type="text" id="conta-pedido">
                                 </div>
                                 <div class="form-group-conta">
@@ -1063,11 +1064,11 @@
                                     </select>
                                 </div>
                                 <div class="form-group-conta" style="max-width: 150px;">
-                                    <label>Número do Documento</label>
+                                    <label>Nï¿½mero do Documento</label>
                                     <input type="text" id="conta-num-doc">
                                 </div>
                                 <div class="form-group-conta" style="max-width: 120px;">
-                                    <label>Número da Parcela</label>
+                                    <label>Nï¿½mero da Parcela</label>
                                     <input type="text" id="conta-parcela" value="001/001">
                                 </div>
                             </div>
@@ -1077,8 +1078,8 @@
                                     <input type="text" id="conta-chave-nfe" placeholder="">
                                 </div>
                                 <div class="form-group-conta">
-                                    <label>Código de Barras</label>
-                                    <input type="text" id="conta-código-barras" placeholder="">
+                                    <label>Cï¿½digo de Barras</label>
+                                    <input type="text" id="conta-cï¿½digo-barras" placeholder="">
                                 </div>
                             </div>
                             <div class="form-row-conta">
@@ -1126,7 +1127,7 @@
                         <i class="fas fa-file-invoice-dollar"></i>
                     </div>
                     <div>
-                        <h2 id="view-título">Detalhes da Conta</h2>
+                        <h2 id="view-tï¿½tulo">Detalhes da Conta</h2>
                         <span id="view-documento-sub" style="font-size:12px;color:#6b7280;font-weight:500;"></span>
                     </div>
                 </div>
@@ -1140,9 +1141,9 @@
 
             <!-- BODY -->
             <div class="modal-body-omie" style="overflow-y:auto;">
-                <!-- Seção Principal -->
+                <!-- Seï¿½ï¿½o Principal -->
                 <div class="view-section">
-                    <div class="view-section-title"><i class="fas fa-user"></i> Informações Principais</div>
+                    <div class="view-section-title"><i class="fas fa-user"></i> Informaï¿½ï¿½es Principais</div>
                     <div class="view-grid">
                         <div class="view-field">
                             <label>Fornecedor</label>
@@ -1157,13 +1158,13 @@
                             <div class="view-value" id="view-categoria">-</div>
                         </div>
                         <div class="view-field">
-                            <label>Código de Barras</label>
+                            <label>Cï¿½digo de Barras</label>
                             <div class="view-value" id="view-codigo-barras" style="font-family:monospace;font-size:12px;">-</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seção Valores -->
+                <!-- Seï¿½ï¿½o Valores -->
                 <div class="view-section">
                     <div class="view-section-title"><i class="fas fa-dollar-sign"></i> Valores</div>
                     <div class="view-grid view-grid-3">
@@ -1182,12 +1183,12 @@
                     </div>
                 </div>
 
-                <!-- Seção Datas -->
+                <!-- Seï¿½ï¿½o Datas -->
                 <div class="view-section">
                     <div class="view-section-title"><i class="fas fa-calendar-alt"></i> Datas</div>
                     <div class="view-grid view-grid-3">
                         <div class="view-field">
-                            <label>Data Emissão</label>
+                            <label>Data Emissï¿½o</label>
                             <div class="view-value" id="view-emissao">-</div>
                         </div>
                         <div class="view-field">
@@ -1201,10 +1202,10 @@
                     </div>
                 </div>
 
-                <!-- Seção Observações -->
+                <!-- Seï¿½ï¿½o Observaï¿½ï¿½es -->
                 <div class="view-section">
-                    <div class="view-section-title"><i class="fas fa-sticky-note"></i> Observações</div>
-                    <div class="view-obs" id="view-observacoes">Nenhuma observação registrada.</div>
+                    <div class="view-section-title"><i class="fas fa-sticky-note"></i> Observaï¿½ï¿½es</div>
+                    <div class="view-obs" id="view-observacoes">Nenhuma observaï¿½ï¿½o registrada.</div>
                 </div>
             </div>
 
@@ -1219,9 +1220,9 @@
         </div>
     </div>
 
-    <!-- CSS PARA MODAIS ESTILO OMIE - VERSÃO 2 -->
+    <!-- CSS PARA MODAIS ESTILO OMIE - VERSï¿½O 2 -->
     <style>
-        /* ========== OVERLAY PADRÃO ========== */
+        /* ========== OVERLAY PADRï¿½O ========== */
         .modal-overlay-omie {
             display: none;
             position: fixed;
@@ -1253,7 +1254,7 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* ========== HEADER PADRÃO ========== */
+        /* ========== HEADER PADRï¿½O ========== */
         .modal-header-omie {
             display: flex;
             justify-content: space-between;
@@ -1312,7 +1313,7 @@
             background: #fafafa;
         }
 
-        /* ========== MODAL ESCOLHA MÉTODO ========== */
+        /* ========== MODAL ESCOLHA Mï¿½TODO ========== */
         .modal-escolha {
             width: 640px;
             max-width: 96vw;
@@ -1320,7 +1321,7 @@
         .modal-escolha .modal-body-omie {
             padding: 28px;
         }
-        .opção-metodo {
+        .opï¿½ï¿½o-metodo {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1332,14 +1333,14 @@
             transition: all 0.2s;
             background: #fff;
         }
-        .opção-metodo:hover {
+        .opï¿½ï¿½o-metodo:hover {
             border-color: #84cc16;
             background: linear-gradient(135deg, #f8fff0 0%, #f0fdf4 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(132, 204, 22, 0.15);
         }
-        .opção-metodo:last-child { margin-bottom: 0; }
-        .opção-título {
+        .opï¿½ï¿½o-metodo:last-child { margin-bottom: 0; }
+        .opï¿½ï¿½o-tï¿½tulo {
             font-size: 15px;
             font-weight: 700;
             color: #fff;
@@ -1350,14 +1351,14 @@
             display: inline-block;
             box-shadow: 0 2px 6px rgba(132, 204, 22, 0.3);
         }
-        .opção-info p {
+        .opï¿½ï¿½o-info p {
             font-size: 13px;
             color: #6b7280;
             margin: 0;
             max-width: 400px;
             line-height: 1.5;
         }
-        .opção-icone {
+        .opï¿½ï¿½o-icone {
             width: 48px;
             height: 48px;
             background: #f3f4f6;
@@ -1369,7 +1370,7 @@
             font-size: 20px;
             transition: all 0.2s;
         }
-        .opção-metodo:hover .opção-icone {
+        .opï¿½ï¿½o-metodo:hover .opï¿½ï¿½o-icone {
             background: #84cc16;
             color: #fff;
         }
@@ -1443,8 +1444,8 @@
         }
         .link-upload-nfe:hover { text-decoration: underline; }
 
-        /* ========== MODAL CÓDIGO DE BARRAS ========== */
-        .modal-código-barras {
+        /* ========== MODAL Cï¿½DIGO DE BARRAS ========== */
+        .modal-cï¿½digo-barras {
             width: 540px;
             max-width: 96vw;
         }
@@ -1519,7 +1520,7 @@
             font-size: 20px;
             border: 2px solid #bbf7d0;
         }
-        .modal-título-conta h2 {
+        .modal-tï¿½tulo-conta h2 {
             font-size: 18px;
             font-weight: 700;
             color: #84cc16;
@@ -1538,7 +1539,7 @@
             border-radius: 16px 0 0 16px;
         }
 
-        /* Seção Principal do Formulário */
+        /* Seï¿½ï¿½o Principal do Formulï¿½rio */
         .form-principal-conta {
             padding: 24px;
             background: #fff;
@@ -1590,7 +1591,7 @@
             min-height: 80px;
         }
 
-        /* Input com ícone */
+        /* Input com ï¿½cone */
         .input-icon-conta, .input-search-conta {
             position: relative;
         }
@@ -1660,7 +1661,7 @@
             border-radius: 8px 8px 0 0;
         }
 
-        /* Conteúdo das abas */
+        /* Conteï¿½do das abas */
         .tab-content-conta {
             padding: 24px;
             min-height: 200px;
@@ -1697,13 +1698,13 @@
             margin-bottom: 8px;
             color: #6b7280;
         }
-        .link-ação {
+        .link-aï¿½ï¿½o {
             color: #84cc16;
             text-decoration: none;
             font-size: 14px;
             font-weight: 500;
         }
-        .link-ação:hover { text-decoration: underline; }
+        .link-aï¿½ï¿½o:hover { text-decoration: underline; }
 
         /* Checkbox */
         .checkbox-conta {
@@ -2099,7 +2100,7 @@
             .pagamentos-layout {
                 flex-direction: column;
             }
-            .modal-escolha, .modal-nfe, .modal-código-barras {
+            .modal-escolha, .modal-nfe, .modal-cï¿½digo-barras {
                 width: 100%;
                 max-width: none;
                 border-radius: 0;
@@ -2143,7 +2144,7 @@
             });
         });
 
-        // Funções dos modais de escolha
+        // Funï¿½ï¿½es dos modais de escolha
         function abrirModalEscolhaMetodo() {
             document.getElementById('modalEscolhaMetodo').classList.add('active');
         }
@@ -2169,11 +2170,11 @@
             abrirModal();
         }
 
-        // Funções auxiliares
+        // Funï¿½ï¿½es auxiliares
         function pesquisarNFe() {
             const chave = document.getElementById('chaveNFe').value;
             if (chave.length !== 44) {
-                alert('A chave de acesso deve ter 44 dígitos');
+                alert('A chave de acesso deve ter 44 dï¿½gitos');
                 return;
             }
             alert('Pesquisando NF-e: ' + chave);
@@ -2208,7 +2209,7 @@
                         const vNF = getTag('vNF') || getTag('vLiq');
                         if (vNF) document.getElementById('conta-valor').value = parseFloat(vNF).toFixed(2).replace('.', ',');
                         const dhEmi = getTag('dhEmi') || getTag('dEmi');
-                        if (dhEmi) document.getElementById('conta-emissão').value = dhEmi.substring(0, 10);
+                        if (dhEmi) document.getElementById('conta-emissï¿½o').value = dhEmi.substring(0, 10);
 
                         mostrarNotificacao('NF-e importada com sucesso! Verifique os dados.', 'success');
                     } catch (err) {
@@ -2218,7 +2219,7 @@
                 };
                 reader.readAsText(file);
             } else {
-                mostrarNotificacao('Para importação automática, envie o arquivo XML da NF-e. PDFs precisam ser preenchidos manualmente.', 'warning');
+                mostrarNotificacao('Para importaï¿½ï¿½o automï¿½tica, envie o arquivo XML da NF-e. PDFs precisam ser preenchidos manualmente.', 'warning');
                 fecharModalNFe();
                 abrirModal();
             }
@@ -2230,18 +2231,18 @@
         function processarBoleto(input) {
             if (!input.files || !input.files[0]) return;
             const file = input.files[0];
-            mostrarNotificacao('Boleto "' + file.name + '" anexado. Preencha os dados manualmente ou use o código de barras.', 'info');
+            mostrarNotificacao('Boleto "' + file.name + '" anexado. Preencha os dados manualmente ou use o cï¿½digo de barras.', 'info');
             input.value = ''; // Reset input
         }
         function processarCodigoBarras() {
             const codigo = document.getElementById('codigoBarrasInput').value;
             if (!codigo) {
-                alert('Digite o código de barras');
+                alert('Digite o cï¿½digo de barras');
                 return;
             }
             fecharModalCodigoBarras();
             abrirModal();
-            document.getElementById('conta-código-barras').value = codigo;
+            document.getElementById('conta-cï¿½digo-barras').value = codigo;
         }
         function abrirModalPagamentoInterno() {
             if (!editandoId) {
@@ -2252,7 +2253,7 @@
         }
     </script>
 
-    <!-- Modal Pagamento - Padrão SaaS Empresarial -->
+    <!-- Modal Pagamento - Padrï¿½o SaaS Empresarial -->
     <div class="modal-overlay-saas" id="modalPagamento" onclick="if(event.target === this) fecharModalPagamento()">
         <div class="modal-saas modal-sm">
             <div class="modal-header-saas header-green">
@@ -2274,7 +2275,7 @@
                     <i class="fas fa-info-circle"></i>
                     <div class="alert-saas-content">
                         <strong id="pagamento-fornecedor">Fornecedor</strong>
-                        <p id="pagamento-descrição">Descrição da conta</p>
+                        <p id="pagamento-descriï¿½ï¿½o">Descriï¿½ï¿½o da conta</p>
                     </div>
                 </div>
 
@@ -2292,14 +2293,14 @@
                             <input type="date" id="pagamento-data">
                         </div>
                         <div class="form-group-saas">
-                            <label><i class="fas fa-university"></i> Conta Bancária</label>
+                            <label><i class="fas fa-university"></i> Conta Bancï¿½ria</label>
                             <select id="pagamento-banco">
                                 <option value="">Selecione a conta...</option>
                             </select>
                         </div>
                         <div class="form-group-saas">
-                            <label><i class="fas fa-sticky-note"></i> Observação</label>
-                            <input type="text" id="pagamento-obs" placeholder="Observação do pagamento">
+                            <label><i class="fas fa-sticky-note"></i> Observaï¿½ï¿½o</label>
+                            <input type="text" id="pagamento-obs" placeholder="Observaï¿½ï¿½o do pagamento">
                         </div>
                     </div>
                 </div>
@@ -2326,13 +2327,13 @@
         let contasBancarias = [];
         let editandoId = null;
 
-        // Carregar usuário
+        // Carregar usuï¿½rio
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuï¿½rio');
 
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
@@ -2360,10 +2361,10 @@
                         fotoEl.onerror = () => { fotoEl.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.error('Erro ao carregar usuário:', e); }
+            } catch (e) { console.error('Erro ao carregar usuï¿½rio:', e); }
         }
 
-        // Carregar contas bancárias
+        // Carregar contas bancï¿½rias
         async function carregarContasBancarias() {
             try {
                 const response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
@@ -2381,7 +2382,7 @@
                 if (selectConta) selectConta.innerHTML = '<option value="">Selecione a conta...</option>' + options;
                 if (selectPagamento) selectPagamento.innerHTML = '<option value="">Selecione a conta...</option>' + options;
             } catch (e) {
-                console.error('Erro ao carregar contas bancárias:', e);
+                console.error('Erro ao carregar contas bancï¿½rias:', e);
             }
         }
 
@@ -2445,7 +2446,7 @@
                     'despesas-fixas': 'Despesas Fixas',
                     'impostos': 'Impostos',
                     'folha': 'Folha',
-                    'servicos': 'Serviços',
+                    'servicos': 'Serviï¿½os',
                     'materiais': 'Materiais',
                     'outros': 'Outros'
                 }[c.categoria] || c.categoria || '-';
@@ -2529,9 +2530,9 @@
             const status = document.getElementById('filter-status').value;
             const categoria = document.getElementById('filter-categoria').value;
             const fornecedor = document.getElementById('filter-fornecedor').value.toLowerCase();
-            const periodo = document.getElementById('filter-período').value;
+            const periodo = document.getElementById('filter-perï¿½odo').value;
 
-            // Calcular intervalo de datas baseado no período
+            // Calcular intervalo de datas baseado no perï¿½odo
             let dataInicio = null;
             let dataFim = null;
             const hoje = new Date();
@@ -2590,17 +2591,17 @@
             atualizarStats();
         }
 
-        // Abre modal de escolha do método (NF-e, Código de Barras ou Manual)
+        // Abre modal de escolha do mï¿½todo (NF-e, Cï¿½digo de Barras ou Manual)
         function abrirModalNovaConta() {
             document.getElementById('modalEscolhaMetodo').classList.add('active');
         }
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-título').textContent = 'Nova Conta a Pagar';
+            document.getElementById('modal-tï¿½tulo').textContent = 'Nova Conta a Pagar';
             document.getElementById('formConta').reset();
             document.getElementById('conta-id').value = '';
-            document.getElementById('conta-emissão').value = new Date().toISOString().split('T')[0];
+            document.getElementById('conta-emissï¿½o').value = new Date().toISOString().split('T')[0];
             document.getElementById('conta-registro').value = new Date().toISOString().split('T')[0];
             document.getElementById('modalConta').classList.add('active');
 
@@ -2616,7 +2617,7 @@
         }
 
         // ============================================
-        // DEPARTAMENTOS / CENTROS DE CUSTO — Distribuição
+        // DEPARTAMENTOS / CENTROS DE CUSTO ï¿½ Distribuiï¿½ï¿½o
         // ============================================
         let centrosCusto = [];
         let distribuicaoLinhas = [];
@@ -2700,7 +2701,7 @@
         }
 
         // ============================================
-        // REPETIÇÃO / RECORRÊNCIA
+        // REPETIï¿½ï¿½O / RECORRï¿½NCIA
         // ============================================
         function atualizarPreviewRepeticao() {
             const freq = document.getElementById('rep-frequencia').value;
@@ -2710,7 +2711,7 @@
             const preview = document.getElementById('rep-preview');
 
             if (!freq || !qty || !dataInicio) {
-                preview.innerHTML = '<span style="color:#b45309;">Selecione a frequência e a data para visualizar as datas.</span>';
+                preview.innerHTML = '<span style="color:#b45309;">Selecione a frequï¿½ncia e a data para visualizar as datas.</span>';
                 return;
             }
 
@@ -2739,7 +2740,7 @@
             }
 
             const fmt = (dt) => dt.toLocaleDateString('pt-BR');
-            const valorFmt = valorConta ? ` — R$ ${valorConta.toFixed(2).replace('.',',')}` : '';
+            const valorFmt = valorConta ? ` ï¿½ R$ ${valorConta.toFixed(2).replace('.',',')}` : '';
             let html = '<div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;">';
             datas.forEach((dt, i) => {
                 html += `<div style="font-weight:600;">Parcela ${i+1}/${qty}</div><div>${fmt(dt)}${valorFmt}</div>`;
@@ -2755,11 +2756,11 @@
             const diaFixo = document.getElementById('rep-dia-fixo').value;
 
             if (!freq || !qty || !dataInicio) {
-                mostrarNotificacao('Preencha frequência, quantidade e data de início', 'warning');
+                mostrarNotificacao('Preencha frequï¿½ncia, quantidade e data de inï¿½cio', 'warning');
                 return;
             }
 
-            if (!confirm(`Serão criadas ${qty} parcelas recorrentes. Deseja continuar?`)) return;
+            if (!confirm(`Serï¿½o criadas ${qty} parcelas recorrentes. Deseja continuar?`)) return;
 
             const freqMap = { semanal: 7, quinzenal: 14, mensal: 1, bimestral: 2, trimestral: 3, semestral: 6, anual: 12 };
             const isMonthBased = !['semanal','quinzenal'].includes(freq);
@@ -2769,9 +2770,9 @@
             const baseDados = {
                 fornecedor: document.getElementById('conta-fornecedor').value,
                 categoria: document.getElementById('conta-categoria').value,
-                número_documento: document.getElementById('conta-documento').value,
+                nï¿½mero_documento: document.getElementById('conta-documento').value,
                 valor_total: parseMoeda(document.getElementById('conta-valor').value),
-                data_emissao: document.getElementById('conta-emissão').value || null,
+                data_emissao: document.getElementById('conta-emissï¿½o').value || null,
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
                 observacoes: document.getElementById('conta-observacoes').value
             };
@@ -2794,7 +2795,7 @@
                 }
 
                 const venc = nd.toISOString().split('T')[0];
-                const desc = `${baseDados.fornecedor} — Parcela ${i}/${qty}`;
+                const desc = `${baseDados.fornecedor} ï¿½ Parcela ${i}/${qty}`;
 
                 try {
                     const resp = await fetch('/api/financeiro/contas-pagar', {
@@ -2806,7 +2807,7 @@
                             descricao: desc,
                             data_vencimento: venc,
                             data_vencimento_original: venc,
-                            observacoes: `[Recorrência ${freq} ${i}/${qty}] ${baseDados.observacoes || ''}`
+                            observacoes: `[Recorrï¿½ncia ${freq} ${i}/${qty}] ${baseDados.observacoes || ''}`
                         })
                     });
                     if (resp.ok) criadas++; else erros++;
@@ -2822,7 +2823,7 @@
             document.getElementById('rep-quantidade').value = '12';
             document.getElementById('rep-data-inicio').value = '';
             document.getElementById('rep-dia-fixo').value = 'original';
-            document.getElementById('rep-preview').innerHTML = '<span style="color:#b45309;">Selecione a frequência para visualizar as datas.</span>';
+            document.getElementById('rep-preview').innerHTML = '<span style="color:#b45309;">Selecione a frequï¿½ncia para visualizar as datas.</span>';
         }
 
         function editarConta(id) {
@@ -2830,15 +2831,15 @@
             if (!conta) return;
 
             editandoId = id;
-            document.getElementById('modal-título').textContent = 'Editar Conta a Pagar';
+            document.getElementById('modal-tï¿½tulo').textContent = 'Editar Conta a Pagar';
 
             document.getElementById('conta-id').value = conta.id;
             document.getElementById('conta-fornecedor').value = conta.fornecedor || conta.fornecedor_nome || '';
             document.getElementById('conta-categoria').value = conta.categoria || '';
             document.getElementById('conta-documento').value = conta.numero_documento || conta.documento || '';
-            document.getElementById('conta-código-barras').value = conta.codigo_barras || '';
+            document.getElementById('conta-cï¿½digo-barras').value = conta.codigo_barras || '';
             document.getElementById('conta-valor').value = formatarMoedaInput2(conta.valor_total || conta.valor || 0);
-            document.getElementById('conta-emissão').value = conta.data_emissao || '';
+            document.getElementById('conta-emissï¿½o').value = conta.data_emissao || '';
             document.getElementById('conta-vencimento-original').value = conta.data_vencimento_original || conta.vencimento_original || conta.data_vencimento || conta.vencimento || '';
             document.getElementById('conta-vencimento').value = conta.data_vencimento || conta.data_vencimento_atualizado || conta.vencimento || '';
             document.getElementById('conta-banco').value = conta.conta_bancaria_id || '';
@@ -2858,9 +2859,9 @@
                 fornecedor: document.getElementById('conta-fornecedor').value,
                 categoria: document.getElementById('conta-categoria').value,
                 numero_documento: document.getElementById('conta-documento').value,
-                codigo_barras: document.getElementById('conta-código-barras').value,
+                codigo_barras: document.getElementById('conta-cï¿½digo-barras').value,
                 valor_total: parseMoeda(document.getElementById('conta-valor').value),
-                data_emissao: document.getElementById('conta-emissão').value || null,
+                data_emissao: document.getElementById('conta-emissï¿½o').value || null,
                 data_vencimento_original: document.getElementById('conta-vencimento-original').value,
                 data_vencimento: document.getElementById('conta-vencimento').value || document.getElementById('conta-vencimento-original').value,
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
@@ -2868,7 +2869,7 @@
             };
 
             if (!dados.fornecedor || !dados.valor_total || !dados.data_vencimento_original) {
-                mostrarNotificacao('Preencha os campos obrigatórios', 'warning');
+                mostrarNotificacao('Preencha os campos obrigatï¿½rios', 'warning');
                 return;
             }
 
@@ -2922,7 +2923,7 @@
 
             document.getElementById('pagamento-conta-id').value = id;
             document.getElementById('pagamento-fornecedor').textContent = conta.fornecedor || conta.fornecedor_nome || 'Fornecedor';
-            document.getElementById('pagamento-descrição').textContent = conta.descricao || `Valor: ${formatarMoeda(saldo)}`;
+            document.getElementById('pagamento-descriï¿½ï¿½o').textContent = conta.descricao || `Valor: ${formatarMoeda(saldo)}`;
             document.getElementById('pagamento-valor').value = formatarMoedaInput2(saldo);
             document.getElementById('pagamento-data').value = new Date().toISOString().split('T')[0];
             document.getElementById('pagamento-banco').value = conta.conta_bancaria_id || '';
@@ -2991,7 +2992,7 @@
 
                 if (response.ok) {
                     await carregarContas();
-                    mostrarNotificacao('Conta excluída com sucesso!', 'success');
+                    mostrarNotificacao('Conta excluï¿½da com sucesso!', 'success');
                 } else {
                     const error = await response.json();
                     mostrarNotificacao('Erro: ' + (error.message || 'Falha ao excluir'), 'error');
@@ -3026,12 +3027,12 @@
             const statusLabels = { pendente: 'Pendente', vencido: 'Vencido', pago: 'Pago', parcial: 'Parcial' };
             const statusIcons = { pendente: 'fa-clock', vencido: 'fa-exclamation-triangle', pago: 'fa-check-circle', parcial: 'fa-adjust' };
 
-            const categoriaLabels = { 'fornecedores': 'Fornecedores', 'despesas-fixas': 'Despesas Fixas', 'impostos': 'Impostos e Tributos', 'folha': 'Folha de Pagamento', 'servicos': 'Serviços', 'materiais': 'Materiais', 'outros': 'Outros' };
+            const categoriaLabels = { 'fornecedores': 'Fornecedores', 'despesas-fixas': 'Despesas Fixas', 'impostos': 'Impostos e Tributos', 'folha': 'Folha de Pagamento', 'servicos': 'Serviï¿½os', 'materiais': 'Materiais', 'outros': 'Outros' };
 
             const doc = conta.numero_documento || conta.documento || '-';
             const fornecedor = conta.fornecedor || conta.fornecedor_nome || '-';
 
-            document.getElementById('view-título').textContent = 'Detalhes da Conta a Pagar';
+            document.getElementById('view-tï¿½tulo').textContent = 'Detalhes da Conta a Pagar';
             document.getElementById('view-documento-sub').textContent = doc !== '-' ? `Documento: ${doc}` : '';
             document.getElementById('view-fornecedor').textContent = fornecedor;
             document.getElementById('view-documento').textContent = doc;
@@ -3043,13 +3044,13 @@
             document.getElementById('view-emissao').textContent = formatarData(conta.data_emissao) || '-';
             document.getElementById('view-vencimento-original').textContent = formatarData(conta.data_vencimento_original || conta.vencimento_original || vencimento);
             document.getElementById('view-vencimento-atualizado').textContent = formatarData(conta.data_vencimento_atualizado || conta.vencimento_atualizado || vencimento);
-            document.getElementById('view-observacoes').textContent = conta.observacoes || 'Nenhuma observação registrada.';
+            document.getElementById('view-observacoes').textContent = conta.observacoes || 'Nenhuma observaï¿½ï¿½o registrada.';
 
             const badge = document.getElementById('view-status-badge');
             badge.className = 'view-status-badge status-' + status;
             badge.innerHTML = `<i class="fas ${statusIcons[status] || 'fa-clock'}"></i> ${statusLabels[status] || status}`;
 
-            // Mostrar/esconder botão de pagar
+            // Mostrar/esconder botï¿½o de pagar
             document.getElementById('btn-view-pagar').style.display = status === 'pago' ? 'none' : 'flex';
 
             document.getElementById('modalVisualizarConta').classList.add('active');
@@ -3074,7 +3075,7 @@
 
         function exportarCSV() {
             if (contasPagar.length === 0) {
-                mostrarNotificacao('Não há dados para exportar', 'warning');
+                mostrarNotificacao('Nï¿½o hï¿½ dados para exportar', 'warning');
                 return;
             }
 
@@ -3092,7 +3093,7 @@
             mostrarNotificacao('Arquivo exportado com sucesso!', 'success');
         }
 
-        // Funções de formatação
+        // Funï¿½ï¿½es de formataï¿½ï¿½o
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
         }
@@ -3120,7 +3121,7 @@
             return new Date(s + 'T00:00:00').toLocaleDateString('pt-BR');
         }
 
-        // Notificações
+        // Notificaï¿½ï¿½es
         function mostrarNotificacao(mensagem, tipo = 'info') {
             const cores = {
                 'success': '#22c55e',
@@ -3164,7 +3165,7 @@
             }, 3000);
         }
 
-        // Adicionar animações CSS
+        // Adicionar animaï¿½ï¿½es CSS
         const style = document.createElement('style');
         style.textContent = `
             @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -3172,7 +3173,7 @@
         `;
         document.head.appendChild(style);
 
-        // Função para filtrar impostos (DARF, IR, SIMPLES NACIONAL, FGTS, INSS)
+        // Funï¿½ï¿½o para filtrar impostos (DARF, IR, SIMPLES NACIONAL, FGTS, INSS)
         function filtrarImpostos() {
             const termosImpostos = ['DARF', 'IR', 'IRRF', 'IRPJ', 'SIMPLES', 'SIMPLES NACIONAL', 'FGTS', 'INSS', 'IMPOSTO', 'TRIBUTO', 'GPS', 'DAS', 'ISS', 'ICMS', 'PIS', 'COFINS', 'CSLL'];
 
@@ -3182,17 +3183,17 @@
                 const documento = (c.numero_documento || c.documento || '').toUpperCase();
                 const fornecedor = (c.fornecedor || c.fornecedor_nome || '').toUpperCase();
                 const observacao = (c.observacao || c.obs || c.observacoes || '').toUpperCase();
-                const descrição = (c.descricao || '').toUpperCase();
+                const descriï¿½ï¿½o = (c.descricao || '').toUpperCase();
 
-                // Verifica se é categoria de impostos
+                // Verifica se ï¿½ categoria de impostos
                 if (categoria === 'impostos') return true;
 
-                // Verifica se algum termo de imposto aparece no documento, fornecedor, observação ou descrição
+                // Verifica se algum termo de imposto aparece no documento, fornecedor, observaï¿½ï¿½o ou descriï¿½ï¿½o
                 return termosImpostos.some(termo =>
                     documento.includes(termo) ||
                     fornecedor.includes(termo) ||
                     observacao.includes(termo) ||
-                    descrição.includes(termo)
+                    descriï¿½ï¿½o.includes(termo)
                 );
             });
 
@@ -3204,10 +3205,10 @@
             mostrarNotificacao(`${contasFiltradas.length} conta(s) de impostos encontrada(s)`, contasFiltradas.length > 0 ? 'success' : 'warning');
         }
 
-        // Função para mostrar todas as contas (limpar filtro)
+        // Funï¿½ï¿½o para mostrar todas as contas (limpar filtro)
         function mostrarTodasContas() {
             contasPagar = [...todasContas];
-            document.getElementById('filter-período').value = 'all';
+            document.getElementById('filter-perï¿½odo').value = 'all';
             document.getElementById('filter-status').value = '';
             document.getElementById('filter-categoria').value = '';
             document.getElementById('filter-fornecedor').value = '';
@@ -3216,7 +3217,7 @@
             mostrarNotificacao('Exibindo todas as contas', 'info');
         }
 
-        // Inicialização
+        // Inicializaï¿½ï¿½o
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarContasBancarias();
@@ -3224,7 +3225,7 @@
         });
     </script>
 
-    <!-- Sistema de Importação XLSX -->
+    <!-- Sistema de Importaï¿½ï¿½o XLSX -->
     <script src="public/js/importar-xlsx.js?v=20260131"></script>
     <script src="public/js/financeiro-shared.js?v=20260217"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>

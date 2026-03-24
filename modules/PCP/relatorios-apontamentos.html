@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Relatórios de Apontamentos</title>
+    <title>Aluforce: Relatï¿½rios de Apontamentos</title>
 
-    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -136,7 +136,7 @@
             margin-bottom: 20px;
         }
 
-        /* ==================== CARD genérico ==================== */
+        /* ==================== CARD genï¿½rico ==================== */
         .card {
             background: white;
             border-radius: 14px;
@@ -257,8 +257,8 @@
         /* ==================== SIDEBAR CARDS ==================== */
         .sidebar-stack { display: flex; flex-direction: column; gap: 20px; }
 
-        /* Funcionário cards */
-        .funcionário-card {
+        /* Funcionï¿½rio cards */
+        .funcionï¿½rio-card {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -268,12 +268,12 @@
             margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .funcionário-card:last-child { margin-bottom: 0; }
-        .funcionário-card:hover {
+        .funcionï¿½rio-card:last-child { margin-bottom: 0; }
+        .funcionï¿½rio-card:hover {
             border-color: var(--accent-indigo);
             box-shadow: 0 2px 8px rgba(99,102,241,0.1);
         }
-        .funcionário-avatar {
+        .funcionï¿½rio-avatar {
             width: 42px; height: 42px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-indigo), #8b5cf6);
@@ -281,15 +281,15 @@
             color: white; font-weight: 700; font-size: 15px;
             flex-shrink: 0;
         }
-        .funcionário-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .funcionário-info { flex: 1; min-width: 0; }
-        .funcionário-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .funcionário-cargo { font-size: 11px; color: var(--text-secondary); }
-        .funcionário-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
-        .funcionário-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
-        .funcionário-stat-label { font-size: 10px; color: var(--text-secondary); }
+        .funcionï¿½rio-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .funcionï¿½rio-info { flex: 1; min-width: 0; }
+        .funcionï¿½rio-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .funcionï¿½rio-cargo { font-size: 11px; color: var(--text-secondary); }
+        .funcionï¿½rio-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
+        .funcionï¿½rio-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
+        .funcionï¿½rio-stat-label { font-size: 10px; color: var(--text-secondary); }
 
-        /* Eficiência Grid */
+        /* Eficiï¿½ncia Grid */
         .eficiencia-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -368,8 +368,10 @@
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
-    <!-- PCP Header & Sidebar  Design Institucional Refinado (DEVE SER O ÚLTIMO) -->
+    <!-- PCP Header & Sidebar  Design Institucional Refinado (DEVE SER O ï¿½LTIMO) -->
     <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260224">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -393,10 +395,10 @@
                 <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
                     <i class="fas fa-shopping-cart"></i>
                 </a>
-                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produï¿½ï¿½o">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
+                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestï¿½o de Produï¿½ï¿½o">
                     <i class="fas fa-industry"></i>
                 </a>
                 <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
@@ -405,15 +407,15 @@
                 <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
                 </a>
-                <a href="relatorios-apontamentos.html" class="sidebar-btn active" title="Relatórios">
+                <a href="relatorios-apontamentos.html" class="sidebar-btn active" title="Relatï¿½rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de Relatórios">
+                <a href="pages/relatorios.html" class="sidebar-btn" title="Central de Relatï¿½rios">
                     <i class="fas fa-chart-pie"></i>
                 </a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações" id="btn-config">
+                <button class="sidebar-btn" title="Configuraï¿½ï¿½es" id="btn-config">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -429,8 +431,8 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatórios de Apontamentos</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatï¿½rios de Apontamentos</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -456,7 +458,7 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-chart-bar"></i>
-                        Relatórios de Produção
+                        Relatï¿½rios de Produï¿½ï¿½o
                     </h1>
                     <div class="header-actions">
                         <button class="btn btn-success" onclick="atualizarDados()">
@@ -474,7 +476,7 @@
                         <div class="stat-icon blue"><i class="fas fa-users"></i></div>
                         <div>
                             <div class="stat-value" id="totalFuncionarios">0</div>
-                            <div class="stat-label">Funcionários Ativos</div>
+                            <div class="stat-label">Funcionï¿½rios Ativos</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -488,7 +490,7 @@
                         <div class="stat-icon yellow"><i class="fas fa-industry"></i></div>
                         <div>
                             <div class="stat-value" id="horasProducao">0h</div>
-                            <div class="stat-label">Horas em Produção</div>
+                            <div class="stat-label">Horas em Produï¿½ï¿½o</div>
                         </div>
                     </div>
                     <div class="stat-card">
@@ -502,7 +504,7 @@
                         <div class="stat-icon indigo"><i class="fas fa-percentage"></i></div>
                         <div>
                             <div class="stat-value" id="eficienciaGeral">0%</div>
-                            <div class="stat-label">Eficiência Geral</div>
+                            <div class="stat-label">Eficiï¿½ncia Geral</div>
                         </div>
                     </div>
                 </div>
@@ -510,7 +512,7 @@
                 <!-- Filtros -->
                 <div class="filters-section">
                     <div class="filter-group">
-                        <label class="filter-label">Data Início</label>
+                        <label class="filter-label">Data Inï¿½cio</label>
                         <input type="date" id="dataInicio" class="filter-input">
                     </div>
                     <div class="filter-group">
@@ -518,7 +520,7 @@
                         <input type="date" id="dataFim" class="filter-input">
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label">Funcionário</label>
+                        <label class="filter-label">Funcionï¿½rio</label>
                         <select id="filtroFuncionario" class="filter-select">
                             <option value="">Todos</option>
                         </select>
@@ -528,13 +530,13 @@
                         <select id="filtroAtividade" class="filter-select">
                             <option value="">Todas</option>
                             <option value="ST">Setup</option>
-                            <option value="1">Início Produção</option>
-                            <option value="1A">Produção Irregular</option>
-                            <option value="PR">Parada Refeição</option>
-                            <option value="PM">Parada Manutenção</option>
+                            <option value="1">Inï¿½cio Produï¿½ï¿½o</option>
+                            <option value="1A">Produï¿½ï¿½o Irregular</option>
+                            <option value="PR">Parada Refeiï¿½ï¿½o</option>
+                            <option value="PM">Parada Manutenï¿½ï¿½o</option>
                             <option value="FM">Falta Mat. Prima</option>
-                            <option value="ME">Manut. Elétrica</option>
-                            <option value="MM">Manut. Mecânica</option>
+                            <option value="ME">Manut. Elï¿½trica</option>
+                            <option value="MM">Manut. Mecï¿½nica</option>
                             <option value="PCM">Parada Corretiva</option>
                             <option value="TT">Troca de Turno</option>
                             <option value="MP">Manut. Preventiva</option>
@@ -543,12 +545,12 @@
                             <option value="TM">Troca Material</option>
                             <option value="QL">Quebra de Lance</option>
                             <option value="QE">Queda Energia</option>
-                            <option value="AM">Aquec. Máquina</option>
+                            <option value="AM">Aquec. Mï¿½quina</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label class="filter-label">Pedido</label>
-                        <input type="text" id="filtroPedido" class="filter-input" placeholder="Nº do pedido" style="min-width:120px;">
+                        <input type="text" id="filtroPedido" class="filter-input" placeholder="Nï¿½ do pedido" style="min-width:120px;">
                     </div>
                     <button class="btn btn-primary" onclick="aplicarFiltros()">
                         <i class="fas fa-filter"></i> Filtrar
@@ -567,15 +569,15 @@
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Funcionário</th>
+                                        <th>Funcionï¿½rio</th>
                                         <th>Atividade</th>
                                         <th>Data</th>
-                                        <th>Início</th>
+                                        <th>Inï¿½cio</th>
                                         <th>Fim</th>
-                                        <th>Duração</th>
+                                        <th>Duraï¿½ï¿½o</th>
                                         <th>OP</th>
                                         <th>Pedido</th>
-                                        <th>Observações</th>
+                                        <th>Observaï¿½ï¿½es</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaApontamentos">
@@ -590,12 +592,12 @@
                         </div>
                     </div>
 
-                    <!-- Sidebar: Funcionários + Atividades + Eficiência -->
+                    <!-- Sidebar: Funcionï¿½rios + Atividades + Eficiï¿½ncia -->
                     <div class="sidebar-stack">
-                        <!-- Resumo por Funcionário -->
+                        <!-- Resumo por Funcionï¿½rio -->
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-users"></i> Por Funcionário</h3>
+                                <h3><i class="fas fa-users"></i> Por Funcionï¿½rio</h3>
                             </div>
                             <div class="card-body" id="resumoFuncionarios">
                                 <div class="empty-state">
@@ -605,7 +607,7 @@
                             </div>
                         </div>
 
-                        <!-- Distribuição por Atividade -->
+                        <!-- Distribuiï¿½ï¿½o por Atividade -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="fas fa-chart-pie"></i> Por Atividade</h3>
@@ -617,7 +619,7 @@
                             </div>
                         </div>
 
-                        <!-- Indicadores de Eficiência -->
+                        <!-- Indicadores de Eficiï¿½ncia -->
                         <div class="card">
                             <div class="card-header">
                                 <h3><i class="fas fa-tachometer-alt"></i> Indicadores</h3>
@@ -634,11 +636,11 @@
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efManutencao" style="color: #f59e0b;">0%</div>
-                                        <div class="eficiencia-label">Manutenção</div>
+                                        <div class="eficiencia-label">Manutenï¿½ï¿½o</div>
                                     </div>
                                     <div class="eficiencia-item">
                                         <div class="eficiencia-valor" id="efMediaDia" style="color: #6366f1;">0h</div>
-                                        <div class="eficiencia-label">Média/Dia</div>
+                                        <div class="eficiencia-label">Mï¿½dia/Dia</div>
                                     </div>
                                 </div>
                             </div>
@@ -653,13 +655,13 @@
         // Cores das atividades - Alinhado com apontamentos.html
         const coresAtividades = {
             'ST': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'Início Produção' },
-            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'Produção Irregular' },
-            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refeição' },
-            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manutenção' },
+            '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'Inï¿½cio Produï¿½ï¿½o' },
+            '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'Produï¿½ï¿½o Irregular' },
+            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refeiï¿½ï¿½o' },
+            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manutenï¿½ï¿½o' },
             'FM': { bg: '#ffedd5', color: '#ea580c', icon: 'fa-box-open', nome: 'Falta Mat. Prima' },
-            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. Elétrica' },
-            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mecânica' },
+            'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. Elï¿½trica' },
+            'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mecï¿½nica' },
             'PCM': { bg: '#fee2e2', color: '#b91c1c', icon: 'fa-times-circle', nome: 'Parada Corretiva' },
             'TT': { bg: '#e0e7ff', color: '#4f46e5', icon: 'fa-exchange-alt', nome: 'Troca de Turno' },
             'MP': { bg: '#d1fae5', color: '#059669', icon: 'fa-clipboard-check', nome: 'Manut. Preventiva' },
@@ -668,10 +670,10 @@
             'TM': { bg: '#f3e8ff', color: '#9333ea', icon: 'fa-sync-alt', nome: 'Troca Material' },
             'QL': { bg: '#fce7f3', color: '#db2777', icon: 'fa-unlink', nome: 'Quebra de Lance' },
             'QE': { bg: '#f5f5f4', color: '#57534e', icon: 'fa-plug', nome: 'Queda Energia' },
-            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. Máquina' },
+            'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. Mï¿½quina' },
             'setup': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            'produção': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'Produção' },
-            'manutencao': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-wrench', nome: 'Manutenção' },
+            'produï¿½ï¿½o': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'Produï¿½ï¿½o' },
+            'manutencao': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-wrench', nome: 'Manutenï¿½ï¿½o' },
             'aquecimento': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquecimento' },
             'limpeza': { bg: '#cffafe', color: '#0891b2', icon: 'fa-broom', nome: 'Limpeza' },
             'intervalo': { bg: '#f1f5f9', color: '#475569', icon: 'fa-coffee', nome: 'Intervalo' },
@@ -679,14 +681,14 @@
             'outros': { bg: '#f8fafc', color: '#64748b', icon: 'fa-ellipsis-h', nome: 'Outros' }
         };
 
-        // Classificação de tipos
-        const TIPOS_PRODUTIVOS = ['1', '1A', 'produção'];
+        // Classificaï¿½ï¿½o de tipos
+        const TIPOS_PRODUTIVOS = ['1', '1A', 'produï¿½ï¿½o'];
         const TIPOS_MANUTENCAO = ['PM', 'ME', 'MM', 'PCM', 'MP', 'MC', 'manutencao'];
         const TIPOS_PARADA = ['PR', 'FM', 'TT', 'QE', 'TB', 'TM', 'QL', 'intervalo'];
 
         // Dados
         let apontamentos = [];
-        let funcionários = [];
+        let funcionï¿½rios = [];
 
         // Mapeamento de avatares
         const avatarNameMap = {
@@ -701,9 +703,9 @@
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
-            'antônio': '/avatars/Antonio.webp',
+            'antï¿½nio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
-            'andréia': '/avatars/Andreia.webp',
+            'andrï¿½ia': '/avatars/Andreia.webp',
             'guilherme': '/avatars/Guilherme.webp',
             'marcelo': '/avatars/Marcelo.webp'
         };
@@ -727,7 +729,7 @@
             return 'Boa noite';
         }
 
-        // Inicialização
+        // Inicializaï¿½ï¿½o
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
             setDatasIniciais();
@@ -757,7 +759,7 @@
                     const email = (user.email || '').toLowerCase();
                     const permissoesPcp = user.permissoes_pcp || '';
                     const rolesPermitidas = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'consultoria'];
-                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administração', 'gerência'];
+                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administraï¿½ï¿½o', 'gerï¿½ncia'];
 
                     const temRole = rolesPermitidas.some(r => role.includes(r));
                     const temDept = deptPermitidos.some(d => departamento.includes(d));
@@ -788,7 +790,7 @@
                     }
                 }
             } catch (e) {
-                console.log('Erro ao carregar usuário:', e);
+                console.log('Erro ao carregar usuï¿½rio:', e);
             }
         }
 
@@ -802,13 +804,13 @@
         async function carregarDados() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            const funcionário = document.getElementById('filtroFuncionario').value;
+            const funcionï¿½rio = document.getElementById('filtroFuncionario').value;
             const atividade = document.getElementById('filtroAtividade').value;
             const pedido = document.getElementById('filtroPedido').value;
 
             try {
                 let url = `/api/pcp/apontamentos/relatorio?dataInicio=${dataInicio}&dataFim=${dataFim}`;
-                if (funcionário) url += `&usuario=${funcionário}`;
+                if (funcionï¿½rio) url += `&usuario=${funcionï¿½rio}`;
                 if (atividade) url += `&atividade=${atividade}`;
                 if (pedido) url += `&pedido=${pedido}`;
 
@@ -818,10 +820,10 @@
                 if (resp.ok) {
                     const data = await resp.json();
                     apontamentos = data.apontamentos || [];
-                    funcionários = data.funcionários || [];
+                    funcionï¿½rios = data.funcionï¿½rios || [];
 
                     atualizarStats(data);
-                    popularSelectFuncionarios(funcionários);
+                    popularSelectFuncionarios(funcionï¿½rios);
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
                     renderizarTabela();
@@ -830,7 +832,7 @@
                     window.location.href = '/login';
                 } else {
                     apontamentos = [];
-                    funcionários = [];
+                    funcionï¿½rios = [];
                     atualizarStats({});
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
@@ -840,7 +842,7 @@
             } catch (e) {
                 console.error('Erro ao carregar dados:', e);
                 apontamentos = [];
-                funcionários = [];
+                funcionï¿½rios = [];
                 atualizarStats({});
                 renderizarResumoFuncionarios();
                 renderizarDistribuicaoAtividades();
@@ -857,7 +859,7 @@
         }
 
         function atualizarStats(data) {
-            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionários.length;
+            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionï¿½rios.length;
             document.getElementById('totalHoras').textContent = (data.totalHoras || calcularTotalHoras()) + 'h';
             document.getElementById('horasProducao').textContent = (data.horasProducao || calcularHorasProducao()) + 'h';
             document.getElementById('totalApontamentos').textContent = data.totalApontamentos || apontamentos.length;
@@ -908,17 +910,17 @@
             const container = document.getElementById('resumoFuncionarios');
             const resumo = {};
             const fotoMap = {};
-            funcionários.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
+            funcionï¿½rios.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
 
             apontamentos.forEach(a => {
-                const key = a.usuário_id || a.usuário_nome;
+                const key = a.usuï¿½rio_id || a.usuï¿½rio_nome;
                 if (!resumo[key]) {
-                    resumo[key] = { nome: a.usuário_nome, foto: a.usuário_foto || fotoMap[a.usuário_id] || '', totalSegundos: 0, produçãoSegundos: 0, apontamentos: 0 };
+                    resumo[key] = { nome: a.usuï¿½rio_nome, foto: a.usuï¿½rio_foto || fotoMap[a.usuï¿½rio_id] || '', totalSegundos: 0, produï¿½ï¿½oSegundos: 0, apontamentos: 0 };
                 }
                 resumo[key].totalSegundos += a.duracao || 0;
                 resumo[key].apontamentos++;
                 if (TIPOS_PRODUTIVOS.includes(a.tipo)) {
-                    resumo[key].produçãoSegundos += a.duracao || 0;
+                    resumo[key].produï¿½ï¿½oSegundos += a.duracao || 0;
                 }
             });
 
@@ -930,7 +932,7 @@
             let idx = 0;
             container.innerHTML = Object.values(resumo).map(f => {
                 const horasTotais = formatarDuracaoHoras(f.totalSegundos);
-                const horasProducao = formatarDuracaoHoras(f.produçãoSegundos);
+                const horasProducao = formatarDuracaoHoras(f.produï¿½ï¿½oSegundos);
                 const primeiraLetra = f.nome ? f.nome[0].toUpperCase() : '?';
                 const primeiroNome = f.nome ? f.nome.split(' ')[0] : 'Desconhecido';
                 const avatarId = 'avatar-func-' + (idx++);
@@ -949,14 +951,14 @@
                             </div>
                             <div>
                                 <div class="funcionario-stat-value" style="color:#16a34a;">${horasProducao}</div>
-                                <div class="funcionario-stat-label">Produção</div>
+                                <div class="funcionario-stat-label">Produï¿½ï¿½o</div>
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            document.querySelectorAll('.funcionário-avatar[data-foto]').forEach(avatarEl => {
+            document.querySelectorAll('.funcionï¿½rio-avatar[data-foto]').forEach(avatarEl => {
                 const foto = avatarEl.dataset.foto;
                 const nome = avatarEl.dataset.nome;
                 const inicial = avatarEl.textContent.trim();
@@ -1037,25 +1039,25 @@
 
             tbody.innerHTML = apontamentos.map(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                const primeiroNome = a.usuário_nome ? a.usuário_nome.split(' ')[0] : 'N/A';
+                const primeiroNome = a.usuï¿½rio_nome ? a.usuï¿½rio_nome.split(' ')[0] : 'N/A';
                 const primeiraLetra = primeiroNome[0]?.toUpperCase() || '?';
-                const fotoUrl = a.usuário_foto || '';
+                const fotoUrl = a.usuï¿½rio_foto || '';
                 const avatarHtml = fotoUrl
                     ? `<img src="${fotoUrl}" alt="${primeiroNome}" onerror="this.parentElement.innerHTML='${primeiraLetra}'">`
                     : primeiraLetra;
 
                 const opHtml = a.op_codigo
                     ? `<span class="op-badge"><i class="fas fa-clipboard-list"></i> ${a.op_codigo}</span>`
-                    : '<span style="color:#cbd5e1;">—</span>';
+                    : '<span style="color:#cbd5e1;">ï¿½</span>';
 
-                const pedidoHtml = a.pedido_número
-                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_número}</span>`
-                    : '<span style="color:#cbd5e1;">—</span>';
+                const pedidoHtml = a.pedido_nï¿½mero
+                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_nï¿½mero}</span>`
+                    : '<span style="color:#cbd5e1;">ï¿½</span>';
 
                 const obsText = a.observacoes || '';
                 const obsHtml = obsText
                     ? `<span class="obs-cell" title="${obsText.replace(/"/g, '&quot;')}">${obsText}</span>`
-                    : '<span style="color:#cbd5e1;">—</span>';
+                    : '<span style="color:#cbd5e1;">ï¿½</span>';
 
                 return `
                     <tr>
@@ -1100,18 +1102,18 @@
         function atualizarDados() { carregarDados(); mostrarToast('Dados atualizados!', 'success'); }
 
         function exportarRelatorio() {
-            let csv = 'Funcionário,Atividade,Data,Início,Fim,Duração,OP,Pedido,Observações\n';
+            let csv = 'Funcionï¿½rio,Atividade,Data,Inï¿½cio,Fim,Duraï¿½ï¿½o,OP,Pedido,Observaï¿½ï¿½es\n';
             apontamentos.forEach(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                csv += `"${a.usuário_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_número || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
+                csv += `"${a.usuï¿½rio_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_nï¿½mero || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `relatório_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `relatï¿½rio_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
-            mostrarToast('Relatório exportado!', 'success');
+            mostrarToast('Relatï¿½rio exportado!', 'success');
         }
 
         function mostrarToast(msg, tipo = 'success') {

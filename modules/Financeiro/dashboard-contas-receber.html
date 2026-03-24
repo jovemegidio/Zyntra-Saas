@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Aluforce: Dashboard Contas a Receber</title>
 
-    <!-- Sistema de Autenticação Unificado -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -35,7 +35,7 @@
             --warning: #f59e0b;
             --danger: #ef4444;
             --info: #3b82f6;
-            /* Aliases para compatibilidade com estilos específicos da página */
+            /* Aliases para compatibilidade com estilos especï¿½ficos da pï¿½gina */
             --primary-color: #84cc16;
             --success-green: #22c55e;
             --warning-yellow: #eab308;
@@ -72,7 +72,7 @@
         .header-btn:hover { background: rgba(255,255,255,0.1); color: white; }
         .header-btn:focus, .header-btn:focus-visible { outline: none; border: none; box-shadow: none; }
 
-        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAï¿½ï¿½ES ======================================== */
         .notification-container { position: relative; }
         .notification-btn { position: relative; }
         .notification-badge { position: absolute; top: 2px; right: 2px; min-width: 18px; height: 18px; background: #ef4444; color: white; font-size: 10px; font-weight: 600; border-radius: 10px; display: flex; align-items: center; justify-content: center; padding: 0 5px; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4); animation: pulse-badge 2s infinite; }
@@ -162,7 +162,7 @@
         .badge-danger { background: #fee2e2; color: #dc2626; }
         .badge-info { background: #dbeafe; color: #2563eb; }
 
-        /* BOTÕES */
+        /* BOTï¿½ES */
         .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
         .btn-primary { background: var(--success-green); color: white; }
         .btn-primary:hover { background: #16a34a; }
@@ -209,6 +209,7 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260221c">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
 </head>
 <body>
     <div class="app-container">
@@ -216,7 +217,7 @@
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
 
-        <!-- SIDEBAR - PADRÃO PCP (HTML estático, RBAC via JS) -->
+        <!-- SIDEBAR - PADRï¿½O PCP (HTML estï¿½tico, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -241,13 +242,13 @@
                 <button class="sidebar-btn" title="Plano de Contas" data-id="plano-contas" data-rbac="admin,financeiro" onclick="window.location.href='plano-contas.html'">
                     <i class="fas fa-list-alt"></i>
                 </button>
-                <button class="sidebar-btn" title="Orçamentos" data-id="orcamentos" data-rbac="admin,financeiro" onclick="window.location.href='orcamentos.html'">
+                <button class="sidebar-btn" title="Orï¿½amentos" data-id="orcamentos" data-rbac="admin,financeiro" onclick="window.location.href='orcamentos.html'">
                     <i class="fas fa-calculator"></i>
                 </button>
-                <button class="sidebar-btn" title="Conciliação" data-id="conciliação" data-rbac="admin,financeiro" onclick="window.location.href='conciliacao.html'">
+                <button class="sidebar-btn" title="Conciliaï¿½ï¿½o" data-id="conciliaï¿½ï¿½o" data-rbac="admin,financeiro" onclick="window.location.href='conciliacao.html'">
                     <i class="fas fa-balance-scale"></i>
                 </button>
-                <button class="sidebar-btn" title="Relatórios" data-id="relatórios" data-rbac="admin,financeiro,vendas" onclick="window.location.href='relatorios.html'">
+                <button class="sidebar-btn" title="Relatï¿½rios" data-id="relatï¿½rios" data-rbac="admin,financeiro,vendas" onclick="window.location.href='relatorios.html'">
                     <i class="fas fa-chart-bar"></i>
                 </button>
             </nav>
@@ -264,7 +265,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃO PCP (HTML estático) -->
+            <!-- HEADER - PADRï¿½O PCP (HTML estï¿½tico) -->
             <header class="header" id="financeiro-header">
                 <div class="header-left">
                         <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
@@ -274,7 +275,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Dashboard Contas a Receber</span>
                     </div>
                 </div>
@@ -283,13 +284,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" id="btn-notifications">
+                        <button class="header-btn notification-btn" title="Notificaï¿½ï¿½es" id="btn-notifications">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
+                                <h3><i class="fas fa-bell"></i> Notificaï¿½ï¿½es</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -302,22 +303,22 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
+                                    <p>Nenhuma notificaï¿½ï¿½o</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
+                            <img src="" alt="Foto do usuï¿½rio" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - Padrão PCP -->
+            <!-- Main Content - Padrï¿½o PCP -->
             <main class="main-content">
 
             <!-- Quick Actions -->
@@ -326,7 +327,7 @@
                     <i class="fas fa-plus"></i> Nova Conta a Receber
                 </button>
                 <button class="btn btn-outline" onclick="window.location.href='relatorios.html'">
-                    <i class="fas fa-file-alt"></i> Relatórios
+                    <i class="fas fa-file-alt"></i> Relatï¿½rios
                 </button>
             </div>
 
@@ -337,7 +338,7 @@
                     <div class="kpi-card">
                         <div class="label">Total a Receber (30 dias)</div>
                         <div class="value success" id="kpi-total">R$ 0,00</div>
-                        <div class="trend up"><i class="fas fa-arrow-up"></i> <span id="trend-total">0%</span> vs mês anterior</div>
+                        <div class="trend up"><i class="fas fa-arrow-up"></i> <span id="trend-total">0%</span> vs mï¿½s anterior</div>
                     </div>
                     <div class="kpi-card">
                         <div class="label">Vencendo Hoje</div>
@@ -350,7 +351,7 @@
                         <div class="trend down"><i class="fas fa-exclamation-circle"></i> <span id="qtd-vencidas">0</span> contas em atraso</div>
                     </div>
                     <div class="kpi-card">
-                        <div class="label">Recebidas este Mês</div>
+                        <div class="label">Recebidas este Mï¿½s</div>
                         <div class="value success" id="kpi-recebidas">R$ 0,00</div>
                         <div class="trend up"><i class="fas fa-check-circle"></i> <span id="qtd-recebidas">0</span> contas recebidas</div>
                     </div>
@@ -358,10 +359,10 @@
 
                 <!-- Grid Principal -->
                 <div class="grid-2">
-                    <!-- Gráfico Recebimentos -->
+                    <!-- Grï¿½fico Recebimentos -->
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-chart-bar"></i> Recebimentos - Próximos 30 dias</h3>
+                            <h3><i class="fas fa-chart-bar"></i> Recebimentos - Prï¿½ximos 30 dias</h3>
                             <button class="btn btn-outline" onclick="window.location.href='contas-receber.html'">Ver Detalhes</button>
                         </div>
                         <div class="card-body">
@@ -374,7 +375,7 @@
                     <!-- Prximos Vencimentos -->
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-calendar-alt"></i> Próximos Recebimentos</h3>
+                            <h3><i class="fas fa-calendar-alt"></i> Prï¿½ximos Recebimentos</h3>
                         </div>
                         <div class="card-body">
                             <div id="lista-vencimentos">
@@ -389,7 +390,7 @@
                     </div>
                 </div>
 
-                <!-- Últimas Contas a Receber -->
+                <!-- ï¿½ltimas Contas a Receber -->
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-list"></i> Contas a Receber Pendentes</h3>
@@ -401,7 +402,7 @@
                                 <thead>
                                     <tr>
                                         <th>Cliente</th>
-                                        <th>Descrição</th>
+                                        <th>Descriï¿½ï¿½o</th>
                                         <th>Vencimento</th>
                                         <th>Valor</th>
                                         <th>Status</th>
@@ -425,15 +426,15 @@
     </div>
 
     <script>
-        // Carregar dados do usuário
+        // Carregar dados do usuï¿½rio
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuï¿½rio');
 
-                    // Saudação
+                    // Saudaï¿½ï¿½o
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
                     if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
@@ -442,7 +443,7 @@
                     document.getElementById('user-name').textContent = primeiroNome;
                     document.getElementById('user-initials').textContent = primeiroNome.charAt(0).toUpperCase();
 
-                    // Foto do usuário
+                    // Foto do usuï¿½rio
                     const fotoUrl = user.avatar || user.foto || user.foto_perfil_url;
                     const fotoEl = document.getElementById('user-photo');
                     const inicialEl = document.getElementById('user-initials');
@@ -460,10 +461,10 @@
                         };
                     }
                 }
-            } catch (e) { console.log('Erro ao carregar usuário:', e); }
+            } catch (e) { console.log('Erro ao carregar usuï¿½rio:', e); }
         }
 
-        // Notificações
+        // Notificaï¿½ï¿½es
         function toggleNotificacoes() {
             document.getElementById('notification-panel').classList.toggle('active');
         }
@@ -516,13 +517,13 @@
                 document.getElementById('kpi-recebidas').textContent = formatarMoeda(valorRecebidas);
                 document.getElementById('qtd-recebidas').textContent = recebidas.length;
 
-                // Notificações
+                // Notificaï¿½ï¿½es
                 carregarNotificacoes(vencendoHoje, vencidas);
 
             } catch (e) { console.log('Erro ao carregar KPIs:', e); }
         }
 
-        // Carregar notificações
+        // Carregar notificaï¿½ï¿½es
         function carregarNotificacoes(vencendoHoje, vencidas) {
             const lista = document.getElementById('notification-list');
             const badge = document.getElementById('notification-count');
@@ -540,8 +541,8 @@
                         <div class="notification-icon error"><i class="fas fa-exclamation-circle"></i></div>
                         <div class="notification-content">
                             <div class="notification-title">?? Contas em Atraso!</div>
-                            <div class="notification-message">Você tem ${vencidas.length} conta(s) a receber em atraso totalizando ${formatarMoeda(vencidas.reduce((s, c) => s + parseFloat(c.valor || 0), 0))}</div>
-                            <div class="notification-time"><i class="fas fa-clock"></i> Requer ação</div>
+                            <div class="notification-message">Vocï¿½ tem ${vencidas.length} conta(s) a receber em atraso totalizando ${formatarMoeda(vencidas.reduce((s, c) => s + parseFloat(c.valor || 0), 0))}</div>
+                            <div class="notification-time"><i class="fas fa-clock"></i> Requer aï¿½ï¿½o</div>
                         </div>
                     </div>
                 `;
@@ -566,7 +567,7 @@
                         <div class="notification-icon success"><i class="fas fa-check"></i></div>
                         <div class="notification-content">
                             <div class="notification-title">Tudo em dia!</div>
-                            <div class="notification-message">Não há contas vencidas ou vencendo hoje</div>
+                            <div class="notification-message">Nï¿½o hï¿½ contas vencidas ou vencendo hoje</div>
                         </div>
                     </div>
                 `;
@@ -575,7 +576,7 @@
             lista.innerHTML = html;
         }
 
-        // Carregar gráfico
+        // Carregar grï¿½fico
         async function carregarGrafico() {
             try {
                 const response = await fetch('/api/financeiro/contas-receber', { credentials: 'include' });
@@ -586,7 +587,7 @@
                 const labels = [];
                 const valores = [];
 
-                // Agrupar por dia nos próximos 30 dias
+                // Agrupar por dia nos prï¿½ximos 30 dias
                 for (let i = 0; i < 30; i++) {
                     const d = new Date();
                     d.setDate(d.getDate() + i);
@@ -627,7 +628,7 @@
                         }
                     }
                 });
-            } catch (e) { console.log('Erro ao carregar gráfico:', e); }
+            } catch (e) { console.log('Erro ao carregar grï¿½fico:', e); }
         }
 
         // Carregar vencimentos
@@ -668,7 +669,7 @@
                     return `
                         <div class="vencimento-item ${statusClass}">
                             <div class="vencimento-info">
-                                <h4>${statusIcon} ${c.cliente || c.descrição || 'Sem descrição'}</h4>
+                                <h4>${statusIcon} ${c.cliente || c.descriï¿½ï¿½o || 'Sem descriï¿½ï¿½o'}</h4>
                                 <span>${venc.toLocaleDateString('pt-BR')} ${isVencida ? '- EM ATRASO' : isHoje ? '- VENCE HOJE' : ''}</span>
                             </div>
                             <div class="vencimento-valor">
@@ -719,7 +720,7 @@
                     return `
                         <tr>
                             <td><strong>${c.cliente || '-'}</strong></td>
-                            <td>${c.descrição || '-'}</td>
+                            <td>${c.descriï¿½ï¿½o || '-'}</td>
                             <td>${venc.toLocaleDateString('pt-BR')}</td>
                             <td class="td-valor--success">${formatarMoeda(c.valor)}</td>
                             <td><span class="badge ${statusClass}">${statusText}</span></td>
@@ -735,7 +736,7 @@
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
         }
 
-        // Inicialização
+        // Inicializaï¿½ï¿½o
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarKPIs();

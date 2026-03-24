@@ -18,7 +18,9 @@ param(
 # ── Configuração ──────────────────────────────
 $servidor = "31.97.64.102"
 $usuario = "root"
-$senha = "Aluforce@2026#Vps"
+# SECURITY: nunca hardcode credenciais — use a variável de ambiente VPS_PASSWORD
+# Para definir: $env:VPS_PASSWORD = "sua_senha" (no perfil PowerShell ou pipeline CI/CD)
+$senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = $PSScriptRoot
 if (-not $caminhoLocal) {
@@ -282,17 +284,17 @@ try {
    $tsNow = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
    $discordPayload = @{
       embeds = @(@{
-         title       = "Deploy Realizado - ALUFORCE"
-         description = $descricao
-         color       = 3447003
-         fields      = @(
-            @{ name = "Modulos"; value = $modulosAfetados; inline = $true }
-            @{ name = "Status"; value = $etapasStr; inline = $true }
-            @{ name = "Arquivos ($($arquivosGit.Count))"; value = $arquivosField; inline = $false }
-         )
-         footer      = @{ text = $footerText }
-         timestamp   = $tsNow
-      })
+            title       = "Deploy Realizado - ALUFORCE"
+            description = $descricao
+            color       = 3447003
+            fields      = @(
+               @{ name = "Modulos"; value = $modulosAfetados; inline = $true }
+               @{ name = "Status"; value = $etapasStr; inline = $true }
+               @{ name = "Arquivos ($($arquivosGit.Count))"; value = $arquivosField; inline = $false }
+            )
+            footer      = @{ text = $footerText }
+            timestamp   = $tsNow
+         })
    }
    $discordPayload = $discordPayload | ConvertTo-Json -Depth 10
 

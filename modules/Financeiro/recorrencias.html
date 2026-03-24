@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Aluforce: Recorrências</title>
+    <title>Aluforce: Recorrï¿½ncias</title>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -111,6 +111,7 @@
     <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
 </head>
 <body>
     <div class="app-container">
@@ -122,9 +123,9 @@
                 <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="contas-receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn active" title="Recorrências"><i class="fas fa-redo"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="recorrencias.html" class="sidebar-btn active" title="Recorrï¿½ncias"><i class="fas fa-redo"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliaï¿½ï¿½o"><i class="fas fa-balance-scale"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatï¿½rios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo"><i class="fas fa-sitemap"></i></a>
@@ -139,13 +140,13 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;margin-left:6px;">Recorrências</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;margin-left:6px;">Recorrï¿½ncias</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                         <div class="user-avatar" id="user-avatar"><img alt="Foto" id="user-photo" style="display:none"><span id="user-initials">U</span></div>
                     </div>
                 </div>
@@ -153,8 +154,8 @@
             <div class="main-content">
                 <div class="page-content">
                     <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px;">
-                        <button class="btn-processar" onclick="processarPendentes()" title="Gera os lançamentos de todas as recorrências vencidas"><i class="fas fa-play-circle"></i> Processar Pendentes</button>
-                        <button class="btn btn-primary" onclick="abrirModalCriar()"><i class="fas fa-plus"></i> Nova Recorrência</button>
+                        <button class="btn-processar" onclick="processarPendentes()" title="Gera os lanï¿½amentos de todas as recorrï¿½ncias vencidas"><i class="fas fa-play-circle"></i> Processar Pendentes</button>
+                        <button class="btn btn-primary" onclick="abrirModalCriar()"><i class="fas fa-plus"></i> Nova Recorrï¿½ncia</button>
                     </div>
 
                     <div class="kpi-grid">
@@ -164,21 +165,21 @@
                         </div>
                         <div class="kpi-card accent-red">
                             <div class="kpi-header"><div class="kpi-icon red"><i class="fas fa-arrow-up"></i></div></div>
-                            <div class="kpi-content"><h3>A Pagar / mês</h3><div class="kpi-value" id="kpi-pagar">R$ 0</div><div class="kpi-sub">despesas recorrentes</div></div>
+                            <div class="kpi-content"><h3>A Pagar / mï¿½s</h3><div class="kpi-value" id="kpi-pagar">R$ 0</div><div class="kpi-sub">despesas recorrentes</div></div>
                         </div>
                         <div class="kpi-card accent-green">
                             <div class="kpi-header"><div class="kpi-icon green"><i class="fas fa-arrow-down"></i></div></div>
-                            <div class="kpi-content"><h3>A Receber / mês</h3><div class="kpi-value" id="kpi-receber">R$ 0</div><div class="kpi-sub">receitas recorrentes</div></div>
+                            <div class="kpi-content"><h3>A Receber / mï¿½s</h3><div class="kpi-value" id="kpi-receber">R$ 0</div><div class="kpi-sub">receitas recorrentes</div></div>
                         </div>
                         <div class="kpi-card accent-orange">
                             <div class="kpi-header"><div class="kpi-icon orange"><i class="fas fa-clock"></i></div></div>
-                            <div class="kpi-content"><h3>Próximos 7 dias</h3><div class="kpi-value" id="kpi-proximas">0</div><div class="kpi-sub">vencimentos</div></div>
+                            <div class="kpi-content"><h3>Prï¿½ximos 7 dias</h3><div class="kpi-value" id="kpi-proximas">0</div><div class="kpi-sub">vencimentos</div></div>
                         </div>
                     </div>
 
                     <div class="alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <div><strong>Processamento automático:</strong> Clique em "Processar Pendentes" para gerar lançamentos de todas as recorrências com próximo vencimento já passado. Cada recorrência gerará um Conta a Pagar ou Conta a Receber automaticamente.</div>
+                        <div><strong>Processamento automï¿½tico:</strong> Clique em "Processar Pendentes" para gerar lanï¿½amentos de todas as recorrï¿½ncias com prï¿½ximo vencimento jï¿½ passado. Cada recorrï¿½ncia gerarï¿½ um Conta a Pagar ou Conta a Receber automaticamente.</div>
                     </div>
 
                     <div class="filters-bar">
@@ -199,14 +200,14 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-list"></i> Recorrências Cadastradas</h3>
+                            <h3><i class="fas fa-list"></i> Recorrï¿½ncias Cadastradas</h3>
                             <span id="count-rec" style="font-size:13px;color:var(--text-secondary)">0 registros</span>
                         </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
-                                <thead><tr><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Frequência</th><th>Dia Venc.</th><th>Próximo Venc.</th><th>Geradas</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>
+                                <thead><tr><th>Descriï¿½ï¿½o</th><th>Tipo</th><th>Valor</th><th>Frequï¿½ncia</th><th>Dia Venc.</th><th>Prï¿½ximo Venc.</th><th>Geradas</th><th>Status</th><th style="width:100px">Aï¿½ï¿½es</th></tr></thead>
                                 <tbody id="tbody-rec">
-                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência</h4><p>Crie sua primeira recorrência clicando no botão acima</p></div></td></tr>
+                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrï¿½ncia</h4><p>Crie sua primeira recorrï¿½ncia clicando no botï¿½o acima</p></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -220,7 +221,7 @@
     <div class="modal-overlay" id="modal-criar">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modal-título"><i class="fas fa-redo"></i> Nova Recorrência</h2>
+                <h2 id="modal-tï¿½tulo"><i class="fas fa-redo"></i> Nova Recorrï¿½ncia</h2>
                 <button class="modal-close" onclick="fecharModal('modal-criar')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -228,7 +229,7 @@
                 <div class="form-section">
                     <h4><i class="fas fa-info-circle"></i> Dados Gerais</h4>
                     <div class="form-grid">
-                        <div class="form-group full"><label><i class="fas fa-tag"></i> Descrição <span class="req">*</span></label><input type="text" id="rec-descrição" placeholder="Ex: Aluguel do galpão, Mensalidade cliente X"></div>
+                        <div class="form-group full"><label><i class="fas fa-tag"></i> Descriï¿½ï¿½o <span class="req">*</span></label><input type="text" id="rec-descriï¿½ï¿½o" placeholder="Ex: Aluguel do galpï¿½o, Mensalidade cliente X"></div>
                         <div class="form-group"><label><i class="fas fa-exchange-alt"></i> Tipo <span class="req">*</span></label>
                             <select id="rec-tipo"><option value="pagar">A Pagar (despesa)</option><option value="receber">A Receber (receita)</option></select>
                         </div>
@@ -238,7 +239,7 @@
                 <div class="form-section">
                     <h4><i class="fas fa-calendar-alt"></i> Periodicidade</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-sync"></i> Frequência <span class="req">*</span></label>
+                        <div class="form-group"><label><i class="fas fa-sync"></i> Frequï¿½ncia <span class="req">*</span></label>
                             <select id="rec-frequencia">
                                 <option value="semanal">Semanal</option>
                                 <option value="quinzenal">Quinzenal</option>
@@ -250,7 +251,7 @@
                             </select>
                         </div>
                         <div class="form-group"><label><i class="fas fa-calendar-day"></i> Dia Vencimento</label><input type="number" id="rec-dia" min="1" max="31" value="1" placeholder="1-31"></div>
-                        <div class="form-group"><label><i class="fas fa-play"></i> Data Início</label><input type="date" id="rec-inicio"></div>
+                        <div class="form-group"><label><i class="fas fa-play"></i> Data Inï¿½cio</label><input type="date" id="rec-inicio"></div>
                         <div class="form-group"><label><i class="fas fa-stop"></i> Data Fim (opcional)</label><input type="date" id="rec-fim"></div>
                     </div>
                 </div>
@@ -279,7 +280,7 @@
         const freqLabels = { semanal:'Semanal', quinzenal:'Quinzenal', mensal:'Mensal', bimestral:'Bimestral', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual' };
         const freqIcons = { semanal:'fa-calendar-week', quinzenal:'fa-calendar-check', mensal:'fa-calendar', bimestral:'fa-calendar-plus', trimestral:'fa-calendar-alt', semestral:'fa-calendar-minus', anual:'fa-calendar-day' };
 
-        let recorrências = [];
+        let recorrï¿½ncias = [];
 
         function mostrarToast(msg, tipo) {
             const colors = { success:'#10b981', error:'#ef4444', warning:'#f59e0b', info:'#3b82f6' };
@@ -304,14 +305,14 @@
                 if (ativo) url += `ativo=${ativo}&`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                recorrências = data.data || [];
+                recorrï¿½ncias = data.data || [];
                 renderizar();
                 atualizarKPIs();
             } catch (e) { console.error('Erro:', e); }
         }
 
         function atualizarKPIs() {
-            const ativas = recorrências.filter(r => r.ativo == 1);
+            const ativas = recorrï¿½ncias.filter(r => r.ativo == 1);
             document.getElementById('kpi-ativas').textContent = ativas.length;
             const pagar = ativas.filter(r => r.tipo === 'pagar').reduce((s, r) => s + Number(r.valor), 0);
             document.getElementById('kpi-pagar').textContent = fmtMoeda(pagar);
@@ -328,17 +329,17 @@
 
         function renderizar() {
             const tb = document.getElementById('tbody-rec');
-            document.getElementById('count-rec').textContent = `${recorrências.length} registro(s)`;
-            if (recorrências.length === 0) {
-                tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência</h4><p>Crie sua primeira recorrência</p></div></td></tr>';
+            document.getElementById('count-rec').textContent = `${recorrï¿½ncias.length} registro(s)`;
+            if (recorrï¿½ncias.length === 0) {
+                tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrï¿½ncia</h4><p>Crie sua primeira recorrï¿½ncia</p></div></td></tr>';
                 return;
             }
-            tb.innerHTML = recorrências.map(r => {
+            tb.innerHTML = recorrï¿½ncias.map(r => {
                 const proxDate = r.proximo_vencimento ? new Date(String(r.proximo_vencimento).slice(0,10) + 'T00:00:00') : null;
                 const isVencido = proxDate && proxDate < new Date();
                 return `
                 <tr>
-                    <td><strong>${r.descrição}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
+                    <td><strong>${r.descriï¿½ï¿½o}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
                     <td><span class="badge badge-${r.tipo}">${r.tipo === 'pagar' ? '? Pagar' : '? Receber'}</span></td>
                     <td class="valor" style="color:${r.tipo === 'pagar' ? 'var(--danger)' : 'var(--success)'}">${fmtMoeda(r.valor)}</td>
                     <td><span class="freq-badge"><i class="fas ${freqIcons[r.frequencia]||'fa-calendar'}"></i> ${freqLabels[r.frequencia]||r.frequencia}</span></td>
@@ -355,7 +356,7 @@
         }
 
         function abrirModalCriar() {
-            document.getElementById('modal-título').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
+            document.getElementById('modal-tï¿½tulo').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrï¿½ncia';
             document.getElementById('rec-id').value = '';
             document.querySelectorAll('#modal-criar input[type="text"], #modal-criar input[type="number"]').forEach(el => el.value = '');
             document.getElementById('rec-tipo').value = 'pagar';
@@ -367,11 +368,11 @@
         }
 
         function editarRecorrencia(id) {
-            const r = recorrências.find(x => x.id === id);
+            const r = recorrï¿½ncias.find(x => x.id === id);
             if (!r) return;
-            document.getElementById('modal-título').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
+            document.getElementById('modal-tï¿½tulo').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrï¿½ncia';
             document.getElementById('rec-id').value = r.id;
-            document.getElementById('rec-descrição').value = r.descrição || '';
+            document.getElementById('rec-descriï¿½ï¿½o').value = r.descriï¿½ï¿½o || '';
             document.getElementById('rec-tipo').value = r.tipo || 'pagar';
             document.getElementById('rec-valor').value = r.valor || '';
             document.getElementById('rec-frequencia').value = r.frequencia || 'mensal';
@@ -386,7 +387,7 @@
         async function salvarRecorrencia() {
             const id = document.getElementById('rec-id').value;
             const payload = {
-                descrição: document.getElementById('rec-descrição').value,
+                descriï¿½ï¿½o: document.getElementById('rec-descriï¿½ï¿½o').value,
                 tipo: document.getElementById('rec-tipo').value,
                 valor: parseFloat(document.getElementById('rec-valor').value),
                 frequencia: document.getElementById('rec-frequencia').value,
@@ -396,8 +397,8 @@
                 fornecedor_cliente: document.getElementById('rec-entidade').value,
                 categoria: document.getElementById('rec-categoria').value
             };
-            if (!payload.descrição || !payload.valor) {
-                mostrarToast('Preencha descrição e valor', 'warning'); return;
+            if (!payload.descriï¿½ï¿½o || !payload.valor) {
+                mostrarToast('Preencha descriï¿½ï¿½o e valor', 'warning'); return;
             }
             try {
                 const url = id ? `${API}/transacoes-recorrentes/${id}` : `${API}/transacoes-recorrentes`;
@@ -405,33 +406,33 @@
                 const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToast(id ? 'Recorrência atualizada!' : 'Recorrência criada!', 'success');
+                    mostrarToast(id ? 'Recorrï¿½ncia atualizada!' : 'Recorrï¿½ncia criada!', 'success');
                     fecharModal('modal-criar');
                     carregarRecorrencias();
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToast('Erro de conexão', 'error'); }
+            } catch (e) { mostrarToast('Erro de conexï¿½o', 'error'); }
         }
 
         async function excluirRecorrencia(id) {
-            if (!confirm('Deseja desativar esta recorrência?')) return;
+            if (!confirm('Deseja desativar esta recorrï¿½ncia?')) return;
             try {
                 const r = await fetch(`${API}/transacoes-recorrentes/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
                 const data = await r.json();
-                if (data.success) { mostrarToast('Recorrência desativada', 'success'); carregarRecorrencias(); }
+                if (data.success) { mostrarToast('Recorrï¿½ncia desativada', 'success'); carregarRecorrencias(); }
             } catch (e) { mostrarToast('Erro', 'error'); }
         }
 
         async function processarPendentes() {
-            if (!confirm('Isso gerará lançamentos (Contas a Pagar/Receber) para todas as recorrências com vencimento passado.\n\nDeseja continuar?')) return;
+            if (!confirm('Isso gerarï¿½ lanï¿½amentos (Contas a Pagar/Receber) para todas as recorrï¿½ncias com vencimento passado.\n\nDeseja continuar?')) return;
             try {
                 const r = await fetch(`${API}/transacoes-recorrentes/processar`, { credentials: 'include', method: 'POST', headers: hdrs() });
                 const data = await r.json();
                 if (data.success) {
                     const total = data.processados || 0;
                     if (total > 0) {
-                        mostrarToast(`${total} lançamento(s) gerado(s) com sucesso!`, 'success');
+                        mostrarToast(`${total} lanï¿½amento(s) gerado(s) com sucesso!`, 'success');
                     } else {
-                        mostrarToast('Nenhuma recorrência pendente para processar', 'info');
+                        mostrarToast('Nenhuma recorrï¿½ncia pendente para processar', 'info');
                     }
                     carregarRecorrencias();
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
@@ -445,7 +446,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuï¿½rio');
                     const h = new Date().getHours();
                     document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                     document.getElementById('user-name').textContent = nome;

@@ -14,9 +14,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Aluforce: Relatórios Faturamento</title>
+    <title>Aluforce: Relatï¿½rios Faturamento</title>
 
-    <!-- Sistema de Autenticação Unificado — DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticaï¿½ï¿½o Unificado ï¿½ DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -31,16 +31,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
-    <!-- Design System — Faturamento Layout -->
+    <!-- Design System ï¿½ Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
 
-    <!-- Global Header & Sidebar — Padrão Institucional -->
+    <!-- Global Header & Sidebar ï¿½ Padrï¿½o Institucional -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
 
-    <!-- Popup Confirmação -->
+    <!-- Popup Confirmaï¿½ï¿½o -->
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
     <!-- Anti-Copy Protection -->
@@ -61,6 +61,8 @@
         .summary-card .label { font-size: 11px; color: #6b7280; text-transform: uppercase; }
         .summary-card .value { font-size: 20px; font-weight: 700; color: var(--fat-primary, #10b981); margin-top: 4px; }
     </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
 
@@ -73,13 +75,13 @@
     <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
         <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-        <a href="relatorios.html" class="sidebar-btn active" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+        <a href="relatorios.html" class="sidebar-btn active" title="Relatï¿½rios"><i class="fas fa-chart-bar"></i></a>
         <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-        <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
-        <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+        <a href="logistica.html" class="sidebar-btn" title="Logï¿½stica"><i class="fas fa-truck"></i></a>
+        <a href="inutilizacao.html" class="sidebar-btn" title="Inutilizaï¿½ï¿½o"><i class="fas fa-ban"></i></a>
     </nav>
     <div class="sidebar-bottom">
-        <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+        <button class="sidebar-btn" title="Configuraï¿½ï¿½es" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
     </div>
 </aside>
 
@@ -91,15 +93,15 @@
                 <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                 <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                 <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatórios</span>
+                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">ï¿½</span>
+                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatï¿½rios</span>
             </div>
         </div>
         <div class="header-right">
             <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-            <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+            <button class="header-btn" title="Notificaï¿½ï¿½es" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
             <div class="user-greeting">
-                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuï¿½rio</strong></span>
                 <div class="user-avatar" id="user-avatar">
                     <img alt="Foto" id="user-photo" style="display:none">
                     <span id="user-initials">U</span>
@@ -120,25 +122,25 @@
                     <div class="page-title-wrapper">
                         <div class="page-icon"><i class="fas fa-chart-bar"></i></div>
                         <div>
-                            <h1 class="page-title">Relatórios Faturamento</h1>
-                            <p class="page-subtitle">Gere e exporte relatórios profissionais em PDF</p>
+                            <h1 class="page-title">Relatï¿½rios Faturamento</h1>
+                            <p class="page-subtitle">Gere e exporte relatï¿½rios profissionais em PDF</p>
                         </div>
                     </div>
                     <div class="page-actions">
                         <div style="display:flex;align-items:center;gap:8px;">
-                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);">Período:</label>
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);">Perï¿½odo:</label>
                             <input type="date" class="form-control" id="reportDataInicio" style="width:140px;padding:6px 10px;font-size:12px;">
-                            <span style="color:var(--text-muted);font-size:12px;">até</span>
+                            <span style="color:var(--text-muted);font-size:12px;">atï¿½</span>
                             <input type="date" class="form-control" id="reportDataFim" style="width:140px;padding:6px 10px;font-size:12px;">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 1: Ordens de Serviço -->
+            <!-- Section 1: Ordens de Serviï¿½o -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-clipboard-list"></i> Ordens de Serviço
+                    <i class="fas fa-clipboard-list"></i> Ordens de Serviï¿½o
                 </div>
                 <div class="card-body">
                     <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
@@ -146,38 +148,38 @@
                             <div class="action-icon"><i class="fas fa-clipboard"></i></div>
                             <div class="action-text">
                                 <span>OS Abertas</span>
-                                <span class="action-desc">Ordens de serviço em aberto</span>
+                                <span class="action-desc">Ordens de serviï¿½o em aberto</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('os_periodo')">
                             <div class="action-icon"><i class="fas fa-calendar"></i></div>
                             <div class="action-text">
-                                <span>OS por Período</span>
+                                <span>OS por Perï¿½odo</span>
                                 <span class="action-desc">Filtrar por data de abertura</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('os_tecnico')">
                             <div class="action-icon"><i class="fas fa-user-cog"></i></div>
                             <div class="action-text">
-                                <span>OS por Técnico</span>
-                                <span class="action-desc">Agrupado por técnico responsável</span>
+                                <span>OS por Tï¿½cnico</span>
+                                <span class="action-desc">Agrupado por tï¿½cnico responsï¿½vel</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('os_status')">
                             <div class="action-icon"><i class="fas fa-tasks"></i></div>
                             <div class="action-text">
                                 <span>OS por Status</span>
-                                <span class="action-desc">Distribuição por status atual</span>
+                                <span class="action-desc">Distribuiï¿½ï¿½o por status atual</span>
                             </div>
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 2: Contratos de Serviço -->
+            <!-- Section 2: Contratos de Serviï¿½o -->
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-file-contract"></i> Contratos de Serviço
+                    <i class="fas fa-file-contract"></i> Contratos de Serviï¿½o
                 </div>
                 <div class="card-body">
                     <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
@@ -192,7 +194,7 @@
                             <div class="action-icon"><i class="fas fa-clock"></i></div>
                             <div class="action-text">
                                 <span>Contratos por Vencimento</span>
-                                <span class="action-desc">Próximos a vencer</span>
+                                <span class="action-desc">Prï¿½ximos a vencer</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('contratos_valor')">
@@ -212,22 +214,22 @@
                         <button class="quick-action" onclick="gerarRelatorio('renovacoes')">
                             <div class="action-icon"><i class="fas fa-redo"></i></div>
                             <div class="action-text">
-                                <span>Renovações Pendentes</span>
-                                <span class="action-desc">Contratos para renovação</span>
+                                <span>Renovaï¿½ï¿½es Pendentes</span>
+                                <span class="action-desc">Contratos para renovaï¿½ï¿½o</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('contratos_cancelados')">
                             <div class="action-icon"><i class="fas fa-times-circle"></i></div>
                             <div class="action-text">
                                 <span>Contratos Cancelados</span>
-                                <span class="action-desc">Histórico de cancelamentos</span>
+                                <span class="action-desc">Histï¿½rico de cancelamentos</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('receita_recorrente')">
                             <div class="action-icon"><i class="fas fa-chart-line"></i></div>
                             <div class="action-text">
                                 <span>Receita Recorrente</span>
-                                <span class="action-desc">MRR e evolução mensal</span>
+                                <span class="action-desc">MRR e evoluï¿½ï¿½o mensal</span>
                             </div>
                         </button>
                     </div>
@@ -245,7 +247,7 @@
                             <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div class="action-text">
                                 <span>Faturamento Mensal</span>
-                                <span class="action-desc">Total faturado por mês</span>
+                                <span class="action-desc">Total faturado por mï¿½s</span>
                             </div>
                         </button>
                         <button class="quick-action" onclick="gerarRelatorio('nfe_status')">
@@ -296,7 +298,7 @@
 <div class="modal-overlay" id="previewSection">
     <div class="modal modal-lg">
         <div class="modal-header">
-            <h3><i class="fas fa-chart-bar"></i> <span id="previewTitle">Relatório</span></h3>
+            <h3><i class="fas fa-chart-bar"></i> <span id="previewTitle">Relatï¿½rio</span></h3>
             <button class="modal-close" onclick="fecharPreview()" title="Fechar"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body" id="previewContent"></div>
@@ -330,7 +332,7 @@ function carregarUsuario() {
     .then(function(r) { return r.json(); })
     .then(function(user) {
         var d = user.dados || user;
-        var nome = (d.nome || d.name || 'Usuário').split(' ')[0];
+        var nome = (d.nome || d.name || 'Usuï¿½rio').split(' ')[0];
         document.getElementById('user-name').textContent = nome;
         var h = new Date().getHours();
         document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -371,7 +373,7 @@ function gerarRelatorio(tipo) {
     if (df) params.append('dataFim', df);
 
     document.getElementById('previewTitle').textContent = 'Carregando...';
-    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando relatório...</p></div>';
+    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando relatï¿½rio...</p></div>';
     document.getElementById('previewSection').classList.add('active');
     document.getElementById('currentReportType').value = tipo;
 
@@ -387,26 +389,26 @@ function gerarRelatorio(tipo) {
     })
     .catch(function(err) {
         dadosRelatorioAtual = null;
-        document.getElementById('previewTitle').textContent = 'Relatório Indisponível';
+        document.getElementById('previewTitle').textContent = 'Relatï¿½rio Indisponï¿½vel';
         document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:48px 24px;">' +
             '<i class="fas fa-database" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>' +
-            '<h3 style="color:var(--text-primary);font-size:16px;margin-bottom:8px;">Dados não disponíveis</h3>' +
-            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatório requer dados do servidor. Verifique se o endpoint da API está configurado ou tente novamente mais tarde.</p>' +
+            '<h3 style="color:var(--text-primary);font-size:16px;margin-bottom:8px;">Dados nï¿½o disponï¿½veis</h3>' +
+            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatï¿½rio requer dados do servidor. Verifique se o endpoint da API estï¿½ configurado ou tente novamente mais tarde.</p>' +
             '</div>';
     });
 }
 
 function renderizarRelatorio(dados) {
-    document.getElementById('previewTitle').textContent = dados.título || 'Relatório';
-    document.title = 'Aluforce: ' + (dados.titulo || 'Relatório');
+    document.getElementById('previewTitle').textContent = dados.tï¿½tulo || 'Relatï¿½rio';
+    document.title = 'Aluforce: ' + (dados.titulo || 'Relatï¿½rio');
 
-    var período = '';
+    var perï¿½odo = '';
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
     if (di && df) {
-        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+        perï¿½odo = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
     } else if (di) {
-        período = 'A partir de ' + new Date(di + 'T00:00:00').toLocaleDateString('pt-BR');
+        perï¿½odo = 'A partir de ' + new Date(di + 'T00:00:00').toLocaleDateString('pt-BR');
     }
 
     var html = '';
@@ -417,15 +419,15 @@ function renderizarRelatorio(dados) {
         });
         html += '</div>';
     }
-    if (período) {
-        html += '<div style="padding:8px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary-500);"></i> Período: <strong>' + período + '</strong></div>';
+    if (perï¿½odo) {
+        html += '<div style="padding:8px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary-500);"></i> Perï¿½odo: <strong>' + perï¿½odo + '</strong></div>';
     }
     if (dados.colunas && dados.linhas) {
         html += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
         dados.colunas.forEach(function(c) { html += '<th>' + _escHtml(c) + '</th>'; });
         html += '</tr></thead><tbody>';
         if (dados.linhas.length === 0) {
-            html += '<tr><td colspan="' + dados.colunas.length + '" style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum registro encontrado para o período selecionado</td></tr>';
+            html += '<tr><td colspan="' + dados.colunas.length + '" style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum registro encontrado para o perï¿½odo selecionado</td></tr>';
         } else {
             dados.linhas.forEach(function(l) {
                 html += '<tr>';
@@ -454,13 +456,13 @@ document.addEventListener('click', function(e) {
 
 function exportarPDF() {
     var dados = dadosRelatorioAtual;
-    if (!dados) { showAlert('Nenhum relatório carregado para exportar', 'warning'); return; }
+    if (!dados) { showAlert('Nenhum relatï¿½rio carregado para exportar', 'warning'); return; }
 
-    var período = '';
+    var perï¿½odo = '';
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
     if (di && df) {
-        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+        perï¿½odo = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
     }
     var dataGeracao = new Date().toLocaleString('pt-BR');
 
@@ -489,7 +491,7 @@ function exportarPDF() {
 
     win.document.write(
         '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
-        '<title>' + _escHtml(dados.título) + ' - ALUFORCE</title>' +
+        '<title>' + _escHtml(dados.tï¿½tulo) + ' - ALUFORCE</title>' +
         '<style>' +
             '@page { margin: 12mm 15mm; size: A4 landscape; }' +
             '@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }' +
@@ -536,33 +538,33 @@ function exportarPDF() {
             '<button class="btn-close" onclick="window.close()">? Fechar</button>' +
         '</div>' +
         '<div class="rpt-header">' +
-            '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra — Módulo NFe</div></div>' +
+            '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra ï¿½ Mï¿½dulo NFe</div></div>' +
             '<div class="rpt-meta">' +
-                '<div class="doc-tag">Relatório</div>' +
+                '<div class="doc-tag">Relatï¿½rio</div>' +
                 '<div class="meta-line">Emitido em: ' + dataGeracao + '</div>' +
-                (período ? '<div class="meta-line">Período: ' + período + '</div>' : '') +
+                (perï¿½odo ? '<div class="meta-line">Perï¿½odo: ' + perï¿½odo + '</div>' : '') +
             '</div>' +
         '</div>' +
-        '<div class="rpt-title"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">Módulo NFe — Sistema Integrado de Gestão Empresarial</div></div>' +
+        '<div class="rpt-title"><h1>' + _escHtml(dados.tï¿½tulo) + '</h1><div class="subtitle">Mï¿½dulo NFe ï¿½ Sistema Integrado de Gestï¿½o Empresarial</div></div>' +
         summaryHtml +
-        '<div class="data-section"><h2>Dados do Relatório</h2>' +
+        '<div class="data-section"><h2>Dados do Relatï¿½rio</h2>' +
         tableHtml +
         '<div style="text-align:right; margin-top:8px; font-size:10px; color:#94a3b8;">' + (dados.linhas ? dados.linhas.length : 0) + ' registro(s) encontrado(s)</div>' +
         '</div>' +
-        '<div class="rpt-footer"><span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
-        '<div class="confidential">Documento Confidencial — Uso Interno</div>' +
+        '<div class="rpt-footer"><span>ALUFORCE ï¿½ Sistema Integrado de Gestï¿½o Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
+        '<div class="confidential">Documento Confidencial ï¿½ Uso Interno</div>' +
         '    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body></html>'
     );
     win.document.close();
-    showAlert('PDF gerado com sucesso — use "Salvar como PDF" na janela de impressão', 'success');
+    showAlert('PDF gerado com sucesso ï¿½ use "Salvar como PDF" na janela de impressï¿½o', 'success');
 }
 
 function imprimirRelatorio() {
     exportarPDF();
 }
 
-function abrirModalConfiguracoes() { showAlert('Configurações — Em desenvolvimento', 'info'); }
+function abrirModalConfiguracoes() { showAlert('Configuraï¿½ï¿½es ï¿½ Em desenvolvimento', 'info'); }
 
 document.addEventListener('DOMContentLoaded', function() {
     carregarUsuario();
@@ -574,12 +576,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-<!-- Sistema de Notificações Global -->
+<!-- Sistema de Notificaï¿½ï¿½es Global -->
 <script src="/js/notification-manager.js?v=20260301"></script>
 <script src="/_shared/connection-monitor.js?v=20260301"></script>
 <script src="/js/popup-confirmacao.js?v=20260301"></script>
 
-<!-- Utilitários Compartilhados -->
+<!-- Utilitï¿½rios Compartilhados -->
 <script src="/_shared/confirm-dialog.js?v=20260301"></script>
 <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 

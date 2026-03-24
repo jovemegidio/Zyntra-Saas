@@ -186,6 +186,8 @@
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -910,7 +912,7 @@
                 modal.innerHTML = `
                     <div class="modal-overlay" onclick="fecharModalDetalhes()"></div>
                     <div class="modal-content" style="max-width: 500px;">
-                        <div class="modal-header" style="background: linear-gradient(135deg, ${tipoInfo.class === 'health' ? '#ef4444' : tipoInfo.class === 'food' ? '#f97316' : tipoInfo.class === 'transport' ? '#10b981' : '#6366f1'}, ${tipoInfo.class === 'health' ? '#dc2626' : tipoInfo.class === 'food' ? '#ea580c' : tipoInfo.class === 'transport' ? '#059669' : '#4f46e5'}); border: none; border-radius: 16px 16px 0 0;">
+                        <div class="modal-header" style="border: none; border-radius: 16px 16px 0 0;">
                             <h3 style="color: white; margin: 0; display: flex; align-items: center; gap: 12px;">
                                 <div style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
                                     <i class="fas ${tipoInfo.icon}" style="font-size: 1.5rem; color: white;"></i>

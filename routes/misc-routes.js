@@ -75,8 +75,8 @@ module.exports = function createMiscRoutes(deps) {
     });
     
     // ===================== API DE NOTIFICAÇÕES DO CHAT =====================
-    // Endpoint para notificar suporte técnico via chat
-    router.post('/notify-support', express.json(), async (req, res) => {
+    // Endpoint para notificar suporte técnico via chat (requer autenticação)
+    router.post('/notify-support', authenticateToken, express.json(), async (req, res) => {
         try {
             const { userName, userEmail, message, timestamp } = req.body;
     
@@ -225,9 +225,8 @@ module.exports = function createMiscRoutes(deps) {
                     'hellen': 'hellen.webp'
                 };
     
-                // Verificar se é admin
-                const isAdmin = user.is_admin === 1 || user.role === 'admin' ||
-                               ['douglas', 'andreia', 'ti', 'antonio'].includes(firstName);
+                // Verificar se é admin baseado apenas no campo role do banco + token JWT
+                const isAdmin = dbUser.role === 'admin' || user.is_admin === 1;
     
                 console.log('[VERIFICAR-SESSAO] Usuário autenticado:', firstName, 'Admin:', isAdmin);
     
@@ -248,8 +247,8 @@ module.exports = function createMiscRoutes(deps) {
             } else {
                 // Fallback para usuários da tabela usuarios
                 const firstName = (user.nome || user.email).split(' ')[0].toLowerCase();
-                const isAdmin = user.is_admin === 1 || user.role === 'admin' ||
-                               ['douglas', 'andreia', 'ti', 'antonio'].includes(firstName);
+                // SECURITY: isAdmin baseado apenas no JWT claim, sem lista hardcoded de nomes
+                const isAdmin = user.is_admin === 1 || user.role === 'admin';
     
                 console.log('[VERIFICAR-SESSAO] Usuário autenticado (fallback):', firstName);
     

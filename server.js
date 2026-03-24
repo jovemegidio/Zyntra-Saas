@@ -675,12 +675,7 @@ app.use(cors({
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
-            // Em desenvolvimento, logar mas não permitir automaticamente
-            if (process.env.NODE_ENV === 'development') {
-                console.warn(`⚠️ CORS DEV: Origem não listada permitida em dev: ${origin}`);
-                callback(null, true);
-                return;
-            }
+            // Bloquear origens não permitidas em qualquer ambiente
             console.warn(`⚠️ CORS: Origem bloqueada: ${origin}`);
             callback(new Error('Origem não permitida pelo CORS'));
         }
