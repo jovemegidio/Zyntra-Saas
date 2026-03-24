@@ -4389,14 +4389,33 @@ apiVendasRouter.get('/empresas', authenticateToken, async (req, res, next) => {
 
 apiVendasRouter.get('/empresas/search', authenticateToken, async (req, res, next) => {
     try {
-        const q = req.query.q || '';
-        const query = `%${q}%`;
-        const [rows] = await pool.query(
-            `SELECT id, nome_fantasia, cnpj FROM empresas
-             WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?
-             ORDER BY nome_fantasia LIMIT 10`,
-            [query, query, query]
-        );
+        const q = (req.query.q || '').trim();
+        if (!q) return res.json([]);
+        // Sanitizar CNPJ: remover pontos, traços, barras para busca numérica
+        const qDigits = q.replace(/\D/g, '');
+        const queryLike = `%${q}%`;
+        const queryDigits = qDigits.length >= 3 ? `%${qDigits}%` : null;
+
+        let sql = `SELECT id, nome_fantasia, razao_social, cnpj FROM empresas
+             WHERE nome_fantasia LIKE ? OR razao_social LIKE ?`;
+        const params = [queryLike, queryLike];
+
+        // Buscar por CNPJ (com ou sem formatação)
+        sql += ` OR cnpj LIKE ?`;
+        params.push(queryLike);
+        if (queryDigits) {
+            sql += ` OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+            params.push(`%${qDigits}%`);
+        }
+
+        sql += ` ORDER BY CASE
+            WHEN nome_fantasia LIKE ? THEN 0
+            WHEN razao_social LIKE ? THEN 1
+            ELSE 2
+          END, nome_fantasia ASC LIMIT 30`;
+        params.push(`${q}%`, `${q}%`);
+
+        const [rows] = await pool.query(sql, params);
         res.json(rows);
     } catch (error) {
         next(error);
@@ -4496,47 +4515,66 @@ apiVendasRouter.delete('/empresas/:id', authenticateToken, authorizeAdmin, async
 // Busca unificada de clientes e empresas (para autocomplete)
 apiVendasRouter.get('/clientes-empresas/search', authenticateToken, async (req, res, next) => {
     try {
-        const q = req.query.q || '';
+        const q = (req.query.q || '').trim();
         if (q.length < 1) {
             return res.json([]);
         }
-        const query = `%${q}%`;
+        const queryLike = `%${q}%`;
+        const qDigits = q.replace(/\D/g, '');
+        const queryDigits = qDigits.length >= 3 ? `%${qDigits}%` : null;
 
-        // Buscar empresas
-        const [empresas] = await pool.query(
-            `SELECT id, nome_fantasia as nome, razao_social, cnpj, 'empresa' as tipo
+        // Buscar empresas (por nome_fantasia, razao_social, cnpj com/sem formatação)
+        let sqlEmpresas = `SELECT id, nome_fantasia, razao_social, cnpj, 'empresa' as tipo
              FROM empresas
-             WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?
-             ORDER BY nome_fantasia
-             LIMIT 10`,
-            [query, query, query]
-        );
+             WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?`;
+        const paramsEmpresas = [queryLike, queryLike, queryLike];
+        if (queryDigits) {
+            sqlEmpresas += ` OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+            paramsEmpresas.push(queryDigits);
+        }
+        sqlEmpresas += ` ORDER BY nome_fantasia LIMIT 15`;
+        const [empresas] = await pool.query(sqlEmpresas, paramsEmpresas);
 
-        // Buscar clientes
-        const [clientes] = await pool.query(
-            `SELECT c.id, c.nome, c.email, c.telefone, c.cpf, c.empresa_id,
+        // Buscar clientes (por nome, nome_fantasia, razao_social, cnpj, cnpj_cpf, cpf, email)
+        let sqlClientes = `SELECT c.id, c.nome, c.nome_fantasia, c.razao_social, c.email,
+                    c.telefone, c.cpf, c.cnpj, c.cnpj_cpf, c.empresa_id,
                     e.nome_fantasia as empresa_nome, 'cliente' as tipo
              FROM clientes c
              LEFT JOIN empresas e ON c.empresa_id = e.id
-             WHERE c.nome LIKE ? OR c.email LIKE ? OR c.cpf LIKE ?
-             ORDER BY c.nome
-             LIMIT 10`,
-            [query, query, query]
-        );
+             WHERE c.nome LIKE ? OR c.nome_fantasia LIKE ? OR c.razao_social LIKE ?
+                OR c.email LIKE ? OR c.cpf LIKE ? OR c.cnpj LIKE ? OR c.cnpj_cpf LIKE ?`;
+        const paramsClientes = [queryLike, queryLike, queryLike, queryLike, queryLike, queryLike, queryLike];
+        if (queryDigits) {
+            sqlClientes += ` OR REPLACE(REPLACE(REPLACE(c.cnpj_cpf, '.', ''), '-', ''), '/', '') LIKE ?`;
+            sqlClientes += ` OR REPLACE(REPLACE(REPLACE(c.cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+            paramsClientes.push(queryDigits, queryDigits);
+        }
+        sqlClientes += ` ORDER BY c.nome LIMIT 15`;
+        const [clientes] = await pool.query(sqlClientes, paramsClientes);
 
         // Combinar resultados: empresas primeiro, depois clientes
         const resultados = [
             ...empresas.map(e => ({
                 id: e.id,
-                nome: e.nome_fantasia || e.razao_social || e.nome,
-                subtitulo: e.cnpj ? `CNPJ: ${e.cnpj}` : '',
+                nome: e.nome_fantasia || e.razao_social || `Empresa #${e.id}`,
+                razao_social: e.razao_social || '',
+                cnpj: e.cnpj || '',
+                subtitulo: [e.razao_social, e.cnpj ? `CNPJ: ${e.cnpj}` : ''].filter(Boolean).join(' | '),
                 tipo: 'empresa',
                 empresa_id: e.id
             })),
             ...clientes.map(c => ({
                 id: c.id,
-                nome: c.nome,
-                subtitulo: c.empresa_nome ? `${c.empresa_nome}` : (c.email || ''),
+                nome: c.nome_fantasia || c.nome || c.razao_social || `Cliente #${c.id}`,
+                razao_social: c.razao_social || '',
+                cnpj: c.cnpj || c.cnpj_cpf || '',
+                cpf: c.cpf || '',
+                email: c.email || '',
+                subtitulo: [
+                    c.razao_social && c.razao_social !== (c.nome_fantasia || c.nome) ? c.razao_social : '',
+                    c.cnpj || c.cnpj_cpf ? `CNPJ/CPF: ${c.cnpj || c.cnpj_cpf}` : (c.cpf ? `CPF: ${c.cpf}` : ''),
+                    c.empresa_nome ? `(${c.empresa_nome})` : ''
+                ].filter(Boolean).join(' | '),
                 tipo: 'cliente',
                 cliente_id: c.id,
                 empresa_id: c.empresa_id
@@ -5444,17 +5482,30 @@ apiVendasRouter.post('/transportadoras', authenticateToken, async (req, res, nex
 // GET /empresas/buscar - Buscar empresas/clientes para autocomplete
 apiVendasRouter.get('/empresas/buscar', authenticateToken, async (req, res, next) => {
     try {
-        const search = req.query.search || req.query.q || req.query.termo || '';
+        const search = (req.query.search || req.query.q || req.query.termo || '').trim();
         let query = `SELECT id, nome_fantasia, razao_social, cnpj, cpf, telefone, email
                      FROM empresas WHERE 1=1`;
         const params = [];
 
         if (search) {
-            query += ` AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ? OR cpf LIKE ?)`;
+            const searchDigits = search.replace(/\D/g, '');
+            query += ` AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ? OR cpf LIKE ?`;
             params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+            // Busca por CNPJ/CPF sem formatação (usuário pode digitar só números)
+            if (searchDigits.length >= 3) {
+                query += ` OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+                query += ` OR REPLACE(REPLACE(cpf, '.', ''), '-', '') LIKE ?`;
+                params.push(`%${searchDigits}%`, `%${searchDigits}%`);
+            }
+            query += `)`;
         }
 
-        query += ' ORDER BY nome_fantasia LIMIT 30';
+        query += ` ORDER BY CASE
+            WHEN nome_fantasia LIKE ? THEN 0
+            WHEN razao_social LIKE ? THEN 1
+            ELSE 2
+          END, nome_fantasia ASC LIMIT 30`;
+        params.push(`${search || ''}%`, `${search || ''}%`);
 
         const [rows] = await pool.query(query, params);
         res.json(rows);
