@@ -357,6 +357,14 @@ function csrfProtection(req, res, next) {
         return next(); // API token-based — CSRF não se aplica
     }
 
+    // FIX 23/03/2026: Bypass CSRF quando autenticado via cookie httpOnly (authToken)
+    // O frontend usa credentials:'include' com cookies httpOnly (SameSite=Strict),
+    // que já é protegido contra CSRF pelo próprio mecanismo de SameSite cookies.
+    // Sem este bypass, todas as operações POST/PUT/DELETE retornavam 403.
+    if (req.cookies?.authToken) {
+        return next();
+    }
+
     const cookieToken = req.cookies?.csrf_token;
     const headerToken = req.headers['x-csrf-token'];
 

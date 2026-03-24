@@ -61,7 +61,11 @@
 
   // ==================== SOCKET ====================
   function initSocket() {
-    W.socket = io();
+    W.socket = io({
+      transports: ['websocket'],
+      upgrade: false,
+      reconnection: true
+    });
 
     W.socket.on('user:registered', (data) => {
       W.user = data.user;

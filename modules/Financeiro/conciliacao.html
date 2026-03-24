@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a2e">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -196,8 +197,8 @@
         .filters-bar .btn:hover { filter: brightness(1.1); }
 
         /* CONCILIAÇÃO GRID */
-        .conciliacao-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
-        .conciliacao-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .conciliação-grid { display: grid; grid-template-columns: 1fr 80px 1fr; gap: 24px; margin-bottom: 24px; }
+        .conciliação-panel { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .panel-header { padding: 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         .panel-header h3 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; }
         .panel-header h3 i { color: var(--primary-orange); }
@@ -226,7 +227,7 @@
         .item-check.checked { background: var(--primary-orange); border-color: var(--primary-orange); color: white; }
         .item-info { flex: 1; }
         .item-info .data { font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; }
-        .item-info .descricao { font-size: 13px; font-weight: 500; }
+        .item-info .descrição { font-size: 13px; font-weight: 500; }
         .item-valor { font-size: 14px; font-weight: 600; text-align: right; }
         .item-valor.entrada { color: var(--success); }
         .item-valor.saida { color: var(--danger); }
@@ -303,7 +304,7 @@
         .upload-area.drag-over { border-color: #225cfa; background: rgba(34,92,250,0.05); }
 
         /* RESPONSIVE */
-        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliacao-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
+        @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliação-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
         @media (max-width: 1100px) { .filters-bar { flex-wrap: wrap; } .filter-group { flex: 1; min-width: 250px; } .filters-bar .btn { width: 100%; justify-content: center; border-radius: 0 0 14px 14px; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .filter-group { flex-direction: column; align-items: flex-start; min-width: 100%; } }
     </style>
@@ -316,10 +317,11 @@
     <link rel="stylesheet" href="css/conciliacao-mobile.css?v=20260201">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
         <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -499,9 +501,9 @@
                 </div>
 
                 <!-- Conciliação Grid -->
-                <div class="conciliacao-grid">
+                <div class="conciliação-grid">
                     <!-- Sistema -->
-                    <div class="conciliacao-panel">
+                    <div class="conciliação-panel">
                         <div class="panel-header">
                             <h3><i class="fas fa-desktop"></i> Lançamentos do Sistema</h3>
                             <div class="saldo positivo" id="saldoSistema">R$ 0,00</div>
@@ -528,7 +530,7 @@
                     </div>
 
                     <!-- Extrato -->
-                    <div class="conciliacao-panel">
+                    <div class="conciliação-panel">
                         <div class="panel-header">
                             <h3><i class="fas fa-file-invoice"></i> Extrato Bancário</h3>
                             <div class="saldo positivo" id="saldoExtrato">R$ 0,00</div>
@@ -555,7 +557,7 @@
                                 <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="historicoConciliacoes"></tbody>
+                        <tbody id="históricoConciliacoes"></tbody>
                     </table>
                 </div>
             </div>
@@ -631,13 +633,13 @@
         function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
         function formatarData(d) {
             if (!d) return '-';
-            try { const dt = new Date(d); return !isNaN(dt.getTime()) ? dt.toLocaleDateString('pt-BR') : '-'; } catch { return '-'; }
+            try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; }
         }
 
         // === State ===
         let lancamentosSistema = []; // contas_pagar + contas_receber pendentes
         let lancamentosExtrato = []; // extratos_importados
-        let historico = []; // conciliacoes_bancarias
+        let histórico = []; // conciliacoes_bancarias
         let sistemasSelecionados = [];
         let extratosSelecionados = [];
         let contaBancariaAtual = '';
@@ -679,7 +681,7 @@
 
         async function carregarBancos() {
             try {
-                const r = await fetch(`${API}/contas-bancarias`, { credentials: 'include', headers: hdrs() }));
+                const r = await fetch(`${API}/contas-bancarias`, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
                 const sel = document.getElementById('filtroBanco');
                 const bancos = data.data || data || [];
@@ -703,22 +705,22 @@
                 const ini = document.getElementById('dataInicio').value;
                 const fim = document.getElementById('dataFim').value;
                 const [rPagar, rReceber] = await Promise.all([
-                    fetch(`${API}/contas-pagar?limit=100&data_inicio=${ini}&data_fim=${fim}`, { credentials: 'include', headers: hdrs() })),
-                    fetch(`${API}/contas-receber?limit=100&data_inicio=${ini}&data_fim=${fim}`, { credentials: 'include', headers: hdrs() }))
+                    fetch(`${API}/contas-pagar?limit=100&data_inicio=${ini}&data_fim=${fim}`, { credentials: 'include', headers: hdrs() }),
+                    fetch(`${API}/contas-receber?limit=100&data_inicio=${ini}&data_fim=${fim}`, { credentials: 'include', headers: hdrs() })
                 ]);
                 const pagar = await rPagar.json();
                 const receber = await rReceber.json();
                 const itensPagar = (pagar.data || []).map(c => ({
                     id: 'p_' + c.id, dbId: c.id, tabela: 'contas_pagar',
-                    data: c.data_vencimento || c.data_emissao, descricao: c.descricao || c.fornecedor,
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descrição || c.fornecedor,
                     tipo: 'saida', valor: Number(c.valor), conciliado: false
                 }));
                 const itensReceber = (receber.data || []).map(c => ({
                     id: 'r_' + c.id, dbId: c.id, tabela: 'contas_receber',
-                    data: c.data_vencimento || c.data_emissao, descricao: c.descricao || c.cliente,
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descrição || c.cliente,
                     tipo: 'entrada', valor: Number(c.valor), conciliado: false
                 }));
-                lancamentosSistema = [...itensPagar, ...itensReceber].sort((a, b) => new Date(b.data) - new Date(a.data));
+                lancamentosSistema = [...itensPagar, ...itensReceber].sort((a, b) => new Date(String(b.data).slice(0,10) + 'T00:00:00') - new Date(String(a.data).slice(0,10) + 'T00:00:00'));
             } catch (e) { console.error('Erro sistema:', e); lancamentosSistema = []; }
         }
 
@@ -728,11 +730,11 @@
                 contaBancariaAtual = contaId;
                 let url = `${API}/conciliacao?tipo=extrato`;
                 if (contaId) url += `&conta_id=${contaId}`;
-                const r = await fetch(url, { credentials: 'include', headers: hdrs() }));
+                const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
                 lancamentosExtrato = (data.data || []).map(e => ({
                     id: 'e_' + e.id, dbId: e.id,
-                    data: e.data, descricao: e.descricao,
+                    data: e.data, descrição: e.descrição,
                     tipo: Number(e.valor) >= 0 ? 'entrada' : 'saida',
                     valor: Math.abs(Number(e.valor)),
                     conciliado: e.conciliado == 1
@@ -745,19 +747,19 @@
                 const contaId = document.getElementById('filtroBanco').value;
                 let url = `${API}/conciliacao?tipo=conciliacoes`;
                 if (contaId) url += `&conta_id=${contaId}`;
-                const r = await fetch(url, { credentials: 'include', headers: hdrs() }));
+                const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                historico = (data.data || []).map(c => ({
+                histórico = (data.data || []).map(c => ({
                     id: c.id, data: c.created_at || c.data,
                     sistemaDesc: c.movimentacao_sistema_id ? `Mov #${c.movimentacao_sistema_id}` : '-',
                     extratoDesc: c.extrato_id ? `Extrato #${c.extrato_id}` : '-',
                     valor: Number(c.valor), status: 'conciliado'
                 }));
-            } catch (e) { console.error('Erro histórico:', e); historico = []; }
+            } catch (e) { console.error('Erro histórico:', e); histórico = []; }
         }
 
         function atualizarKPIs() {
-            const conciliados = historico.length;
+            const conciliados = histórico.length;
             const pendentesSis = lancamentosSistema.filter(l => !l.conciliado).length;
             const pendentesExt = lancamentosExtrato.filter(l => !l.conciliado).length;
             const divergencias = lancamentosExtrato.filter(e => !e.conciliado && !lancamentosSistema.some(s => Math.abs(s.valor - e.valor) < 0.01 && !s.conciliado)).length;
@@ -787,7 +789,7 @@
                         <div class="item-check ${sistemasSelecionados.includes(item.id) ? 'checked' : ''}">
                             ${sistemasSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                         </div>
-                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descricao">${item.descricao}</div></div>
+                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
                         <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                     </li>
                 `).join('');
@@ -803,7 +805,7 @@
                         <div class="item-check ${extratosSelecionados.includes(item.id) ? 'checked' : ''}">
                             ${extratosSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
                         </div>
-                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descricao">${item.descricao}</div></div>
+                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
                         <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
                     </li>
                 `).join('');
@@ -811,12 +813,12 @@
         }
 
         function renderizarHistorico() {
-            const tbody = document.getElementById('historicoConciliacoes');
-            if (historico.length === 0) {
+            const tbody = document.getElementById('históricoConciliacoes');
+            if (histórico.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-secondary)">Nenhuma conciliação realizada</td></tr>';
                 return;
             }
-            tbody.innerHTML = historico.map(item => `
+            tbody.innerHTML = histórico.map(item => `
                 <tr>
                     <td>${formatarData(item.data)}</td>
                     <td>${item.sistemaDesc}</td>
@@ -961,6 +963,7 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

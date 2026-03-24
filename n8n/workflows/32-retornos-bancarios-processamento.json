@@ -1,0 +1,67 @@
+{
+  "name": "32-retornos-bancarios-processamento",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 6, "triggerAtMinute": 30 }, { "triggerAtHour": 14 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/financeiro/retornos-bancarios-pendentes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Verificar Retornos Bancários",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.extrato_nao_conciliado?.total }}", "rightValue": "0", "operator": { "type": "number", "operation": "gt" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Há Pendência?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'financeiro', mensagem: '🏦 *RETORNOS BANCÁRIOS*\\n\\n' + $json.extrato_nao_conciliado.total + ' lançamentos não conciliados (R$ ' + parseFloat($json.extrato_nao_conciliado.valor_total).toFixed(2) + ')\\n\\n' + $json.integracoes_ativas + ' integrações bancárias ativas.\\n\\nRealize a conciliação!' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Alerta Conciliação",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Verificar Retornos Bancários", "type": "main", "index": 0 }]] },
+    "Verificar Retornos Bancários": { "main": [[{ "node": "Há Pendência?", "type": "main", "index": 0 }]] },
+    "Há Pendência?": { "main": [[{ "node": "Alerta Conciliação", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

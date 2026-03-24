@@ -134,7 +134,7 @@ function authorizeModule(moduleName, action = 'visualizar') {
     // Mapeamento de roles para módulos permitidos
     const ROLE_MODULE_MAP = {
         'admin': '*', // Acesso total
-        'comercial': ['vendas', 'clientes', 'produtos', 'crm', 'dashboard'],
+        'comercial': ['vendas', 'clientes', 'produtos', 'crm', 'dashboard', 'rh'],
         'financeiro': ['financeiro', 'faturamento', 'dashboard'],
         'compras': ['compras', 'produtos', 'fornecedores', 'dashboard'],
         'pcp': ['pcp', 'produtos', 'estoque', 'dashboard'],

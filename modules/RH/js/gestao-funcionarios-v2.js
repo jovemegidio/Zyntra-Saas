@@ -1,6 +1,8 @@
 ﻿// Módulo de Gestão de Funcionários - RH Admin v2.0
 // Sistema completo de CRUD e gerenciamento
 
+function _escRH(str) { if (str == null) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; }
+
 class GestãoFuncionarios {
     constructor() {
         this.funcionarios = [];
@@ -108,7 +110,7 @@ class GestãoFuncionarios {
             if (e.target.id === 'btn-importar-funcionarios') {
                 this.importarFuncionarios();
             }
-            
+
             // Eventos da tabela
             if (e.target.classList.contains('btn-editar')) {
                 const id = parseInt(e.target.dataset.id);
@@ -152,7 +154,7 @@ class GestãoFuncionarios {
         if (!container) return;
 
         const funcionariosFiltrados = this.obterFuncionariosFiltrados();
-        
+
         container.innerHTML = `
             <div class="funcionarios-header">
                 <div class="funcionarios-stats">
@@ -173,7 +175,7 @@ class GestãoFuncionarios {
                         <div class="stat-label">Folha Total</div>
                     </div>
                 </div>
-                
+
                 <div class="funcionarios-filters">
                     <div class="filter-group">
                         <input type="text" id="search-funcionarios" placeholder="Buscar funcionário..." class="filter-input">
@@ -187,7 +189,7 @@ class GestãoFuncionarios {
                             <option value="inativo">Inativos</option>
                         </select>
                     </div>
-                    
+
                     <div class="action-buttons">
                         <button id="btn-novo-funcionario" class="btn btn-primary">
                             <i class="fas fa-plus"></i>
@@ -204,7 +206,7 @@ class GestãoFuncionarios {
                     </div>
                 </div>
             </div>
-            
+
             <div class="funcionarios-table-container">
                 <table class="funcionarios-table">
                     <thead>
@@ -232,29 +234,29 @@ class GestãoFuncionarios {
     renderizarLinhaFuncionario(funcionario) {
         const departamento = this.departamentos.find(d => d.id === funcionario.departamento_id);
         const dataAdmissao = new Date(funcionario.data_admissao).toLocaleDateString('pt-BR');
-        
+
         return `
             <tr class="funcionario-row">
                 <td>
                     <div class="funcionario-info">
                         <div class="funcionario-avatar">
-                            ${funcionario.foto ? 
-                                `<img src="${funcionario.foto}" alt="${funcionario.nome}">` :
-                                `<div class="avatar-placeholder">${funcionario.nome.split(' ').map(n => n[0]).join('')}</div>`
+                            ${funcionario.foto ?
+                                `<img src="${_escRH(funcionario.foto)}" alt="${_escRH(funcionario.nome)}">` :
+                                `<div class="avatar-placeholder">${_escRH(funcionario.nome.split(' ').map(n => n[0]).join(''))}</div>`
                             }
                         </div>
                         <div class="funcionario-dados">
-                            <div class="funcionario-nome">${funcionario.nome}</div>
-                            <div class="funcionario-email">${funcionario.email}</div>
+                            <div class="funcionario-nome">${_escRH(funcionario.nome)}</div>
+                            <div class="funcionario-email">${_escRH(funcionario.email)}</div>
                         </div>
                     </div>
                 </td>
                 <td>
-                    <div class="funcionario-cargo">${funcionario.cargo}</div>
+                    <div class="funcionario-cargo">${_escRH(funcionario.cargo)}</div>
                 </td>
                 <td>
-                    <div class="departamento-badge" style="background-color: ${departamento?.cor || '#6b7280'}20; color: ${departamento?.cor || '#6b7280'};">
-                        ${departamento?.nome || 'N/A'}
+                    <div class="departamento-badge" style="background-color: ${_escRH(departamento?.cor || '#6b7280')}20; color: ${_escRH(departamento?.cor || '#6b7280')};">
+                        ${_escRH(departamento?.nome || 'N/A')}
                     </div>
                 </td>
                 <td>
@@ -287,27 +289,27 @@ class GestãoFuncionarios {
 
     obterFuncionariosFiltrados() {
         let funcionarios = [...this.funcionarios];
-        
+
         const search = document.getElementById('search-funcionarios')?.value.toLowerCase() || '';
         const departamento = document.getElementById('filter-departamento')?.value || '';
         const status = document.getElementById('filter-status')?.value || '';
-        
+
         if (search) {
-            funcionarios = funcionarios.filter(f => 
+            funcionarios = funcionarios.filter(f =>
                 f.nome.toLowerCase().includes(search) ||
                 f.email.toLowerCase().includes(search) ||
                 f.cargo.toLowerCase().includes(search)
             );
         }
-        
+
         if (departamento) {
             funcionarios = funcionarios.filter(f => f.departamento_id == departamento);
         }
-        
+
         if (status) {
             funcionarios = funcionarios.filter(f => f.status === status);
         }
-        
+
         return funcionarios;
     }
 
@@ -324,20 +326,20 @@ class GestãoFuncionarios {
     abrirModalCadastro(funcionario = null) {
         const isEdicao = funcionario !== null;
         const titulo = isEdicao ? 'Editar Funcionário' : 'Novo Funcionário';
-        
+
         const modal = this.criarModal(titulo, this.gerarFormularioFuncionario(funcionario));
-        
+
         // Event listener para o formulário
         const form = modal.querySelector('#form-funcionario');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
-            
+
             if (isEdicao) {
                 this.atualizarFuncionario(funcionario.id, this.obterDadosFormulario(form));
             } else {
                 this.adicionarFuncionario(this.obterDadosFormulario(form));
             }
-            
+
             this.fecharModal();
         });
     }
@@ -371,7 +373,7 @@ class GestãoFuncionarios {
                     <button type="button" class="tab-button" data-tab="endereco">Endereço</button>
                     <button type="button" class="tab-button" data-tab="observacoes">Observações</button>
                 </div>
-                
+
                 <div class="tab-content">
                     <div id="dados-pessoais" class="tab-panel active">
                         <div class="form-row">
@@ -380,7 +382,7 @@ class GestãoFuncionarios {
                                 <input type="text" id="nome" name="nome" value="${dados.nome}" required>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="email">E-mail *</label>
@@ -391,7 +393,7 @@ class GestãoFuncionarios {
                                 <input type="tel" id="telefone" name="telefone" value="${dados.telefone}">
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="cpf">CPF *</label>
@@ -403,7 +405,7 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div id="dados-profissionais" class="tab-panel">
                         <div class="form-row">
                             <div class="form-group">
@@ -414,13 +416,13 @@ class GestãoFuncionarios {
                                 <label for="departamento_id">Departamento *</label>
                                 <select id="departamento_id" name="departamento_id" required>
                                     <option value="">Selecione...</option>
-                                    ${this.departamentos.map(dep => 
+                                    ${this.departamentos.map(dep =>
                                         `<option value="${dep.id}" ${dados.departamento_id == dep.id ? 'selected' : ''}>${dep.nome}</option>`
                                     ).join('')}
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="salario">Salário *</label>
@@ -435,7 +437,7 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div id="endereco" class="tab-panel">
                         <div class="form-row">
                             <div class="form-group">
@@ -453,7 +455,7 @@ class GestãoFuncionarios {
                                 </select>
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="cidade">Cidade</label>
@@ -464,7 +466,7 @@ class GestãoFuncionarios {
                                 <input type="text" id="bairro" name="bairro" value="${dados.endereco?.bairro || ''}">
                             </div>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="rua">Endereço</label>
@@ -472,7 +474,7 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div id="observacoes" class="tab-panel">
                         <div class="form-group">
                             <label for="observacoes_text">Observações</label>
@@ -480,7 +482,7 @@ class GestãoFuncionarios {
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="gestãoFuncionarios.fecharModal()">Cancelar</button>
                     <button type="submit" class="btn btn-primary">
@@ -494,7 +496,7 @@ class GestãoFuncionarios {
     obterDadosFormulario(form) {
         const formData = new FormData(form);
         const dados = {};
-        
+
         for (let [key, value] of formData.entries()) {
             if (key.startsWith('endereco_')) {
                 if (!dados.endereco) dados.endereco = {};
@@ -503,11 +505,11 @@ class GestãoFuncionarios {
                 dados[key] = value;
             }
         }
-        
+
         // Processar campos específicos
         if (dados.salario) dados.salario = parseFloat(dados.salario);
         if (dados.departamento_id) dados.departamento_id = parseInt(dados.departamento_id);
-        
+
         return dados;
     }
 
@@ -520,10 +522,10 @@ class GestãoFuncionarios {
             beneficios: [],
             foto: null
         };
-        
+
         this.funcionarios.push(novoFuncionario);
         this.renderizarLista();
-        
+
         console.log('✅ Funcionário adicionado:', novoFuncionario);
         this.mostrarNotificacao('Funcionário cadastrado com sucesso!', 'success');
     }
@@ -533,7 +535,7 @@ class GestãoFuncionarios {
         if (index !== -1) {
             this.funcionarios[index] = { ...this.funcionarios[index], ...dados };
             this.renderizarLista();
-            
+
             console.log('✅ Funcionário atualizado:', this.funcionarios[index]);
             this.mostrarNotificacao('Funcionário atualizado com sucesso!', 'success');
         }
@@ -551,7 +553,7 @@ class GestãoFuncionarios {
         if (funcionario && confirm(`Tem certeza que deseja excluir ${funcionario.nome}?`)) {
             this.funcionarios = this.funcionarios.filter(f => f.id !== id);
             this.renderizarLista();
-            
+
             console.log('🗑️ Funcionário excluído:', funcionario);
             this.mostrarNotificacao('Funcionário excluído com sucesso!', 'success');
         }
@@ -560,14 +562,14 @@ class GestãoFuncionarios {
     visualizarFuncionario(id) {
         const funcionario = this.funcionarios.find(f => f.id === id);
         if (!funcionario) return;
-        
+
         const departamento = this.departamentos.find(d => d.id === funcionario.departamento_id);
-        
+
         const conteudo = `
             <div class="funcionario-detalhes">
                 <div class="funcionario-header">
                     <div class="funcionario-avatar-grande">
-                        ${funcionario.foto ? 
+                        ${funcionario.foto ?
                             `<img src="${funcionario.foto}" alt="${funcionario.nome}">` :
                             `<div class="avatar-placeholder-grande">${funcionario.nome.split(' ').map(n => n[0]).join('')}</div>`
                         }
@@ -578,7 +580,7 @@ class GestãoFuncionarios {
                         <div class="status-badge ${funcionario.status}">${funcionario.status === 'ativo' ? 'Ativo' : 'Inativo'}</div>
                     </div>
                 </div>
-                
+
                 <div class="funcionario-dados-grid">
                     <div class="dados-grupo">
                         <h4><i class="fas fa-user"></i> Dados Pessoais</h4>
@@ -597,7 +599,7 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="dados-grupo">
                         <h4><i class="fas fa-briefcase"></i> Dados Profissionais</h4>
                         <div class="dados-lista">
@@ -615,7 +617,7 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="dados-grupo">
                         <h4><i class="fas fa-map-marker-alt"></i> Endereço</h4>
                         <div class="dados-lista">
@@ -633,18 +635,18 @@ class GestãoFuncionarios {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="dados-grupo">
                         <h4><i class="fas fa-gift"></i> Benefícios</h4>
                         <div class="beneficios-lista">
-                            ${funcionario.beneficios?.length ? 
+                            ${funcionario.beneficios?.length ?
                                 funcionario.beneficios.map(b => `<span class="beneficio-tag">${this.formatarBeneficio(b)}</span>`).join('') :
                                 '<span class="sem-beneficios">Nenhum benefício cadastrado</span>'
                             }
                         </div>
                     </div>
                 </div>
-                
+
                 ${funcionario.observacoes ? `
                     <div class="observacoes-funcionario">
                         <h4><i class="fas fa-sticky-note"></i> Observações</h4>
@@ -653,7 +655,7 @@ class GestãoFuncionarios {
                 ` : ''}
             </div>
         `;
-        
+
         this.criarModal(`Funcionário: ${funcionario.nome}`, conteudo, 'modal-grande');
     }
 
@@ -662,10 +664,10 @@ class GestãoFuncionarios {
         const admissao = new Date(dataAdmissao);
         const diffTime = Math.abs(hoje - admissao);
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
+
         const anos = Math.floor(diffDays / 365);
         const meses = Math.floor((diffDays % 365) / 30);
-        
+
         if (anos > 0) {
             return `${anos} ano(s) e ${meses} mês(es)`;
         } else {
@@ -681,26 +683,26 @@ class GestãoFuncionarios {
             'plano_odonto': 'Plano Odontológico',
             'seguro_vida': 'Seguro de Vida'
         };
-        
+
         return beneficios[beneficio] || beneficio;
     }
 
     exportarFuncionarios() {
         console.log('📤 Exportando funcionários...');
-        
+
         const csvContent = this.gerarCSVFuncionarios();
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
-        
+
         link.setAttribute('href', url);
         link.setAttribute('download', `funcionarios_${new Date().toISOString().split('T')[0]}.csv`);
         link.style.visibility = 'hidden';
-        
+
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        
+
         this.mostrarNotificacao('Relatório exportado com sucesso!', 'success');
     }
 
@@ -747,11 +749,11 @@ class GestãoFuncionarios {
 
     importarFuncionarios() {
         console.log('📥 Importando funcionários...');
-        
+
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = '.csv';
-        
+
         input.onchange = (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -768,30 +770,30 @@ class GestãoFuncionarios {
                 reader.readAsText(file);
             }
         };
-        
+
         input.click();
     }
 
     processarCSVImportacao(csvContent) {
         const lines = csvContent.split('\n');
         const headers = lines[0].split(',').map(h => h.replace(/"/g, ''));
-        
+
         for (let i = 1; i < lines.length; i++) {
             if (lines[i].trim()) {
                 const values = lines[i].split(',').map(v => v.replace(/"/g, ''));
                 const funcionario = {};
-                
+
                 headers.forEach((header, index) => {
                     funcionario[header.toLowerCase().replace(' ', '_')] = values[index];
                 });
-                
+
                 // Processar e adicionar funcionário
                 if (funcionario.nome && funcionario.email) {
                     this.adicionarFuncionario(funcionario);
                 }
             }
         }
-        
+
         this.renderizarLista();
     }
 
@@ -813,28 +815,28 @@ class GestãoFuncionarios {
                 </div>
             </div>
         `;
-        
+
         document.body.appendChild(modal);
         modal.style.display = 'flex';
-        
+
         // Setup tab functionality
         this.setupTabFunctionality(modal);
-        
+
         return modal;
     }
 
     setupTabFunctionality(modal) {
         const tabButtons = modal.querySelectorAll('.tab-button');
         const tabPanels = modal.querySelectorAll('.tab-panel');
-        
+
         tabButtons.forEach(button => {
             button.addEventListener('click', () => {
                 const targetTab = button.dataset.tab;
-                
+
                 // Remove active class from all buttons and panels
                 tabButtons.forEach(btn => btn.classList.remove('active'));
                 tabPanels.forEach(panel => panel.classList.remove('active'));
-                
+
                 // Add active class to clicked button and corresponding panel
                 button.classList.add('active');
                 modal.querySelector(`#${targetTab}`).classList.add('active');
@@ -861,9 +863,9 @@ class GestãoFuncionarios {
                 <i class="fas fa-times"></i>
             </button>
         `;
-        
+
         document.body.appendChild(notificação);
-        
+
         // Auto-remove após 5 segundos
         setTimeout(() => {
             if (notificação.parentElement) {

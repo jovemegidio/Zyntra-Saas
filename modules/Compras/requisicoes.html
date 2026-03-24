@@ -246,6 +246,7 @@
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -347,7 +348,7 @@
                 <button class="filter-btn active" onclick="filtrarRequisicoes('todos', this)">Todas</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('pendente', this)">Pendentes</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('aprovado', this)">Aprovadas</button>
-                <button class="filter-btn" onclick="filtrarRequisicoes('cotacao', this)">Em Cotação</button>
+                <button class="filter-btn" onclick="filtrarRequisicoes('cotação', this)">Em Cotação</button>
                 <button class="filter-btn" onclick="filtrarRequisicoes('rascunho', this)">Rascunhos</button>
             </div>
         </div>
@@ -527,7 +528,7 @@
     let requisicoesData = [];
     let materiaisData = [];
     let centrosCustoData = [];
-    let usuarioLogado = null;
+    let usuárioLogado = null;
     let filtroAtual = 'todos';
     let termoBusca = '';
     let itemCounter = 0;
@@ -553,7 +554,7 @@
         try {
             const token = localStorage.getItem('token');
             const r = await fetch('/api/me', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { usuarioLogado = await r.json(); }
+            if (r.ok) { usuárioLogado = await r.json(); }
         } catch (e) { console.log('Erro user:', e); }
     }
 
@@ -569,7 +570,7 @@
                 const data = await r.json();
                 requisicoesData = data.requisicoes || data || [];
             }
-        } catch (e) { console.log('Erro requisições:', e); requisicoesData = gerarDadosExemplo(); }
+        } catch (e) { console.log('Erro requisições:', e); requisicoesData = []; }
         atualizarContadores();
         filtrarRequisicoes(filtroAtual);
     }
@@ -590,13 +591,6 @@
         } catch (e) { console.log('Erro CC:', e); }
     }
 
-    function gerarDadosExemplo() {
-        return [
-            { id: 1, numero: 'RC-001', solicitante: 'Admin', data_solicitacao: new Date().toISOString(), centro_custo: 'Produção', prioridade: 'normal', valor_estimado: 1500, status: 'pendente' },
-            { id: 2, numero: 'RC-002', solicitante: 'Admin', data_solicitacao: new Date().toISOString(), centro_custo: 'Manutenção', prioridade: 'alta', valor_estimado: 3200, status: 'aprovado' }
-        ];
-    }
-
     function configurarEventos() {
         const search = document.getElementById('searchRequisicao');
         if (search) search.addEventListener('input', () => { termoBusca = search.value; filtrarRequisicoes(filtroAtual); });
@@ -610,7 +604,7 @@
         if (status !== 'todos') dados = dados.filter(r => r.status === status);
         if (termoBusca) {
             const t = termoBusca.toLowerCase();
-            dados = dados.filter(r => (r.numero || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
+            dados = dados.filter(r => (r.número || '').toLowerCase().includes(t) || (r.solicitante || '').toLowerCase().includes(t));
         }
         renderizarTabela(dados);
     }
@@ -624,9 +618,9 @@
         tbody.innerHTML = dados.map((r, i) => `
             <tr>
                 <td>${i + 1}</td>
-                <td><strong>${r.numero || '-'}</strong></td>
+                <td><strong>${r.número || '-'}</strong></td>
                 <td>${r.solicitante || '-'}</td>
-                <td>${formatarData(r.data_solicitacao)}</td>
+                <td>${formatarData(r.data_solicitação)}</td>
                 <td>${r.centro_custo || '-'}</td>
                 <td><span class="badge badge-${r.prioridade === 'urgente' ? 'urgent' : r.prioridade === 'alta' ? 'pending' : r.prioridade === 'normal' ? 'in-progress' : 'approved'}">${r.prioridade || 'normal'}</span></td>
                 <td>${formatarMoeda(r.valor_estimado)}</td>
@@ -646,7 +640,7 @@
         document.getElementById('totalRequisicoes').textContent = requisicoesData.length;
         document.getElementById('requisicoesPendentes').textContent = requisicoesData.filter(r => r.status === 'pendente' || r.status === 'urgente').length;
         document.getElementById('requisicoesAprovadas').textContent = requisicoesData.filter(r => r.status === 'aprovado' || r.status === 'aprovada').length;
-        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotacao' || r.status === 'em_cotacao').length;
+        document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotação' || r.status === 'em_cotação').length;
     }
 
     /* ========== Modal: Nova Requisição ========== */
@@ -658,15 +652,15 @@
         document.getElementById('itensContainer').innerHTML = '';
         document.getElementById('anexosList').innerHTML = '';
         document.getElementById('reqDataSolicitacao').value = new Date().toISOString().split('T')[0];
-        if (usuarioLogado) document.getElementById('reqSolicitante').value = usuarioLogado.nome || usuarioLogado.name || 'Usuário';
+        if (usuárioLogado) document.getElementById('reqSolicitante').value = usuárioLogado.nome || usuárioLogado.name || 'Usuário';
         // Populate CC
         const sel = document.getElementById('reqCentroCusto');
-        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descricao}</option>`).join('');
+        sel.innerHTML = '<option value="">Selecione</option>' + centrosCustoData.map(c => `<option value="${c.id || c.nome}">${c.nome || c.descrição}</option>`).join('');
         // Get next number
         try {
             const token = localStorage.getItem('token');
             const r = await fetch('/api/compras/requisicoes/proximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.numero || d.proximo_numero || ''; }
+            if (r.ok) { const d = await r.json(); document.getElementById('reqNumero').value = d.número || d.proximo_número || ''; }
         } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar título do modal para criação
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
@@ -682,7 +676,7 @@
     function adicionarItemReq() {
         itemCounter++;
         const id = itemCounter;
-        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descricao}">${m.codigo ? m.codigo + ' - ' : ''}${m.nome || m.descricao}</option>`).join('');
+        const materiaisOptions = materiaisData.map(m => `<option value="${m.nome || m.descrição}">${m.código ? m.código + ' - ' : ''}${m.nome || m.descrição}</option>`).join('');
         const html = `
         <div class="item-card" id="item-${id}">
             <div class="item-header">
@@ -753,7 +747,7 @@
     }
 
     function buscarPrecoMaterial(input, itemId) {
-        const mat = materiaisData.find(m => (m.nome || m.descricao) === input.value);
+        const mat = materiaisData.find(m => (m.nome || m.descrição) === input.value);
         if (mat && mat.preco_unitario) {
             document.getElementById('itemPreco-' + itemId).value = formatarMoeda(mat.preco_unitario);
             calcularSubtotal(itemId);
@@ -771,8 +765,8 @@
         const justificativa = document.getElementById('reqJustificativa').value;
         if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
 
-        const numero = document.getElementById('reqNumero').value;
-        if (!numero) { showToast('Número da requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
+        const número = document.getElementById('reqNumero').value;
+        if (!número) { showToast('Número da requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
 
         const items = [];
         document.querySelectorAll('.item-card').forEach(card => {
@@ -780,7 +774,7 @@
             const qtd = parseFloat(document.getElementById('itemQtd-' + id)?.value) || 0;
             const preco = parseMoeda(document.getElementById('itemPreco-' + id)?.value);
             items.push({
-                descricao: document.getElementById('itemMaterial-' + id)?.value || '',
+                descrição: document.getElementById('itemMaterial-' + id)?.value || '',
                 quantidade: qtd,
                 unidade: document.getElementById('itemUnidade-' + id)?.value || 'UN',
                 valor_estimado: preco,
@@ -792,14 +786,14 @@
         if (items.length === 0) { showToast('Adicione pelo menos 1 item', 'warning'); return; }
 
         const prioridade = document.querySelector('input[name="prioridade"]:checked')?.value || 'normal';
-        const solicitante = document.getElementById('reqSolicitante')?.value || (usuarioLogado ? (usuarioLogado.nome || usuarioLogado.name) : 'Usuário');
-        const solicitante_id = usuarioLogado ? (usuarioLogado.id || null) : null;
+        const solicitante = document.getElementById('reqSolicitante')?.value || (usuárioLogado ? (usuárioLogado.nome || usuárioLogado.name) : 'Usuário');
+        const solicitante_id = usuárioLogado ? (usuárioLogado.id || null) : null;
         const body = {
-            numero,
+            número,
             solicitante,
             solicitante_id,
             centro_custo: document.getElementById('reqCentroCusto').value || null,
-            data_solicitacao: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
+            data_solicitação: document.getElementById('reqDataSolicitacao')?.value || new Date().toISOString().split('T')[0],
             data_necessidade: document.getElementById('reqDataNecessidade').value || null,
             projeto: document.getElementById('reqProjeto').value || null,
             prioridade, justificativa, status, itens: items,
@@ -845,18 +839,18 @@
             const r = await fetch(`/api/compras/requisicoes/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const d = await r.json();
             const req = d.requisicao || d;
-            document.getElementById('viewReqNumero').textContent = req.numero || '';
+            document.getElementById('viewReqNumero').textContent = req.número || '';
             let itensHtml = '';
             if (req.itens && req.itens.length) {
                 itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Un</th><th>Preço</th><th>Subtotal</th></tr></thead><tbody>' +
-                    req.itens.map(it => `<tr><td>${it.descricao || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
+                    req.itens.map(it => `<tr><td>${it.descrição || it.material || '-'}</td><td>${it.quantidade}</td><td>${it.unidade}</td><td>${formatarMoeda(it.valor_estimado || it.preco_unitario)}</td><td>${formatarMoeda(it.subtotal || (it.quantidade || 0) * (it.valor_estimado || it.preco_unitario || 0))}</td></tr>`).join('') +
                     '</tbody></table>';
             }
             document.getElementById('viewReqContent').innerHTML =
                 '<div class="view-section"><h4>Informações Gerais</h4><div class="view-grid">' +
-                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.numero || '-') + '</p></div>' +
+                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.número || '-') + '</p></div>' +
                 '<div class="view-item"><label>Solicitante</label><p>' + (req.solicitante || '-') + '</p></div>' +
-                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitacao) + '</p></div>' +
+                '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitação) + '</p></div>' +
                 '<div class="view-item"><label>Centro de Custo</label><p>' + (req.centro_custo || '-') + '</p></div>' +
                 '<div class="view-item"><label>Prioridade</label><p><span class="badge badge-' + (req.prioridade === 'urgente' ? 'urgent' : 'pending') + '">' + (req.prioridade || 'normal') + '</span></p></div>' +
                 '<div class="view-item"><label>Status</label><p><span class="badge badge-' + getStatusClass(req.status) + '">' + getStatusLabel(req.status) + '</span></p></div>' +
@@ -882,7 +876,7 @@
             if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta requisição não pode ser editada', 'warning'); return; }
             await abrirModalNovaRequisicao();
             editingId = id;
-            document.getElementById('reqNumero').value = req.numero || '';
+            document.getElementById('reqNumero').value = req.número || '';
             document.getElementById('reqJustificativa').value = req.justificativa || '';
             document.getElementById('reqObservacoes').value = req.observacoes || '';
             // Preencher campos adicionais
@@ -906,7 +900,7 @@
                 req.itens.forEach(it => {
                     adicionarItemReq();
                     const itemId = itemCounter;
-                    document.getElementById('itemMaterial-' + itemId).value = it.descricao || it.material || '';
+                    document.getElementById('itemMaterial-' + itemId).value = it.descrição || it.material || '';
                     document.getElementById('itemQtd-' + itemId).value = it.quantidade || 1;
                     const unSel = document.getElementById('itemUnidade-' + itemId);
                     if (unSel && it.unidade) unSel.value = it.unidade;
@@ -922,15 +916,18 @@
         } catch (e) { showToast('Erro ao carregar para edição', 'error'); console.error('[Requisição] Erro edição:', e); }
     }
 
+    let _excluindoRequisicao = false;
     async function excluirRequisicao(id) {
+        if (_excluindoRequisicao) return;
         if (!confirm('Excluir esta requisição?')) return;
+        _excluindoRequisicao = true;
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/requisicoes/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao excluir requisição'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir requisição'); }
             carregarRequisicoes();
             showToast('Requisição excluída com sucesso!', 'success');
-        } catch (e) { showToast('Erro: ' + e.message, 'error'); }
+        } catch (e) { showToast('Erro: ' + e.message, 'error'); } finally { _excluindoRequisicao = false; }
     }
 
     /* ========== Attachments ========== */
@@ -983,7 +980,7 @@
         const bom = '\uFEFF';
         let csv = bom + 'Nº;Solicitante;Data;Centro Custo;Prioridade;Valor;Status\n';
         requisicoesData.forEach(r => {
-            csv += `${r.numero};${r.solicitante};${formatarData(r.data_solicitacao)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
+            csv += `${r.número};${r.solicitante};${formatarData(r.data_solicitação)};${r.centro_custo};${r.prioridade};${r.valor_estimado || 0};${r.status}\n`;
         });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -994,11 +991,11 @@
 
     /* ========== Helpers ========== */
     function getStatusClass(s) {
-        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotacao: 'in-progress', em_cotacao: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
+        const map = { pendente: 'pending', aprovado: 'approved', aprovada: 'approved', rascunho: 'in-progress', cotação: 'in-progress', em_cotação: 'in-progress', rejeitado: 'cancelled', rejeitada: 'cancelled', cancelado: 'cancelled', urgente: 'urgent', finalizada: 'approved' };
         return map[s] || 'pending';
     }
     function getStatusLabel(s) {
-        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotacao: 'Em Cotação', em_cotacao: 'Em Cotação', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
+        const map = { pendente: 'Pendente', aprovado: 'Aprovada', aprovada: 'Aprovada', rascunho: 'Rascunho', cotação: 'Em Cotação', em_cotação: 'Em Cotação', rejeitado: 'Rejeitada', rejeitada: 'Rejeitada', cancelado: 'Cancelado', urgente: 'Urgente', finalizada: 'Finalizada' };
         return map[s] || s || '-';
     }
     function formatarData(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('pt-BR'); } catch (e) { return d; } }
@@ -1070,5 +1067,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

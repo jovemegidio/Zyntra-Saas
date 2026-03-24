@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#1a2744">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: CRM Prospecção B2B</title>
+    <title>Aluforce: Prospecções & Leads</title>
     
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260301" defer></script>
@@ -971,7 +971,7 @@
     <script src="js/vendas-admin-check.js"></script>
 
     <!-- Controle de Acesso por Permissões -->
-    <script src="js/vendas-access-control.js?v=20260114" defer></script>
+    <script src="js/vendas-access-control.js?v=20260319" defer></script>
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
@@ -993,7 +993,7 @@
                 <button class="sidebar-btn" title="Kanban" onclick="window.location.href='index.html'"><i class="fas fa-columns"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Clientes" onclick="window.location.href='clientes.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn active" title="Prospecção CRM"><i class="fas fa-crosshairs"></i></button>
+                <button class="sidebar-btn active" title="Prospecções & Leads"><i class="fas fa-crosshairs"></i></button>
                 <button class="sidebar-btn" title="Estoque" onclick="window.location.href='estoque.html'"><i class="fas fa-boxes-stacked"></i></button>
                 <button class="sidebar-btn" title="Meu Dashboard" onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-pie"></i></button>
                 <button class="sidebar-btn" title="Gestão de Vendas" onclick="window.location.href='dashboard-admin.html'"><i class="fas fa-chart-line"></i></button>
@@ -1017,8 +1017,8 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Prospecções</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Prospecções & Leads</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -1039,7 +1039,7 @@
             <!-- Tabs -->
             <div class="tabs-bar">
                 <button class="tab" onclick="window.location.href='index.html'">Vendas e NF-e</button>
-                <button class="tab active">Prospecção CRM</button>
+                <button class="tab active">Prospecções & Leads</button>
                 <div class="tabs-actions">
                     <button class="tab-action-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <button class="tab-action-btn" title="Configurações"><i class="fas fa-cog"></i></button>
@@ -1050,7 +1050,7 @@
             <div class="content-area">
                 <!-- Hero Search Section -->
                 <div class="search-hero">
-                    <h1><i class="fas fa-rocket"></i> Prospecção Inteligente B2B</h1>
+                    <h1><i class="fas fa-rocket"></i> Prospecções & Leads</h1>
                     <p>Encontre empresas com dados da Receita Federal, Simples Nacional e bases públicas. Gerencie seu funil de vendas.</p>
                     
                     <div class="search-container">
@@ -1061,11 +1061,11 @@
                         <div class="filter-group">
                             <select class="filter-select" id="filter-segmento">
                                 <option value="">Segmento</option>
-                                <option value="industria">🏭 Indústria</option>
-                                <option value="comercio">🛒 Comércio</option>
-                                <option value="construcao">🏗️ Construção</option>
-                                <option value="servicos">💼 Serviços</option>
-                                <option value="agro">🌾 Agronegócio</option>
+                                <option value="industria">?? Indústria</option>
+                                <option value="comercio">?? Comércio</option>
+                                <option value="construcao">??? Construção</option>
+                                <option value="servicos">?? Serviços</option>
+                                <option value="agro">?? Agronegócio</option>
                             </select>
                             <select class="filter-select" id="filter-uf">
                                 <option value="">Estado</option>
@@ -1331,11 +1331,11 @@
                         <label>Segmento</label>
                         <select class="form-control" id="lead-segmento">
                             <option value="">Selecione...</option>
-                            <option value="industria">🏭 Indústria</option>
-                            <option value="comercio">🛒 Comércio</option>
-                            <option value="construcao">🏗️ Construção Civil</option>
-                            <option value="servicos">💼 Serviços</option>
-                            <option value="agro">🌾 Agronegócio</option>
+                            <option value="industria">?? Indústria</option>
+                            <option value="comercio">?? Comércio</option>
+                            <option value="construcao">??? Construção Civil</option>
+                            <option value="servicos">?? Serviços</option>
+                            <option value="agro">?? Agronegócio</option>
                         </select>
                     </div>
                 </div>
@@ -1389,12 +1389,12 @@
                 <div class="form-section-title"><i class="fas fa-tag"></i> Status</div>
                 <div class="form-group">
                     <select class="form-control" id="lead-status">
-                        <option value="novo">🆕 Novo Lead</option>
-                        <option value="contato">📞 Em Contato</option>
-                        <option value="qualificado">⭐ Qualificado</option>
-                        <option value="negociacao">🤝 Em Negociação</option>
-                        <option value="convertido">🏆 Convertido</option>
-                        <option value="perdido">❌ Perdido</option>
+                        <option value="novo">?? Novo Lead</option>
+                        <option value="contato">?? Em Contato</option>
+                        <option value="qualificado">? Qualificado</option>
+                        <option value="negociacao">?? Em Negociação</option>
+                        <option value="convertido">?? Convertido</option>
+                        <option value="perdido">? Perdido</option>
                     </select>
                 </div>
 
@@ -1515,7 +1515,7 @@ Aceita com ou sem formatação"></textarea>
     <div class="toast-container" id="toast-container"></div>
 
     <script src="js/vendas-admin-check.js"></script>
-    <script src="js/vendas-access-control.js?v=20260114"></script>
+    <script src="js/vendas-access-control.js?v=20260319"></script>
     <script>
     const CRM = {
         leads: [],
@@ -1568,7 +1568,7 @@ Aceita com ou sem formatação"></textarea>
                 }
             });
 
-            // Filtros conectados — filtrar leads ao mudar
+            // Filtros conectados  filtrar leads ao mudar
             ['filter-segmento', 'filter-uf', 'filter-porte'].forEach(id => {
                 document.getElementById(id)?.addEventListener('change', () => {
                     const termo = document.getElementById('search-empresa').value.trim();
@@ -1717,7 +1717,7 @@ Aceita com ou sem formatação"></textarea>
                         ${lead.cidade ? `<div class="lead-detail"><i class="fas fa-map-marker-alt"></i> ${lead.cidade}${lead.uf ? '/' + lead.uf : ''}</div>` : ''}
                     </div>
                     <div class="lead-tags">
-                        ${lead.situacao === 'ATIVA' ? '<span class="lead-tag ativo">Ativa</span>' : ''}
+                        ${lead.situação === 'ATIVA' ? '<span class="lead-tag ativo">Ativa</span>' : ''}
                         ${lead.optante_simples ? '<span class="lead-tag simples">Simples</span>' : ''}
                         ${score >= 70 ? '<span class="lead-tag score-high">Score ' + score + '%</span>' : ''}
                     </div>
@@ -1897,7 +1897,7 @@ Aceita com ou sem formatação"></textarea>
             } catch (e) { /* API pode não existir ainda */ }
 
             if (resultados.length > 0) {
-                // Aplicar filtros visuais — mostrar apenas os resultados
+                // Aplicar filtros visuais  mostrar apenas os resultados
                 this.leadsOriginal = this.leadsOriginal || [...this.leads];
                 this.leadsFiltrados = resultados;
                 this.renderizarKanbanFiltrado(resultados);
@@ -2133,7 +2133,7 @@ Aceita com ou sem formatação"></textarea>
                 this.leads.unshift(lead);
                 localStorage.setItem('crm_leads', JSON.stringify(this.leads));
                 
-                this.toast(`🎯 Empresa adicionada! ${dadosEnriquecidos.fontes_consultadas.length} fontes consultadas.`, 'success');
+                this.toast(`?? Empresa adicionada! ${dadosEnriquecidos.fontes_consultadas.length} fontes consultadas.`, 'success');
                 this.atualizarMetricas();
                 this.renderizarKanban();
                 this.renderizarTabela();
@@ -2332,7 +2332,7 @@ Aceita com ou sem formatação"></textarea>
                 cidade: rf.municipio,
                 uf: rf.uf,
                 bairro: rf.bairro,
-                endereco: `${rf.logradouro || ''}, ${rf.numero || 's/n'}`.trim(),
+                endereco: `${rf.logradouro || ''}, ${rf.número || 's/n'}`.trim(),
                 cep: rf.cep,
                 telefone: rf.ddd_telefone_1 ? `(${rf.ddd_telefone_1.substring(0,2)}) ${rf.ddd_telefone_1.substring(2)}` : '',
                 email: rf.email || '',
@@ -2488,7 +2488,7 @@ Aceita com ou sem formatação"></textarea>
                             </p>
                             <p style="margin-bottom: 12px;">
                                 <strong>Situação:</strong> 
-                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; ${lead.situacao === 'ATIVA' ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;'}">${lead.situacao || '-'}</span>
+                                <span style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; ${lead.situação === 'ATIVA' ? 'background: #dcfce7; color: #166534;' : 'background: #fee2e2; color: #991b1b;'}">${lead.situação || '-'}</span>
                             </p>
                             <p style="margin-bottom: 12px;"><strong>Data de Abertura:</strong> ${dataAbertura} ${idadeEmpresa ? `<span style="color: #64748b;">(${idadeEmpresa} anos)</span>` : ''}</p>
                             <p style="margin-bottom: 12px;"><strong>Capital Social:</strong> <span style="color: #3b82f6; font-weight: 600;">${capitalFormatado}</span></p>
@@ -2549,9 +2549,9 @@ Aceita com ou sem formatação"></textarea>
                             <div style="font-size: 56px; font-weight: 800; color: ${(lead.score_prospeccao || 50) >= 70 ? '#22c55e' : '#f59e0b'}; line-height: 1;">${lead.score_prospeccao || 50}<span style="font-size: 24px;">%</span></div>
                             <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Probabilidade de conversão</p>
                             <div style="margin-top: 12px; display: flex; justify-content: center; gap: 8px;">
-                                ${(lead.score_prospeccao || 50) >= 80 ? '<span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">🔥 HOT LEAD</span>' : ''}
-                                ${(lead.score_prospeccao || 50) >= 60 && (lead.score_prospeccao || 50) < 80 ? '<span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">⭐ QUALIFICADO</span>' : ''}
-                                ${(lead.score_prospeccao || 50) < 60 ? '<span style="background: #94a3b8; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">📋 NOVO</span>' : ''}
+                                ${(lead.score_prospeccao || 50) >= 80 ? '<span style="background: #22c55e; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">?? HOT LEAD</span>' : ''}
+                                ${(lead.score_prospeccao || 50) >= 60 && (lead.score_prospeccao || 50) < 80 ? '<span style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">? QUALIFICADO</span>' : ''}
+                                ${(lead.score_prospeccao || 50) < 60 ? '<span style="background: #94a3b8; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 600;">?? NOVO</span>' : ''}
                             </div>
                         </div>
                     </div>
@@ -2641,7 +2641,7 @@ Aceita com ou sem formatação"></textarea>
         abrirWhatsApp(telefone) {
             if (!telefone) return;
             const numero = telefone.replace(/\D/g, '');
-            window.open(`https://wa.me/55${numero}`, '_blank');
+            window.open(`https://wa.me/55${número}`, '_blank');
         },
 
         abrirEmail(email) {
@@ -2698,7 +2698,7 @@ Aceita com ou sem formatação"></textarea>
    <Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#1E3A8A"/>
   </Borders>
  </Style>
- <Style ss:ID="titulo">
+ <Style ss:ID="título">
   <Font ss:Bold="1" ss:Color="#1E3A8A" ss:Size="16" ss:FontName="Segoe UI"/>
   <Alignment ss:Horizontal="Left" ss:Vertical="Center"/>
  </Style>
@@ -2779,10 +2779,10 @@ Aceita com ou sem formatação"></textarea>
 `;
             // Título
             xml += `  <Row ss:Height="35">
-   <Cell ss:StyleID="titulo" ss:MergeAcross="7"><Data ss:Type="String">ALUFORCE  |  Relatório de Leads - Prospecção B2B</Data></Cell>
+   <Cell ss:StyleID="título" ss:MergeAcross="7"><Data ss:Type="String">ZYNTRA  |  Relatório de Leads - Prospecção B2B</Data></Cell>
   </Row>
   <Row ss:Height="20">
-   <Cell ss:StyleID="subtitulo" ss:MergeAcross="7"><Data ss:Type="String">Gerado em ${dataHoje} às ${horaAtual} — ${dadosExportar.length} lead(s) exportado(s)</Data></Cell>
+   <Cell ss:StyleID="subtitulo" ss:MergeAcross="7"><Data ss:Type="String">Gerado em ${dataHoje} às ${horaAtual}  ${dadosExportar.length} lead(s) exportado(s)</Data></Cell>
   </Row>
   <Row ss:Height="8"></Row>
 `;
@@ -2838,7 +2838,7 @@ Aceita com ou sem formatação"></textarea>
    <Cell ss:StyleID="${scoreStyle}"><Data ss:Type="Number">${score}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.porte || '-')}</Data></Cell>
    <Cell ss:StyleID="moeda"><Data ss:Type="Number">${l.capital_social || 0}</Data></Cell>
-   <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.situacao || '-')}</Data></Cell>
+   <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.situação || '-')}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(dataAb)}</Data></Cell>
    <Cell ss:StyleID="normal"><Data ss:Type="String">${escXml(l.cnae_descricao || '-')}</Data></Cell>
   </Row>\n`;
@@ -2846,7 +2846,7 @@ Aceita com ou sem formatação"></textarea>
             // Rodapé
             xml += `  <Row ss:Height="8"></Row>
   <Row ss:Height="20">
-   <Cell ss:StyleID="rodape" ss:MergeAcross="14"><Data ss:Type="String">ALUFORCE — Sistema de Gestão Empresarial | Relatório gerado em ${dataHoje} às ${horaAtual}</Data></Cell>
+   <Cell ss:StyleID="rodape" ss:MergeAcross="14"><Data ss:Type="String">ZYNTRA  Sistema de Gestão Empresarial | Relatório gerado em ${dataHoje} às ${horaAtual}</Data></Cell>
   </Row>
 `;
             xml += ` </Table>
@@ -2870,7 +2870,7 @@ Aceita com ou sem formatação"></textarea>
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            this.toast('📊 Relatório XLSX exportado com sucesso!', 'success');
+            this.toast('?? Relatório XLSX exportado com sucesso!', 'success');
         },
 
         importarCNPJs() {
@@ -2906,7 +2906,7 @@ Aceita com ou sem formatação"></textarea>
                 cidade: dados.municipio,
                 uf: dados.uf,
                 bairro: dados.bairro,
-                endereco: `${dados.logradouro || ''}, ${dados.numero || 's/n'}`.trim(),
+                endereco: `${dados.logradouro || ''}, ${dados.número || 's/n'}`.trim(),
                 cep: dados.cep,
                 telefone: dados.ddd_telefone_1 ? `(${dados.ddd_telefone_1.substring(0,2)}) ${dados.ddd_telefone_1.substring(2)}` : '',
                 email: dados.email || '',
@@ -2914,7 +2914,7 @@ Aceita com ou sem formatação"></textarea>
                 cnae_codigo: dados.cnae_fiscal,
                 cnae_descricao: dados.cnae_fiscal_descricao,
                 segmento: this.inferirSegmento(dados.cnae_fiscal_descricao),
-                situacao: dados.descricao_situacao_cadastral,
+                situação: dados.descricao_situacao_cadastral,
                 capital_social: dados.capital_social,
                 optante_simples: dados.opcao_pelo_simples || false,
                 optante_mei: dados.opcao_pelo_mei || false,
@@ -3032,7 +3032,7 @@ Aceita com ou sem formatação"></textarea>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
 

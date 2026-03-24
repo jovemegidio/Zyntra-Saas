@@ -20,6 +20,7 @@
     let typingTimeout = null;
     let isOpen = false;
     let unreadCount = 0;
+    let dmUnreadMap = {};  // userId -> unread count per contact
     let searchQuery = '';
     let pendingFile = null;
     let mediaRecorder = null;
@@ -32,6 +33,12 @@
 
     const STATUS_LABELS = { online: 'Online', almoco: 'Em Almoço', reuniao: 'Em Reunião', offline: 'Offline' };
     const STATUS_ICONS = { online: '🟢', almoco: '🟡', reuniao: '🟠', offline: '⚫' };
+
+    // ── Auth helper ───────────────────────────────────────
+    function getAuthToken() {
+        if (window.AluforceAuth && window.AluforceAuth.getTabToken) return window.AluforceAuth.getTabToken();
+        return sessionStorage.getItem('tabAuthToken') || null;
+    }
 
     // ── Notificação sonora ────────────────────────────────
     let notifSound = null;
@@ -96,18 +103,9 @@
     function isImageUrl(url) { return /\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/i.test(url); }
     function isAudioUrl(url) { return /\.(mp3|wav|ogg|webm)(\?|$)/i.test(url); }
 
-    function getAuthToken() {
-        // Priorizar sessionStorage (isolamento por aba)
-        const sessionToken = sessionStorage.getItem('tabAuthToken');
-        if (sessionToken && sessionToken !== 'null' && sessionToken !== 'undefined') return sessionToken;
-        return localStorage.getItem('authToken') || localStorage.getItem('token') || sessionStorage.getItem('token') || null;
-    }
-
     async function apiFetch(url, opts = {}) {
-        const token = getAuthToken();
         const headers = { ...(opts.headers || {}) };
         if (!opts.isFormData) headers['Content-Type'] = 'application/json';
-        if (token) headers['Authorization'] = `Bearer ${token}`;
         const res = await fetch(url, { ...opts, headers, credentials: 'include' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
@@ -441,19 +439,30 @@
     function initSocket() {
         const authToken = getAuthToken();
         socket = io('/chat-teams', {
-            transports: ['websocket', 'polling'],
+            transports: ['websocket'],
+            upgrade: false,
             withCredentials: true,
             auth: authToken ? { token: authToken } : {}
         });
         socket.on('connect', () => { console.log('[CHAT] Socket conectado'); if (currentUser) socket.emit('chat:online', { ...currentUser, status: myStatus }); });
 
-        socket.on('connect_error', (error) => {
+        socket.on('connect_error', async (error) => {
             console.warn('[CHAT] Erro de conexão Socket:', error.message);
-            // Se token expirou, tentar atualizar
+            // Se token expirou, tentar refresh via auth-unified e reconectar
             if (error.message === 'Token inválido ou expirado' || error.message === 'Autenticação necessária') {
-                const freshToken = getAuthToken();
-                if (freshToken) {
-                    socket.auth = { token: freshToken };
+                try {
+                    // v7.5 FIX: Tentar refresh antes de pegar o token fresco
+                    if (window.AluforceAuth && window.AluforceAuth.refreshToken) {
+                        await window.AluforceAuth.refreshToken();
+                    }
+                    const freshToken = getAuthToken();
+                    if (freshToken) {
+                        socket.auth = { token: freshToken };
+                        // Forçar reconexão com novo token
+                        socket.connect();
+                    }
+                } catch (e) {
+                    console.error('[CHAT] Falha ao renovar token para socket:', e);
                 }
             }
         });
@@ -482,7 +491,7 @@
             if (msg.fromId === currentUser?.id) return;
             unreadCount++; updateFabBadge(); playNotifSound();
         });
-        socket.on('chat:dm:notification', data => { if (!isOpen || activeView.type !== 'dm' || activeView.id !== data.fromId) { unreadCount++; updateFabBadge(); playNotifSound(); } });
+        socket.on('chat:dm:notification', data => { if (!isOpen || activeView.type !== 'dm' || activeView.id !== data.fromId) { unreadCount++; updateFabBadge(); dmUnreadMap[data.fromId] = (dmUnreadMap[data.fromId] || 0) + 1; renderDMList(); playNotifSound(); } });
         socket.on('chat:users:online', ids => { onlineUserIds = ids; renderDMList(); document.getElementById('ct-online-count').textContent = `${ids.length} online`; });
         socket.on('chat:users:statuses', statuses => { userStatuses = statuses; renderDMList(); updateChatHeader(); });
         socket.on('chat:user:status', data => { if (data.userId && data.status) { userStatuses[data.userId] = data.status; renderDMList(); updateChatHeader(); } });
@@ -680,12 +689,15 @@
         const isActive = activeView.type === 'dm' && activeView.id === u.id;
         const status = getUserStatus(u.id);
         const name = u.displayName || getFirstName(u.fullName);
+        const unread = dmUnreadMap[u.id] || 0;
         const avatarInner = u.foto
             ? `<img src="${u.foto.startsWith('/') ? u.foto : '/avatars/' + u.foto}" onerror="this.parentElement.textContent='${initials(name)}'" />`
             : initials(name);
-        return `<div class="ct-dm-item ${isActive ? 'active' : ''}" data-user-id="${u.id}">
+        const unreadBadge = unread > 0 ? `<span class="ct-dm-unread-badge">${unread > 99 ? '99+' : unread}</span>` : '';
+        return `<div class="ct-dm-item ${isActive ? 'active' : ''} ${unread > 0 ? 'has-unread' : ''}" data-user-id="${u.id}">
             <div class="ct-dm-avatar" style="background:${u.avatarColor}">${avatarInner}<span class="ct-status-dot ${status}"></span></div>
             <div class="ct-dm-info"><span class="ct-dm-name">${esc(name)}</span><span class="ct-dm-dept">${esc(u.department || 'Geral')}</span></div>
+            ${unreadBadge}
         </div>`;
     }
 
@@ -767,6 +779,8 @@
     function selectDM(user) {
         if (activeView.type === 'channel' && activeView.id) socket.emit('chat:channel:leave', activeView.id);
         activeView = { type: 'dm', id: user.id };
+        // Limpar unread do contato selecionado
+        if (dmUnreadMap[user.id]) { unreadCount = Math.max(0, unreadCount - dmUnreadMap[user.id]); delete dmUnreadMap[user.id]; updateFabBadge(); }
         // Adicionar aos contatos quando iniciar conversa
         if (!user.isBot && !dmContactIds.includes(user.id)) { dmContactIds.push(user.id); }
         updateChatHeader();
@@ -774,7 +788,6 @@
         document.getElementById('ct-input').placeholder = user.isBot ? 'Descreva seu problema...' : `Mensagem para ${name}`;
         renderChannelList(); renderDMList();
         loadDMMessages(user.id);
-        unreadCount = Math.max(0, unreadCount - 1); updateFabBadge();
         updateInputState();
     }
 
@@ -1301,26 +1314,10 @@
     // INIT
     // ═══════════════════════════════════════════════════════
 
-    let initRetries = 0;
-
-    async function init() {
-        // Se tem token no JS, iniciar direto
-        if (getAuthToken()) {
-            buildWidget();
-            setTimeout(checkUnread, 3000);
-            return;
-        }
-        // Sem token JS: verificar se há sessão válida via cookie httpOnly
-        try {
-            const res = await fetch('/api/me', { credentials: 'include', headers: { 'Accept': 'application/json' } });
-            if (res.ok) {
-                buildWidget();
-                setTimeout(checkUnread, 3000);
-                return;
-            }
-        } catch (e) { /* servidor indisponível */ }
-        // Retry até 5 vezes (10s total)
-        if (initRetries < 5) { initRetries++; setTimeout(init, 2000); }
+    function init() {
+        if (!getAuthToken()) { setTimeout(init, 2000); return; }
+        buildWidget();
+        setTimeout(checkUnread, 3000);
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

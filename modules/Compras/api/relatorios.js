@@ -58,7 +58,7 @@ router.get('/compras-periodo', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao gerar relatório de compras:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -94,7 +94,7 @@ router.get('/desempenho-fornecedores', async (req, res) => {
         res.json({ fornecedores });
     } catch (error) {
         console.error('Erro ao gerar relatório de fornecedores:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -140,7 +140,7 @@ router.get('/estoque-baixo', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao gerar relatório de estoque baixo:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -183,7 +183,7 @@ router.get('/materiais-criticos', async (req, res) => {
         res.json({ materiais, total: materiais.length });
     } catch (error) {
         console.error('Erro ao gerar relatório de materiais críticos:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -247,7 +247,7 @@ router.get('/movimentacoes-estoque', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao gerar relatório de movimentações:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -302,7 +302,7 @@ router.get('/requisicoes-status', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao gerar relatório de requisições:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 
@@ -356,7 +356,7 @@ router.get('/cotacoes', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao gerar relatório de cotações:', error);
-        res.status(500).json({ error: 'Erro ao gerar relatório', message: error.message });
+        res.status(500).json({ error: 'Erro ao gerar relatório' });
     }
 });
 

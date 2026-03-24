@@ -50,10 +50,10 @@
             margin-top: 4px;
         }
 
-        /* Stats Grid */
+        /* Stats Grid - Padrão KPI Compras */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             margin-bottom: 24px;
         }
@@ -62,37 +62,75 @@
             background: white;
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
         }
 
         .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            font-size: 26px;
+            flex-shrink: 0;
+            color: white;
         }
 
-        .stat-icon.purple { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
-        .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-        .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #6366f1; }
-        .stat-icon.yellow { background: rgba(249, 115, 22, 0.1); color: #f97316; }
+        .stat-icon.purple { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1.2;
+            margin-bottom: 4px;
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .stat-trend.positive { color: #10b981; }
+        .stat-trend.negative { color: #ef4444; }
 
         .stat-badge {
             font-size: 0.75rem;
@@ -103,18 +141,6 @@
 
         .stat-badge.up { background: rgba(16, 185, 129, 0.1); color: #10b981; }
         .stat-badge.down { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 0.875rem;
-        }
 
         /* Content Grid */
         .content-grid {
@@ -460,10 +486,14 @@
             }
 
             .stat-card {
-                padding: 14px;
-                flex-direction: row;
-                align-items: center;
-                gap: 12px;
+                padding: 16px;
+                gap: 14px;
+            }
+
+            .stat-icon {
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
             }
 
             .stat-value {
@@ -483,13 +513,13 @@
             }
         }
     </style>
-    <script src="/js/anti-copy-protection.js"></script>
+    <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
-    <script src="/js/tooltips-professional.js?v=20260209"></script>
-    <script src="/js/modal-title.js?v=20260210"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
+    <script src="/js/modal-title.js?v=20260210" defer></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
 
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
@@ -511,6 +541,7 @@
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="pages/ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="pages/requisicoes-compra.html" class="sidebar-btn" title="Requisições de Compra"><i class="fas fa-shopping-cart"></i></a>
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -551,35 +582,44 @@
             <!-- Content Area -->
             <div class="content-area">
                 <!-- Stats Grid -->
-                <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon purple">
-                                <i class="fas fa-users"></i>
+                        <div class="stat-icon purple">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Funcionários Ativos</div>
+                            <div class="stat-value" id="stat-funcionarios"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
+                            <div class="stat-trend positive" id="trend-funcionarios">
+                                <i class="fas fa-check"></i> Atualizado
                             </div>
                         </div>
-                        <div class="stat-value" id="stat-funcionarios"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
-                        <div class="stat-label">Funcionários Ativos</div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon blue">
-                                <i class="fas fa-umbrella-beach"></i>
+                        <div class="stat-icon blue">
+                            <i class="fas fa-umbrella-beach"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Em Férias</div>
+                            <div class="stat-value" id="stat-ferias"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
+                            <div class="stat-trend" id="trend-ferias">
+                                <i class="fas fa-calendar"></i> Período atual
                             </div>
                         </div>
-                        <div class="stat-value" id="stat-ferias"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
-                        <div class="stat-label">Em Férias</div>
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-header">
-                            <div class="stat-icon green">
-                                <i class="fas fa-user-plus"></i>
+                        <div class="stat-icon green">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-label">Novas Admissões (mês)</div>
+                            <div class="stat-value" id="stat-admissoes"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
+                            <div class="stat-trend positive" id="trend-admissoes">
+                                <i class="fas fa-arrow-up"></i> Este mês
                             </div>
                         </div>
-                        <div class="stat-value" id="stat-admissoes"><i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i></div>
-                        <div class="stat-label">Novas Admissões (mês)</div>
                     </div>
                 </div>
 
@@ -708,7 +748,7 @@
                 return marcacao.foto_url;
             }
             // 2. Tentar pelo nome no mapa de avatares
-            const nome = marcacao.funcionario_nome || '';
+            const nome = marcacao.funcionário_nome || '';
             const primeiroNome = nome.split(' ')[0].toLowerCase()
                 .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
             if (avatarNameMap[primeiroNome]) return avatarNameMap[primeiroNome];
@@ -860,7 +900,7 @@
         // ========================================
         async function carregarEstatisticas() {
             try {
-                // Buscar total de funcionarios com autenticação
+                // Buscar total de funcionários com autenticação
                 const token = getAuthToken();
                 const headers = { 'Content-Type': 'application/json' };
                 const respfuncionarios = await fetch('/api/rh/funcionarios', {
@@ -870,19 +910,19 @@
 
                 if (respfuncionarios.ok) {
                     const data = await respfuncionarios.json();
-                    // A API retorna { funcionarios: [], stats, departamentos, cargos }
-                    const funcionarios = Array.isArray(data) ? data : (data.funcionarios || []);
+                    // A API retorna { funcionários: [], stats, departamentos, cargos }
+                    const funcionários = Array.isArray(data) ? data : (data.funcionarios || []);
                     const stats = data.stats || {};
                     const departamentos = data.departamentos || [];
 
                     // Usar stats da API — mostrar apenas ativos (consistente com a página de funcionários)
-                    const total = stats.total || funcionarios.length;
-                    const ativos = stats.ativos || funcionarios.filter(f => f.status === 'Ativo').length;
-                    const ferias = stats.ferias || funcionarios.filter(f => f.status === 'Férias').length;
+                    const total = stats.total || funcionários.length;
+                    const ativos = stats.ativos || funcionários.filter(f => f.status === 'Ativo').length;
+                    const férias = stats.férias || funcionários.filter(f => f.status === 'Férias').length;
                     const admissoes = stats.admissoes_mes || 0;
 
                     document.getElementById('stat-funcionarios').textContent = ativos;
-                    document.getElementById('stat-ferias').textContent = ferias;
+                    document.getElementById('stat-ferias').textContent = férias;
                     document.getElementById('stat-admissoes').textContent = admissoes;
                 } else {
                     // Se a API falhar, mostrar erro amigável
@@ -923,7 +963,7 @@
 
                 // Atualizar contadores
                 document.getElementById('marcacoes-count').textContent = marcacoes.length;
-                const uniqueFuncs = new Set(marcacoes.filter(m => m.funcionario_id).map(m => m.funcionario_id));
+                const uniqueFuncs = new Set(marcacoes.filter(m => m.funcionário_id).map(m => m.funcionário_id));
                 document.getElementById('marcacoes-presentes').textContent = uniqueFuncs.size;
 
                 const agora = new Date();
@@ -947,7 +987,7 @@
                 });
 
                 tbody.innerHTML = marcacoes.slice(0, 20).map(m => {
-                    let nome = m.funcionario_nome || 'Não identificado';
+                    let nome = m.funcionário_nome || 'Não identificado';
                     // Tentar extrair nome da observação se não tem nome
                     if (nome === 'Não identificado' && m.observacao) {
                         const match = m.observacao.match(/^RHi?D:\s*(.+)/i);
@@ -1063,7 +1103,7 @@
 
         function gerarAtividadesLocal(activityList) {
             // Tentar buscar funcionários da tabela para gerar atividades reais
-            const rows = document.querySelectorAll('#tbody-funcionarios tr');
+            const rows = document.querySelectorAll('#tbody-funcionários tr');
             const atividades = [];
 
             rows.forEach(row => {
@@ -1155,22 +1195,24 @@
     <!-- Sistema de Chat e Suporte -->
 
     <!-- Sistema de Monitoramento de Conexão -->
-    <script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
-    <script src="/js/popup-confirmacao.js"></script>
-    <script src="/js/unsaved-changes.js?v=20260108"></script>
-    <script src="/js/modal-integration.js?v=20260108"></script>
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
+    <script src="/js/unsaved-changes.js?v=20260108" defer></script>
+    <script src="/js/modal-integration.js?v=20260323" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
-    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
         <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <script src="/chat/widget.js?v=20260218" defer></script> -->
 
     <!-- Sidebar Click Animation -->
-    <script src="/js/sidebar-click-animation.js?v=20260224"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/js/sidebar-click-animation.js?v=20260224" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

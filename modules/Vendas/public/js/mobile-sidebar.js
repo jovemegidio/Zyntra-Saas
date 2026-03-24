@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const btn = document.createElement('button');
         btn.className = 'mobile-menu-btn';
         btn.onclick = toggleMobileSidebar;
-        btn.innerHTML = '<i class=" fas fa-bars\></i>';
+        btn.innerHTML = '<i class="fas fa-bars"></i>';
  document.body.insertBefore(btn, document.body.firstChild);
  }
  

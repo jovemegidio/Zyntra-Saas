@@ -1,52 +1,21 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aluforce: Faturamento — Dashboard</title>
-    <script src="/js/auth-unified.js?v=20260204" defer></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="../css/faturamento-layout.css?v=20260220">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <style>
         /* ── Dashboard Pro Overrides ─────────────────────── */
-        .dash-stats {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        .dash-stat {
-            background: #fff;
-            border-radius: 12px;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
-            border: 1px solid #e2e8f0;
-            transition: transform .2s ease, box-shadow .2s ease;
-        }
-        .dash-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.08); }
-        .dash-stat-icon {
-            width: 48px; height: 48px;
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-        .dash-stat-icon.blue   { background: #eff6ff; color: #3b82f6; }
-        .dash-stat-icon.green  { background: #f0fdf4; color: #22c55e; }
-        .dash-stat-icon.amber  { background: #fffbeb; color: #f59e0b; }
-        .dash-stat-icon.red    { background: #fef2f2; color: #ef4444; }
-        .dash-stat-icon.cyan   { background: #ecfeff; color: #06b6d4; }
-        .dash-stat-info { flex: 1; min-width: 0; }
-        .dash-stat-label { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-        .dash-stat-value { font-size: 24px; font-weight: 700; color: #0f172a; line-height: 1.1; }
-        .dash-stat-sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
         .dash-grid-2 {
             display: grid;
@@ -54,30 +23,57 @@
             gap: 16px;
             margin-bottom: 20px;
         }
+
         .dash-card {
             background: #fff;
             border-radius: 12px;
             border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0,0,0,.06);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .06);
             overflow: hidden;
         }
+
         .dash-card-header {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 16px 20px;
             border-bottom: 1px solid #f1f5f9;
         }
+
         .dash-card-title {
-            display: flex; align-items: center; gap: 8px;
-            font-size: 14px; font-weight: 600; color: #1e293b; margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
         }
-        .dash-card-title i { color: #3b82f6; font-size: 14px; }
+
+        .dash-card-title i {
+            color: #3b82f6;
+            font-size: 14px;
+        }
+
         .dash-card-link {
-            font-size: 12px; color: #3b82f6; text-decoration: none; font-weight: 500;
+            font-size: 12px;
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
             transition: color .15s;
         }
-        .dash-card-link:hover { color: #1d4ed8; }
-        .dash-card-body { padding: 16px 20px; }
-        .dash-card-body.no-pad { padding: 0; }
+
+        .dash-card-link:hover {
+            color: #1d4ed8;
+        }
+
+        .dash-card-body {
+            padding: 16px 20px;
+        }
+
+        .dash-card-body.no-pad {
+            padding: 0;
+        }
 
         /* Ações Rápidas */
         .dash-actions {
@@ -85,8 +81,12 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
         }
+
         .dash-action-btn {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             gap: 8px;
             padding: 16px 8px;
             border-radius: 10px;
@@ -94,77 +94,210 @@
             border: 1px solid #e2e8f0;
             text-decoration: none;
             color: #334155;
-            font-size: 12px; font-weight: 500;
+            font-size: 12px;
+            font-weight: 500;
             transition: all .2s ease;
         }
-        .dash-action-btn:hover { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
-        .dash-action-btn i { font-size: 20px; color: #3b82f6; }
-        .dash-action-btn:hover i { color: #1d4ed8; }
+
+        .dash-action-btn:hover {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .dash-action-btn i {
+            font-size: 20px;
+            color: #3b82f6;
+        }
+
+        .dash-action-btn:hover i {
+            color: #1d4ed8;
+        }
 
         /* Status Ring */
-        .dash-status-list { display: flex; flex-direction: column; gap: 10px; }
+        .dash-status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
         .dash-status-row {
-            display: flex; align-items: center; gap: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             padding: 10px 0;
             border-bottom: 1px solid #f1f5f9;
         }
-        .dash-status-row:last-child { border-bottom: none; }
-        .dash-status-dot {
-            width: 10px; height: 10px;
-            border-radius: 50%; flex-shrink: 0;
+
+        .dash-status-row:last-child {
+            border-bottom: none;
         }
-        .dash-status-dot.green  { background: #22c55e; }
-        .dash-status-dot.amber  { background: #f59e0b; }
-        .dash-status-dot.red    { background: #ef4444; }
-        .dash-status-dot.gray   { background: #94a3b8; }
-        .dash-status-name { flex: 1; font-size: 13px; color: #334155; font-weight: 500; }
-        .dash-status-count { font-size: 14px; font-weight: 700; color: #0f172a; min-width: 32px; text-align: right; }
+
+        .dash-status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .dash-status-dot.green {
+            background: #22c55e;
+        }
+
+        .dash-status-dot.amber {
+            background: #f59e0b;
+        }
+
+        .dash-status-dot.red {
+            background: #ef4444;
+        }
+
+        .dash-status-dot.gray {
+            background: #94a3b8;
+        }
+
+        .dash-status-name {
+            flex: 1;
+            font-size: 13px;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .dash-status-count {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            min-width: 32px;
+            text-align: right;
+        }
+
         .dash-status-pct {
-            font-size: 11px; color: #94a3b8; min-width: 40px; text-align: right;
+            font-size: 11px;
+            color: #94a3b8;
+            min-width: 40px;
+            text-align: right;
         }
 
         /* Tabela NF-e */
-        .dash-nfe-table { width: 100%; border-collapse: collapse; }
-        .dash-nfe-table th {
-            text-align: left; padding: 10px 16px;
-            font-size: 11px; font-weight: 600; color: #64748b;
-            text-transform: uppercase; letter-spacing: .5px;
-            background: #f8fafc; border-bottom: 1px solid #e2e8f0;
+        .dash-nfe-table {
+            width: 100%;
+            border-collapse: collapse;
         }
+
+        .dash-nfe-table th {
+            text-align: left;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
         .dash-nfe-table td {
-            padding: 12px 16px; font-size: 13px; color: #334155;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #334155;
             border-bottom: 1px solid #f1f5f9;
         }
-        .dash-nfe-table tbody tr:hover { background: #f8fafc; }
-        .dash-nfe-table .nfe-num { font-weight: 600; color: #1e293b; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
-        .dash-nfe-badge {
-            display: inline-flex; align-items: center; gap: 4px;
-            padding: 3px 10px; border-radius: 20px;
-            font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px;
+
+        .dash-nfe-table tbody tr:hover {
+            background: #f8fafc;
         }
-        .dash-nfe-badge.autorizada { background: #f0fdf4; color: #16a34a; }
-        .dash-nfe-badge.pendente   { background: #fffbeb; color: #d97706; }
-        .dash-nfe-badge.cancelada  { background: #fef2f2; color: #dc2626; }
-        .dash-nfe-badge.denegada   { background: #f1f5f9; color: #64748b; }
-        .dash-nfe-valor { font-weight: 600; color: #0f172a; white-space: nowrap; }
-        .dash-nfe-actions { display: flex; gap: 4px; }
-        .dash-nfe-actions button {
-            width: 28px; height: 28px;
-            border: 1px solid #e2e8f0; border-radius: 6px;
-            background: #fff; color: #64748b;
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all .15s;
+
+        .dash-nfe-table .nfe-num {
+            font-weight: 600;
+            color: #1e293b;
+            font-family: 'JetBrains Mono', monospace;
             font-size: 12px;
         }
-        .dash-nfe-actions button:hover { background: #eff6ff; color: #3b82f6; border-color: #bfdbfe; }
+
+        .dash-nfe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .dash-nfe-badge.autorizada {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .dash-nfe-badge.pendente {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .dash-nfe-badge.cancelada {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .dash-nfe-badge.denegada {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .dash-nfe-valor {
+            font-weight: 600;
+            color: #0f172a;
+            white-space: nowrap;
+        }
+
+        .dash-nfe-actions {
+            display: flex;
+            gap: 4px;
+        }
+
+        .dash-nfe-actions button {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: #fff;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all .15s;
+            font-size: 12px;
+        }
+
+        .dash-nfe-actions button:hover {
+            background: #eff6ff;
+            color: #3b82f6;
+            border-color: #bfdbfe;
+        }
 
         /* Empty */
         .dash-empty {
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            padding: 40px 20px; color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            color: #94a3b8;
         }
-        .dash-empty i { font-size: 32px; margin-bottom: 12px; opacity: .5; }
-        .dash-empty p { font-size: 13px; margin: 0; }
+
+        .dash-empty i {
+            font-size: 32px;
+            margin-bottom: 12px;
+            opacity: .5;
+        }
+
+        .dash-empty p {
+            font-size: 13px;
+            margin: 0;
+        }
 
         /* Skeleton */
         .dash-skeleton {
@@ -173,367 +306,645 @@
             animation: dash-shimmer 1.5s infinite;
             border-radius: 6px;
         }
-        @keyframes dash-shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        @keyframes dash-shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* Atividades Recentes */
+        .dash-activity-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .dash-activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dash-activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .dash-activity-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .dash-activity-icon.insert {
+            background: #f0fdf4;
+            color: #16a34a;
+        }
+
+        .dash-activity-icon.update {
+            background: #eff6ff;
+            color: #3b82f6;
+        }
+
+        .dash-activity-icon.delete {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .dash-activity-icon.evento {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .dash-activity-icon.default {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .dash-activity-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dash-activity-desc {
+            font-size: 13px;
+            color: #334155;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dash-activity-meta {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .dash-activity-skeleton {
+            height: 48px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
 
         /* Responsive */
         @media (max-width: 900px) {
-            .dash-stats { grid-template-columns: repeat(2, 1fr); }
-            .dash-grid-2 { grid-template-columns: 1fr; }
+            .dash-grid-2 {
+                grid-template-columns: 1fr;
+            }
         }
+
         @media (max-width: 480px) {
-            .dash-stats { grid-template-columns: 1fr; }
-            .dash-actions { grid-template-columns: repeat(2, 1fr); }
+            .dash-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
     </style>
-    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
 </head>
+
 <body>
-<div class="app-container">
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-    <aside class="sidebar" id="mobile-sidebar">
-        <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
-        <nav class="sidebar-nav">
-            <a href="dashboard.html" class="sidebar-btn active" title="Dashboard"><i class="fas fa-tachometer-alt"></i></a>
-            <a href="index.html" class="sidebar-btn" title="NF-e"><i class="fas fa-file-invoice-dollar"></i></a>
-            <a href="emitir.html" class="sidebar-btn" title="Emitir NF-e"><i class="fas fa-plus-circle"></i></a>
-            <a href="consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
-            <a href="danfe.html" class="sidebar-btn" title="DANFE"><i class="fas fa-file-pdf"></i></a>
-            <a href="nfse.html" class="sidebar-btn" title="NFS-e"><i class="fas fa-file-contract"></i></a>
-            <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
-            <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
-            <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
-            <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
-            <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
-        </nav>
-        <div class="sidebar-bottom">
-            <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
-        </div>
-    </aside>
-
-    <main class="main-area">
-        <header class="header">
-            <div class="header-left">
-                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
-                <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
-                    <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
-                    <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
-                    <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                    <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
-                </div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="dashboard.html" class="sidebar-btn active" title="Dashboard"><i
+                        class="fas fa-tachometer-alt"></i></a>
+                <a href="/Vendas/index.html" class="sidebar-btn" title="Pedidos"><i
+                        class="fas fa-file-invoice-dollar"></i></a>
+                <a href="consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
+                <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
+                <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
+                <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </div>
-            <div class="header-right">
-                <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                <div class="user-greeting">
-                    <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                    <div class="user-avatar" id="user-avatar">
-                        <img src="" alt="" id="user-photo" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;">
-                        <span id="user-initials">U</span>
+        </aside>
+
+        <main class="main-area">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i
+                            class="fas fa-bars"></i></button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
+                            style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
                     </div>
                 </div>
-            </div>
-        </header>
-
-        <div class="page-content">
-            <div class="page-header">
-                <div class="page-header-top">
-                    <div class="page-title-wrapper">
-                        <div class="page-icon"><i class="fas fa-tachometer-alt"></i></div>
-                        <div>
-                            <h1 class="page-title">Dashboard Faturamento</h1>
-                            <p class="page-subtitle">Visão geral de notas fiscais e faturamento</p>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i
+                            class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="" id="user-photo"
+                                style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                            <span id="user-initials">U</span>
                         </div>
                     </div>
-                    <div class="page-actions">
-                        <a href="emitir.html" class="btn btn-primary"><i class="fas fa-plus"></i> Nova NF-e</a>
-                        <button class="btn btn-secondary" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Atualizar</button>
-                    </div>
                 </div>
-            </div>
+            </header>
 
-            <!-- ── Cards de Estatísticas ──────────────── -->
-            <div class="dash-stats">
-                <div class="dash-stat">
-                    <div class="dash-stat-icon blue"><i class="fas fa-file-invoice"></i></div>
-                    <div class="dash-stat-info">
-                        <div class="dash-stat-label">Total NF-e</div>
-                        <div class="dash-stat-value" id="stat-total">—</div>
-                        <div class="dash-stat-sub">Notas emitidas</div>
+            <div class="page-content">
+                <div class="page-header">
+                    <div class="page-header-top">
+                        <div class="page-title-wrapper">
+                            <div class="page-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            <div>
+                                <h1 class="page-title">Dashboard Faturamento</h1>
+                                <p class="page-subtitle">Visão geral de notas fiscais e faturamento</p>
+                            </div>
+                        </div>
+                        <div class="page-actions">
+                            <a href="/Vendas/index.html" class="btn btn-primary"><i
+                                    class="fas fa-file-invoice-dollar"></i> Ver Pedidos</a>
+                            <button class="btn btn-secondary" onclick="location.reload()"><i
+                                    class="fas fa-sync-alt"></i> Atualizar</button>
+                        </div>
                     </div>
                 </div>
-                <div class="dash-stat">
-                    <div class="dash-stat-icon green"><i class="fas fa-check-circle"></i></div>
-                    <div class="dash-stat-info">
-                        <div class="dash-stat-label">Autorizadas</div>
-                        <div class="dash-stat-value" id="stat-autorizadas">—</div>
-                        <div class="dash-stat-sub">Aprovadas pela SEFAZ</div>
-                    </div>
-                </div>
-                <div class="dash-stat">
-                    <div class="dash-stat-icon amber"><i class="fas fa-clock"></i></div>
-                    <div class="dash-stat-info">
-                        <div class="dash-stat-label">Pendentes</div>
-                        <div class="dash-stat-value" id="stat-pendentes">—</div>
-                        <div class="dash-stat-sub">Aguardando processamento</div>
-                    </div>
-                </div>
-                <div class="dash-stat">
-                    <div class="dash-stat-icon cyan"><i class="fas fa-dollar-sign"></i></div>
-                    <div class="dash-stat-info">
-                        <div class="dash-stat-label">Valor Faturado</div>
-                        <div class="dash-stat-value" id="stat-valor">—</div>
-                        <div class="dash-stat-sub" id="stat-valor-mes">Autorizadas no período</div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- ── Ações Rápidas + Distribuição Status ── -->
-            <div class="dash-grid-2">
+                <!-- ── Cards de Estatísticas (Padrão Compras) ──────────────── -->
+                <div class="stats-grid">
+                    <div class="stat-card indigo">
+                        <div class="stat-header">
+                            <div class="stat-icon indigo"><i class="fas fa-file-invoice"></i></div>
+                            <span class="stat-trend" id="trend-total">&mdash;</span>
+                        </div>
+                        <div class="stat-value" id="stat-total">—</div>
+                        <div class="stat-label">Total Faturamento</div>
+                        <div class="stat-footer"><a href="/Vendas/index.html">Ver todas <i
+                                    class="fas fa-arrow-right"></i></a></div>
+                    </div>
+                    <div class="stat-card green">
+                        <div class="stat-header">
+                            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                            <span class="stat-trend" id="trend-autorizadas">&mdash;</span>
+                        </div>
+                        <div class="stat-value" id="stat-autorizadas">—</div>
+                        <div class="stat-label">Faturados</div>
+                        <div class="stat-footer"><a href="/Vendas/index.html">Ver todas <i
+                                    class="fas fa-arrow-right"></i></a></div>
+                    </div>
+                    <div class="stat-card amber">
+                        <div class="stat-header">
+                            <div class="stat-icon amber"><i class="fas fa-clock"></i></div>
+                            <span class="stat-trend" id="trend-pendentes">&mdash;</span>
+                        </div>
+                        <div class="stat-value" id="stat-pendentes">—</div>
+                        <div class="stat-label">Aguardando Faturamento</div>
+                        <div class="stat-footer"><a href="/Vendas/index.html">Ver todas <i
+                                    class="fas fa-arrow-right"></i></a></div>
+                    </div>
+                    <div class="stat-card purple">
+                        <div class="stat-header">
+                            <div class="stat-icon purple"><i class="fas fa-dollar-sign"></i></div>
+                            <span class="stat-trend" id="trend-valor">&mdash;</span>
+                        </div>
+                        <div class="stat-value" id="stat-valor">—</div>
+                        <div class="stat-label">Valor Faturado</div>
+                        <div class="stat-footer" id="stat-valor-mes"><a href="relatorios.html">Ver relatório <i
+                                    class="fas fa-arrow-right"></i></a></div>
+                    </div>
+                </div>
+
+                <!-- ── Ações Rápidas + Distribuição Status ── -->
+                <div class="dash-grid-2">
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <h3 class="dash-card-title"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                        </div>
+                        <div class="dash-card-body">
+                            <div class="dash-actions">
+                                <a href="consultar.html" class="dash-action-btn">
+                                    <i class="fas fa-search"></i>
+                                    <span>Consultar NF-e</span>
+                                </a>
+                                <a href="logistica.html" class="dash-action-btn">
+                                    <i class="fas fa-truck"></i>
+                                    <span>Logística</span>
+                                </a>
+                                <a href="eventos.html" class="dash-action-btn">
+                                    <i class="fas fa-calendar-check"></i>
+                                    <span>Eventos</span>
+                                </a>
+                                <a href="regua.html" class="dash-action-btn">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Régua Cobrança</span>
+                                </a>
+                                <a href="pix.html" class="dash-action-btn">
+                                    <i class="fas fa-qrcode"></i>
+                                    <span>PIX</span>
+                                </a>
+                                <a href="relatorios.html" class="dash-action-btn">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>Relatórios</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <h3 class="dash-card-title"><i class="fas fa-chart-pie"></i> Distribuição por Status</h3>
+                        </div>
+                        <div class="dash-card-body">
+                            <div class="dash-status-list" id="status-distribuição">
+                                <div class="dash-status-row">
+                                    <span class="dash-status-dot green"></span>
+                                    <span class="dash-status-name">Faturados</span>
+                                    <span class="dash-status-count" id="dist-autorizadas">—</span>
+                                    <span class="dash-status-pct" id="dist-autorizadas-pct"></span>
+                                </div>
+                                <div class="dash-status-row">
+                                    <span class="dash-status-dot amber"></span>
+                                    <span class="dash-status-name">Aguardando Faturamento</span>
+                                    <span class="dash-status-count" id="dist-pendentes">—</span>
+                                    <span class="dash-status-pct" id="dist-pendentes-pct"></span>
+                                </div>
+                                <div class="dash-status-row">
+                                    <span class="dash-status-dot gray"></span>
+                                    <span class="dash-status-name">Recibos</span>
+                                    <span class="dash-status-count" id="dist-canceladas">—</span>
+                                    <span class="dash-status-pct" id="dist-canceladas-pct"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Atividades Recentes ─────────────────── -->
                 <div class="dash-card">
                     <div class="dash-card-header">
-                        <h3 class="dash-card-title"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                        <h3 class="dash-card-title"><i class="fas fa-history"></i> Atividades Recentes</h3>
                     </div>
-                    <div class="dash-card-body">
-                        <div class="dash-actions">
-                            <a href="emitir.html" class="dash-action-btn">
-                                <i class="fas fa-plus-circle"></i>
-                                <span>Emitir NF-e</span>
-                            </a>
-                            <a href="consultar.html" class="dash-action-btn">
-                                <i class="fas fa-search"></i>
-                                <span>Consultar</span>
-                            </a>
-                            <a href="danfe.html" class="dash-action-btn">
-                                <i class="fas fa-file-pdf"></i>
-                                <span>DANFE</span>
-                            </a>
-                            <a href="nfse.html" class="dash-action-btn">
-                                <i class="fas fa-file-contract"></i>
-                                <span>NFS-e</span>
-                            </a>
-                            <a href="logistica.html" class="dash-action-btn">
-                                <i class="fas fa-truck"></i>
-                                <span>Logística</span>
-                            </a>
-                            <a href="relatorios.html" class="dash-action-btn">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Relatórios</span>
-                            </a>
+                    <div class="dash-card-body" id="atividades-container">
+                        <!-- Skeleton Loader -->
+                        <div id="atividades-skeleton">
+                            <div class="dash-activity-skeleton dash-skeleton"></div>
+                            <div class="dash-activity-skeleton dash-skeleton"></div>
+                            <div class="dash-activity-skeleton dash-skeleton"></div>
                         </div>
+                        <div class="dash-activity-list" id="atividades-lista" style="display:none;"></div>
                     </div>
                 </div>
+
+                <!-- ── Notas Fiscais Recentes ───────────────────────── -->
                 <div class="dash-card">
                     <div class="dash-card-header">
-                        <h3 class="dash-card-title"><i class="fas fa-chart-pie"></i> Distribuição por Status</h3>
+                        <h3 class="dash-card-title"><i class="fas fa-file-invoice-dollar"></i> Notas Fiscais Recentes
+                        </h3>
+                        <a href="/Vendas/index.html" class="dash-card-link">→ Ver todas</a>
                     </div>
-                    <div class="dash-card-body">
-                        <div class="dash-status-list" id="status-distribuicao">
-                            <div class="dash-status-row">
-                                <span class="dash-status-dot green"></span>
-                                <span class="dash-status-name">Autorizadas</span>
-                                <span class="dash-status-count" id="dist-autorizadas">—</span>
-                                <span class="dash-status-pct" id="dist-autorizadas-pct"></span>
-                            </div>
-                            <div class="dash-status-row">
-                                <span class="dash-status-dot amber"></span>
-                                <span class="dash-status-name">Pendentes</span>
-                                <span class="dash-status-count" id="dist-pendentes">—</span>
-                                <span class="dash-status-pct" id="dist-pendentes-pct"></span>
-                            </div>
-                            <div class="dash-status-row">
-                                <span class="dash-status-dot red"></span>
-                                <span class="dash-status-name">Canceladas</span>
-                                <span class="dash-status-count" id="dist-canceladas">—</span>
-                                <span class="dash-status-pct" id="dist-canceladas-pct"></span>
-                            </div>
+                    <div class="dash-card-body no-pad">
+                        <div style="overflow-x:auto;">
+                            <table class="dash-nfe-table">
+                                <thead>
+                                    <tr>
+                                        <th>Número</th>
+                                        <th>Cliente</th>
+                                        <th>Data</th>
+                                        <th>Valor</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="nfes-recentes">
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="dash-empty">
+                                                <i class="fas fa-file-invoice"></i>
+                                                <p>Carregando notas fiscais...</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <!-- ── Últimas NF-e ───────────────────────── -->
-            <div class="dash-card">
-                <div class="dash-card-header">
-                    <h3 class="dash-card-title"><i class="fas fa-list"></i> Últimas Notas Fiscais</h3>
-                    <a href="index.html" class="dash-card-link">Ver todas →</a>
-                </div>
-                <div class="dash-card-body no-pad">
-                    <div style="overflow-x:auto;">
-                        <table class="dash-nfe-table">
-                            <thead>
-                                <tr>
-                                    <th>Número</th>
-                                    <th>Série</th>
-                                    <th>Destinatário</th>
-                                    <th>Valor</th>
-                                    <th>Data</th>
-                                    <th>Status</th>
-                                    <th style="width:120px;">Ações</th>
-                                </tr>
-                            </thead>
-                            <tbody id="nfes-recentes">
-                                <tr>
-                                    <td colspan="7">
-                                        <div class="dash-empty">
-                                            <i class="fas fa-file-invoice"></i>
-                                            <p>Carregando notas fiscais...</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-</div>
-
-<script>
-function toggleMobileSidebar() {
-    const sidebar = document.getElementById('mobile-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    sidebar.classList.toggle('open');
-    overlay.classList.toggle('active');
-}
-
-function formatarMoeda(valor) {
-    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
-}
-
-function formatarData(data) {
-    if (!data) return '—';
-    return new Date(data).toLocaleDateString('pt-BR');
-}
-
-/* ── Carregar Estatísticas ───────────────── */
-async function carregarEstatisticas() {
-    try {
-        const r = await fetch('/api/faturamento/estatisticas', { credentials: 'include' });
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const res = await r.json();
-        const d = res.data || res;
-
-        const total     = Number(d.total_nfes)          || 0;
-        const autorz    = Number(d.autorizadas)          || 0;
-        const pend      = Number(d.pendentes)            || 0;
-        const cancel    = Number(d.canceladas)           || 0;
-        const valorFat  = Number(d.valor_total_faturado) || 0;
-        const valorMes  = Number(d.valor_mes_atual)      || 0;
-
-        document.getElementById('stat-total').textContent      = total;
-        document.getElementById('stat-autorizadas').textContent = autorz;
-        document.getElementById('stat-pendentes').textContent   = pend;
-        document.getElementById('stat-valor').textContent       = formatarMoeda(valorFat);
-
-        if (valorMes > 0) {
-            document.getElementById('stat-valor-mes').textContent = 'Mês atual: ' + formatarMoeda(valorMes);
+    <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
         }
 
-        // Distribuição
-        document.getElementById('dist-autorizadas').textContent = autorz;
-        document.getElementById('dist-pendentes').textContent   = pend;
-        document.getElementById('dist-canceladas').textContent  = cancel;
-
-        if (total > 0) {
-            document.getElementById('dist-autorizadas-pct').textContent = ((autorz / total) * 100).toFixed(1) + '%';
-            document.getElementById('dist-pendentes-pct').textContent   = ((pend / total) * 100).toFixed(1) + '%';
-            document.getElementById('dist-canceladas-pct').textContent  = ((cancel / total) * 100).toFixed(1) + '%';
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
         }
-    } catch(e) {
-        console.error('[Dashboard] Erro ao carregar estatísticas:', e);
-        ['stat-total','stat-autorizadas','stat-pendentes'].forEach(id => {
-            document.getElementById(id).textContent = '0';
-        });
-        document.getElementById('stat-valor').textContent = 'R$ 0,00';
-    }
-}
 
-/* ── Carregar Últimas NF-e ───────────────── */
-async function carregarNFesRecentes() {
-    try {
-        const r = await fetch('/api/faturamento/nfes?limit=10', { credentials: 'include' });
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const res = await r.json();
-        const nfes = Array.isArray(res) ? res : (res.data || []);
-        renderizarNFes(nfes);
-    } catch(e) {
-        console.error('[Dashboard] Erro ao carregar NF-e:', e);
-        document.getElementById('nfes-recentes').innerHTML = `
-            <tr><td colspan="7">
-                <div class="dash-empty">
-                    <i class="fas fa-file-invoice"></i>
-                    <p>Nenhuma nota fiscal encontrada</p>
-                </div>
-            </td></tr>`;
-    }
-}
+        function formatarData(data) {
+            if (!data) return '—';
+            const d = new Date(data);
+            if (isNaN(d.getTime())) return '—';
+            return d.toLocaleDateString('pt-BR');
+        }
 
-function renderizarNFes(nfes) {
-    const tbody = document.getElementById('nfes-recentes');
-    if (!nfes || !nfes.length) {
-        tbody.innerHTML = `
-            <tr><td colspan="7">
-                <div class="dash-empty">
-                    <i class="fas fa-file-invoice"></i>
-                    <p>Nenhuma nota fiscal emitida</p>
-                </div>
-            </td></tr>`;
-        return;
-    }
-    tbody.innerHTML = nfes.map(n => {
-        const status = (n.status || 'pendente').toLowerCase();
-        return `<tr>
-            <td><span class="nfe-num">${n.numero || '—'}</span></td>
-            <td>${n.serie || '1'}</td>
-            <td>${n.destinatario || n.cliente || '—'}</td>
-            <td><span class="dash-nfe-valor">${formatarMoeda(n.valor || n.valor_total)}</span></td>
-            <td>${formatarData(n.data_emissao)}</td>
-            <td><span class="dash-nfe-badge ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span></td>
-            <td>
-                <div class="dash-nfe-actions">
-                    <button onclick="window.open('consultar.html?id=${n.id}','_self')" title="Detalhes"><i class="fas fa-eye"></i></button>
-                    <button onclick="window.open('/api/nfe/${n.id}/danfe','_blank')" title="DANFE"><i class="fas fa-file-pdf"></i></button>
-                </div>
-            </td>
-        </tr>`;
-    }).join('');
-}
+        function formatarDataHora(data) {
+            if (!data) return '';
+            const d = new Date(data);
+            if (isNaN(d.getTime())) return '';
+            return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
 
-/* ── Carregar Usuário ────────────────────── */
-function carregarUsuarioLogado() {
-    const avatarNameMap = {'admin':'AD','Admin':'AD','usuario':'US','João':'JO','Maria':'MA','Pedro':'PE','Ana':'AN','Carlos':'CA','Lucas':'LU','Mariana':'MN','Fernanda':'FE','Rafael':'RA','Juliana':'JU','Gabriel':'GA','Beatriz':'BE','Diego':'DI','Camila':'CM'};
-    const h = new Date().getHours();
-    const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-    document.getElementById('greeting-text').textContent = g;
-    fetch('/api/me', { credentials: 'include' })
-        .then(r => r.json())
-        .then(u => {
-            const nome = u.nome || u.name || 'Usuário';
-            document.getElementById('user-name').textContent = nome.split(' ')[0];
-            const initials = avatarNameMap[nome.split(' ')[0]] || nome.substring(0,2).toUpperCase();
-            document.getElementById('user-initials').textContent = initials;
-            if (u.foto || u.avatar) {
-                const img = document.getElementById('user-photo');
-                img.src = u.foto || u.avatar;
-                img.style.display = 'block';
-                document.getElementById('user-initials').style.display = 'none';
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        /* ── Buscar pedidos por status (API Vendas) ────── */
+        async function buscarPedidosPorStatus(status, limit) {
+            try {
+                const r = await fetch(`/api/vendas/pedidos?status=${encodeURIComponent(status)}&limit=${limit || 20}&period=90`, { credentials: 'include' });
+                if (!r.ok) return [];
+                const res = await r.json();
+                return Array.isArray(res) ? res : (res.data || res.pedidos || []);
+            } catch { return []; }
+        }
+
+        /* ── Carregar Estatísticas (via Vendas API) ──── */
+        async function carregarEstatisticas() {
+            try {
+                // Buscar pedidos por cada status de faturamento em paralelo
+                const [faturar, faturados, recibos, entregues] = await Promise.all([
+                    buscarPedidosPorStatus('faturar', 500),
+                    buscarPedidosPorStatus('faturado', 500),
+                    buscarPedidosPorStatus('recibo', 500),
+                    buscarPedidosPorStatus('entregue', 500)
+                ]);
+
+                const pendentes = faturar.length;
+                const faturadosCount = faturados.length + entregues.length;
+                const recibosCount = recibos.length;
+                const total = pendentes + faturadosCount + recibosCount;
+
+                const valorFaturado = [...faturados, ...entregues, ...recibos].reduce((s, p) => s + (Number(p.valor) || Number(p.valor_total) || 0), 0);
+                const mesAtual = new Date().getMonth();
+                const anoAtual = new Date().getFullYear();
+                const valorMes = [...faturados, ...entregues, ...recibos]
+                    .filter(p => {
+                        const d = new Date(p.data_faturamento || p.updated_at);
+                        return d.getMonth() === mesAtual && d.getFullYear() === anoAtual;
+                    })
+                    .reduce((s, p) => s + (Number(p.valor) || Number(p.valor_total) || 0), 0);
+
+                document.getElementById('stat-total').textContent = total;
+                document.getElementById('stat-autorizadas').textContent = faturadosCount;
+                document.getElementById('stat-pendentes').textContent = pendentes;
+                document.getElementById('stat-valor').textContent = formatarMoeda(valorFaturado);
+
+                if (valorMes > 0) {
+                    const mesEl = document.getElementById('stat-valor-mes');
+                    if (mesEl) mesEl.innerHTML = '<a href="relatorios.html">Mês atual: ' + formatarMoeda(valorMes) + ' →</a>';
+                }
+
+                // Distribuição
+                document.getElementById('dist-autorizadas').textContent = faturadosCount;
+                document.getElementById('dist-pendentes').textContent = pendentes;
+                document.getElementById('dist-canceladas').textContent = recibosCount;
+
+                if (total > 0) {
+                    document.getElementById('dist-autorizadas-pct').textContent = ((faturadosCount / total) * 100).toFixed(1) + '%';
+                    document.getElementById('dist-pendentes-pct').textContent = ((pendentes / total) * 100).toFixed(1) + '%';
+                    document.getElementById('dist-canceladas-pct').textContent = ((recibosCount / total) * 100).toFixed(1) + '%';
+                }
+            } catch (e) {
+                console.error('[Dashboard] Erro ao carregar estatísticas:', e);
+                ['stat-total', 'stat-autorizadas', 'stat-pendentes'].forEach(id => {
+                    document.getElementById(id).textContent = '0';
+                });
+                document.getElementById('stat-valor').textContent = 'R$ 0,00';
             }
-        }).catch(() => {});
-}
+        }
 
-/* ── Init ────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-    carregarUsuarioLogado();
-    carregarEstatisticas();
-    carregarNFesRecentes();
-});
-</script>
-<script src="../../_shared/connection-monitor.js?v=20251223"></script>
-<script src="/js/tooltips-professional.js?v=20260216"></script>
-<script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
-    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
+        /* ── Carregar Notas Fiscais Recentes (pedidos faturados) ──── */
+        async function carregarNFesRecentes() {
+            try {
+                const [faturar, faturados, recibos, entregues] = await Promise.all([
+                    buscarPedidosPorStatus('faturar', 20),
+                    buscarPedidosPorStatus('faturado', 20),
+                    buscarPedidosPorStatus('recibo', 20),
+                    buscarPedidosPorStatus('entregue', 20)
+                ]);
+
+                // Combinar e ordenar por data de faturamento (mais recente primeiro)
+                const todos = [...faturar, ...faturados, ...recibos, ...entregues]
+                    .sort((a, b) => {
+                        const da = new Date(a.data_faturamento || a.updated_at || a.created_at);
+                        const db = new Date(b.data_faturamento || b.updated_at || b.created_at);
+                        return db - da;
+                    })
+                    .slice(0, 10);
+
+                renderizarNFes(todos);
+            } catch (e) {
+                console.error('[Dashboard] Erro ao carregar NF-e:', e);
+                document.getElementById('nfes-recentes').innerHTML = `
+            <tr><td colspan="5">
+                <div class="dash-empty">
+                    <i class="fas fa-file-invoice"></i>
+                    <p>Nenhuma nota fiscal encontrada.</p>
+                    <p style="font-size:11px;margin-top:4px;">Fature pedidos no módulo de Vendas para visualizar aqui.</p>
+                </div>
+            </td></tr>`;
+            }
+        }
+
+        function renderizarNFes(pedidos) {
+            const tbody = document.getElementById('nfes-recentes');
+            if (!pedidos || !pedidos.length) {
+                tbody.innerHTML = `
+            <tr><td colspan="5">
+                <div class="dash-empty">
+                    <i class="fas fa-file-invoice"></i>
+                    <p>Nenhuma nota fiscal encontrada.</p>
+                    <p style="font-size:11px;margin-top:4px;">Fature pedidos no módulo de Vendas para visualizar aqui.</p>
+                </div>
+            </td></tr>`;
+                return;
+            }
+            tbody.innerHTML = pedidos.map(p => {
+                const numero = p.numero_nf || p.nf || p.nfe_faturamento_numero || ('PED-' + p.id);
+                const cliente = escapeHtml(p.cliente_nome || p.empresa_nome || 'Não informado');
+                const data = formatarData(p.data_faturamento || p.updated_at);
+                const valor = Number(p.valor) || Number(p.valor_total) || 0;
+                const status = (p.status || '').toLowerCase();
+                const tipo = (p.tipo_faturamento || 'normal').toLowerCase();
+
+                // Determinar badge de tipo
+                let badgeClass, badgeLabel;
+                if (tipo === 'parcial_50' || tipo === 'entrega_futura') {
+                    badgeClass = 'pendente';
+                    badgeLabel = 'Meia Nota (F9)';
+                } else if (status === 'faturar') {
+                    badgeClass = 'pendente';
+                    badgeLabel = 'Aguardando';
+                } else if (status === 'faturado' || status === 'entregue') {
+                    badgeClass = 'autorizada';
+                    badgeLabel = 'Faturado';
+                } else if (status === 'recibo') {
+                    badgeClass = 'autorizada';
+                    badgeLabel = 'Recibo';
+                } else {
+                    badgeClass = 'denegada';
+                    badgeLabel = status.charAt(0).toUpperCase() + status.slice(1);
+                }
+
+                return `<tr>
+            <td><span class="nfe-num">${escapeHtml(String(numero))}</span></td>
+            <td>${cliente}</td>
+            <td>${data}</td>
+            <td><span class="dash-nfe-valor">${formatarMoeda(valor)}</span></td>
+            <td><span class="dash-nfe-badge ${badgeClass}">${badgeLabel}</span></td>
+        </tr>`;
+            }).join('');
+        }
+
+        /* ── Carregar Usuário ────────────────────── */
+        function carregarUsuarioLogado() {
+            const h = new Date().getHours();
+            const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+            document.getElementById('greeting-text').textContent = g;
+            fetch('/api/me', { credentials: 'include' })
+                .then(r => r.json())
+                .then(u => {
+                    const nome = u.nome || u.name || 'Usuário';
+                    document.getElementById('user-name').textContent = nome.split(' ')[0];
+                    const initials = nome.substring(0, 2).toUpperCase();
+                    document.getElementById('user-initials').textContent = initials;
+                    if (u.foto || u.avatar) {
+                        const img = document.getElementById('user-photo');
+                        img.src = u.foto || u.avatar;
+                        img.style.display = 'block';
+                        document.getElementById('user-initials').style.display = 'none';
+                    }
+                }).catch(() => { });
+        }
+
+        /* ── Carregar Atividades Recentes (movimentações reais) ─── */
+        async function carregarAtividades() {
+            const skeleton = document.getElementById('atividades-skeleton');
+            const lista = document.getElementById('atividades-lista');
+            try {
+                // Buscar pedidos recentes em status de faturamento
+                const [faturar, faturados, recibos, entregues] = await Promise.all([
+                    buscarPedidosPorStatus('faturar', 10),
+                    buscarPedidosPorStatus('faturado', 10),
+                    buscarPedidosPorStatus('recibo', 10),
+                    buscarPedidosPorStatus('entregue', 10)
+                ]);
+
+                // Converter em atividades com ícones e descrições
+                const atividades = [];
+
+                faturar.forEach(p => atividades.push({
+                    icon: 'fa-clock', iconClass: 'evento',
+                    desc: `Pedido #${p.id} movido para faturar — ${escapeHtml(p.cliente_nome || p.empresa_nome || '')}`,
+                    valor: Number(p.valor) || 0,
+                    usuario: p.vendedor_nome || 'Sistema',
+                    data: p.updated_at || p.created_at
+                }));
+
+                faturados.forEach(p => atividades.push({
+                    icon: 'fa-file-invoice-dollar', iconClass: 'insert',
+                    desc: `Pedido #${p.id} faturado${p.numero_nf ? ' — NF ' + p.numero_nf : ''} — ${escapeHtml(p.cliente_nome || p.empresa_nome || '')}`,
+                    valor: Number(p.valor) || 0,
+                    usuario: p.vendedor_nome || 'Sistema',
+                    data: p.data_faturamento || p.updated_at
+                }));
+
+                entregues.forEach(p => atividades.push({
+                    icon: 'fa-truck', iconClass: 'update',
+                    desc: `Pedido #${p.id} entregue${p.numero_nf ? ' — NF ' + p.numero_nf : ''} — ${escapeHtml(p.cliente_nome || p.empresa_nome || '')}`,
+                    valor: Number(p.valor) || 0,
+                    usuario: p.vendedor_nome || 'Sistema',
+                    data: p.data_entrega || p.updated_at
+                }));
+
+                recibos.forEach(p => atividades.push({
+                    icon: 'fa-check-double', iconClass: 'insert',
+                    desc: `Recibo emitido — Pedido #${p.id}${p.numero_nf ? ' NF ' + p.numero_nf : ''} — ${escapeHtml(p.cliente_nome || p.empresa_nome || '')}`,
+                    valor: Number(p.valor) || 0,
+                    usuario: p.vendedor_nome || 'Sistema',
+                    data: p.updated_at
+                }));
+
+                // Ordenar por data mais recente
+                atividades.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
+                const top10 = atividades.slice(0, 10);
+
+                skeleton.style.display = 'none';
+                lista.style.display = '';
+
+                if (!top10.length) {
+                    lista.innerHTML = '<div class="dash-empty"><i class="fas fa-history"></i><p>Nenhuma atividade recente</p></div>';
+                    return;
+                }
+
+                lista.innerHTML = top10.map(a => {
+                    const dataStr = formatarDataHora(a.data);
+                    return `<div class="dash-activity-item">
+                <div class="dash-activity-icon ${a.iconClass}"><i class="fas ${a.icon}"></i></div>
+                <div class="dash-activity-body">
+                    <div class="dash-activity-desc" title="${escapeHtml(a.desc)}">${a.desc}</div>
+                    <div class="dash-activity-meta">
+                        <span>${escapeHtml(a.usuario)}</span>
+                        <span>•</span>
+                        <span>${formatarMoeda(a.valor)}</span>
+                        <span>•</span>
+                        <span>${dataStr}</span>
+                    </div>
+                </div>
+            </div>`;
+                }).join('');
+            } catch (e) {
+                console.error('[Dashboard] Erro ao carregar atividades:', e);
+                skeleton.style.display = 'none';
+                lista.style.display = '';
+                lista.innerHTML = '<div class="dash-empty"><i class="fas fa-history"></i><p>Nenhuma atividade recente</p></div>';
+            }
+        }
+
+        /* ── Init ────────────────────────────────── */
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarUsuarioLogado();
+            carregarEstatisticas();
+            carregarNFesRecentes();
+            carregarAtividades();
+        });
+    </script>
+    <script src="../../_shared/connection-monitor.js?v=20251223"></script>
+    <script src="/js/tooltips-professional.js?v=20260216"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <script src="/chat/widget.js?v=20260218" defer></script> -->
 
     <!-- Sidebar Click Animation -->
@@ -543,5 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
+
 </html>

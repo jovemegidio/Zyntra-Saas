@@ -1047,7 +1047,7 @@ module.exports = function createFinanceiroRoutes(deps) {
     // 8. Gestão de Contas a Receber - NOVA FUNCIONALIDADE
     router.get('/contas-receber', cacheMiddleware('fin_contas_rec', 120000), async (req, res, next) => {
         try {
-            const { page = 1, limit = 100, status, vencimento_inicio, vencimento_fim } = req.query;
+            const { page = 1, limit = 100, status, vencimento_inicio, vencimento_fim, pedido_id } = req.query;
             const offset = (page - 1) * limit;
 
             let whereClause = 'WHERE 1=1';
@@ -1063,9 +1063,16 @@ module.exports = function createFinanceiroRoutes(deps) {
                 params.push(vencimento_inicio, vencimento_fim);
             }
 
+            // Sprint E2E-S1 (E5-HIGH-08): Filtro por pedido_id para rastreabilidade
+            if (pedido_id) {
+                whereClause += ' AND cr.pedido_id = ?';
+                params.push(parseInt(pedido_id));
+            }
+
             const [contas] = await pool.query(`
                 SELECT
                     cr.id,
+                    cr.pedido_id,
                     cr.cliente_id,
                     COALESCE(c.razao_social, c.nome_fantasia, cr.descricao, 'Cliente não identificado') as cliente_nome,
                     COALESCE(c.cnpj_cpf, '') as cnpj_cpf,
@@ -1110,7 +1117,7 @@ module.exports = function createFinanceiroRoutes(deps) {
 
     router.post('/contas-receber', async (req, res, next) => {
         try {
-            const { cliente_nome, valor, data_vencimento, descricao, categoria } = req.body;
+            const { cliente_nome, valor, data_vencimento, descricao, categoria, pedido_id } = req.body;
 
             if (!cliente_nome || !valor || !data_vencimento) {
                 return res.status(400).json({
@@ -1119,11 +1126,12 @@ module.exports = function createFinanceiroRoutes(deps) {
                 });
             }
 
+            // Sprint E2E-S1 (E5-HIGH-09 fix): Accept pedido_id for traceability
             const [result] = await pool.query(`
                 INSERT INTO contas_receber
-                (cliente_nome, valor, data_vencimento, descricao, categoria, status, data_cadastro)
-                VALUES (?, ?, ?, ?, ?, 'pendente', NOW())
-            `, [cliente_nome, valor, data_vencimento, descricao, categoria]);
+                (cliente_nome, valor, data_vencimento, descricao, categoria, pedido_id, status, data_cadastro)
+                VALUES (?, ?, ?, ?, ?, ?, 'pendente', NOW())
+            `, [cliente_nome, valor, data_vencimento, descricao, categoria, pedido_id || null]);
 
             res.status(201).json({
                 success: true,
@@ -1656,14 +1664,146 @@ module.exports = function createFinanceiroRoutes(deps) {
     // Busca Global Inteligente
     router.get('/busca-global', async (req, res, next) => {
         try {
-            const { q: _q } = req.query; // query param accepted but not used in this stub
-            res.json({
-                resultados: [
-                    { tipo: 'cliente', nome: 'Empresa X', id: 1 },
-                    { tipo: 'conta_receber', valor: 1200, id: 10 },
-                    { tipo: 'nota_fiscal', numero: 'NF12345', id: 5 }
-                ]
-            });
+            const { q } = req.query;
+            if (!q || q.trim().length < 2) {
+                return res.json({ resultados: [], total: 0 });
+            }
+
+            const termo = `%${q.trim()}%`;
+            const resultados = [];
+
+            // Buscar clientes
+            try {
+                const [clientes] = await pool.query(
+                    `SELECT id, nome, razao_social, nome_fantasia, cnpj_cpf, email, telefone
+                     FROM clientes
+                     WHERE nome LIKE ? OR razao_social LIKE ? OR nome_fantasia LIKE ? OR cnpj_cpf LIKE ? OR email LIKE ?
+                     ORDER BY nome LIMIT 5`,
+                    [termo, termo, termo, termo, termo]
+                );
+                clientes.forEach(c => resultados.push({
+                    tipo: 'cliente',
+                    id: c.id,
+                    titulo: c.nome_fantasia || c.razao_social || c.nome || 'Cliente',
+                    subtitulo: [c.cnpj_cpf, c.email].filter(Boolean).join(' | '),
+                    nome: c.nome_fantasia || c.razao_social || c.nome
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar pedidos
+            try {
+                const [pedidos] = await pool.query(
+                    `SELECT id, cliente_nome, valor, status, created_at
+                     FROM pedidos
+                     WHERE id LIKE ? OR cliente_nome LIKE ? OR status LIKE ?
+                     ORDER BY id DESC LIMIT 5`,
+                    [termo, termo, termo]
+                );
+                pedidos.forEach(p => resultados.push({
+                    tipo: 'pedido',
+                    id: p.id,
+                    titulo: `Pedido #${p.id}`,
+                    subtitulo: `${p.cliente_nome || 'Sem cliente'} — ${p.status || ''}`,
+                    nome: `Pedido #${p.id}`,
+                    valor: p.valor
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar contas a receber
+            try {
+                const [contasR] = await pool.query(
+                    `SELECT id, descricao, cliente_nome, valor, status, data_vencimento
+                     FROM contas_receber
+                     WHERE descricao LIKE ? OR cliente_nome LIKE ? OR CAST(id AS CHAR) LIKE ?
+                     ORDER BY id DESC LIMIT 5`,
+                    [termo, termo, termo]
+                );
+                contasR.forEach(c => resultados.push({
+                    tipo: 'conta_receber',
+                    id: c.id,
+                    titulo: c.descricao || `Conta a Receber #${c.id}`,
+                    subtitulo: `${c.cliente_nome || ''} — Venc: ${c.data_vencimento ? new Date(c.data_vencimento).toLocaleDateString('pt-BR') : 'N/A'} — ${c.status || ''}`,
+                    nome: c.descricao || `Conta #${c.id}`,
+                    valor: c.valor
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar contas a pagar
+            try {
+                const [contasP] = await pool.query(
+                    `SELECT id, descricao, fornecedor_nome, valor, status, data_vencimento
+                     FROM contas_pagar
+                     WHERE descricao LIKE ? OR fornecedor_nome LIKE ? OR CAST(id AS CHAR) LIKE ?
+                     ORDER BY id DESC LIMIT 5`,
+                    [termo, termo, termo]
+                );
+                contasP.forEach(c => resultados.push({
+                    tipo: 'conta_pagar',
+                    id: c.id,
+                    titulo: c.descricao || `Conta a Pagar #${c.id}`,
+                    subtitulo: `${c.fornecedor_nome || ''} — Venc: ${c.data_vencimento ? new Date(c.data_vencimento).toLocaleDateString('pt-BR') : 'N/A'} — ${c.status || ''}`,
+                    nome: c.descricao || `Conta #${c.id}`,
+                    valor: c.valor
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar produtos
+            try {
+                const [produtos] = await pool.query(
+                    `SELECT id, codigo, nome, descricao, preco_venda, estoque_atual
+                     FROM produtos
+                     WHERE nome LIKE ? OR descricao LIKE ? OR codigo LIKE ? OR sku LIKE ?
+                     ORDER BY nome LIMIT 5`,
+                    [termo, termo, termo, termo]
+                );
+                produtos.forEach(p => resultados.push({
+                    tipo: 'produto',
+                    id: p.id,
+                    titulo: p.nome || p.descricao || `Produto ${p.codigo}`,
+                    subtitulo: `Cód: ${p.codigo || 'N/A'} — Estoque: ${p.estoque_atual ?? 'N/A'}`,
+                    nome: p.nome || p.descricao,
+                    valor: p.preco_venda
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar fornecedores
+            try {
+                const [fornecedores] = await pool.query(
+                    `SELECT id, razao_social, nome_fantasia, cnpj, email, telefone
+                     FROM fornecedores
+                     WHERE razao_social LIKE ? OR nome_fantasia LIKE ? OR cnpj LIKE ? OR email LIKE ?
+                     ORDER BY razao_social LIMIT 5`,
+                    [termo, termo, termo, termo]
+                );
+                fornecedores.forEach(f => resultados.push({
+                    tipo: 'fornecedor',
+                    id: f.id,
+                    titulo: f.nome_fantasia || f.razao_social || 'Fornecedor',
+                    subtitulo: [f.cnpj, f.email].filter(Boolean).join(' | '),
+                    nome: f.nome_fantasia || f.razao_social
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            // Buscar notas fiscais (NFe/NFS-e)
+            try {
+                const [nfse] = await pool.query(
+                    `SELECT id, numero, cliente_nome, valor, status
+                     FROM notas_fiscais_servico
+                     WHERE numero LIKE ? OR cliente_nome LIKE ? OR CAST(id AS CHAR) LIKE ?
+                     ORDER BY id DESC LIMIT 5`,
+                    [termo, termo, termo]
+                );
+                nfse.forEach(n => resultados.push({
+                    tipo: 'nfe',
+                    id: n.id,
+                    titulo: `NFS-e ${n.numero || '#' + n.id}`,
+                    subtitulo: `${n.cliente_nome || ''} — ${n.status || ''}`,
+                    nome: `NFS-e ${n.numero || n.id}`,
+                    valor: n.valor
+                }));
+            } catch (e) { /* tabela pode não existir */ }
+
+            res.json({ resultados, total: resultados.length });
         } catch (error) { next(error); }
     });
 

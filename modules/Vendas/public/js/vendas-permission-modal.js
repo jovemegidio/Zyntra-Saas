@@ -119,12 +119,13 @@ window.VendasPermissionModal = (function() {
         closeBtn.focus();
     }
     
-    // Helper para escape HTML
-    function escapeHtml(text) {
+    // S3-17: Usar escapeHtml global (vendas-kanban.js/utils.js) com fallback local
+    const escapeHtml = window.escapeHtml || function(text) {
+        if (text === null || text === undefined) return '';
         const div = document.createElement('div');
-        div.textContent = text;
+        div.textContent = String(text);
         return div.innerHTML;
-    }
+    };
     
     // Métodos específicos
     function showPermissionDenied(customMessage, customDetail) {

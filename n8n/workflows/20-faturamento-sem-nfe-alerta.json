@@ -1,0 +1,67 @@
+{
+  "name": "20-faturamento-sem-nfe-alerta",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 10, "triggerAtMinute": 30 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/faturamento/sem-nfe?horas=48",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Pedidos sem NF-e",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.total }}", "rightValue": "0", "operator": { "type": "number", "operation": "gt" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Tem Pendências?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'faturamento', mensagem: '📄 *PEDIDOS SEM NF-e*\\n\\n' + $json.total + ' pedidos faturados sem NF-e há mais de 48h.\\n\\nEmita as notas fiscais urgentemente!' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Alerta WhatsApp Faturamento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Buscar Pedidos sem NF-e", "type": "main", "index": 0 }]] },
+    "Buscar Pedidos sem NF-e": { "main": [[{ "node": "Tem Pendências?", "type": "main", "index": 0 }]] },
+    "Tem Pendências?": { "main": [[{ "node": "Alerta WhatsApp Faturamento", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

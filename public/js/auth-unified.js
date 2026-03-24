@@ -1,10 +1,12 @@
 // auth-unified.js - Sistema de autenticação unificado para todos os módulos ALUFORCE
-// VERSÃO 7.2 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR
+// VERSÃO 7.4 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
 // FIX v7.0: Resolve o problema de "espelhamento" onde o login de outro usuário em outra aba
 //      sobrescreve a sessão da aba atual via localStorage/cookie compartilhados.
 // FIX v7.1: NÃO copia mais token/userData de localStorage para sessionStorage em novas abas.
 // FIX v7.2: Em novas abas, consulta o SERVIDOR via cookie antes de redirecionar para login.
 //      Isso permite abrir módulos em novas abas sem forçar re-login, mantendo segurança.
+// FIX v7.4: Remove lsToken undefined, injeta credentials:'include', trata 503,
+//      exige 3 falhas consecutivas no check periódico antes de redirecionar.
 
 // =============================================================================
 // 🔒 STORAGE ISOLATOR - Deve rodar ANTES de qualquer outro código
@@ -20,7 +22,7 @@
             'authToken': 'tabAuthToken',
             'token': 'tabAuthToken'
         };
-        Storage.prototype.getItem = function(key) {
+        Storage.prototype.getItem = function (key) {
             // Só interceptar chamadas ao localStorage, não ao sessionStorage
             if (this === window.localStorage && _authKeyMap[key]) {
                 var sessionVal = _origGet.call(window.sessionStorage, _authKeyMap[key]);
@@ -32,11 +34,11 @@
         };
         // Também interceptar setItem para SEMPRE manter sessionStorage sincronizado
         var _origSet = Storage.prototype.setItem;
-        Storage.prototype.setItem = function(key, value) {
+        Storage.prototype.setItem = function (key, value) {
             _origSet.call(this, key, value);
             // Quando qualquer código salva no localStorage, espelhar no sessionStorage
             if (this === window.localStorage && _authKeyMap[key] && value) {
-                try { _origSet.call(window.sessionStorage, _authKeyMap[key], value); } catch(e) {}
+                try { _origSet.call(window.sessionStorage, _authKeyMap[key], value); } catch (e) { }
             }
         };
         console.log('🔒 Storage Isolator v1.0 ativo - localStorage interceptado para isolamento por aba');
@@ -44,26 +46,26 @@
         // Tokens JWT NÃO devem ficar em localStorage (vulnerável a XSS)
         // A autenticação agora usa httpOnly cookies exclusivamente
         try {
-            ['token', 'authToken'].forEach(function(k) {
+            ['token', 'authToken'].forEach(function (k) {
                 var val = _origGet.call(window.localStorage, k);
                 if (val && val !== 'null' && val !== 'undefined') {
                     window.localStorage.removeItem(k);
                     console.log('[SECURITY] 🗑️ Token legado removido do localStorage:', k);
                 }
             });
-        } catch(cleanErr) {
+        } catch (cleanErr) {
             // Silently ignore cleanup errors
         }
-    } catch(e) {
+    } catch (e) {
         console.warn('⚠️ Storage Isolator falhou:', e);
     }
 })();
 
-(function() {
+(function () {
     'use strict';
-    
+
     console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.3 (Tab-Isolated + Server Validation + Token Refresh)');
-    
+
     // Configurações
     const AUTH_CONFIG = {
         loginUrl: '/login.html',
@@ -74,7 +76,7 @@
         refreshBeforeExpiry: 2 * 60 * 1000, // Refresh 2 min antes de expirar
         debug: true
     };
-    
+
     // Flag para evitar múltiplos redirecionamentos
     let isRedirecting = false;
 
@@ -149,9 +151,15 @@
     // Fetch interceptor: adiciona timeout padrão + detecta 401 TOKEN_EXPIRED e tenta refresh
     const DEFAULT_FETCH_TIMEOUT = 30000; // 30 segundos
 
-    window.fetch = async function(input, init) {
+    window.fetch = async function (input, init) {
         const url = (typeof input === 'string') ? input : (input?.url || '');
         init = init || {};
+
+        // v7.4 FIX: Sempre injetar credentials:'include' para enviar httpOnly cookies
+        // Sem isso, requests sem credentials explícito não enviam o authToken cookie
+        if (!init.credentials && url.startsWith('/')) {
+            init.credentials = 'include';
+        }
 
         // Nunca interceptar a própria rota de refresh (evita loop infinito)
         if (url.includes('/api/auth/refresh')) {
@@ -176,6 +184,13 @@
         }
         if (timeoutId) clearTimeout(timeoutId);
 
+        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático
+        if (response.status === 503) {
+            debugLog('⚠️ Serviço temporariamente indisponível (503), retentando em 2s...');
+            await new Promise(r => setTimeout(r, 2000));
+            return _originalFetch(input, init);
+        }
+
         if (response.status === 401) {
             // Clonar antes de consumir o body
             const cloned = response.clone();
@@ -183,11 +198,29 @@
                 const body = await cloned.json();
                 const code = body && body.code;
 
-                // Códigos que indicam sessão irrecuperável — redirect direto
-                if (code === 'AUTH_INACTIVE' || code === 'AUTH_REVOKED' || code === 'AUTH_MISSING' || code === 'AUTH_INVALID') {
+                // Códigos irrecuperáveis — redirect direto
+                if (code === 'AUTH_REVOKED' || code === 'AUTH_MISSING' || code === 'AUTH_INVALID') {
                     debugLog('🔒 Sessão encerrada — ' + (body.message || code));
                     clearAuthData();
                     redirectToLogin(body.message || 'Sessão encerrada');
+                } else if (code === 'AUTH_INACTIVE') {
+                    // Inatividade detectada pelo servidor — dar chance de continuar
+                    // Se o InactivityManager estiver carregado, ele exibe o modal
+                    // Caso contrário, tentar refresh (refreshToken ainda pode ser válido)
+                    debugLog('⏰ Sessão inativa detectada pelo servidor');
+                    if (window.InactivityManager) {
+                        window.dispatchEvent(new CustomEvent('sessionInactive'));
+                        // Retornar a response original (não redirecionar)
+                    } else {
+                        // Fallback: tentar refresh automático
+                        debugLog('🔄 Tentando refresh após inatividade...');
+                        var refreshOk = await _doRefresh();
+                        if (refreshOk) {
+                            return _originalFetch(input, init);
+                        }
+                        clearAuthData();
+                        redirectToLogin(body.message || 'Sessão expirada por inatividade');
+                    }
                 } else if (code === 'TOKEN_EXPIRED' || code === 'AUTH_EXPIRED') {
                     debugLog('🔄 Access token expirado, tentando refresh...');
                     const refreshed = await _doRefresh();
@@ -199,27 +232,45 @@
                     debugLog('❌ Refresh falhou — redirecionando para login');
                     clearAuthData();
                     redirectToLogin('Sessão expirada');
+                } else if (!code) {
+                    // v7.5 FIX: Módulos com authMiddleware local podem retornar 401 sem campo `code`.
+                    // Tentar refresh antes de desistir — se o refreshToken cookie estiver válido,
+                    // o servidor emitirá novo accessToken e a request original será reexecutada.
+                    debugLog('🔄 401 sem código específico — tentando refresh preventivo...');
+                    const refreshed = await _doRefresh();
+                    if (refreshed) {
+                        return _originalFetch(input, init);
+                    }
+                    // Refresh falhou — sessão realmente expirada
+                    debugLog('❌ Refresh preventivo falhou — sessão expirada');
+                    clearAuthData();
+                    redirectToLogin(body.message || 'Sessão expirada');
                 }
             } catch (e) {
-                // Body não era JSON, retornar resposta original
+                // Body não era JSON — tentar refresh como último recurso
+                debugLog('🔄 401 sem body JSON — tentando refresh...');
+                const refreshed = await _doRefresh();
+                if (refreshed) {
+                    return _originalFetch(input, init);
+                }
             }
         }
 
         return response;
     };
-    
+
     // Função para logs de debug
     function debugLog(message, data = null) {
         if (AUTH_CONFIG.debug) {
             console.log(`[AUTH-UNIFIED] ${message}`, data || '');
         }
     }
-    
+
     // =========================================================================
     // 🔐 TOKEN ISOLATION: sessionStorage é a fonte PRIMÁRIA do token nesta aba
     // localStorage é usado APENAS para inicializar novas abas (lido UMA vez)
     // =========================================================================
-    
+
     // Obter o token DESTA aba (sessionStorage APENAS - NÃO copiar de localStorage)
     // v7.1 FIX: Não copiar automaticamente de localStorage para evitar que o login
     // de outro usuário no mesmo computador "contamine" novas abas.
@@ -234,7 +285,7 @@
         // no mesmo computador. O token será obtido via checkAuthentication() se necessário.
         return null;
     }
-    
+
     // Salvar token nesta aba (sessionStorage only — token NOT stored in localStorage)
     // SECURITY: JWT is delivered via httpOnly cookie, sessionStorage is kept only for
     // backward compatibility with code that calls localStorage.getItem('authToken')
@@ -244,12 +295,12 @@
             sessionStorage.setItem('tabAuthToken', token);
         }
     }
-    
+
     // Obter deviceId deste dispositivo/aba
     function getDeviceId() {
         return sessionStorage.getItem('deviceId');
     }
-    
+
     // Obter dados do usuário DESTA aba (sessionStorage APENAS)
     // v7.1 FIX: Não copiar de localStorage para evitar contaminação entre usuários
     function getTabUserData() {
@@ -266,7 +317,7 @@
         }
         return null;
     }
-    
+
     // Salvar dados do usuário nesta aba (e localStorage para futuras abas)
     function setTabUserData(userData) {
         if (userData) {
@@ -275,14 +326,14 @@
             localStorage.setItem('userData', json);
         }
     }
-    
+
     // Verificar se deviceId local corresponde ao do servidor
     function validateDeviceId(serverDeviceId) {
         const localDeviceId = getDeviceId();
         if (!localDeviceId || !serverDeviceId) return true;
         return localDeviceId === serverDeviceId;
     }
-    
+
     // Função para obter cookie por nome
     function getCookie(name) {
         const value = `; ${document.cookie}`;
@@ -290,90 +341,90 @@
         if (parts.length === 2) return parts.pop().split(';').shift();
         return null;
     }
-    
+
     // Função para remover dados de autenticação
     function clearAuthData() {
         debugLog('🧹 Limpando dados de autenticação...');
-        
+
         const localKeys = [
-            'authToken','token','userData','user','user_data','userName',
-            'chatSupportUser','chatSupportConversations','chatSupportTickets',
-            'chatUser','supportTickets','chatVoiceEnabled',
+            'authToken', 'token', 'userData', 'user', 'user_data', 'userName',
+            'chatSupportUser', 'chatSupportConversations', 'chatSupportTickets',
+            'chatUser', 'supportTickets', 'chatVoiceEnabled',
             'currentUser', 'loggedUser', 'userInfo', 'userProfile',
             'rememberToken', 'sessionUser', 'lastUser',
             'userEmail', 'userRole'
         ];
-        
-        try { 
-            localKeys.forEach(k => localStorage.removeItem(k)); 
-        } catch (e) { 
-            debugLog('⚠️ Erro ao limpar localStorage:', e); 
+
+        try {
+            localKeys.forEach(k => localStorage.removeItem(k));
+        } catch (e) {
+            debugLog('⚠️ Erro ao limpar localStorage:', e);
         }
-        
-        try { 
+
+        try {
             sessionStorage.clear();
-        } catch (e) { 
-            debugLog('⚠️ Erro ao limpar sessionStorage:', e); 
+        } catch (e) {
+            debugLog('⚠️ Erro ao limpar sessionStorage:', e);
         }
-        
-        const cookieNames = ['authToken','token','connect.sid','rememberToken','refreshToken'];
+
+        const cookieNames = ['authToken', 'token', 'connect.sid', 'rememberToken', 'refreshToken'];
         cookieNames.forEach(name => {
             document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         });
-        
+
         debugLog('✅ Dados de autenticação limpos');
     }
-    
+
     // Função para verificar se está na página de login
     function isLoginPage() {
         const pathname = window.location.pathname.toLowerCase();
         return pathname.includes('login') || pathname.endsWith('login.html');
     }
-    
+
     // Função para verificar se deve pular verificação
     function shouldSkipAuth() {
         const pathname = window.location.pathname.toLowerCase();
         // SECURITY FIX H-01: Removido bypass via query param (no-auth=1/skip-auth=1)
         // Apenas páginas de login e assets estáticos devem pular autenticação
-        
+
         if (isLoginPage()) return true;
-        
-        if (pathname.endsWith('.css') || pathname.endsWith('.js') || 
-            pathname.endsWith('.png') || pathname.endsWith('.jpg') || 
+
+        if (pathname.endsWith('.css') || pathname.endsWith('.js') ||
+            pathname.endsWith('.png') || pathname.endsWith('.jpg') ||
             pathname.endsWith('.ico') || pathname.endsWith('.woff') ||
             pathname.endsWith('.woff2') || pathname.endsWith('.svg')) {
             return true;
         }
-        
+
         return false;
     }
-    
+
     // Função para redirecionar para login (com proteção contra loop)
     function redirectToLogin(reason = 'Não autenticado') {
         if (isRedirecting) {
             debugLog('⚠️ Redirecionamento já em andamento, ignorando...');
             return;
         }
-        
+
         if (isLoginPage()) {
             debugLog('⚠️ Já está na página de login, não redirecionando');
             return;
         }
-        
+
         isRedirecting = true;
         debugLog(`🚪 Redirecionando para login: ${reason}`);
-        
+
         const currentPath = window.location.pathname + window.location.search + window.location.hash;
         const returnTo = encodeURIComponent(currentPath);
-        
+
         let loginUrl = AUTH_CONFIG.loginUrl;
         if (currentPath !== '/' && currentPath !== '/index.html' && currentPath.length > 1) {
             loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
-        
+
         window.location.href = loginUrl;
     }
-    
+
     // =========================================================================
     // 🛡️ LISTENER: Detectar quando OUTRA aba muda o localStorage
     // Se outro usuário fez login em outra aba, NÃO afetar esta aba
@@ -384,35 +435,36 @@
             // Não fazer nada - esta aba continua com seu próprio token/dados em sessionStorage
         }
     });
-    
+
     // Função para verificar autenticação via API
     async function checkAuthentication() {
         debugLog('🔍 Verificando autenticação no servidor...');
-        
+
         try {
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), AUTH_CONFIG.timeout);
-            
+
             // SECURITY: Auth via httpOnly cookie only — no Authorization header needed
             const headers = {
                 'Accept': 'application/json',
                 'Cache-Control': 'no-cache'
             };
-            
-            const response = await fetch(AUTH_CONFIG.apiMeEndpoint, { credentials: 'include', method: 'GET',
+
+            const response = await fetch(AUTH_CONFIG.apiMeEndpoint, {
+                method: 'GET',
                 credentials: 'include',
                 headers: headers,
                 signal: controller.signal
             });
-            
+
             clearTimeout(timeoutId);
-            
+
             debugLog(`📡 Resposta da API: ${response.status}`);
-            
+
             if (response.ok) {
                 const userData = await response.json();
                 debugLog('✅ Usuário autenticado:', userData.nome || userData.email);
-                
+
                 // Ativar refresh proativo (access token dura 15m)
                 _scheduleProactiveRefresh();
 
@@ -431,63 +483,63 @@
                         debugLog('📱 DeviceId salvo:', userData.deviceId.substring(0, 8) + '...');
                     }
                 }
-                
+
                 // 🔐 v6.0: Salvar no sessionStorage DESTA ABA como fonte primária
                 setTabUserData(userData);
 
                 // Disparar evento de sucesso
-                window.dispatchEvent(new CustomEvent('authSuccess', { 
-                    detail: { user: userData } 
+                window.dispatchEvent(new CustomEvent('authSuccess', {
+                    detail: { user: userData }
                 }));
-                
+
                 return userData;
             } else {
                 debugLog(`❌ Falha na autenticação: ${response.status}`);
                 return null;
             }
-            
+
         } catch (error) {
             debugLog(`🚨 Erro na verificação: ${error.message}`);
-            
+
             // Em caso de erro de rede, usar dados DESTA ABA como fallback
             const tabUser = getTabUserData();
             if (tabUser) {
                 debugLog('⚠️ Usando dados da aba como fallback (offline)');
                 return tabUser;
             }
-            
+
             return null;
         }
     }
-    
+
     // Função para verificar se tem dados válidos (sessionStorage desta aba primeiro)
     function getLocalUserData() {
         return getTabUserData();
     }
-    
+
     // Função principal de verificação (v6.0 - sessionStorage primeiro)
     async function verifyAuth() {
         if (shouldSkipAuth()) {
             debugLog('⏭️ Pulando verificação de autenticação');
             return;
         }
-        
+
         debugLog('🚀 Iniciando verificação de autenticação v6.0...');
-        
+
         // 1. PRIMEIRO: Verificar se tem dados válidos nesta aba (sessionStorage)
         const localUser = getTabUserData();
         if (localUser) {
             debugLog('✅ Usuário encontrado nesta aba:', localUser.email);
             debugLog('🎉 Autenticação confirmada via sessionStorage!');
-            
+
             // Disparar evento de sucesso
-            window.dispatchEvent(new CustomEvent('authSuccess', { 
-                detail: { user: localUser, source: 'sessionStorage' } 
+            window.dispatchEvent(new CustomEvent('authSuccess', {
+                detail: { user: localUser, source: 'sessionStorage' }
             }));
-            
+
             // Mostrar a página
             document.body?.classList?.remove('auth-loading');
-            
+
             // Verificar servidor em background (usando token DESTA aba)
             checkAuthentication().then(serverUser => {
                 if (serverUser) {
@@ -501,83 +553,76 @@
             }).catch(() => {
                 debugLog('⚠️ Não foi possível verificar servidor (offline?)');
             });
-            
+
             return;
         }
-        
+
         // 2. SEGUNDO: Se não tem dados nesta aba, tentar validar sessão via cookie no servidor
         // v7.2 FIX: Antes de forçar re-login, verificar se o servidor reconhece a sessão via cookie.
         // Isso permite abrir novas abas/links sem precisar re-logar, enquanto mantém
         // a segurança — apenas o servidor decide se o cookie é válido.
         debugLog('🔍 Nenhum token nesta aba - verificando sessão via cookie no servidor...');
-        
+
         try {
             const serverUser = await checkAuthentication();
             if (serverUser) {
                 debugLog('✅ Sessão válida confirmada pelo servidor - salvando nesta aba');
                 setTabUserData(serverUser);
 
-                // v7.3 FIX: Copiar token do localStorage para sessionStorage desta aba
-                // O servidor confirmou a sessao via cookie, entao o localStorage tem token valido
-                // Precisamos salvar em sessionStorage para que getAuthHeaders() funcione isolado
-                if (!getTabToken()) {
-                    if (lsToken && lsToken !== 'null') {
-                        setTabToken(lsToken);
-                        debugLog('Token copiado do localStorage para esta aba (server-cookie validou)');
-                    }
-                }
-                
+                // v7.4 FIX: Token vem via httpOnly cookie — não precisa copiar de localStorage
+                // O checkAuthentication() já validou via cookie e setTabUserData() foi chamado acima
+
                 // Mostrar a página
                 document.body?.classList?.remove('auth-loading');
-                
+
                 // Disparar evento de sucesso
-                window.dispatchEvent(new CustomEvent('authSuccess', { 
-                    detail: { user: serverUser, source: 'server-cookie' } 
+                window.dispatchEvent(new CustomEvent('authSuccess', {
+                    detail: { user: serverUser, source: 'server-cookie' }
                 }));
                 return;
             }
         } catch (e) {
             debugLog('⚠️ Erro ao verificar sessão no servidor:', e.message);
         }
-        
+
         // Servidor não reconheceu a sessão — agora sim, redirecionar para login
         debugLog('❌ Sessão não válida no servidor - redirecionando para login');
         redirectToLogin('Nova sessão - faça login');
     }
-    
+
     // Função para inicializar sistema de auth
     function initAuth() {
         debugLog('🔧 Inicializando sistema de autenticação v7.2 (Tab-Isolated + Server Validation)...');
-        
+
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', verifyAuth);
         } else {
             verifyAuth();
         }
-        
-        // Verificação periódica a cada 5 minutos (access token dura 15m, com refresh proativo aos 13m)
+
+        // v7.4 FIX: Verificação periódica com tolerância a falhas
+        // Exige 3 falhas consecutivas antes de redirecionar (evita logout por blip de rede)
+        let _periodicFailCount = 0;
+        const MAX_PERIODIC_FAILURES = 3;
         setInterval(async () => {
             if (!shouldSkipAuth() && !isRedirecting) {
                 debugLog('🔄 Verificação periódica...');
-                const tabUser = getTabUserData();
-                if (!tabUser) {
-                    const serverUser = await checkAuthentication();
-                    if (!serverUser) {
-                        redirectToLogin('Sessão expirada');
-                    }
-                } else {
-                    // Verificar se a sessão ainda é válida no servidor
-                    const serverUser = await checkAuthentication();
-                    if (!serverUser) {
-                        debugLog('⚠️ Sessão expirada no servidor durante check periódico');
+                const serverUser = await checkAuthentication();
+                if (!serverUser) {
+                    _periodicFailCount++;
+                    debugLog(`⚠️ Check periódico falhou (${_periodicFailCount}/${MAX_PERIODIC_FAILURES})`);
+                    if (_periodicFailCount >= MAX_PERIODIC_FAILURES) {
+                        debugLog('❌ Múltiplas falhas consecutivas — sessão expirada');
                         clearAuthData();
                         redirectToLogin('Sessão expirada');
                     }
+                } else {
+                    _periodicFailCount = 0;
                 }
             }
         }, 5 * 60 * 1000);
     }
-    
+
     // Expor funções para os módulos
     window.AluforceAuth = {
         checkAuth: checkAuthentication,
@@ -606,10 +651,10 @@
             window.location.href = AUTH_CONFIG.loginUrl;
         }
     };
-    
+
     // Inicializar
     initAuth();
-    
+
     debugLog('✅ Sistema de autenticação v7.3 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
-    
+
 })();

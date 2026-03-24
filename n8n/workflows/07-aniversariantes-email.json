@@ -1,0 +1,90 @@
+{
+  "name": "07-aniversariantes-email",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * *" }]
+        }
+      },
+      "name": "⏰ Diário às 8h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/rh/aniversariantes?periodo=dia",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "🎂 Buscar Aniversariantes",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }
+          ]
+        }
+      },
+      "name": "Tem aniversariantes?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data"
+      },
+      "name": "Loop aniversariantes",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [910, 300],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$json.email}}",
+        "subject": "🎂 Feliz Aniversário, {{$json.nome}}! 🎉",
+        "html": "<div style='font-family: Arial; max-width: 600px; margin: 0 auto; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 15px;'><h1 style='color: white; margin: 0;'>🎂 Feliz Aniversário!</h1><h2 style='color: #fff; font-weight: normal;'>{{$json.nome}}</h2><p style='color: rgba(255,255,255,0.9); font-size: 18px;'>Hoje você completa <strong>{{$json.idade}} anos</strong>!</p><div style='background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; margin: 20px 0;'><p style='color: white; font-size: 16px; margin: 0;'>Desejamos a você um dia repleto de alegria e realizações! 🎉</p></div><p style='color: rgba(255,255,255,0.7); font-size: 12px; margin-top: 30px;'>Com carinho, equipe ALUFORCE 💙</p></div>",
+        "options": {}
+      },
+      "name": "📧 Email Aniversário",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1130, 250],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "content": "🎂 **Aniversariante do dia:** {{$json.nome}} ({{$json.cargo}} — {{$json.area}}) completa {{$json.idade}} anos! Parabéns! 🎉"
+        },
+        "options": {}
+      },
+      "name": "🟣 Discord: Aniversário",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1130, 400],
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "⏰ Diário às 8h": { "main": [[{ "node": "🎂 Buscar Aniversariantes", "type": "main", "index": 0 }]] },
+    "🎂 Buscar Aniversariantes": { "main": [[{ "node": "Tem aniversariantes?", "type": "main", "index": 0 }]] },
+    "Tem aniversariantes?": { "main": [[{ "node": "Loop aniversariantes", "type": "main", "index": 0 }], []] },
+    "Loop aniversariantes": { "main": [[{ "node": "📧 Email Aniversário", "type": "main", "index": 0 }, { "node": "🟣 Discord: Aniversário", "type": "main", "index": 0 }], []] },
+    "📧 Email Aniversário": { "main": [[{ "node": "Loop aniversariantes", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "rh" }, { "name": "aniversario" }, { "name": "email" }]
+}

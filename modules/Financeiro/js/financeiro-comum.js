@@ -307,7 +307,12 @@ const FinanceiroUtils = {
             box-shadow: 0 8px 24px rgba(0,0,0,0.2);
             display: flex; align-items: center; gap: 10px;
         `;
-        toast.innerHTML = `<i class="fas fa-${icones[tipo]}"></i><span>${mensagem}</span>`;
+        var icon = document.createElement('i');
+        icon.className = 'fas fa-' + icones[tipo];
+        var span = document.createElement('span');
+        span.textContent = mensagem;
+        toast.appendChild(icon);
+        toast.appendChild(span);
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 3000);
     }

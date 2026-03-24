@@ -732,7 +732,7 @@
             align-items: center;
             gap: 6px;
         }
-        select#orcamento-alerta-pct option {
+        select#orçamento-alerta-pct option {
             padding: 8px;
         }
 
@@ -773,6 +773,7 @@
 
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -952,7 +953,7 @@
                     <div class="chart-card">
                         <h3><i class="fas fa-chart-bar"></i> Orçamento vs Realizado por Categoria</h3>
                         <div class="chart-container">
-                            <canvas id="chart-orcamento"></canvas>
+                            <canvas id="chart-orçamento"></canvas>
                         </div>
                     </div>
 
@@ -987,7 +988,7 @@
     </div>
 
     <!-- Modal Novo Orçamento - Design SaaS Empresarial Institucional -->
-    <div class="modal-overlay-padrão" id="modal-orcamento" onclick="fecharModal()">
+    <div class="modal-overlay-padrão" id="modal-orçamento" onclick="fecharModal()">
         <div class="modal-padrão" onclick="event.stopPropagation()">
             <!-- HEADER PROFISSIONAL COM GRADIENT VERDE LIMA -->
             <div class="modal-header-padrão">
@@ -996,7 +997,7 @@
                         <i class="fas fa-calculator"></i>
                     </div>
                     <div class="modal-header-text-padrão">
-                        <h2 id="modal-titulo">Novo Orçamento</h2>
+                        <h2 id="modal-título">Novo Orçamento</h2>
                         <p>Configure os limites e controles do orçamento</p>
                     </div>
                     <button class="modal-close-padrão" type="button" onclick="fecharModal()" title="Fechar">
@@ -1022,8 +1023,8 @@
 
             <!-- BODY -->
             <div class="modal-body-padrão">
-                <form id="form-orcamento">
-                    <input type="hidden" id="orcamento-id">
+                <form id="form-orçamento">
+                    <input type="hidden" id="orçamento-id">
 
                     <!-- Seção 1: Classificação -->
                     <div class="form-section-padrão">
@@ -1039,7 +1040,7 @@
                                     Categoria
                                     <span class="required">*</span>
                                 </label>
-                                <select id="orcamento-categoria" required>
+                                <select id="orçamento-categoria" required>
                                     <option value="">&#128204; Selecione a categoria...</option>
                                     <option value="Marketing">&#128226; Marketing</option>
                                     <option value="Vendas">&#128200; Vendas</option>
@@ -1057,7 +1058,7 @@
                                     <i class="fas fa-building"></i>
                                     Centro de Custo
                                 </label>
-                                <select id="orcamento-centro">
+                                <select id="orçamento-centro">
                                     <option value="">&#127970; Todos os centros</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Vincule a um centro específico</span>
@@ -1080,7 +1081,7 @@
                             </label>
                             <div class="valor-destaque-padrão">
                                 <span class="currency-symbol">R$</span>
-                                <input type="text" id="orcamento-limite" placeholder="0,00" required oninput="formatarMoeda(this)">
+                                <input type="text" id="orçamento-limite" placeholder="0,00" required oninput="formatarMoeda(this)">
                             </div>
                             <span class="field-hint"><i class="fas fa-lightbulb"></i> Valor máximo permitido para esta categoria</span>
                         </div>
@@ -1103,7 +1104,7 @@
                                     <option value="trimestral">&#128198; Renovar Trimestralmente</option>
                                     <option value="semestral">&#128467;&#65039; Renovar Semestralmente</option>
                                     <option value="anual">&#128198; Renovar Anualmente</option>
-                                    <option value="unico">&#9989; Período Único</option>
+                                    <option value="único">&#9989; Período Único</option>
                                 </select>
                                 <span class="field-hint"><i class="fas fa-info-circle"></i> Frequência de renovação automática</span>
                             </div>
@@ -1123,7 +1124,7 @@
                                     <i class="fas fa-percentage"></i>
                                     Gatilho de Alerta
                                 </label>
-                                <select id="orcamento-alerta-pct">
+                                <select id="orçamento-alerta-pct">
                                     <option value="70">&#128993; 70% do limite (Atenção)</option>
                                     <option value="80" selected>&#128992; 80% do limite (Alerta)</option>
                                     <option value="90">&#128308; 90% do limite (Crítico)</option>
@@ -1136,7 +1137,7 @@
                                     <i class="fas fa-comment-alt"></i>
                                     Mensagem do Alerta
                                 </label>
-                                <input type="text" id="orcamento-alerta-msg" placeholder="Ex: Orçamento de Marketing próximo do limite">
+                                <input type="text" id="orçamento-alerta-msg" placeholder="Ex: Orçamento de Marketing próximo do limite">
                             </div>
                         </div>
                     </div>
@@ -1252,10 +1253,10 @@
 
     <script>
         // Estado
-        let orcamentos = [];
+        let orçamentos = [];
         let chartOrcamento = null;
         let editandoId = null;
-        let orcamentoVisualizando = null;
+        let orçamentoVisualizando = null;
 
         // Helper de autenticação
         function getAuthHeaders(extra = {}) {
@@ -1326,13 +1327,13 @@
                 const response = await fetch('/api/financeiro/orcamentos', { headers: getAuthHeaders(), credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    orcamentos = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+                    orçamentos = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
                     // Normalizar campos
-                    orcamentos = orcamentos.map(o => ({
+                    orçamentos = orçamentos.map(o => ({
                         id: o.id,
                         categoria: o.categoria || o.nome || 'Sem categoria',
                         centro_custo: o.centro_custo || o.centro || 'Geral',
-                        limite: parseFloat(o.limite || o.valor_limite || o.orcamento || 0),
+                        limite: parseFloat(o.limite || o.valor_limite || o.orçamento || 0),
                         gasto: parseFloat(o.gasto || o.valor_gasto || o.utilizado || 0),
                         alerta: o.alerta || o.mensagem_alerta || null,
                         alerta_pct: o.alerta_pct || o.percentual_alerta || 80
@@ -1342,7 +1343,7 @@
                 }
             } catch (e) {
                 console.error('Erro ao carregar orçamentos:', e);
-                orcamentos = [];
+                orçamentos = [];
                 showToast('Erro ao carregar orçamentos. Verifique sua conexão.', 'error');
             }
             renderizarOrcamentos();
@@ -1358,7 +1359,7 @@
                 if (response.ok) {
                     const centros = await response.json();
                     const listaCentros = Array.isArray(centros) ? centros : (Array.isArray(centros.data) ? centros.data : []);
-                    const select = document.getElementById('orcamento-centro');
+                    const select = document.getElementById('orçamento-centro');
                     select.innerHTML = '<option value="">Selecione um centro de custo</option>';
                     listaCentros.forEach(c => {
                         const nome = c.nome || c.descrição || '';
@@ -1387,7 +1388,7 @@
         function renderizarOrcamentos() {
             const container = document.getElementById('budget-items');
 
-            if (orcamentos.length === 0) {
+            if (orçamentos.length === 0) {
                 container.innerHTML = `
                     <div style="text-align: center; padding: 60px; color: var(--text-secondary);">
                         <i class="fas fa-folder-open" style="font-size: 48px; margin-bottom: 16px; display: block; opacity: 0.3;"></i>
@@ -1397,7 +1398,7 @@
                 return;
             }
 
-            container.innerHTML = orcamentos.map(orc => {
+            container.innerHTML = orçamentos.map(orc => {
                 const percentual = orc.limite > 0 ? Math.round((orc.gasto / orc.limite) * 100) : 0;
                 const progressClass = percentual >= 100 ? 'red' : percentual >= 80 ? 'yellow' : 'green';
                 const statusClass = percentual >= 100 ? 'excedido' : percentual >= 80 ? 'alerta' : 'ok';
@@ -1433,10 +1434,10 @@
 
         // Visualizar orçamento (abre modal de visualização)
         function visualizarOrcamento(id) {
-            const orc = orcamentos.find(o => o.id === id);
+            const orc = orçamentos.find(o => o.id === id);
             if (!orc) return;
 
-            orcamentoVisualizando = orc;
+            orçamentoVisualizando = orc;
             const percentual = orc.limite > 0 ? ((orc.gasto / orc.limite) * 100).toFixed(1) : 0;
             const disponivel = Math.max(0, orc.limite - orc.gasto);
             const cor = coresCategorias[orc.categoria] || '#6366f1';
@@ -1523,23 +1524,23 @@
         // Fechar modal de visualização
         function fecharModalVisualizar() {
             document.getElementById('modal-visualizar').classList.remove('active');
-            orcamentoVisualizando = null;
+            orçamentoVisualizando = null;
         }
 
         // Editar a partir do modal de visualização
         function editarOrcamentoFromView() {
-            if (orcamentoVisualizando) {
+            if (orçamentoVisualizando) {
                 fecharModalVisualizar();
-                editarOrcamento(orcamentoVisualizando.id);
+                editarOrcamento(orçamentoVisualizando.id);
             }
         }
 
         // Atualizar KPIs
         function atualizarKPIs() {
-            const totalOrcamento = orcamentos.reduce((sum, o) => sum + (o.limite || 0), 0);
-            const totalGasto = orcamentos.reduce((sum, o) => sum + (o.gasto || 0), 0);
+            const totalOrcamento = orçamentos.reduce((sum, o) => sum + (o.limite || 0), 0);
+            const totalGasto = orçamentos.reduce((sum, o) => sum + (o.gasto || 0), 0);
             const saldo = totalOrcamento - totalGasto;
-            const alertas = orcamentos.filter(o => o.gasto >= o.limite * 0.8).length;
+            const alertas = orçamentos.filter(o => o.gasto >= o.limite * 0.8).length;
             const percentualGeral = totalOrcamento > 0 ? Math.round((totalGasto / totalOrcamento) * 100) : 0;
 
             document.getElementById('kpi-total').textContent = formatarValor(totalOrcamento);
@@ -1559,15 +1560,15 @@
 
         // Renderizar gráfico
         function renderizarGrafico() {
-            const ctx = document.getElementById('chart-orcamento').getContext('2d');
+            const ctx = document.getElementById('chart-orçamento').getContext('2d');
 
             if (chartOrcamento) {
                 chartOrcamento.destroy();
             }
 
-            const labels = orcamentos.map(o => o.categoria);
-            const limites = orcamentos.map(o => o.limite);
-            const gastos = orcamentos.map(o => o.gasto);
+            const labels = orçamentos.map(o => o.categoria);
+            const limites = orçamentos.map(o => o.limite);
+            const gastos = orçamentos.map(o => o.gasto);
 
             chartOrcamento = new Chart(ctx, {
                 type: 'bar',
@@ -1611,7 +1612,7 @@
         // Renderizar alertas
         function renderizarAlertas() {
             const container = document.getElementById('alerts-list');
-            const alertas = orcamentos.filter(o => o.gasto >= o.limite * 0.8);
+            const alertas = orçamentos.filter(o => o.gasto >= o.limite * 0.8);
 
             if (alertas.length === 0) {
                 container.innerHTML = `
@@ -1654,41 +1655,41 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-titulo').textContent = 'Novo Orçamento';
-            document.getElementById('form-orcamento').reset();
-            document.getElementById('modal-orcamento').classList.add('active');
+            document.getElementById('modal-título').textContent = 'Novo Orçamento';
+            document.getElementById('form-orçamento').reset();
+            document.getElementById('modal-orçamento').classList.add('active');
         }
 
         // Fechar modal
         function fecharModal() {
-            document.getElementById('modal-orcamento').classList.remove('active');
+            document.getElementById('modal-orçamento').classList.remove('active');
             editandoId = null;
         }
 
         // Editar orçamento
         function editarOrcamento(id) {
-            const orc = orcamentos.find(o => o.id === id);
+            const orc = orçamentos.find(o => o.id === id);
             if (!orc) return;
 
             editandoId = id;
-            document.getElementById('modal-titulo').textContent = 'Editar Orçamento';
-            document.getElementById('orcamento-id').value = orc.id;
-            document.getElementById('orcamento-categoria').value = orc.categoria;
-            document.getElementById('orcamento-centro').value = orc.centro_custo || '';
-            document.getElementById('orcamento-limite').value = (orc.limite / 1).toFixed(2).replace('.', ',');
-            document.getElementById('orcamento-alerta-pct').value = orc.alerta_pct || 80;
-            document.getElementById('orcamento-alerta-msg').value = orc.alerta || '';
+            document.getElementById('modal-título').textContent = 'Editar Orçamento';
+            document.getElementById('orçamento-id').value = orc.id;
+            document.getElementById('orçamento-categoria').value = orc.categoria;
+            document.getElementById('orçamento-centro').value = orc.centro_custo || '';
+            document.getElementById('orçamento-limite').value = (orc.limite / 1).toFixed(2).replace('.', ',');
+            document.getElementById('orçamento-alerta-pct').value = orc.alerta_pct || 80;
+            document.getElementById('orçamento-alerta-msg').value = orc.alerta || '';
 
-            document.getElementById('modal-orcamento').classList.add('active');
+            document.getElementById('modal-orçamento').classList.add('active');
         }
 
         // Salvar orçamento
         async function salvarOrcamento() {
-            const categoria = document.getElementById('orcamento-categoria').value;
-            const centro_custo = document.getElementById('orcamento-centro').value;
-            const limite = parseFloat(document.getElementById('orcamento-limite').value.replace(',', '.')) || 0;
-            const alerta_pct = parseInt(document.getElementById('orcamento-alerta-pct').value) || 80;
-            const alerta = document.getElementById('orcamento-alerta-msg').value.trim();
+            const categoria = document.getElementById('orçamento-categoria').value;
+            const centro_custo = document.getElementById('orçamento-centro').value;
+            const limite = parseFloat(document.getElementById('orçamento-limite').value.replace(',', '.')) || 0;
+            const alerta_pct = parseInt(document.getElementById('orçamento-alerta-pct').value) || 80;
+            const alerta = document.getElementById('orçamento-alerta-msg').value.trim();
 
             if (!categoria || limite <= 0) {
                 showToast('Preencha categoria e limite', 'error');
@@ -1696,7 +1697,7 @@
             }
 
             // Preservar o gasto atual se estiver editando
-            const gastoAtual = editandoId ? (orcamentos.find(o => o.id === editandoId)?.gasto || 0) : 0;
+            const gastoAtual = editandoId ? (orçamentos.find(o => o.id === editandoId)?.gasto || 0) : 0;
             const dados = { categoria, centro_custo, limite, alerta, alerta_pct, gasto: gastoAtual };
 
             try {
@@ -1751,6 +1752,7 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

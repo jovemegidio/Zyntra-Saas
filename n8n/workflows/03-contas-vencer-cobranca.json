@@ -1,0 +1,86 @@
+{
+  "name": "03-contas-vencer-cobranca",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 8 * * *" }]
+        }
+      },
+      "name": "⏰ Diário às 8h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/financeiro/contas-vencer?dias=0&tipo=receber",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "name": "💰 Buscar Contas Vencendo Hoje",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }
+          ]
+        }
+      },
+      "name": "Tem contas?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data"
+      },
+      "name": "Loop cada conta",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [910, 300],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$json.email}}",
+        "subject": "Cobrança Pendente - Vencimento Hoje",
+        "html": "<div style='font-family: Arial; max-width: 600px; margin: 0 auto;'><h2 style='color: #e74c3c;'>⚠️ Cobrança Pendente</h2><p>Olá <strong>{{$json.cliente_nome}}</strong>,</p><p>Informamos que sua cobrança no valor de <strong style='color: #e74c3c;'>R$ {{$json.valor}}</strong> vence <strong>hoje</strong>.</p><p>Caso já tenha efetuado o pagamento, desconsidere esta mensagem.</p><hr><p style='font-size: 12px; color: #999;'>ALUFORCE — Sistema de Gestão Empresarial</p></div>",
+        "options": {}
+      },
+      "name": "📧 Enviar Cobrança",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1130, 300],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "functionCode": "// Aguardar 2 segundos entre envios (rate limit)\nawait new Promise(resolve => setTimeout(resolve, 2000));\nreturn items;"
+      },
+      "name": "⏳ Rate Limit (2s)",
+      "type": "n8n-nodes-base.code",
+      "position": [1350, 300],
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "⏰ Diário às 8h": { "main": [[{ "node": "💰 Buscar Contas Vencendo Hoje", "type": "main", "index": 0 }]] },
+    "💰 Buscar Contas Vencendo Hoje": { "main": [[{ "node": "Tem contas?", "type": "main", "index": 0 }]] },
+    "Tem contas?": { "main": [[{ "node": "Loop cada conta", "type": "main", "index": 0 }], []] },
+    "Loop cada conta": { "main": [[{ "node": "📧 Enviar Cobrança", "type": "main", "index": 0 }], []] },
+    "📧 Enviar Cobrança": { "main": [[{ "node": "⏳ Rate Limit (2s)", "type": "main", "index": 0 }]] },
+    "⏳ Rate Limit (2s)": { "main": [[{ "node": "Loop cada conta", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "financeiro" }, { "name": "cobranca" }, { "name": "email" }]
+}

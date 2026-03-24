@@ -3,7 +3,7 @@
 /**
  * Pool MySQL centralizado — ÚNICA FONTE de conexões do sistema.
  * Todos os módulos devem importar deste arquivo em vez de criar pools próprios.
- * 
+ *
  * Uso:
  *   const pool = require('../../database/pool');
  *   const [rows] = await pool.query('SELECT 1');
@@ -19,7 +19,7 @@ const pool = mysql.createPool({
     charset: 'utf8mb4',
     waitForConnections: true,
     connectionLimit: 15,
-    queueLimit: 0
+    queueLimit: 250
 });
 
 module.exports = pool;

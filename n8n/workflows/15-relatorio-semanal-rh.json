@@ -1,0 +1,67 @@
+[
+  {
+    "name": "15-relatorio-semanal-rh",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 8 * * 1" }]
+          }
+        },
+        "name": "⏰ Segunda 8h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/rh/resumo-semanal",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "👥 Buscar Resumo RH",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_RH || 'rh@aluforce.ind.br'}}",
+          "subject": "👥 Relatório Semanal RH — Semana de {{$json.semana}}",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#1565c0;'>👥 Relatório Semanal de RH</h2><p>Semana de <strong>{{$json.semana}}</strong> | Total colaboradores: <strong>{{$json.total_colaboradores}}</strong></p><h3 style='color:#2e7d32;'>🎂 Aniversariantes da Semana ({{$json.aniversariantes_semana.length}})</h3><p>{{$json.aniversariantes_semana.length > 0 ? $json.aniversariantes_semana.map(a => a.nome + ' (' + a.cargo + ') - ' + a.idade + ' anos').join('<br>') : 'Nenhum aniversariante esta semana'}}</p><h3 style='color:#e65100;'>🏖️ Férias Próximas ({{$json.ferias_proximas.length}})</h3><p>{{$json.ferias_proximas.length > 0 ? $json.ferias_proximas.map(f => f.nome + ' — ' + f.dias_para_ferias + ' dias').join('<br>') : 'Nenhuma férias programada'}}</p><h3 style='color:#1565c0;'>🆕 Admissões da Semana ({{$json.admissoes_semana.length}})</h3><p>{{$json.admissoes_semana.length > 0 ? $json.admissoes_semana.map(a => a.nome + ' — ' + a.cargo).join('<br>') : 'Nenhuma admissão esta semana'}}</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Email RH",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [690, 300],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "15", "workflow_name": "Relatório Semanal RH", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [910, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ Segunda 8h": { "main": [[{ "node": "👥 Buscar Resumo RH", "type": "main", "index": 0 }]] },
+      "👥 Buscar Resumo RH": { "main": [[{ "node": "📧 Email RH", "type": "main", "index": 0 }]] },
+      "📧 Email RH": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

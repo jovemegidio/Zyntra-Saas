@@ -330,10 +330,6 @@
     // DESABILITAR CÓPIA
     // ============================================
     document.addEventListener('copy', function(e) {
-        // Permitir cópia apenas em inputs
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-            return true;
-        }
         e.preventDefault();
         e.clipboardData.setData('text/plain', 'Conteúdo protegido - ALUFORCE © 2026');
         return false;

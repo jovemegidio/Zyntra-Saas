@@ -35,6 +35,16 @@ module.exports = function createRHExtrasRoutes(deps) {
 
     const router = express.Router();
 
+    // Helper: restrict ponto mutation routes to admin or RH managers
+    const requireAdminOrRH = (req, res, next) => {
+        const role = req.user?.role;
+        const isAdmin = role === 'admin' || role === 'Admin' || role === 'administrador' || role === 'Administrador';
+        const areas = req.user?.areas || [];
+        const isRH = isAdmin || areas.includes('rh') || areas.includes('RH');
+        if (!isRH) return res.status(403).json({ success: false, message: 'Acesso restrito a gestores de RH' });
+        next();
+    };
+
 // ==================== AUTO-CREATE AUDIT TABLE ====================
 (async () => {
     try {
@@ -389,7 +399,13 @@ router.delete('/calendario/:id', authenticateToken, async (req, res) => {
  */
 router.get('/ponto/marcacoes', authenticateToken, async (req, res) => {
     try {
-        const { funcionario_id, data_inicio, data_fim, status } = req.query;
+        const { data_inicio, data_fim, status } = req.query;
+        const role = req.user?.role;
+        const isAdmin = role === 'admin' || role === 'Admin' || role === 'administrador' || role === 'Administrador';
+        const areas = req.user?.areas || [];
+        const isRH = isAdmin || areas.includes('rh') || areas.includes('RH');
+        // Non-admin/RH users can only see their own records
+        const funcionario_id = (isRH && req.query.funcionario_id) ? req.query.funcionario_id : req.user.id;
 
         let sql = `
             SELECT m.*, 
@@ -438,7 +454,7 @@ router.get('/ponto/marcacoes', authenticateToken, async (req, res) => {
  * PUT /api/rh/ponto/marcacoes/:id
  * Editar marcação de ponto com audit trail completo
  */
-router.put('/ponto/marcacoes/:id', authenticateToken, async (req, res) => {
+router.put('/ponto/marcacoes/:id', authenticateToken, requireAdminOrRH, async (req, res) => {
     try {
         const { id } = req.params;
         const { hora, tipo, observacao, motivo, data, funcionario_id } = req.body;
@@ -580,7 +596,7 @@ router.put('/ponto/marcacoes/:id', authenticateToken, async (req, res) => {
  * POST /api/rh/ponto/marcacoes
  * Adicionar marcação manual
  */
-router.post('/ponto/marcacoes', authenticateToken, async (req, res) => {
+router.post('/ponto/marcacoes', authenticateToken, requireAdminOrRH, async (req, res) => {
     try {
         const { funcionario_id, pis, data, hora, tipo, observacao } = req.body;
 
@@ -609,7 +625,7 @@ router.post('/ponto/marcacoes', authenticateToken, async (req, res) => {
  * DELETE /api/rh/ponto/marcacoes/:id
  * Excluir marcação de ponto com audit trail
  */
-router.delete('/ponto/marcacoes/:id', authenticateToken, async (req, res) => {
+router.delete('/ponto/marcacoes/:id', authenticateToken, requireAdminOrRH, async (req, res) => {
     try {
         const { id } = req.params;
         const motivo = req.body ? req.body.motivo : null;

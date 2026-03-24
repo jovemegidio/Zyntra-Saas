@@ -1,0 +1,65 @@
+{
+  "name": "33-performance-transportadoras-mensal",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "months", "triggerAtDayOfMonth": 1, "triggerAtHour": 9 }] }
+      },
+      "name": "Schedule Trigger Mensal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/logistica/performance-transportadoras?meses=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Performance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'logistica', mensagem: '📊 *PERFORMANCE TRANSPORTADORAS - Mês Anterior*\\n\\n' + ($json.data || []).map(t => '• ' + t.transportadora_nome + ': ' + t.total_pedidos + ' pedidos | ' + t.no_prazo + ' no prazo | ' + t.atrasadas + ' atraso').join('\\n') + '\\n\\nRelatório completo no painel.' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Enviar Relatório WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "sendTo": "logistica@aluforce.ind.br",
+        "subject": "Relatório Mensal - Performance de Transportadoras",
+        "emailType": "html",
+        "html": "=<h2>Performance de Transportadoras</h2><table border='1' cellpadding='8'><tr><th>Transportadora</th><th>Pedidos</th><th>No Prazo</th><th>Atrasadas</th><th>Frete Total</th><th>Média Dias</th></tr>{{ ($('Buscar Performance').item.json.data || []).map(t => '<tr><td>' + t.transportadora_nome + '</td><td>' + t.total_pedidos + '</td><td>' + t.no_prazo + '</td><td>' + t.atrasadas + '</td><td>R$ ' + parseFloat(t.total_frete).toFixed(2) + '</td><td>' + t.media_dias_entrega + '</td></tr>').join('') }}</table>",
+        "options": {}
+      },
+      "name": "Email Relatório",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [690, 500],
+      "credentials": { "smtp": { "id": "1", "name": "SMTP Aluforce" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger Mensal": { "main": [[{ "node": "Buscar Performance", "type": "main", "index": 0 }]] },
+    "Buscar Performance": { "main": [[{ "node": "Enviar Relatório WhatsApp", "type": "main", "index": 0 }, { "node": "Email Relatório", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

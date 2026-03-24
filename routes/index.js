@@ -277,6 +277,10 @@ module.exports = function registerAllRoutes(app, deps) {
             app.use('/api/rh', require(path.join(__dirname, 'rh-treinamentos'))({ pool, authenticateToken }));
             console.log('[ROUTES] ✅ rh-treinamentos montado em /api/rh');
         } catch (e) { console.error('[ROUTES] ⚠️ rh-treinamentos não carregou:', e.message); }
+        try {
+            app.use('/api/rh', require(path.join(__dirname, 'rh-requisicoes-compra'))({ pool, authenticateToken }));
+            console.log('[ROUTES] ✅ rh-requisicoes-compra montado em /api/rh');
+        } catch (e) { console.error('[ROUTES] ⚠️ rh-requisicoes-compra não carregou:', e.message); }
 
         console.log('[ROUTES] ✅ RH routes mounted at /api/rh');
     } catch (err) {
@@ -316,7 +320,7 @@ module.exports = function registerAllRoutes(app, deps) {
     // ============================================================
     const externalApis = [
         { path: '/api', file: '../api/dashboard-executivo', name: 'Dashboard Executivo' },
-        { path: '/api', file: '../api/notificacoes', name: 'Notificações' },
+        { path: '/api/notificacoes', file: '../api/notificacoes', name: 'Notificações' },
         { path: '/api', file: '../api/workflow-aprovacoes', name: 'Workflow Aprovações' },
         { path: '/api', file: '../api/relatorios-gerenciais', name: 'Relatórios Gerenciais' },
         { path: '/api', file: '../api/esocial', name: 'eSocial' },

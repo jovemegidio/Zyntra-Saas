@@ -281,13 +281,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const links = {
                 cliente: `/Vendas/index.html?cliente=${id}`,
                 pedido: `/Vendas/index.html?pedido=${id}`,
-                nfe: `/modules/NFe/index.html?nfe=${id}`,
+                nfe: `/NFe/index.html?nfe=${id}`,
                 funcionario: `/RecursosHumanos/funcionarios.html?funcionario=${id}`,
-                produto: `/modules/PCP/index.html?produto=${id}`,
-                conta_pagar: `/modules/Financeiro/index.html?conta_pagar=${id}`,
-                conta_receber: `/modules/Financeiro/index.html?conta_receber=${id}`,
-                fornecedor: `/modules/Compras/index.html?fornecedor=${id}`,
-                ordem_producao: `/modules/PCP/ordens-producao.html?ordem=${id}`
+                produto: `/PCP/index.html?produto=${id}`,
+                conta_pagar: `/Financeiro/contas-pagar.html?conta_pagar=${id}`,
+                conta_receber: `/Financeiro/contas-receber.html?conta_receber=${id}`,
+                fornecedor: `/Compras/index.html?fornecedor=${id}`,
+                ordem_producao: `/PCP/ordens-producao.html?ordem=${id}`
             };
             
             return links[tipo] || item.url || null;

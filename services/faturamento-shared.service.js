@@ -215,65 +215,82 @@ class FaturamentoSharedService {
     }
 
     // ============================================================
-    // CONTAS A RECEBER — VENCIMENTO INTELIGENTE
+    // CONTAS A RECEBER — VENCIMENTO INTELIGENTE COM PARCELAS
     // ============================================================
 
     /**
-     * Calcula a data de vencimento de uma conta a receber.
-     * Usa o prazo_pagamento do pedido se disponível, senão usa config global.
-     * 
-     * @param {Object} pedido - Dados do pedido (condicao_pagamento, parcelas)
-     * @returns {string} Expressão SQL para data_vencimento
+     * Extrai prazos de parcelas de uma condição de pagamento.
+     * "30/60/90" → [30, 60, 90]
+     * "30 dias" → [30]
+     * "À Vista" → [0]
+     * @param {Object} pedido - Dados do pedido
+     * @returns {number[]} Array de dias para cada parcela
      */
-    calcularVencimentoSQL(pedido) {
-        // Tentar extrair dias do campo condicao_pagamento
-        // Formatos comuns: "30 dias", "30/60/90", "30DDL", "À Vista", "28 DDL"
-        let diasVencimento = null;
+    extrairParcelas(pedido) {
+        if (!pedido || !pedido.condicao_pagamento) return null;
+        const condicao = pedido.condicao_pagamento.toString().trim().toLowerCase();
 
-        if (pedido && pedido.condicao_pagamento) {
-            const condicao = pedido.condicao_pagamento.toString().trim().toLowerCase();
+        // "à vista" ou "a vista"
+        if (condicao.includes('vista') || condicao === '0') return [0];
 
-            // "à vista" ou "a vista" = 0 dias
-            if (condicao.includes('vista') || condicao === '0') {
-                diasVencimento = 0;
-            }
-            // "30 dias", "30ddl", "30 DDL" = extrair primeiro número
-            else {
-                const match = condicao.match(/(\d+)/);
-                if (match) {
-                    diasVencimento = parseInt(match[1]);
-                }
-            }
-        }
+        // "30/60/90" ou "30-60-90" ou "30,60,90"
+        const partes = condicao.split(/[\/\-,]+/).map(p => p.trim());
+        const numeros = partes.map(p => {
+            const m = p.match(/(\d+)/);
+            return m ? parseInt(m[1]) : null;
+        }).filter(n => n !== null && n >= 0);
 
-        // Se não conseguiu extrair do pedido, usar prazo padrão
-        if (diasVencimento === null) {
-            // Valor será substituído pelo caller com o config
-            diasVencimento = null;
-        }
-
-        return diasVencimento;
+        return numeros.length > 0 ? numeros : null;
     }
 
     /**
-     * Gera o INSERT de contas_receber com vencimento inteligente.
-     * Usa o prazo do pedido quando disponível, senão o prazo padrão do config.
+     * Gera contas_receber com suporte a parcelas (30/60/90).
+     * Se a condição de pagamento tiver múltiplos prazos, divide o valor
+     * igualmente entre as parcelas e gera um registro para cada.
      * 
      * @param {Object} connection - Conexão MySQL
      * @param {Object} params - { pedido_id, cliente_id, descricao, valor, tipo, pedido }
-     * @returns {Object} { insertId, data_vencimento_dias }
+     * @returns {Object} { insertId (primeira parcela), data_vencimento_dias, parcelas_geradas, total_parcelas }
      */
     async gerarContaReceber(connection, { pedido_id, cliente_id, descricao, valor, tipo, pedido }) {
         const config = await this.getConfig();
-        const diasPedido = this.calcularVencimentoSQL(pedido);
-        const dias = diasPedido !== null ? diasPedido : config.prazo_vencimento_padrao;
+        const prazos = this.extrairParcelas(pedido);
+
+        // Se tem múltiplas parcelas, gerar uma conta para cada
+        if (prazos && prazos.length > 1) {
+            const totalParcelas = prazos.length;
+            const valorParcela = Math.round((valor / totalParcelas) * 100) / 100;
+            // Ajuste de centavos na última parcela
+            const valorUltimaParcela = Math.round((valor - valorParcela * (totalParcelas - 1)) * 100) / 100;
+            let primeiroId = null;
+            const parcelasGeradas = [];
+
+            for (let i = 0; i < totalParcelas; i++) {
+                const dias = prazos[i];
+                const valorParcAtual = (i === totalParcelas - 1) ? valorUltimaParcela : valorParcela;
+                const descParcela = `${descricao} (${i + 1}/${totalParcelas})`;
+
+                const [result] = await connection.query(`
+                    INSERT INTO contas_receber (pedido_id, cliente_id, descricao, valor, data_vencimento, status, tipo, parcela_numero, total_parcelas)
+                    VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY), 'pendente', ?, ?, ?)
+                `, [pedido_id, cliente_id, descParcela, valorParcAtual, dias, tipo, i + 1, totalParcelas]);
+
+                if (i === 0) primeiroId = result.insertId;
+                parcelasGeradas.push({ id: result.insertId, parcela: i + 1, dias, valor: valorParcAtual });
+            }
+
+            return { insertId: primeiroId, data_vencimento_dias: prazos[0], parcelas_geradas: parcelasGeradas, total_parcelas: totalParcelas };
+        }
+
+        // Parcela única (comportamento original)
+        const dias = (prazos && prazos.length === 1) ? prazos[0] : config.prazo_vencimento_padrao;
 
         const [result] = await connection.query(`
-            INSERT INTO contas_receber (pedido_id, cliente_id, descricao, valor, data_vencimento, status, tipo)
-            VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY), 'pendente', ?)
+            INSERT INTO contas_receber (pedido_id, cliente_id, descricao, valor, data_vencimento, status, tipo, parcela_numero, total_parcelas)
+            VALUES (?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY), 'pendente', ?, 1, 1)
         `, [pedido_id, cliente_id, descricao, valor, dias, tipo]);
 
-        return { insertId: result.insertId, data_vencimento_dias: dias };
+        return { insertId: result.insertId, data_vencimento_dias: dias, parcelas_geradas: [{ id: result.insertId, parcela: 1, dias, valor }], total_parcelas: 1 };
     }
 
     // ============================================================

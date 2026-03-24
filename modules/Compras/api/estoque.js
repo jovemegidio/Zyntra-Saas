@@ -31,7 +31,7 @@ router.get('/', async (req, res) => {
         res.json({ estoque });
     } catch (error) {
         console.error('Erro ao consultar estoque:', error);
-        res.status(500).json({ error: 'Erro ao consultar estoque', message: error.message });
+        res.status(500).json({ error: 'Erro ao consultar estoque' });
     }
 });
 
@@ -188,7 +188,7 @@ router.get('/materiais-com-entrada', async (req, res) => {
         res.json({ materiais, stats });
     } catch (error) {
         console.error('Erro ao buscar materiais com entrada:', error);
-        res.status(500).json({ error: 'Erro ao buscar materiais', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar materiais' });
     }
 });
 
@@ -212,7 +212,7 @@ router.get('/:material_id', async (req, res) => {
         res.json(estoque[0]);
     } catch (error) {
         console.error('Erro ao obter estoque:', error);
-        res.status(500).json({ error: 'Erro ao buscar estoque', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar estoque' });
     }
 });
 
@@ -230,13 +230,21 @@ router.post('/movimentacao', async (req, res) => {
             quantidade,
             motivo,
             documento,
-            observacoes,
-            usuario_id
+            observacoes
         } = req.body;
+        
+        // Usar usuario_id do token autenticado, não do body (previne spoofing)
+        const usuario_id = req.user ? req.user.id : null;
         
         if (!material_id || !tipo_movimentacao || !quantidade) {
             await connection.rollback();
             return res.status(400).json({ error: 'Material, tipo de movimentação e quantidade são obrigatórios' });
+        }
+        
+        const qtdNum = parseFloat(quantidade);
+        if (!Number.isFinite(qtdNum) || qtdNum <= 0) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Quantidade deve ser um número positivo' });
         }
         
         if (!['entrada', 'saida'].includes(tipo_movimentacao)) {
@@ -315,7 +323,7 @@ router.post('/movimentacao', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao registrar movimentação:', error);
-        res.status(500).json({ error: 'Erro ao registrar movimentação', message: error.message });
+        res.status(500).json({ error: 'Erro ao registrar movimentação' });
     } finally {
         connection.release();
     }
@@ -376,7 +384,7 @@ router.get('/movimentacoes', async (req, res) => {
         res.json({ movimentacoes });
     } catch (error) {
         console.error('Erro ao listar movimentações:', error);
-        res.status(500).json({ error: 'Erro ao buscar movimentações', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar movimentações' });
     }
 });
 
@@ -413,14 +421,16 @@ router.get('/movimentacoes/historico', async (req, res) => {
         }
         
         sql += ' ORDER BY m.data_movimentacao DESC LIMIT ? OFFSET ?';
-        params.push(parseInt(limit), parseInt(offset));
+        const parsedLimit = Math.min(Math.max(parseInt(limit) || 100, 1), 500);
+        const parsedOffset = Math.max(parseInt(offset) || 0, 0);
+        params.push(parsedLimit, parsedOffset);
         
         const [movimentacoes] = await db.query(sql, params);
         
         res.json({ movimentacoes });
     } catch (error) {
         console.error('Erro ao listar movimentações:', error);
-        res.status(500).json({ error: 'Erro ao buscar histórico', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar histórico' });
     }
 });
 
@@ -436,13 +446,21 @@ router.post('/ajuste', async (req, res) => {
             material_id,
             quantidade_contada,
             motivo = 'Ajuste de inventário',
-            observacoes,
-            usuario_id
+            observacoes
         } = req.body;
+        
+        // Usar usuario_id do token autenticado, não do body (previne spoofing)
+        const usuario_id = req.user ? req.user.id : null;
         
         if (!material_id || quantidade_contada === undefined) {
             await connection.rollback();
             return res.status(400).json({ error: 'Material e quantidade contada são obrigatórios' });
+        }
+        
+        const qtdContada = parseFloat(quantidade_contada);
+        if (!Number.isFinite(qtdContada) || qtdContada < 0) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Quantidade contada deve ser um número >= 0' });
         }
         
         // Buscar estoque atual
@@ -457,12 +475,12 @@ router.post('/ajuste', async (req, res) => {
         }
         
         const quantidade_atual = estoqueAtual[0].quantidade_atual;
-        const diferenca = quantidade_contada - quantidade_atual;
+        const diferenca = qtdContada - quantidade_atual;
         
         // Atualizar estoque
         await connection.query(
             'UPDATE estoque SET quantidade_atual = ? WHERE material_id = ?',
-            [quantidade_contada, material_id]
+            [qtdContada, material_id]
         );
         
         // Registrar movimentação de ajuste
@@ -499,7 +517,7 @@ router.post('/ajuste', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao ajustar estoque:', error);
-        res.status(500).json({ error: 'Erro ao ajustar estoque', message: error.message });
+        res.status(500).json({ error: 'Erro ao ajustar estoque' });
     } finally {
         connection.release();
     }
@@ -523,7 +541,7 @@ router.get('/alertas/estoque-baixo', async (req, res) => {
         res.json({ alertas, total: alertas.length });
     } catch (error) {
         console.error('Erro ao buscar alertas:', error);
-        res.status(500).json({ error: 'Erro ao buscar alertas de estoque', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar alertas de estoque' });
     }
 });
 

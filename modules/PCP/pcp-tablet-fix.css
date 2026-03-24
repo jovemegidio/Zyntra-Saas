@@ -1,0 +1,635 @@
+﻿/* ============================================
+   PCP - CORREÇÕES PARA TABLET
+   ALUFORCE © 2026
+   ============================================ */
+
+/* ============================================
+   BREAKPOINTS:
+   - Tablet Portrait: 600px - 900px
+   - Tablet Landscape: 900px - 1200px
+   ============================================ */
+
+/* --------------------------------------------
+   STATS CARDS - CORREÇÍO TABLET
+   -------------------------------------------- */
+
+/* Tablet Portrait e Landscape */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    /* Grid de estatísticas - 2 colunas em tablet */
+    .stats-grid,
+    .pcp-stats-grid {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 16px !important;
+        padding: 0 8px;
+    }
+    
+    /* Cards de estatísticas */
+    .stat-card {
+        padding: 16px 14px !important;
+        min-height: 100px;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+    
+    /* Ícone do card */
+    .stat-icon {
+        width: 48px !important;
+        height: 48px !important;
+        min-width: 48px !important;
+        font-size: 20px !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Conteúdo do card */
+    .stat-content {
+        flex: 1 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+    }
+    
+    /* Label do card - texto completo */
+    .stat-label {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #64748b !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.3px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin-bottom: 4px !important;
+    }
+    
+    /* Valor do card */
+    .stat-value {
+        font-size: 26px !important;
+        font-weight: 700 !important;
+        line-height: 1.1 !important;
+        color: #1e293b !important;
+    }
+    
+    /* Trend/descriçÁo */
+    .stat-trend {
+        font-size: 10px !important;
+        margin-top: 4px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+}
+
+/* Tablet Portrait específico (600px - 900px) */
+@media screen and (min-width: 600px) and (max-width: 900px) {
+    
+    .stats-grid,
+    .pcp-stats-grid {
+        gap: 12px !important;
+    }
+    
+    .stat-card {
+        padding: 14px 12px !important;
+    }
+    
+    .stat-icon {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        font-size: 18px !important;
+    }
+    
+    .stat-label {
+        font-size: 10px !important;
+    }
+    
+    .stat-value {
+        font-size: 24px !important;
+    }
+    
+    .stat-trend {
+        font-size: 9px !important;
+    }
+}
+
+/* Tablet Landscape (900px - 1200px) - 4 colunas */
+@media screen and (min-width: 900px) and (max-width: 1200px) {
+    
+    .stats-grid,
+    .pcp-stats-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    .stat-card {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        padding: 14px !important;
+        gap: 10px !important;
+    }
+    
+    .stat-icon {
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        font-size: 16px !important;
+    }
+    
+    .stat-label {
+        font-size: 10px !important;
+    }
+    
+    .stat-value {
+        font-size: 22px !important;
+    }
+    
+    .stat-trend {
+        font-size: 9px !important;
+    }
+}
+
+/* --------------------------------------------
+   SIDEBAR - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    /* Sidebar compacta em tablet */
+    .sidebar {
+        width: 60px !important;
+    }
+    
+    .sidebar.expanded {
+        width: 240px !important;
+    }
+    
+    /* Main content com margem adequada */
+    .main-content {
+        margin-left: 60px !important;
+        padding: 16px !important;
+    }
+    
+    .sidebar.expanded ~ .main-content {
+        margin-left: 240px !important;
+    }
+}
+
+/* --------------------------------------------
+   HEADER/TOPBAR - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .topbar {
+        padding: 0 16px !important;
+    }
+    
+    .topbar-center {
+        display: none !important;
+    }
+    
+    .header-logo {
+        height: 28px !important;
+    }
+    
+    .user-info .user-name {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+/* --------------------------------------------
+   CONTENT GRID - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .content-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+    
+    .page-content {
+        padding: 16px !important;
+    }
+    
+    /* Card de ações rÁpidas */
+    .card {
+        margin-bottom: 16px;
+    }
+    
+    .card-header {
+        padding: 14px 16px !important;
+    }
+    
+    .card-body {
+        padding: 16px !important;
+    }
+    
+    .card-title {
+        font-size: 14px !important;
+    }
+}
+
+/* --------------------------------------------
+   AÇÕES RÁPIDAS - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .quick-actions-list {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .quick-action-btn {
+        flex-direction: column !important;
+        text-align: center !important;
+        padding: 16px 12px !important;
+        gap: 10px !important;
+    }
+    
+    .quick-action-icon {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 18px !important;
+        margin: 0 auto !important;
+    }
+    
+    .quick-action-content {
+        text-align: center;
+    }
+    
+    .quick-action-title {
+        font-size: 12px !important;
+    }
+    
+    .quick-action-desc {
+        display: none !important;
+    }
+    
+    .quick-action-btn .fa-chevron-right {
+        display: none !important;
+    }
+}
+
+/* --------------------------------------------
+   ALERTAS DO SISTEMA - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .alerts-container {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+    
+    .alert-item {
+        padding: 12px !important;
+    }
+    
+    .alert-icon {
+        width: 36px !important;
+        height: 36px !important;
+        font-size: 14px !important;
+    }
+    
+    .alert-title {
+        font-size: 13px !important;
+    }
+    
+    .alert-message {
+        font-size: 11px !important;
+    }
+}
+
+/* --------------------------------------------
+   BOTÕES - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .btn {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        min-width: auto !important;
+    }
+    
+    .page-actions {
+        gap: 8px !important;
+    }
+    
+    .page-actions .btn {
+        padding: 10px 14px !important;
+    }
+    
+    /* Esconder texto em telas menores */
+    @media (max-width: 900px) {
+        .page-actions .btn .btn-text,
+        .page-actions .btn span:not(.btn-icon) {
+            display: none;
+        }
+        
+        .page-actions .btn {
+            padding: 10px 12px !important;
+        }
+    }
+}
+
+/* --------------------------------------------
+   MODAIS - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .modal-content,
+    .modal-dialog {
+        width: 95% !important;
+        max-width: 95% !important;
+        margin: 16px auto !important;
+        max-height: 90vh !important;
+    }
+    
+    .modal-header {
+        padding: 16px !important;
+    }
+    
+    .modal-body {
+        padding: 16px !important;
+        max-height: calc(90vh - 140px) !important;
+        overflow-y: auto !important;
+    }
+    
+    .modal-footer {
+        padding: 12px 16px !important;
+    }
+    
+    .modal-title {
+        font-size: 16px !important;
+    }
+}
+
+/* --------------------------------------------
+   TABELAS - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .pcp-table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .pcp-table {
+        font-size: 12px !important;
+    }
+    
+    .pcp-table thead th {
+        padding: 10px 8px !important;
+        font-size: 10px !important;
+    }
+    
+    .pcp-table tbody td {
+        padding: 10px 8px !important;
+    }
+}
+
+/* --------------------------------------------
+   FORMULÁRIOS - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .form-group {
+        margin-bottom: 14px !important;
+    }
+    
+    .form-label,
+    .filter-label {
+        font-size: 12px !important;
+        margin-bottom: 6px !important;
+    }
+    
+    .form-control,
+    .filter-input,
+    .filter-select {
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+    }
+    
+    .pcp-filters {
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+    
+    .pcp-filters .filter-group {
+        flex: 1 1 calc(50% - 12px) !important;
+        min-width: 140px !important;
+    }
+}
+
+/* --------------------------------------------
+   DRAWER/MENU LATERAL - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .drawer-menu {
+        width: 280px !important;
+    }
+    
+    .drawer-item {
+        padding: 12px 16px !important;
+    }
+    
+    .drawer-item-text {
+        font-size: 13px !important;
+    }
+    
+    .drawer-item-icon {
+        width: 20px !important;
+        font-size: 16px !important;
+    }
+}
+
+/* --------------------------------------------
+   VIEW CARDS (ALTERNATIVA À TABELA)
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .pcp-cards-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+    }
+    
+    .pcp-card-item {
+        padding: 14px !important;
+    }
+    
+    .pcp-card-header {
+        margin-bottom: 10px !important;
+    }
+    
+    .pcp-card-title {
+        font-size: 14px !important;
+    }
+    
+    .pcp-card-body {
+        font-size: 12px !important;
+    }
+}
+
+/* --------------------------------------------
+   NOTIFICAÇÕES - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .notification-badge {
+        min-width: 18px !important;
+        height: 18px !important;
+        font-size: 10px !important;
+    }
+    
+    .notification-dropdown {
+        width: 320px !important;
+        right: -50px !important;
+    }
+}
+
+/* --------------------------------------------
+   TOAST/SNACKBAR - AJUSTE TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    .toast,
+    .snackbar {
+        max-width: 90% !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+}
+
+/* --------------------------------------------
+   SCROLL CUSTOMIZADO TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    /* Scrollbar mais visível em tablet */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: #64748b;
+    }
+}
+
+/* --------------------------------------------
+   DARK MODE - AJUSTES TABLET
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) {
+    
+    body.dark-mode .stat-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+    
+    body.dark-mode .stat-label {
+        color: #94a3b8 !important;
+    }
+    
+    body.dark-mode .stat-value {
+        color: #f1f5f9 !important;
+    }
+    
+    body.dark-mode .card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+}
+
+/* --------------------------------------------
+   ORIENTAÇÍO LANDSCAPE ESPECÍFICA
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) and (orientation: landscape) {
+    
+    .stats-grid,
+    .pcp-stats-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .stat-card {
+        flex-direction: row !important;
+        padding: 12px !important;
+    }
+    
+    .stat-icon {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 16px !important;
+    }
+    
+    .stat-value {
+        font-size: 20px !important;
+    }
+    
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .quick-actions-list {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* --------------------------------------------
+   ORIENTAÇÍO PORTRAIT ESPECÍFICA
+   -------------------------------------------- */
+@media screen and (min-width: 600px) and (max-width: 1200px) and (orientation: portrait) {
+    
+    .stats-grid,
+    .pcp-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .content-grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .quick-actions-list {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* --------------------------------------------
+   FIXES PARA TEXTO CORTADO
+   -------------------------------------------- */
+@media screen and (max-width: 1200px) {
+    
+    /* Garantir que textos nÁo sejam cortados */
+    .stat-label,
+    .stat-trend,
+    .card-title,
+    .quick-action-title,
+    .alert-title {
+        word-break: break-word;
+        hyphens: auto;
+    }
+    
+    /* Abreviações para labels longos em telas muito pequenas */
+    @media (max-width: 700px) {
+        .stat-card[data-stat="produtos"] .stat-label::after { content: ""; }
+        .stat-card[data-stat="ordens"] .stat-label::after { content: ""; }
+        .stat-card[data-stat="estoque"] .stat-label::after { content: ""; }
+        .stat-card[data-stat="materiais"] .stat-label::after { content: ""; }
+    }
+}

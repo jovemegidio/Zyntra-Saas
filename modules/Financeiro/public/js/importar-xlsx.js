@@ -524,12 +524,10 @@ async function processarArquivoXLSX(file, tipo) {
         console.log('[IMPORT] Enviando', dados.length, 'registros para', config.endpoint);
         
         // Enviar para API
-        const token = localStorage.getItem('authToken') || getCookie('authToken');
         const response = await fetch(config.endpoint, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token || ''}`
+                'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify({ dados })
@@ -589,14 +587,6 @@ async function processarArquivoXLSX(file, tipo) {
             </div>
         `;
     }
-}
-
-// Helper para pegar cookie
-function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(';').shift();
-    return null;
 }
 
 // Estilos adicionais para o modal

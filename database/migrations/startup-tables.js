@@ -181,16 +181,19 @@ async function runMigrations(pool) {
         `CREATE TABLE IF NOT EXISTS apontamentos_producao (
             id INT PRIMARY KEY AUTO_INCREMENT,
             ordem_producao_id INT,
-            operador_id INT,
-            operador_nome VARCHAR(255),
-            maquina VARCHAR(100),
-            quantidade_produzida DECIMAL(10,2),
-            quantidade_refugo DECIMAL(10,2) DEFAULT 0,
-            data_inicio DATETIME,
-            data_fim DATETIME,
+            usuario_id INT,
+            operador VARCHAR(255),
+            tipo_atividade VARCHAR(100),
+            nome_atividade VARCHAR(255),
+            hora_inicio DATETIME,
+            hora_fim DATETIME,
+            duracao_segundos INT DEFAULT 0,
+            pedido_id INT,
+            produto_descricao TEXT,
             observacoes TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_ordem (ordem_producao_id)
+            INDEX idx_ordem (ordem_producao_id),
+            INDEX idx_usuario (usuario_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
 
         // Atestados

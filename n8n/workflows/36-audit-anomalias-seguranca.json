@@ -1,0 +1,81 @@
+{
+  "name": "36-audit-anomalias-seguranca",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 7 }, { "triggerAtHour": 13 }, { "triggerAtHour": 19 }] }
+      },
+      "name": "Schedule Trigger 3x/dia",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/admin/audit-anomalias?horas=8",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Anomalias",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.total_anomalias }}", "rightValue": "0", "operator": { "type": "number", "operation": "gt" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Tem Anomalias?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'ti', mensagem: '🔒 *ALERTA DE SEGURANÇA*\\n\\n' + $json.total_anomalias + ' anomalias detectadas nas últimas ' + $json.periodo_horas + 'h:\\n\\n🗑️ Exclusões em massa: ' + $json.exclusoes_massa.length + '\\n🌙 Acessos fora horário: ' + $json.fora_horario.length + '\\n⚡ Alto volume: ' + $json.alto_volume.length + '\\n\\nInvestigue imediatamente!' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Alerta Segurança WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "sendTo": "ti@aluforce.ind.br",
+        "subject": "=🔒 ALERTA: {{ $json.total_anomalias }} Anomalias de Segurança Detectadas",
+        "emailType": "html",
+        "html": "=<h2 style='color:red'>⚠️ Anomalias de Segurança</h2><p>Período: últimas {{ $json.periodo_horas }}h</p><h3>Exclusões em Massa ({{ $json.exclusoes_massa.length }})</h3><ul>{{ ($json.exclusoes_massa || []).map(e => '<li>' + (e.nome || e.user_id) + ' - ' + e.total_exclusoes + ' exclusões (' + e.tipos + ')</li>').join('') }}</ul><h3>Acessos Fora do Horário ({{ $json.fora_horario.length }})</h3><ul>{{ ($json.fora_horario || []).map(a => '<li>' + (a.nome || a.user_id) + ' - ' + a.acessos + ' acessos</li>').join('') }}</ul><h3>Alto Volume ({{ $json.alto_volume.length }})</h3><ul>{{ ($json.alto_volume || []).map(v => '<li>' + (v.nome || v.user_id) + ' - ' + v.total_acoes + ' ações (' + v.acoes + ')</li>').join('') }}</ul>",
+        "options": {}
+      },
+      "name": "Email Alerta Segurança",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [910, 400],
+      "credentials": { "smtp": { "id": "1", "name": "SMTP Aluforce" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger 3x/dia": { "main": [[{ "node": "Buscar Anomalias", "type": "main", "index": 0 }]] },
+    "Buscar Anomalias": { "main": [[{ "node": "Tem Anomalias?", "type": "main", "index": 0 }]] },
+    "Tem Anomalias?": { "main": [[{ "node": "Alerta Segurança WhatsApp", "type": "main", "index": 0 }, { "node": "Email Alerta Segurança", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

@@ -1,0 +1,63 @@
+{
+  "name": "34-cleanup-usuarios-inativos",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "weeks", "triggerAtDay": 1, "triggerAtHour": 7 }] }
+      },
+      "name": "Schedule Trigger Semanal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/admin/usuarios-inativos?dias=60",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Usuários Inativos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.total }}", "rightValue": "0", "operator": { "type": "number", "operation": "gt" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Tem Inativos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "sendTo": "ti@aluforce.ind.br",
+        "subject": "=🔒 {{ $json.total }} Usuários Inativos há mais de 60 dias",
+        "emailType": "html",
+        "html": "=<h2>Usuários Inativos - Revisão de Segurança</h2><p>{{ $json.total }} usuários não acessam o sistema há mais de 60 dias.</p><table border='1' cellpadding='6'><tr><th>Nome</th><th>Email</th><th>Role</th><th>Dias Inativo</th></tr>{{ ($json.data || []).map(u => '<tr><td>' + u.nome + '</td><td>' + u.email + '</td><td>' + u.role + '</td><td>' + u.dias_inativo + '</td></tr>').join('') }}</table><p>Considere desativar contas não utilizadas por segurança.</p>",
+        "options": {}
+      },
+      "name": "Email TI Segurança",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [910, 200],
+      "credentials": { "smtp": { "id": "1", "name": "SMTP Aluforce" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger Semanal": { "main": [[{ "node": "Buscar Usuários Inativos", "type": "main", "index": 0 }]] },
+    "Buscar Usuários Inativos": { "main": [[{ "node": "Tem Inativos?", "type": "main", "index": 0 }]] },
+    "Tem Inativos?": { "main": [[{ "node": "Email TI Segurança", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

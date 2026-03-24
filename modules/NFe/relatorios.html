@@ -71,10 +71,7 @@
     <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
     <nav class="sidebar-nav">
         <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-        <a href="emitir.html" class="sidebar-btn" title="Emitir NFe"><i class="fas fa-file-invoice"></i></a>
         <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-        <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-        <a href="danfe.html" class="sidebar-btn" title="Gerar DANFE"><i class="fas fa-print"></i></a>
         <a href="relatorios.html" class="sidebar-btn active" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
         <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
         <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
@@ -399,16 +396,16 @@ function gerarRelatorio(tipo) {
 }
 
 function renderizarRelatorio(dados) {
-    document.getElementById('previewTitle').textContent = dados.titulo || 'Relatório';
+    document.getElementById('previewTitle').textContent = dados.título || 'Relatório';
     document.title = 'Aluforce: ' + (dados.titulo || 'Relatório');
 
-    var periodo = '';
+    var período = '';
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
     if (di && df) {
-        periodo = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
     } else if (di) {
-        periodo = 'A partir de ' + new Date(di + 'T00:00:00').toLocaleDateString('pt-BR');
+        período = 'A partir de ' + new Date(di + 'T00:00:00').toLocaleDateString('pt-BR');
     }
 
     var html = '';
@@ -419,8 +416,8 @@ function renderizarRelatorio(dados) {
         });
         html += '</div>';
     }
-    if (periodo) {
-        html += '<div style="padding:8px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary-500);"></i> Período: <strong>' + periodo + '</strong></div>';
+    if (período) {
+        html += '<div style="padding:8px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary-500);"></i> Período: <strong>' + período + '</strong></div>';
     }
     if (dados.colunas && dados.linhas) {
         html += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
@@ -458,11 +455,11 @@ function exportarPDF() {
     var dados = dadosRelatorioAtual;
     if (!dados) { showAlert('Nenhum relatório carregado para exportar', 'warning'); return; }
 
-    var periodo = '';
+    var período = '';
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
     if (di && df) {
-        periodo = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
     }
     var dataGeracao = new Date().toLocaleString('pt-BR');
 
@@ -491,7 +488,7 @@ function exportarPDF() {
 
     win.document.write(
         '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
-        '<title>' + _escHtml(dados.titulo) + ' - ALUFORCE</title>' +
+        '<title>' + _escHtml(dados.título) + ' - ALUFORCE</title>' +
         '<style>' +
             '@page { margin: 12mm 15mm; size: A4 landscape; }' +
             '@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }' +
@@ -542,10 +539,10 @@ function exportarPDF() {
             '<div class="rpt-meta">' +
                 '<div class="doc-tag">Relatório</div>' +
                 '<div class="meta-line">Emitido em: ' + dataGeracao + '</div>' +
-                (periodo ? '<div class="meta-line">Período: ' + periodo + '</div>' : '') +
+                (período ? '<div class="meta-line">Período: ' + período + '</div>' : '') +
             '</div>' +
         '</div>' +
-        '<div class="rpt-title"><h1>' + _escHtml(dados.titulo) + '</h1><div class="subtitle">Módulo NFe — Sistema Integrado de Gestão Empresarial</div></div>' +
+        '<div class="rpt-title"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">Módulo NFe — Sistema Integrado de Gestão Empresarial</div></div>' +
         summaryHtml +
         '<div class="data-section"><h2>Dados do Relatório</h2>' +
         tableHtml +
@@ -553,7 +550,8 @@ function exportarPDF() {
         '</div>' +
         '<div class="rpt-footer"><span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
         '<div class="confidential">Documento Confidencial — Uso Interno</div>' +
-        '</body></html>'
+        '    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+</body></html>'
     );
     win.document.close();
     showAlert('PDF gerado com sucesso — use "Salvar como PDF" na janela de impressão', 'success');
@@ -594,5 +592,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <!-- Enterprise Shared -->
 <script src="/js/sidebar-click-animation.js?v=20260301"></script>
 <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

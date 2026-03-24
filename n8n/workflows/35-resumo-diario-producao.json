@@ -1,0 +1,65 @@
+{
+  "name": "35-resumo-diario-producao",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 18, "triggerAtMinute": 30 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/pcp/resumo-diario-producao",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Resumo Produção",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'pcp', mensagem: '🏭 *RESUMO PRODUÇÃO - ' + $json.data + '*\\n\\n📦 Produção: ' + $json.producao + ' peças\\n🔴 Refugo: ' + $json.refugo + ' peças\\n📊 Eficiência: ' + $json.eficiencia_pct + '%\\n👷 Operadores: ' + $json.operadores_ativos + '\\n✅ OPs concluídas: ' + $json.ops_concluidas + '\\n🆕 OPs iniciadas: ' + $json.ops_iniciadas }) }}"
+        },
+        "options": {}
+      },
+      "name": "Enviar Resumo WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "sendTo": "producao@aluforce.ind.br",
+        "subject": "=Resumo Diário Produção - {{ $('Buscar Resumo Produção').item.json.data }}",
+        "emailType": "html",
+        "html": "=<h2>Resumo de Produção</h2><p><strong>Data:</strong> {{ $('Buscar Resumo Produção').item.json.data }}</p><table border='1' cellpadding='8'><tr><td>Produção</td><td>{{ $('Buscar Resumo Produção').item.json.producao }} peças</td></tr><tr><td>Refugo</td><td>{{ $('Buscar Resumo Produção').item.json.refugo }} peças</td></tr><tr><td>Eficiência</td><td>{{ $('Buscar Resumo Produção').item.json.eficiencia_pct }}%</td></tr><tr><td>Operadores Ativos</td><td>{{ $('Buscar Resumo Produção').item.json.operadores_ativos }}</td></tr><tr><td>OPs Concluídas</td><td>{{ $('Buscar Resumo Produção').item.json.ops_concluidas }}</td></tr><tr><td>OPs Iniciadas</td><td>{{ $('Buscar Resumo Produção').item.json.ops_iniciadas }}</td></tr></table>",
+        "options": {}
+      },
+      "name": "Email Resumo Produção",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [690, 500],
+      "credentials": { "smtp": { "id": "1", "name": "SMTP Aluforce" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Buscar Resumo Produção", "type": "main", "index": 0 }]] },
+    "Buscar Resumo Produção": { "main": [[{ "node": "Enviar Resumo WhatsApp", "type": "main", "index": 0 }, { "node": "Email Resumo Produção", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

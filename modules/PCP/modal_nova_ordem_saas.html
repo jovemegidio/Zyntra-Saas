@@ -203,7 +203,7 @@
                     <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
                         <div>
                             <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">Orçamento</label>
-                            <input type="text" id="num_orcamento" placeholder="Nº Orçamento" style="width: 100%; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                            <input type="text" id="num_orçamento" placeholder="Nº Orçamento" style="width: 100%; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
                         </div>
                         <div>
                             <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">Revisão</label>
@@ -546,7 +546,7 @@ async function submitNovaOrdem(event) {
         if (codigo || nome || qtde > 0) {
             produtos.push({
                 codigo,
-                descricao: nome, // ð§ Usar 'descricao' ao invés de 'nome' para compatibilidade
+                descrição: nome, // ð§ Usar 'descrição' ao invés de 'nome' para compatibilidade
                 nome,
                 peso_liquido: pesoLiquido,
                 lote: lote,
@@ -566,7 +566,7 @@ async function submitNovaOrdem(event) {
     
     const dados = {
         // Dados Principais
-        num_orcamento: document.getElementById('num_orcamento').value,
+        num_orçamento: document.getElementById('num_orçamento').value,
         revisao: document.getElementById('revisao').value,
         num_pedido: document.getElementById('num_pedido').value,
         data_liberacao: document.getElementById('data_liberacao').value,
@@ -614,17 +614,17 @@ async function submitNovaOrdem(event) {
         btnSubmit.disabled = true;
         
         // ========== 1. SALVAR NO BANCO DE DADOS + KANBAN ==========
-        const numeroOP = dados.num_pedido || `OP-${Date.now()}`;
+        const númeroOP = dados.num_pedido || `OP-${Date.now()}`;
         const qtdTotal = produtos.reduce((acc, p) => acc + (parseFloat(p.quantidade) || 0), 0);
         
         const payloadKanban = {
             // Cabeçalho
-            numero: numeroOP,
+            número: númeroOP,
             revisao: dados.revisao || '01',
-            numero_pedido: dados.num_pedido,
-            numero_orcamento: dados.num_orcamento,
+            número_pedido: dados.num_pedido,
+            número_orçamento: dados.num_orçamento,
             num_pedido: dados.num_pedido,
-            num_orcamento: dados.num_orcamento,
+            num_orçamento: dados.num_orçamento,
             data_liberacao: dados.data_liberacao,
             
             // Cliente
@@ -665,7 +665,7 @@ async function submitNovaOrdem(event) {
             // Produtos (formato compatível com endpoint kanban)
             produtos: produtos.map(p => ({
                 codigo: p.codigo || '',
-                descricao: p.descricao || p.nome || '',
+                descrição: p.descrição || p.nome || '',
                 nome: p.nome || '',
                 embalagem: p.embalagem || '',
                 lances: p.lances || '',
@@ -678,7 +678,7 @@ async function submitNovaOrdem(event) {
             })),
             
             // Campos para visualização no Kanban
-            produto: produtos.map(p => p.descricao || p.codigo).filter(Boolean).join(', ').substring(0, 200) || dados.cliente,
+            produto: produtos.map(p => p.descrição || p.codigo).filter(Boolean).join(', ').substring(0, 200) || dados.cliente,
             dataConclusao: dados.prazo_entrega || dados.data_liberacao || null,
             data_previsao_entrega: dados.prazo_entrega || null,
             quantidade: qtdTotal || 1,
@@ -735,7 +735,7 @@ async function submitNovaOrdem(event) {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `Ordem_Producao_${dados.num_pedido || Date.now()}.xlsx`;
+        a.download = `Ordem_Produção_${dados.num_pedido || Date.now()}.xlsx`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);

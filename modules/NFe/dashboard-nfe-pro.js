@@ -116,7 +116,7 @@ class NFeDashboard {
             ];
 
             this.data.logística = [
-                { 
+                {
                     nfe: '000342',
                     destino: 'São Paulo - SP',
                     transportadora: 'TRANSPORTADORA RÁPIDA',
@@ -298,14 +298,14 @@ class NFeDashboard {
         const range = max - min || 1;
         const padding = 5;
         const divisor = dados.length > 1 ? dados.length - 1 : 1;
-        
+
         ctx.clearRect(0, 0, width, height);
-        
+
         // Criar gradiente para área
         const gradient = ctx.createLinearGradient(0, 0, 0, height);
         gradient.addColorStop(0, cor + '40');
         gradient.addColorStop(1, cor + '00');
-        
+
         // Desenhar área preenchida
         ctx.beginPath();
         dados.forEach((valor, i) => {
@@ -319,7 +319,7 @@ class NFeDashboard {
         ctx.closePath();
         ctx.fillStyle = gradient;
         ctx.fill();
-        
+
         // Desenhar linha
         ctx.strokeStyle = cor;
         ctx.lineWidth = 2.5;
@@ -327,7 +327,7 @@ class NFeDashboard {
         ctx.lineJoin = 'round';
         ctx.shadowColor = cor;
         ctx.shadowBlur = 4;
-        
+
         ctx.beginPath();
         dados.forEach((valor, i) => {
             const x = (i / divisor) * width;
@@ -336,12 +336,12 @@ class NFeDashboard {
             else ctx.lineTo(x, y);
         });
         ctx.stroke();
-        
+
         // Desenhar ponto final destacado
         ctx.shadowBlur = 0;
         const lastX = width;
         const lastY = padding + ((max - dados[dados.length - 1]) / range) * (height - padding * 2);
-        
+
         ctx.beginPath();
         ctx.arc(lastX, lastY, 3, 0, Math.PI * 2);
         ctx.fillStyle = '#ffffff';
@@ -390,12 +390,12 @@ class NFeDashboard {
         const padding = 40;
         const chartWidth = width - padding * 2;
         const chartHeight = height - padding * 2;
-        
+
         const valores = dados.map(d => d.quantidade);
         const max = Math.max(...valores);
-        
+
         ctx.clearRect(0, 0, width, height);
-        
+
         // Grid
         ctx.strokeStyle = '#e5e7eb';
         ctx.lineWidth = 1;
@@ -405,31 +405,31 @@ class NFeDashboard {
             ctx.moveTo(padding, y);
             ctx.lineTo(width - padding, y);
             ctx.stroke();
-            
+
             const valor = max - (max / 5) * i;
             ctx.fillStyle = '#6b7280';
             ctx.font = '11px Inter';
             ctx.textAlign = 'right';
             ctx.fillText(Math.round(valor), padding - 10, y + 4);
         }
-        
+
         // Barras
         const barWidth = chartWidth / dados.length * 0.7;
         const barGap = chartWidth / dados.length * 0.3;
-        
+
         dados.forEach((item, i) => {
             const barHeight = (item.quantidade / max) * chartHeight;
             const x = padding + (chartWidth / dados.length) * i + barGap / 2;
             const y = height - padding - barHeight;
-            
+
             // Gradiente
             const gradient = ctx.createLinearGradient(x, y, x, height - padding);
             gradient.addColorStop(0, '#8b5cf6');
             gradient.addColorStop(1, '#7c3aed');
-            
+
             ctx.fillStyle = gradient;
             ctx.fillRect(x, y, barWidth, barHeight);
-            
+
             // Labels
             ctx.fillStyle = '#6b7280';
             ctx.font = '11px Inter';
@@ -482,31 +482,31 @@ class NFeDashboard {
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
         const radius = Math.min(centerX, centerY) - 10;
-        
+
         const total = status.reduce((sum, s) => sum + s.quantidade, 0);
         if (total === 0) return;
         let currentAngle = -Math.PI / 2;
-        
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         status.forEach((s) => {
             const sliceAngle = (s.quantidade / total) * 2 * Math.PI;
-            
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
             ctx.lineTo(centerX, centerY);
             ctx.closePath();
-            
+
             ctx.fillStyle = s.cor;
             ctx.fill();
-            
+
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
             ctx.stroke();
-            
+
             currentAngle += sliceAngle;
         });
-        
+
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius * 0.5, 0, 2 * Math.PI);
         ctx.fillStyle = '#ffffff';
@@ -653,12 +653,19 @@ class NFeDashboard {
     }
 
     iniciarAtualizacaoAutomatica() {
-        setInterval(async () => {
+        this._autoRefreshInterval = setInterval(async () => {
             await this.carregarDados();
             this.renderizarMetricas();
             this.renderizarGraficos();
             this.renderizarTabelaNFes();
         }, 300000);
+    }
+
+    pararAtualizacaoAutomatica() {
+        if (this._autoRefreshInterval) {
+            clearInterval(this._autoRefreshInterval);
+            this._autoRefreshInterval = null;
+        }
     }
 
     // Métodos para ações das NFes
@@ -686,7 +693,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('nfe-metricas-dashboard')) {
         window.nfeDashboard = new NFeDashboard();
     }
-    
+
     // Inicializar dados do usuário no header
     initUserHeader();
 });
@@ -700,15 +707,15 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 async function initUserHeader() {
     console.log('🔄 Inicializando header do usuário...');
-    
+
     // Tentar carregar dados do localStorage primeiro
     let userData = getUserDataFromStorage();
-    
+
     if (!userData) {
         // Se não tiver no localStorage, buscar da API
         userData = await fetchUserData();
     }
-    
+
     if (userData) {
         updateUserHeader(userData);
     } else {
@@ -735,7 +742,7 @@ async function fetchUserData() {
                 'Cache-Control': 'no-cache'
             }
         });
-        
+
         if (response.ok) {
             const userData = await response.json();
             // Salvar no localStorage para uso futuro
@@ -770,7 +777,7 @@ function updateUserHeader(userData) {
     userTextElements.forEach(el => {
         el.textContent = primeiroNome;
     });
-    
+
     // Atualizar avatar do usuário
     const avatarImages = document.querySelectorAll('.avatar-circle img, .user-avatar img, #user-photo');
     avatarImages.forEach(img => {
@@ -788,19 +795,19 @@ function updateUserHeader(userData) {
     if (userInitial) {
         userInitial.textContent = (userData.nome || 'U').charAt(0).toUpperCase();
     }
-    
+
     // Atualizar nome/role no dropdown (se existir)
     const userNameDropdown = document.querySelector('.user-name');
     const userRoleDropdown = document.querySelector('.user-role');
-    
+
     if (userNameDropdown) {
         userNameDropdown.textContent = userData.nome || 'Usuário';
     }
-    
+
     if (userRoleDropdown) {
         userRoleDropdown.textContent = userData.cargo || userData.role || 'Colaborador';
     }
-    
+
     console.log('✅ Header atualizado com dados do usuário:', userData.nome);
 }
 

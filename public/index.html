@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
@@ -9,15 +10,19 @@
     <meta name="apple-mobile-web-app-title" content="ALUFORCE">
     <title>Aluforce: Painel de Controle</title>
 
+    <!-- Autenticação Unificada (isolamento por aba + refresh + inatividade) -->
+    <script src="/js/auth-unified.js?v=20260324"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+
     <!-- PWA: Service Worker Registration -->
     <script>
-    if('serviceWorker' in navigator){
-        window.addEventListener('load', function(){
-            navigator.serviceWorker.register('/sw.js')
-                .then(function(reg){ console.log('[PWA] SW registrado, escopo:', reg.scope); })
-                .catch(function(err){ console.warn('[PWA] Falha ao registrar SW:', err); });
-        });
-    }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function (reg) { console.log('[PWA] SW registrado, escopo:', reg.scope); })
+                    .catch(function (err) { console.warn('[PWA] Falha ao registrar SW:', err); });
+            });
+        }
     </script>
 
     <!-- Favicon -->
@@ -27,10 +32,13 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Manrope:wght@600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
@@ -38,6 +46,8 @@
     <!-- Critical CSS - Modal Fix -->
     <link rel="stylesheet" href="/css/modal-fix-critical.css?v=20260219">
     <link rel="stylesheet" href="/css/notifications-fix.css?v=20260129">
+    <!-- Modal Visual Standard — cobertura de famílias não-padrão -->
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260323">
 
     <!-- Modal Configurações CSS - Enterprise v4 -->
     <link rel="stylesheet" href="/css/modal-configuracoes-v4.css?v=20260301">
@@ -56,7 +66,11 @@
     <link rel="prefetch" as="image" type="image/webp" href="/Fundos/Fundos (9).webp?v=20260214">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         :root {
             --slate-50: #f8fafc;
@@ -82,7 +96,8 @@
             --pink-600: #db2777;
         }
 
-        html, body {
+        html,
+        body {
             height: 100%;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: transparent;
@@ -119,9 +134,17 @@
         }
 
         @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
         /* Header - forçando estilo branco (sobrescreve backgrounds.css) */
@@ -140,7 +163,7 @@
             -webkit-backdrop-filter: blur(20px) !important;
             border-bottom: 1px solid var(--slate-200) !important;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
         }
 
         .header-content {
@@ -273,7 +296,7 @@
             background: white;
             border: 1px solid var(--slate-200);
             border-radius: 16px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px);
@@ -320,9 +343,30 @@
             aspect-ratio: 1 / 1;
         }
 
-        .dropdown-info { flex: 1; min-width: 0; overflow: hidden; }
-        .dropdown-user-name { display: block; font-weight: 600; font-size: 14px; color: var(--slate-900); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .dropdown-user-email { display: block; font-size: 12px; color: var(--slate-500); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .dropdown-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .dropdown-user-name {
+            display: block;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--slate-900);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dropdown-user-email {
+            display: block;
+            font-size: 12px;
+            color: var(--slate-500);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
         .dropdown-divider {
             border: none;
@@ -331,7 +375,9 @@
             margin: 0;
         }
 
-        .dropdown-options { padding: 8px; }
+        .dropdown-options {
+            padding: 8px;
+        }
 
         .dropdown-item {
             display: flex;
@@ -350,10 +396,19 @@
             color: var(--slate-900);
         }
 
-        .dropdown-item i { width: 18px; text-align: center; }
+        .dropdown-item i {
+            width: 18px;
+            text-align: center;
+        }
 
-        .logout-item { color: var(--rose-600); }
-        .logout-item:hover { background: var(--rose-50); color: var(--rose-600); }
+        .logout-item {
+            color: var(--rose-600);
+        }
+
+        .logout-item:hover {
+            background: var(--rose-50);
+            color: var(--rose-600);
+        }
 
         /* Main Content */
         .main-content {
@@ -383,7 +438,7 @@
         .greeting-date-text {
             font-size: 14px;
             color: #ffffff;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
         .greeting-time {
@@ -395,7 +450,7 @@
             background: rgba(255, 255, 255, 0.95);
             padding: 8px 16px;
             border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             font-weight: 500;
         }
 
@@ -406,70 +461,104 @@
             color: #ffffff;
             margin-bottom: 6px;
             letter-spacing: -1px;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
         }
 
         .greeting-quote {
             font-size: 16px;
             color: rgba(255, 255, 255, 0.9);
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
         }
 
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        /* Modules Grid - 3x2 layout (v2026-02-18) */
+        /* Modules Grid - 6x1 layout (v2026-03-22e) */
         .modules-grid {
-            display: grid !important;
-            grid-template-columns: repeat(3, 1fr) !important;
-            grid-template-rows: repeat(2, 140px) !important;
-            gap: 16px;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: stretch !important;
+            gap: 10px;
             margin-bottom: 32px;
             animation: fadeInUp 0.5s ease 0.2s both;
-            max-width: 900px;
+            max-width: 100%;
             width: 100%;
+            padding: 0 20px;
+            box-sizing: border-box;
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes toastIn {
-            from { opacity: 0; transform: translateX(100px); }
-            to { opacity: 1; transform: translateX(0); }
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         @keyframes toastOut {
-            from { opacity: 1; transform: translateX(0); }
-            to { opacity: 0; transform: translateX(100px); }
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
         }
 
         .module-card {
-            background: rgba(255, 255, 255, 0.95);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(230,230,230,0.5);
-            border-radius: 16px;
-            padding: 20px 20px 16px;
+            background: rgba(255, 255, 255, 0.90);
+            -webkit-backdrop-filter: blur(24px) saturate(1.4);
+            backdrop-filter: blur(24px) saturate(1.4);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-left: 3px solid var(--card-accent, #94a3b8);
+            border-radius: 12px;
+            padding: 14px 14px 14px 12px;
             cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             display: flex !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
+            flex-direction: row !important;
+            align-items: center !important;
             justify-content: flex-start !important;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
-            height: 140px !important;
-            min-height: 140px !important;
-            max-height: 140px !important;
+            box-shadow:
+                0 1px 3px rgba(0, 0, 0, 0.04),
+                0 4px 14px rgba(0, 0, 0, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            flex: 1 1 0 !important;
+            min-width: 0 !important;
             box-sizing: border-box !important;
             color: inherit;
+            text-align: left;
+            gap: 10px;
         }
 
         /* Impedir que elementos injetados por JS quebrem o layout */
@@ -478,22 +567,13 @@
             display: none !important;
         }
 
-        /* Gradient accent bar - hidden by default */
+        /* Gradient accent bar - hidden, using left border instead */
         .module-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: var(--card-gradient);
-            border-radius: 16px 16px 0 0;
-            opacity: 0;
-            transition: opacity 0.35s ease;
+            display: none;
         }
 
         .module-card:hover::before {
-            opacity: 1;
+            display: none;
         }
 
         /* Subtle ambient glow on hover */
@@ -501,37 +581,44 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 16px;
-            background: radial-gradient(ellipse at 30% 20%, var(--glow-color, rgba(59,130,246,0.08)), transparent 70%);
+            border-radius: 12px;
+            background: radial-gradient(ellipse at 0% 50%, var(--glow-color, rgba(59, 130, 246, 0.06)), transparent 70%);
             opacity: 0;
-            transition: opacity 0.35s ease;
+            transition: opacity 0.3s ease;
             pointer-events: none;
         }
 
-        .module-card:hover::after { opacity: 1; }
+        .module-card:hover::after {
+            opacity: 1;
+        }
 
         .module-card:hover {
-            transform: translateY(-4px) scale(1.01);
-            background: rgba(255, 255, 255, 0.98);
-            border-color: rgba(200,200,200,0.5);
-            box-shadow: 0 12px 32px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05), 0 0 24px var(--glow-shadow, rgba(59,130,246,0.08));
+            transform: translateY(-3px);
+            background: rgba(255, 255, 255, 0.96);
+            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow:
+                0 8px 28px rgba(0, 0, 0, 0.08),
+                0 2px 8px rgba(0, 0, 0, 0.04),
+                0 0 20px var(--glow-shadow, rgba(59, 130, 246, 0.08)),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
 
         .module-icon {
-            width: 48px;
-            height: 48px;
-            min-width: 48px;
-            min-height: 48px;
-            border-radius: 14px;
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            min-height: 38px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            margin-bottom: 12px;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px;
+            margin-bottom: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             z-index: 1;
             flex-shrink: 0;
+            box-shadow: 0 2px 6px var(--icon-shadow, rgba(0, 0, 0, 0.06));
         }
 
         .module-icon i {
@@ -543,77 +630,76 @@
         }
 
         .module-card:hover .module-icon {
-            transform: scale(1.1) translateY(-2px);
-            box-shadow: 0 6px 16px var(--icon-shadow, rgba(0,0,0,0.1));
+            transform: scale(1.08);
+            box-shadow: 0 4px 14px var(--icon-shadow, rgba(0, 0, 0, 0.15));
         }
 
         .module-info {
-            flex: 1;
+            flex: 1 1 0;
             display: flex;
             flex-direction: column;
+            align-items: flex-start;
             gap: 2px;
             position: relative;
             z-index: 1;
+            min-width: 0;
+            overflow: visible;
         }
 
         .module-title {
             font-family: 'Manrope', sans-serif;
-            font-size: 15px;
+            font-size: 12.5px;
             font-weight: 700;
             color: var(--slate-900);
             margin-bottom: 2px;
-            line-height: 1.25;
+            line-height: 1.3;
             letter-spacing: -0.01em;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
         }
 
         .module-desc {
-            font-size: 12px;
+            font-size: 10.5px;
             color: var(--slate-500);
             line-height: 1.35;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            max-width: 100%;
+            font-weight: 400;
         }
 
-        /* Arrow indicator */
+        /* Arrow indicator - hidden in compact 6-col layout */
         .module-arrow {
-            position: absolute;
-            top: 20px;
-            right: 18px;
-            width: 26px;
-            height: 26px;
-            border-radius: 50%;
-            background: var(--arrow-bg, rgba(0,0,0,0.04));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            color: var(--slate-400);
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1;
-            opacity: 0 !important;
-            visibility: hidden;
-        }
-
-        .module-card:hover .module-arrow {
-            opacity: 1 !important;
-            visibility: visible;
-            background: var(--card-gradient);
-            color: white;
-            transform: translateX(3px);
-            box-shadow: 0 4px 12px var(--icon-shadow, rgba(0,0,0,0.15));
+            display: none !important;
         }
 
         /* Staggered entrance animation */
-        .module-card:nth-child(1) { animation-delay: 0.1s; }
-        .module-card:nth-child(2) { animation-delay: 0.15s; }
-        .module-card:nth-child(3) { animation-delay: 0.2s; }
-        .module-card:nth-child(4) { animation-delay: 0.25s; }
-        .module-card:nth-child(5) { animation-delay: 0.3s; }
-        .module-card:nth-child(6) { animation-delay: 0.35s; }
+        .module-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .module-card:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .module-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .module-card:nth-child(4) {
+            animation-delay: 0.25s;
+        }
+
+        .module-card:nth-child(5) {
+            animation-delay: 0.3s;
+        }
+
+        .module-card:nth-child(6) {
+            animation-delay: 0.35s;
+        }
 
         .module-card {
             animation: cardEntrance 0.5s ease both;
@@ -624,6 +710,7 @@
                 opacity: 0;
                 transform: translateY(24px) scale(0.96);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -637,9 +724,17 @@
             --card-gradient: linear-gradient(135deg, #f97316, #fb923c);
             --icon-shadow: rgba(234, 88, 12, 0.25);
             --arrow-bg: rgba(234, 88, 12, 0.08);
+            --card-accent: #f97316;
         }
-        .module-card.compras .module-icon { background: linear-gradient(135deg, #fff7ed, #ffedd5); color: #ea580c; }
-        .module-card.compras .module-arrow { color: #f97316; }
+
+        .module-card.compras .module-icon {
+            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            color: #ea580c;
+        }
+
+        .module-card.compras .module-arrow {
+            color: #f97316;
+        }
 
         .module-card.vendas {
             --glow-color: rgba(59, 130, 246, 0.08);
@@ -647,9 +742,17 @@
             --card-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
             --icon-shadow: rgba(59, 130, 246, 0.25);
             --arrow-bg: rgba(59, 130, 246, 0.08);
+            --card-accent: #3b82f6;
         }
-        .module-card.vendas .module-icon { background: linear-gradient(135deg, #eff6ff, #dbeafe); color: #2563eb; }
-        .module-card.vendas .module-arrow { color: #3b82f6; }
+
+        .module-card.vendas .module-icon {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #2563eb;
+        }
+
+        .module-card.vendas .module-arrow {
+            color: #3b82f6;
+        }
 
         .module-card.nfe {
             --glow-color: rgba(37, 99, 235, 0.08);
@@ -657,9 +760,17 @@
             --card-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
             --icon-shadow: rgba(37, 99, 235, 0.25);
             --arrow-bg: rgba(37, 99, 235, 0.08);
+            --card-accent: #2563eb;
         }
-        .module-card.nfe .module-icon { background: linear-gradient(135deg, #eef2ff, #e0e7ff); color: #1d4ed8; }
-        .module-card.nfe .module-arrow { color: #2563eb; }
+
+        .module-card.nfe .module-icon {
+            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+            color: #1d4ed8;
+        }
+
+        .module-card.nfe .module-arrow {
+            color: #2563eb;
+        }
 
         .module-card.pcp {
             --glow-color: rgba(71, 85, 105, 0.08);
@@ -667,9 +778,17 @@
             --card-gradient: linear-gradient(135deg, #475569, #64748b);
             --icon-shadow: rgba(71, 85, 105, 0.25);
             --arrow-bg: rgba(71, 85, 105, 0.08);
+            --card-accent: #475569;
         }
-        .module-card.pcp .module-icon { background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #334155; }
-        .module-card.pcp .module-arrow { color: #475569; }
+
+        .module-card.pcp .module-icon {
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            color: #334155;
+        }
+
+        .module-card.pcp .module-arrow {
+            color: #475569;
+        }
 
         .module-card.financeiro {
             --glow-color: rgba(16, 185, 129, 0.08);
@@ -677,9 +796,17 @@
             --card-gradient: linear-gradient(135deg, #10b981, #34d399);
             --icon-shadow: rgba(16, 185, 129, 0.25);
             --arrow-bg: rgba(16, 185, 129, 0.08);
+            --card-accent: #10b981;
         }
-        .module-card.financeiro .module-icon { background: linear-gradient(135deg, #ecfdf5, #d1fae5); color: #059669; }
-        .module-card.financeiro .module-arrow { color: #10b981; }
+
+        .module-card.financeiro .module-icon {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            color: #059669;
+        }
+
+        .module-card.financeiro .module-arrow {
+            color: #10b981;
+        }
 
         .module-card.rh {
             --glow-color: rgba(236, 72, 153, 0.08);
@@ -687,14 +814,24 @@
             --card-gradient: linear-gradient(135deg, #ec4899, #f472b6);
             --icon-shadow: rgba(236, 72, 153, 0.25);
             --arrow-bg: rgba(236, 72, 153, 0.08);
+            --card-accent: #ec4899;
         }
-        .module-card.rh .module-icon { background: linear-gradient(135deg, #fdf2f8, #fce7f3); color: #db2777; }
-        .module-card.rh .module-arrow { color: #ec4899; }
+
+        .module-card.rh .module-icon {
+            background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+            color: #db2777;
+        }
+
+        .module-card.rh .module-arrow {
+            color: #ec4899;
+        }
 
 
 
         /* Search Container - tema claro */
-        .header-search-wrapper { position: relative; }
+        .header-search-wrapper {
+            position: relative;
+        }
 
         .header-search-container,
         #header-search-container {
@@ -703,10 +840,10 @@
             right: 0;
             width: 380px;
             background: white !important;
-            border: 1px solid rgba(0,0,0,0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
             border-radius: 16px;
             padding: 16px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
             opacity: 0;
             visibility: hidden;
             transform: translateY(-10px) scale(0.98);
@@ -805,12 +942,29 @@
             font-size: 14px;
         }
 
-        .search-quick-nav-item.vendas i { color: var(--emerald-600); }
-        .search-quick-nav-item.compras i { color: var(--blue-600); }
-        .search-quick-nav-item.financeiro i { color: var(--indigo-600); }
-        .search-quick-nav-item.nfe i { color: var(--orange-600); }
-        .search-quick-nav-item.pcp i { color: var(--slate-600); }
-        .search-quick-nav-item.rh i { color: var(--pink-500); }
+        .search-quick-nav-item.vendas i {
+            color: var(--emerald-600);
+        }
+
+        .search-quick-nav-item.compras i {
+            color: var(--blue-600);
+        }
+
+        .search-quick-nav-item.financeiro i {
+            color: var(--indigo-600);
+        }
+
+        .search-quick-nav-item.nfe i {
+            color: var(--orange-600);
+        }
+
+        .search-quick-nav-item.pcp i {
+            color: var(--slate-600);
+        }
+
+        .search-quick-nav-item.rh i {
+            color: var(--pink-500);
+        }
 
         .search-hint {
             margin-top: 12px;
@@ -916,7 +1070,7 @@
             background: white !important;
             border-color: var(--module-color, #3b82f6) !important;
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
         }
 
         .search-module-item:hover::after {
@@ -933,7 +1087,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 12px;
-            background: linear-gradient(135deg, rgba(var(--module-color-rgb, 59,130,246), 0.08), rgba(var(--module-color-rgb, 59,130,246), 0.15));
+            background: linear-gradient(135deg, rgba(var(--module-color-rgb, 59, 130, 246), 0.08), rgba(var(--module-color-rgb, 59, 130, 246), 0.15));
             color: var(--module-color, #3b82f6);
             transition: all 0.25s ease;
         }
@@ -968,20 +1122,56 @@
 
         /* Responsive */
         @media (max-width: 768px) {
-            .header-content { padding: 0 16px; }
-            .main-content { padding: 80px 16px 40px; }
-            .user-name { display: none; }
-            .greeting-title { font-size: 28px; }
-            .modules-grid { grid-template-columns: 1fr 1fr !important; grid-template-rows: repeat(3, 130px) !important; gap: 12px; }
-            .module-card { padding: 18px 16px 14px; height: 130px !important; min-height: 130px !important; max-height: 130px !important; border-radius: 14px; }
-            .module-icon { width: 38px; height: 38px; font-size: 16px; border-radius: 10px; margin-bottom: 8px; }
-            .module-title { font-size: 14px; }
-            .module-desc { font-size: 11px; }
-            .module-arrow { width: 22px; height: 22px; font-size: 10px; top: 16px; right: 14px; }
+            .header-content {
+                padding: 0 16px;
+            }
+
+            .main-content {
+                padding: 80px 16px 40px;
+            }
+
+            .user-name {
+                display: none;
+            }
+
+            .greeting-title {
+                font-size: 28px;
+            }
+
+            .modules-grid {
+                flex-wrap: wrap !important;
+                gap: 10px;
+            }
+
+            .module-card {
+                flex: 0 0 calc(33.33% - 7px) !important;
+                height: 110px !important;
+                min-height: 110px !important;
+                max-height: 110px !important;
+                border-radius: 14px;
+            }
+
+            .module-icon {
+                width: 34px;
+                height: 34px;
+                font-size: 15px;
+                border-radius: 9px;
+                margin-bottom: 6px;
+            }
+
+            .module-title {
+                font-size: 12px;
+            }
+
+            .module-desc {
+                font-size: 9px;
+            }
         }
 
         @media (max-width: 480px) {
-            .modules-grid { grid-template-columns: 1fr; }
+            .modules-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Modal Perfil e Preferências */
@@ -1015,7 +1205,7 @@
             max-width: 460px;
             max-height: 85vh;
             overflow-y: auto;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255,255,255,0.1);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
             animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -1024,10 +1214,12 @@
         .modal-preferencias-content::-webkit-scrollbar {
             width: 4px;
         }
+
         .modal-perfil-content::-webkit-scrollbar-track,
         .modal-preferencias-content::-webkit-scrollbar-track {
             background: transparent;
         }
+
         .modal-perfil-content::-webkit-scrollbar-thumb,
         .modal-preferencias-content::-webkit-scrollbar-thumb {
             background: #cbd5e1;
@@ -1039,6 +1231,7 @@
                 opacity: 0;
                 transform: translateY(-20px) scale(0.97);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0) scale(1);
@@ -1308,14 +1501,14 @@
             background-color: white;
             transition: 0.3s;
             border-radius: 50%;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
         }
 
-        .toggle-switch input:checked + .toggle-slider {
+        .toggle-switch input:checked+.toggle-slider {
             background-color: #3b82f6;
         }
 
-        .toggle-switch input:checked + .toggle-slider:before {
+        .toggle-switch input:checked+.toggle-slider:before {
             transform: translateX(20px);
         }
 
@@ -1443,17 +1636,17 @@
         body.dark-mode .module-card {
             background: rgba(30, 41, 59, 0.88) !important;
             border-color: rgba(255, 255, 255, 0.08) !important;
-            box-shadow: 0 4px 16px rgba(0,0,0,0.2), 0 1px 3px rgba(0,0,0,0.15) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.15) !important;
         }
 
         body.dark-mode .module-card:hover {
             background: rgba(30, 41, 59, 0.95) !important;
             border-color: rgba(255, 255, 255, 0.15) !important;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.2), 0 0 40px var(--glow-shadow, rgba(59,130,246,0.08)) !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.2), 0 0 40px var(--glow-shadow, rgba(59, 130, 246, 0.08)) !important;
         }
 
         body.dark-mode .module-card::after {
-            background: radial-gradient(ellipse at 30% 20%, var(--glow-color, rgba(59,130,246,0.06)), transparent 70%) !important;
+            background: radial-gradient(ellipse at 30% 20%, var(--glow-color, rgba(59, 130, 246, 0.06)), transparent 70%) !important;
         }
 
         body.dark-mode .module-title {
@@ -1473,12 +1666,35 @@
             color: white !important;
         }
 
-        body.dark-mode .module-card.compras .module-icon { background: rgba(249, 115, 22, 0.15) !important; color: #fb923c !important; }
-        body.dark-mode .module-card.vendas .module-icon { background: rgba(59, 130, 246, 0.15) !important; color: #60a5fa !important; }
-        body.dark-mode .module-card.nfe .module-icon { background: rgba(37, 99, 235, 0.15) !important; color: #93c5fd !important; }
-        body.dark-mode .module-card.pcp .module-icon { background: rgba(100, 116, 139, 0.2) !important; color: #94a3b8 !important; }
-        body.dark-mode .module-card.financeiro .module-icon { background: rgba(16, 185, 129, 0.15) !important; color: #34d399 !important; }
-        body.dark-mode .module-card.rh .module-icon { background: rgba(236, 72, 153, 0.15) !important; color: #f472b6 !important; }
+        body.dark-mode .module-card.compras .module-icon {
+            background: rgba(249, 115, 22, 0.15) !important;
+            color: #fb923c !important;
+        }
+
+        body.dark-mode .module-card.vendas .module-icon {
+            background: rgba(59, 130, 246, 0.15) !important;
+            color: #60a5fa !important;
+        }
+
+        body.dark-mode .module-card.nfe .module-icon {
+            background: rgba(37, 99, 235, 0.15) !important;
+            color: #93c5fd !important;
+        }
+
+        body.dark-mode .module-card.pcp .module-icon {
+            background: rgba(100, 116, 139, 0.2) !important;
+            color: #94a3b8 !important;
+        }
+
+        body.dark-mode .module-card.financeiro .module-icon {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #34d399 !important;
+        }
+
+        body.dark-mode .module-card.rh .module-icon {
+            background: rgba(236, 72, 153, 0.15) !important;
+            color: #f472b6 !important;
+        }
 
         body.dark-mode .header-search-container,
         body.dark-mode #header-search-container {
@@ -1609,12 +1825,13 @@
             background: #475569;
         }
     </style>
-    <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
+    <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
 
     <!-- Chat Corporativo (Teams) -->
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
 </head>
+
 <body>
     <!-- Background Manager vai inserir o fundo aqui -->
     <div class="animated-gradient"></div>
@@ -1622,8 +1839,10 @@
     <header class="main-header">
         <div class="header-content">
             <div class="header-logo">
-                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce copy.webp" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="display:none;">
+                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul"
+                    id="logo-azul">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce copy.webp" alt="ALUFORCE" class="logo-branca"
+                    id="logo-branca" style="display:none;">
             </div>
 
             <div class="header-right">
@@ -1632,19 +1851,23 @@
                         <i class="fas fa-search"></i>
                     </button>
                     <div id="header-search-container" class="header-search-container">
-                        <input type="search" id="header-search-input" placeholder="O que você deseja pesquisar?" autocomplete="off">
+                        <input type="search" id="header-search-input" placeholder="O que você deseja pesquisar?"
+                            autocomplete="off">
                         <div id="header-search-results" class="header-search-results"></div>
                     </div>
                 </div>
 
-                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true" style="display:none;">
+                <button class="header-icon-btn" id="settings-btn" title="Configurações" data-admin-only="true"
+                    style="display:none;">
                     <i class="fas fa-cog"></i>
                 </button>
 
-                <button class="header-icon-btn" id="notifications-btn" title="Notificações">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-dot" id="notification-count"></span>
-                </button>
+                <div class="header-notifications-wrapper" style="position:relative;">
+                    <button class="header-icon-btn" id="notifications-btn" title="Notificações">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-dot" id="notification-count"></span>
+                    </button>
+                </div>
 
                 <button class="header-icon-btn" id="help-btn" title="Ajuda">
                     <i class="fas fa-question-circle"></i>
@@ -1661,7 +1884,8 @@
                             <div class="dropdown-avatar" id="dropdown-avatar">U</div>
                             <div class="dropdown-info">
                                 <span class="dropdown-user-name" id="dropdown-user-name">Usuário</span>
-                                <span class="dropdown-user-email" id="dropdown-user-email">usuario@aluforce.ind.br</span>
+                                <span class="dropdown-user-email"
+                                    id="dropdown-user-email">usuario@aluforce.ind.br</span>
                             </div>
                         </div>
                         <hr class="dropdown-divider">
@@ -1678,7 +1902,8 @@
                                 <i class="fas fa-users-cog"></i>
                                 <span>Gerenciar Usuários</span>
                             </div>
-                            <div class="dropdown-item" id="settings-option" data-admin-only="true" style="display: none;">
+                            <div class="dropdown-item" id="settings-option" data-admin-only="true"
+                                style="display: none;">
                                 <i class="fas fa-cog"></i>
                                 <span>Configurações</span>
                             </div>
@@ -1866,12 +2091,12 @@
 
                 // Verificar se é admin
                 const isAdmin = user.is_admin === 1 || user.is_admin === true ||
-                               user.role === 'admin' || user.role === 'administrador';
+                    user.role === 'admin' || user.role === 'administrador';
 
                 // Verificar se é usuário da consultoria (Lumière)
                 const isConsultoria = userEmail && (
-                    userEmail.includes('lumiereassessoria') || 
-                    userEmail.includes('lumiereassesoria') || 
+                    userEmail.includes('lumiereassessoria') ||
+                    userEmail.includes('lumiereassesoria') ||
                     userEmail.includes('lumiere')
                 );
 
@@ -1944,7 +2169,7 @@
             if (!user) return;
 
             const isAdmin = user.is_admin === 1 || user.is_admin === true ||
-                           user.role === 'admin' || user.role === 'administrador';
+                user.role === 'admin' || user.role === 'administrador';
 
             // Verificar se é consultoria
             const emailCheck = (user.email || '').toLowerCase();
@@ -1967,12 +2192,25 @@
             // Obter áreas permitidas: email específico > áreas do banco > padrão RH
             let allowedAreas = [];
 
+            // Mapeamento padrão por role (usado quando não há email específico nem areas no DB)
+            const roleDefaultAreas = {
+                'comercial': ['vendas', 'rh'],
+                'financeiro': ['financeiro', 'rh'],
+                'compras': ['compras', 'rh'],
+                'pcp': ['pcp', 'rh'],
+                'rh': ['rh'],
+                'logistica': ['nfe', 'rh'],
+                'user': ['rh']
+            };
+
             if (emailSpecificAreas) {
                 allowedAreas = emailSpecificAreas;
             } else if (user.areas && Array.isArray(user.areas) && user.areas.length > 0) {
                 allowedAreas = user.areas.map(a => a.toLowerCase());
+            } else if (user.role && roleDefaultAreas[user.role.toLowerCase()]) {
+                allowedAreas = roleDefaultAreas[user.role.toLowerCase()];
             } else {
-                // Se não há permissões definidas, mostrar apenas RH (padrão seguro)
+                // Padrão seguro: apenas RH (área de funcionário)
                 allowedAreas = ['rh'];
             }
 
@@ -2005,59 +2243,43 @@
         }
 
         // Carregar dados do usuário ao iniciar
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const user = getUsuarioLogado();
             updateUserUI(user);
-
-            // Buscar dados atualizados do servidor (garante áreas/permissões corretas)
-            fetch('/api/me', {
-                credentials: 'include',
-                credentials: 'include'
-            })
-            .then(r => r.ok ? r.json() : null)
-            .then(serverUser => {
-                if (serverUser) {
-                    // Atualizar localStorage com dados frescos do servidor
-                    const currentData = JSON.parse(localStorage.getItem('userData') || '{}');
-                    // IMPORTANTE: Preservar o email original do login (tabela usuarios)
-                    // porque /api/me retorna dados da tabela funcionarios onde os IDs
-                    // não correspondem (ex: usuarios.id=37 é Jamerson/lumiere,
-                    // mas funcionarios.id=37 é Fernando/aluforce)
-                    const loginEmail = currentData.email;
-                    const merged = Object.assign({}, currentData, serverUser);
-                    if (loginEmail) {
-                        merged.email = loginEmail; // Manter email do login
-                    }
-                    localStorage.setItem('userData', JSON.stringify(merged));
-                    // Re-aplicar permissões com dados atualizados
-                    updateUserUI(merged);
-                    console.log('[Dashboard] ✅ Permissões atualizadas do servidor, áreas:', merged.areas || []);
-                }
-            })
-            .catch(err => console.warn('[Dashboard] Não foi possível verificar /api/me:', err));
+            // Dados do servidor serão atualizados via authSuccess event (auth-unified.js)
         });
 
 
 
-        // Escutar evento de autenticação
-        window.addEventListener('authSuccess', function(e) {
+        // Escutar evento de autenticação (auth-unified.js já chama /api/me)
+        window.addEventListener('authSuccess', function (e) {
             if (e.detail && e.detail.user) {
-                updateUserUI(e.detail.user);
+                // Merge com dados locais preservando email do login
+                const serverUser = e.detail.user;
+                const currentData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const loginEmail = currentData.email;
+                const merged = Object.assign({}, currentData, serverUser);
+                if (loginEmail) {
+                    merged.email = loginEmail; // Manter email original do login
+                }
+                localStorage.setItem('userData', JSON.stringify(merged));
+                updateUserUI(merged);
+                console.log('[Dashboard] ✅ Permissões atualizadas via authSuccess, áreas:', merged.areas || []);
             }
         });
 
         // Toggle dropdown do usuário
-        document.getElementById('user-profile').addEventListener('click', function(e) {
+        document.getElementById('user-profile').addEventListener('click', function (e) {
             e.stopPropagation();
             document.getElementById('user-dropdown').classList.toggle('active');
         });
 
-        document.addEventListener('click', function() {
+        document.addEventListener('click', function () {
             document.getElementById('user-dropdown').classList.remove('active');
         });
 
         // Toggle pesquisa
-        document.getElementById('search-btn').addEventListener('click', function(e) {
+        document.getElementById('search-btn').addEventListener('click', function (e) {
             e.stopPropagation();
             const container = document.getElementById('header-search-container');
             container.classList.toggle('active');
@@ -2067,13 +2289,13 @@
         });
 
         // Logout
-        document.getElementById('logout-option').addEventListener('click', function() {
+        document.getElementById('logout-option').addEventListener('click', function () {
             // Limpar todos os dados de autenticação
             ['authToken', 'token', 'userData', 'user', 'user_data', 'userName'].forEach(k => {
                 try {
                     localStorage.removeItem(k);
                     sessionStorage.removeItem(k);
-                } catch {}
+                } catch { }
             });
             window.location.href = '/login.html';
         });
@@ -2083,7 +2305,7 @@
             event.preventDefault();
             const user = getUsuarioLogado();
             const isAdmin = user.is_admin === 1 || user.is_admin === true ||
-                           user.role === 'admin' || user.role === 'administrador';
+                user.role === 'admin' || user.role === 'administrador';
 
             if (isAdmin) {
                 window.location.href = '/modules/RH/public/areaadm.html';
@@ -2093,33 +2315,33 @@
         }
 
         // Admin users option
-        document.getElementById('admin-users-option')?.addEventListener('click', function() {
+        document.getElementById('admin-users-option')?.addEventListener('click', function () {
             window.location.href = '/admin/usuarios.html';
         });
 
         // Profile option
-        document.getElementById('profile-option')?.addEventListener('click', function() {
+        document.getElementById('profile-option')?.addEventListener('click', function () {
             if (typeof abrirModalPerfil === 'function') {
                 abrirModalPerfil();
             }
         });
 
         // Preferences option
-        document.getElementById('preferences-option')?.addEventListener('click', function() {
+        document.getElementById('preferences-option')?.addEventListener('click', function () {
             if (typeof abrirModalPreferencias === 'function') {
                 abrirModalPreferencias();
             }
         });
 
         // Settings option
-        document.getElementById('settings-option')?.addEventListener('click', function() {
+        document.getElementById('settings-option')?.addEventListener('click', function () {
             if (typeof abrirModalConfig === 'function') {
                 abrirModalConfig();
             }
         });
 
         // Botão de configurações no header (engrenagem)
-        document.getElementById('settings-btn')?.addEventListener('click', function() {
+        document.getElementById('settings-btn')?.addEventListener('click', function () {
             if (typeof abrirModalConfig === 'function') {
                 abrirModalConfig();
             } else {
@@ -2129,7 +2351,7 @@
         });
 
         // Botão de notificações no header (sino)
-        document.getElementById('notifications-btn')?.addEventListener('click', function() {
+        document.getElementById('notifications-btn')?.addEventListener('click', function () {
             if (typeof abrirCentralNotificacoes === 'function') {
                 abrirCentralNotificacoes();
             } else if (typeof toggleNotificationPanel === 'function') {
@@ -2137,8 +2359,8 @@
             } else {
                 // Fallback - verificar se existe o painel de notificações
                 const notifPanel = document.getElementById('notification-panel') ||
-                                   document.getElementById('notifications-panel') ||
-                                   document.querySelector('.notification-panel');
+                    document.getElementById('notifications-panel') ||
+                    document.querySelector('.notification-panel');
                 if (notifPanel) {
                     notifPanel.classList.toggle('active');
                     notifPanel.classList.toggle('show');
@@ -2149,7 +2371,7 @@
         });
 
         // Botão de ajuda no header (interrogação)
-        document.getElementById('help-btn')?.addEventListener('click', function() {
+        document.getElementById('help-btn')?.addEventListener('click', function () {
             window.open('/ajuda/index.html', '_blank');
         });
 
@@ -2157,7 +2379,7 @@
         // Salvar título original da página para restaurar ao fechar
         window._originalPageTitle = document.title;
 
-        window.abrirModalConfig = function() {
+        window.abrirModalConfig = function () {
             console.log('🔧 Abrindo modal de configurações...');
             // Salvar título original antes de alterar
             if (!window._originalPageTitle) {
@@ -2261,7 +2483,7 @@
         }
 
         // Função abrirCentralNotificacoes
-        window.abrirCentralNotificacoes = function() {
+        window.abrirCentralNotificacoes = function () {
             console.log('🔔 Abrindo central de notificações...');
             if (typeof NotificationManager !== 'undefined' && NotificationManager.toggle) {
                 NotificationManager.toggle();
@@ -2281,7 +2503,6 @@
     <script src="/modules/_shared/connection-monitor.js?v=20260219"></script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/modal-fix-global.js?v=20260219"></script>
-    <script src="/js/notification-manager.js?v=20260219"></script>
     <script src="/js/background-manager.js?v=20260214"></script>
     <script src="/js/config-modals.js?v=20260301"></script>
 
@@ -2296,10 +2517,12 @@
                 <div class="perfil-avatar-section">
                     <div class="perfil-avatar-wrapper">
                         <div class="perfil-avatar-large" id="perfil-avatar-letra">U</div>
-                        <div class="perfil-avatar-edit" onclick="document.getElementById('perfil-foto-input').click()" title="Alterar foto">
+                        <div class="perfil-avatar-edit" onclick="document.getElementById('perfil-foto-input').click()"
+                            title="Alterar foto">
                             <i class="fas fa-camera"></i>
                         </div>
-                        <input type="file" id="perfil-foto-input" accept="image/*" style="display:none" onchange="handleFotoUpload(this)">
+                        <input type="file" id="perfil-foto-input" accept="image/*" style="display:none"
+                            onchange="handleFotoUpload(this)">
                     </div>
                     <div class="perfil-nome-usuario" id="perfil-nome">Usuário</div>
                     <div class="perfil-email-usuario" id="perfil-email">usuario@aluforce.ind.br</div>
@@ -2397,318 +2620,320 @@
     </div>
 
     <script>
-    // Funções dos Modais de Perfil e Preferências
-    window.abrirModalPerfil = function() {
-        const modal = document.getElementById('modal-perfil');
-        if (!modal) return;
+        // Funções dos Modais de Perfil e Preferências
+        window.abrirModalPerfil = function () {
+            const modal = document.getElementById('modal-perfil');
+            if (!modal) return;
 
-        // Carregar dados do usuário
-        try {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const userId = userData.id || 'default';
-            const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
-
-            const nome = userData.nome || userData.name || 'Usuário';
-            const email = userData.email || 'usuario@aluforce.ind.br';
-            const cargo = userData.cargo || userData.role || '-';
-            const departamento = userData.departamento || userData.setor || '-';
-            const isAdmin = userData.is_admin === 1 || userData.role === 'admin';
-            const apelido = userProfile.apelido || userData.apelido || '';
-            const fotoUrl = userProfile.foto || userData.foto || userData.avatar || '';
-
-            // Avatar
-            const avatarEl = document.getElementById('perfil-avatar-letra');
-            if (fotoUrl) {
-                avatarEl.innerHTML = `<img src="${fotoUrl}" alt="Avatar">`;
-            } else {
-                avatarEl.innerHTML = nome.charAt(0).toUpperCase();
-            }
-
-            document.getElementById('perfil-nome').textContent = nome;
-            document.getElementById('perfil-email').textContent = email;
-            document.getElementById('perfil-apelido').value = apelido;
-            document.getElementById('perfil-cargo').textContent = cargo;
-            document.getElementById('perfil-departamento').textContent = departamento;
-            document.getElementById('perfil-nivel').textContent = isAdmin ? 'Administrador' : 'Usuário';
-        } catch(e) {
-            console.error('Erro ao carregar dados do perfil:', e);
-        }
-
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-
-        // Fechar dropdown do usuário
-        document.getElementById('user-dropdown')?.classList.remove('active');
-    };
-
-    window.fecharModalPerfil = function() {
-        const modal = document.getElementById('modal-perfil');
-        if (modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    };
-
-    // Função para tratar upload de foto
-    window.handleFotoUpload = function(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-
-            // Validar tamanho (max 2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('A imagem deve ter no máximo 2MB');
-                return;
-            }
-
-            // Guardar arquivo para upload ao salvar
-            window._tempFotoFile = file;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                // Atualizar preview no modal
-                const avatarEl = document.getElementById('perfil-avatar-letra');
-                avatarEl.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    // Função para salvar perfil (com upload de foto ao servidor)
-    window.salvarPerfil = async function() {
-        try {
-            const apelido = document.getElementById('perfil-apelido').value.trim();
-            const fotoFile = window._tempFotoFile || null;
-
-            let userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const userId = userData.id || 'default';
-            let userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
-            let novaFotoUrl = null;
-
-            // Upload foto ao servidor se foi alterada
-            if (fotoFile) {
-                try {
-                    const formData = new FormData();
-                    formData.append('avatar', fotoFile);
-                    const upHeaders = {};
-                    if (token) upHeaders['Authorization'] = `Bearer ${token}`;
-
-                    const uploadResp = await fetch('/api/upload-avatar', { credentials: 'include', method: 'POST',
-                        headers: upHeaders,
-                        credentials: 'include',
-                        body: formData
-                    });
-                    if (uploadResp.ok) {
-                        const result = await uploadResp.json();
-                        novaFotoUrl = result.avatarUrl;
-                        console.log('[Perfil] ✅ Foto salva no servidor:', novaFotoUrl);
-                    } else {
-                        console.error('[Perfil] Erro upload foto:', uploadResp.status);
-                    }
-                } catch(uploadErr) {
-                    console.error('[Perfil] Erro upload:', uploadErr);
-                }
-            }
-
-            // Salvar apelido no servidor
+            // Carregar dados do usuário
             try {
-                const headers = { 'Content-Type': 'application/json' };
-                await fetch('/api/me', { credentials: 'include', method: 'PUT',
-                    headers: headers,
-                    credentials: 'include',
-                    body: JSON.stringify({ apelido: apelido || null })
-                });
-            } catch(e) { console.error('[Perfil] Erro ao salvar apelido:', e); }
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const userId = userData.id || 'default';
+                const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
 
-            // Atualizar localStorage
-            if (apelido) {
-                userProfile.apelido = apelido;
-                userData.apelido = apelido;
-            } else {
-                delete userProfile.apelido;
-                delete userData.apelido;
-            }
+                const nome = userData.nome || userData.name || 'Usuário';
+                const email = userData.email || 'usuario@aluforce.ind.br';
+                const cargo = userData.cargo || userData.role || '-';
+                const departamento = userData.departamento || userData.setor || '-';
+                const isAdmin = userData.is_admin === 1 || userData.role === 'admin';
+                const apelido = userProfile.apelido || userData.apelido || '';
+                const fotoUrl = userProfile.foto || userData.foto || userData.avatar || '';
 
-            if (novaFotoUrl) {
-                userProfile.foto = novaFotoUrl;
-                userData.foto = novaFotoUrl;
-                userData.avatar = novaFotoUrl;
-                userData.foto_perfil_url = novaFotoUrl;
-            }
-
-            localStorage.setItem(`userProfile_${userId}`, JSON.stringify(userProfile));
-            localStorage.setItem('userData', JSON.stringify(userData));
-
-            // Atualizar UI imediatamente
-            atualizarUIComPerfil();
-
-            // Disparar evento para outras páginas/módulos
-            const fotoFinal = novaFotoUrl || userProfile.foto || userData.foto || '';
-            if (fotoFinal) {
-                window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatarUrl: fotoFinal } }));
-            }
-
-            // Limpar temporários
-            window._tempFotoFile = null;
-
-            fecharModalPerfil();
-
-            // Feedback
-            if (typeof showToast === 'function') {
-                showToast('Perfil atualizado com sucesso!', 'success');
-            } else {
-                alert('Perfil salvo!');
-            }
-        } catch(e) {
-            console.error('Erro ao salvar perfil:', e);
-            alert('Erro ao salvar perfil');
-        }
-    };
-
-    // Função para atualizar toda a UI com os dados do perfil
-    window.atualizarUIComPerfil = function() {
-        try {
-            const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-            const userId = userData.id || 'default';
-            const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
-
-            const nome = userData.nome || userData.name || 'Usuário';
-            const firstName = nome.split(' ')[0];
-            const apelido = userProfile.apelido || userData.apelido || firstName;
-            const fotoUrl = userProfile.foto || userData.foto || userData.avatar || '';
-
-            // Atualizar saudação
-            const greetingName = document.getElementById('greeting-name');
-            if (greetingName) greetingName.textContent = apelido;
-
-            // Atualizar nome no header
-            const userNameDisplay = document.getElementById('user-name-display');
-            if (userNameDisplay) userNameDisplay.textContent = apelido;
-
-            // Atualizar todos os avatares
-            const avatares = [
-                document.getElementById('user-avatar'),
-                document.getElementById('dropdown-avatar')
-            ];
-
-            avatares.forEach(avatar => {
-                if (!avatar) return;
+                // Avatar
+                const avatarEl = document.getElementById('perfil-avatar-letra');
                 if (fotoUrl) {
-                    avatar.innerHTML = `<img src="${fotoUrl}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    avatarEl.innerHTML = `<img src="${fotoUrl}" alt="Avatar">`;
                 } else {
-                    avatar.innerHTML = firstName.charAt(0).toUpperCase();
+                    avatarEl.innerHTML = nome.charAt(0).toUpperCase();
                 }
-            });
 
-            console.log('✓ UI atualizada com perfil:', apelido);
-        } catch(e) {
-            console.error('Erro ao atualizar UI:', e);
-        }
-    };
-
-    // Carregar perfil ao iniciar
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(atualizarUIComPerfil, 100);
-    });
-
-    window.abrirModalPreferencias = function() {
-        const modal = document.getElementById('modal-preferencias');
-        if (!modal) return;
-
-        // Carregar preferências salvas
-        try {
-            const prefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
-            document.getElementById('pref-notificacoes').checked = prefs.notificacoes !== false;
-            document.getElementById('pref-som').checked = prefs.som === true;
-            document.getElementById('pref-dark-mode').checked = localStorage.getItem('darkMode') === '1';
-            document.getElementById('pref-fundos').checked = prefs.fundos !== false;
-        } catch(e) {
-            console.error('Erro ao carregar preferências:', e);
-        }
-
-        modal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-
-        // Fechar dropdown do usuário
-        document.getElementById('user-dropdown')?.classList.remove('active');
-    };
-
-    window.fecharModalPreferencias = function() {
-        const modal = document.getElementById('modal-preferencias');
-        if (modal) {
-            modal.classList.remove('active');
-            document.body.style.overflow = '';
-        }
-    };
-
-    window.salvarPreferencias = function() {
-        try {
-            const prefs = {
-                notificacoes: document.getElementById('pref-notificacoes').checked,
-                som: document.getElementById('pref-som').checked,
-                fundos: document.getElementById('pref-fundos').checked
-            };
-
-            localStorage.setItem('userPreferences', JSON.stringify(prefs));
-
-            // Aplicar dark mode
-            const darkMode = document.getElementById('pref-dark-mode').checked;
-            localStorage.setItem('darkMode', darkMode ? '1' : '0');
-            aplicarDarkMode(darkMode);
-
-            // Aplicar fundos animados
-            if (typeof BackgroundManager !== 'undefined') {
-                if (prefs.fundos) {
-                    BackgroundManager.startAutoChange();
-                    console.log('✅ Fundos animados: ATIVADO');
-                } else {
-                    BackgroundManager.stopAutoChange();
-                    console.log('⏸️ Fundos animados: PAUSADO');
-                }
+                document.getElementById('perfil-nome').textContent = nome;
+                document.getElementById('perfil-email').textContent = email;
+                document.getElementById('perfil-apelido').value = apelido;
+                document.getElementById('perfil-cargo').textContent = cargo;
+                document.getElementById('perfil-departamento').textContent = departamento;
+                document.getElementById('perfil-nivel').textContent = isAdmin ? 'Administrador' : 'Usuário';
+            } catch (e) {
+                console.error('Erro ao carregar dados do perfil:', e);
             }
 
-            // Aplicar configuração de notificações
-            if (typeof NotificationManager !== 'undefined') {
-                NotificationManager.setEnabled(prefs.notificacoes);
-                NotificationManager.setSoundEnabled(prefs.som);
-                console.log('🔔 Notificações:', prefs.notificacoes ? 'ATIVADAS' : 'DESATIVADAS');
-                console.log('🔊 Som:', prefs.som ? 'ATIVADO' : 'DESATIVADO');
-            }
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
 
-            // Salvar no objeto global de preferências
-            window.ALUFORCE_PREFS = prefs;
-
-            fecharModalPreferencias();
-
-            // Feedback visual
-            mostrarToast('Preferências salvas com sucesso!', 'success');
-        } catch(e) {
-            console.error('Erro ao salvar preferências:', e);
-            mostrarToast('Erro ao salvar preferências', 'error');
-        }
-    };
-
-    // Função para mostrar toast de feedback
-    window.mostrarToast = function(mensagem, tipo = 'info') {
-        // Remover toast existente
-        const existente = document.querySelector('.toast-notification');
-        if (existente) existente.remove();
-
-        const toast = document.createElement('div');
-        toast.className = 'toast-notification toast-' + tipo;
-
-        const icones = {
-            success: 'fa-check-circle',
-            error: 'fa-exclamation-circle',
-            warning: 'fa-exclamation-triangle',
-            info: 'fa-info-circle'
+            // Fechar dropdown do usuário
+            document.getElementById('user-dropdown')?.classList.remove('active');
         };
 
-        toast.innerHTML = `
+        window.fecharModalPerfil = function () {
+            const modal = document.getElementById('modal-perfil');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        // Função para tratar upload de foto
+        window.handleFotoUpload = function (input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // Validar tamanho (max 2MB)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('A imagem deve ter no máximo 2MB');
+                    return;
+                }
+
+                // Guardar arquivo para upload ao salvar
+                window._tempFotoFile = file;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // Atualizar preview no modal
+                    const avatarEl = document.getElementById('perfil-avatar-letra');
+                    avatarEl.innerHTML = `<img src="${e.target.result}" alt="Avatar">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // Função para salvar perfil (com upload de foto ao servidor)
+        window.salvarPerfil = async function () {
+            try {
+                const apelido = document.getElementById('perfil-apelido').value.trim();
+                const fotoFile = window._tempFotoFile || null;
+
+                let userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const userId = userData.id || 'default';
+                let userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
+                let novaFotoUrl = null;
+
+                // Upload foto ao servidor se foi alterada
+                if (fotoFile) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('avatar', fotoFile);
+                        const upHeaders = {};
+                        if (token) upHeaders['Authorization'] = `Bearer ${token}`;
+
+                        const uploadResp = await fetch('/api/upload-avatar', {
+                            credentials: 'include', method: 'POST',
+                            headers: upHeaders,
+                            credentials: 'include',
+                            body: formData
+                        });
+                        if (uploadResp.ok) {
+                            const result = await uploadResp.json();
+                            novaFotoUrl = result.avatarUrl;
+                            console.log('[Perfil] ✅ Foto salva no servidor:', novaFotoUrl);
+                        } else {
+                            console.error('[Perfil] Erro upload foto:', uploadResp.status);
+                        }
+                    } catch (uploadErr) {
+                        console.error('[Perfil] Erro upload:', uploadErr);
+                    }
+                }
+
+                // Salvar apelido no servidor
+                try {
+                    const headers = { 'Content-Type': 'application/json' };
+                    await fetch('/api/me', {
+                        credentials: 'include', method: 'PUT',
+                        headers: headers,
+                        credentials: 'include',
+                        body: JSON.stringify({ apelido: apelido || null })
+                    });
+                } catch (e) { console.error('[Perfil] Erro ao salvar apelido:', e); }
+
+                // Atualizar localStorage
+                if (apelido) {
+                    userProfile.apelido = apelido;
+                    userData.apelido = apelido;
+                } else {
+                    delete userProfile.apelido;
+                    delete userData.apelido;
+                }
+
+                if (novaFotoUrl) {
+                    userProfile.foto = novaFotoUrl;
+                    userData.foto = novaFotoUrl;
+                    userData.avatar = novaFotoUrl;
+                    userData.foto_perfil_url = novaFotoUrl;
+                }
+
+                localStorage.setItem(`userProfile_${userId}`, JSON.stringify(userProfile));
+                localStorage.setItem('userData', JSON.stringify(userData));
+
+                // Atualizar UI imediatamente
+                atualizarUIComPerfil();
+
+                // Disparar evento para outras páginas/módulos
+                const fotoFinal = novaFotoUrl || userProfile.foto || userData.foto || '';
+                if (fotoFinal) {
+                    window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatarUrl: fotoFinal } }));
+                }
+
+                // Limpar temporários
+                window._tempFotoFile = null;
+
+                fecharModalPerfil();
+
+                // Feedback
+                if (typeof showToast === 'function') {
+                    showToast('Perfil atualizado com sucesso!', 'success');
+                } else {
+                    alert('Perfil salvo!');
+                }
+            } catch (e) {
+                console.error('Erro ao salvar perfil:', e);
+                alert('Erro ao salvar perfil');
+            }
+        };
+
+        // Função para atualizar toda a UI com os dados do perfil
+        window.atualizarUIComPerfil = function () {
+            try {
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+                const userId = userData.id || 'default';
+                const userProfile = JSON.parse(localStorage.getItem(`userProfile_${userId}`) || '{}');
+
+                const nome = userData.nome || userData.name || 'Usuário';
+                const firstName = nome.split(' ')[0];
+                const apelido = userProfile.apelido || userData.apelido || firstName;
+                const fotoUrl = userProfile.foto || userData.foto || userData.avatar || '';
+
+                // Atualizar saudação
+                const greetingName = document.getElementById('greeting-name');
+                if (greetingName) greetingName.textContent = apelido;
+
+                // Atualizar nome no header
+                const userNameDisplay = document.getElementById('user-name-display');
+                if (userNameDisplay) userNameDisplay.textContent = apelido;
+
+                // Atualizar todos os avatares
+                const avatares = [
+                    document.getElementById('user-avatar'),
+                    document.getElementById('dropdown-avatar')
+                ];
+
+                avatares.forEach(avatar => {
+                    if (!avatar) return;
+                    if (fotoUrl) {
+                        avatar.innerHTML = `<img src="${fotoUrl}" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+                    } else {
+                        avatar.innerHTML = firstName.charAt(0).toUpperCase();
+                    }
+                });
+
+                console.log('✓ UI atualizada com perfil:', apelido);
+            } catch (e) {
+                console.error('Erro ao atualizar UI:', e);
+            }
+        };
+
+        // Carregar perfil ao iniciar
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(atualizarUIComPerfil, 100);
+        });
+
+        window.abrirModalPreferencias = function () {
+            const modal = document.getElementById('modal-preferencias');
+            if (!modal) return;
+
+            // Carregar preferências salvas
+            try {
+                const prefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                document.getElementById('pref-notificacoes').checked = prefs.notificacoes !== false;
+                document.getElementById('pref-som').checked = prefs.som === true;
+                document.getElementById('pref-dark-mode').checked = localStorage.getItem('darkMode') === '1';
+                document.getElementById('pref-fundos').checked = prefs.fundos !== false;
+            } catch (e) {
+                console.error('Erro ao carregar preferências:', e);
+            }
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Fechar dropdown do usuário
+            document.getElementById('user-dropdown')?.classList.remove('active');
+        };
+
+        window.fecharModalPreferencias = function () {
+            const modal = document.getElementById('modal-preferencias');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        };
+
+        window.salvarPreferencias = function () {
+            try {
+                const prefs = {
+                    notificacoes: document.getElementById('pref-notificacoes').checked,
+                    som: document.getElementById('pref-som').checked,
+                    fundos: document.getElementById('pref-fundos').checked
+                };
+
+                localStorage.setItem('userPreferences', JSON.stringify(prefs));
+
+                // Aplicar dark mode
+                const darkMode = document.getElementById('pref-dark-mode').checked;
+                localStorage.setItem('darkMode', darkMode ? '1' : '0');
+                aplicarDarkMode(darkMode);
+
+                // Aplicar fundos animados
+                if (typeof BackgroundManager !== 'undefined') {
+                    if (prefs.fundos) {
+                        BackgroundManager.startAutoChange();
+                        console.log('✅ Fundos animados: ATIVADO');
+                    } else {
+                        BackgroundManager.stopAutoChange();
+                        console.log('⏸️ Fundos animados: PAUSADO');
+                    }
+                }
+
+                // Aplicar configuração de notificações
+                if (typeof NotificationManager !== 'undefined') {
+                    NotificationManager.setEnabled(prefs.notificacoes);
+                    NotificationManager.setSoundEnabled(prefs.som);
+                    console.log('🔔 Notificações:', prefs.notificacoes ? 'ATIVADAS' : 'DESATIVADAS');
+                    console.log('🔊 Som:', prefs.som ? 'ATIVADO' : 'DESATIVADO');
+                }
+
+                // Salvar no objeto global de preferências
+                window.ALUFORCE_PREFS = prefs;
+
+                fecharModalPreferencias();
+
+                // Feedback visual
+                mostrarToast('Preferências salvas com sucesso!', 'success');
+            } catch (e) {
+                console.error('Erro ao salvar preferências:', e);
+                mostrarToast('Erro ao salvar preferências', 'error');
+            }
+        };
+
+        // Função para mostrar toast de feedback
+        window.mostrarToast = function (mensagem, tipo = 'info') {
+            // Remover toast existente
+            const existente = document.querySelector('.toast-notification');
+            if (existente) existente.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification toast-' + tipo;
+
+            const icones = {
+                success: 'fa-check-circle',
+                error: 'fa-exclamation-circle',
+                warning: 'fa-exclamation-triangle',
+                info: 'fa-info-circle'
+            };
+
+            toast.innerHTML = `
             <i class="fas ${icones[tipo] || icones.info}"></i>
             <span>${mensagem}</span>
         `;
 
-        toast.style.cssText = `
+            toast.style.cssText = `
             position: fixed;
             bottom: 24px;
             right: 24px;
@@ -2726,168 +2951,168 @@
             animation: toastIn 0.3s ease;
         `;
 
-        document.body.appendChild(toast);
+            document.body.appendChild(toast);
 
-        setTimeout(() => {
-            toast.style.animation = 'toastOut 0.3s ease forwards';
-            setTimeout(() => toast.remove(), 300);
-        }, 3000);
-    };
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
 
-    // Função para aplicar/remover dark mode
-    window.aplicarDarkMode = function(ativar) {
-        const logoAzul = document.getElementById('logo-azul');
-        const logoBranca = document.getElementById('logo-branca');
+        // Função para aplicar/remover dark mode
+        window.aplicarDarkMode = function (ativar) {
+            const logoAzul = document.getElementById('logo-azul');
+            const logoBranca = document.getElementById('logo-branca');
 
-        if (ativar) {
-            document.body.classList.add('dark-mode');
-            if (logoAzul) logoAzul.style.display = 'none';
-            if (logoBranca) logoBranca.style.display = 'block';
-        } else {
-            document.body.classList.remove('dark-mode');
-            if (logoAzul) logoAzul.style.display = 'block';
-            if (logoBranca) logoBranca.style.display = 'none';
-        }
-    };
+            if (ativar) {
+                document.body.classList.add('dark-mode');
+                if (logoAzul) logoAzul.style.display = 'none';
+                if (logoBranca) logoBranca.style.display = 'block';
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (logoAzul) logoAzul.style.display = 'block';
+                if (logoBranca) logoBranca.style.display = 'none';
+            }
+        };
 
-    // Aplicar preferências ao carregar a página
-    document.addEventListener('DOMContentLoaded', function() {
-        // Dark mode
-        const darkMode = localStorage.getItem('darkMode') === '1';
-        if (darkMode) {
-            aplicarDarkMode(true);
-        }
-
-        // Outras preferências
-        try {
-            const prefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
-            window.ALUFORCE_PREFS = prefs;
-
-            // Aplicar fundos animados
-            if (prefs.fundos === false && typeof BackgroundManager !== 'undefined') {
-                setTimeout(() => {
-                    BackgroundManager.stopAutoChange();
-                    console.log('⏸️ Fundos animados desativados por preferência');
-                }, 1000);
+        // Aplicar preferências ao carregar a página
+        document.addEventListener('DOMContentLoaded', function () {
+            // Dark mode
+            const darkMode = localStorage.getItem('darkMode') === '1';
+            if (darkMode) {
+                aplicarDarkMode(true);
             }
 
-            // Configurar notificações
-            if (typeof NotificationManager !== 'undefined') {
-                NotificationManager.setEnabled(prefs.notificacoes !== false);
-                NotificationManager.setSoundEnabled(prefs.som === true);
+            // Outras preferências
+            try {
+                const prefs = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+                window.ALUFORCE_PREFS = prefs;
+
+                // Aplicar fundos animados
+                if (prefs.fundos === false && typeof BackgroundManager !== 'undefined') {
+                    setTimeout(() => {
+                        BackgroundManager.stopAutoChange();
+                        console.log('⏸️ Fundos animados desativados por preferência');
+                    }, 1000);
+                }
+
+                // Configurar notificações
+                if (typeof NotificationManager !== 'undefined') {
+                    NotificationManager.setEnabled(prefs.notificacoes !== false);
+                    NotificationManager.setSoundEnabled(prefs.som === true);
+                }
+            } catch (e) {
+                console.log('Preferências padrão aplicadas');
             }
-        } catch(e) {
-            console.log('Preferências padrão aplicadas');
-        }
-    });
+        });
 
-    // Fechar modais com ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            fecharModalPerfil();
-            fecharModalPreferencias();
-        }
-    });
+        // Fechar modais com ESC
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                fecharModalPerfil();
+                fecharModalPreferencias();
+            }
+        });
 
-    // Fechar modais ao clicar fora
-    document.getElementById('modal-perfil')?.addEventListener('click', function(e) {
-        if (e.target === this) fecharModalPerfil();
-    });
+        // Fechar modais ao clicar fora
+        document.getElementById('modal-perfil')?.addEventListener('click', function (e) {
+            if (e.target === this) fecharModalPerfil();
+        });
 
-    document.getElementById('modal-preferencias')?.addEventListener('click', function(e) {
-        if (e.target === this) fecharModalPreferencias();
-    });
+        document.getElementById('modal-preferencias')?.addEventListener('click', function (e) {
+            if (e.target === this) fecharModalPreferencias();
+        });
     </script>
 
     <!-- Carrega modal de configurações dinamicamente -->
     <script>
-    (function() {
-        // Criar container para modal de configurações se não existir
-        if (!document.getElementById('modal-configuracoes')) {
-            fetch('/modal-configuracoes-content.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('Modal file not found');
-                    return response.text();
-                })
-                .then(html => {
-                    // Inserir o HTML do modal
-                    const container = document.createElement('div');
-                    container.innerHTML = html;
-                    const modal = container.querySelector('#modal-configuracoes');
-                    if (modal) {
-                        document.body.appendChild(modal);
-                        console.log('✅ Modal de configurações carregado');
+        (function () {
+            // Criar container para modal de configurações se não existir
+            if (!document.getElementById('modal-configuracoes')) {
+                fetch('/modal-configuracoes-content.html')
+                    .then(response => {
+                        if (!response.ok) throw new Error('Modal file not found');
+                        return response.text();
+                    })
+                    .then(html => {
+                        // Inserir o HTML do modal
+                        const container = document.createElement('div');
+                        container.innerHTML = html;
+                        const modal = container.querySelector('#modal-configuracoes');
+                        if (modal) {
+                            document.body.appendChild(modal);
+                            console.log('✅ Modal de configurações carregado');
 
-                        // Configurar eventos do modal
-                        setupModalConfig();
-                    }
-                })
-                .catch(err => console.log('Modal de configurações será carregado sob demanda:', err));
-        }
-
-        // Função para configurar eventos do modal
-        function setupModalConfig() {
-            const modal = document.getElementById('modal-configuracoes');
-            if (!modal) return;
-
-            // Botão fechar
-            const closeBtn = modal.querySelector('.modal-config-close');
-            if (closeBtn) {
-                closeBtn.addEventListener('click', fecharModalConfig);
+                            // Configurar eventos do modal
+                            setupModalConfig();
+                        }
+                    })
+                    .catch(err => console.log('Modal de configurações será carregado sob demanda:', err));
             }
 
-            // Tabs
-            modal.querySelectorAll('.modal-config-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    const tabId = this.dataset.tab;
+            // Função para configurar eventos do modal
+            function setupModalConfig() {
+                const modal = document.getElementById('modal-configuracoes');
+                if (!modal) return;
 
-                    // Remove active de todas as tabs
-                    modal.querySelectorAll('.modal-config-tab').forEach(t => t.classList.remove('active'));
-                    modal.querySelectorAll('.modal-config-tab-content').forEach(c => c.classList.remove('active'));
+                // Botão fechar
+                const closeBtn = modal.querySelector('.modal-config-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', fecharModalConfig);
+                }
 
-                    // Adiciona active na tab clicada
-                    this.classList.add('active');
-                    const content = modal.querySelector('#tab-' + tabId);
-                    if (content) content.classList.add('active');
+                // Tabs
+                modal.querySelectorAll('.modal-config-tab').forEach(tab => {
+                    tab.addEventListener('click', function () {
+                        const tabId = this.dataset.tab;
+
+                        // Remove active de todas as tabs
+                        modal.querySelectorAll('.modal-config-tab').forEach(t => t.classList.remove('active'));
+                        modal.querySelectorAll('.modal-config-tab-content').forEach(c => c.classList.remove('active'));
+
+                        // Adiciona active na tab clicada
+                        this.classList.add('active');
+                        const content = modal.querySelector('#tab-' + tabId);
+                        if (content) content.classList.add('active');
+                    });
                 });
-            });
 
-            // Fechar com ESC
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && modal.classList.contains('active')) {
-                    fecharModalConfig();
-                }
-            });
+                // Fechar com ESC
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && modal.classList.contains('active')) {
+                        fecharModalConfig();
+                    }
+                });
 
-            // Fechar ao clicar fora
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    fecharModalConfig();
-                }
-            });
-        }
-    })();
-
-    // Função global para fechar modal
-    function fecharModalConfig() {
-        const modal = document.getElementById('modal-configuracoes');
-        if (modal) {
-            modal.classList.remove('active');
-            modal.style.setProperty('display', 'none', 'important');
-            modal.setAttribute('aria-hidden', 'true');
-            document.body.style.overflow = '';
-            // Restaurar título original da página
-            if (window._originalPageTitle) {
-                document.title = window._originalPageTitle;
-            } else {
-                document.title = 'Aluforce: Painel de Controle';
+                // Fechar ao clicar fora
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        fecharModalConfig();
+                    }
+                });
             }
-            console.log('✅ Modal de configurações fechado, título restaurado');
+        })();
+
+        // Função global para fechar modal
+        function fecharModalConfig() {
+            const modal = document.getElementById('modal-configuracoes');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.setProperty('display', 'none', 'important');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+                // Restaurar título original da página
+                if (window._originalPageTitle) {
+                    document.title = window._originalPageTitle;
+                } else {
+                    document.title = 'Aluforce: Painel de Controle';
+                }
+                console.log('✅ Modal de configurações fechado, título restaurado');
+            }
         }
-    }
     </script>
-    <!-- Chat Widget BOB AI - DESATIVADO -->
-    <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
+    <script src="/chat/widget.js?v=20260218" defer></script> -->
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
@@ -2895,62 +3120,72 @@
 
     <!-- 🔄 Real-time: Atualização instantânea de permissões -->
     <script>
-    (function() {
-        let _rtSocket = null;
-        function initRealtimePermissions() {
-            if (typeof io === 'undefined') return setTimeout(initRealtimePermissions, 500);
-            try {
-                _rtSocket = io();
-                const myData = JSON.parse(localStorage.getItem('userData') || '{}');
-                const myId = myData.id;
-                if (!myId) return;
-
-                _rtSocket.on('permissions-updated', function(data) {
-                    if (data.userId !== myId) return;
-                    console.log('[REALTIME] 📡 Permissões atualizadas em tempo real:', data);
-
-                    // Atualizar áreas no localStorage
-                    const current = JSON.parse(localStorage.getItem('userData') || '{}');
-                    if (data.areas) current.areas = data.areas;
-                    if (data.is_admin !== undefined) {
-                        current.is_admin = data.is_admin;
-                        current.role = data.is_admin ? 'admin' : (current.role === 'admin' ? 'user' : current.role);
+        (function () {
+            let _rtSocket = null;
+            function initRealtimePermissions() {
+                if (typeof io === 'undefined') return setTimeout(initRealtimePermissions, 500);
+                try {
+                    if (window._aluforceSocket && window._aluforceSocket.connected) {
+                        _rtSocket = window._aluforceSocket;
+                    } else {
+                        _rtSocket = io({
+                            transports: ['websocket'],
+                            upgrade: false,
+                            reconnection: true,
+                            withCredentials: true
+                        });
+                        window._aluforceSocket = _rtSocket;
                     }
-                    if (data.status) current.status = data.status;
-                    localStorage.setItem('userData', JSON.stringify(current));
+                    const myData = JSON.parse(localStorage.getItem('userData') || '{}');
+                    const myId = myData.id;
+                    if (!myId) return;
 
-                    // Re-aplicar permissões nos cards imediatamente
-                    if (typeof applyModulePermissions === 'function') {
-                        applyModulePermissions(current);
-                    }
-                    if (typeof updateUserUI === 'function') {
-                        updateUserUI(current);
-                    }
+                    _rtSocket.on('permissions-updated', function (data) {
+                        if (data.userId !== myId) return;
+                        console.log('[REALTIME] 📡 Permissões atualizadas em tempo real:', data);
 
-                    // Toast informativo
-                    var toast = document.createElement('div');
-                    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;background:#3b82f6;color:#fff;padding:14px 22px;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.9rem;box-shadow:0 8px 25px rgba(0,0,0,0.2);animation:slideIn .3s ease;display:flex;align-items:center;gap:10px;';
-                    toast.innerHTML = '<i class="fas fa-shield-alt"></i> Suas permissões foram atualizadas';
-                    document.body.appendChild(toast);
-                    setTimeout(function(){ toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(function(){ toast.remove(); }, 300); }, 4000);
-                });
+                        // Atualizar áreas no localStorage
+                        const current = JSON.parse(localStorage.getItem('userData') || '{}');
+                        if (data.areas) current.areas = data.areas;
+                        if (data.is_admin !== undefined) {
+                            current.is_admin = data.is_admin;
+                            current.role = data.is_admin ? 'admin' : (current.role === 'admin' ? 'user' : current.role);
+                        }
+                        if (data.status) current.status = data.status;
+                        localStorage.setItem('userData', JSON.stringify(current));
 
-                _rtSocket.on('user-blocked', function(data) {
-                    if (data.userId !== myId) return;
-                    alert('Seu acesso foi bloqueado pelo administrador. Você será redirecionado.');
-                    localStorage.clear();
-                    window.location.href = '/login.html';
-                });
+                        // Re-aplicar permissões nos cards imediatamente
+                        if (typeof applyModulePermissions === 'function') {
+                            applyModulePermissions(current);
+                        }
+                        if (typeof updateUserUI === 'function') {
+                            updateUserUI(current);
+                        }
 
-                console.log('[REALTIME] ✅ Listener de permissões ativo para userId=' + myId);
-            } catch(e) { console.warn('[REALTIME] Erro ao inicializar:', e); }
-        }
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initRealtimePermissions);
-        } else {
-            initRealtimePermissions();
-        }
-    })();
+                        // Toast informativo
+                        var toast = document.createElement('div');
+                        toast.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:99999;background:#3b82f6;color:#fff;padding:14px 22px;border-radius:12px;font-family:Poppins,sans-serif;font-size:0.9rem;box-shadow:0 8px 25px rgba(0,0,0,0.2);animation:slideIn .3s ease;display:flex;align-items:center;gap:10px;';
+                        toast.innerHTML = '<i class="fas fa-shield-alt"></i> Suas permissões foram atualizadas';
+                        document.body.appendChild(toast);
+                        setTimeout(function () { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; setTimeout(function () { toast.remove(); }, 300); }, 4000);
+                    });
+
+                    _rtSocket.on('user-blocked', function (data) {
+                        if (data.userId !== myId) return;
+                        alert('Seu acesso foi bloqueado pelo administrador. Você será redirecionado.');
+                        localStorage.clear();
+                        window.location.href = '/login.html';
+                    });
+
+                    console.log('[REALTIME] ✅ Listener de permissões ativo para userId=' + myId);
+                } catch (e) { console.warn('[REALTIME] Erro ao inicializar:', e); }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initRealtimePermissions);
+            } else {
+                initRealtimePermissions();
+            }
+        })();
     </script>
 
     <!-- PWA + Offline Sync -->
@@ -2959,5 +3194,611 @@
 
     <!-- iOS Native App Bridge (Capacitor) -->
     <script src="/js/ios-native-bridge.js?v=20260309" defer></script>
+
+    <!-- ====================================================
+         HISTÓRICO DE ALTERAÇÕES — Sistema de Auditoria
+         ==================================================== -->
+    <style id="auditoria-styles">
+        #auditoria-historico-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 20000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .audit-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        .audit-modal-container {
+            position: relative;
+            background: #ffffff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 860px;
+            height: 85vh;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.06);
+            animation: auditSlideIn 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        @keyframes auditSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .audit-modal-header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .audit-modal-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .audit-modal-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #f59e0b;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .audit-modal-title h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .audit-modal-title p {
+            margin: 2px 0 0;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .audit-modal-close {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: 8px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+
+        .audit-modal-close:hover {
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+        }
+
+        .audit-modal-toolbar {
+            padding: 10px 16px;
+            display: flex;
+            gap: 8px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            flex-shrink: 0;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .audit-search-wrapper {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .audit-search-wrapper i {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 12px;
+            pointer-events: none;
+        }
+
+        .audit-search-wrapper input {
+            width: 100%;
+            padding: 8px 12px 8px 30px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            background: #ffffff;
+            color: #1e293b;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        .audit-search-wrapper input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .audit-modal-toolbar select {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 12px;
+            background: #ffffff;
+            color: #1e293b;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .audit-modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .audit-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 60px 16px;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .audit-spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: auditSpin 0.8s linear infinite;
+        }
+
+        @keyframes auditSpin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .audit-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 60px 16px;
+            color: #94a3b8;
+            text-align: center;
+        }
+
+        .audit-empty i {
+            font-size: 32px;
+            opacity: 0.4;
+        }
+
+        .audit-empty span {
+            font-size: 14px;
+        }
+
+        .audit-entry {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.1s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .audit-entry:last-child {
+            border-bottom: none;
+        }
+
+        .audit-entry:hover {
+            background: #f8fafc;
+        }
+
+        .audit-entry-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .audit-entry-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .audit-entry-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 3px;
+        }
+
+        .audit-entry-user {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .audit-entry-user i {
+            color: #94a3b8;
+            font-size: 11px;
+        }
+
+        .audit-entry-date {
+            font-size: 11px;
+            color: #94a3b8;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .audit-entry-desc {
+            font-size: 12px;
+            color: #475569;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 5px;
+        }
+
+        .audit-entry-tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .audit-tag-module,
+        .audit-tag-action,
+        .audit-tag-ip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .audit-tag-action {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .audit-tag-ip {
+            background: #f1f5f9;
+            color: #94a3b8;
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .audit-modal-footer {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            flex-shrink: 0;
+        }
+
+        .audit-modal-footer span {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+
+        .audit-btn-refresh {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 14px;
+            background: #1e293b;
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: inherit;
+        }
+
+        .audit-btn-refresh:hover {
+            background: #0f172a;
+        }
+    </style>
+
+    <script>
+        // ====================================================
+        // HISTÓRICO DE ALTERAÇÕES — Funções de auditoria
+        // ====================================================
+        window._auditoriaLogs = [];
+
+        window.abrirHistoricoAlteracoes = function (event) {
+            if (event) event.stopPropagation();
+
+            // Fechar config modal primeiro para dar foco ao histórico
+            const configModal = document.getElementById('modal-configuracoes');
+            if (configModal) {
+                configModal.style.display = 'none';
+            }
+
+            // Remover se já existir
+            const existente = document.getElementById('auditoria-historico-modal');
+            if (existente) { existente.remove(); return; }
+
+            const overlay = document.createElement('div');
+            overlay.id = 'auditoria-historico-modal';
+            overlay.innerHTML = `
+            <div class="audit-modal-backdrop" onclick="window.fecharHistoricoAlteracoes()"></div>
+            <div class="audit-modal-container" role="dialog" aria-modal="true" aria-label="Histórico de Alterações">
+                <div class="audit-modal-header">
+                    <div class="audit-modal-title">
+                        <div class="audit-modal-icon"><i class="fas fa-history"></i></div>
+                        <div>
+                            <h2>Histórico de Alterações</h2>
+                            <p>Registro completo de todas as ações no sistema</p>
+                        </div>
+                    </div>
+                    <button class="audit-modal-close" onclick="window.fecharHistoricoAlteracoes()" title="Fechar">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="audit-modal-toolbar">
+                    <div class="audit-search-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="audit-search-input" placeholder="Buscar por usuário, ação ou módulo..." oninput="window.filtrarAuditoria()">
+                    </div>
+                    <select id="audit-module-filter" onchange="window.filtrarAuditoria()">
+                        <option value="">Todos os módulos</option>
+                        <option value="financeiro">Financeiro</option>
+                        <option value="vendas">Vendas</option>
+                        <option value="pcp">PCP</option>
+                        <option value="compras">Compras</option>
+                        <option value="rh">RH</option>
+                        <option value="faturamento">Faturamento</option>
+                        <option value="nfe">NF-e</option>
+                        <option value="sistema">Sistema</option>
+                    </select>
+                    <select id="audit-action-filter" onchange="window.filtrarAuditoria()">
+                        <option value="">Todas as ações</option>
+                        <option value="create">Criação</option>
+                        <option value="update">Atualização</option>
+                        <option value="delete">Exclusão</option>
+                        <option value="insert">Inserção</option>
+                        <option value="login">Login</option>
+                    </select>
+                </div>
+                <div class="audit-modal-body" id="audit-modal-body">
+                    <div class="audit-loading">
+                        <div class="audit-spinner"></div>
+                        <span>Carregando histórico...</span>
+                    </div>
+                </div>
+                <div class="audit-modal-footer">
+                    <span id="audit-total-count">—</span>
+                    <button class="audit-btn-refresh" onclick="window.carregarAuditoria()">
+                        <i class="fas fa-sync-alt"></i> Atualizar
+                    </button>
+                </div>
+            </div>
+        `;
+            document.body.appendChild(overlay);
+            document.body.style.overflow = 'hidden';
+
+            window.carregarAuditoria();
+
+            // Fechar com ESC
+            overlay._escHandler = function (e) {
+                if (e.key === 'Escape') {
+                    window.fecharHistoricoAlteracoes();
+                }
+            };
+            document.addEventListener('keydown', overlay._escHandler);
+        };
+
+        window.fecharHistoricoAlteracoes = function () {
+            const modal = document.getElementById('auditoria-historico-modal');
+            if (modal) {
+                if (modal._escHandler) document.removeEventListener('keydown', modal._escHandler);
+                modal.remove();
+            }
+            document.body.style.overflow = '';
+
+            // Reabrir config modal
+            const configModal = document.getElementById('modal-configuracoes');
+            if (configModal) {
+                configModal.style.removeProperty('display');
+                configModal.classList.add('active');
+            }
+        };
+
+        window.carregarAuditoria = async function () {
+            const body = document.getElementById('audit-modal-body');
+            if (!body) return;
+            body.innerHTML = '<div class="audit-loading"><div class="audit-spinner"></div><span>Carregando...</span></div>';
+
+            try {
+                const res = await fetch('/api/audit-log?limite=500', { credentials: 'include' });
+                if (!res.ok) {
+                    // fallback para endpoint do Financeiro
+                    const res2 = await fetch('/api/financeiro/auditoria', { credentials: 'include' });
+                    if (!res2.ok) throw new Error('Status ' + res2.status);
+                    const data2 = await res2.json();
+                    window._auditoriaLogs = Array.isArray(data2) ? data2 : (data2.logs || data2.data || []);
+                } else {
+                    const data = await res.json();
+                    window._auditoriaLogs = data.logs || data.data || [];
+                }
+
+                const countEl = document.getElementById('audit-total-count');
+                if (countEl) countEl.textContent = window._auditoriaLogs.length + ' registros';
+
+                window.renderizarAuditoria(window._auditoriaLogs);
+            } catch (err) {
+                if (body) {
+                    body.innerHTML = '<div class="audit-empty"><i class="fas fa-exclamation-triangle"></i><span>Erro ao carregar: ' + err.message + '</span></div>';
+                }
+            }
+        };
+
+        window.filtrarAuditoria = function () {
+            const query = (document.getElementById('audit-search-input')?.value || '').toLowerCase().trim();
+            const modulo = (document.getElementById('audit-module-filter')?.value || '').toLowerCase();
+            const acao = (document.getElementById('audit-action-filter')?.value || '').toLowerCase();
+
+            let filtered = window._auditoriaLogs || [];
+
+            if (query) {
+                filtered = filtered.filter(function (log) {
+                    return (log.usuario || '').toLowerCase().includes(query) ||
+                        (log.acao || '').toLowerCase().includes(query) ||
+                        (log.descricao || '').toLowerCase().includes(query) ||
+                        (log.modulo || '').toLowerCase().includes(query);
+                });
+            }
+            if (modulo) {
+                filtered = filtered.filter(function (log) {
+                    return (log.modulo || '').toLowerCase().includes(modulo);
+                });
+            }
+            if (acao) {
+                filtered = filtered.filter(function (log) {
+                    return (log.acao || '').toLowerCase().includes(acao);
+                });
+            }
+
+            const countEl = document.getElementById('audit-total-count');
+            if (countEl) countEl.textContent = filtered.length + ' de ' + (window._auditoriaLogs.length) + ' registros';
+
+            window.renderizarAuditoria(filtered);
+        };
+
+        window.renderizarAuditoria = function (logs) {
+            const body = document.getElementById('audit-modal-body');
+            if (!body) return;
+
+            if (!logs || !logs.length) {
+                body.innerHTML = '<div class="audit-empty"><i class="fas fa-search"></i><span>Nenhum registro encontrado</span></div>';
+                return;
+            }
+
+            var moduleColors = {
+                financeiro: '#10b981', vendas: '#3b82f6', pcp: '#f59e0b',
+                compras: '#8b5cf6', rh: '#ec4899', faturamento: '#06b6d4',
+                nfe: '#6366f1', sistema: '#ef4444'
+            };
+
+            var actionIcons = {
+                create: { icon: 'fa-plus-circle', color: '#10b981' },
+                insert: { icon: 'fa-plus-circle', color: '#10b981' },
+                update: { icon: 'fa-edit', color: '#3b82f6' },
+                patch: { icon: 'fa-edit', color: '#3b82f6' },
+                delete: { icon: 'fa-trash', color: '#ef4444' },
+                login: { icon: 'fa-sign-in-alt', color: '#8b5cf6' },
+                logout: { icon: 'fa-sign-out-alt', color: '#64748b' }
+            };
+
+            var escHtml = function (s) {
+                if (!s) return '';
+                var d = document.createElement('div');
+                d.textContent = String(s);
+                return d.innerHTML;
+            };
+
+            var formatDate = function (dateStr) {
+                if (!dateStr) return '';
+                try {
+                    var d = new Date(dateStr);
+                    var now = new Date();
+                    var diff = now - d;
+                    var mins = Math.floor(diff / 60000);
+                    var hours = Math.floor(diff / 3600000);
+                    var days = Math.floor(diff / 86400000);
+                    if (mins < 1) return 'Agora';
+                    if (mins < 60) return mins + ' min atrás';
+                    if (hours < 24) return hours + 'h atrás';
+                    if (days < 7) return days + 'd atrás';
+                    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                } catch (e) { return escHtml(dateStr); }
+            };
+
+            body.innerHTML = logs.slice(0, 300).map(function (log) {
+                var acao = (log.acao || 'action').toLowerCase();
+                var modulo = (log.modulo || 'sistema').toLowerCase().split('/')[0];
+                var iconInf = actionIcons[acao] || { icon: 'fa-circle', color: '#94a3b8' };
+                var modClr = moduleColors[modulo] || '#64748b';
+                var usuario = escHtml(log.usuario || 'Usuário');
+                var desc = escHtml(log.descricao || '—');
+                var data = formatDate(log.data || log.created_at);
+
+                return '<div class="audit-entry">' +
+                    '<div class="audit-entry-icon" style="background:' + iconInf.color + '22;color:' + iconInf.color + '">' +
+                    '<i class="fas ' + iconInf.icon + '"></i>' +
+                    '</div>' +
+                    '<div class="audit-entry-content">' +
+                    '<div class="audit-entry-row">' +
+                    '<span class="audit-entry-user"><i class="fas fa-user-circle"></i> ' + usuario + '</span>' +
+                    '<span class="audit-entry-date">' + data + '</span>' +
+                    '</div>' +
+                    '<div class="audit-entry-desc">' + desc + '</div>' +
+                    '<div class="audit-entry-tags">' +
+                    '<span class="audit-tag-module" style="background:' + modClr + '22;color:' + modClr + '">' + escHtml(log.modulo || 'sistema') + '</span>' +
+                    '<span class="audit-tag-action">' + escHtml(log.acao || '—') + '</span>' +
+                    (log.ip ? '<span class="audit-tag-ip"><i class="fas fa-network-wired"></i> ' + escHtml(log.ip) + '</span>' : '') +
+                    '</div>' +
+                    '</div>' +
+                    '</div>';
+            }).join('');
+        };
+    </script>
 </body>
+
 </html>

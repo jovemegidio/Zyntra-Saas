@@ -393,7 +393,7 @@
                             </div>
                             <div class="kpi purple">
                                 <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-calendar-check"></i></span></div>
-                                <div class="kpi-val" id="metros-dias-producao"></div>
+                                <div class="kpi-val" id="metros-dias-produção"></div>
                                 <div class="kpi-lbl">Dias com Produção</div>
                             </div>
                         </div>
@@ -489,6 +489,7 @@
     <script>
     /* ============================= GLOBALS ============================= */
     var API = getAPIBase();
+    var t = localStorage.getItem('token');
     var MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     var MESES_ABR = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     var charts = {};
@@ -610,7 +611,7 @@
         /* Chart */
         destroyChart('cabos');
         var top = items.slice(0, 10);
-        var lbls = top.map(function(i) { var d = i.descricao || i.produto_nome || i.codigo || 'N/A'; return d.length > 35 ? d.substring(0,35) + '' : d; });
+        var lbls = top.map(function(i) { var d = i.descrição || i.produto_nome || i.código || 'N/A'; return d.length > 35 ? d.substring(0,35) + '' : d; });
         var vals = top.map(function(i) { return parseFloat(i.total_quantidade) || 0; });
         var maxVal = Math.max.apply(null, vals) || 1;
         var colors = top.map(function(_, idx) { var o = 1 - (idx * 0.07); return 'rgba(59,130,246,' + o.toFixed(2) + ')'; });
@@ -633,8 +634,8 @@
             var pct = maxVal > 0 ? ((parseFloat(item.total_quantidade) || 0) / maxVal * 100) : 0;
             html += '<tr>';
             html += '<td>' + rankBadge(idx) + '</td>';
-            html += '<td class="mono">' + (item.codigo || item.codigo_produto || '') + '</td>';
-            html += '<td class="product-name">' + (item.descricao || item.produto_nome || '') + '</td>';
+            html += '<td class="mono">' + (item.código || item.codigo_produto || '') + '</td>';
+            html += '<td class="product-name">' + (item.descrição || item.produto_nome || '') + '</td>';
             html += '<td style="text-align:right"><div class="progress-bar-cell"><span class="money">' + (parseFloat(item.total_quantidade) || 0).toLocaleString('pt-BR') + '</span><div class="progress-mini"><div class="fill" style="width:' + pct.toFixed(0) + '%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div></div></td>';
             html += '<td>' + (item.unidade || '') + '</td>';
             html += '<td style="text-align:right" class="money">' + formatarMoeda(item.total_valor || 0) + '</td>';
@@ -747,7 +748,7 @@
         document.getElementById('metros-total-produzido').textContent = (parseFloat(ra.total_produzido) || parseFloat(ro.total_quantidade) || 0).toLocaleString('pt-BR');
         document.getElementById('metros-media-diaria').textContent = (parseFloat(ra.media_diaria) || 0).toLocaleString('pt-BR', {maximumFractionDigits:1});
         document.getElementById('metros-max-dia').textContent = (parseFloat(ra.max_dia) || 0).toLocaleString('pt-BR');
-        document.getElementById('metros-dias-producao').textContent = ra.dias_com_producao || '0';
+        document.getElementById('metros-dias-produção').textContent = ra.dias_com_producao || '0';
 
         /* Apontamentos chart */
         destroyChart('metrosApt');
@@ -929,5 +930,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

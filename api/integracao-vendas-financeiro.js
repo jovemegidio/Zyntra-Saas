@@ -9,6 +9,14 @@ const router = express.Router();
 let pool;
 let authenticateToken;
 
+// Aplicar autenticação em todas as rotas
+router.use((req, res, next) => {
+    if (!authenticateToken) {
+        return res.status(500).json({ success: false, error: 'Serviço de autenticação indisponível' });
+    }
+    authenticateToken(req, res, next);
+});
+
 /**
  * POST /api/integracao-vendas-financeiro/gerar-financeiro
  * Gera contas a receber a partir de um pedido
@@ -19,6 +27,10 @@ router.post('/gerar-financeiro', async (req, res) => {
 
         if (!pedido_id) {
             return res.status(400).json({ success: false, error: 'ID do pedido é obrigatório' });
+        }
+
+        if (!Number.isInteger(parcelas) || parcelas < 1) {
+            return res.status(400).json({ success: false, error: 'Número de parcelas deve ser inteiro >= 1' });
         }
 
         // Buscar pedido
@@ -34,13 +46,17 @@ router.post('/gerar-financeiro', async (req, res) => {
         }
 
         const pedido = pedidos[0];
-        const valorParcela = pedido.valor_total / parcelas;
+        const valorTotal = Math.round((parseFloat(pedido.valor_total) || 0) * 100);
+        const valorBase = Math.floor(valorTotal / parcelas);
         const dataBase = primeiro_vencimento ? new Date(primeiro_vencimento) : new Date();
         const contasCriadas = [];
 
         for (let i = 0; i < parcelas; i++) {
             const dataVencimento = new Date(dataBase);
             dataVencimento.setDate(dataVencimento.getDate() + (i * intervalo_dias));
+            // Última parcela absorve o resíduo de centavos
+            const valorCentavos = (i === parcelas - 1) ? valorTotal - valorBase * (parcelas - 1) : valorBase;
+            const valorParcela = valorCentavos / 100;
 
             const [result] = await pool.query(`
                 INSERT INTO contas_receber (
@@ -63,7 +79,9 @@ router.post('/gerar-financeiro', async (req, res) => {
         // Atualizar pedido
         await pool.query(`
             UPDATE pedidos SET financeiro_gerado = 1 WHERE id = ?
-        `, [pedido_id]).catch(() => {});
+        `, [pedido_id]).catch(err => {
+            console.error('[INTEGRAÇÃO V-F] Erro ao marcar financeiro_gerado:', err.message);
+        });
 
         res.json({ 
             success: true, 

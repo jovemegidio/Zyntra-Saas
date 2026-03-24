@@ -109,6 +109,7 @@
     <script src="/js/anti-copy-protection.js" defer></script>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -345,7 +346,7 @@
                     const data = await r.json();
                     const materiais = data.produtos || data || [];
                     select.innerHTML = '<option value="">Selecione o material...</option>' +
-                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descricao || m.name}</option>`).join('');
+                        materiais.map(m => `<option value="${m.id}">${m.nome || m.descrição || m.name}</option>`).join('');
                 }
             } catch (e) {
                 console.error('Erro ao carregar materiais:', e);
@@ -365,7 +366,7 @@
             try {
                 const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                 const r = await fetch('/api/compras/cotacoes/proximo-numero', { headers: { 'Authorization': `Bearer ${token}` } });
-                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.numero || d.proximo_numero || ''; }
+                if (r.ok) { const d = await r.json(); document.getElementById('cotacaoNumero').value = d.número || d.proximo_número || ''; }
             } catch (e) { document.getElementById('cotacaoNumero').value = 'COT-' + String(Date.now()).slice(-4); }
         }
 
@@ -373,13 +374,19 @@
             document.getElementById('modalNovaCotacao').classList.remove('active');
         }
 
+        let _salvandoCotacao = false;
         async function salvarCotacao() {
-            const descricao = document.getElementById('cotDescricao').value;
+            if (_salvandoCotacao) return;
+            _salvandoCotacao = true;
+            const btn = event && event.target ? event.target : null;
+            if (btn) btn.disabled = true;
+            const descrição = document.getElementById('cotDescricao').value;
             const validade = document.getElementById('cotValidade').value;
             const material = document.getElementById('cotMaterial').value;
             const quantidade = document.getElementById('cotQuantidade').value;
-            if (!descricao || !validade || !material || !quantidade) {
+            if (!descrição || !validade || !material || !quantidade) {
                 showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
+                _salvandoCotacao = false; if (btn) btn.disabled = false;
                 return;
             }
 
@@ -387,8 +394,8 @@
             const fornecedores_ids = Array.from(fornecedoresChecked).map(cb => parseInt(cb.value));
 
             const body = {
-                numero: document.getElementById('cotacaoNumero').value,
-                descricao: descricao,
+                número: document.getElementById('cotacaoNumero').value,
+                descrição: descrição,
                 data_abertura: new Date().toISOString().split('T')[0],
                 data_validade: validade,
                 quantidade: parseFloat(quantidade),
@@ -414,17 +421,19 @@
                     throw new Error(err.message || 'Erro ao salvar cotação');
                 }
 
-                showToast(cotacaoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
+                showToast(cotaçãoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
                 fecharModalCotacao();
 
                 // Recarregar dados na tabela
-                if (typeof cotacoesManager !== 'undefined') {
-                    await cotacoesManager.carregarDados();
-                    cotacoesManager.atualizarCards();
-                    cotacoesManager.renderizarTabela();
+                if (typeof cotaçõesManager !== 'undefined') {
+                    await cotaçõesManager.carregarDados();
+                    cotaçõesManager.atualizarCards();
+                    cotaçõesManager.renderizarTabela();
                 }
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');
+            } finally {
+                _salvandoCotacao = false; if (btn) btn.disabled = false;
             }
         }
 
@@ -506,5 +515,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

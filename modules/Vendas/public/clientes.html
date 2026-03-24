@@ -1456,15 +1456,14 @@
         }
 
         function formatarDocumento(cnpj, cpf) {
-            if (cnpj && cnpj.length > 0) {
-                const numeros = cnpj.replace(/\D/g, '');
-                if (numeros.length === 14) return numeros.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
-                return cnpj;
-            } else if (cpf && cpf.length > 0) {
-                const numeros = cpf.replace(/\D/g, '');
-                if (numeros.length === 11) return numeros.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
-                return cpf;
-            }
+            const cnpjNum = cnpj ? cnpj.replace(/\D/g, '') : '';
+            const cpfNum = cpf ? cpf.replace(/\D/g, '') : '';
+            if (cnpjNum.length === 14) return cnpjNum.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5');
+            if (cpfNum.length === 11) return cpfNum.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+            // cnpj_cpf might contain a CPF (11 digits) passed as first arg
+            if (cnpjNum.length === 11) return cnpjNum.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+            if (cnpj && cnpj.length > 0) return cnpj;
+            if (cpf && cpf.length > 0) return cpf;
             return '-';
         }
 
@@ -1483,7 +1482,7 @@
             itensPorPagina = limitSelect === 'all' ? 9999 : parseInt(limitSelect);
             paginaAtual = 1;
             clientesFiltrados = todosClientes.filter(cliente => {
-                const matchBusca = !busca || (cliente.nome && cliente.nome.toLowerCase().includes(busca)) || (cliente.cnpj && cliente.cnpj.includes(busca)) || (cliente.email && cliente.email.toLowerCase().includes(busca));
+                const matchBusca = !busca || (cliente.nome && cliente.nome.toLowerCase().includes(busca)) || (cliente.cnpj && cliente.cnpj.includes(busca)) || (cliente.cnpj_cpf && cliente.cnpj_cpf.includes(busca)) || (cliente.cpf && cliente.cpf.includes(busca)) || (cliente.email && cliente.email.toLowerCase().includes(busca));
                 const matchStatus = !statusFiltro || (statusFiltro === '1' && cliente.ativo) || (statusFiltro === '0' && !cliente.ativo);
                 return matchBusca && matchStatus;
             });

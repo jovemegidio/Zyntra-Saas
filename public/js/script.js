@@ -843,7 +843,7 @@ function initDashboardPage() {
             event.preventDefault();
             try {
                 // Ask server to clear the auth cookie
-                await fetch('/api/logout', { credentials: 'include', method: 'POST', credentials: 'include' });
+                await fetch('/api/logout', { method: 'POST', credentials: 'include' });
             } catch (e) {
                 // ignore network errors here
             }

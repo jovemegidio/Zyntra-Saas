@@ -1,0 +1,76 @@
+{
+  "name": "06-pedidos-atrasados-alerta",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 9 * * *" }]
+        }
+      },
+      "name": "⏰ Diário às 9h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/compras/pedidos-atrasados",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "📋 Buscar Pedidos Atrasados",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }
+          ]
+        }
+      },
+      "name": "Tem atrasados?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data"
+      },
+      "name": "Loop pedidos",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [910, 300],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$json.solicitante_email}}",
+        "subject": "⚠️ Pedido {{$json.numero_pedido}} atrasado — {{$json.dias_atraso}} dias",
+        "html": "<div style='font-family: Arial;'><h2 style='color: #e74c3c;'>Pedido de Compra Atrasado</h2><p>O pedido <strong>{{$json.numero_pedido}}</strong> está com <strong>{{$json.dias_atraso}} dias</strong> de atraso.</p><table style='border-collapse: collapse; width: 100%;'><tr style='background: #f8f9fa;'><td style='padding: 8px; border: 1px solid #ddd;'>Fornecedor</td><td style='padding: 8px; border: 1px solid #ddd;'><strong>{{$json.fornecedor}}</strong></td></tr><tr><td style='padding: 8px; border: 1px solid #ddd;'>Data prevista</td><td style='padding: 8px; border: 1px solid #ddd;'>{{$json.data_entrega_prevista}}</td></tr><tr style='background: #f8f9fa;'><td style='padding: 8px; border: 1px solid #ddd;'>Valor</td><td style='padding: 8px; border: 1px solid #ddd;'>R$ {{$json.valor_total}}</td></tr></table><p>Por favor, entre em contato com o fornecedor.</p></div>",
+        "options": {}
+      },
+      "name": "📧 Email Solicitante",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1130, 300],
+      "typeVersion": 2.1
+    }
+  ],
+  "connections": {
+    "⏰ Diário às 9h": { "main": [[{ "node": "📋 Buscar Pedidos Atrasados", "type": "main", "index": 0 }]] },
+    "📋 Buscar Pedidos Atrasados": { "main": [[{ "node": "Tem atrasados?", "type": "main", "index": 0 }]] },
+    "Tem atrasados?": { "main": [[{ "node": "Loop pedidos", "type": "main", "index": 0 }], []] },
+    "Loop pedidos": { "main": [[{ "node": "📧 Email Solicitante", "type": "main", "index": 0 }], []] },
+    "📧 Email Solicitante": { "main": [[{ "node": "Loop pedidos", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "compras" }, { "name": "pedidos" }, { "name": "alerta" }]
+}

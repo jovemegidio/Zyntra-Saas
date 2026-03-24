@@ -1,0 +1,590 @@
+/* ============================================================
+   ZYNTRA ERP — Desktop Splash Screen
+   Premium Theme  ·  Lime/Green Design System
+   Based on Zyntra brand wallpaper with 3D coin modules
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============ DESIGN TOKENS ============ */
+:root {
+    /* Brand — Lime/Green palette (matches Zyntra wallpaper) */
+    --lime-50:  #f7fee7;
+    --lime-100: #ecfccb;
+    --lime-200: #d9f99d;
+    --lime-300: #bef264;
+    --lime-400: #a3e635;
+    --lime-500: #C8E600;
+    --lime-600: #a5bf00;
+    --lime-700: #7d9200;
+    --lime-800: #5a6900;
+    --lime-900: #3d4800;
+
+    /* Accent — Metallic/Silver for coin aesthetic */
+    --silver-400: #b0bec5;
+    --silver-500: #90a4ae;
+
+    /* Neutral */
+    --slate-50:  #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-300: #cbd5e1;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+
+    /* Semantic */
+    --success: #22c55e;
+    --danger:  #ef4444;
+    --warning: #f59e0b;
+
+    /* Surfaces */
+    --bg-deep:  #000000;
+    --bg-base:  #050505;
+    --bg-card:  rgba(10, 10, 10, 0.75);
+    --border:   rgba(200, 230, 0, 0.12);
+    --glass:    rgba(255, 255, 255, 0.03);
+
+    /* Typography */
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+    /* Transitions */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: var(--bg-deep);
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ============ SPLASH CONTAINER ============ */
+.splash {
+    position: fixed; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-end;
+    z-index: 9999;
+}
+
+/* ============ BACKGROUND — Wallpaper Image ============ */
+.splash-bg {
+    position: absolute; inset: 0;
+    overflow: hidden;
+}
+
+.splash-bg-image {
+    position: absolute; inset: 0;
+    background: url('splash-bg.jpg') center center / cover no-repeat;
+}
+
+@keyframes bgZoom {
+    0%   { transform: scale(1); }
+    100% { transform: scale(1.04); }
+}
+
+/* Dark gradient overlay for content readability (bottom area) */
+.splash-bg-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        transparent 45%,
+        rgba(0, 0, 0, 0.5) 65%,
+        rgba(0, 0, 0, 0.85) 85%,
+        rgba(0, 0, 0, 0.95) 100%
+    );
+}
+
+/* Subtle vignette */
+.splash-bg-vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 50%, rgba(0,0,0,0.4) 100%);
+}
+
+/* ============ MAIN CONTENT ============ */
+.splash-main {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 2rem 6rem;
+    width: 100%;
+    max-width: 500px;
+    animation: fadeInUp 0.8s var(--ease-out) both;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ LOGO (hidden — already in the wallpaper image) ============ */
+.logo-block { display: none; }
+
+/* ============ TAGLINE ============ */
+.tagline {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--lime-500);
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 20px rgba(200, 230, 0, 0.3);
+    animation: fadeInUp 0.8s var(--ease-out) 0.4s both;
+}
+
+/* ============ DIVIDER ============ */
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.75rem;
+    animation: fadeInUp 0.8s var(--ease-out) 0.5s both;
+}
+
+.divider-line {
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--lime-500), transparent);
+    opacity: 0.4;
+}
+
+.divider-diamond {
+    width: 6px; height: 6px;
+    background: var(--lime-500);
+    transform: rotate(45deg);
+    opacity: 0.6;
+}
+
+/* ============ PROGRESS ============ */
+.progress-section {
+    width: 380px;
+    max-width: 90vw;
+    animation: fadeInUp 0.8s var(--ease-out) 0.6s both;
+}
+
+.progress-track {
+    position: relative;
+    width: 100%;
+    height: 3px;
+    background: rgba(200, 230, 0, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--lime-700), var(--lime-500), var(--lime-300));
+    box-shadow: 0 0 16px rgba(200, 230, 0, 0.5);
+    transition: width 0.5s var(--ease-out);
+}
+
+/* Shimmer effect on progress bar */
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    animation: shimmer 2s linear infinite;
+}
+
+@keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.875rem;
+}
+
+.progress-step {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--slate-400);
+    transition: color 0.3s;
+}
+
+.progress-pct {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--lime-500);
+    letter-spacing: 0.02em;
+}
+
+/* ============ ERROR STATE ============ */
+.error-state {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    animation: fadeInUp 0.5s var(--ease-out);
+    width: 380px;
+    max-width: 90vw;
+}
+
+.error-icon-wrap {
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.error-icon {
+    width: 26px; height: 26px;
+    color: var(--danger);
+}
+
+.error-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--slate-100);
+}
+
+.error-msg {
+    font-size: 0.8125rem;
+    color: var(--slate-400);
+    line-height: 1.5;
+    text-align: center;
+    max-width: 300px;
+}
+
+.error-actions {
+    display: flex;
+    gap: 0.625rem;
+    margin-top: 0.5rem;
+}
+
+.btn-retry, .btn-settings {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    font-family: var(--font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+}
+
+.btn-retry {
+    background: var(--lime-600);
+    color: #000;
+    font-weight: 600;
+}
+.btn-retry:hover {
+    background: var(--lime-500);
+    box-shadow: 0 0 20px rgba(200, 230, 0, 0.35);
+    transform: translateY(-1px);
+}
+
+.btn-settings {
+    background: rgba(200, 230, 0, 0.06);
+    color: var(--slate-300);
+    border: 1px solid rgba(200, 230, 0, 0.15);
+}
+.btn-settings:hover {
+    background: rgba(200, 230, 0, 0.12);
+    color: var(--slate-100);
+    transform: translateY(-1px);
+}
+
+/* ============ FOOTER ============ */
+.splash-footer {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.6875rem;
+    color: var(--slate-600);
+    z-index: 10;
+    animation: fadeInUp 0.8s var(--ease-out) 0.8s both;
+}
+
+.footer-version {
+    font-weight: 600;
+    color: var(--lime-500);
+    font-variant-numeric: tabular-nums;
+}
+
+.footer-sep { opacity: 0.3; }
+
+.footer-brand {
+    letter-spacing: 0.03em;
+}
+
+/* ============ MODAL ============ */
+.modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(2, 6, 23, 0.8);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: modalFadeIn 0.25s var(--ease-out);
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-card {
+    width: 420px;
+    max-width: 92vw;
+    background: var(--slate-900);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(200, 230, 0, 0.06),
+        0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: modalSlideIn 0.35s var(--ease-spring);
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid rgba(200, 230, 0, 0.08);
+}
+
+.modal-header h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    color: var(--slate-100);
+}
+
+.modal-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px; height: 32px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--slate-400);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.modal-close:hover {
+    background: rgba(200, 230, 0, 0.1);
+    color: var(--slate-200);
+}
+
+.modal-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.field-label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--slate-300);
+    margin-bottom: 0.5rem;
+}
+
+.field-input {
+    width: 100%;
+    padding: 0.625rem 0.875rem;
+    font-family: var(--font);
+    font-size: 0.875rem;
+    color: var(--slate-100);
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(200, 230, 0, 0.15);
+    border-radius: 10px;
+    outline: none;
+    transition: all 0.2s;
+}
+.field-input:focus {
+    border-color: var(--lime-500);
+    box-shadow: 0 0 0 3px rgba(200, 230, 0, 0.15);
+}
+.field-input::placeholder {
+    color: var(--slate-600);
+}
+
+.field-hint {
+    font-size: 0.75rem;
+    color: var(--slate-500);
+    margin-top: 0.375rem;
+    line-height: 1.4;
+}
+
+.conn-test {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(200, 230, 0, 0.08);
+}
+
+.test-icon { font-size: 1rem; }
+.test-result {
+    font-size: 0.8125rem;
+    color: var(--slate-400);
+    transition: color 0.2s;
+}
+.test-result.success { color: var(--success); }
+.test-result.error { color: var(--danger); }
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.625rem;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid rgba(200, 230, 0, 0.08);
+}
+
+.btn-outline, .btn-primary {
+    padding: 0.5rem 1rem;
+    font-family: var(--font);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s var(--ease-out);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--slate-300);
+    border: 1px solid rgba(200, 230, 0, 0.2);
+}
+.btn-outline:hover {
+    background: rgba(200, 230, 0, 0.08);
+    border-color: rgba(200, 230, 0, 0.35);
+    color: var(--slate-100);
+}
+
+.btn-primary {
+    background: var(--lime-600);
+    color: #000;
+    border: none;
+    font-weight: 600;
+}
+.btn-primary:hover {
+    background: var(--lime-500);
+    box-shadow: 0 0 20px rgba(200, 230, 0, 0.3);
+}
+
+/* ============ PARALLAX / FLOATING EFFECTS ============ */
+
+/* Floating light particles overlay */
+.splash-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        radial-gradient(2px 2px at 15% 25%, rgba(200, 230, 0, 0.4), transparent),
+        radial-gradient(2px 2px at 40% 60%, rgba(200, 230, 0, 0.25), transparent),
+        radial-gradient(1.5px 1.5px at 70% 35%, rgba(200, 230, 0, 0.35), transparent),
+        radial-gradient(2px 2px at 85% 70%, rgba(200, 230, 0, 0.2), transparent),
+        radial-gradient(1px 1px at 25% 80%, rgba(200, 230, 0, 0.3), transparent),
+        radial-gradient(1.5px 1.5px at 55% 15%, rgba(200, 230, 0, 0.15), transparent),
+        radial-gradient(2px 2px at 90% 20%, rgba(200, 230, 0, 0.2), transparent),
+        radial-gradient(1px 1px at 60% 85%, rgba(200, 230, 0, 0.25), transparent);
+    animation: particleFloat 8s ease-in-out infinite alternate;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.7;
+}
+
+@keyframes particleFloat {
+    0%   { transform: translateY(0) translateX(0); opacity: 0.7; }
+    25%  { transform: translateY(-8px) translateX(4px); opacity: 0.5; }
+    50%  { transform: translateY(-4px) translateX(-3px); opacity: 0.8; }
+    75%  { transform: translateY(-12px) translateX(6px); opacity: 0.4; }
+    100% { transform: translateY(-6px) translateX(-2px); opacity: 0.6; }
+}
+
+/* Pulsing glow on background image — simulates coin shine */
+.splash-bg-image::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(
+        ellipse 40% 40% at 50% 45%,
+        rgba(200, 230, 0, 0.08) 0%,
+        transparent 70%
+    );
+    animation: coinGlow 4s ease-in-out infinite alternate;
+    pointer-events: none;
+}
+
+@keyframes coinGlow {
+    0%   { opacity: 0; transform: scale(1); }
+    50%  { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.3; transform: scale(0.98); }
+}
+
+/* Slow parallax drift on the background (separate from zoom) */
+.splash-bg-image {
+    animation: bgZoom 20s ease-in-out infinite alternate,
+               bgDrift 30s ease-in-out infinite alternate;
+}
+
+@keyframes bgDrift {
+    0%   { transform: scale(1) translate(0, 0); }
+    33%  { transform: scale(1.02) translate(-6px, -3px); }
+    66%  { transform: scale(1.03) translate(4px, -5px); }
+    100% { transform: scale(1.04) translate(-2px, -2px); }
+}
+
+/* Subtle light streak sweep */
+.splash-bg-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(200, 230, 0, 0.03) 50%,
+        transparent 60%
+    );
+    animation: lightStreak 12s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes lightStreak {
+    0%   { left: -100%; }
+    40%  { left: 200%; }
+    100% { left: 200%; }
+}

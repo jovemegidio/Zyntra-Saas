@@ -1,0 +1,305 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0f172a">
+    <title>Zyntra - Baixar App iOS</title>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+            background: #0f172a;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .app-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 27px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, #1e1b4b, #312e81);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.3);
+        }
+
+        .app-icon img {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .version {
+            font-size: 15px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 32px;
+        }
+
+        .description {
+            font-size: 17px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        .install-btn {
+            display: block;
+            width: 100%;
+            padding: 16px 24px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .install-btn:active {
+            transform: scale(0.97);
+            opacity: 0.9;
+        }
+
+        .install-btn.secondary {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+
+        .steps {
+            text-align: left;
+            background: rgba(255,255,255,0.05);
+            border-radius: 14px;
+            padding: 20px 24px;
+            margin-top: 32px;
+        }
+
+        .steps h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+
+        .step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 14px;
+            font-size: 15px;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.45;
+        }
+
+        .step:last-child { margin-bottom: 0; }
+
+        .step-number {
+            flex-shrink: 0;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(99, 102, 241, 0.2);
+            color: #a5b4fc;
+            font-size: 13px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .feature {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .feature-label {
+            font-size: 13px;
+            color: rgba(255,255,255,0.6);
+            font-weight: 500;
+        }
+
+        .warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-top: 24px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.7);
+            line-height: 1.4;
+        }
+
+        .warning strong {
+            color: #fbbf24;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* Partículas de fundo */
+        .bg-glow {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            opacity: 0.4;
+        }
+        .bg-glow.g1 { width: 300px; height: 300px; background: #4f46e5; top: -50px; left: -80px; }
+        .bg-glow.g2 { width: 250px; height: 250px; background: #7c3aed; bottom: -30px; right: -60px; }
+
+        /* Not iOS */
+        .not-ios {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: rgba(255,255,255,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow g1"></div>
+    <div class="bg-glow g2"></div>
+
+    <div class="container">
+        <div class="app-icon">
+            <img src="/icons/icon-512x512.png" alt="Zyntra" onerror="this.style.display='none'">
+        </div>
+
+        <h1>Zyntra</h1>
+        <p class="version">Sistema de Gestão Empresarial • v2.1.7</p>
+
+        <div class="not-ios" id="notIOS">
+            Este link é exclusivo para <strong>iPhone/iPad</strong>. 
+            Abra este link no Safari do seu dispositivo iOS.
+        </div>
+
+        <p class="description">
+            Gestão completa na palma da mão — Vendas, Financeiro, PCP, Compras, NFe e RH.
+        </p>
+
+        <!-- Botão de instalação OTA -->
+        <a href="itms-services://?action=download-manifest&url=https://SEU_DOMINIO/app/manifest.plist" 
+           class="install-btn" id="installBtn">
+            Instalar App
+        </a>
+
+        <a href="/" class="install-btn secondary">
+            Abrir versão Web
+        </a>
+
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <div class="feature-label">Dashboard</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🛒</div>
+                <div class="feature-label">Vendas</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">💰</div>
+                <div class="feature-label">Financeiro</div>
+            </div>
+            <div class="feature">
+                <div class="feature-icon">🏭</div>
+                <div class="feature-label">PCP</div>
+            </div>
+        </div>
+
+        <div class="steps">
+            <h3>Como instalar</h3>
+            <div class="step">
+                <span class="step-number">1</span>
+                <span>Toque em <strong>"Instalar App"</strong> acima</span>
+            </div>
+            <div class="step">
+                <span class="step-number">2</span>
+                <span>Quando aparecer o popup, toque em <strong>"Instalar"</strong></span>
+            </div>
+            <div class="step">
+                <span class="step-number">3</span>
+                <span>Vá em <strong>Ajustes → Geral → Gerenciamento de Dispositivos</strong> e confie no certificado</span>
+            </div>
+            <div class="step">
+                <span class="step-number">4</span>
+                <span>O app <strong>Zyntra</strong> aparecerá na tela inicial</span>
+            </div>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Importante:</strong> Abra esta página no <strong>Safari</strong> do iPhone. 
+            Outros navegadores (Chrome, Firefox) não suportam instalação direta.
+        </div>
+
+        <p class="footer">
+            Zyntra &copy; 2026 — Todos os direitos reservados
+        </p>
+    </div>
+
+    <script>
+        // Detectar se NÃO é iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        
+        if (!isIOS) {
+            document.getElementById('notIOS').style.display = 'block';
+        }
+
+        // Atualizar URL do manifest baseado no domínio atual
+        const installBtn = document.getElementById('installBtn');
+        const currentDomain = window.location.origin;
+        installBtn.href = `itms-services://?action=download-manifest&url=${currentDomain}/app/manifest.plist`;
+    </script>
+</body>
+</html>

@@ -10,6 +10,10 @@ module.exports = function createNfeRoutes(deps) {
     const router = express.Router();
     router.use(authenticateToken);
     router.use(authorizeArea('nfe'));
+
+    // Sprint 3 (Gap-3 fix): Usar serviço centralizado de faturamento para contas_receber
+    const { getFaturamentoSharedService } = require('../services/faturamento-shared.service');
+    const faturamentoShared = getFaturamentoSharedService(pool);
     // ===================== ROTAS SERVIÇOS/NF-e PROFISSIONAL =====================
     
     // 1. Cálculo Automático de Impostos (ISS, PIS, COFINS, CSLL, IRRF)
@@ -66,11 +70,15 @@ module.exports = function createNfeRoutes(deps) {
             );
             const nfeId = nfeResult.insertId;
     
-            // Integração Financeiro: cria conta a receber
-            await connection.query(
-                'INSERT INTO contas_receber (cliente_id, valor, descricao, status, vencimento, nfe_id) VALUES (?, ?, ?, "pendente", ?, ?)',
-                [cliente_id, valor, descricao_servico, vencimento, nfeId]
-            );
+            // Integração Financeiro: cria conta a receber via serviço centralizado (Sprint 3 Gap-3)
+            const contaCriada = await faturamentoShared.gerarContaReceber(connection, {
+                pedido_id: pedido_id || null,
+                cliente_id,
+                descricao: descricao_servico,
+                valor,
+                tipo: 'nfe',
+                pedido: null
+            });
     
             // Se há pedido vinculado, atualizar status
             if (pedido_id) {

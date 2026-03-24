@@ -1,0 +1,103 @@
+{
+  "name": "02-backup-banco-dados",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 2 * * *" }]
+        }
+      },
+      "name": "⏰ Diário às 2h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/acoes/backup-database",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 120000 }
+      },
+      "name": "💾 Executar Backup",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            { "value1": "={{$json.success}}", "value2": true }
+          ]
+        }
+      },
+      "name": "Backup OK?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "embeds": [{
+            "title": "✅ Backup Concluído",
+            "description": "Backup do banco de dados realizado com sucesso.",
+            "color": 3066993,
+            "fields": [
+              { "name": "📦 Tamanho", "value": "{{$json.tamanho_mb}} MB", "inline": true },
+              { "name": "🗑️ Backups removidos", "value": "{{$json.backups_removidos}}", "inline": true },
+              { "name": "📁 Arquivo", "value": "{{$json.arquivo}}", "inline": false }
+            ],
+            "timestamp": "{{new Date().toISOString()}}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "🟣 Discord: Sucesso",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [910, 200],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "embeds": [{
+            "title": "❌ Backup FALHOU",
+            "description": "O backup do banco de dados falhou!",
+            "color": 15158332,
+            "fields": [
+              { "name": "Erro", "value": "{{$json.error}}", "inline": false }
+            ],
+            "timestamp": "{{new Date().toISOString()}}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "🔴 Discord: Erro",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [910, 400],
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "⏰ Diário às 2h": { "main": [[{ "node": "💾 Executar Backup", "type": "main", "index": 0 }]] },
+    "💾 Executar Backup": { "main": [[{ "node": "Backup OK?", "type": "main", "index": 0 }]] },
+    "Backup OK?": {
+      "main": [
+        [{ "node": "🟣 Discord: Sucesso", "type": "main", "index": 0 }],
+        [{ "node": "🔴 Discord: Erro", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "backup" }, { "name": "devops" }, { "name": "diario" }]
+}

@@ -212,7 +212,7 @@
                             <div class="stat-content">
                                 <div class="stat-label">Concluídos</div>
                                 <div class="stat-value" id="pcp-concluidos">0</div>
-                                <div class="stat-trend"><i class="fas fa-play-circle"></i> <span id="pcp-em-producao">0</span> em produção</div>
+                                <div class="stat-trend"><i class="fas fa-play-circle"></i> <span id="pcp-em-produção">0</span> em produção</div>
                             </div>
                         </div>
                         <div class="stat-card orange">
@@ -542,7 +542,7 @@
     <div class="modal-maquina-saas" id="modalMaquina">
         <div class="modal-maquina-content">
             <div class="modal-maquina-header">
-                <h3 id="modalMaquinaTitulo"><i class="fas fa-cogs"></i> Nova Máquina</h3>
+                <h3 id="modalMaquinaTítulo"><i class="fas fa-cogs"></i> Nova Máquina</h3>
                 <button class="modal-maquina-close" onclick="fecharModalMaquina()">&times;</button>
             </div>
             <div class="modal-maquina-body">
@@ -555,7 +555,7 @@
                         <div class="form-row-maq cols-2">
                             <div class="form-group-maq">
                                 <label>Código <span class="required">*</span></label>
-                                <input type="text" id="maquina-codigo" class="form-input-maq" required placeholder="Ex: EXT-001">
+                                <input type="text" id="maquina-código" class="form-input-maq" required placeholder="Ex: EXT-001">
                             </div>
                             <div class="form-group-maq">
                                 <label>Nome da Máquina <span class="required">*</span></label>
@@ -584,7 +584,7 @@
                                 <label>Status</label>
                                 <select id="maquina-status" class="form-input-maq">
                                     <option value="ativa">Ativa</option>
-                                    <option value="manutencao">Em Manutenção</option>
+                                    <option value="manutenção">Em Manutenção</option>
                                     <option value="inativa">Inativa</option>
                                 </select>
                             </div>
@@ -592,7 +592,7 @@
                         <div class="form-row-maq">
                             <div class="form-group-maq">
                                 <label>Descrição / Especificações</label>
-                                <textarea id="maquina-descricao" class="form-input-maq" rows="3" placeholder="Informações adicionais sobre a máquina..."></textarea>
+                                <textarea id="maquina-descrição" class="form-input-maq" rows="3" placeholder="Informações adicionais sobre a máquina..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -603,11 +603,11 @@
                         <div class="form-row-maq cols-equal">
                             <div class="form-group-maq">
                                 <label>Data da Manutenção</label>
-                                <input type="date" id="maquina-manutencao-data" class="form-input-maq">
+                                <input type="date" id="maquina-manutenção-data" class="form-input-maq">
                             </div>
                             <div class="form-group-maq">
                                 <label>Tipo de Manutenção</label>
-                                <select id="maquina-manutencao-tipo" class="form-input-maq">
+                                <select id="maquina-manutenção-tipo" class="form-input-maq">
                                     <option value="">Selecione...</option>
                                     <option value="preventiva">Preventiva</option>
                                     <option value="corretiva">Corretiva</option>
@@ -618,13 +618,13 @@
                         <div class="form-row-maq">
                             <div class="form-group-maq">
                                 <label>Descrição do Serviço</label>
-                                <textarea id="maquina-manutencao-descricao" class="form-input-maq" rows="2" placeholder="Descreva o serviço realizado..."></textarea>
+                                <textarea id="maquina-manutenção-descrição" class="form-input-maq" rows="2" placeholder="Descreva o serviço realizado..."></textarea>
                             </div>
                         </div>
                         <div class="form-row-maq">
                             <div class="form-group-maq">
                                 <label>Responsável</label>
-                                <input type="text" id="maquina-manutencao-responsavel" class="form-input-maq" placeholder="Nome do técnico responsável">
+                                <input type="text" id="maquina-manutenção-responsavel" class="form-input-maq" placeholder="Nome do técnico responsável">
                             </div>
                         </div>
                         <div class="form-row-maq">
@@ -648,7 +648,7 @@
                         <div class="form-row-maq cols-equal">
                             <div class="form-group-maq">
                                 <label>Data Prevista</label>
-                                <input type="date" id="maquina-proxima-manutencao" class="form-input-maq">
+                                <input type="date" id="maquina-proxima-manutenção" class="form-input-maq">
                             </div>
                             <div class="form-group-maq">
                                 <label>Custo Estimado (R$)</label>
@@ -759,7 +759,7 @@
                         <div class="form-row-maq">
                             <div class="form-group-maq">
                                 <label>Observação</label>
-                                <textarea id="receb-observacao" class="form-input-maq" rows="3" placeholder="Observações adicionais..."></textarea>
+                                <textarea id="receb-observação" class="form-input-maq" rows="3" placeholder="Observações adicionais..."></textarea>
                             </div>
                         </div>
                         <div class="form-row-maq">
@@ -812,7 +812,7 @@
                         <div class="form-row-maq">
                             <div class="form-group-maq">
                                 <label>Descrição do Produto <span class="required">*</span></label>
-                                <input type="text" id="ext-descricao" class="form-input-maq" required placeholder="Ex: Multiplex 10 F.R. Preto CL">
+                                <input type="text" id="ext-descrição" class="form-input-maq" required placeholder="Ex: Multiplex 10 F.R. Preto CL">
                             </div>
                         </div>
                         <div class="form-row-maq cols-3">
@@ -922,11 +922,11 @@
             }
             tbody.innerHTML = maquinasData.map(m => `
                 <tr>
-                    <td><strong>${m.codigo}</strong></td>
+                    <td><strong>${m.código}</strong></td>
                     <td>${m.nome}</td>
                     <td>${m.setor || '-'}</td>
                     <td>${m.capacidade || '-'}</td>
-                    <td><span class="status-badge ${m.status === 'ativa' ? 'concluido' : m.status === 'manutencao' ? 'em_producao' : 'pendente'}">${m.status === 'ativa' ? '? ativa' : m.status === 'manutencao' ? '? manutenção' : '? inativa'}</span></td>
+                    <td><span class="status-badge ${m.status === 'ativa' ? 'concluido' : m.status === 'manutenção' ? 'em_producao' : 'pendente'}">${m.status === 'ativa' ? '? ativa' : m.status === 'manutenção' ? '? manutenção' : '? inativa'}</span></td>
                     <td class="hide-mobile">${formatarData(m.ultima_manutencao)}</td>
                     <td><button class="btn btn-sm btn-secondary" onclick="editarMaquina(${m.id})" title="Editar"><i class="fas fa-edit"></i></button></td>
                 </tr>
@@ -936,7 +936,7 @@
 
         // ========== MÁQUINAS ==========
         function abrirModalNovaMaquina() {
-            document.getElementById('modalMaquinaTitulo').innerHTML = '<i class="fas fa-cogs"></i> Nova Máquina';
+            document.getElementById('modalMaquinaTítulo').innerHTML = '<i class="fas fa-cogs"></i> Nova Máquina';
             document.getElementById('formMaquina').reset();
             document.getElementById('maquina-id').value = '';
             document.getElementById('fotos-preview').innerHTML = '';
@@ -957,19 +957,19 @@
                 return;
             }
 
-            document.getElementById('modalMaquinaTitulo').innerHTML = '<i class="fas fa-edit"></i> Editar Máquina';
+            document.getElementById('modalMaquinaTítulo').innerHTML = '<i class="fas fa-edit"></i> Editar Máquina';
             document.getElementById('maquina-id').value = maquina.id;
-            document.getElementById('maquina-codigo').value = maquina.codigo || '';
+            document.getElementById('maquina-código').value = maquina.codigo || '';
             document.getElementById('maquina-nome').value = maquina.nome || '';
             document.getElementById('maquina-setor').value = maquina.setor || '';
             document.getElementById('maquina-capacidade').value = maquina.capacidade || '';
             document.getElementById('maquina-status').value = maquina.status || 'ativa';
-            document.getElementById('maquina-descricao').value = maquina.descricao || '';
-            document.getElementById('maquina-manutencao-data').value = (maquina.ultima_manutencao || '').substring(0, 10);
-            document.getElementById('maquina-manutencao-tipo').value = maquina.tipo_manutencao || '';
-            document.getElementById('maquina-manutencao-descricao').value = maquina.descricao_manutencao || '';
-            document.getElementById('maquina-manutencao-responsavel').value = maquina.responsavel_manutencao || '';
-            document.getElementById('maquina-proxima-manutencao').value = (maquina.proxima_manutencao || '').substring(0, 10);
+            document.getElementById('maquina-descrição').value = maquina.descricao || '';
+            document.getElementById('maquina-manutenção-data').value = (maquina.ultima_manutencao || '').substring(0, 10);
+            document.getElementById('maquina-manutenção-tipo').value = maquina.tipo_manutencao || '';
+            document.getElementById('maquina-manutenção-descrição').value = maquina.descricao_manutencao || '';
+            document.getElementById('maquina-manutenção-responsavel').value = maquina.responsavel_manutencao || '';
+            document.getElementById('maquina-proxima-manutenção').value = (maquina.proxima_manutencao || '').substring(0, 10);
             document.getElementById('maquina-custo').value = maquina.custo_manutencao || '';
 
             // Carregar fotos existentes
@@ -1008,17 +1008,17 @@
         async function salvarMaquina() {
             const id = document.getElementById('maquina-id').value;
             const dados = {
-                codigo: document.getElementById('maquina-codigo').value,
+                codigo: document.getElementById('maquina-código').value,
                 nome: document.getElementById('maquina-nome').value,
                 setor: document.getElementById('maquina-setor').value,
                 capacidade: document.getElementById('maquina-capacidade').value,
                 status: document.getElementById('maquina-status').value,
-                descricao: document.getElementById('maquina-descricao').value,
-                ultima_manutencao: document.getElementById('maquina-manutencao-data').value,
-                tipo_manutencao: document.getElementById('maquina-manutencao-tipo').value,
-                descricao_manutencao: document.getElementById('maquina-manutencao-descricao').value,
-                responsavel_manutencao: document.getElementById('maquina-manutencao-responsavel').value,
-                proxima_manutencao: document.getElementById('maquina-proxima-manutencao').value,
+                descricao: document.getElementById('maquina-descrição').value,
+                ultima_manutencao: document.getElementById('maquina-manutenção-data').value,
+                tipo_manutencao: document.getElementById('maquina-manutenção-tipo').value,
+                descricao_manutencao: document.getElementById('maquina-manutenção-descrição').value,
+                responsavel_manutencao: document.getElementById('maquina-manutenção-responsavel').value,
+                proxima_manutencao: document.getElementById('maquina-proxima-manutenção').value,
                 custo_manutencao: document.getElementById('maquina-custo').value
             };
 
@@ -1033,10 +1033,8 @@
                 const method = id ? 'PUT' : 'POST';
 
                 const response = await fetch(url, {
-                    credentials: 'include',
                     method,
-                    headers: { 'Content-Type': 'application/json'
-                }),
+                    headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(dados)
                 });
@@ -1136,7 +1134,7 @@
                 'bruno': 'extrusao',
                 'luiz': 'extrusao',
                 'extrusao': 'extrusao',
-                'producao': 'extrusao'
+                'produção': 'extrusao'
             };
 
             // Admin pode ver todos - mostra seletor
@@ -1228,7 +1226,7 @@
                 numero_nf: document.getElementById('receb-nf').value,
                 fornecedor: document.getElementById('receb-fornecedor').value,
                 material: document.getElementById('receb-material').value,
-                observacao: document.getElementById('receb-observacao').value,
+                observacao: document.getElementById('receb-observação').value,
                 responsavel: document.getElementById('receb-responsavel').value
             };
 
@@ -1286,7 +1284,7 @@
                 data: document.getElementById('ext-data').value,
                 lote: document.getElementById('ext-lote').value,
                 extrusora: document.getElementById('ext-extrusora').value,
-                descricao: document.getElementById('ext-descricao').value,
+                descricao: document.getElementById('ext-descrição').value,
                 secao: document.getElementById('ext-secao').value,
                 metragem: document.getElementById('ext-metragem').value,
                 bobinas: document.getElementById('ext-bobinas').value,
@@ -1332,7 +1330,7 @@
         function novoRegistroDiario() {
             const select = document.getElementById('diario-maquina');
             select.innerHTML = '<option value="">Selecione...</option>' +
-                maquinasData.map(m => `<option value="${m.id}">${m.codigo} - ${m.nome}</option>`).join('');
+                maquinasData.map(m => `<option value="${m.id}">${m.código} - ${m.nome}</option>`).join('');
 
             document.getElementById('diario-hora').value = new Date().toTimeString().substring(0, 5);
             document.getElementById('modalDiario').style.display = 'flex';
@@ -1363,7 +1361,7 @@
                                 <td>${r.maquina_nome || r.maquina || '-'}</td>
                                 <td>${r.operador || '-'}</td>
                                 <td>${r.pedido || '-'}</td>
-                                <td style="text-align:right;font-weight:600;">${r.producao || 0}</td>
+                                <td style="text-align:right;font-weight:600;">${r.produção || 0}</td>
                                 <td style="text-align:right;color:#ef4444;">${r.refugo || 0}</td>
                                 <td>${r.observacoes || '-'}</td>
                                 <td><button class="btn btn-sm btn-secondary" onclick="editarRegistroDiario(${r.id})"><i class="fas fa-edit"></i></button></td>
@@ -1391,7 +1389,6 @@
                 const API_BASE = getAPIBase();
                 const response = await fetch(`${API_BASE}/api/pcp/diario-producao`, { credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
                     body: JSON.stringify(dados)
                 });
 
@@ -1581,9 +1578,8 @@
 
                     const API = (typeof getAPIBase === 'function') ? getAPIBase() : '';
                     const hdr = { 'Content-Type': 'application/json' };
-                    if (token && token !== 'unified-session-active') hdr['Authorization'] = 'Bearer ' + token;
 
-                    const resp = await fetch(API + '/api/pcp/bobinas/calcular', { credentials: 'include', method: 'POST', credentials: 'include', headers: hdr,
+                    const resp = await fetch(API + '/api/pcp/bobinas/calcular', { method: 'POST', credentials: 'include', headers: hdr,
                         body: JSON.stringify({ categoria: catBobina, secao: secaoBob, metragem: metragem })
                     });
 

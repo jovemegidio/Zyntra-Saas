@@ -9,7 +9,6 @@
 const { exec, spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const chokidar = require('chokidar');
 
 // ==================== CONFIGURAÇÕES ====================
 const CONFIG = {
@@ -48,6 +47,13 @@ const CONFIG = {
         '.py', '.sh', '.bat', '.md', '.txt'
     ],
     
+    // Backup local antes de upload
+    backup: {
+        enabled: true,
+        dir: path.join(process.cwd(), 'backups', 'auto-sync'),
+        maxBackups: 50 // máximo de backups por arquivo
+    },
+
     // Delay antes de sincronizar (para evitar múltiplos uploads)
     debounceDelay: 1000, // ms
     
@@ -107,22 +113,64 @@ function shouldSync(filePath) {
     return true;
 }
 
+// ==================== BACKUP LOCAL ====================
+
+function backupFile(filePath) {
+    if (!CONFIG.backup.enabled) return;
+    
+    try {
+        if (!fs.existsSync(filePath)) return;
+        
+        const relativePath = getRelativePath(filePath);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        const ext = path.extname(filePath);
+        const baseName = path.basename(filePath, ext);
+        const dir = path.dirname(relativePath);
+        
+        const backupDir = path.join(CONFIG.backup.dir, dir);
+        if (!fs.existsSync(backupDir)) {
+            fs.mkdirSync(backupDir, { recursive: true });
+        }
+        
+        const backupPath = path.join(backupDir, `${baseName}_${timestamp}${ext}`);
+        fs.copyFileSync(filePath, backupPath);
+        log(`Backup: ${relativePath} → backups/auto-sync/${dir}/${baseName}_${timestamp}${ext}`, 'info');
+        
+        // Limpar backups antigos do mesmo arquivo
+        const files = fs.readdirSync(backupDir)
+            .filter(f => f.startsWith(baseName + '_') && f.endsWith(ext))
+            .sort()
+            .reverse();
+        
+        if (files.length > CONFIG.backup.maxBackups) {
+            for (const old of files.slice(CONFIG.backup.maxBackups)) {
+                fs.unlinkSync(path.join(backupDir, old));
+            }
+        }
+    } catch (err) {
+        log(`Erro no backup: ${err.message}`, 'warning');
+    }
+}
+
 // ==================== SINCRONIZAÇÃO ====================
 
 function uploadFile(localPath) {
     return new Promise((resolve, reject) => {
+        // Backup local antes de enviar
+        backupFile(localPath);
+        
         const remotePath = getRemotePath(localPath);
         const remoteDir = path.dirname(remotePath).replace(/\\/g, '/');
         const relativePath = getRelativePath(localPath);
         
         // Criar diretório remoto se não existir
-        const mkdirCmd = `echo y | "C:\\Program Files\\PuTTY\\plink.exe" -pw "${CONFIG.server.password}" ${CONFIG.server.user}@${CONFIG.server.host} "mkdir -p ${remoteDir}"`;
+        const mkdirCmd = `"C:\\Program Files\\PuTTY\\plink.exe" -batch -pw "${CONFIG.server.password}" ${CONFIG.server.user}@${CONFIG.server.host} "mkdir -p ${remoteDir}"`;
         
         exec(mkdirCmd, { windowsHide: true }, (mkdirErr) => {
             // Ignorar erro de mkdir (pode já existir)
             
             // Upload do arquivo
-            const scpCmd = `"C:\\Program Files\\PuTTY\\pscp.exe" -pw "${CONFIG.server.password}" -q "${localPath}" ${CONFIG.server.user}@${CONFIG.server.host}:${remotePath}`;
+            const scpCmd = `"C:\\Program Files\\PuTTY\\pscp.exe" -batch -pw "${CONFIG.server.password}" -q "${localPath}" ${CONFIG.server.user}@${CONFIG.server.host}:${remotePath}`;
             
             exec(scpCmd, { windowsHide: true }, (err, stdout, stderr) => {
                 if (err) {
@@ -144,7 +192,7 @@ function deleteRemoteFile(localPath) {
         const remotePath = getRemotePath(localPath);
         const relativePath = getRelativePath(localPath);
         
-        const cmd = `echo y | "C:\\Program Files\\PuTTY\\plink.exe" -pw "${CONFIG.server.password}" ${CONFIG.server.user}@${CONFIG.server.host} "rm -f ${remotePath}"`;
+        const cmd = `"C:\\Program Files\\PuTTY\\plink.exe" -batch -pw "${CONFIG.server.password}" ${CONFIG.server.user}@${CONFIG.server.host} "rm -f ${remotePath}"`;
         
         exec(cmd, { windowsHide: true }, (err) => {
             if (err) {
@@ -202,49 +250,41 @@ function startWatcher() {
     log('Iniciando monitoramento de arquivos...', 'watch');
     log(`Pasta: ${CONFIG.local.basePath}`, 'info');
     log(`Servidor: ${CONFIG.server.user}@${CONFIG.server.host}:${CONFIG.server.remotePath}`, 'info');
-    
-    const watcher = chokidar.watch(CONFIG.local.basePath, {
-        ignored: CONFIG.ignore,
-        persistent: true,
-        ignoreInitial: true,
-        awaitWriteFinish: {
-            stabilityThreshold: 500,
-            pollInterval: 100
+
+    // Usar fs.watch nativo com modo recursivo (suportado no Windows)
+    const watcher = fs.watch(CONFIG.local.basePath, { recursive: true }, (eventType, filename) => {
+        if (!filename) return;
+        const filePath = path.join(CONFIG.local.basePath, filename);
+
+        // Pré-filtrar antes de logar
+        if (!shouldSync(filePath)) return;
+
+        // Verificar se o arquivo existe (change vs delete)
+        if (fs.existsSync(filePath)) {
+            const stat = fs.statSync(filePath);
+            if (stat.isFile()) {
+                log(`Modificado: ${filename}`, 'info');
+                queueSync(filePath, 'upload');
+            }
+        } else {
+            log(`Removido: ${filename}`, 'warning');
+            queueSync(filePath, 'delete');
         }
     });
-    
-    watcher
-        .on('add', filePath => {
-            log(`Novo arquivo: ${getRelativePath(filePath)}`, 'info');
-            queueSync(filePath, 'upload');
-        })
-        .on('change', filePath => {
-            log(`Modificado: ${getRelativePath(filePath)}`, 'info');
-            queueSync(filePath, 'upload');
-        })
-        .on('unlink', filePath => {
-            log(`Removido: ${getRelativePath(filePath)}`, 'warning');
-            queueSync(filePath, 'delete');
-        })
-        .on('error', error => {
-            log(`Erro no watcher: ${error}`, 'error');
-        })
-        .on('ready', () => {
-            console.log('');
-            console.log('╔═══════════════════════════════════════════════════════════╗');
-            console.log('║        🚀 AUTO SYNC VPS - ATIVO E MONITORANDO            ║');
-            console.log('╠═══════════════════════════════════════════════════════════╣');
-            console.log('║  Qualquer alteração será enviada automaticamente para:   ║');
-            console.log(`║  📡 ${CONFIG.server.host}:${CONFIG.server.remotePath.padEnd(35)}║`);
-            console.log('║                                                           ║');
-            console.log('║  Funciona com Live Share! Alterações de guests também    ║');
-            console.log('║  serão sincronizadas automaticamente.                    ║');
-            console.log('║                                                           ║');
-            console.log('║  Pressione Ctrl+C para parar.                            ║');
-            console.log('╚═══════════════════════════════════════════════════════════╝');
-            console.log('');
-        });
-    
+
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════╗');
+    console.log('║        🚀 AUTO SYNC VPS - ATIVO E MONITORANDO            ║');
+    console.log('╠═══════════════════════════════════════════════════════════╣');
+    console.log('║  Qualquer alteração será enviada automaticamente para:   ║');
+    console.log(`║  📡 ${CONFIG.server.host}:${CONFIG.server.remotePath.padEnd(35)}║`);
+    console.log('║                                                           ║');
+    console.log('║  📂 Backup local automático em backups/auto-sync/        ║');
+    console.log('║                                                           ║');
+    console.log('║  Pressione Ctrl+C para parar.                            ║');
+    console.log('╚═══════════════════════════════════════════════════════════╝');
+    console.log('');
+
     // Graceful shutdown
     process.on('SIGINT', () => {
         console.log('');
@@ -259,20 +299,6 @@ function startWatcher() {
 }
 
 // ==================== INICIALIZAÇÃO ====================
-
-// Verificar se chokidar está instalado
-try {
-    require.resolve('chokidar');
-} catch (e) {
-    console.log('');
-    console.log('⚠️  Dependência não encontrada: chokidar');
-    console.log('');
-    console.log('Execute o comando abaixo para instalar:');
-    console.log('');
-    console.log('  npm install chokidar');
-    console.log('');
-    process.exit(1);
-}
 
 // Iniciar
 startWatcher();

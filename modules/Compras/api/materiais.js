@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao listar materiais:', error);
-        res.status(500).json({ error: 'Erro ao buscar materiais', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar materiais' });
     }
 });
 
@@ -79,7 +79,7 @@ router.get('/:id', async (req, res) => {
         res.json(materiais[0]);
     } catch (error) {
         console.error('Erro ao obter material:', error);
-        res.status(500).json({ error: 'Erro ao buscar material', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar material' });
     }
 });
 
@@ -139,7 +139,7 @@ router.post('/', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao criar material:', error);
-        res.status(500).json({ error: 'Erro ao criar material', message: error.message });
+        res.status(500).json({ error: 'Erro ao criar material' });
     }
 });
 
@@ -210,7 +210,7 @@ router.put('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao atualizar material:', error);
-        res.status(500).json({ error: 'Erro ao atualizar material', message: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar material' });
     }
 });
 
@@ -231,7 +231,7 @@ router.delete('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao deletar material:', error);
-        res.status(500).json({ error: 'Erro ao deletar material', message: error.message });
+        res.status(500).json({ error: 'Erro ao deletar material' });
     }
 });
 
@@ -246,7 +246,7 @@ router.get('/categorias/list', async (req, res) => {
         res.json({ categorias });
     } catch (error) {
         console.error('Erro ao listar categorias:', error);
-        res.status(500).json({ error: 'Erro ao buscar categorias', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar categorias' });
     }
 });
 
@@ -275,7 +275,7 @@ router.post('/categorias', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao criar categoria:', error);
-        res.status(500).json({ error: 'Erro ao criar categoria', message: error.message });
+        res.status(500).json({ error: 'Erro ao criar categoria' });
     }
 });
 

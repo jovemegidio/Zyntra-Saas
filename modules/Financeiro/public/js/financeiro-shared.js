@@ -11,6 +11,14 @@
 (function() {
     'use strict';
 
+    // Sanitização XSS
+    function _escFin(value) {
+        if (value === null || value === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(value);
+        return div.innerHTML;
+    }
+
     // ======== TOGGLE MOBILE SIDEBAR ========
     window.toggleMobileSidebar = function() {
         const sidebar = document.querySelector('.sidebar, #mobile-sidebar');
@@ -121,7 +129,7 @@
             info: { bg: '#3b82f6', icon: 'fa-info-circle' }
         };
         const c = colors[tipo] || colors.info;
-        toast.innerHTML = `<i class="fas ${c.icon}"></i> ${mensagem}`;
+        toast.innerHTML = `<i class="fas ${c.icon}"></i> ${_escFin(mensagem)}`;
         Object.assign(toast.style, {
             position: 'fixed', bottom: '20px', right: '20px', zIndex: '99999',
             background: c.bg, color: '#fff', padding: '12px 20px', borderRadius: '8px',

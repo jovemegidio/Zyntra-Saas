@@ -257,7 +257,7 @@
         .sidebar-stack { display: flex; flex-direction: column; gap: 20px; }
 
         /* Funcionário cards */
-        .funcionario-card {
+        .funcionário-card {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -267,12 +267,12 @@
             margin-bottom: 10px;
             transition: all 0.2s;
         }
-        .funcionario-card:last-child { margin-bottom: 0; }
-        .funcionario-card:hover {
+        .funcionário-card:last-child { margin-bottom: 0; }
+        .funcionário-card:hover {
             border-color: var(--accent-indigo);
             box-shadow: 0 2px 8px rgba(99,102,241,0.1);
         }
-        .funcionario-avatar {
+        .funcionário-avatar {
             width: 42px; height: 42px;
             border-radius: 50%;
             background: linear-gradient(135deg, var(--accent-indigo), #8b5cf6);
@@ -280,13 +280,13 @@
             color: white; font-weight: 700; font-size: 15px;
             flex-shrink: 0;
         }
-        .funcionario-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .funcionario-info { flex: 1; min-width: 0; }
-        .funcionario-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .funcionario-cargo { font-size: 11px; color: var(--text-secondary); }
-        .funcionario-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
-        .funcionario-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
-        .funcionario-stat-label { font-size: 10px; color: var(--text-secondary); }
+        .funcionário-avatar img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+        .funcionário-info { flex: 1; min-width: 0; }
+        .funcionário-nome { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .funcionário-cargo { font-size: 11px; color: var(--text-secondary); }
+        .funcionário-stats { display: flex; gap: 16px; text-align: center; flex-shrink: 0; }
+        .funcionário-stat-value { font-size: 15px; font-weight: 700; color: var(--accent-indigo); }
+        .funcionário-stat-label { font-size: 10px; color: var(--text-secondary); }
 
         /* Eficiência Grid */
         .eficiencia-grid {
@@ -669,7 +669,7 @@
             'QE': { bg: '#f5f5f4', color: '#57534e', icon: 'fa-plug', nome: 'Queda Energia' },
             'AM': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquec. Máquina' },
             'setup': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
-            'producao': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'Produção' },
+            'produção': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-industry', nome: 'Produção' },
             'manutencao': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-wrench', nome: 'Manutenção' },
             'aquecimento': { bg: '#fef3c7', color: '#d97706', icon: 'fa-fire', nome: 'Aquecimento' },
             'limpeza': { bg: '#cffafe', color: '#0891b2', icon: 'fa-broom', nome: 'Limpeza' },
@@ -679,13 +679,13 @@
         };
 
         // Classificação de tipos
-        const TIPOS_PRODUTIVOS = ['1', '1A', 'producao'];
+        const TIPOS_PRODUTIVOS = ['1', '1A', 'produção'];
         const TIPOS_MANUTENCAO = ['PM', 'ME', 'MM', 'PCM', 'MP', 'MC', 'manutencao'];
         const TIPOS_PARADA = ['PR', 'FM', 'TT', 'QE', 'TB', 'TM', 'QL', 'intervalo'];
 
         // Dados
         let apontamentos = [];
-        let funcionarios = [];
+        let funcionários = [];
 
         // Mapeamento de avatares
         const avatarNameMap = {
@@ -744,8 +744,6 @@
         async function carregarUsuario() {
             try {
                 const headers = {};
-                if (token && token !== 'unified-session-active') {
-                }
                 const resp = await fetch('/api/me', { credentials: 'include', headers });
                 if (resp.ok) {
                     const data = await resp.json();
@@ -803,29 +801,26 @@
         async function carregarDados() {
             const dataInicio = document.getElementById('dataInicio').value;
             const dataFim = document.getElementById('dataFim').value;
-            const funcionario = document.getElementById('filtroFuncionario').value;
+            const funcionário = document.getElementById('filtroFuncionario').value;
             const atividade = document.getElementById('filtroAtividade').value;
             const pedido = document.getElementById('filtroPedido').value;
 
             try {
                 let url = `/api/pcp/apontamentos/relatorio?dataInicio=${dataInicio}&dataFim=${dataFim}`;
-                if (funcionario) url += `&usuario=${funcionario}`;
+                if (funcionário) url += `&usuario=${funcionário}`;
                 if (atividade) url += `&atividade=${atividade}`;
                 if (pedido) url += `&pedido=${pedido}`;
 
                 const headers = {};
-                if (token && token !== 'unified-session-active') {
-                }
-
                 const resp = await fetch(url, { credentials: 'include', headers });
 
                 if (resp.ok) {
                     const data = await resp.json();
                     apontamentos = data.apontamentos || [];
-                    funcionarios = data.funcionarios || [];
+                    funcionários = data.funcionários || [];
 
                     atualizarStats(data);
-                    popularSelectFuncionarios(funcionarios);
+                    popularSelectFuncionarios(funcionários);
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
                     renderizarTabela();
@@ -834,7 +829,7 @@
                     window.location.href = '/login';
                 } else {
                     apontamentos = [];
-                    funcionarios = [];
+                    funcionários = [];
                     atualizarStats({});
                     renderizarResumoFuncionarios();
                     renderizarDistribuicaoAtividades();
@@ -844,7 +839,7 @@
             } catch (e) {
                 console.error('Erro ao carregar dados:', e);
                 apontamentos = [];
-                funcionarios = [];
+                funcionários = [];
                 atualizarStats({});
                 renderizarResumoFuncionarios();
                 renderizarDistribuicaoAtividades();
@@ -861,7 +856,7 @@
         }
 
         function atualizarStats(data) {
-            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionarios.length;
+            document.getElementById('totalFuncionarios').textContent = data.totalFuncionarios || funcionários.length;
             document.getElementById('totalHoras').textContent = (data.totalHoras || calcularTotalHoras()) + 'h';
             document.getElementById('horasProducao').textContent = (data.horasProducao || calcularHorasProducao()) + 'h';
             document.getElementById('totalApontamentos').textContent = data.totalApontamentos || apontamentos.length;
@@ -912,17 +907,17 @@
             const container = document.getElementById('resumoFuncionarios');
             const resumo = {};
             const fotoMap = {};
-            funcionarios.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
+            funcionários.forEach(f => { if (f.foto) fotoMap[f.id] = f.foto; });
 
             apontamentos.forEach(a => {
-                const key = a.usuario_id || a.usuario_nome;
+                const key = a.usuário_id || a.usuário_nome;
                 if (!resumo[key]) {
-                    resumo[key] = { nome: a.usuario_nome, foto: a.usuario_foto || fotoMap[a.usuario_id] || '', totalSegundos: 0, producaoSegundos: 0, apontamentos: 0 };
+                    resumo[key] = { nome: a.usuário_nome, foto: a.usuário_foto || fotoMap[a.usuário_id] || '', totalSegundos: 0, produçãoSegundos: 0, apontamentos: 0 };
                 }
                 resumo[key].totalSegundos += a.duracao || 0;
                 resumo[key].apontamentos++;
                 if (TIPOS_PRODUTIVOS.includes(a.tipo)) {
-                    resumo[key].producaoSegundos += a.duracao || 0;
+                    resumo[key].produçãoSegundos += a.duracao || 0;
                 }
             });
 
@@ -934,7 +929,7 @@
             let idx = 0;
             container.innerHTML = Object.values(resumo).map(f => {
                 const horasTotais = formatarDuracaoHoras(f.totalSegundos);
-                const horasProducao = formatarDuracaoHoras(f.producaoSegundos);
+                const horasProducao = formatarDuracaoHoras(f.produçãoSegundos);
                 const primeiraLetra = f.nome ? f.nome[0].toUpperCase() : '?';
                 const primeiroNome = f.nome ? f.nome.split(' ')[0] : 'Desconhecido';
                 const avatarId = 'avatar-func-' + (idx++);
@@ -960,7 +955,7 @@
                 `;
             }).join('');
 
-            document.querySelectorAll('.funcionario-avatar[data-foto]').forEach(avatarEl => {
+            document.querySelectorAll('.funcionário-avatar[data-foto]').forEach(avatarEl => {
                 const foto = avatarEl.dataset.foto;
                 const nome = avatarEl.dataset.nome;
                 const inicial = avatarEl.textContent.trim();
@@ -1041,9 +1036,9 @@
 
             tbody.innerHTML = apontamentos.map(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                const primeiroNome = a.usuario_nome ? a.usuario_nome.split(' ')[0] : 'N/A';
+                const primeiroNome = a.usuário_nome ? a.usuário_nome.split(' ')[0] : 'N/A';
                 const primeiraLetra = primeiroNome[0]?.toUpperCase() || '?';
-                const fotoUrl = a.usuario_foto || '';
+                const fotoUrl = a.usuário_foto || '';
                 const avatarHtml = fotoUrl
                     ? `<img src="${fotoUrl}" alt="${primeiroNome}" onerror="this.parentElement.innerHTML='${primeiraLetra}'">`
                     : primeiraLetra;
@@ -1052,8 +1047,8 @@
                     ? `<span class="op-badge"><i class="fas fa-clipboard-list"></i> ${a.op_codigo}</span>`
                     : '<span style="color:#cbd5e1;">—</span>';
 
-                const pedidoHtml = a.pedido_numero
-                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_numero}</span>`
+                const pedidoHtml = a.pedido_número
+                    ? `<span class="pedido-badge"><i class="fas fa-file-alt"></i> #${a.pedido_número}</span>`
                     : '<span style="color:#cbd5e1;">—</span>';
 
                 const obsText = a.observacoes || '';
@@ -1107,13 +1102,13 @@
             let csv = 'Funcionário,Atividade,Data,Início,Fim,Duração,OP,Pedido,Observações\n';
             apontamentos.forEach(a => {
                 const cores = coresAtividades[a.tipo] || coresAtividades.outros;
-                csv += `"${a.usuario_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_numero || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
+                csv += `"${a.usuário_nome || ''}","${cores.nome || a.tipo}","${a.data || ''}","${a.hora_inicio || ''}","${a.hora_fim || ''}","${formatarDuracao(a.duracao)}","${a.op_codigo || ''}","${a.pedido_número || ''}","${(a.observacoes || '').replace(/"/g, '""')}"\n`;
             });
 
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `relatorio_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
+            link.download = `relatório_apontamentos_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
             mostrarToast('Relatório exportado!', 'success');
         }

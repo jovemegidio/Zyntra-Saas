@@ -1,0 +1,51 @@
+{
+  "name": "28-xml-contabilidade-export",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "weeks", "triggerAtDay": 5, "triggerAtHour": 18 }] }
+      },
+      "name": "Schedule Trigger Semanal",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/nfe/pendentes",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar NF-es da Semana",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'financeiro', mensagem: '📋 *RESUMO NF-e SEMANAL*\\n\\nTotal de NF-es pendentes encontradas: ' + $json.total + '\\n\\nExporte os XMLs para a contabilidade pelo painel fiscal.' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Notificar Contabilidade",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger Semanal": { "main": [[{ "node": "Buscar NF-es da Semana", "type": "main", "index": 0 }]] },
+    "Buscar NF-es da Semana": { "main": [[{ "node": "Notificar Contabilidade", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

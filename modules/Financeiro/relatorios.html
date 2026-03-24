@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -383,40 +383,43 @@
             .filter-btn-section { margin-left: 0; width: 100%; text-align: right; border-bottom: none; }
         }
 
-        /* STATS GRID */
-        .stats-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 20px; margin-bottom: 24px; }
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        /* STATS GRID - Padrão Compras */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
         @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
 
-        .stat-card { background: white; border-radius: 20px; padding: 24px; position: relative; overflow: visible; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: all 0.3s ease; display: block !important; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
-        .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 20px 20px 0 0; }
-        .stat-card.orange::before { background: linear-gradient(90deg, #f97316, #fb923c); }
-        .stat-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .stat-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        .stat-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        .stat-card.red::before { background: linear-gradient(90deg, #ef4444, #f87171); }
-        .stat-card.teal::before { background: linear-gradient(90deg, #14b8a6, #2dd4bf); }
-        .stat-card.lime::before { background: linear-gradient(90deg, #84cc16, #a3e635); }
-
-        .stat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
-        .stat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-        .stat-icon.orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
-        .stat-icon.blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
-        .stat-icon.green { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
-        .stat-icon.purple { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); color: #7c3aed; }
-        .stat-icon.red { background: linear-gradient(135deg, #fef2f2, #fecaca); color: #dc2626; }
-        .stat-icon.teal { background: linear-gradient(135deg, #f0fdfa, #99f6e4); color: #0d9488; }
-        .stat-icon.lime { background: linear-gradient(135deg, #f7fee7, #d9f99d); color: #65a30d; }
-
-        .stat-label { font-size: 13px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-        .stat-value { font-size: 28px; font-weight: 800; color: #0f172a; line-height: 1.2; margin-bottom: 16px; white-space: nowrap; overflow: visible; }
-        .stat-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 16px; border-top: 1px solid #f1f5f9; }
-        .stat-change { display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; padding: 6px 12px; border-radius: 20px; }
+        .stat-card {
+            background: white; border-radius: 16px; padding: 24px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 20px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            border: 1px solid transparent;
+            animation: slideInUp 0.4s cubic-bezier(0.4,0,0.2,1) backwards;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); border-color: rgba(99,102,241,0.2); }
+        @keyframes slideInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+        .stat-icon {
+            width: 60px; height: 60px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0; color: white;
+        }
+        .stat-icon.green  { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.red    { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .stat-icon.lime   { background: linear-gradient(135deg, #84cc16, #65a30d); }
+        .stat-icon.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .stat-icon.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .stat-icon.teal   { background: linear-gradient(135deg, #14b8a6, #0d9488); }
+        .stat-content { flex: 1; }
+        .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
+        .stat-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin-top: 6px; }
         .stat-change.up { background: #ecfdf5; color: #059669; }
         .stat-change.down { background: #fef2f2; color: #dc2626; }
         .stat-change i { font-size: 10px; }
-        .stat-period { font-size: 12px; color: #94a3b8; }
         .stat-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.3px; }
         .stat-badge.green { background: #ecfdf5; color: #059669; }
         .stat-badge.red { background: #fef2f2; color: #dc2626; }
@@ -458,7 +461,7 @@
         }
 
         /* REPORT CARD - Enhanced actions */
-        .relatorio-actions .btn-secondary {
+        .relatório-actions .btn-secondary {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             color: #475569;
@@ -467,16 +470,16 @@
             border-radius: 8px;
             transition: all 0.2s;
         }
-        .relatorio-actions .btn-secondary:hover {
+        .relatório-actions .btn-secondary:hover {
             background: #225cfa;
             color: white;
             border-color: #225cfa;
             transform: translateY(-1px);
         }
-        .relatorio-actions .btn-secondary .fa-file-pdf { color: #ef4444; }
-        .relatorio-actions .btn-secondary .fa-file-excel { color: #059669; }
-        .relatorio-actions .btn-secondary:hover .fa-file-pdf,
-        .relatorio-actions .btn-secondary:hover .fa-file-excel { color: white; }
+        .relatório-actions .btn-secondary .fa-file-pdf { color: #ef4444; }
+        .relatório-actions .btn-secondary .fa-file-excel { color: #059669; }
+        .relatório-actions .btn-secondary:hover .fa-file-pdf,
+        .relatório-actions .btn-secondary:hover .fa-file-excel { color: white; }
 
         /* SUMMARY GRID - Enhanced */
         .summary-grid {
@@ -536,21 +539,21 @@
         .report-card p { font-size: 13px; color: #64748b; line-height: 1.5; }
 
         /* RELATORIOS GRID - LEGADO */
-        .relatorios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px; }
-        .relatorio-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.3s; cursor: pointer; border: 2px solid transparent; }
-        .relatorio-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); border-color: var(--primary-blue); }
+        .relatórios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .relatório-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.3s; cursor: pointer; border: 2px solid transparent; }
+        .relatório-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); border-color: var(--primary-blue); }
         .template-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-        .relatorio-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
-        .relatorio-icon.blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
-        .relatorio-icon.green { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
-        .relatorio-icon.orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
-        .relatorio-icon.purple { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); color: #7c3aed; }
-        .relatorio-icon.red { background: linear-gradient(135deg, #fef2f2, #fecaca); color: #dc2626; }
-        .relatorio-icon.teal { background: linear-gradient(135deg, #f0fdfa, #99f6e4); color: #0d9488; }
-        .relatorio-icon.lime { background: linear-gradient(135deg, #f7fee7, #d9f99d); color: #65a30d; }
-        .relatorio-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
-        .relatorio-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
-        .relatorio-actions { display: flex; gap: 8px; }
+        .relatório-icon { width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
+        .relatório-icon.blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
+        .relatório-icon.green { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
+        .relatório-icon.orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
+        .relatório-icon.purple { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); color: #7c3aed; }
+        .relatório-icon.red { background: linear-gradient(135deg, #fef2f2, #fecaca); color: #dc2626; }
+        .relatório-icon.teal { background: linear-gradient(135deg, #f0fdfa, #99f6e4); color: #0d9488; }
+        .relatório-icon.lime { background: linear-gradient(135deg, #f7fee7, #d9f99d); color: #65a30d; }
+        .relatório-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+        .relatório-card p { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+        .relatório-actions { display: flex; gap: 8px; }
 
         /* CARD */
         .card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); overflow: hidden; margin-bottom: 24px; }
@@ -624,7 +627,7 @@
 
         /* RESPONSIVE */
         @media (max-width: 1200px) { .charts-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 768px) { .relatorios-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .relatórios-grid { grid-template-columns: 1fr; } .summary-grid { grid-template-columns: 1fr; } }
 
         /* MODAL - Classes Padrão (Padrão SaaS Empresarial) */
         -webkit-backdrop-filter: blur(8px); }
@@ -663,7 +666,7 @@
         .btn-padrão-danger:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4); }
 
         /* Loading Spinner Profissional */
-        .loading-relatorio { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
+        .loading-relatório { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; }
         .loading-spinner { width: 56px; height: 56px; border: 4px solid #e5e7eb; border-top-color: #84cc16; border-radius: 50%; animation: spinRelatorio 0.8s linear infinite; margin-bottom: 20px; }
         @keyframes spinRelatorio { to { transform: rotate(360deg); } }
         .loading-text { font-size: 16px; font-weight: 500; color: #64748b; margin-bottom: 8px; }
@@ -674,15 +677,33 @@
         @keyframes skeletonShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
         /* Empty State Profissional */
-        .empty-state-relatorio { text-align: center; padding: 60px 20px; }
+        .empty-state-relatório { text-align: center; padding: 60px 20px; }
         .empty-state-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #f8fafc, #f1f5f9); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
         .empty-state-icon i { font-size: 32px; color: #94a3b8; }
         .empty-state-title { font-size: 18px; font-weight: 600; color: #334155; margin-bottom: 8px; }
         .empty-state-desc { font-size: 14px; color: #64748b; max-width: 400px; margin: 0 auto; }
 
         /* Resultado do Relatório */
-        .resultado-relatorio { animation: fadeInRelatorio 0.3s ease; }
+        .resultado-relatório { animation: fadeInRelatorio 0.3s ease; }
         @keyframes fadeInRelatorio { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+
+        /* ===== Abas Relatórios CP/CR ===== */
+        .relatório-tabs {
+            display: flex; gap: 0;
+            margin: 24px 0 18px 0;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .relatório-tab {
+            padding: 10px 26px; border: none;
+            border-bottom: 3px solid transparent;
+            background: none; font-size: 14px; font-weight: 600;
+            color: #64748b; cursor: pointer; margin-bottom: -2px;
+            border-radius: 8px 8px 0 0; transition: all 0.18s;
+        }
+        .relatório-tab:hover { color: #1e293b; background: #f1f5f9; }
+        .relatório-tab.ativa { color: #0f172a; border-bottom-color: #0f172a; background: #f8fafc; }
+
 
     </style>
     <!-- Tooltips Profissionais -->
@@ -703,6 +724,7 @@
     <!-- XLSX Library para exportação e templates -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
 
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -851,184 +873,191 @@
 
                 <!-- Stats Cards - Resumo Financeiro -->
                 <div class="stats-grid">
-                    <div class="stat-card green">
-                        <div class="stat-header">
-                            <div class="stat-icon green"><i class="fas fa-hand-holding-usd"></i></div>
-                            <span class="stat-badge green">Receitas</span>
-                        </div>
-                        <div class="stat-label">Total a Receber</div>
-                        <div class="stat-value" id="statTotalReceber">R$ 0,00</div>
-                        <div class="stat-footer">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total a Receber</div>
+                            <div class="stat-value" id="statTotalReceber">R$ 0,00</div>
                             <div class="stat-change up" id="changeReceber"><i class="fas fa-arrow-up"></i> 0%</div>
-                            <div class="stat-period">vs mês anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card red">
-                        <div class="stat-header">
-                            <div class="stat-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <span class="stat-badge red">Despesas</span>
-                        </div>
-                        <div class="stat-label">Total a Pagar</div>
-                        <div class="stat-value" id="statTotalPagar">R$ 0,00</div>
-                        <div class="stat-footer">
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total a Pagar</div>
+                            <div class="stat-value" id="statTotalPagar">R$ 0,00</div>
                             <div class="stat-change down" id="changePagar"><i class="fas fa-arrow-down"></i> 0%</div>
-                            <div class="stat-period">vs mês anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card lime">
-                        <div class="stat-header">
-                            <div class="stat-icon lime"><i class="fas fa-chart-line"></i></div>
-                            <span class="stat-badge lime">Projeção</span>
-                        </div>
-                        <div class="stat-label">Saldo Projetado</div>
-                        <div class="stat-value" id="statSaldoProjetado">R$ 0,00</div>
-                        <div class="stat-footer">
+                    <div class="stat-card">
+                        <div class="stat-icon lime"><i class="fas fa-chart-line"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Saldo Projetado</div>
+                            <div class="stat-value" id="statSaldoProjetado">R$ 0,00</div>
                             <div class="stat-change up" id="changeSaldo"><i class="fas fa-arrow-up"></i> 0%</div>
-                            <div class="stat-period">vs mês anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card blue">
-                        <div class="stat-header">
-                            <div class="stat-icon blue"><i class="fas fa-university"></i></div>
-                            <span class="stat-badge blue">Bancário</span>
-                        </div>
-                        <div class="stat-label">Saldo em Contas</div>
-                        <div class="stat-value" id="statSaldoContas">R$ 0,00</div>
-                        <div class="stat-footer">
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-university"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Saldo em Contas</div>
+                            <div class="stat-value" id="statSaldoContas">R$ 0,00</div>
                             <div class="stat-change up" id="changeContas"><i class="fas fa-arrow-up"></i> 0%</div>
-                            <div class="stat-period">atual</div>
                         </div>
                     </div>
                 </div>
 
+                <!-- ===== Abas CP / CR ===== -->
+                <div class="relatório-tabs">
+                    <button class="relatório-tab ativa" id="tab-btn-cr"
+                        onclick="alternarAbaRelatorio('cr')">
+                        <i class="fas fa-hand-holding-usd"></i>&nbsp; Contas a Receber
+                    </button>
+                    <button class="relatório-tab" id="tab-btn-cp"
+                        onclick="alternarAbaRelatorio('cp')">
+                        <i class="fas fa-file-invoice-dollar"></i>&nbsp; Contas a Pagar
+                    </button>
+                </div>
+
                 <!-- Operação de Desconto -->
-                <div class="section-header">
+                <div class="section-header" data-aba="cr">
                     <div class="section-icon purple"><i class="fas fa-percent"></i></div>
                     <h2>Operação de Desconto</h2>
                     <span class="section-desc">Antecipação de recebíveis</span>
                 </div>
-                <div class="relatorios-grid" style="margin-bottom: 32px;">
-                    <div class="relatorio-card" onclick="abrirModalDesconto()" style="border-left: 4px solid #8b5cf6;">
-                        <div class="relatorio-icon purple"><i class="fas fa-percent"></i></div>
+                <div class="relatórios-grid" data-aba="cr" style="margin-bottom: 32px;">
+                    <div class="relatório-card" onclick="abrirModalDesconto()" style="border-left: 4px solid #8b5cf6;">
+                        <div class="relatório-icon purple"><i class="fas fa-percent"></i></div>
                         <h3>Nova Operação de Desconto</h3>
                         <p>Realize operações de desconto de títulos a receber, antecipando valores com cálculo automático de taxas e IOF.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-primary btn-sm" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);"><i class="fas fa-plus"></i> Nova Operação</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Seção: Relatórios de Títulos -->
-                <div class="section-header">
+                <div class="section-header" data-aba="cr">
                     <div class="section-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
-                    <h2>Relatórios de Títulos</h2>
-                    <span class="section-desc">Liquidados, vencidos e a vencer</span>
+                    <h2>Relatórios de Contas a Receber</h2>
+                    <span class="section-desc">Liquidados, vencidos, a vencer e por cliente</span>
                 </div>
-                <div class="relatorios-grid">
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-liquidados')">
-                        <div class="relatorio-icon green"><i class="fas fa-check-circle"></i></div>
+                <div class="relatórios-grid">
+                    <div class="relatório-card" onclick="abrirRelatorio('títulos-liquidados')">
+                        <div class="relatório-icon green"><i class="fas fa-check-circle"></i></div>
                         <h3>Títulos Liquidados</h3>
                         <p>Listagem de todos os títulos que foram pagos/recebidos no período selecionado.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-liquidados', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-liquidados', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-liquidados', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-liquidados', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-vencidos')">
-                        <div class="relatorio-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="relatório-card" onclick="abrirRelatorio('títulos-vencidos')">
+                        <div class="relatório-icon red"><i class="fas fa-exclamation-triangle"></i></div>
                         <h3>Títulos Vencidos</h3>
                         <p>Títulos com data de vencimento ultrapassada e ainda não liquidados.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-vencidos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-vencidos', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-vencidos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-vencidos', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-a-vencer')">
-                        <div class="relatorio-icon orange"><i class="fas fa-clock"></i></div>
+                    <div class="relatório-card" onclick="abrirRelatorio('títulos-a-vencer')">
+                        <div class="relatório-icon orange"><i class="fas fa-clock"></i></div>
                         <h3>Títulos a Vencer</h3>
                         <p>Títulos com vencimento futuro, organizados por data de vencimento.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-a-vencer', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-a-vencer', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-a-vencer', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-a-vencer', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-por-cliente')">
-                        <div class="relatorio-icon blue"><i class="fas fa-user"></i></div>
+                    <div class="relatório-card" onclick="abrirRelatorio('títulos-por-cliente')">
+                        <div class="relatório-icon blue"><i class="fas fa-user"></i></div>
                         <h3>Por Cliente</h3>
                         <p>Títulos a receber agrupados por cliente, com totais e detalhamento.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-por-cliente', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-por-cliente', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-por-cliente', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-por-cliente', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-por-fornecedor')">
-                        <div class="relatorio-icon teal"><i class="fas fa-truck"></i></div>
+                <!-- Seção CP -->
+                <div class="section-header" data-aba="cp">
+                    <div class="section-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <h2>Relatórios de Contas a Pagar</h2>
+                    <span class="section-desc">Por fornecedor e por período</span>
+                </div>
+                    <div class="relatório-card" data-aba="cp" onclick="abrirRelatorio('títulos-por-fornecedor')">
+                        <div class="relatório-icon teal"><i class="fas fa-truck"></i></div>
                         <h3>Por Fornecedor</h3>
                         <p>Títulos a pagar agrupados por fornecedor, com totais e detalhamento.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-por-fornecedor', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-por-fornecedor', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-por-fornecedor', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-por-fornecedor', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('portador-carteira')">
-                        <div class="relatorio-icon purple"><i class="fas fa-wallet"></i></div>
+                    <div class="relatório-card" onclick="abrirRelatorio('portador-carteira')">
+                        <div class="relatório-icon purple"><i class="fas fa-wallet"></i></div>
                         <h3>Portador "Carteira"</h3>
                         <p>Títulos em carteira (não enviados para cobrança bancária).</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('portador-carteira', 'pdf')"><i class="fas fa-file-pdf"></i></button>
                             <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('portador-carteira', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirRelatorio('titulos-descontos')">
-                        <div class="relatorio-icon lime"><i class="fas fa-percent"></i></div>
+                    <div class="relatório-card" onclick="abrirRelatorio('títulos-descontos')">
+                        <div class="relatório-icon lime"><i class="fas fa-percent"></i></div>
                         <h3>Descontos</h3>
                         <p>Histórico de operações de desconto de títulos realizadas.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-eye"></i> Visualizar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-descontos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('titulos-descontos', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-descontos', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('títulos-descontos', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Seção: Relatórios de Contas a Pagar e Receber por Período -->
-                <div class="section-header">
-                    <div class="section-icon orange"><i class="fas fa-filter"></i></div>
-                    <h2>Relatórios por Período com Filtros</h2>
-                    <span class="section-desc">Contas a pagar e receber detalhados</span>
+                <div class="section-header" data-aba="cr">
+                    <div class="section-icon green"><i class="fas fa-filter"></i></div>
+                    <h2>Relatório por Período — Receber</h2>
+                    <span class="section-desc">Contas a receber detalhadas por período</span>
                 </div>
-                <div class="relatorios-grid">
-                    <div class="relatorio-card" onclick="abrirModalRelatorioContasPagar()" style="border-left: 4px solid #ef4444;">
-                        <div class="relatorio-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div class="section-header" data-aba="cp">
+                    <div class="section-icon orange"><i class="fas fa-filter"></i></div>
+                    <h2>Relatório por Período — Pagar</h2>
+                    <span class="section-desc">Contas a pagar detalhadas por período</span>
+                </div>
+                <div class="relatórios-grid">
+                    <div class="relatório-card" data-aba="cp" onclick="abrirModalRelatorioContasPagar()" style="border-left: 4px solid #ef4444;">
+                        <div class="relatório-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
                         <h3>Contas a Pagar por Período</h3>
                         <p>Relatório detalhado de contas a pagar com filtros por período, fornecedor e banco sacado.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-pagar-periodo', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-pagar-periodo', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-pagar-período', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-pagar-período', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
 
-                    <div class="relatorio-card" onclick="abrirModalRelatorioContasReceber()" style="border-left: 4px solid #22c55e;">
-                        <div class="relatorio-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="relatório-card" data-aba="cr" onclick="abrirModalRelatorioContasReceber()" style="border-left: 4px solid #22c55e;">
+                        <div class="relatório-icon green"><i class="fas fa-hand-holding-usd"></i></div>
                         <h3>Contas a Receber por Período</h3>
                         <p>Relatório detalhado de contas a receber com filtros por período, cliente e banco sacado.</p>
-                        <div class="relatorio-actions">
+                        <div class="relatório-actions">
                             <button class="btn btn-secondary btn-sm"><i class="fas fa-filter"></i> Filtrar</button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-receber-periodo', 'pdf')"><i class="fas fa-file-pdf"></i></button>
-                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-receber-periodo', 'excel')"><i class="fas fa-file-excel"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-receber-período', 'pdf')"><i class="fas fa-file-pdf"></i></button>
+                            <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation(); exportarRelatorio('contas-receber-período', 'excel')"><i class="fas fa-file-excel"></i></button>
                         </div>
                     </div>
                 </div>
@@ -1201,7 +1230,7 @@
                         <i class="fas fa-chart-bar"></i>
                     </div>
                     <div>
-                        <h2 id="modalRelatorioTitulo">Relatório</h2>
+                        <h2 id="modalRelatorioTítulo">Relatório</h2>
                         <p class="subtitle">Visualização detalhada dos dados</p>
                     </div>
                 </div>
@@ -1211,13 +1240,13 @@
             </div>
             <div class="modal-body-padrão" id="modalRelatorioBody">
                 <!-- Loading State Inicial -->
-                <div class="loading-relatorio" id="loading-relatorio">
+                <div class="loading-relatório" id="loading-relatório">
                     <div class="loading-spinner"></div>
                     <div class="loading-text">Carregando Relatório...</div>
                     <div class="loading-subtext">Processando dados, aguarde um momento</div>
                 </div>
                 <!-- Conteúdo Dinâmico -->
-                <div id="conteudo-relatorio" style="display: none;"></div>
+                <div id="conteudo-relatório" style="display: none;"></div>
             </div>
             <div class="modal-footer-padrão">
                 <button class="btn-padrão-ghost" onclick="fecharModal('modalRelatorio')">
@@ -1264,7 +1293,7 @@
                         <div class="form-grid-padrão">
                             <div class="form-group-padrão">
                                 <label><i class="fas fa-hashtag"></i> Número do Título <span class="required">*</span></label>
-                                <input type="text" id="desconto-numero" placeholder="Ex: DUP-001234" required>
+                                <input type="text" id="desconto-número" placeholder="Ex: DUP-001234" required>
                             </div>
                             <div class="form-group-padrão">
                                 <label><i class="fas fa-user"></i> Cliente/Sacado <span class="required">*</span></label>
@@ -1302,7 +1331,7 @@
                             </div>
                             <div class="form-group-padrão">
                                 <label><i class="fas fa-calendar-day"></i> Data da Operação <span class="required">*</span></label>
-                                <input type="date" id="desconto-data-operacao" onchange="calcularDesconto()" required>
+                                <input type="date" id="desconto-data-operação" onchange="calcularDesconto()" required>
                             </div>
                             <div class="form-group-padrão">
                                 <label><i class="fas fa-percentage"></i> Taxa de Desconto (% a.m.) <span class="required">*</span></label>
@@ -1849,7 +1878,7 @@
                     </div>
 
                     <!-- 7. Importação de Mercadoria -->
-                    <div class="template-card" data-cat="operacional" onclick="baixarTemplate('importacao-mercadoria')" style="background: white; border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.25s ease; border: 1px solid #e2e8f0; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(245,158,11,0.12)';this.style.borderColor='#fcd34d'" onmouseout="this.style.transform='none';this.style.boxShadow='none';this.style.borderColor='#e2e8f0'">
+                    <div class="template-card" data-cat="operacional" onclick="baixarTemplate('importação-mercadoria')" style="background: white; border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.25s ease; border: 1px solid #e2e8f0; position: relative; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(245,158,11,0.12)';this.style.borderColor='#fcd34d'" onmouseout="this.style.transform='none';this.style.boxShadow='none';this.style.borderColor='#e2e8f0'">
                         <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                             <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                                 <i class="fas fa-ship" style="color: white; font-size: 15px;"></i>
@@ -1916,7 +1945,7 @@
     </div>
 
     <script>
-        let relatorioAtual = '';
+        let relatórioAtual = '';
         let dadosContasPagar = [];
         let dadosContasReceber = [];
         let fornecedores = [];
@@ -1925,14 +1954,18 @@
 
         // Init
         document.addEventListener('DOMContentLoaded', function() {
-            carregarUsuario();
+            // Carregar dados em paralelo para reduzir tempo de carregamento
+            Promise.all([
+                carregarUsuario(),
+                carregarFornecedores(),
+                carregarClientes(),
+                carregarBancos()
+            ]).catch(e => console.error('Erro ao carregar dados iniciais:', e));
+            // Resumo financeiro e gráficos (dependem um do outro, mas carregam em paralelo com o acima)
             carregarResumoFinanceiro();
             inicializarGraficos();
-            carregarFornecedores();
-            carregarClientes();
-            carregarBancos();
             // Definir data de operação como hoje
-            document.getElementById('desconto-data-operacao').value = new Date().toISOString().split('T')[0];
+            document.getElementById('desconto-data-operação').value = new Date().toISOString().split('T')[0];
             // Definir datas padrão nos filtros de relatório
             const hoje = new Date();
             const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
@@ -1979,10 +2012,10 @@
 
         async function carregarFornecedores() {
             try {
-                const response = await fetch('/api/fornecedores', { credentials: 'include' });
+                const response = await fetch('/api/financeiro/fornecedores', { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    fornecedores = data.data || data || [];
+                    fornecedores = Array.isArray(data) ? data : (data.data || data.fornecedores || []);
                     const select = document.getElementById('pagar-fornecedor');
                     select.innerHTML = '<option value="">Todos os Fornecedores</option>';
                     fornecedores.forEach(f => {
@@ -1994,10 +2027,10 @@
 
         async function carregarClientes() {
             try {
-                const response = await fetch('/api/clientes', { credentials: 'include' });
+                const response = await fetch('/api/financeiro/clientes', { credentials: 'include' });
                 if (response.ok) {
                     const data = await response.json();
-                    clientes = data.data || data || [];
+                    clientes = Array.isArray(data) ? data : (data.data || data.clientes || []);
                     const select = document.getElementById('receber-cliente');
                     select.innerHTML = '<option value="">Todos os Clientes</option>';
                     clientes.forEach(c => {
@@ -2134,7 +2167,7 @@
 
                 return `
                     <tr>
-                        <td>${c.numero_documento || c.documento || '-'}</td>
+                        <td>${c.número_documento || c.documento || '-'}</td>
                         <td>${c.fornecedor_nome || c.fornecedor || '-'}</td>
                         <td>${formatarData(vencOriginal)}</td>
                         <td>${formatarData(vencAtual)}</td>
@@ -2277,7 +2310,7 @@
 
                 return `
                     <tr>
-                        <td>${c.numero_documento || c.documento || '-'}</td>
+                        <td>${c.número_documento || c.documento || '-'}</td>
                         <td>${c.cliente_nome || c.cliente || '-'}</td>
                         <td>${formatarData(vencOriginal)}</td>
                         <td>${formatarData(vencAtual)}</td>
@@ -2317,7 +2350,9 @@
 
         function formatarData(data) {
             if (!data) return '-';
-            return new Date(data + 'T00:00:00').toLocaleDateString('pt-BR');
+            var s = String(data).slice(0, 10);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-';
+            return new Date(s + 'T00:00:00').toLocaleDateString('pt-BR');
         }
 
         function normalizarStatus(valor) {
@@ -2328,7 +2363,7 @@
 
         function abrirModalDesconto() {
             document.getElementById('modalDesconto').classList.add('active');
-            document.getElementById('desconto-data-operacao').value = new Date().toISOString().split('T')[0];
+            document.getElementById('desconto-data-operação').value = new Date().toISOString().split('T')[0];
         }
 
         function formatarMoedaInput(valor) {
@@ -2351,9 +2386,9 @@
         });
 
         function calcularDesconto() {
-            const valorTitulo = parsearMoedaInput(document.getElementById('desconto-valor')?.value || '0');
+            const valorTítulo = parsearMoedaInput(document.getElementById('desconto-valor')?.value || '0');
             const dataVencimento = new Date(document.getElementById('desconto-vencimento')?.value);
-            const dataOperacao = new Date(document.getElementById('desconto-data-operacao')?.value);
+            const dataOperacao = new Date(document.getElementById('desconto-data-operação')?.value);
             const taxaMensal = parseFloat(document.getElementById('desconto-taxa')?.value) || 0;
             const iof = parseFloat(document.getElementById('desconto-iof')?.value) || 0.38;
             const tarifaBancaria = 15.00;
@@ -2389,12 +2424,12 @@
             }
 
             const dados = {
-                numero_titulo: document.getElementById('desconto-numero').value,
+                número_título: document.getElementById('desconto-número').value,
                 cliente_sacado: document.getElementById('desconto-cliente').value,
                 valor_titulo: parsearMoedaInput(document.getElementById('desconto-valor').value),
                 data_vencimento: document.getElementById('desconto-vencimento').value,
                 banco: document.getElementById('desconto-banco').value,
-                data_operacao: document.getElementById('desconto-data-operacao').value,
+                data_operação: document.getElementById('desconto-data-operação').value,
                 taxa_desconto: parseFloat(document.getElementById('desconto-taxa').value),
                 iof: parseFloat(document.getElementById('desconto-iof').value) || 0.38,
                 observacoes: document.getElementById('desconto-obs').value,
@@ -2413,7 +2448,7 @@
                     mostrarToast('Operação de desconto registrada com sucesso!', 'success');
                     fecharModal('modalDesconto');
                     form.reset();
-                    document.getElementById('desconto-data-operacao').value = new Date().toISOString().split('T')[0];
+                    document.getElementById('desconto-data-operação').value = new Date().toISOString().split('T')[0];
                     limparResumoDesconto();
                 } else {
                     const erro = await response.json();
@@ -2471,14 +2506,14 @@
                 // Atualizar período exibido
                 const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-                const periodoEl = document.getElementById('periodoResumo');
-                if (periodoEl) {
+                const períodoEl = document.getElementById('periodoResumo');
+                if (períodoEl) {
                     const dI = new Date(primeiroDia + 'T00:00:00');
                     const dF = new Date(ultimoDia + 'T00:00:00');
                     if (dI.getMonth() === dF.getMonth() && dI.getFullYear() === dF.getFullYear()) {
-                        periodoEl.textContent = `${meses[dI.getMonth()]} ${dI.getFullYear()}`;
+                        períodoEl.textContent = `${meses[dI.getMonth()]} ${dI.getFullYear()}`;
                     } else {
-                        periodoEl.textContent = `${dI.toLocaleDateString('pt-BR')} a ${dF.toLocaleDateString('pt-BR')}`;
+                        períodoEl.textContent = `${dI.toLocaleDateString('pt-BR')} a ${dF.toLocaleDateString('pt-BR')}`;
                     }
                 }
 
@@ -2556,7 +2591,7 @@
                     totalReceber, totalPagar, totalRecebido, totalPago,
                     saldoContas, saldoProjetado, receitaBruta, despesasTotais,
                     resultadoLiquido, margemLiquida,
-                    periodoInicio: primeiroDia, periodoFim: ultimoDia
+                    períodoInicio: primeiroDia, períodoFim: ultimoDia
                 };
 
             } catch (error) {
@@ -2786,35 +2821,31 @@
         async function atualizarGraficosComDadosReais() {
             try {
                 const hoje = new Date();
-                const dadosMensais = [];
+                const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-                // Buscar dados dos últimos 6 meses
+                // Buscar todos os 6 meses em paralelo (12 req → 6 batches paralelas)
+                const promessas = [];
                 for (let i = 5; i >= 0; i--) {
                     const mes = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
                     const primeiroDia = new Date(mes.getFullYear(), mes.getMonth(), 1).toISOString().split('T')[0];
                     const ultimoDia = new Date(mes.getFullYear(), mes.getMonth() + 1, 0).toISOString().split('T')[0];
-
-                    const [receberResp, pagarResp] = await Promise.all([
-                        fetch(`/api/financeiro/contas-receber?data_inicio=${primeiroDia}&data_fim=${ultimoDia}`, { credentials: 'include' }),
-                        fetch(`/api/financeiro/contas-pagar?data_inicio=${primeiroDia}&data_fim=${ultimoDia}`, { credentials: 'include' })
-                    ]);
-
-                    const receberData = receberResp.ok ? await receberResp.json() : [];
-                    const pagarData = pagarResp.ok ? await pagarResp.json() : [];
-
-                    const contasReceber = Array.isArray(receberData) ? receberData : (receberData.data || []);
-                    const contasPagar = Array.isArray(pagarData) ? pagarData : (pagarData.data || []);
-
-                    const receitas = contasReceber.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const despesas = contasPagar.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0);
-
-                    const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-                    dadosMensais.push({
-                        mes: meses[mes.getMonth()],
-                        receitas: receitas,
-                        despesas: despesas
-                    });
+                    promessas.push(
+                        Promise.all([
+                            fetch(`/api/financeiro/contas-receber?data_inicio=${primeiroDia}&data_fim=${ultimoDia}`, { credentials: 'include' }).then(r => r.ok ? r.json() : []).catch(() => []),
+                            fetch(`/api/financeiro/contas-pagar?data_inicio=${primeiroDia}&data_fim=${ultimoDia}`, { credentials: 'include' }).then(r => r.ok ? r.json() : []).catch(() => [])
+                        ]).then(([receberData, pagarData]) => {
+                            const contasReceber = Array.isArray(receberData) ? receberData : (receberData.data || []);
+                            const contasPagar = Array.isArray(pagarData) ? pagarData : (pagarData.data || []);
+                            return {
+                                mes: mesesNomes[mes.getMonth()],
+                                receitas: contasReceber.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0),
+                                despesas: contasPagar.reduce((sum, c) => sum + parseFloat(c.valor_total || c.valor || 0), 0)
+                            };
+                        })
+                    );
                 }
+
+                const dadosMensais = await Promise.all(promessas);
 
                 // Atualizar gráfico de barras
                 const chart1 = Chart.getChart('receitasDespesasChart');
@@ -2992,13 +3023,13 @@
                     const cat = (c.categoria || c.categoria_nome || '').toLowerCase();
                     const valor = parseFloat(c.valor_total || c.valor || 0);
 
-                    if (cat.includes('pessoal') || cat.includes('folha') || cat.includes('salario')) {
+                    if (cat.includes('pessoal') || cat.includes('folha') || cat.includes('salário')) {
                         categorias['Pessoal'] += valor;
                     } else if (cat.includes('fornecedor') || cat.includes('materia') || cat.includes('produto')) {
                         categorias['Fornecedores'] += valor;
                     } else if (cat.includes('imposto') || cat.includes('tributo') || cat.includes('icms') || cat.includes('pis')) {
                         categorias['Impostos'] += valor;
-                    } else if (cat.includes('operacional') || cat.includes('manutencao') || cat.includes('aluguel')) {
+                    } else if (cat.includes('operacional') || cat.includes('manutenção') || cat.includes('aluguel')) {
                         categorias['Operacional'] += valor;
                     } else if (cat.includes('financeiro') || cat.includes('juros') || cat.includes('banco') || cat.includes('taxa')) {
                         categorias['Financeiro'] += valor;
@@ -3026,11 +3057,11 @@
         }
 
         function atualizarRelatorios() {
-            const periodo = document.getElementById('filtroPeriodo').value;
+            const período = document.getElementById('filtroPeriodo').value;
             const hoje = new Date();
             let dataInicio, dataFim;
 
-            switch (periodo) {
+            switch (período) {
                 case 'mes':
                     dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
                     dataFim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -3066,14 +3097,25 @@
             if (elInicio) elInicio.value = dataInicio;
             if (elFim) elFim.value = dataFim;
 
+            // Sincronizar datas dos modais de relatório
+            const pagarInicio = document.getElementById('pagar-data-inicio');
+            const pagarFim = document.getElementById('pagar-data-fim');
+            const receberInicio = document.getElementById('receber-data-inicio');
+            const receberFim = document.getElementById('receber-data-fim');
+            if (pagarInicio) pagarInicio.value = dataInicio;
+            if (pagarFim) pagarFim.value = dataFim;
+            if (receberInicio) receberInicio.value = dataInicio;
+            if (receberFim) receberFim.value = dataFim;
+
             // Recarregar todos os dados com o novo período
             mostrarToast('Atualizando dados do período...', 'info');
             carregarResumoFinanceiro(dataInicio, dataFim);
+            atualizarGraficosComDadosReais();
             console.log('Relatórios atualizados para:', dataInicio, 'até', dataFim);
         }
 
         async function abrirRelatorio(tipo) {
-            relatorioAtual = tipo;
+            relatórioAtual = tipo;
             const titulos = {
                 'dre': 'DRE - Demonstrativo de Resultados',
                 'fluxo': 'Fluxo de Caixa',
@@ -3090,10 +3132,10 @@
                 'resumido': 'Relatório Resumido',
                 'resumo-executivo': 'Resumo Executivo de Finanças',
                 'clientes-fornecedores': 'Clientes e Fornecedores',
-                'atividades-usuarios': 'Atividades dos Usuários',
+                'atividades-usuários': 'Atividades dos Usuários',
                 'comissao-vendas': 'Comissão de Vendas',
-                'movimentacao-financeira': 'Movimentação Financeira (12 meses)',
-                'por-periodo': 'Contas por Período',
+                'movimentação-financeira': 'Movimentação Financeira (12 meses)',
+                'por-período': 'Contas por Período',
                 'por-mes-ano': 'Contas por Mês/Ano',
                 'contas-por-categoria': 'Contas por Categoria',
                 'contas-cliente-fornecedor': 'Contas por Cliente/Fornecedor',
@@ -3101,22 +3143,22 @@
                 'por-vendedor': 'Por Vendedor',
                 'por-projeto': 'Por Projeto',
                 'atrasadas': 'Contas Atrasadas',
-                'titulos-liquidados': 'Títulos Liquidados',
-                'titulos-vencidos': 'Títulos Vencidos',
-                'titulos-a-vencer': 'Títulos a Vencer',
-                'titulos-por-cliente': 'Títulos por Cliente',
-                'titulos-por-fornecedor': 'Títulos por Fornecedor',
+                'títulos-liquidados': 'Títulos Liquidados',
+                'títulos-vencidos': 'Títulos Vencidos',
+                'títulos-a-vencer': 'Títulos a Vencer',
+                'títulos-por-cliente': 'Títulos por Cliente',
+                'títulos-por-fornecedor': 'Títulos por Fornecedor',
                 'portador-carteira': 'Portador Carteira',
-                'titulos-descontos': 'Descontos de Títulos',
-                'contas-pagar-periodo': 'Contas a Pagar por Período',
-                'contas-receber-periodo': 'Contas a Receber por Período'
+                'títulos-descontos': 'Descontos de Títulos',
+                'contas-pagar-período': 'Contas a Pagar por Período',
+                'contas-receber-período': 'Contas a Receber por Período'
             };
 
             document.getElementById('modalRelatorioTitulo').textContent = titulos[tipo] || 'Relatório';
 
             // Mostrar loading
-            const loadingEl = document.getElementById('loading-relatorio');
-            const conteudoEl = document.getElementById('conteudo-relatorio');
+            const loadingEl = document.getElementById('loading-relatório');
+            const conteudoEl = document.getElementById('conteudo-relatório');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
 
@@ -3129,7 +3171,7 @@
                 if (conteudoEl) {
                     conteudoEl.innerHTML = html;
                     conteudoEl.style.display = 'block';
-                    conteudoEl.classList.add('resultado-relatorio');
+                    conteudoEl.classList.add('resultado-relatório');
                 } else {
                     document.getElementById('modalRelatorioBody').innerHTML = html;
                 }
@@ -3170,6 +3212,32 @@
                 } catch { return []; }
             }
 
+            // Helper: gera HTML de abas Pagar / Receber separadas
+            function gerarAbasSeparadas({ summaryHtml, pagarRows, receberRows, pagarHeaders, receberHeaders, pagarLabel, receberLabel, totalPagar, totalReceber }) {
+                const uid = 'tabs-' + Date.now();
+                pagarLabel = pagarLabel || 'A Pagar';
+                receberLabel = receberLabel || 'A Receber';
+                return `
+                    ${summaryHtml}
+                    <div class="rel-tabs" style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid #e2e8f0;">
+                        <button class="rel-tab active" onclick="this.parentElement.querySelectorAll('.rel-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');document.getElementById('${uid}-pagar').style.display='block';document.getElementById('${uid}-receber').style.display='none';" style="padding:10px 24px;font-weight:600;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:3px solid #ef4444;color:#ef4444;margin-bottom:-2px;transition:all .2s;">
+                            <i class="fas fa-arrow-up" style="margin-right:6px;"></i>${pagarLabel} <span style="background:#fef2f2;color:#ef4444;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">${totalPagar !== undefined ? totalPagar : ''}</span>
+                        </button>
+                        <button class="rel-tab" onclick="this.parentElement.querySelectorAll('.rel-tab').forEach(t=>t.classList.remove('active'));this.classList.add('active');document.getElementById('${uid}-pagar').style.display='none';document.getElementById('${uid}-receber').style.display='block';" style="padding:10px 24px;font-weight:600;font-size:13px;border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;color:#64748b;margin-bottom:-2px;transition:all .2s;">
+                            <i class="fas fa-arrow-down" style="margin-right:6px;"></i>${receberLabel} <span style="background:#f0fdf4;color:#22c55e;padding:2px 8px;border-radius:10px;font-size:11px;margin-left:6px;">${totalReceber !== undefined ? totalReceber : ''}</span>
+                        </button>
+                    </div>
+                    <div id="${uid}-pagar" style="display:block;">
+                        <table class="data-table"><thead><tr>${pagarHeaders}</tr></thead>
+                        <tbody>${pagarRows || '<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum registro a pagar</td></tr>'}</tbody></table>
+                    </div>
+                    <div id="${uid}-receber" style="display:none;">
+                        <table class="data-table"><thead><tr>${receberHeaders}</tr></thead>
+                        <tbody>${receberRows || '<tr><td colspan="10" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum registro a receber</td></tr>'}</tbody></table>
+                    </div>
+                    <style>.rel-tab:hover{color:#334155!important;}.rel-tab.active{font-weight:700!important;}</style>`;
+            }
+
             switch(tipo) {
                 case 'contas-pagar':
                 case 'contas-pagar-aberto': {
@@ -3178,7 +3246,7 @@
                     const total = contas.filter(c => c.status !== 'pago').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const vencidas = contas.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const pagoMes = contas.filter(c => c.status === 'pago').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = contas.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    const rows = contas.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total a Pagar</h4><div class="value red">${fmtM(total)}</div></div>
@@ -3195,7 +3263,7 @@
                     const totalPago = pagos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const media = pagos.length > 0 ? totalPago / pagos.length : 0;
                     const maior = pagos.reduce((m, c) => Math.max(m, parseFloat(c.valor_total || c.valor || 0)), 0);
-                    const rows = pagos.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descricao || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
+                    const rows = pagos.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Pago</h4><div class="value green">${fmtM(totalPago)}</div></div>
@@ -3213,7 +3281,7 @@
                     const total = contas.filter(c => c.status !== 'recebido' && c.status !== 'pago').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const vencidas = contas.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const recebidoMes = contas.filter(c => c.status === 'recebido' || c.status === 'pago').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = contas.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    const rows = contas.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total a Receber</h4><div class="value blue">${fmtM(total)}</div></div>
@@ -3230,7 +3298,7 @@
                     const totalRec = recebidos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const media = recebidos.length > 0 ? totalRec / recebidos.length : 0;
                     const maior = recebidos.reduce((m, c) => Math.max(m, parseFloat(c.valor_total || c.valor || 0)), 0);
-                    const rows = recebidos.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
+                    const rows = recebidos.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Recebido</h4><div class="value green">${fmtM(totalRec)}</div></div>
@@ -3256,8 +3324,8 @@
                     while (semStart <= d2) {
                         const semEnd = new Date(Math.min(semStart.getTime() + 6 * 86400000, d2.getTime()));
                         const label = `${semStart.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'})} - ${semEnd.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit'})}`;
-                        const entSem = receber.filter(c => { const v = (c.data_vencimento || c.vencimento || ''); return v >= semStart.toISOString().split('T')[0] && v <= semEnd.toISOString().split('T')[0]; }).reduce((s,c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                        const saiSem = pagar.filter(c => { const v = (c.data_vencimento || c.vencimento || ''); return v >= semStart.toISOString().split('T')[0] && v <= semEnd.toISOString().split('T')[0]; }).reduce((s,c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                        const entSem = receber.filter(c => { const v = String(c.data_vencimento || c.vencimento || '').slice(0,10); return v >= semStart.toISOString().split('T')[0] && v <= semEnd.toISOString().split('T')[0]; }).reduce((s,c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                        const saiSem = pagar.filter(c => { const v = String(c.data_vencimento || c.vencimento || '').slice(0,10); return v >= semStart.toISOString().split('T')[0] && v <= semEnd.toISOString().split('T')[0]; }).reduce((s,c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                         semanas.push({ label, ent: entSem, sai: saiSem, saldo: entSem - saiSem });
                         semStart = new Date(semEnd.getTime() + 86400000);
                     }
@@ -3308,12 +3376,12 @@
                     // Agrupar por nome
                     const entidades = {};
                     receber.forEach(c => {
-                        const nome = c.cliente || c.cliente_nome || c.descricao || 'Sem nome';
+                        const nome = c.cliente || c.cliente_nome || c.descrição || 'Sem nome';
                         if (!entidades[nome]) entidades[nome] = { tipo: 'Cliente', pagar: 0, receber: 0 };
                         entidades[nome].receber += parseFloat(c.valor_total || c.valor || 0);
                     });
                     pagar.forEach(c => {
-                        const nome = c.fornecedor || c.fornecedor_nome || c.descricao || 'Sem nome';
+                        const nome = c.fornecedor || c.fornecedor_nome || c.descrição || 'Sem nome';
                         if (!entidades[nome]) entidades[nome] = { tipo: 'Fornecedor', pagar: 0, receber: 0 };
                         entidades[nome].pagar += parseFloat(c.valor_total || c.valor || 0);
                     });
@@ -3407,7 +3475,7 @@
                 case 'bancos': {
                     const bancosArr = await fetchAPI('/api/financeiro/contas-bancarias');
                     const saldoTotal = bancosArr.reduce((s, b) => s + parseFloat(b.saldo_atual || b.saldo || 0), 0);
-                    const rows = bancosArr.map(b => `<tr><td><strong>${b.banco || b.nome_banco || b.nome || '-'}</strong></td><td>${b.agencia || '-'}</td><td>${b.conta || b.numero_conta || '-'}</td><td style="text-align:right" class="valor-cell positivo">${fmtM(b.saldo_atual || b.saldo)}</td></tr>`).join('');
+                    const rows = bancosArr.map(b => `<tr><td><strong>${b.banco || b.nome_banco || b.nome || '-'}</strong></td><td>${b.agencia || '-'}</td><td>${b.conta || b.número_conta || '-'}</td><td style="text-align:right" class="valor-cell positivo">${fmtM(b.saldo_atual || b.saldo)}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Saldo Total</h4><div class="value blue">${fmtM(saldoTotal)}</div></div>
@@ -3443,49 +3511,51 @@
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=2020-01-01&data_fim=${hoje}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=2020-01-01&data_fim=${hoje}`)
                     ]);
-                    const pagarAtrasadas = pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje);
-                    const receberAtrasadas = receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje);
+                    const pagarAtrasadas = pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const receberAtrasadas = receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
                     const totalPagarAtr = pagarAtrasadas.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const totalReceberAtr = receberAtrasadas.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const todas = [
-                        ...pagarAtrasadas.map(c => ({ ...c, _tipo: 'Pagar' })),
-                        ...receberAtrasadas.map(c => ({ ...c, _tipo: 'Receber' }))
-                    ].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
                     const diasAtraso = (v) => v ? Math.ceil((new Date() - new Date(v)) / 86400000) : 0;
-                    const mediaAtraso = todas.length > 0 ? Math.round(todas.reduce((s, c) => s + diasAtraso(c.data_vencimento || c.vencimento), 0) / todas.length) : 0;
-                    const rows = todas.map(c => `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--warning)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${diasAtraso(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
+                    const todos = [...pagarAtrasadas, ...receberAtrasadas];
+                    const mediaAtraso = todos.length > 0 ? Math.round(todos.reduce((s, c) => s + diasAtraso(c.data_vencimento || c.vencimento), 0) / todos.length) : 0;
+                    const pagarRows = pagarAtrasadas.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${diasAtraso(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    const receberRows = receberAtrasadas.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${diasAtraso(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Atrasado</h4><div class="value red">${fmtM(totalPagarAtr + totalReceberAtr)}</div></div>
                             <div class="summary-box"><h4>A Pagar Atras.</h4><div class="value red">${fmtM(totalPagarAtr)}</div></div>
                             <div class="summary-box"><h4>A Receber Atras.</h4><div class="value orange">${fmtM(totalReceberAtr)}</div></div>
                             <div class="summary-box"><h4>Dias Médio</h4><div class="value purple">${mediaAtraso} dias</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Vencimento</th><th>Dias</th><th>Valor</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhuma conta atrasada!</td></tr>'}</tbody>
-                        ${todas.length > 0 ? `<tfoot><tr><td colspan="4"><strong>TOTAL ATRASADO</strong></td><td><strong class="valor-cell negativo">${fmtM(totalPagarAtr + totalReceberAtr)}</strong></td></tr></tfoot>` : ''}</table>`;
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Vencimento</th><th>Dias</th><th>Valor</th>',
+                        receberHeaders: '<th>Cliente</th><th>Vencimento</th><th>Dias</th><th>Valor</th>',
+                        totalPagar: pagarAtrasadas.length, totalReceber: receberAtrasadas.length
+                    });
                 }
-                case 'por-periodo': {
+                case 'por-período': {
                     const [receber, pagar] = await Promise.all([
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${dataInicio}&data_fim=${dataFim}`)
                     ]);
                     const totalPagar = pagar.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const totalReceber = receber.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const todas = [
-                        ...pagar.map(c => ({ ...c, _tipo: 'Pagar' })),
-                        ...receber.map(c => ({ ...c, _tipo: 'Receber' }))
-                    ].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
-                    const rows = todas.map(c => `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--success)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
+                    const sortedPagar = [...pagar].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const sortedReceber = [...receber].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const pagarRows = sortedPagar.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    const receberRows = sortedReceber.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Período</h4><div class="value blue">${fmtD(dataInicio)} a ${fmtD(dataFim)}</div></div>
                             <div class="summary-box"><h4>A Pagar</h4><div class="value red">${fmtM(totalPagar)}</div></div>
                             <div class="summary-box"><h4>A Receber</h4><div class="value green">${fmtM(totalReceber)}</div></div>
                             <div class="summary-box"><h4>Saldo Prev.</h4><div class="value orange">${fmtM(totalReceber - totalPagar)}</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Vencimento</th><th>Valor</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;">Sem dados no período</td></tr>'}</tbody></table>`;
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Vencimento</th><th>Valor</th><th>Status</th>',
+                        receberHeaders: '<th>Cliente</th><th>Vencimento</th><th>Valor</th><th>Status</th>',
+                        totalPagar: pagar.length, totalReceber: receber.length
+                    });
                 }
                 case 'contas-por-categoria': {
                     const [receber, pagar] = await Promise.all([
@@ -3515,87 +3585,92 @@
                         <table class="data-table"><thead><tr><th>Categoria</th><th>A Pagar</th><th>A Receber</th><th>Saldo</th></tr></thead>
                         <tbody>${rows || '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;">Sem dados</td></tr>'}</tbody></table>`;
                 }
-                case 'titulos-liquidados': {
+                case 'títulos-liquidados': {
                     const [receber, pagar] = await Promise.all([
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${dataInicio}&data_fim=${dataFim}`)
                     ]);
-                    const liquidados = [
-                        ...pagar.filter(c => c.status === 'pago').map(c => ({ ...c, _tipo: 'Pagar' })),
-                        ...receber.filter(c => c.status === 'recebido' || c.status === 'pago').map(c => ({ ...c, _tipo: 'Receber' }))
-                    ].sort((a, b) => (b.data_pagamento || b.data_baixa || b.data_vencimento || '').localeCompare(a.data_pagamento || a.data_baixa || a.data_vencimento || ''));
-                    const totalLiq = liquidados.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalPagar = liquidados.filter(c => c._tipo === 'Pagar').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalReceber = liquidados.filter(c => c._tipo === 'Receber').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = liquidados.map(c => `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--success)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
+                    const liqPagar = pagar.filter(c => c.status === 'pago').sort((a, b) => (b.data_pagamento || b.data_baixa || b.data_vencimento || '').localeCompare(a.data_pagamento || a.data_baixa || a.data_vencimento || ''));
+                    const liqReceber = receber.filter(c => c.status === 'recebido' || c.status === 'pago').sort((a, b) => (b.data_pagamento || b.data_baixa || b.data_vencimento || '').localeCompare(a.data_pagamento || a.data_baixa || a.data_vencimento || ''));
+                    const totalPagar = liqPagar.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const totalReceber = liqReceber.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const totalLiq = totalPagar + totalReceber;
+                    const pagarRows = liqPagar.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
+                    const receberRows = liqReceber.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_pagamento || c.data_baixa || c.data_vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${c.forma_pagamento || c.tipo_pagamento || 'N/I'}</td></tr>`).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Liquidado</h4><div class="value green">${fmtM(totalLiq)}</div></div>
                             <div class="summary-box"><h4>Pagamentos</h4><div class="value red">${fmtM(totalPagar)}</div></div>
                             <div class="summary-box"><h4>Recebimentos</h4><div class="value blue">${fmtM(totalReceber)}</div></div>
-                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${liquidados.length}</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Data Liquidação</th><th>Valor</th><th>Forma</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título liquidado no período</td></tr>'}</tbody></table>`;
+                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${liqPagar.length + liqReceber.length}</div></div>
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Data Liquidação</th><th>Valor</th><th>Forma</th>',
+                        receberHeaders: '<th>Cliente</th><th>Data Liquidação</th><th>Valor</th><th>Forma</th>',
+                        pagarLabel: 'Pagamentos', receberLabel: 'Recebimentos',
+                        totalPagar: liqPagar.length, totalReceber: liqReceber.length
+                    });
                 }
-                case 'titulos-vencidos': {
+                case 'títulos-vencidos': {
                     const [receber, pagar] = await Promise.all([
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=2020-01-01&data_fim=${hoje}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=2020-01-01&data_fim=${hoje}`)
                     ]);
-                    const vencidos = [
-                        ...pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).map(c => ({ ...c, _tipo: 'Pagar' })),
-                        ...receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).map(c => ({ ...c, _tipo: 'Receber' }))
-                    ].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
-                    const totalVenc = vencidos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const vencPagar = pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const vencReceber = receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') < hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const totalVencP = vencPagar.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const totalVencR = vencReceber.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const diasAtraso = (v) => v ? Math.ceil((new Date() - new Date(v)) / 86400000) : 0;
-                    const mediaAtraso = vencidos.length > 0 ? Math.round(vencidos.reduce((s, c) => s + diasAtraso(c.data_vencimento || c.vencimento), 0) / vencidos.length) : 0;
-                    const rows = vencidos.map(c => `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--warning)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td style="color:var(--danger);font-weight:600;">${diasAtraso(c.data_vencimento || c.vencimento)} dias</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
-                            <div class="summary-box"><h4>Total Vencido</h4><div class="value red">${fmtM(totalVenc)}</div></div>
-                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${vencidos.length}</div></div>
+                    const todos = [...vencPagar, ...vencReceber];
+                    const mediaAtraso = todos.length > 0 ? Math.round(todos.reduce((s, c) => s + diasAtraso(c.data_vencimento || c.vencimento), 0) / todos.length) : 0;
+                    const pagarRows = vencPagar.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td style="color:var(--danger);font-weight:600;">${diasAtraso(c.data_vencimento || c.vencimento)} dias</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    const receberRows = vencReceber.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td style="color:var(--danger);font-weight:600;">${diasAtraso(c.data_vencimento || c.vencimento)} dias</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
+                            <div class="summary-box"><h4>Total Vencido</h4><div class="value red">${fmtM(totalVencP + totalVencR)}</div></div>
+                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${todos.length}</div></div>
                             <div class="summary-box"><h4>Média Atraso</h4><div class="value purple">${mediaAtraso} dias</div></div>
-                            <div class="summary-box"><h4>Maior Valor</h4><div class="value red">${fmtM(vencidos.reduce((m, c) => Math.max(m, parseFloat(c.valor_total || c.valor || 0)), 0))}</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Vencimento</th><th>Atraso</th><th>Valor</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título vencido!</td></tr>'}</tbody>
-                        ${vencidos.length > 0 ? `<tfoot><tr><td colspan="4"><strong>TOTAL VENCIDO</strong></td><td><strong>${fmtM(totalVenc)}</strong></td></tr></tfoot>` : ''}</table>`;
+                            <div class="summary-box"><h4>Maior Valor</h4><div class="value red">${fmtM(todos.reduce((m, c) => Math.max(m, parseFloat(c.valor_total || c.valor || 0)), 0))}</div></div>
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Vencimento</th><th>Atraso</th><th>Valor</th>',
+                        receberHeaders: '<th>Cliente</th><th>Vencimento</th><th>Atraso</th><th>Valor</th>',
+                        totalPagar: vencPagar.length, totalReceber: vencReceber.length
+                    });
                 }
-                case 'titulos-a-vencer': {
+                case 'títulos-a-vencer': {
                     const [receber, pagar] = await Promise.all([
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=${hoje}&data_fim=${dataFim}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${hoje}&data_fim=${dataFim}`)
                     ]);
-                    const aVencer = [
-                        ...pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') >= hoje).map(c => ({ ...c, _tipo: 'Pagar' })),
-                        ...receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') >= hoje).map(c => ({ ...c, _tipo: 'Receber' }))
-                    ].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
-                    const totalAV = aVencer.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalPag = aVencer.filter(c => c._tipo === 'Pagar').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalRec = aVencer.filter(c => c._tipo === 'Receber').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const avPagar = pagar.filter(c => c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') >= hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const avReceber = receber.filter(c => c.status !== 'recebido' && c.status !== 'pago' && (c.data_vencimento || c.vencimento || '') >= hoje).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const totalPag = avPagar.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const totalRec = avReceber.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const diasParaVencer = (v) => v ? Math.max(0, Math.ceil((new Date(v) - new Date()) / 86400000)) : 0;
-                    const prox7 = aVencer.filter(c => diasParaVencer(c.data_vencimento || c.vencimento) <= 7).reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = aVencer.map(c => {
-                        const dias = diasParaVencer(c.data_vencimento || c.vencimento);
-                        const corDias = dias <= 3 ? 'var(--danger)' : dias <= 7 ? 'var(--warning)' : 'var(--success)';
-                        return `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--success)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td style="color:${corDias};font-weight:600;">${dias} dias</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`;
-                    }).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
-                            <div class="summary-box"><h4>Total a Vencer</h4><div class="value blue">${fmtM(totalAV)}</div></div>
+                    const todos = [...avPagar, ...avReceber];
+                    const prox7 = todos.filter(c => diasParaVencer(c.data_vencimento || c.vencimento) <= 7).reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const mkRow = (c, desc) => { const dias = diasParaVencer(c.data_vencimento || c.vencimento); const corDias = dias <= 3 ? 'var(--danger)' : dias <= 7 ? 'var(--warning)' : 'var(--success)'; return `<tr><td>${desc}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td style="color:${corDias};font-weight:600;">${dias} dias</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`; };
+                    const pagarRows = avPagar.map(c => mkRow(c, c.fornecedor || c.fornecedor_nome || c.descrição || '-')).join('');
+                    const receberRows = avReceber.map(c => mkRow(c, c.cliente || c.cliente_nome || c.descrição || '-')).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
+                            <div class="summary-box"><h4>Total a Vencer</h4><div class="value blue">${fmtM(totalPag + totalRec)}</div></div>
                             <div class="summary-box"><h4>A Pagar</h4><div class="value red">${fmtM(totalPag)}</div></div>
                             <div class="summary-box"><h4>A Receber</h4><div class="value green">${fmtM(totalRec)}</div></div>
                             <div class="summary-box"><h4>Próx. 7 dias</h4><div class="value orange">${fmtM(prox7)}</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Vencimento</th><th>Dias</th><th>Valor</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título a vencer no período</td></tr>'}</tbody></table>`;
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Vencimento</th><th>Dias</th><th>Valor</th>',
+                        receberHeaders: '<th>Cliente</th><th>Vencimento</th><th>Dias</th><th>Valor</th>',
+                        totalPagar: avPagar.length, totalReceber: avReceber.length
+                    });
                 }
-                case 'titulos-por-cliente': {
+                case 'títulos-por-cliente': {
                     const contas = await fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`);
                     const clientes = {};
                     contas.forEach(c => {
-                        const nome = c.cliente || c.cliente_nome || c.descricao || 'Sem nome';
+                        const nome = c.cliente || c.cliente_nome || c.descrição || 'Sem nome';
                         if (!clientes[nome]) clientes[nome] = { total: 0, aberto: 0, recebido: 0, qtd: 0 };
                         clientes[nome].qtd++;
                         const val = parseFloat(c.valor_total || c.valor || 0);
@@ -3618,11 +3693,11 @@
                         <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título por cliente no período</td></tr>'}</tbody>
                         ${sortedCli.length > 0 ? `<tfoot><tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>${fmtM(totalGeral)}</strong></td><td><strong>${fmtM(totalGeral - totalAberto)}</strong></td><td><strong>${fmtM(totalAberto)}</strong></td></tr></tfoot>` : ''}</table>`;
                 }
-                case 'titulos-por-fornecedor': {
+                case 'títulos-por-fornecedor': {
                     const contas = await fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${dataInicio}&data_fim=${dataFim}`);
                     const fornecedores = {};
                     contas.forEach(c => {
-                        const nome = c.fornecedor || c.fornecedor_nome || c.descricao || 'Sem nome';
+                        const nome = c.fornecedor || c.fornecedor_nome || c.descrição || 'Sem nome';
                         if (!fornecedores[nome]) fornecedores[nome] = { total: 0, aberto: 0, pago: 0, qtd: 0 };
                         fornecedores[nome].qtd++;
                         const val = parseFloat(c.valor_total || c.valor || 0);
@@ -3650,34 +3725,33 @@
                         fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`),
                         fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${dataInicio}&data_fim=${dataFim}`)
                     ]);
-                    // Títulos em carteira = não enviados para cobrança bancária (portador = carteira ou sem portador)
-                    const emCarteira = [
-                        ...receber.filter(c => (c.status !== 'recebido' && c.status !== 'pago') && (!c.portador || c.portador === 'carteira' || c.portador === 'Carteira')).map(c => ({ ...c, _tipo: 'Receber' })),
-                        ...pagar.filter(c => c.status !== 'pago' && (!c.portador || c.portador === 'carteira' || c.portador === 'Carteira')).map(c => ({ ...c, _tipo: 'Pagar' }))
-                    ].sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
-                    const totalCarteira = emCarteira.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalRecCart = emCarteira.filter(c => c._tipo === 'Receber').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const totalPagCart = emCarteira.filter(c => c._tipo === 'Pagar').reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = emCarteira.map(c => `<tr><td><span style="color:${c._tipo === 'Pagar' ? 'var(--danger)' : 'var(--success)'}">${c._tipo}</span></td><td>${c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${c.numero_documento || c.documento || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
-                    return `
-                        <div class="summary-grid" style="margin-bottom:20px;">
-                            <div class="summary-box"><h4>Total Carteira</h4><div class="value blue">${fmtM(totalCarteira)}</div></div>
+                    const cartPagar = pagar.filter(c => c.status !== 'pago' && (!c.portador || c.portador === 'carteira' || c.portador === 'Carteira')).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const cartReceber = receber.filter(c => (c.status !== 'recebido' && c.status !== 'pago') && (!c.portador || c.portador === 'carteira' || c.portador === 'Carteira')).sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || ''));
+                    const totalPagCart = cartPagar.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const totalRecCart = cartReceber.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
+                    const pagarRows = cartPagar.map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${c.número_documento || c.documento || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    const receberRows = cartReceber.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${c.número_documento || c.documento || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td></tr>`).join('');
+                    return gerarAbasSeparadas({
+                        summaryHtml: `<div class="summary-grid" style="margin-bottom:20px;">
+                            <div class="summary-box"><h4>Total Carteira</h4><div class="value blue">${fmtM(totalPagCart + totalRecCart)}</div></div>
                             <div class="summary-box"><h4>A Receber</h4><div class="value green">${fmtM(totalRecCart)}</div></div>
                             <div class="summary-box"><h4>A Pagar</h4><div class="value red">${fmtM(totalPagCart)}</div></div>
-                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${emCarteira.length}</div></div>
-                        </div>
-                        <table class="data-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Documento</th><th>Vencimento</th><th>Valor</th></tr></thead>
-                        <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título em carteira no período</td></tr>'}</tbody>
-                        ${emCarteira.length > 0 ? `<tfoot><tr><td colspan="4"><strong>TOTAL EM CARTEIRA</strong></td><td><strong>${fmtM(totalCarteira)}</strong></td></tr></tfoot>` : ''}</table>`;
+                            <div class="summary-box"><h4>Qtd. Títulos</h4><div class="value orange">${cartPagar.length + cartReceber.length}</div></div>
+                        </div>`,
+                        pagarRows, receberRows,
+                        pagarHeaders: '<th>Fornecedor</th><th>Documento</th><th>Vencimento</th><th>Valor</th>',
+                        receberHeaders: '<th>Cliente</th><th>Documento</th><th>Vencimento</th><th>Valor</th>',
+                        totalPagar: cartPagar.length, totalReceber: cartReceber.length
+                    });
                 }
-                case 'titulos-descontos': {
+                case 'títulos-descontos': {
                     const receber = await fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`);
                     // Títulos com desconto = que possuem campo desconto ou valor_desconto > 0
                     const comDesconto = receber.filter(c => parseFloat(c.desconto || c.valor_desconto || 0) > 0);
                     const totalOriginal = comDesconto.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const totalDesconto = comDesconto.reduce((s, c) => s + parseFloat(c.desconto || c.valor_desconto || 0), 0);
                     const totalLiquido = totalOriginal - totalDesconto;
-                    const rows = comDesconto.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${c.numero_documento || c.documento || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td class="valor-cell negativo">${fmtM(c.desconto || c.valor_desconto)}</td><td class="valor-cell positivo">${fmtM(parseFloat(c.valor_total || c.valor || 0) - parseFloat(c.desconto || c.valor_desconto || 0))}</td></tr>`).join('');
+                    const rows = comDesconto.map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${c.número_documento || c.documento || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td class="valor-cell negativo">${fmtM(c.desconto || c.valor_desconto)}</td><td class="valor-cell positivo">${fmtM(parseFloat(c.valor_total || c.valor || 0) - parseFloat(c.desconto || c.valor_desconto || 0))}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Valor Original</h4><div class="value blue">${fmtM(totalOriginal)}</div></div>
@@ -3689,14 +3763,14 @@
                         <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum título com desconto no período</td></tr>'}</tbody>
                         ${comDesconto.length > 0 ? `<tfoot><tr><td colspan="3"><strong>TOTAIS</strong></td><td><strong>${fmtM(totalOriginal)}</strong></td><td><strong>${fmtM(totalDesconto)}</strong></td><td><strong>${fmtM(totalLiquido)}</strong></td></tr></tfoot>` : ''}</table>`;
                 }
-                case 'contas-pagar-periodo': {
+                case 'contas-pagar-período': {
                     const contas = await fetchAPI(`/api/financeiro/contas-pagar?data_inicio=${dataInicio}&data_fim=${dataFim}`);
                     const total = contas.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const pagos = contas.filter(c => c.status === 'pago');
                     const abertos = contas.filter(c => c.status !== 'pago');
                     const totalPago = pagos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const totalAberto = abertos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = contas.sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || '')).map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descricao || '-'}</td><td>${c.numero_documento || c.documento || '-'}</td><td>${c.categoria || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    const rows = contas.sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || '')).map(c => `<tr><td>${c.fornecedor || c.fornecedor_nome || c.descrição || '-'}</td><td>${c.número_documento || c.documento || '-'}</td><td>${c.categoria || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Período</h4><div class="value blue">${fmtM(total)}</div></div>
@@ -3708,14 +3782,14 @@
                         <tbody>${rows || '<tr><td colspan="6" style="text-align:center;color:#94a3b8;padding:20px;">Nenhuma conta a pagar no período</td></tr>'}</tbody>
                         ${contas.length > 0 ? `<tfoot><tr><td colspan="4"><strong>TOTAL</strong></td><td><strong>${fmtM(total)}</strong></td><td></td></tr></tfoot>` : ''}</table>`;
                 }
-                case 'contas-receber-periodo': {
+                case 'contas-receber-período': {
                     const contas = await fetchAPI(`/api/financeiro/contas-receber?data_inicio=${dataInicio}&data_fim=${dataFim}`);
                     const total = contas.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const recebidos = contas.filter(c => c.status === 'recebido' || c.status === 'pago');
                     const abertos = contas.filter(c => c.status !== 'recebido' && c.status !== 'pago');
                     const totalRec = recebidos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
                     const totalAberto = abertos.reduce((s, c) => s + parseFloat(c.valor_total || c.valor || 0), 0);
-                    const rows = contas.sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || '')).map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descricao || '-'}</td><td>${c.numero_documento || c.documento || '-'}</td><td>${c.categoria || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
+                    const rows = contas.sort((a, b) => (a.data_vencimento || a.vencimento || '').localeCompare(b.data_vencimento || b.vencimento || '')).map(c => `<tr><td>${c.cliente || c.cliente_nome || c.descrição || '-'}</td><td>${c.número_documento || c.documento || '-'}</td><td>${c.categoria || '-'}</td><td>${fmtD(c.data_vencimento || c.vencimento)}</td><td>${fmtM(c.valor_total || c.valor)}</td><td>${statusBadge(c.status, c.data_vencimento || c.vencimento)}</td></tr>`).join('');
                     return `
                         <div class="summary-grid" style="margin-bottom:20px;">
                             <div class="summary-box"><h4>Total Período</h4><div class="value blue">${fmtM(total)}</div></div>
@@ -3729,7 +3803,7 @@
                 }
                 default:
                     return `
-                        <div class="empty-state-relatorio">
+                        <div class="empty-state-relatório">
                             <div class="empty-state-icon"><i class="fas fa-chart-bar"></i></div>
                             <div class="empty-state-title">Nenhum dado disponível</div>
                             <div class="empty-state-desc">Selecione os filtros e clique em "Gerar Relatório" para visualizar os dados.</div>
@@ -3740,8 +3814,8 @@
         function fecharModal(id) {
             document.getElementById(id).classList.remove('active');
             // Resetar loading ao fechar
-            const loadingEl = document.getElementById('loading-relatorio');
-            const conteudoEl = document.getElementById('conteudo-relatorio');
+            const loadingEl = document.getElementById('loading-relatório');
+            const conteudoEl = document.getElementById('conteudo-relatório');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
         }
@@ -3835,15 +3909,15 @@
         async function buscarDadosRelatorio(tipo) {
             switch(tipo) {
                 case 'contas-pagar':
-                case 'contas-pagar-periodo':
-                case 'titulos-por-fornecedor':
+                case 'contas-pagar-período':
+                case 'títulos-por-fornecedor':
                 case 'pagamentos-realizados':
                     return await buscarContasPagar();
                 case 'contas-receber':
-                case 'contas-receber-periodo':
-                case 'titulos-por-cliente':
+                case 'contas-receber-período':
+                case 'títulos-por-cliente':
                 case 'recebimentos-realizados':
-                case 'titulos-descontos':
+                case 'títulos-descontos':
                     return await buscarContasReceber();
                 case 'bancos':
                 case 'portador-carteira':
@@ -3855,11 +3929,11 @@
                 case 'resumido':
                 case 'fluxo':
                 case 'fluxo-caixa':
-                case 'titulos-liquidados':
-                case 'titulos-vencidos':
-                case 'titulos-a-vencer':
+                case 'títulos-liquidados':
+                case 'títulos-vencidos':
+                case 'títulos-a-vencer':
                 case 'atrasadas':
-                case 'por-periodo':
+                case 'por-período':
                 case 'contas-por-categoria':
                 case 'por-fornecedor':
                 case 'contas-cliente-fornecedor': {
@@ -3961,9 +4035,9 @@
 
         async function exportarRelatorioAtual(formato) {
             if (formato === 'pdf') {
-                await imprimirRelatorioFormatado(relatorioAtual);
+                await imprimirRelatorioFormatado(relatórioAtual);
             } else {
-                exportarRelatorio(relatorioAtual, formato);
+                exportarRelatorio(relatórioAtual, formato);
             }
         }
 
@@ -3998,9 +4072,9 @@
                 nome: 'Serviços', cat: 'cadastros',
                 arquivo: 'zyntra/Zyntra_Servicos_v1_0_10.xlsx', colunas: 24, abas: 2
             },
-            'importacao-mercadoria': {
+            'importação-mercadoria': {
                 nome: 'Importação de Mercadoria', cat: 'operacional',
-                arquivo: 'zyntra/Zyntra_Importacao_Mercadoria_v1_0_8_5.xlsx', colunas: 28, abas: 1
+                arquivo: 'zyntra/Zyntra_Importação_Mercadoria_v1_0_8_5.xlsx', colunas: 28, abas: 1
             },
             'ordens-servico': {
                 nome: 'Ordens de Serviço', cat: 'operacional',
@@ -4120,7 +4194,7 @@
             localStorage.setItem('fin_agendamentos', JSON.stringify(agendamentos));
 
             fecharModal('modalAgendamento');
-            mostrarToast(`✅ Agendamento criado! "${tipoLabels[tipo]}" será enviado ${freqLabels[freq]} às ${horario} para ${emailList.length} destinatário(s).`, 'success');
+            mostrarToast(`✅ Agendamento criado! "${tipoLabels[tipo]}" será enviado ${freqLabels[freq]} às ${horário} para ${emailList.length} destinatário(s).`, 'success');
         }
 
         // --- Exportação CSV/Excel ---
@@ -4139,7 +4213,7 @@
                 headers = ['ID', 'Documento', tipo === 'contas-pagar' ? 'Fornecedor' : 'Cliente', 'Categoria', 'Vencimento', 'Valor', 'Pago', 'Saldo', 'Status'];
                 rows = contas.map(c => [
                     c.id || '',
-                    c.numero_documento || c.documento || '',
+                    c.número_documento || c.documento || '',
                     c.fornecedor || c.fornecedor_nome || c.cliente || c.cliente_nome || '',
                     c.categoria || '',
                     c.data_vencimento || c.vencimento || '',
@@ -4153,7 +4227,7 @@
                 rows = contas.map(c => [
                     c.banco || c.nome_banco || '',
                     c.agencia || '',
-                    c.conta || c.numero_conta || '',
+                    c.conta || c.número_conta || '',
                     c.tipo || '',
                     parseFloat(c.saldo || 0).toFixed(2)
                 ]);
@@ -4173,7 +4247,7 @@
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `relatorio-${tipo}-${new Date().toISOString().split('T')[0]}.${ext}`;
+            link.download = `relatório-${tipo}-${new Date().toISOString().split('T')[0]}.${ext}`;
             link.click();
             URL.revokeObjectURL(url);
             mostrarToast('Relatório exportado com sucesso!', 'success');
@@ -4184,9 +4258,9 @@
             const fmtMoeda = (v) => parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             // Usar o conteúdo já renderizado no modal se disponível
-            const conteudoEl = document.getElementById('conteudo-relatorio');
+            const conteudoEl = document.getElementById('conteudo-relatório');
             if (conteudoEl && conteudoEl.innerHTML.trim().length > 100) {
-                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatorioTitulo')?.textContent || 'Relatório'}</div>
+                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatorioTítulo')?.textContent || 'Relatório'}</div>
                 <div class="section-content">${conteudoEl.innerHTML}</div></div>`;
             }
 
@@ -4204,7 +4278,7 @@
 
         // Função de impressão profissional - mesmo template de Vendas (Orçamento)
         async function imprimirRelatorioFormatado(tipo) {
-            const titulos = {
+            const títulos = {
                 'dre': 'DRE - Demonstrativo de Resultados',
                 'fluxo': 'Fluxo de Caixa',
                 'contas-pagar': 'Relatório de Contas a Pagar',
@@ -4219,33 +4293,33 @@
                 'por-fornecedor': 'Por Cliente ou Fornecedor',
                 'resumido': 'Relatório Resumido',
                 'resumo-executivo': 'Resumo Executivo de Finanças',
-                'por-periodo': 'Contas por Período',
+                'por-período': 'Contas por Período',
                 'por-mes-ano': 'Contas por Mês/Ano',
                 'contas-por-categoria': 'Contas por Categoria',
                 'por-departamento': 'Por Departamento',
                 'por-vendedor': 'Por Vendedor',
                 'por-projeto': 'Por Projeto',
                 'atrasadas': 'Contas Atrasadas',
-                'titulos-liquidados': 'Títulos Liquidados',
-                'titulos-vencidos': 'Títulos Vencidos',
-                'titulos-a-vencer': 'Títulos a Vencer',
-                'titulos-por-cliente': 'Títulos por Cliente',
-                'titulos-por-fornecedor': 'Títulos por Fornecedor',
+                'títulos-liquidados': 'Títulos Liquidados',
+                'títulos-vencidos': 'Títulos Vencidos',
+                'títulos-a-vencer': 'Títulos a Vencer',
+                'títulos-por-cliente': 'Títulos por Cliente',
+                'títulos-por-fornecedor': 'Títulos por Fornecedor',
                 'portador-carteira': 'Portador Carteira',
-                'titulos-descontos': 'Descontos de Títulos',
-                'contas-pagar-periodo': 'Contas a Pagar por Período',
-                'contas-receber-periodo': 'Contas a Receber por Período'
+                'títulos-descontos': 'Descontos de Títulos',
+                'contas-pagar-período': 'Contas a Pagar por Período',
+                'contas-receber-período': 'Contas a Receber por Período'
             };
 
             const titulo = titulos[tipo] || 'Relatório Financeiro';
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const periodo = document.getElementById('dataInício')?.value && document.getElementById('dataFim')?.value
+            const período = document.getElementById('dataInício')?.value && document.getElementById('dataFim')?.value
                 ? `${new Date(document.getElementById('dataInício').value).toLocaleDateString('pt-BR')} a ${new Date(document.getElementById('dataFim').value).toLocaleDateString('pt-BR')}`
                 : dataAtual;
 
             // Buscar dados da empresa do banco (Configurações > Dados da Empresa)
-            let empresa = { razao_social: 'ALUFORCE', cnpj: '', ie: '', endereco: '', numero: '', bairro: '', cidade: '', uf: '', cep: '', telefone: '', logo_path: '' };
+            let empresa = { razao_social: 'ALUFORCE', cnpj: '', ie: '', endereco: '', número: '', bairro: '', cidade: '', uf: '', cep: '', telefone: '', logo_path: '' };
             try {
                 const resp = await fetch('/api/configuracoes/empresa', { credentials: 'include' });
                 if (resp.ok) {
@@ -4257,7 +4331,7 @@
                         cnpj: e.cnpj || '',
                         ie: e.inscricao_estadual || '',
                         endereco: e.endereco || '',
-                        numero: e.numero || '',
+                        número: e.número || '',
                         complemento: e.complemento || '',
                         bairro: e.bairro || '',
                         cidade: e.cidade || '',
@@ -4274,7 +4348,7 @@
 
             // Montar informações formatadas
             const cnpjIe = [empresa.cnpj ? `CNPJ: ${empresa.cnpj}` : '', empresa.ie ? `IE: ${empresa.ie}` : ''].filter(Boolean).join(' | ');
-            const enderecoLinha = [empresa.endereco, empresa.numero].filter(Boolean).join(', ') + (empresa.bairro ? ` - ${empresa.bairro}` : '');
+            const enderecoLinha = [empresa.endereco, empresa.número].filter(Boolean).join(', ') + (empresa.bairro ? ` - ${empresa.bairro}` : '');
             const cidadeUfCep = [empresa.cidade && empresa.uf ? `${empresa.cidade} - ${empresa.uf}` : empresa.cidade || empresa.uf, empresa.cep ? `CEP: ${empresa.cep}` : ''].filter(Boolean).join(' | ');
             const telLinha = empresa.telefone ? `Tel: ${empresa.telefone}` : '';
             const logoSrc = empresa.logo_path || '/images/Logo Monocromatico - Azul - Aluforce.png';
@@ -4295,7 +4369,7 @@
                 <head>
                     <meta charset="UTF-8">
                     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-                    <title>ALUFORCE: ${titulo}</title>
+                    <title>ALUFORCE: ${título}</title>
                     <style>
                         @page { margin: 12mm 15mm; size: A4; }
                         @media print {
@@ -4316,7 +4390,7 @@
                         /* Título */
                         .doc-title { margin-bottom: 20px; }
                         .doc-title h1 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
-                        .doc-title .periodo { font-size: 11px; color: #64748b; }
+                        .doc-title .período { font-size: 11px; color: #64748b; }
                         .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
 
                         /* Seções */
@@ -4412,8 +4486,8 @@
 
                         <!-- TÍTULO -->
                         <div class="doc-title">
-                            <h1>${titulo}</h1>
-                            <div class="periodo">Período: ${periodo} — Módulo Financeiro</div>
+                            <h1>${título}</h1>
+                            <div class="período">Período: ${período} — Módulo Financeiro</div>
                         </div>
 
                         <!-- CONTEÚDO DO RELATÓRIO -->
@@ -4435,6 +4509,23 @@
             `);
             printWindow.document.close();
         }
+
+    // ===== Abas Relatórios CP / CR =====
+    function alternarAbaRelatorio(aba) {
+        document.querySelectorAll('.relatório-tab').forEach(function(btn) {
+            btn.classList.remove('ativa');
+        });
+        var btn = document.getElementById('tab-btn-' + aba);
+        if (btn) btn.classList.add('ativa');
+        document.querySelectorAll('[data-aba]').forEach(function(el) {
+            el.style.display = (el.getAttribute('data-aba') === aba) ? '' : 'none';
+        });
+    }
+    // Default: show CR on load
+    document.addEventListener('DOMContentLoaded', function() {
+        alternarAbaRelatorio('cr');
+    });
+
     </script>
 
     <!-- Funções Compartilhadas Financeiro -->
@@ -4448,5 +4539,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

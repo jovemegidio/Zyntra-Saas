@@ -8,14 +8,17 @@ let fornecedores = [];
 let produtos = [];
 let itemCounter = 0;
 let filtroAtual = 'todos';
+let salvandoPedido = false;
+
+// Escape HTML para prevenir XSS
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
 
 // Função para obter headers de autenticação
 function getAuthHeaders() {
-    const token = localStorage.getItem('token');
-    return {
-        'Content-Type': 'application/json',
-        'Authorization': token ? `Bearer ${token}` : ''
-    };
+    return { 'Content-Type': 'application/json' };
 }
 
 // Mostrar toast de notificação (usa ComprasUtils se disponível)
@@ -131,9 +134,7 @@ async function inicializarSistema() {
 async function carregarPedidos() {
     try {
         // Tentar carregar do backend
-        const response = await fetch('/api/compras/pedidos', {
-            headers: getAuthHeaders()
-        });
+        const response = await fetch('/api/compras/pedidos', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             pedidos = Array.isArray(data) ? data : (data.pedidos || []);
@@ -173,9 +174,7 @@ async function carregarPedidos() {
 
 async function carregarFornecedores() {
     try {
-        const response = await fetch('/api/compras/fornecedores', {
-            headers: getAuthHeaders()
-        });
+        const response = await fetch('/api/compras/fornecedores', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             fornecedores = Array.isArray(data) ? data : (data.fornecedores || []);
@@ -200,9 +199,7 @@ async function carregarFornecedores() {
 
 async function carregarProdutos() {
     try {
-        const response = await fetch('/api/produtos', {
-            headers: getAuthHeaders()
-        });
+        const response = await fetch('/api/produtos', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             produtos = Array.isArray(data) ? data : (data.produtos || []);
@@ -214,9 +211,7 @@ async function carregarProdutos() {
 
     // Tentar também da API de materiais do PCP
     try {
-        const response = await fetch('/api/pcp/materiais', {
-            headers: getAuthHeaders()
-        });
+        const response = await fetch('/api/pcp/materiais', { credentials: 'include' });
         if (response.ok) {
             const data = await response.json();
             produtos = Array.isArray(data) ? data : (data.materiais || []);
@@ -254,9 +249,7 @@ async function abrirModalEditarPedido(pedidoId) {
     // Se não tiver itens ou itens vazio, buscar da API
     if (!pedido || !pedido.itens || pedido.itens.length === 0) {
         try {
-            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
-                headers: getAuthHeaders()
-            });
+            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, { credentials: 'include' });
             if (response.ok) {
                 pedido = await response.json();
             }
@@ -423,6 +416,12 @@ function calcularTotais() {
 // ============ SALVAR PEDIDO ============
 
 async function salvarPedido() {
+    if (salvandoPedido) return;
+    salvandoPedido = true;
+    // SECURITY FIX: Disable button to prevent double-click
+    const _btnSalvar = document.querySelector('[onclick="salvarPedido()"]');
+    if (_btnSalvar) _btnSalvar.disabled = true;
+    try {
     const pedidoId = document.getElementById('pedidoId').value;
     const fornecedorId = document.getElementById('fornecedorId').value;
 
@@ -469,6 +468,7 @@ async function salvarPedido() {
         const response = await fetch(url, {
             method: pedidoId ? 'PUT' : 'POST',
             headers: getAuthHeaders(),
+            credentials: 'include',
             body: JSON.stringify(pedido)
         });
 
@@ -508,8 +508,10 @@ async function salvarPedido() {
     renderizarTabelaPedidos();
     atualizarCards();
     fecharModalPedido();
-
-    mostrarNotificacao(pedidoId ? 'Pedido atualizado com sucesso!' : 'Pedido criado com sucesso!', 'success');
+    } finally {
+        salvandoPedido = false;
+        if (_btnSalvar) _btnSalvar.disabled = false;
+    }
 }
 
 function coletarItens() {
@@ -540,7 +542,7 @@ function coletarItens() {
     return itens;
 }
 
-// ============ RENDERIZAÇÍO ============
+// ============ RENDERIZAÇÃO ============
 
 function renderizarTabelaPedidos() {
     const tbody = document.getElementById('pedidosTableBody');
@@ -587,10 +589,10 @@ function renderizarTabelaPedidos() {
         <tr data-id="${pedido.id}">
             <td><input type="checkbox" class="pedido-checkbox" data-id="${pedido.id}" onchange="atualizarSelecao()"></td>
             <td>
-                <strong>${pedido.numero_pedido || '-'}</strong>
+                <strong>${escapeHtml(pedido.numero_pedido) || '-'}</strong>
                 ${pedido.origem === 'PCP' ? '<span style="background: #8b5cf6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 6px; font-weight: 600;">PCP</span>' : ''}
             </td>
-            <td>${pedido.fornecedor_nome || '-'}</td>
+            <td>${escapeHtml(pedido.fornecedor_nome) || '-'}</td>
             <td>${formatarData(pedido.data_pedido)}</td>
             <td><strong>${formatarMoeda(valorExibir)}</strong></td>
             <td>${pedido.data_entrega_prevista ? formatarData(pedido.data_entrega_prevista) : '-'}</td>
@@ -645,9 +647,7 @@ async function visualizarPedido(pedidoId) {
     // Se não tiver itens ou itens vazio, buscar da API
     if (!pedido || !pedido.itens || pedido.itens.length === 0) {
         try {
-            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
-                headers: getAuthHeaders()
-            });
+            const response = await fetch(`/api/compras/pedidos/${pedidoId}`, { credentials: 'include' });
             if (response.ok) {
                 pedido = await response.json();
             }
@@ -669,15 +669,15 @@ async function visualizarPedido(pedidoId) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
             <div>
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 4px;">Número do Pedido</p>
-                <p style="font-weight: 600; font-size: 16px;">${pedido.numero_pedido || '-'}</p>
+                <p style="font-weight: 600; font-size: 16px;">${escapeHtml(pedido.numero_pedido) || '-'}</p>
             </div>
             <div>
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 4px;">Status</p>
-                <span class="badge-status badge-${pedido.status}">${getStatusLabel(pedido.status)}</span>
+                <span class="badge-status badge-${escapeHtml(pedido.status)}">${escapeHtml(getStatusLabel(pedido.status))}</span>
             </div>
             <div>
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 4px;">Fornecedor</p>
-                <p style="font-weight: 600;">${pedido.fornecedor_nome || '-'}</p>
+                <p style="font-weight: 600;">${escapeHtml(pedido.fornecedor_nome) || '-'}</p>
             </div>
             <div>
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 4px;">Data do Pedido</p>
@@ -708,7 +708,7 @@ async function visualizarPedido(pedidoId) {
             <tbody>
                 ${itens.map(item => `
                     <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td style="padding: 12px;">${item.descricao || item.material || '-'}</td>
+                        <td style="padding: 12px;">${escapeHtml(item.descricao || item.material) || '-'}</td>
                         <td style="padding: 12px; text-align: center;">${item.quantidade || 0}</td>
                         <td style="padding: 12px; text-align: center;">${item.unidade || 'UN'}</td>
                         <td style="padding: 12px; text-align: right;">${formatarMoeda(item.preco_unitario || 0)}</td>
@@ -725,8 +725,8 @@ async function visualizarPedido(pedidoId) {
                 <span style="font-weight: 600;">${formatarMoeda(pedido.valor_total || 0)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                <span>Desconto (${pedido.desconto || 0}%):</span>
-                <span style="font-weight: 600;">- ${formatarMoeda((pedido.valor_total || 0) * (pedido.desconto || 0) / 100)}</span>
+                <span>Desconto:</span>
+                <span style="font-weight: 600;">- ${formatarMoeda(pedido.desconto || 0)}</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
                 <span>Frete:</span>
@@ -741,7 +741,7 @@ async function visualizarPedido(pedidoId) {
         ${pedido.observacoes ? `
             <div style="margin-top: 20px;">
                 <p style="color: #64748b; font-size: 13px; margin-bottom: 8px;">Observações</p>
-                <p style="background: #f9fafb; padding: 12px; border-radius: 8px;">${pedido.observacoes}</p>
+                <p style="background: #f9fafb; padding: 12px; border-radius: 8px;">${escapeHtml(pedido.observacoes)}</p>
             </div>
         ` : ''}
     `;
@@ -758,8 +758,7 @@ async function aprovarPedido(pedidoId) {
 
     try {
         const response = await fetch(`/api/compras/pedidos/${pedidoId}/aprovar`, {
-            method: 'POST',
-            headers: getAuthHeaders()
+            method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }
         });
         if (response.ok) {
             mostrarNotificacao('Pedido aprovado com sucesso!', 'success');
@@ -789,7 +788,7 @@ async function excluirPedido(pedidoId) {
     try {
         const response = await fetch(`/api/compras/pedidos/${pedidoId}/cancelar`, {
             method: 'POST',
-            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+            credentials: 'include', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ motivo: 'Cancelado pelo usuário' })
         });
         if (response.ok) {
@@ -853,7 +852,7 @@ function filtrarPedidos() {
     renderizarTabelaPedidos();
 }
 
-// ============ MULTI-SELEÇÍO ============
+// ============ MULTI-SELEÇÃO ============
 
 function toggleSelectAll(checkbox) {
     const checkboxes = document.querySelectorAll('.pedido-checkbox');
@@ -894,7 +893,7 @@ async function excluirSelecionados() {
         try {
             const response = await fetch(`/api/compras/pedidos/${id}/cancelar`, {
                 method: 'POST',
-                headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+                credentials: 'include', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ motivo: 'Exclusão em massa pelo usuário' })
             });
             if (response.ok) {
@@ -922,7 +921,7 @@ async function excluirSelecionados() {
     }
 }
 
-// ============ PAGINAÇÍO ============
+// ============ PAGINAÇÃO ============
 
 let paginaAtual = 1;
 const itensPorPagina = 10;

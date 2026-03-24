@@ -6,19 +6,19 @@
 const funcionariosData = [
     {
         nome: "Andreia Silva",
-        cargo: "Gerente RH", 
+        cargo: "Gerente RH",
         dataAdmissao: "2016-07-15", // 8 anos e 3 meses
         avatar: "Interativo-Aluforce.jpg"
     },
     {
-        nome: "Douglas Santos", 
+        nome: "Douglas Santos",
         cargo: "Desenvolvedor",
         dataAdmissao: "2018-03-10", // 6 anos e 7 meses
         avatar: "Interativo-Aluforce.jpg"
     },
     {
         nome: "Helton Costa",
-        cargo: "Designer", 
+        cargo: "Designer",
         dataAdmissao: "2019-08-22", // 5 anos e 2 meses
         avatar: "Interativo-Aluforce.jpg"
     },
@@ -30,7 +30,7 @@ const funcionariosData = [
     },
     {
         nome: "Joáo Silva",
-        cargo: "Coordenador de Vendas", 
+        cargo: "Coordenador de Vendas",
         dataAdmissao: "2021-05-03", // 3 anos e 5 meses
         avatar: "Interativo-Aluforce.jpg"
     }
@@ -40,15 +40,15 @@ const funcionariosData = [
 function calcularTempoCasa(dataAdmissao) {
     const hoje = new Date();
     const admissao = new Date(dataAdmissao);
-    
+
     let anos = hoje.getFullYear() - admissao.getFullYear();
     let meses = hoje.getMonth() - admissao.getMonth();
-    
+
     if (meses < 0) {
         anos--;
         meses += 12;
     }
-    
+
     // Ajustar se o dia ainda náo passou no mês atual
     if (hoje.getDate() < admissao.getDate()) {
         meses--;
@@ -57,7 +57,7 @@ function calcularTempoCasa(dataAdmissao) {
             meses += 12;
         }
     }
-    
+
     if (anos > 0 && meses > 0) {
         return `${anos} ${anos === 1 ? 'ano' : 'anos'} e ${meses} ${meses === 1 ? 'mês' : 'meses'}`;
     } else if (anos > 0) {
@@ -81,33 +81,33 @@ function ordenarPorTempoCasa(funcionarios) {
 // Funçáo para atualizar o card de colaboradores com mais tempo de casa
 function atualizarColaboradoresTempoCasa() {
     console.log('📊 Atualizando colaboradores com mais tempo de casa...');
-    
+
     const funcionariosOrdenados = ordenarPorTempoCasa([...funcionariosData]);
     const top3 = funcionariosOrdenados.slice(0, 3);
-    
+
     // Atualizar o card detalhado
     const cardBody = document.querySelector('.content-card .card-body');
     if (cardBody && cardBody.querySelector('.collaborator-item')) {
         const items = cardBody.querySelectorAll('.collaborator-item');
-        
+
         items.forEach((item, index) => {
             if (top3[index]) {
                 const funcionario = top3[index];
                 const tempoCasa = calcularTempoCasa(funcionario.dataAdmissao);
-                
+
                 // Atualizar nome
                 const nameElement = item.querySelector('.collaborator-name');
                 if (nameElement) nameElement.textContent = funcionario.nome;
-                
+
                 // Atualizar cargo
                 const roleElement = item.querySelector('.collaborator-role');
                 if (roleElement) roleElement.textContent = funcionario.cargo;
-                
+
                 // Atualizar tempo de casa
                 const timeElement = item.querySelector('.collaborator-time');
                 if (timeElement) {
                     timeElement.textContent = tempoCasa;
-                    
+
                     // Adicionar classe especial para o primeiro colocado
                     if (index === 0) {
                         timeElement.style.background = 'linear-gradient(135deg, #ffd700, #ffed4a)';
@@ -120,25 +120,25 @@ function atualizarColaboradoresTempoCasa() {
                         timeElement.style.color = 'white';
                     }
                 }
-                
+
                 // Atualizar avatar
                 const avatarImg = item.querySelector('.collaborator-avatar img');
                 if (avatarImg) {
                     avatarImg.alt = funcionario.nome;
                     avatarImg.src = funcionario.avatar;
                 }
-                
+
                 console.log(`✅ ${funcionario.nome}: ${tempoCasa}`);
             }
         });
     }
-    
+
     // Atualizar o card simples também
     const simpleCard = document.querySelector('.card-body');
     if (simpleCard && simpleCard.innerHTML.includes('fa-crown')) {
         const paragraphs = simpleCard.querySelectorAll('p');
         const medals = ['<i class="fas fa-crown" style="color: #ffd700"></i>', '<i class="fas fa-award" style="color: #c0c0c0"></i>', '<i class="fas fa-star" style="color: #cd7f32"></i>'];
-        
+
         paragraphs.forEach((p, index) => {
             if (top3[index]) {
                 const funcionario = top3[index];
@@ -147,7 +147,7 @@ function atualizarColaboradoresTempoCasa() {
             }
         });
     }
-    
+
     console.log('🎉 Colaboradores com mais tempo de casa atualizados!');
 }
 
@@ -155,7 +155,7 @@ function atualizarColaboradoresTempoCasa() {
 async function buscarDadosFuncionarios() {
     try {
         console.log('🔄 Tentando buscar dados reais dos funcionários...');
-        
+
         const response = await fetch('/api/funcionarios', {
                     credentials: 'include',
                     headers: token ? { 'Authorization': `Bearer ${token
@@ -163,13 +163,13 @@ async function buscarDadosFuncionarios() {
         });
         if (response.ok) {
             const funcionarios = await response.json();
-            
+
             // Filtrar funcionários com data de admissáo
             const funcionariosComData = funcionarios.filter(f => f.data_admissao || f.dataAdmissao);
-            
+
             if (funcionariosComData.length > 0) {
                 console.log(`✅ Encontrados ${funcionariosComData.length} funcionários com data de admissáo`);
-                
+
                 // Converter para o formato esperado
                 const funcionariosFormatados = funcionariosComData.map(f => ({
                     nome: f.nome_completo || f.nome,
@@ -177,11 +177,11 @@ async function buscarDadosFuncionarios() {
                     dataAdmissao: f.data_admissao || f.dataAdmissao,
                     avatar: f.foto_url || f.avatar || 'Interativo-Aluforce.jpg'
                 }));
-                
+
                 // Substituir dados simulados pelos reais
                 funcionariosData.length = 0;
                 funcionariosData.push(...funcionariosFormatados);
-                
+
                 // Atualizar interface
                 atualizarColaboradoresTempoCasa();
                 return true;
@@ -190,14 +190,14 @@ async function buscarDadosFuncionarios() {
     } catch (error) {
         console.log('ℹ️ Dados do servidor náo disponíveis, usando dados simulados');
     }
-    
+
     return false;
 }
 
 // Funçáo de inicializaçáo
 function inicializarTempoCasa() {
     console.log('🚀 Inicializando sistema de tempo de casa...');
-    
+
     // Tentar buscar dados reais primeiro
     buscarDadosFuncionarios().then(sucessoReal => {
         if (!sucessoReal) {
@@ -216,7 +216,7 @@ if (document.readyState === 'loading') {
 }
 
 // Atualizar a cada 5 minutos (para casos onde a página fica aberta muito tempo)
-setInterval(() => {
+window._tempoCasaInterval = setInterval(() => {
     atualizarColaboradoresTempoCasa();
 }, 300000); // 5 minutos
 

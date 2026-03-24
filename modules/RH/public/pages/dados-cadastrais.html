@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
 
     <style>
-        /* === DADOS CADASTRAIS - CSS ESPECÍFICO === */
+        /* === DADOS CADASTRAIS - CSS ESPECFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #f8fafc; }
@@ -160,7 +160,7 @@
 
         .status-ativo { background: #dcfce7; color: #166534; }
         .status-inativo { background: #fee2e2; color: #991b1b; }
-        .status-ferias, .status-férias { background: #fef3c7; color: #92400e; }
+        .status-férias, .status-frias { background: #fef3c7; color: #92400e; }
         .status-afastado { background: #e0e7ff; color: #3730a3; }
 
         /* Bank Details Box */
@@ -180,7 +180,7 @@
         .bank-item span { font-size: 0.9rem; color: #475569; }
         .bank-item strong { color: #1e293b; }
 
-        /* Modal Solicitação */
+        /* Modal Solicitao */
         .modal {
             display: none;
             position: fixed;
@@ -527,13 +527,14 @@
             }
         }
     </style>
-    <script src="/js/anti-copy-protection.js"></script>    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <script src="/js/anti-copy-protection.js" defer></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
 
 
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
-    <script src="/js/tooltips-professional.js?v=20260209"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
@@ -549,17 +550,17 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn active" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
                 <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="/ajuda/index.html" class="sidebar-btn" title="Ajuda"><i class="fas fa-question-circle"></i></a>
-                <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar à Área Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
+                <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar  rea Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
             </div>
         </aside>
 
@@ -575,16 +576,16 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Dados Cadastrais</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
+                            <img src="" alt="Foto do usurio" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -599,12 +600,12 @@
                             <i class="fas fa-user-circle"></i>
                             Meus Dados Cadastrais
                         </h1>
-                        <p class="page-subtitle">Visualize suas informações pessoais e profissionais</p>
+                        <p class="page-subtitle">Visualize suas informaes pessoais e profissionais</p>
                     </div>
                     <div class="page-header-right">
                         <button type="button" class="btn btn-warning" onclick="abrirModalSolicitacao()">
                             <i class="fas fa-edit"></i>
-                            Solicitar Alterações
+                            Solicitar Alteraes
                         </button>
                         <a href="/rh/funcionario" class="btn btn-outline">
                             <i class="fas fa-arrow-left"></i>
@@ -617,14 +618,14 @@
                 <div class="data-section">
                     <div class="photo-section">
                         <div class="photo-container" id="foto-container">
-                            <img id="funcionario-foto" src="" alt="Foto do Funcionário" style="display: none;">
-                            <div id="funcionario-iniciais" class="avatar-iniciais">
+                            <img id="funcionário-foto" src="" alt="Foto do Funcionário" style="display: none;">
+                            <div id="funcionário-iniciais" class="avatar-iniciais">
                                 <span>?</span>
                             </div>
                         </div>
-                        <div class="employee-name" id="funcionario-nome-completo">Carregando...</div>
-                        <div class="employee-role" id="funcionario-cargo-dept">Cargo - Departamento</div>
-                        <span class="employee-status status-ativo" id="funcionario-status">ATIVO</span>
+                        <div class="employee-name" id="funcionário-nome-completo">Carregando...</div>
+                        <div class="employee-role" id="funcionário-cargo-dept">Cargo - Departamento</div>
+                        <span class="employee-status status-ativo" id="funcionário-status">ATIVO</span>
                     </div>
                 </div>
 
@@ -669,7 +670,7 @@
                                 <div class="data-value" id="dado-naturalidade">-</div>
                             </div>
                                 <div class="data-item">
-                                    <span class="data-label">Nome da Mãe</span>
+                                    <span class="data-label">Nome da Me</span>
                                     <div class="data-value" id="dado-mae">-</div>
                                 </div>
                             <div class="data-item">
@@ -701,7 +702,7 @@
                                 <div class="data-value" id="dado-departamento">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Data de Admissão</span>
+                                <span class="data-label">Data de Admisso</span>
                                 <div class="data-value" id="dado-admissao">-</div>
                             </div>
                             <div class="data-item">
@@ -725,16 +726,16 @@
                                 <div class="data-value" id="dado-pis">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">CTPS Número</span>
-                                <div class="data-value" id="dado-ctps-numero">-</div>
+                                <span class="data-label">CTPS Nmero</span>
+                                <div class="data-value" id="dado-ctps-número">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">CTPS Série</span>
+                                <span class="data-label">CTPS Srie</span>
                                 <div class="data-value" id="dado-ctps-serie">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Título de Eleitor</span>
-                                <div class="data-value" id="dado-titulo-eleitor">-</div>
+                                <span class="data-label">Ttulo de Eleitor</span>
+                                <div class="data-value" id="dado-título-eleitor">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">CNH</span>
@@ -748,11 +749,11 @@
                     </div>
                 </div>
 
-                <!-- Endereço -->
+                <!-- Endereo -->
                 <div class="data-section">
                     <div class="section-header">
                         <i class="fas fa-map-marker-alt"></i>
-                        Endereço
+                        Endereo
                     </div>
                     <div class="section-body">
                         <div class="data-grid">
@@ -761,8 +762,8 @@
                                 <div class="data-value" id="dado-logradouro">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Número</span>
-                                <div class="data-value" id="dado-numero">-</div>
+                                <span class="data-label">Nmero</span>
+                                <div class="data-value" id="dado-número">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">Complemento</span>
@@ -787,41 +788,41 @@
                 <div class="data-section" id="secao-demissao" style="display:none;">
                     <div class="section-header" style="background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%);">
                         <i class="fas fa-user-times"></i>
-                        Dados da Demissão
+                        Dados da Demisso
                     </div>
                     <div class="section-body">
                         <div class="data-grid">
                             <div class="data-item">
-                                <span class="data-label">Data de Demissão</span>
+                                <span class="data-label">Data de Demisso</span>
                                 <div class="data-value" id="dado-data-demissao">-</div>
                             </div>
                             <div class="data-item full-width">
-                                <span class="data-label">Motivo da Demissão</span>
+                                <span class="data-label">Motivo da Demisso</span>
                                 <div class="data-value" id="dado-motivo-demissao">-</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Salário e Benefícios -->
-                <div class="data-section" id="secao-salario">
+                <!-- Salrio e Benefcios -->
+                <div class="data-section" id="secao-salário">
                     <div class="section-header" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);">
                         <i class="fas fa-money-bill-wave"></i>
-                        Salário e Benefícios
+                        Salrio e Benefcios
                     </div>
                     <div class="section-body">
                         <div class="data-grid">
                             <div class="data-item">
-                                <span class="data-label">Salário Base</span>
-                                <div class="data-value" id="dado-salario" style="color:#059669;font-weight:700;">-</div>
+                                <span class="data-label">Salrio Base</span>
+                                <div class="data-value" id="dado-salário" style="color:#059669;font-weight:700;">-</div>
                             </div>
                             <div class="data-item">
                                 <span class="data-label">Data do Reajuste</span>
                                 <div class="data-value" id="dado-data-reajuste">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Último Reajuste</span>
-                                <div class="data-value" id="dado-ultimo-reajuste">-</div>
+                                <span class="data-label">ltimo Reajuste</span>
+                                <div class="data-value" id="dado-último-reajuste">-</div>
                             </div>
                         </div>
                     </div>
@@ -844,7 +845,7 @@
                                 <div class="data-value" id="dado-vt-tipo">-</div>
                             </div>
                             <div class="data-item">
-                                <span class="data-label">Valor Diário</span>
+                                <span class="data-label">Valor Dirio</span>
                                 <div class="data-value" id="dado-vt-valor-diario">-</div>
                             </div>
                             <div class="data-item">
@@ -863,11 +864,11 @@
                     </div>
                 </div>
 
-                <!-- Contato de Emergência -->
+                <!-- Contato de Emergncia -->
                 <div class="data-section" id="secao-emergencia" style="display:none;">
                     <div class="section-header" style="background: linear-gradient(135deg, #78350f 0%, #92400e 100%);">
                         <i class="fas fa-phone-alt"></i>
-                        Contato de Emergência
+                        Contato de Emergncia
                     </div>
                     <div class="section-body">
                         <div class="data-grid">
@@ -890,7 +891,7 @@
                 <div class="data-section" id="secao-pensao" style="display:none;">
                     <div class="section-header" style="background: linear-gradient(135deg, #312e81 0%, #4338ca 100%);">
                         <i class="fas fa-gavel"></i>
-                        Pensão Alimentícia
+                        Penso Alimentcia
                     </div>
                     <div class="section-body">
                         <div id="lista-pensoes-meus-dados" style="display:flex; flex-direction:column; gap:10px;">
@@ -902,12 +903,12 @@
                 <div class="data-section" id="secao-salario-familia">
                     <div class="section-header" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);">
                         <i class="fas fa-child"></i>
-                        Salário-Família
+                        Salrio-Famlia
                     </div>
                     <div class="section-body">
                         <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; gap:12px;">
-                            <span style="font-weight:600; color:#334155;">Recebe Salário-Família?</span>
-                            <span id="sf-recebe-display-meus-dados" style="font-weight:600; font-size:14px; padding:4px 12px; border-radius:6px; background:#fee2e2; color:#991b1b;">Não</span>
+                            <span style="font-weight:600; color:#334155;">Recebe Salrio-Famlia?</span>
+                            <span id="sf-recebe-display-meus-dados" style="font-weight:600; font-size:14px; padding:4px 12px; border-radius:6px; background:#fee2e2; color:#991b1b;">No</span>
                         </div>
 
                         <div id="sf-dependentes-section-meus-dados" style="display:none;">
@@ -925,7 +926,7 @@
                         </div>
 
                         <div id="sf-observacoes-view-meus-dados" style="margin-top:12px; display:none;">
-                            <label style="font-size:12px; font-weight:600; color:#475569;">Observações</label>
+                            <label style="font-size:12px; font-weight:600; color:#475569;">Observaes</label>
                             <div id="sf-observacoes-display-meus-dados" style="margin-top:4px; color:#64748b; font-size:13px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px;">-</div>
                         </div>
                     </div>
@@ -941,15 +942,15 @@
                         <div class="bank-box">
                             <div class="bank-item">
                                 <i class="fas fa-building"></i>
-                                <span>Banco: <strong id="dado-banco">Não informado</strong></span>
+                                <span>Banco: <strong id="dado-banco">No informado</strong></span>
                             </div>
                             <div class="bank-item">
                                 <i class="fas fa-key" style="color:#32BCAD;"></i>
-                                <span>Tipo Chave PIX: <strong id="dado-tipo-pix">Não informado</strong></span>
+                                <span>Tipo Chave PIX: <strong id="dado-tipo-pix">No informado</strong></span>
                             </div>
                             <div class="bank-item">
                                 <i class="fas fa-qrcode" style="color:#32BCAD;"></i>
-                                <span>Chave PIX: <strong id="dado-chave-pix">Não informado</strong></span>
+                                <span>Chave PIX: <strong id="dado-chave-pix">No informado</strong></span>
                             </div>
                         </div>
                     </div>
@@ -958,22 +959,22 @@
         </main>
     </div>
 
-    <!-- Modal Solicitar Alterações -->
+    <!-- Modal Solicitar Alteraes -->
     <div id="modalSolicitacao" class="modal">
         <div class="modal-overlay" onclick="fecharModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> Solicitar Alteração de Dados</h3>
+                <h3><i class="fas fa-edit"></i> Solicitar Alterao de Dados</h3>
                 <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
                 <div class="request-intro">
                     <div class="request-intro-icon"><i class="fas fa-clipboard-check"></i></div>
                     <div>
-                        <h4>Solicitação de atualização cadastral</h4>
-                        <p>Descreva com objetividade o que precisa ser alterado. Se houver comprovante, anexe no formulário para acelerar a análise do RH.</p>
+                        <h4>Solicitao de atualizao cadastral</h4>
+                        <p>Descreva com objetividade o que precisa ser alterado. Se houver comprovante, anexe no formulrio para acelerar a anlise do RH.</p>
                         <div class="request-hints">
-                            <span class="request-hint"><i class="fas fa-bolt"></i> Análise mais rápida</span>
+                            <span class="request-hint"><i class="fas fa-bolt"></i> Anlise mais rpida</span>
                             <span class="request-hint"><i class="fas fa-shield-alt"></i> Dados tratados com sigilo</span>
                             <span class="request-hint"><i class="fas fa-paperclip"></i> Envie comprovantes quando houver</span>
                         </div>
@@ -982,39 +983,39 @@
                 <form id="formSolicitacao" class="request-form-shell">
                     <div class="request-grid">
                     <div class="form-group">
-                        <label for="tipoAlteracao">Tipo de Alteração <span style="color: #ef4444;">*</span></label>
+                        <label for="tipoAlteracao">Tipo de Alterao <span style="color: #ef4444;">*</span></label>
                         <span class="field-note">Escolha a categoria que mais se aproxima do ajuste solicitado.</span>
                         <select id="tipoAlteracao" class="form-input" required>
                             <option value="">Selecione o tipo...</option>
                             <option value="Dados Pessoais">Dados Pessoais (nome, CPF, RG, etc.)</option>
                             <option value="Contato">Contato (telefone, e-mail)</option>
-                            <option value="Endereço">Endereço</option>
+                            <option value="Endereo">Endereo</option>
                             <option value="Estado Civil">Estado Civil / Dependentes</option>
                             <option value="Dados Profissionais">Dados Profissionais</option>
-                            <option value="Dados Bancários">Dados Bancários</option>
+                            <option value="Dados Bancrios">Dados Bancrios</option>
                             <option value="Documentos">Documentos (PIS, CTPS, CNH, etc.)</option>
-                            <option value="Salário e Benefícios">Salário e Benefícios</option>
+                            <option value="Salrio e Benefcios">Salrio e Benefcios</option>
                             <option value="Vale-Transporte">Vale-Transporte</option>
-                            <option value="Pensão Alimentícia">Pensão Alimentícia</option>
-                            <option value="Salário-Família">Salário-Família</option>
-                            <option value="Contato de Emergência">Contato de Emergência</option>
+                            <option value="Penso Alimentcia">Penso Alimentcia</option>
+                            <option value="Salrio-Famlia">Salrio-Famlia</option>
+                            <option value="Contato de Emergncia">Contato de Emergncia</option>
                             <option value="Outros">Outros</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="descricaoAlteracao">Descrição da Alteração <span style="color: #ef4444;">*</span></label>
-                        <span class="field-note">Informe o dado atual, o dado correto e, se possível, o motivo da alteração.</span>
-                        <textarea id="descricaoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereço para Rua X, número Y, bairro Z. Motivo: mudança de residência." required></textarea>
+                        <label for="descriçãoAlteracao">Descrio da Alterao <span style="color: #ef4444;">*</span></label>
+                        <span class="field-note">Informe o dado atual, o dado correto e, se possvel, o motivo da alterao.</span>
+                        <textarea id="descriçãoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereo para Rua X, nmero Y, bairro Z. Motivo: mudana de residncia." required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="anexoAlteracao">Anexo Comprobatório</label>
-                        <span class="field-note">Opcional, mas recomendado para documentos, endereço, dados bancários e dependentes.</span>
+                        <label for="anexoAlteracao">Anexo Comprobatrio</label>
+                        <span class="field-note">Opcional, mas recomendado para documentos, endereo, dados bancrios e dependentes.</span>
                         <div class="file-upload-wrapper">
                             <div id="fileUploadArea" class="file-upload-area" onclick="document.getElementById('anexoAlteracao').click()">
                                 <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                 <div class="file-upload-text">
                                     <div class="main-text">Clique para selecionar um arquivo</div>
-                                    <div class="sub-text">PDF, JPG ou PNG • Máx. 5MB</div>
+                                    <div class="sub-text">PDF, JPG ou PNG  Mx. 5MB</div>
                                 </div>
                             </div>
                             <input type="file" id="anexoAlteracao" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFileSelect(this)">
@@ -1027,7 +1028,7 @@
                 <button type="button" class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
                 <button type="button" class="btn btn-primary" onclick="enviarSolicitacao()">
                     <i class="fas fa-paper-plane"></i>
-                    Enviar Solicitação
+                    Enviar Solicitao
                 </button>
             </div>
         </div>
@@ -1040,7 +1041,7 @@
     </div>
 
     <script>
-        let funcionarioData = null;
+        let funcionárioData = null;
 
         const avatarNameMap = {
             'clemerson': '/avatars/Clemerson.webp',
@@ -1054,7 +1055,7 @@
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
-            'antônio': '/avatars/Antonio.webp',
+            'antnio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
             'guilherme': '/avatars/Guilherme.webp',
             'marcelo': '/avatars/Marcelo.webp',
@@ -1118,14 +1119,14 @@
         }
 
         function formatarTipoChavePix(tipo) {
-            const tipos = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave Aleatória' };
+            const tipos = { cpf: 'CPF', cnpj: 'CNPJ', email: 'E-mail', telefone: 'Telefone', aleatoria: 'Chave Aleatria' };
             return tipos[tipo] || tipo || '-';
         }
 
         function formatarTipoTransporte(tipo) {
             const tipos = {
-                'onibus': 'Ônibus Urbano', 'metro': 'Metrô', 'trem': 'Trem',
-                'integracao': 'Integração (Ônibus + Metrô/Trem)', 'brt': 'BRT',
+                'onibus': 'nibus Urbano', 'metro': 'Metr', 'trem': 'Trem',
+                'integração': 'Integrao (nibus + Metr/Trem)', 'brt': 'BRT',
                 'vlt': 'VLT', 'intermunicipal': 'Intermunicipal', 'misto': 'Misto (Outros)'
             };
             return tipos[tipo] || tipo || '-';
@@ -1175,11 +1176,11 @@
         async function carregarPensaoMeusDados(funcionarioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/pensao`, { credentials: 'include' });
-                if (!response.ok) throw new Error('Erro ao carregar pensão');
+                if (!response.ok) throw new Error('Erro ao carregar penso');
                 const pensoes = await response.json();
                 renderizarPensoesMeusDados(pensoes);
             } catch (error) {
-                console.error('Erro ao carregar pensão alimentícia:', error);
+                console.error('Erro ao carregar penso alimentcia:', error);
                 const secao = document.getElementById('secao-pensao');
                 const container = document.getElementById('lista-pensoes-meus-dados');
                 if (secao) secao.style.display = 'none';
@@ -1211,7 +1212,7 @@
         async function carregarSalarioFamiliaMeusDados(funcionarioId) {
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/salario-familia`, { credentials: 'include' });
-                if (!response.ok) throw new Error('Erro ao carregar salário-família');
+                if (!response.ok) throw new Error('Erro ao carregar salrio-famlia');
                 const data = await response.json();
                 const recebe = data.recebe === 1 || data.recebe === true;
                 const displayEl = document.getElementById('sf-recebe-display-meus-dados');
@@ -1220,7 +1221,7 @@
                 const obsDisplay = document.getElementById('sf-observacoes-display-meus-dados');
 
                 if (displayEl) {
-                    displayEl.textContent = recebe ? 'Sim' : 'Não';
+                    displayEl.textContent = recebe ? 'Sim' : 'No';
                     displayEl.style.background = recebe ? '#dcfce7' : '#fee2e2';
                     displayEl.style.color = recebe ? '#166534' : '#991b1b';
                 }
@@ -1230,7 +1231,7 @@
 
                 renderizarDependentesMeusDados(data.dependentes || []);
             } catch (error) {
-                console.error('Erro ao carregar salário-família:', error);
+                console.error('Erro ao carregar salrio-famlia:', error);
             }
         }
 
@@ -1243,13 +1244,13 @@
                 }
                 const user = await meResponse.json();
 
-                // Usar apelido se disponível, senão primeiro nome
-                const userName = user.apelido || user.nome_completo || user.nome || 'Usuário';
-                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                // Usar apelido se disponvel, seno primeiro nome
+                const userName = user.apelido || user.nome_completo || user.nome || 'Usurio';
+                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
                 const userNameEl = document.getElementById('user-name');
                 if (userNameEl) userNameEl.textContent = primeiroNome;
 
-                // Atualizar saudação dinâmica baseada na hora
+                // Atualizar saudao dinmica baseada na hora
                 const greetingTextEl = document.getElementById('greeting-text');
                 if (greetingTextEl) {
                     const hour = new Date().getHours();
@@ -1291,7 +1292,7 @@
                 if (btnAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
                     btnAdmin.style.display = 'flex';
                 }
-                // Mostrar botão voltar à área admin na sidebar
+                // Mostrar boto voltar  rea admin na sidebar
                 const btnVoltarAdmin = document.getElementById('btn-voltar-admin');
                 if (btnVoltarAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
                     btnVoltarAdmin.style.display = 'flex';
@@ -1300,34 +1301,34 @@
                 const funcResponse = await fetch('/api/rh/funcionarios', { credentials: 'include' });
                 if (funcResponse.ok) {
                     const data = await funcResponse.json();
-                    // A API retorna { funcionarios: [], stats, departamentos, cargos }
-                    const funcionarios = Array.isArray(data) ? data : (data.funcionarios || []);
-                    funcionarioData = funcionarios.find(f =>
+                    // A API retorna { funcionários: [], stats, departamentos, cargos }
+                    const funcionários = Array.isArray(data) ? data : (data.funcionarios || []);
+                    funcionárioData = funcionários.find(f =>
                         f.email && f.email.toLowerCase() === user.email.toLowerCase()
                     );
 
-                    if (funcionarioData) {
-                        let funcionarioDetalhado = funcionarioData;
-                        if (funcionarioData.id) {
+                    if (funcionárioData) {
+                        let funcionárioDetalhado = funcionárioData;
+                        if (funcionárioData.id) {
                             try {
-                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionarioData.id}`, {
+                                const detalheResponse = await fetch(`/api/rh/funcionarios/${funcionárioData.id}`, {
                                     credentials: 'include'
                                 });
                                 if (detalheResponse.ok) {
-                                    funcionarioDetalhado = await detalheResponse.json();
+                                    funcionárioDetalhado = await detalheResponse.json();
                                 }
                             } catch (detailError) {
-                                console.warn('Não foi possível carregar os detalhes completos do funcionário:', detailError);
+                                console.warn('No foi possvel carregar os detalhes completos do funcionário:', detailError);
                             }
                         }
 
-                        funcionarioData = funcionarioDetalhado;
-                        preencherDados(funcionarioDetalhado);
-                        carregarPensaoMeusDados(funcionarioDetalhado.id);
-                        carregarSalarioFamiliaMeusDados(funcionarioDetalhado.id);
+                        funcionárioData = funcionárioDetalhado;
+                        preencherDados(funcionárioDetalhado);
+                        carregarPensaoMeusDados(funcionárioDetalhado.id);
+                        carregarSalarioFamiliaMeusDados(funcionárioDetalhado.id);
 
-                        // Atualizar também a foto do header com dados do funcionário
-                        const fotoFuncionario = funcionarioDetalhado.foto_perfil_url || funcionarioDetalhado.foto_thumb_url || funcionarioDetalhado.foto;
+                        // Atualizar tambm a foto do header com dados do funcionário
+                        const fotoFuncionário = funcionárioDetalhado.foto_perfil_url || funcionárioDetalhado.foto_thumb_url || funcionárioDetalhado.foto;
                         if (fotoFuncionario && userPhotoEl) {
                             userPhotoEl.src = fotoFuncionario;
                             userPhotoEl.classList.add('visible');
@@ -1355,23 +1356,23 @@
         }
 
         function preencherDadosBasicos(user) {
-            const nomeEl = document.getElementById('funcionario-nome-completo');
-            if (nomeEl) nomeEl.textContent = user.nome || user.apelido || 'Usuário';
+            const nomeEl = document.getElementById('funcionário-nome-completo');
+            if (nomeEl) nomeEl.textContent = user.nome || user.apelido || 'Usurio';
 
             setValor('dado-nome', user.nome || user.apelido);
             setValor('dado-email', user.email);
 
-            document.getElementById('funcionario-cargo-dept').textContent = 'Dados completos não encontrados';
-            document.getElementById('funcionario-status').textContent = 'N/A';
+            document.getElementById('funcionário-cargo-dept').textContent = 'Dados completos no encontrados';
+            document.getElementById('funcionário-status').textContent = 'N/A';
         }
 
         function preencherDados(f) {
-            funcionarioData = f;
+            funcionárioData = f;
 
-            const fotoEl = document.getElementById('funcionario-foto');
-            const iniciaisEl = document.getElementById('funcionario-iniciais');
+            const fotoEl = document.getElementById('funcionário-foto');
+            const iniciaisEl = document.getElementById('funcionário-iniciais');
 
-            // Tentar obter foto do funcionário (mesma lógica usada no card de funcionários)
+            // Tentar obter foto do funcionário (mesma lgica usada no card de funcionários)
             let fotoUrl = f.foto_perfil_url || f.foto_thumb_url || null;
 
             if (!fotoUrl && f.foto) {
@@ -1403,11 +1404,11 @@
                 if (fotoEl) fotoEl.style.display = 'none';
             }
 
-            document.getElementById('funcionario-nome-completo').textContent = f.nome_completo || '-';
-            document.getElementById('funcionario-cargo-dept').textContent =
-                `${f.cargo || 'Cargo não definido'} - ${f.departamento || 'Departamento não definido'}`;
+            document.getElementById('funcionário-nome-completo').textContent = f.nome_completo || '-';
+            document.getElementById('funcionário-cargo-dept').textContent =
+                `${f.cargo || 'Cargo no definido'} - ${f.departamento || 'Departamento no definido'}`;
 
-            const statusEl = document.getElementById('funcionario-status');
+            const statusEl = document.getElementById('funcionário-status');
             const status = f.status || 'Ativo';
             statusEl.textContent = status.toUpperCase();
             statusEl.className = 'employee-status status-' + status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1429,26 +1430,26 @@
 
             setValor('dado-cargo', f.cargo);
             setValor('dado-departamento', f.departamento);
-            setValor('dado-admissao', formatarData(f.data_admissao));
+            setValor('dado-admissão', formatarData(f.data_admissao));
             setValor('dado-status', f.status);
 
             const secaoDemissao = document.getElementById('secao-demissao');
             if (f.status === 'Demitido' && secaoDemissao) {
                 secaoDemissao.style.display = 'block';
-                setValor('dado-data-demissao', formatarData(f.data_demissao));
-                setValor('dado-motivo-demissao', f.motivo_demissao);
+                setValor('dado-data-demissão', formatarData(f.data_demissao));
+                setValor('dado-motivo-demissão', f.motivo_demissao);
             } else if (secaoDemissao) {
                 secaoDemissao.style.display = 'none';
             }
 
             setValor('dado-pis', f.pis_pasep);
-            setValor('dado-ctps-numero', f.ctps_numero);
+            setValor('dado-ctps-número', f.ctps_número);
             setValor('dado-ctps-serie', f.ctps_serie);
-            setValor('dado-titulo-eleitor', f.titulo_eleitor);
+            setValor('dado-título-eleitor', f.título_eleitor);
             setValor('dado-cnh', f.cnh);
             setValor('dado-reservista', f.certificado_reservista);
 
-            // Endereço — campos separados
+            // Endereo  campos separados
             const _tc = (s) => s ? s.replace(/\S+/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()) : '';
             if (f.endereco) {
                 const enderecoBruto = f.endereco || '';
@@ -1461,10 +1462,10 @@
                 const cep = f.cep || cepFromEnd || '';
                 const endMatch = endSemCep.match(/^(.+?),\s*(\d+)\s*(?:,\s*(.+))?$/);
                 let logradouro = endSemCep;
-                let numero = '';
+                let número = '';
                 let complemento = '';
                 if (endMatch) {
-                    numero = endMatch[2].trim();
+                    número = endMatch[2].trim();
                     complemento = (endMatch[3] || '').trim();
                 }
                 if (bairro && logradouro.toUpperCase().includes(bairro.toUpperCase())) {
@@ -1474,28 +1475,28 @@
                     logradouro = logradouro.replace(new RegExp(cidade.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '').replace(/,\s*$/, '').trim();
                 }
                 setValor('dado-logradouro', _tc(logradouro) || '-');
-                setValor('dado-numero', numero || '-');
+                setValor('dado-número', número || '-');
                 setValor('dado-complemento', _tc(complemento) || '-');
                 setValor('dado-bairro', _tc(bairro) || '-');
                 setValor('dado-cidade-uf', (cidade || estado) ? (_tc(cidade) + (estado ? ' - ' + estado.toUpperCase() : '')) : '-');
                 setValor('dado-cep', cep ? cep.replace(/^(\d{5})-?(\d{3})$/, '$1-$2') : '-');
             } else {
                 setValor('dado-logradouro', '-');
-                setValor('dado-numero', '-');
+                setValor('dado-número', '-');
                 setValor('dado-complemento', '-');
                 setValor('dado-bairro', '-');
                 setValor('dado-cidade-uf', '-');
                 setValor('dado-cep', '-');
             }
 
-            document.getElementById('dado-banco').textContent = f.banco || 'Não informado';
+            document.getElementById('dado-banco').textContent = f.banco || 'No informado';
             document.getElementById('dado-tipo-pix').textContent = formatarTipoChavePix(f.tipo_chave_pix);
-            document.getElementById('dado-chave-pix').textContent = f.chave_pix || 'Não informado';
+            document.getElementById('dado-chave-pix').textContent = f.chave_pix || 'No informado';
 
-            // Salário e Benefícios
-            setValor('dado-salario', f.salario ? formatarMoedaDisplay(f.salario) : '-');
+            // Salrio e Benefcios
+            setValor('dado-salário', f.salario ? formatarMoedaDisplay(f.salario) : '-');
             setValor('dado-data-reajuste', formatarData(f.data_reajuste));
-            setValor('dado-ultimo-reajuste', f.ultimo_reajuste ? f.ultimo_reajuste + '%' : '-');
+            setValor('dado-último-reajuste', f.ultimo_reajuste ? f.ultimo_reajuste + '%' : '-');
 
             // Vale-Transporte
             const secaoVT = document.getElementById('secao-vt');
@@ -1513,7 +1514,7 @@
                 secaoVT.style.display = 'none';
             }
 
-            // Contato de Emergência
+            // Contato de Emergncia
             const secaoEmerg = document.getElementById('secao-emergencia');
             if ((f.contato_emergencia_nome || f.contato_emergencia_telefone) && secaoEmerg) {
                 secaoEmerg.style.display = 'block';
@@ -1554,7 +1555,7 @@
                 <div class="file-upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <div class="file-upload-text">
                     <div class="main-text">Clique para selecionar um arquivo</div>
-                    <div class="sub-text">PDF, JPG ou PNG • Máx. 5MB</div>
+                    <div class="sub-text">PDF, JPG ou PNG  Mx. 5MB</div>
                 </div>
             `;
         }
@@ -1571,20 +1572,20 @@
 
         async function enviarSolicitacao() {
             const tipo = document.getElementById('tipoAlteracao').value;
-            const descricao = document.getElementById('descricaoAlteracao').value;
+            const descrição = document.getElementById('descriçãoAlteracao').value;
             const anexo = document.getElementById('anexoAlteracao').files[0];
 
-            if (!tipo || !descricao) {
-                showToast('Preencha todos os campos obrigatórios', 'error');
+            if (!tipo || !descrição) {
+                showToast('Preencha todos os campos obrigatrios', 'error');
                 return;
             }
 
             try {
                 const formData = new FormData();
-                formData.append('tipo', 'Alteração de Dados Cadastrais');
+                formData.append('tipo', 'Alterao de Dados Cadastrais');
                 formData.append('categoria', tipo);
-                formData.append('descricao', descricao);
-                formData.append('funcionario_id', funcionarioData?.id || null);
+                formData.append('descrição', descrição);
+                formData.append('funcionário_id', funcionárioData?.id || null);
                 if (anexo) {
                     formData.append('anexo', anexo);
                 }
@@ -1595,11 +1596,11 @@
                     body: formData
                 });
 
-                showToast('Solicitação enviada com sucesso! O RH irá analisar seu pedido.', 'success');
+                showToast('Solicitao enviada com sucesso! O RH ir analisar seu pedido.', 'success');
                 fecharModal();
             } catch (error) {
-                console.error('Erro ao enviar solicitação:', error);
-                showToast('Solicitação enviada com sucesso! O RH irá analisar seu pedido.', 'success');
+                console.error('Erro ao enviar solicitao:', error);
+                showToast('Solicitao enviada com sucesso! O RH ir analisar seu pedido.', 'success');
                 fecharModal();
             }
         }
@@ -1628,19 +1629,20 @@
         });
     </script>
 
-    <!-- Sistema de Monitoramento de Conexão -->
-    <script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
-    <script src="/js/popup-confirmacao.js"></script>
+    <!-- Sistema de Monitoramento de Conexo -->
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
-    <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
         <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

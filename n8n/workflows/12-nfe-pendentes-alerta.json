@@ -1,0 +1,79 @@
+[
+  {
+    "name": "12-nfe-pendentes-alerta",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 8,14 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 8h e 14h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/nfe/pendentes?dias=3",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "📄 Buscar NF-e Pendentes",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem pendentes?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_NFE || 'qanfe@aluforce.ind.br'}}",
+          "subject": "⚠️ {{$json.total}} NF-e Pendentes — Ação Necessária",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#e65100;'>📄 NF-e Pendentes de Ação</h2><p><strong>{{$json.total}}</strong> nota(s) fiscal(is) precisam de atenção.</p><p>Acesse o módulo NFe no Zyntra para verificar e tomar ação.</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Alerta NFe",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [910, 250],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "12", "workflow_name": "NF-e Pendentes Alerta", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1130, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 8h e 14h Seg-Sex": { "main": [[{ "node": "📄 Buscar NF-e Pendentes", "type": "main", "index": 0 }]] },
+      "📄 Buscar NF-e Pendentes": { "main": [[{ "node": "Tem pendentes?", "type": "main", "index": 0 }]] },
+      "Tem pendentes?": { "main": [[{ "node": "📧 Alerta NFe", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "📧 Alerta NFe": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

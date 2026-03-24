@@ -1,0 +1,117 @@
+[
+  {
+    "name": "18-escalonamento-aprovacoes",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 10,15 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 10h e 15h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/compras/aprovacoes-escalar?horas=48",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "⏰ Buscar Aprovações Atrasadas",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem pendentes?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_GERENCIA || 'adm@aluforce.ind.br'}}",
+          "subject": "🚨 {{$json.total}} Aprovação(ões) pendente(s) há +48h — ESCALONAMENTO",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#c62828;'>🚨 Escalonamento de Aprovações</h2><p><strong>{{$json.total}}</strong> aprovação(ões) de compras pendente(s) há mais de <strong>48 horas</strong>.</p><p style='background:#fff3e0;padding:12px;border-radius:8px;border-left:3px solid #ff9800;'>Essas aprovações foram escalonadas para a gerência pois excedem o prazo normal de resposta.</p><p>Acesse o módulo Compras no Zyntra para aprovar/rejeitar.</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Escalonar para Gerência",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [910, 200],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/whatsapp/alerta",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": {
+            "tipo": "geral",
+            "telefones": "={{($env.TELEFONES_GERENCIA || '').split(',')}}",
+            "dados": {
+              "titulo": "🚨 Aprovações Escalonadas",
+              "mensagem": "⚠️ *{{$json.total}}* aprovação(ões) pendente(s) há +48h.\n\nEscalonamento automático para gerência.\n\nVerifique no Zyntra → Compras → Aprovações"
+            }
+          },
+          "options": {}
+        },
+        "name": "📱 WhatsApp Gerência",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [910, 400],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/acoes/marcar-lembrete-enviado",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "ids": "={{$json.data.map(a => a.id)}}" },
+          "options": {}
+        },
+        "name": "✏️ Marcar Lembrete Enviado",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1130, 200],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "18", "workflow_name": "Escalonamento Aprovações", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1350, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 10h e 15h Seg-Sex": { "main": [[{ "node": "⏰ Buscar Aprovações Atrasadas", "type": "main", "index": 0 }]] },
+      "⏰ Buscar Aprovações Atrasadas": { "main": [[{ "node": "Tem pendentes?", "type": "main", "index": 0 }]] },
+      "Tem pendentes?": { "main": [[{ "node": "📧 Escalonar para Gerência", "type": "main", "index": 0 }, { "node": "📱 WhatsApp Gerência", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "📧 Escalonar para Gerência": { "main": [[{ "node": "✏️ Marcar Lembrete Enviado", "type": "main", "index": 0 }]] },
+      "✏️ Marcar Lembrete Enviado": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

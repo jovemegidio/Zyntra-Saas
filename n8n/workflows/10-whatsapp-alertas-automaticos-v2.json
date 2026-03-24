@@ -1,0 +1,255 @@
+{
+  "id": "wf10WhatsAppAlertasV2",
+  "name": "10-whatsapp-alertas-automaticos-v2",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "⏰ Manhã 8h (Seg-Sex)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [200, 300],
+      "typeVersion": 1.1,
+      "id": "cron-manha-10"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 14 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "⏰ Tarde 14h (Seg-Sex)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [200, 700],
+      "typeVersion": 1.1,
+      "id": "cron-tarde-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/aniversariantes",
+        "options": { "timeout": 30000 }
+      },
+      "name": "🎂 Aniversariantes (WhatsApp+Email)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 100],
+      "typeVersion": 4.1,
+      "id": "http-aniversario-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/contas-pagar",
+        "options": { "timeout": 30000 }
+      },
+      "name": "💳 Contas a Pagar",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 250],
+      "typeVersion": 4.1,
+      "id": "http-pagar-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/contas-receber",
+        "options": { "timeout": 30000 }
+      },
+      "name": "💰 Contas a Receber",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 400],
+      "typeVersion": 4.1,
+      "id": "http-receber-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/estoque",
+        "options": { "timeout": 30000 }
+      },
+      "name": "📦 Estoque Crítico",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 550],
+      "typeVersion": 4.1,
+      "id": "http-estoque-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/pedidos-atrasados",
+        "options": { "timeout": 30000 }
+      },
+      "name": "🚚 Pedidos Atrasados",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 700],
+      "typeVersion": 4.1,
+      "id": "http-atrasados-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/nfe-pendentes",
+        "options": { "timeout": 30000 }
+      },
+      "name": "📄 NFe Pendentes",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 850],
+      "typeVersion": 4.1,
+      "id": "http-nfe-10"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Coletar resultados de todos os módulos\nconst items = $input.all();\nconst results = [];\nlet totalAlertas = 0;\n\nfor (const item of items) {\n  const data = item.json;\n  const modulo = data?.message || data?.error || 'desconhecido';\n  const total = data?.total || 0;\n  const success = data?.success || false;\n  \n  results.push({\n    modulo: modulo,\n    total: total,\n    success: success\n  });\n  \n  if (success && total > 0) totalAlertas += total;\n}\n\nreturn [{\n  json: {\n    total_alertas: totalAlertas,\n    resultados: results,\n    horario: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),\n    tipo: 'manha'\n  }\n}];"
+      },
+      "name": "⚙️ Consolidar Resultados Manhã",
+      "type": "n8n-nodes-base.code",
+      "position": [740, 400],
+      "typeVersion": 2,
+      "id": "code-consolidar-manha-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/contas-pagar",
+        "options": { "timeout": 30000 }
+      },
+      "name": "💳 Contas a Pagar (tarde)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 600],
+      "typeVersion": 4.1,
+      "id": "http-pagar-tarde-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/contas-receber",
+        "options": { "timeout": 30000 }
+      },
+      "name": "💰 Contas a Receber (tarde)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 750],
+      "typeVersion": 4.1,
+      "id": "http-receber-tarde-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/whatsapp-alertas/resumo-diario",
+        "options": { "timeout": 30000 }
+      },
+      "name": "📊 Resumo Diário (tarde)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [480, 900],
+      "typeVersion": 4.1,
+      "id": "http-resumo-10"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Coletar resultados da rodada da tarde\nconst items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  results.push({\n    modulo: data?.message || 'desconhecido',\n    total: data?.total || 0,\n    success: data?.success || false\n  });\n}\n\nreturn [{\n  json: {\n    resultados: results,\n    horario: new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' }),\n    tipo: 'tarde'\n  }\n}];"
+      },
+      "name": "⚙️ Consolidar Resultados Tarde",
+      "type": "n8n-nodes-base.code",
+      "position": [740, 800],
+      "typeVersion": 2,
+      "id": "code-consolidar-tarde-10"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "body": {
+          "workflow_id": "10",
+          "workflow_name": "WhatsApp Alertas Automáticos V2",
+          "status": "success"
+        },
+        "options": {}
+      },
+      "name": "✅ Notificar Conclusão",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [980, 550],
+      "typeVersion": 4.1,
+      "id": "notify-done-10"
+    }
+  ],
+  "connections": {
+    "⏰ Manhã 8h (Seg-Sex)": {
+      "main": [
+        [
+          { "node": "🎂 Aniversariantes (WhatsApp+Email)", "type": "main", "index": 0 },
+          { "node": "💳 Contas a Pagar", "type": "main", "index": 0 },
+          { "node": "💰 Contas a Receber", "type": "main", "index": 0 },
+          { "node": "📦 Estoque Crítico", "type": "main", "index": 0 },
+          { "node": "🚚 Pedidos Atrasados", "type": "main", "index": 0 },
+          { "node": "📄 NFe Pendentes", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "🎂 Aniversariantes (WhatsApp+Email)": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "💳 Contas a Pagar": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "💰 Contas a Receber": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "📦 Estoque Crítico": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "🚚 Pedidos Atrasados": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "📄 NFe Pendentes": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Manhã", "type": "main", "index": 0 } ]]
+    },
+    "⚙️ Consolidar Resultados Manhã": {
+      "main": [[ { "node": "✅ Notificar Conclusão", "type": "main", "index": 0 } ]]
+    },
+    "⏰ Tarde 14h (Seg-Sex)": {
+      "main": [
+        [
+          { "node": "💳 Contas a Pagar (tarde)", "type": "main", "index": 0 },
+          { "node": "💰 Contas a Receber (tarde)", "type": "main", "index": 0 },
+          { "node": "📊 Resumo Diário (tarde)", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "💳 Contas a Pagar (tarde)": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Tarde", "type": "main", "index": 0 } ]]
+    },
+    "💰 Contas a Receber (tarde)": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Tarde", "type": "main", "index": 0 } ]]
+    },
+    "📊 Resumo Diário (tarde)": {
+      "main": [[ { "node": "⚙️ Consolidar Resultados Tarde", "type": "main", "index": 0 } ]]
+    },
+    "⚙️ Consolidar Resultados Tarde": {
+      "main": [[ { "node": "✅ Notificar Conclusão", "type": "main", "index": 0 } ]]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo",
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "whatsapp" },
+    { "name": "alertas" },
+    { "name": "automatico" }
+  ]
+}

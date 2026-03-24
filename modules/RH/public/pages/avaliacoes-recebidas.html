@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aluforce: Avaliacoes Recebidas</title>
+  <title>Aluforce: Avaliações Recebidas</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,17 +38,17 @@
       <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
       <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
       <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-      <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-      <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
+      <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+      <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
       <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
       <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-      <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+      <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
       <a href="avaliacoes-recebidas.html" class="sidebar-btn active" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
       <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
     </nav>
     <div class="sidebar-bottom">
       <a href="/ajuda/index.html" class="sidebar-btn" title="Ajuda"><i class="fas fa-question-circle"></i></a>
-      <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar à Área Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
+      <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar  rea Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
     </div>
   </aside>
 
@@ -59,27 +59,27 @@
               <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
               <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
               <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-              <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+              <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
               <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Avaliações Recebidas</span>
           </div>
       </div>
-      <div class="header-right"><button class="header-btn" title="Atualizar" onclick="carregarAvaliacoes()"><i class="fas fa-sync-alt"></i></button><div class="user-greeting"><span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span><div class="user-avatar"><img id="user-photo" alt="avatar"><span id="user-initials">U</span></div></div></div>
+      <div class="header-right"><button class="header-btn" title="Atualizar" onclick="carregarAvaliacoes()"><i class="fas fa-sync-alt"></i></button><div class="user-greeting"><span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span><div class="user-avatar"><img id="user-photo" alt="avatar"><span id="user-initials">U</span></div></div></div>
     </header>
     <section class="content">
-      <div><h1 class="page-title">Avaliacoes Recebidas</h1><p class="page-subtitle">Canal exclusivo para colaborador visualizar feedbacks e notas recebidas.</p></div>
-      <article class="saas-card"><div class="saas-card-header"><h2 class="saas-card-title">Historico</h2></div><div class="saas-card-body table-wrap"><table><thead><tr><th>Periodo</th><th>Avaliador</th><th>Tipo</th><th>Status</th><th>Data</th><th>Acoes</th></tr></thead><tbody id="tbody-avaliacoes"><tr><td colspan="6">Carregando...</td></tr></tbody></table></div></article>
+      <div><h1 class="page-title">Avaliações Recebidas</h1><p class="page-subtitle">Canal exclusivo para colaborador visualizar feedbacks e notas recebidas.</p></div>
+      <article class="saas-card"><div class="saas-card-header"><h2 class="saas-card-title">Histórico</h2></div><div class="saas-card-body table-wrap"><table><thead><tr><th>Período</th><th>Avaliador</th><th>Tipo</th><th>Status</th><th>Data</th><th>Ações</th></tr></thead><tbody id="tbody-avaliações"><tr><td colspan="6">Carregando...</td></tr></tbody></table></div></article>
     </section>
   </main>
 </div>
 
-<aside class="drawer" id="drawer-detalhes"><div class="drawer-head"><strong>Detalhes da Avaliacao</strong><button class="saas-btn saas-btn-outline" title="Fechar painel" onclick="fecharDrawer()"><i class="fas fa-times"></i></button></div><div class="drawer-body" id="drawer-body"></div></aside>
+<aside class="drawer" id="drawer-detalhes"><div class="drawer-head"><strong>Detalhes da Avaliação</strong><button class="saas-btn saas-btn-outline" title="Fechar painel" onclick="fecharDrawer()"><i class="fas fa-times"></i></button></div><div class="drawer-body" id="drawer-body"></div></aside>
 <div class="toast" id="toast"><span id="toast-message"></span></div>
 
 <script src="/js/auth-unified.js?v=20260214" defer></script>
-<script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-<script src="/modules/RH/public/js/rh-ui-common.js"></script>
+<script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+<script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
 <script>
-let usuario = null;
+let usuário = null;
 function formatarData(v){if(!v) return '--'; const d=new Date(v); if(Number.isNaN(d.getTime())) return '--'; return d.toLocaleDateString('pt-BR');}
 function fecharDrawer(){document.getElementById('drawer-detalhes').classList.remove('open');}
 function statusHtml(status){const txt=rhUiCommon.escapeHtml(status||'RASCUNHO'); const cls=String(status||'').toUpperCase()==='CONCLUIDA'?'badge-concluida':'badge-rascunho'; return `<span class="badge ${cls}">${txt}</span>`;}
@@ -89,30 +89,31 @@ async function abrirDetalhes(id){
   const resp = await fetch(`/api/rh/avaliacoes/${id}`, {headers: rhUiCommon.getAuthHeaders(), credentials:'include'});
   const data = await resp.json().catch(()=>null);
   if(!resp.ok || !data){body.textContent='Nao foi possivel carregar os detalhes.'; return;}
-  const av = data.avaliacao || {}; const itens = Array.isArray(data.itens) ? data.itens : [];
-  body.innerHTML = `<div style='display:grid;gap:8px;margin-bottom:16px;'><div><strong>Periodo:</strong> ${rhUiCommon.escapeHtml(av.periodo_nome || av['per\u00edodo_nome'] || '--')}</div><div><strong>Avaliador:</strong> ${rhUiCommon.escapeHtml(av.avaliador_nome || '--')}</div><div><strong>Status:</strong> ${statusHtml(av.status)}</div><div><strong>Pontos fortes:</strong> ${rhUiCommon.escapeHtml(av.pontos_fortes || '--')}</div><div><strong>Pontos de melhoria:</strong> ${rhUiCommon.escapeHtml(av.pontos_melhoria || '--')}</div><div><strong>Comentarios:</strong> ${rhUiCommon.escapeHtml(av.comentarios_avaliador || '--')}</div></div><h3 style='margin:0 0 8px 0;'>Competencias</h3><div style='display:grid;gap:8px;'>${itens.map(i=>`<div class='saas-card' style='padding:10px;'><strong>${rhUiCommon.escapeHtml(i.competencia_nome || '-')}</strong><br><small>Nota: ${rhUiCommon.escapeHtml(String(i.nota || 0))}</small><br><small>${rhUiCommon.escapeHtml(i.comentario || '')}</small></div>`).join('') || '<small>Nenhuma competencia registrada.</small>'}</div>`;
+  const av = data.avaliação || {}; const itens = Array.isArray(data.itens) ? data.itens : [];
+  body.innerHTML = `<div style='display:grid;gap:8px;margin-bottom:16px;'><div><strong>Período:</strong> ${rhUiCommon.escapeHtml(av.período_nome || av['per\u00edodo_nome'] || '--')}</div><div><strong>Avaliador:</strong> ${rhUiCommon.escapeHtml(av.avaliador_nome || '--')}</div><div><strong>Status:</strong> ${statusHtml(av.status)}</div><div><strong>Pontos fortes:</strong> ${rhUiCommon.escapeHtml(av.pontos_fortes || '--')}</div><div><strong>Pontos de melhoria:</strong> ${rhUiCommon.escapeHtml(av.pontos_melhoria || '--')}</div><div><strong>Comentarios:</strong> ${rhUiCommon.escapeHtml(av.comentarios_avaliador || '--')}</div></div><h3 style='margin:0 0 8px 0;'>Competencias</h3><div style='display:grid;gap:8px;'>${itens.map(i=>`<div class='saas-card' style='padding:10px;'><strong>${rhUiCommon.escapeHtml(i.competencia_nome || '-')}</strong><br><small>Nota: ${rhUiCommon.escapeHtml(String(i.nota || 0))}</small><br><small>${rhUiCommon.escapeHtml(i.comentario || '')}</small></div>`).join('') || '<small>Nenhuma competencia registrada.</small>'}</div>`;
 }
 
 async function carregarAvaliacoes(){
-  const id = usuario.funcionario_id || usuario.id;
+  const id = usuário.funcionário_id || usuário.id;
   const resp = await fetch(`/api/rh/avaliacoes/funcionario/${id}`, {headers: rhUiCommon.getAuthHeaders(), credentials:'include'});
   const rows = await resp.json().catch(()=>[]);
-  const tb = document.getElementById('tbody-avaliacoes');
-  if(!resp.ok){tb.innerHTML='<tr><td colspan="6">Falha ao carregar avaliacoes.</td></tr>'; return;}
-  if(!Array.isArray(rows) || !rows.length){tb.innerHTML='<tr><td colspan="6">Voce ainda nao recebeu avaliacoes.</td></tr>'; return;}
-  tb.innerHTML = rows.map(r=>`<tr><td>${rhUiCommon.escapeHtml(r.periodo_nome || r['per\u00edodo_nome'] || '--')}</td><td>${rhUiCommon.escapeHtml(r.avaliador_nome || '--')}</td><td>${rhUiCommon.escapeHtml(r.tipo_avaliacao || '--')}</td><td>${statusHtml(r.status)}</td><td>${rhUiCommon.escapeHtml(formatarData(r.data_avaliacao))}</td><td><button class='saas-btn saas-btn-outline' onclick='abrirDetalhes(${Number(r.id)})'><i class='fas fa-eye'></i> Ver</button></td></tr>`).join('');
+  const tb = document.getElementById('tbody-avaliações');
+  if(!resp.ok){tb.innerHTML='<tr><td colspan="6">Falha ao carregar avaliações.</td></tr>'; return;}
+  if(!Array.isArray(rows) || !rows.length){tb.innerHTML='<tr><td colspan="6">Voce ainda nao recebeu avaliações.</td></tr>'; return;}
+  tb.innerHTML = rows.map(r=>`<tr><td>${rhUiCommon.escapeHtml(r.período_nome || r['per\u00edodo_nome'] || '--')}</td><td>${rhUiCommon.escapeHtml(r.avaliador_nome || '--')}</td><td>${rhUiCommon.escapeHtml(r.tipo_avaliação || '--')}</td><td>${statusHtml(r.status)}</td><td>${rhUiCommon.escapeHtml(formatarData(r.data_avaliação))}</td><td><button class='saas-btn saas-btn-outline' onclick='abrirDetalhes(${Number(r.id)})'><i class='fas fa-eye'></i> Ver</button></td></tr>`).join('');
 }
 
 document.addEventListener('DOMContentLoaded', async function(){
-  try{usuario = await rhUiCommon.getCurrentUser(); rhUiCommon.updateHeaderUser(usuario); await carregarAvaliacoes();}
-  catch(e){rhUiCommon.showToast('Nao foi possivel carregar as avaliacoes recebidas.', 'danger');}
+  try{usuário = await rhUiCommon.getCurrentUser(); rhUiCommon.updateHeaderUser(usuário); await carregarAvaliacoes();}
+  catch(e){rhUiCommon.showToast('Nao foi possivel carregar as avaliações recebidas.', 'danger');}
 });
 </script>
-<script src="/js/tooltips-professional.js?v=20260209"></script>
+<script src="/js/tooltips-professional.js?v=20260209" defer></script>
 <script src="/chat/widget.js?v=20260218" defer></script>
-<script src="/_shared/accessibility-widget.js?v=20260226"></script>
-<script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
+<script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
+<script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

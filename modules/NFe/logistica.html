@@ -380,10 +380,8 @@
         <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
         <nav class="sidebar-nav">
             <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-            <a href="emitir.html" class="sidebar-btn" title="Emitir NFe"><i class="fas fa-file-invoice"></i></a>
             <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
             <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-            <a href="danfe.html" class="sidebar-btn" title="Gerar DANFE"><i class="fas fa-print"></i></a>
             <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
             <a href="logistica.html" class="sidebar-btn active" title="Logística"><i class="fas fa-truck"></i></a>
@@ -1397,7 +1395,8 @@ function imprimirEtiquetaPopup() {
         '<div class="lbl-barcode"><div class="lbl-barcode-lines">' + gerarBarcodeHtml() + '</div>' +
         '<div class="lbl-barcode-number">ALU-' + String(p.pedido || p.id).padStart(6, '0') + '</div></div>' +
         '<script>window.onload=function(){window.print();}<\/script>' +
-        '</body></html>'
+        '    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+</body></html>'
     );
     win.document.close();
 }
@@ -1815,5 +1814,6 @@ document.addEventListener('DOMContentLoaded', function() {
 <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 <script src="/js/sidebar-click-animation.js?v=20260301"></script>
 <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

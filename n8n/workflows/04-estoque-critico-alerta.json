@@ -1,0 +1,106 @@
+{
+  "name": "04-estoque-critico-alerta",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 */6 * * *" }]
+        }
+      },
+      "name": "⏰ A cada 6 horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/acoes/verificar-estoque-minimo",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "🔄 Verificar Estoque SP",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/estoque/criticos",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": {}
+      },
+      "name": "📦 Buscar Produtos Críticos",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [690, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }
+          ]
+        }
+      },
+      "name": "Tem críticos?",
+      "type": "n8n-nodes-base.if",
+      "position": [910, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "embeds": [{
+            "title": "🚨 Estoque Crítico — {{$json.total}} produtos",
+            "description": "Produtos abaixo do estoque mínimo detectados!",
+            "color": 15158332,
+            "timestamp": "{{new Date().toISOString()}}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "🟣 Discord: Alerta Estoque",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1130, 200],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "compras@aluforce.ind.br",
+        "subject": "🚨 Alerta: {{$json.total}} produtos com estoque crítico",
+        "html": "<h2>⚠️ Estoque Crítico</h2><p><strong>{{$json.total}} produtos</strong> estão abaixo do estoque mínimo.</p><p>Acesse o módulo de Compras para verificar e gerar requisições.</p>",
+        "options": {}
+      },
+      "name": "📧 Email Compras",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [1130, 400],
+      "typeVersion": 2.1
+    }
+  ],
+  "connections": {
+    "⏰ A cada 6 horas": { "main": [[{ "node": "🔄 Verificar Estoque SP", "type": "main", "index": 0 }]] },
+    "🔄 Verificar Estoque SP": { "main": [[{ "node": "📦 Buscar Produtos Críticos", "type": "main", "index": 0 }]] },
+    "📦 Buscar Produtos Críticos": { "main": [[{ "node": "Tem críticos?", "type": "main", "index": 0 }]] },
+    "Tem críticos?": {
+      "main": [
+        [{ "node": "🟣 Discord: Alerta Estoque", "type": "main", "index": 0 }, { "node": "📧 Email Compras", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "estoque" }, { "name": "compras" }, { "name": "alerta" }]
+}

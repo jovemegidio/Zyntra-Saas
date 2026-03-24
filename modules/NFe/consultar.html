@@ -62,10 +62,7 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="emitir.html" class="sidebar-btn" title="Emitir NFe"><i class="fas fa-file-invoice"></i></a>
                 <a href="consultar.html" class="sidebar-btn active" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-                <a href="danfe.html" class="sidebar-btn" title="Gerar DANFE"><i class="fas fa-print"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
@@ -389,7 +386,7 @@
                 const stLabel = st.charAt(0).toUpperCase() + st.slice(1);
                 const chaveEsc = escapeHtml(nfe.chave||'');
                 return `<tr>
-                    <td><strong>${escapeHtml(nfe.numero||'-')}</strong></td>
+                    <td><strong>${escapeHtml(nfe.número||'-')}</strong></td>
                     <td>${escapeHtml(nfe.serie||'1')}</td>
                     <td>${escapeHtml(nfe.cliente||nfe.destinatario||'-')}</td>
                     <td>${escapeHtml(dt)}</td>
@@ -579,7 +576,7 @@
             if (nfesCarregadas.length === 0) { showAlert('Nenhum dado para exportar', 'warning'); return; }
             let csv = 'Número;Série;Cliente;Data;Valor;Status\n';
             nfesCarregadas.forEach(nfe => {
-                csv += `${nfe.numero||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
+                csv += `${nfe.número||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
             });
             const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' });
             const a = document.createElement('a');
@@ -615,5 +612,7 @@
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
     <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
 </html>

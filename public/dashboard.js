@@ -31,18 +31,18 @@ function initSidebar() {
     const sidebar = document.getElementById('sidebar');
     const sidebarToggle = document.getElementById('sidebarToggle');
     const mobileMenuBtn = document.getElementById('mobileMenuBtn');
-    
+
     // Toggle sidebar collapse
     sidebarToggle?.addEventListener('click', () => {
         sidebar.classList.toggle('collapsed');
         localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
     });
-    
+
     // Mobile menu toggle
     mobileMenuBtn?.addEventListener('click', () => {
         sidebar.classList.toggle('mobile-open');
     });
-    
+
     // Close sidebar on outside click (mobile)
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 1024) {
@@ -51,7 +51,7 @@ function initSidebar() {
             }
         }
     });
-    
+
     // Restore sidebar state
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
         sidebar.classList.add('collapsed');
@@ -65,7 +65,7 @@ function initTheme() {
     const themeToggle = document.getElementById('themeToggle');
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
     const savedTheme = localStorage.getItem('theme');
-    
+
     // Set initial theme
     if (savedTheme) {
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -74,11 +74,11 @@ function initTheme() {
         document.documentElement.setAttribute('data-theme', 'dark');
         updateThemeIcon('dark');
     }
-    
+
     themeToggle?.addEventListener('click', () => {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('theme', newTheme);
         updateThemeIcon(newTheme);
@@ -99,26 +99,26 @@ function updateThemeIcon(theme) {
 // ============================================
 function initDateTime() {
     updateDateTime();
-    setInterval(updateDateTime, 1000);
+    window._dateTimeInterval = setInterval(updateDateTime, 1000);
 }
 
 function updateDateTime() {
     const now = new Date();
-    
+
     const dateOptions = { day: 'numeric', month: 'long', year: 'numeric' };
     const dateStr = now.toLocaleDateString('pt-BR', dateOptions);
-    
-    const timeStr = now.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+
+    const timeStr = now.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit'
     });
-    
+
     const currentDate = document.getElementById('currentDate');
     const currentTime = document.getElementById('currentTime');
-    
+
     if (currentDate) currentDate.textContent = dateStr;
     if (currentTime) currentTime.textContent = timeStr;
-    
+
     // Update welcome message based on time
     updateGreeting(now.getHours());
 }
@@ -126,10 +126,10 @@ function updateDateTime() {
 function updateGreeting(hour) {
     const welcomeText = document.querySelector('.welcome-text h1');
     if (!welcomeText) return;
-    
+
     let greeting = 'Bom dia';
     let emoji = '☀️';
-    
+
     if (hour >= 12 && hour < 18) {
         greeting = 'Boa tarde';
         emoji = '🌤️';
@@ -137,7 +137,7 @@ function updateGreeting(hour) {
         greeting = 'Boa noite';
         emoji = '🌙';
     }
-    
+
     const userName = document.getElementById('welcomeName')?.textContent || 'Administrador';
     welcomeText.innerHTML = `${greeting}, <span id="welcomeName">${userName}</span>! ${emoji}`;
 }
@@ -153,15 +153,15 @@ function initCharts() {
 function initRevenueChart() {
     const ctx = document.getElementById('revenueChart');
     if (!ctx) return;
-    
+
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     const textColor = isDark ? '#94a3b8' : '#64748b';
     const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
-    
+
     const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 300);
     gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
     gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
-    
+
     new Chart(ctx, {
         type: 'line',
         data: {
@@ -236,9 +236,9 @@ function initRevenueChart() {
 function initCategoryChart() {
     const ctx = document.getElementById('categoryChart');
     if (!ctx) return;
-    
+
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    
+
     new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -295,31 +295,31 @@ function initCommandPalette() {
     const commandPalette = document.getElementById('commandPalette');
     const commandInput = document.getElementById('commandInput');
     const searchInput = document.querySelector('.search-input');
-    
+
     // Open with Ctrl+K or Cmd+K
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();
             toggleCommandPalette();
         }
-        
+
         if (e.key === 'Escape') {
             closeCommandPalette();
         }
     });
-    
+
     // Open from search input click
     searchInput?.addEventListener('focus', () => {
         toggleCommandPalette();
     });
-    
+
     // Close on overlay click
     commandPalette?.addEventListener('click', (e) => {
         if (e.target === commandPalette) {
             closeCommandPalette();
         }
     });
-    
+
     // Filter results on input
     commandInput?.addEventListener('input', filterCommands);
 }
@@ -327,9 +327,9 @@ function initCommandPalette() {
 function toggleCommandPalette() {
     const commandPalette = document.getElementById('commandPalette');
     const commandInput = document.getElementById('commandInput');
-    
+
     commandPalette?.classList.toggle('active');
-    
+
     if (commandPalette?.classList.contains('active')) {
         setTimeout(() => commandInput?.focus(), 100);
     }
@@ -344,7 +344,7 @@ function filterCommands() {
     const input = document.getElementById('commandInput');
     const query = input?.value.toLowerCase() || '';
     const items = document.querySelectorAll('.command-item');
-    
+
     items.forEach(item => {
         const text = item.textContent.toLowerCase();
         item.style.display = text.includes(query) ? 'flex' : 'none';
@@ -357,12 +357,12 @@ function filterCommands() {
 function initUserMenu() {
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userMenuDropdown = document.getElementById('userMenuDropdown');
-    
+
     userMenuBtn?.addEventListener('click', (e) => {
         e.stopPropagation();
         userMenuDropdown?.classList.toggle('active');
     });
-    
+
     // Close on outside click
     document.addEventListener('click', () => {
         userMenuDropdown?.classList.remove('active');
@@ -376,21 +376,21 @@ function initNotifications() {
     const notificationBtn = document.getElementById('notificationBtn');
     const notificationPanel = document.getElementById('notificationPanel');
     const closeBtn = document.getElementById('closeNotificationPanel');
-    
+
     notificationBtn?.addEventListener('click', () => {
         notificationPanel?.classList.toggle('active');
     });
-    
+
     closeBtn?.addEventListener('click', () => {
         notificationPanel?.classList.remove('active');
     });
-    
+
     // Mark all as read
     document.querySelector('.mark-all-read')?.addEventListener('click', () => {
         document.querySelectorAll('.notification-item.unread').forEach(item => {
             item.classList.remove('unread');
         });
-        
+
         const badge = document.querySelector('.notification-badge');
         if (badge) badge.style.display = 'none';
     });
@@ -407,7 +407,7 @@ function loadUserData() {
         role: 'TI',
         initials: 'TI'
     };
-    
+
     // Try to get from localStorage or session
     try {
         const sessionUser = localStorage.getItem('usuario');
@@ -421,7 +421,7 @@ function loadUserData() {
     } catch (e) {
         console.log('Using default user data');
     }
-    
+
     // Update UI
     document.getElementById('userName').textContent = userData.name;
     document.getElementById('userRole').textContent = userData.role;
@@ -449,15 +449,15 @@ async function loadDashboardData() {
             fetchWithFallback('/api/dashboard/pedidos-hoje', { count: 24 }),
             fetchWithFallback('/api/dashboard/novos-clientes', { count: 7 })
         ]);
-        
+
         // Update KPIs
-        animateValue('kpiFaturamento', 0, faturamento.total, 1500, (v) => 
+        animateValue('kpiFaturamento', 0, faturamento.total, 1500, (v) =>
             'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
         );
-        
+
         // Load recent orders
         loadRecentOrders();
-        
+
     } catch (error) {
         console.log('Using cached dashboard data');
     }
@@ -476,25 +476,25 @@ async function fetchWithFallback(url, fallback) {
 function animateValue(elementId, start, end, duration, formatter) {
     const element = document.getElementById(elementId);
     if (!element) return;
-    
+
     const range = end - start;
     const startTime = performance.now();
-    
+
     function update(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
+
         // Ease out cubic
         const easeOut = 1 - Math.pow(1 - progress, 3);
         const value = Math.round(start + (range * easeOut));
-        
+
         element.textContent = formatter ? formatter(value) : value;
-        
+
         if (progress < 1) {
             requestAnimationFrame(update);
         }
     }
-    
+
     requestAnimationFrame(update);
 }
 
@@ -502,12 +502,12 @@ async function loadRecentOrders() {
     try {
         const response = await fetch('/api/vendas/pedidos?limit=5&sort=id,desc');
         if (!response.ok) throw new Error('API Error');
-        
+
         const data = await response.json();
         const ordersContainer = document.getElementById('recentOrdersList');
-        
+
         if (!ordersContainer || !data.data?.length) return;
-        
+
         ordersContainer.innerHTML = data.data.map(order => `
             <div class="order-item">
                 <div class="order-info">
@@ -520,7 +520,7 @@ async function loadRecentOrders() {
                 </div>
             </div>
         `).join('');
-        
+
     } catch (error) {
         console.log('Using sample orders data');
     }
@@ -543,7 +543,7 @@ function getStatusClass(status) {
 document.querySelectorAll('.quick-action').forEach(btn => {
     btn.addEventListener('click', () => {
         const action = btn.dataset.action;
-        
+
         switch (action) {
             case 'novo-pedido':
                 window.location.href = '/Vendas/?novo=true';

@@ -12,6 +12,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const fs = require('fs');
+const twoFactorService = require('../services/two-factor.service');
 
 // Helper de log que também escreve em arquivo
 const logToFile = (msg) => {
@@ -33,7 +34,8 @@ const JWT_EXPIRES = process.env.JWT_EXPIRES || '8h';
 const REFRESH_TOKEN_EXPIRES = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
 // Log de inicialização para confirmar carregamento
-logToFile('[AUTH-RBAC] 🔐 Módulo carregado - JWT_SECRET: ' + JWT_SECRET.substring(0, 10) + '...');
+// SECURITY FIX H-09: Não logar nenhuma parte do JWT_SECRET (CWE-532)
+logToFile('[AUTH-RBAC] 🔐 Módulo carregado - JWT_SECRET: [REDACTED] (len=' + JWT_SECRET.length + ')');
 
 /**
  * Middleware de autenticação JWT
@@ -239,10 +241,16 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Buscar usuário - query simplificada primeiro
+        // Buscar usuário - SECURITY FIX H-10: Apenas colunas necessárias (CWE-200)
+        // NOTA: Usar apenas colunas que existem na tabela usuarios (cargo, tentativas_login,
+        // bloqueado_ate, dois_fatores_ativo, dois_fatores_secret NÃO existem)
         console.log('[RBAC LOGIN] Buscando usuário no banco...');
         const [users] = await pool.query(
-            'SELECT * FROM usuarios WHERE email = ? LIMIT 1',
+            `SELECT id, nome, email, senha_hash, password_hash, role, is_admin, status, avatar, foto,
+                    setor, departamento, apelido, areas, telefone, login,
+                    ultimo_login, ativo, senha_temporaria, two_factor_disabled,
+                    totp_enabled, totp_secret
+             FROM usuarios WHERE email = ? LIMIT 1`,
             [email.toLowerCase().trim()]
         );
 
@@ -856,6 +864,20 @@ router.put('/admin/users/:id', authMiddleware, adminOnly, async (req, res) => {
 
         await logAccess(pool, req.user.id, 'editar_usuario', 'admin', req, { usuario_id: id, email });
 
+        // 🔄 Real-time: notificar o usuário afetado via Socket.IO
+        try {
+            if (global.io) {
+                const [freshUser] = await pool.query('SELECT id, areas, is_admin, status FROM usuarios WHERE id = ?', [id]);
+                if (freshUser.length) {
+                    let areas = [];
+                    try { areas = JSON.parse(freshUser[0].areas || '[]'); } catch(e) {}
+                    if (freshUser[0].is_admin) areas = ['dashboard','pcp','vendas','compras','financeiro','nfe','rh','faturamento','admin'];
+                    global.io.emit('permissions-updated', { userId: parseInt(id), areas, is_admin: Boolean(freshUser[0].is_admin), status: freshUser[0].status });
+                    console.log(`[REALTIME] 📡 permissions-updated emitido para userId=${id}`);
+                }
+            }
+        } catch(e) { console.warn('[REALTIME] Erro ao emitir evento:', e.message); }
+
         res.json({
             success: true,
             message: 'Usuário atualizado com sucesso'
@@ -963,6 +985,17 @@ router.put('/admin/users/:id/roles', authMiddleware, adminOnly, async (req, res)
         const pool = req.app.locals.pool || require('../database').getPool();
         await logAccess(pool, req.user.id, 'atualizar_roles_usuario', 'admin', req, { usuario_id: id, roles });
 
+        // 🔄 Real-time: notificar o usuário afetado via Socket.IO
+        try {
+            if (global.io) {
+                const [freshUser] = await pool.query('SELECT is_admin, status FROM usuarios WHERE id = ?', [id]);
+                const isAdm = freshUser.length ? Boolean(freshUser[0].is_admin) : false;
+                const finalAreas = isAdm ? ['dashboard','pcp','vendas','compras','financeiro','nfe','rh','faturamento','admin'] : areas;
+                global.io.emit('permissions-updated', { userId: parseInt(id), areas: finalAreas, is_admin: isAdm, status: freshUser[0]?.status || 'ativo' });
+                console.log(`[REALTIME] 📡 permissions-updated (roles) emitido para userId=${id}`);
+            }
+        } catch(e) { console.warn('[REALTIME] Erro ao emitir evento:', e.message); }
+
         res.json({
             success: true,
             message: 'Roles atualizadas com sucesso',
@@ -1013,6 +1046,17 @@ router.put('/admin/users/:id/status', authMiddleware, adminOnly, async (req, res
         }
 
         await logAccess(pool, req.user.id, `usuario_${status}`, 'admin', req, { usuario_id: id });
+
+        // 🔄 Real-time: notificar o usuário afetado via Socket.IO
+        try {
+            if (global.io) {
+                global.io.emit('permissions-updated', { userId: parseInt(id), status });
+                if (status === 'bloqueado') {
+                    global.io.emit('user-blocked', { userId: parseInt(id) });
+                }
+                console.log(`[REALTIME] 📡 permissions-updated (status=${status}) emitido para userId=${id}`);
+            }
+        } catch(e) { console.warn('[REALTIME] Erro ao emitir evento:', e.message); }
 
         res.json({
             success: true,
@@ -1321,6 +1365,17 @@ router.put('/admin/users/:id/permissions', authMiddleware, adminOnly, async (req
 
         await logAccess(pool, req.user.id, 'atualizar_permissoes', 'admin', req, { usuario_id: id });
 
+        // 🔄 Real-time: notificar o usuário afetado via Socket.IO
+        try {
+            if (global.io) {
+                const [freshUser] = await pool.query('SELECT is_admin, status FROM usuarios WHERE id = ?', [id]);
+                const isAdm = freshUser.length ? Boolean(freshUser[0].is_admin) : false;
+                const finalAreas = isAdm ? ['dashboard','pcp','vendas','compras','financeiro','nfe','rh','faturamento','admin'] : areasAtivas;
+                global.io.emit('permissions-updated', { userId: parseInt(id), areas: finalAreas, is_admin: isAdm, status: freshUser[0]?.status || 'ativo' });
+                console.log(`[REALTIME] 📡 permissions-updated (perms) emitido para userId=${id}`);
+            }
+        } catch(e) { console.warn('[REALTIME] Erro ao emitir evento:', e.message); }
+
         res.json({ success: true, message: 'Permissões salvas com sucesso' });
     } catch (error) {
         await connection.rollback();
@@ -1589,30 +1644,27 @@ router.post('/admin/modulos', authMiddleware, adminOnly, async (req, res) => {
 
 // ============================================================
 // PUT /api/auth/admin/users/:id/2fa — Ativar/Desativar 2FA de um usuário
+// [REFACTORED 10/03/2026] Usa serviço centralizado two-factor.service
 // ============================================================
 router.put('/admin/users/:id/2fa', authMiddleware, adminOnly, async (req, res) => {
     try {
         const { id } = req.params;
-        const { disabled } = req.body; // true = desabilitar, false = habilitar
+        const { disabled, enabled } = req.body;
         const pool = req.app.locals.pool || require('../database').getPool();
 
-        // Garantir que a coluna existe (MySQL compatível)
-        try {
-            const [cols] = await pool.query("SHOW COLUMNS FROM usuarios LIKE 'two_factor_disabled'");
-            if (cols.length === 0) {
-                await pool.query('ALTER TABLE usuarios ADD COLUMN two_factor_disabled TINYINT(1) DEFAULT 0');
-            }
-        } catch (e) {
-            // Coluna já existe ou erro de sintaxe — ignorar
+        // Suporta ambas as interfaces:
+        // - { disabled: true } (legado - desabilita override)
+        // - { enabled: true/false } (novo - ativa/desativa 2FA)
+        if (typeof enabled === 'boolean') {
+            await twoFactorService.set2FAEnabled(pool, id, enabled);
+        }
+        if (typeof disabled === 'boolean') {
+            await twoFactorService.set2FADisabledByAdmin(pool, id, disabled);
         }
 
-        await pool.query(
-            'UPDATE usuarios SET two_factor_disabled = ? WHERE id = ?',
-            [disabled ? 1 : 0, id]
-        );
-
         // Limpar dispositivos confiáveis se estiver reativando 2FA
-        if (!disabled) {
+        const isReactivating = (typeof enabled === 'boolean' && enabled) || (typeof disabled === 'boolean' && !disabled);
+        if (isReactivating) {
             try {
                 await pool.query('DELETE FROM auth_trusted_devices WHERE usuario_id = ?', [id]);
             } catch (e) {
@@ -1620,11 +1672,12 @@ router.put('/admin/users/:id/2fa', authMiddleware, adminOnly, async (req, res) =
             }
         }
 
-        await logAccess(pool, req.user.id, disabled ? 'desativar_2fa' : 'ativar_2fa', 'admin', req, { usuario_id: id });
+        const action = (disabled || enabled === false) ? 'desativar_2fa' : 'ativar_2fa';
+        await logAccess(pool, req.user.id, action, 'admin', req, { usuario_id: id });
 
         res.json({
             success: true,
-            message: disabled ? '2FA desabilitado para o usuário' : '2FA reabilitado para o usuário'
+            message: (disabled || enabled === false) ? '2FA desabilitado para o usuário' : '2FA reabilitado para o usuário'
         });
     } catch (error) {
         console.error('Erro ao alterar 2FA:', error);
@@ -1633,41 +1686,13 @@ router.put('/admin/users/:id/2fa', authMiddleware, adminOnly, async (req, res) =
 });
 
 // GET /api/auth/admin/users/:id/2fa — Verificar status 2FA do usuário
+// [REFACTORED 10/03/2026] Usa serviço centralizado two-factor.service
 router.get('/admin/users/:id/2fa', authMiddleware, adminOnly, async (req, res) => {
     try {
         const { id } = req.params;
         const pool = req.app.locals.pool || require('../database').getPool();
 
-        // Garantir que a coluna existe (MySQL compatível)
-        try {
-            const [cols] = await pool.query("SHOW COLUMNS FROM usuarios LIKE 'two_factor_disabled'");
-            if (cols.length === 0) {
-                await pool.query('ALTER TABLE usuarios ADD COLUMN two_factor_disabled TINYINT(1) DEFAULT 0');
-            }
-        } catch (e) {}
-
-        const [rows] = await pool.query(
-            'SELECT email, two_factor_disabled FROM usuarios WHERE id = ?', [id]
-        );
-        if (!rows.length) {
-            return res.status(404).json({ success: false, message: 'Usuário não encontrado' });
-        }
-
-        const user = rows[0];
-        const email = (user.email || '').toLowerCase().trim();
-
-        // Whitelist de 2FA (mesma do auth.js)
-        const twoFA_whitelist = [
-            'ti@aluforce.ind.br', 'pcp@aluforce.ind.br', 'rh@aluforce.ind.br',
-            'augusto.santos@aluforce.ind.br', 'vendas4@aluforce.ind.br',
-            'financeiro2@aluforce.ind.br', 'financeiro3@aluforce.ind.br',
-            'adm@aluforce.ind.br', 'compras@aluforce.ind.br', 'aluforce@aluforce.ind.br',
-            'qavendas@aluforce.ind.br', 'qapcp@aluforce.ind.br', 'qarh@aluforce.ind.br',
-            'qacompras@aluforce.ind.br', 'qanfe@aluforce.ind.br', 'qapainel@aluforce.ind.br'
-        ];
-
-        const isInWhitelist = twoFA_whitelist.includes(email);
-        const isDisabled = user.two_factor_disabled === 1;
+        const status = await twoFactorService.get2FAStatus(pool, id);
 
         // Contar dispositivos confiáveis
         let trustedDevices = 0;
@@ -1681,9 +1706,7 @@ router.get('/admin/users/:id/2fa', authMiddleware, adminOnly, async (req, res) =
         res.json({
             success: true,
             twoFA: {
-                eligible: isInWhitelist,
-                disabled: isDisabled,
-                active: isInWhitelist && !isDisabled,
+                ...status,
                 trustedDevices
             }
         });

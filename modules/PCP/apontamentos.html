@@ -171,7 +171,7 @@
             font-weight: 600;
         }
         .status-badge.ativa { background: #dbeafe; color: #3b82f6; }
-        .status-badge.em_producao { background: #fef3c7; color: #d97706; }
+        .status-badge.em_produção { background: #fef3c7; color: #d97706; }
         .status-badge.concluida { background: #dcfce7; color: #16a34a; }
         .status-badge.pendente { background: #f1f5f9; color: #64748b; }
 
@@ -635,7 +635,7 @@
                             <span class="resumo-label">Total trabalhado</span>
                         </div>
                     </div>
-                    <div class="historico-lista" id="historicoLista">
+                    <div class="historico-lista" id="históricoLista">
                         <div class="empty-state-mini">
                             <i class="fas fa-clock"></i>
                             <p>Nenhum registro hoje</p>
@@ -776,13 +776,13 @@
         }
 
         /* Botões de Ação */
-        .acoes-timer {
+        .ações-timer {
             display: flex;
             justify-content: center;
             gap: 16px;
             margin-bottom: 24px;
         }
-        .btn-acao {
+        .btn-ação {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -796,48 +796,48 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .btn-acao.pausar {
+        .btn-ação.pausar {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
-        .btn-acao.pausar:hover {
+        .btn-ação.pausar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
         }
-        .btn-acao.continuar {
+        .btn-ação.continuar {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-        .btn-acao.finalizar {
+        .btn-ação.finalizar {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-        .btn-acao.finalizar:hover {
+        .btn-ação.finalizar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
-        .btn-acao i {
+        .btn-ação i {
             font-size: 20px;
         }
 
         /* Histórico */
-        .historico-section {
+        .histórico-section {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .historico-header {
+        .histórico-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .historico-header h3 {
+        .histórico-header h3 {
             font-size: 16px;
             font-weight: 600;
             display: flex;
@@ -845,15 +845,15 @@
             gap: 10px;
             margin: 0;
         }
-        .historico-header h3 i {
+        .histórico-header h3 i {
             color: var(--primary-color);
         }
-        .historico-resumo {
+        .histórico-resumo {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        .historico-resumo span:first-child {
+        .histórico-resumo span:first-child {
             font-size: 24px;
             font-weight: 700;
             color: var(--primary-color);
@@ -863,11 +863,11 @@
             font-size: 12px;
             color: var(--text-secondary);
         }
-        .historico-lista {
+        .histórico-lista {
             max-height: 400px;
             overflow-y: auto;
         }
-        .historico-item {
+        .histórico-item {
             display: flex;
             align-items: center;
             gap: 16px;
@@ -875,10 +875,10 @@
             border-bottom: 1px solid #f1f5f9;
             transition: background 0.2s;
         }
-        .historico-item:hover {
+        .histórico-item:hover {
             background: #f8fafc;
         }
-        .historico-icon {
+        .histórico-icon {
             width: 44px;
             height: 44px;
             border-radius: 12px;
@@ -887,20 +887,20 @@
             justify-content: center;
             font-size: 18px;
         }
-        .historico-info {
+        .histórico-info {
             flex: 1;
         }
-        .historico-atividade {
+        .histórico-atividade {
             font-weight: 600;
             font-size: 14px;
             color: var(--text-primary);
         }
-        .historico-horarios {
+        .histórico-horarios {
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 2px;
         }
-        .historico-duracao {
+        .histórico-duracao {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
@@ -936,7 +936,7 @@
             .timer-display-grande {
                 font-size: 48px;
             }
-            .btn-acao {
+            .btn-ação {
                 padding: 14px 24px;
                 font-size: 14px;
             }
@@ -1015,7 +1015,7 @@
         let timerRunning = false;
         let timerPausado = false;
         let horaInicio = null;
-        let historicoHoje = [];
+        let históricoHoje = [];
 
         // Cores das atividades
         const coresAtividades = {
@@ -1053,7 +1053,7 @@
             const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('dataHoje').innerHTML = `
                 <i class="fas fa-calendar"></i>
-                ${hoje.toLocaleDateString('pt-BR', opcoes)}
+                ${hoje.toLocaleDateString('pt-BR', opções)}
             `;
         }
 
@@ -1067,10 +1067,10 @@
 
         // Mapeamento de avatares por nome de usuário
         const avatarNameMap = {
-            'clemerson': '/avatars/Clemerson.webp',
-            'isabela': '/avatars/Isabela.webp',
+            'clemerson': '/avatars/Clemerson.png',
+            'isabela': '/avatars/Isabela.png', 'isabella': '/avatars/Isabela.png',
             'thaina': '/avatars/Thaina.webp',
-            'thiago': '/avatars/Thiago.webp',
+            'thiago': '/avatars/Thiago.png',
             'nicolas': '/avatars/NicolasDaniel.webp',
             'nicolasdaniel': '/avatars/NicolasDaniel.webp',
             'rh': '/avatars/Rh.webp',
@@ -1081,8 +1081,18 @@
             'antônio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
             'andréia': '/avatars/Andreia.webp',
-            'guilherme': '/avatars/Guilherme.webp',
-            'marcelo': '/avatars/Marcelo.webp'
+            'guilherme': '/avatars/GuilhermeBastos.png',
+            'marcelo': '/avatars/Marcelo.webp',
+            'augusto': '/avatars/Augusto.png', 'renata': '/avatars/Renata.png',
+            'fabiano': '/avatars/Fabiano.png', 'marcia': '/avatars/Marcia.png',
+            'ronaldo': '/avatars/Ronaldo.png', 'joao': '/avatars/JoaoVitor.png',
+            'douglas': '/avatars/Douglas.webp', 'fernando': '/avatars/Fernando.png',
+            'robson': '/avatars/Robson.png', 'junior': '/avatars/Junior.png',
+            'bruno': '/avatars/Bruno.png', 'tatiane': '/avatars/Tatiane.png',
+            'felipesimoes': '/avatars/FelipeSimoes.png', 'felipe': '/avatars/FelipeSimoes.png',
+            'hellen': '/avatars/Hellen.webp', 'jamesson': '/avatars/jamerson.svg',
+            'sergio': '/avatars/Sergio.png', 'lucas': '/avatars/Lucas.png',
+            'miqueias': '/avatars/Miqueias.png', 'lucio': '/avatars/Lucio.png', 'lúcio': '/avatars/Lucio.png'
         };
 
         function getAvatarFromEmail(email, nome) {
@@ -1102,9 +1112,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
-
                 console.log('?? Carregando dados do usuário...');
                 const resp = await fetch('/api/me', {
                     credentials: 'include',
@@ -1301,24 +1308,22 @@
         }
 
         // Enviar notificação push genérica (início, pausa, retomada, finalização)
-        async function notificarAcaoPCP(acao, tipo, nome, duracao) {
+        async function notificarAcaoPCP(ação, tipo, nome, duracao) {
             const headers = { 'Content-Type': 'application/json' };
-            if (token && token !== 'unified-session-active') {
-            }
             const operador = getOperadorNome();
             const body = {
                 tipo_atividade: tipo,
                 nome_atividade: nome,
                 operador: operador,
-                acao: acao,
+                ação: ação,
                 duracao: duracao || null
             };
 
             // Se offline, enfileirar
             if (!navigator.onLine && window.OfflineSyncManager) {
                 await window.OfflineSyncManager.enqueue('/api/pcp/notificar-atividade', 'POST', body, {
-                    module: 'pcp-notificacoes',
-                    description: 'Notificacao PCP: ' + acao,
+                    module: 'pcp-notificações',
+                    description: 'Notificação PCP: ' + ação,
                     priority: 3
                 });
                 return;
@@ -1331,11 +1336,11 @@
                     body: JSON.stringify(body)
                 });
             } catch (e) {
-                console.warn('Erro ao enviar notificacao PCP:', e);
+                console.warn('Erro ao enviar notificação PCP:', e);
                 if (window.OfflineSyncManager) {
                     await window.OfflineSyncManager.enqueue('/api/pcp/notificar-atividade', 'POST', body, {
-                        module: 'pcp-notificacoes',
-                        description: 'Notificacao PCP (offline): ' + acao,
+                        module: 'pcp-notificações',
+                        description: 'Notificação PCP (offline): ' + ação,
                         priority: 3
                     });
                 }
@@ -1375,11 +1380,11 @@
             // Atualizar botão pausar/continuar
             const btnPausar = document.getElementById('btnPausar');
             if (timerPausado) {
-                btnPausar.className = 'btn-acao continuar';
+                btnPausar.className = 'btn-ação continuar';
                 btnPausar.innerHTML = '<i class="fas fa-play"></i><span>CONTINUAR</span>';
                 btnPausar.onclick = continuarAtividade;
             } else {
-                btnPausar.className = 'btn-acao pausar';
+                btnPausar.className = 'btn-ação pausar';
                 btnPausar.innerHTML = '<i class="fas fa-pause"></i><span>PAUSAR</span>';
                 btnPausar.onclick = pausarAtividade;
             }
@@ -1452,7 +1457,7 @@
             };
 
             // Adicionar ao histórico
-            historicoHoje.unshift(registro);
+            históricoHoje.unshift(registro);
             salvarHistoricoLocal();
             renderizarHistorico();
 
@@ -1481,7 +1486,7 @@
                 data: new Date().toISOString().split('T')[0]
             };
 
-            historicoHoje.unshift(registro);
+            históricoHoje.unshift(registro);
             salvarHistoricoLocal();
             salvarRegistroServidor(registro);
         }
@@ -1580,14 +1585,14 @@
         }
 
         function salvarHistoricoLocal() {
-            localStorage.setItem('historico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(historicoHoje));
+            localStorage.setItem('histórico_apontamentos_' + new Date().toISOString().split('T')[0], JSON.stringify(históricoHoje));
         }
 
         function carregarHistoricoLocal() {
             const hoje = new Date().toISOString().split('T')[0];
-            const dados = localStorage.getItem('historico_apontamentos_' + hoje);
+            const dados = localStorage.getItem('histórico_apontamentos_' + hoje);
             if (dados) {
-                historicoHoje = JSON.parse(dados);
+                históricoHoje = JSON.parse(dados);
             }
             renderizarHistorico();
 
@@ -1598,8 +1603,6 @@
         async function carregarHistoricoServidor(hoje) {
             try {
                 const headers = {};
-                if (token && token !== 'unified-session-active') {
-                }
                 const resp = await fetch(`/api/pcp/apontamentos/meus?data=${hoje}`, {
                     credentials: 'include',
                     headers: headers
@@ -1609,10 +1612,10 @@
                     const serverApontamentos = data.apontamentos || [];
                     if (serverApontamentos.length > 0) {
                         // Mesclar: IDs do servidor que não existem no local
-                        const localIds = new Set(historicoHoje.map(h => h.id));
+                        const localIds = new Set(históricoHoje.map(h => h.id));
                         serverApontamentos.forEach(sa => {
                             if (!localIds.has(sa.id)) {
-                                historicoHoje.push({
+                                históricoHoje.push({
                                     id: sa.id,
                                     tipo: sa.tipo,
                                     nome: sa.nome || sa.tipo,
@@ -1625,7 +1628,7 @@
                             }
                         });
                         // Ordenar por hora de início (mais recente primeiro)
-                        historicoHoje.sort((a, b) => new Date(b.horaInicio) - new Date(a.horaInicio));
+                        históricoHoje.sort((a, b) => new Date(b.horaInicio) - new Date(a.horaInicio));
                         salvarHistoricoLocal();
                         renderizarHistorico();
                     }
@@ -1637,8 +1640,6 @@
 
         async function salvarRegistroServidor(registro) {
             const headers = { 'Content-Type': 'application/json' };
-            if (token && token !== 'unified-session-active') {
-            }
             const body = {
                 tipo_atividade: registro.tipo,
                 nome_atividade: registro.nome,
@@ -1665,7 +1666,6 @@
             try {
                 const resp = await fetch('/api/pcp/apontamentos/chao', { credentials: 'include', method: 'POST',
                     headers: headers,
-                    credentials: 'include',
                     body: JSON.stringify(body)
                 });
                 if (!resp.ok) {
@@ -1697,9 +1697,9 @@
         }
 
         function renderizarHistorico() {
-            const container = document.getElementById('historicoLista');
+            const container = document.getElementById('históricoLista');
 
-            if (!historicoHoje.length) {
+            if (!históricoHoje.length) {
                 container.innerHTML = `
                     <div class="empty-state-mini">
                         <i class="fas fa-clock"></i>
@@ -1711,10 +1711,10 @@
             }
 
             // Calcular tempo total
-            const totalSegundos = historicoHoje.reduce((acc, r) => acc + r.duracao, 0);
+            const totalSegundos = históricoHoje.reduce((acc, r) => acc + r.duracao, 0);
             document.getElementById('totalTempo').textContent = formatarDuracao(totalSegundos);
 
-            container.innerHTML = historicoHoje.map(registro => {
+            container.innerHTML = históricoHoje.map(registro => {
                 const cores = coresAtividades[registro.tipo] || coresAtividades.outros;
                 const inicio = new Date(registro.horaInicio);
                 const fim = new Date(registro.horaFim);
@@ -1729,7 +1729,7 @@
                             <div class="historico-horarios">
                                 ${inicio.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} -
                                 ${fim.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
-                                ${registro.pedido_numero ? ` · <span style="color:#4338ca;font-weight:600;">Pedido #${registro.pedido_numero}</span>` : ''}
+                                ${registro.pedido_número ? ` · <span style="color:#4338ca;font-weight:600;">Pedido #${registro.pedido_número}</span>` : ''}
                             </div>
                             ${registro.observacoes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${registro.observacoes}">${registro.observacoes}</div>` : ''}
                         </div>

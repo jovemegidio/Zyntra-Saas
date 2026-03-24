@@ -24,45 +24,21 @@ const {
     securityHeaders
 } = require('../../security-middleware');
 
+// VULN-013 FIX: Audit trail para operações de mutação
+const { auditTrail } = require('../../middleware/audit-trail');
+// VULN-006 FIX: Idempotency keys para prevenir replay attacks
+const { idempotency } = require('../../middleware/idempotency');
+
+// v7.5 FIX: Usar auth-central.js para retornar códigos padronizados (AUTH_EXPIRED etc.)
+const { authenticateToken, requireModule } = require('../../middleware/auth-central');
+const authorizeCompras = requireModule('compras');
+
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 // ============================================
-// 🔐 AUTHENTICATION MIDDLEWARE
+// 🔐 AUTHENTICATION: Delegado para auth-central.js (códigos padronizados)
 // ============================================
-const authenticateToken = (req, res, next) => {
-    // Check Authorization header first, then cookies
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.startsWith('Bearer ') 
-        ? authHeader.split(' ')[1] 
-        : (req.cookies?.authToken || req.cookies?.token);
-
-    if (!token) {
-        return res.status(401).json({ 
-            error: 'Token não fornecido',
-            message: 'Autenticação necessária para acessar este recurso'
-        });
-    }
-
-    // AUDIT-FIX ARCH-004: Enforce HS256 algorithm (audience enforced in sign, verify-side after token rotation)
-    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] }, (err, user) => {
-        if (err) {
-            console.log('[Compras] Token inválido:', err.message);
-            if (err.name === 'TokenExpiredError') {
-                return res.status(401).json({ 
-                    error: 'Token expirado',
-                    message: 'Sessão expirada. Faça login novamente.'
-                });
-            }
-            return res.status(403).json({ 
-                error: 'Token inválido ou expirado',
-                message: 'Por favor, faça login novamente'
-            });
-        }
-        req.user = user;
-        next();
-    });
-};
 
 // ============================================
 // 🔐 AUTHORIZATION MIDDLEWARE - Admin/Manager only for sensitive ops
@@ -72,14 +48,14 @@ const requireComprasPermission = (action) => {
         if (!req.user) {
             return res.status(401).json({ error: 'Não autenticado' });
         }
-        
+
         const role = (req.user.role || req.user.cargo || '').toLowerCase();
-        const isAdmin = req.user.is_admin === true || req.user.is_admin === 1 || 
+        const isAdmin = req.user.is_admin === true || req.user.is_admin === 1 ||
                         role === 'admin' || role === 'administrador';
-        
+
         // Admins have full access
         if (isAdmin) return next();
-        
+
         // Define permissions by role
         const permissions = {
             gerente: ['visualizar', 'criar', 'editar', 'aprovar', 'excluir'],
@@ -87,16 +63,16 @@ const requireComprasPermission = (action) => {
             supervisor: ['visualizar', 'criar', 'editar', 'aprovar'],
             usuario: ['visualizar']
         };
-        
+
         const userPerms = permissions[role] || permissions.usuario;
-        
+
         if (!userPerms.includes(action)) {
             return res.status(403).json({
                 error: 'Acesso negado',
                 message: `Você não tem permissão para ${action} no módulo Compras`
             });
         }
-        
+
         next();
     };
 };
@@ -120,7 +96,20 @@ app.use(generalLimiter);
 app.use(sanitizeInput);
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: function(origin, callback) {
+        // Permitir requests sem origin (same-origin, Postman, mobile apps)
+        if (!origin) return callback(null, true);
+        // Em produção, restringir origens
+        const allowed = (process.env.ALLOWED_ORIGINS || 'https://aluforce.ind.br,https://www.aluforce.ind.br,http://localhost:3000').split(',');
+        if (allowed.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(null, false);
+        }
+    },
+    credentials: true
+}));
 app.use(express.json({ limit: '2mb' })); // SEGURANÇA: Limite de payload
 
 // Cookie parser for auth token in cookies
@@ -177,15 +166,28 @@ const requisicoesRoutes = require('./api/requisicoes');
 const recebimentoRoutes = require('./api/recebimento');
 const relatoriosRoutes = require('./api/relatorios');
 
-// Usar rotas COM AUTENTICAÇÃO
-app.use('/api/compras/fornecedores', authenticateToken, fornecedoresRoutes);
-app.use('/api/compras/estoque', authenticateToken, estoqueRoutes);
-app.use('/api/compras/materiais', authenticateToken, materiaisRoutes);
-app.use('/api/compras/pedidos', authenticateToken, pedidosRoutes);
-app.use('/api/compras/cotacoes', authenticateToken, cotacoesRoutes);
-app.use('/api/compras/requisicoes', authenticateToken, requisicoesRoutes);
-app.use('/api/compras/recebimento', authenticateToken, recebimentoRoutes);
-app.use('/api/compras/relatorios', authenticateToken, relatoriosRoutes);
+// Disponibilizar pool para audit trail middleware
+app.locals.pool = mysqlPool;
+
+// Garantir tabela de auditoria existe (fire-and-forget)
+mysqlPool.query(`CREATE TABLE IF NOT EXISTS auditoria_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT DEFAULT NULL, acao VARCHAR(50) NOT NULL, modulo VARCHAR(50) NOT NULL,
+    descricao VARCHAR(500) DEFAULT NULL, dados_anteriores JSON DEFAULT NULL, dados_novos JSON DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL, user_agent VARCHAR(500) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_modulo_acao (modulo, acao), INDEX idx_usuario (usuario_id), INDEX idx_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
+
+// Usar rotas COM AUTENTICAÇÃO + RBAC + AUDIT + IDEMPOTENCY
+app.use('/api/compras/fornecedores', authenticateToken, authorizeCompras, auditTrail('compras'), fornecedoresRoutes);
+app.use('/api/compras/estoque', authenticateToken, authorizeCompras, auditTrail('compras'), estoqueRoutes);
+app.use('/api/compras/materiais', authenticateToken, authorizeCompras, auditTrail('compras'), materiaisRoutes);
+app.use('/api/compras/pedidos', authenticateToken, authorizeCompras, idempotency(), auditTrail('compras'), pedidosRoutes);
+app.use('/api/compras/cotacoes', authenticateToken, authorizeCompras, idempotency(), auditTrail('compras'), cotacoesRoutes);
+app.use('/api/compras/requisicoes', authenticateToken, authorizeCompras, auditTrail('compras'), requisicoesRoutes);
+app.use('/api/compras/recebimento', authenticateToken, authorizeCompras, idempotency(), auditTrail('compras'), recebimentoRoutes);
+app.use('/api/compras/relatorios', authenticateToken, authorizeCompras, relatoriosRoutes);
 
 // ============ NF-e ENTRADA & RECEBIMENTO ROUTES ============
 // Rota de recebimento via pedido (match frontend: POST /api/compras/pedidos/:id/receber)
@@ -326,7 +328,7 @@ app.post('/api/compras/nf-entrada/importar-xml-texto', authenticateToken, async 
         });
     } catch (error) {
         console.error('[COMPRAS] Erro importar XML:', error);
-        res.status(500).json({ error: 'Erro ao importar XML: ' + error.message });
+        res.status(500).json({ error: 'Erro ao importar XML' });
     }
 });
 
@@ -334,40 +336,40 @@ app.post('/api/compras/nf-entrada/importar-xml-texto', authenticateToken, async 
 app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
     try {
         const conn = await mysqlPool.getConnection();
-        
+
         // Total de pedidos e valor
         const [totais] = await conn.query(`
-            SELECT 
+            SELECT
                 COUNT(*) as total_pedidos,
                 COALESCE(SUM(valor_total), 0) as valor_total_pedidos
             FROM pedidos_compra
         `);
-        
+
         // Pedidos por status
         const [porStatus] = await conn.query(`
             SELECT status, COUNT(*) as quantidade, COALESCE(SUM(valor_total), 0) as valor
             FROM pedidos_compra
             GROUP BY status
         `);
-        
+
         // Pedidos pendentes de aprovação
         const [pendentes] = await conn.query(`
             SELECT COUNT(*) as total FROM pedidos_compra WHERE status = 'pendente'
         `);
-        
+
         // Cotações abertas
         const [cotacoes] = await conn.query(`
             SELECT COUNT(*) as total FROM cotacoes WHERE status = 'aberta' OR status = 'em_analise'
         `).catch(() => [[{total: 0}]]);
-        
+
         // Fornecedores ativos
         const [fornecedores] = await conn.query(`
             SELECT COUNT(*) as total FROM fornecedores WHERE ativo = 1 OR ativo IS NULL
         `);
-        
+
         // Compras dos últimos 12 meses
         const [evolucaoMensal] = await conn.query(`
-            SELECT 
+            SELECT
                 DATE_FORMAT(data_pedido, '%Y-%m') as mes,
                 COUNT(*) as qtd_pedidos,
                 COALESCE(SUM(valor_total), 0) as valor
@@ -376,10 +378,10 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             GROUP BY DATE_FORMAT(data_pedido, '%Y-%m')
             ORDER BY mes ASC
         `);
-        
+
         // Top 5 fornecedores por valor
         const [topFornecedores] = await conn.query(`
-            SELECT 
+            SELECT
                 f.razao_social,
                 f.nome_fantasia,
                 COUNT(pc.id) as qtd_pedidos,
@@ -392,10 +394,10 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             ORDER BY valor_total DESC
             LIMIT 5
         `);
-        
+
         // Pedidos recentes (últimos 10)
         const [pedidosRecentes] = await conn.query(`
-            SELECT 
+            SELECT
                 pc.id,
                 pc.numero_pedido,
                 pc.status,
@@ -407,16 +409,16 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             ORDER BY pc.created_at DESC
             LIMIT 10
         `);
-        
+
         // Atividades recentes
         const [atividades] = await conn.query(`
-            SELECT * FROM compras_atividades 
-            ORDER BY created_at DESC 
+            SELECT * FROM compras_atividades
+            ORDER BY created_at DESC
             LIMIT 10
         `).catch(() => [[]]);
-        
+
         conn.release();
-        
+
         res.json({
             total_pedidos: totais[0].total_pedidos || 0,
             valor_total_pedidos: parseFloat(totais[0].valor_total_pedidos) || 0,
@@ -451,7 +453,7 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
 app.post('/api/pedidos', authenticateToken, requireComprasPermission('criar'), (req, res) => {
     const pedido = req.body;
     console.log('Novo pedido recebido:', pedido);
-    
+
     // Simular salvamento do pedido
     const novoPedido = {
         id: 'PC-' + Date.now().toString().slice(-6),
@@ -470,9 +472,8 @@ app.post('/api/pedidos', authenticateToken, requireComprasPermission('criar'), (
 // Error handling middleware
 app.use((err, req, res, next) => {
     console.error('❌ Erro:', err);
-    res.status(500).json({ 
-        error: 'Erro interno do servidor',
-        message: err.message 
+    res.status(500).json({
+        error: 'Erro interno do servidor'
     });
 });
 
@@ -487,7 +488,7 @@ async function startServer() {
         // Inicializar banco de dados
         await initDatabase();
         console.log('✅ Banco de dados inicializado');
-        
+
         // Iniciar servidor
         app.listen(PORT, () => {
             console.log(`🚀 Servidor de Compras rodando em http://localhost:${PORT}`);

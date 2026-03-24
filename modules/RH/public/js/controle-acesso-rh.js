@@ -1,6 +1,7 @@
 /**
  * Controle de Acesso RH - Restrição de Consultoria
- * 
+ * v2 - autenticação via cookie httpOnly (sem token JS)
+ *
  * Este script deve ser incluído em todas as páginas do módulo RH
  * Ele verifica se o usuário é do departamento Consultoria e
  * redireciona para o dashboard se tentar acessar outras páginas.
@@ -25,16 +26,9 @@
     
     async function verificarAcessoConsultoria() {
         try {
-            
-            if (!token) {
-                console.log('[RH Access] Token não encontrado, permitindo acesso padrão');
-                return; // Sem token, deixa o sistema de autenticação normal tratar
-            }
-            
             const response = await fetch('/api/me', {
                 credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
+                headers: { 'Content-Type': 'application/json' }
             });
             
             if (!response.ok) {

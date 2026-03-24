@@ -6,6 +6,14 @@
 // Variável global do usuário
 let usuarioLogado = null;
 
+// Sanitização XSS
+function escapeHtml(value) {
+    if (value === null || value === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(value);
+    return div.innerHTML;
+}
+
 // Fallback para VendasAuth caso não exista
 const VendasAuth = window.VendasAuth || {
     isAdmin: (user) => user && (user.role === 'admin' || user.cargo === 'admin'),
@@ -14,220 +22,9 @@ const VendasAuth = window.VendasAuth || {
     inicializarAuth: async () => null
 };
 
-// Dados seed (usado na primeira carga ou para reset local)
-const pedidosSeed = [
-    // ORÇAMENTOS
-    {
-        id: 9,
-        numero: 'Orçamento Nº 9',
-        cliente: 'TIAO MATERIAIS PARA CONSTRUCAO LTDA',
-        valor: 3700.0,
-        status: 'orcamento',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'a vista',
-        vendedor: 'Antonio',
-        data: '2025-12-01'
-    },
-    {
-        id: 8,
-        numero: 'Orçamento Nº 8',
-        cliente: 'COMERCIAL ELETRICA FABRO LTDA',
-        valor: 13084.67,
-        status: 'orcamento',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'em 3x',
-        vendedor: 'Maria',
-        data: '2025-12-02'
-    },
-    {
-        id: 5,
-        numero: 'Orçamento Nº 5',
-        cliente: 'AFS ELETRICA',
-        valor: 21615.0,
-        status: 'orcamento',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'em 4x',
-        vendedor: 'João',
-        data: '2025-11-28'
-    },
-    {
-        id: 10,
-        numero: 'Orçamento Nº 10',
-        cliente: 'COMERCIAL SILVA LTDA',
-        valor: 5400.00,
-        status: 'orcamento',
-        faturamento: 'Aguardando aprovação',
-        origem: 'Omie',
-        tipo: 'a vista',
-        vendedor: 'Antonio',
-        data: '2025-12-04'
-    },
-
-    // ANÁLISE DE CRÉDITO
-    {
-        id: 1357,
-        numero: 'Orçamento Nº 1357',
-        cliente: 'GASPARZINHO DISTRIBUIDORA DE MATERIAIS ELETRICOS LTDA',
-        valor: 7500.00,
-        status: 'analise-credito',
-        faturamento: 'Previsto para hoje',
-        origem: 'Omie',
-        transportadora: 'ACEVILLE TRANSPORTES LTDA',
-        tipo: 'em 3x',
-        vendedor: 'Maria',
-        data: '2025-12-03'
-    },
-    {
-        id: 1356,
-        numero: 'Orçamento Nº 1356',
-        cliente: 'CASA DAS CONEXOES',
-        valor: 5970.00,
-        status: 'analise-credito',
-        faturamento: 'Aguardando faturamento',
-        origem: 'Omie',
-        tipo: 'em 4x',
-        vendedor: 'João',
-        data: '2025-12-04'
-    },
-    {
-        id: 1345,
-        numero: 'Orçamento Nº 1345',
-        cliente: 'KCOAL TURISMO E LOCACAO',
-        valor: 46410.00,
-        status: 'analise-credito',
-        faturamento: 'Aguardando faturamento',
-        origem: 'Omie',
-        tipo: 'em 4x',
-        vendedor: 'Antonio',
-        data: '2025-12-05'
-    },
-
-    // PEDIDO APROVADO
-    {
-        id: 1177,
-        numero: 'Orçamento Nº 1177',
-        cliente: 'COMERCIAL MARTINS LTDA',
-        valor: 26092.00,
-        status: 'pedido-aprovado',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        transportadora: 'TRANSVALENI TRANSPORTES LTDA',
-        tipo: 'em 3x',
-        vendedor: 'Antonio',
-        data: '2025-12-02'
-    },
-    {
-        id: 1185,
-        numero: 'Orçamento Nº 1185',
-        cliente: 'ELECTRASUL DISTRIBUIDORA DE MATERIAIS ELETRICOS',
-        valor: 37910.00,
-        status: 'pedido-aprovado',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'em 5x',
-        vendedor: 'Maria',
-        data: '2025-12-01'
-    },
-    {
-        id: 1273,
-        numero: 'Orçamento Nº 1273',
-        cliente: 'COMERCIAL MARTINS LTDA',
-        valor: 12450.00,
-        status: 'pedido-aprovado',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'em 2x',
-        vendedor: 'João',
-        data: '2025-12-03'
-    },
-
-    // FATURAR
-    {
-        id: 3,
-        numero: 'Orçamento Nº 3',
-        cliente: 'ILUMINACAO PAULISTANA SPE S/A',
-        valor: 529.00,
-        status: 'faturar',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        vencimento: 'p/ 11/06 Qua',
-        tipo: 'a vista',
-        vendedor: 'Antonio',
-        data: '2025-12-06'
-    },
-    {
-        id: 56,
-        numero: 'Orçamento Nº 56',
-        cliente: 'BELLA ELETRICA E HIDRAULICA LTDA',
-        valor: 7224.00,
-        status: 'faturar',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'a vista',
-        vendedor: 'Maria',
-        data: '2025-12-06'
-    },
-    {
-        id: 151,
-        numero: 'Orçamento Nº 151',
-        cliente: 'JAF PAINEIS',
-        valor: 7991.71,
-        status: 'faturar',
-        faturamento: 'Faturamento atrasado',
-        origem: 'Omie',
-        tipo: 'em 3x',
-        vendedor: 'João',
-        data: '2025-12-07'
-    },
-
-    // FATURADO
-    {
-        id: 7513,
-        numero: 'Orçamento Nº 751/3',
-        cliente: 'ILUMINACAO PAULISTANA SPE S/A',
-        valor: 12781.80,
-        status: 'faturado',
-        faturamento: 'Faturado',
-        origem: 'Omie',
-        notaFiscal: '00000237',
-        manifestacao: 'Está ciente da operação',
-        vencimento: 'p/ 08/01/26 Qui',
-        tipo: 'parcelado',
-        vendedor: 'Antonio',
-        data: '2025-12-05'
-    },
-    {
-        id: 4739,
-        numero: 'Orçamento Nº 473/9',
-        cliente: 'ILUMINACAO PAULISTANA SPE S/A',
-        valor: 49863.60,
-        status: 'faturado',
-        faturamento: 'Faturado',
-        origem: 'Omie',
-        notaFiscal: '00000236',
-        manifestacao: 'Está ciente da operação',
-        vencimento: 'p/ 08/01/26 Qui',
-        tipo: 'parcelado',
-        vendedor: 'Maria',
-        data: '2025-12-02'
-    },
-    {
-        id: 1137,
-        numero: 'Orçamento Nº 1137',
-        cliente: 'COMERCIAL ELETRICA LTDA',
-        valor: 8540.00,
-        status: 'faturado',
-        faturamento: 'Faturado',
-        origem: 'Omie',
-        notaFiscal: '00000235',
-        tipo: 'em 4x',
-        vendedor: 'João',
-        data: '2025-12-01'
-    }
-];
+// Dados seed removidos por segurança (dados PII não devem estar no frontend)
+// Dados reais são carregados via API: GET /api/vendas/kanban/pedidos
+const pedidosSeed = [];
 
 let pedidos = [];
 
@@ -269,7 +66,7 @@ async function carregarPedidosDaAPI() {
         });
         if (!resp.ok) throw new Error(`Erro ${resp.status}`);
         const data = await resp.json();
-        let todosPedidos = (Array.isArray(data) && data.length ? data : [...pedidosSeed]).map(p => ({
+        let todosPedidos = (Array.isArray(data) && data.length ? data : []).map(p => ({
             ...p,
             vendedor: p.vendedor_nome || p.vendedor || '',
             data: p.data_criacao ? p.data_criacao.slice(0, 10) : p.data || '',
@@ -277,13 +74,13 @@ async function carregarPedidosDaAPI() {
             // Priorizar valor_total (soma dos itens) sobre valor do pedido
             valor: p.valor_total || p.valor || 0
         }));
-        
+
         // Filtrar pedidos por vendedor se não for admin
         if (usuarioLogado && !VendasAuth.isAdmin(usuarioLogado)) {
             const nomeVendedor = (usuarioLogado.nome ? usuarioLogado.nome.split(' ')[0] : '').toLowerCase();
             pedidos = todosPedidos.filter(p => {
                 const vendedorPedido = (p.vendedor || '').toLowerCase();
-                return vendedorPedido.includes(nomeVendedor) || 
+                return vendedorPedido.includes(nomeVendedor) ||
                        nomeVendedor.includes(vendedorPedido.split(' ')[0]);
             });
         } else {
@@ -291,8 +88,8 @@ async function carregarPedidosDaAPI() {
         }
     } catch (err) {
         console.error('Falha ao carregar pedidos do kanban', err);
-        pedidos = [...pedidosSeed];
-        mostrarNotificacao('Não foi possível carregar pedidos do servidor. Exibindo dados locais.', 'error');
+        pedidos = [];
+        mostrarNotificacao('Não foi possível carregar pedidos do servidor. Verifique sua conexão.', 'error');
     }
     renderizarKanban();
 }
@@ -320,8 +117,8 @@ function getFaturamentoClasse(faturamento) {
 function criarCardHTML(pedido) {
     // Linha do status de faturamento (vermelho se atrasado)
     const faturamentoClasse = getFaturamentoClasse(pedido.faturamento);
-    const faturamentoHTML = pedido.faturamento 
-        ? `<div class="card-faturamento ${faturamentoClasse}">${pedido.faturamento}</div>`
+    const faturamentoHTML = pedido.faturamento
+        ? `<div class="card-faturamento ${faturamentoClasse}">${escapeHtml(pedido.faturamento)}</div>`
         : '';
 
     // Valor com cifrão e tipo de pagamento
@@ -329,28 +126,28 @@ function criarCardHTML(pedido) {
     const tipoHTML = pedido.tipo ? ` ${pedido.tipo}` : '';
 
     // Vencimento (ex: "p/ 11/06 Qua")
-    const vencimentoHTML = pedido.vencimento 
+    const vencimentoHTML = pedido.vencimento
         ? `<div class="card-vencimento">$ ${valorFormatado} ${pedido.vencimento}</div>`
         : '';
 
     // Transportadora
     const transportadoraHTML = pedido.transportadora
-        ? `<div class="card-transportadora">Transportadora: ${pedido.transportadora}</div>`
+        ? `<div class="card-transportadora">Transportadora: ${escapeHtml(pedido.transportadora)}</div>`
         : '';
 
     // Nota Fiscal (para faturados)
     const notaFiscalHTML = pedido.notaFiscal
-        ? `<div class="card-nf">Nota Fiscal: ${pedido.notaFiscal}</div>`
+        ? `<div class="card-nf">Nota Fiscal: ${escapeHtml(pedido.notaFiscal)}</div>`
         : '';
 
     // Manifestação do cliente
     const manifestacaoHTML = pedido.manifestacao
-        ? `<div class="card-manifestacao"><i class="fas fa-clipboard-check"></i> Manifestação do cliente: "${pedido.manifestacao}"</div>`
+        ? `<div class="card-manifestacao"><i class="fas fa-clipboard-check"></i> Manifestação do cliente: "${escapeHtml(pedido.manifestacao)}"</div>`
         : '';
 
     // Origem (Omie)
-    const origemHTML = pedido.origem 
-        ? `<div class="card-origem">Origem: ${pedido.origem}</div>`
+    const origemHTML = pedido.origem
+        ? `<div class="card-origem">Origem: ${escapeHtml(pedido.origem)}</div>`
         : '';
 
     return `
@@ -363,7 +160,7 @@ function criarCardHTML(pedido) {
                     <i class="fas fa-ellipsis-v"></i>
                 </button>
             </div>
-            <div class="card-cliente">${pedido.cliente}</div>
+            <div class="card-cliente">${escapeHtml(pedido.cliente)}</div>
             ${faturamentoHTML}
             ${pedido.vencimento ? vencimentoHTML : `<div class="card-valor-row"><span class="card-valor-cifrao">$</span><span class="card-valor">${valorFormatado}</span><span class="card-tipo">${tipoHTML}</span></div>`}
             ${transportadoraHTML}
@@ -378,13 +175,21 @@ function criarCardHTML(pedido) {
 function renderizarKanban() {
     const filtrados = filtrarPedidos(pedidos);
 
+    // Mapeamento de status para IDs reais no DOM
+    const statusParaColunaDOM = {
+        'orcamento': 'col-orcamento',
+        'analise-credito': 'col-analise',
+        'pedido-aprovado': 'col-aprovado',
+        'faturar': 'col-faturar',
+        'faturado': 'col-faturado',
+        'recibo': 'col-recibo'
+    };
+
     // Limpar colunas
-    document.getElementById('col-orcamento').innerHTML = '';
-    document.getElementById('col-analise-credito').innerHTML = '';
-    document.getElementById('col-pedido-aprovado').innerHTML = '';
-    document.getElementById('col-faturar').innerHTML = '';
-    document.getElementById('col-faturado').innerHTML = '';
-    document.getElementById('col-recibo').innerHTML = '';
+    Object.values(statusParaColunaDOM).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = '';
+    });
 
     // Contadores e totais
     const contadores = {
@@ -396,17 +201,22 @@ function renderizarKanban() {
         recibo: { qnt: 0, total: 0 }
     };
 
-    // Inserir cards
+    // Agrupar HTML por coluna antes de inserir (evita reflow por iteração)
+    const htmlPorColuna = {};
     filtrados.forEach(pedido => {
         const cardHTML = criarCardHTML(pedido);
-        const colunaId = `col-${pedido.status}`;
+        const colunaId = statusParaColunaDOM[pedido.status] || `col-${pedido.status}`;
+
+        if (!htmlPorColuna[colunaId]) htmlPorColuna[colunaId] = '';
+        htmlPorColuna[colunaId] += cardHTML;
+        contadores[pedido.status].qnt++;
+        contadores[pedido.status].total += Number(pedido.valor || 0);
+    });
+
+    // Inserir HTML de uma vez por coluna (único reflow por coluna)
+    Object.entries(htmlPorColuna).forEach(([colunaId, html]) => {
         const coluna = document.getElementById(colunaId);
-        
-        if (coluna) {
-            coluna.innerHTML += cardHTML;
-            contadores[pedido.status].qnt++;
-            contadores[pedido.status].total += Number(pedido.valor || 0);
-        }
+        if (coluna) coluna.innerHTML = html;
     });
 
     // Atualizar contadores nas colunas
@@ -456,40 +266,46 @@ function atualizarContadores(contadores) {
 let draggedCard = null;
 let isDragging = false;
 let clickTimeout = null;
+let columnDndConfigured = false; // S3-22: evitar duplicação de listeners nas colunas
 
 function configurarDragAndDrop() {
+    // Drag listeners nos cards (dragstart/dragend são necessários por card para dataTransfer)
     const cards = document.querySelectorAll('.kanban-card');
-    const colunas = document.querySelectorAll('.kanban-column-content');
-
     cards.forEach(card => {
+        if (card._dndBound) return; // Evitar listeners duplicados
+        card._dndBound = true;
         card.addEventListener('dragstart', handleDragStart);
         card.addEventListener('dragend', handleDragEnd);
-        
-        // Clique simples abre o modal (com pequeno delay para não conflitar com drag)
-        card.addEventListener('click', (e) => {
-            // Ignorar se clicou no botão de menu
-            if (e.target.closest('.card-menu-btn')) return;
-            
-            // Se estava arrastando, não abrir modal
-            if (isDragging) return;
-            
-            const id = card.getAttribute('data-id');
-            abrirModalEditarPedido(id);
-        });
-        
-        // Manter dblclick como alternativa
-        card.addEventListener('dblclick', () => {
-            const id = card.getAttribute('data-id');
-            abrirModalEditarPedido(id);
-        });
     });
 
-    colunas.forEach(coluna => {
-        coluna.addEventListener('dragover', handleDragOver);
-        coluna.addEventListener('drop', handleDrop);
-        coluna.addEventListener('dragenter', handleDragEnter);
-        coluna.addEventListener('dragleave', handleDragLeave);
-    });
+    // S3-22: Event delegation para click/dblclick + colunas (uma vez só)
+    if (!columnDndConfigured) {
+        const kanbanBoard = document.querySelector('.kanban-board') || document.querySelector('.kanban-columns');
+        if (kanbanBoard) {
+            // Click delegation — evita N listeners por card
+            kanbanBoard.addEventListener('click', (e) => {
+                if (e.target.closest('.card-menu-btn')) return;
+                if (isDragging) return;
+                const card = e.target.closest('.kanban-card');
+                if (!card) return;
+                abrirModalEditarPedido(card.getAttribute('data-id'));
+            });
+            kanbanBoard.addEventListener('dblclick', (e) => {
+                const card = e.target.closest('.kanban-card');
+                if (!card) return;
+                abrirModalEditarPedido(card.getAttribute('data-id'));
+            });
+        }
+
+        const colunas = document.querySelectorAll('.kanban-column-content');
+        colunas.forEach(coluna => {
+            coluna.addEventListener('dragover', handleDragOver);
+            coluna.addEventListener('drop', handleDrop);
+            coluna.addEventListener('dragenter', handleDragEnter);
+            coluna.addEventListener('dragleave', handleDragLeave);
+        });
+        columnDndConfigured = true;
+    }
 }
 
 function handleDragStart(e) {
@@ -533,34 +349,34 @@ function handleDrop(e) {
         const cardId = draggedCard.getAttribute('data-id');
         const novaColuna = this.id.replace('col-', '');
         const statusAnterior = draggedCard.dataset.status;
-        
+
         // Verificar permissão de movimentação
         if (typeof VendasAuth.podeMoverPedido === 'function' && !VendasAuth.podeMoverPedido(usuarioLogado, statusAnterior, novaColuna)) {
             mostrarNotificacao('Você não tem permissão para mover este pedido para esta etapa.', 'error');
             this.style.background = '';
             return false;
         }
-        
+
         // Remover card da posição original
         draggedCard.remove();
-        
+
         // Adicionar card na nova coluna
         this.appendChild(draggedCard);
-        
+
         // Atualizar status do pedido
         const pedido = pedidos.find(p => p.id == cardId);
         if (pedido) {
             pedido.status = novaColuna;
             renderizarKanban();
-            salvarStatusPedido(cardId, novaColuna).catch(() => {
+            salvarStatusPedido(cardId, novaColuna).then(() => {
+                mostrarNotificacao('Pedido movido com sucesso!', 'success');
+            }).catch(() => {
                 // rollback visual
                 pedido.status = statusAnterior || pedido.status;
                 renderizarKanban();
                 mostrarNotificacao('Falha ao salvar no servidor. Status revertido.', 'error');
             });
         }
-        // Feedback visual
-        mostrarNotificacao('Pedido movido com sucesso!', 'success');
     }
 
     this.style.background = '';
@@ -602,16 +418,16 @@ async function salvarStatusPedido(id, status) {
 async function excluirPedidoAtual() {
     const form = document.getElementById('form-novo-pedido');
     const id = form?.dataset.pedidoId;
-    
+
     if (!id) {
         mostrarNotificacao('Nenhum pedido selecionado para excluir.', 'error');
         return;
     }
-    
+
     // Confirmação
-    const confirmar = confirm('Tem certeza que deseja excluir este pedido?Esta ação não pode ser desfeita.');
+    const confirmar = confirm('Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.');
     if (!confirmar) return;
-    
+
     try {
         const resp = await fetch(`/api/vendas/pedidos/${id}`, {
             method: 'DELETE',
@@ -620,23 +436,23 @@ async function excluirPedidoAtual() {
                 'Content-Type': 'application/json'
             }
         });
-        
+
         if (!resp.ok) {
             const errorData = await resp.json().catch(() => ({}));
             throw new Error(errorData.message || 'Erro ao excluir pedido');
         }
-        
+
         // Remover do array local
         const idx = pedidos.findIndex(p => p.id == id);
         if (idx !== -1) {
             pedidos.splice(idx, 1);
         }
-        
+
         // Fechar modal e atualizar kanban
         fecharModalNovoPedido();
         renderizarKanban();
         mostrarNotificacao('Pedido excluído com sucesso!', 'success');
-        
+
     } catch (err) {
         console.error('Erro ao excluir pedido:', err);
         mostrarNotificacao(err.message || 'Falha ao excluir pedido', 'error');
@@ -648,20 +464,20 @@ function abrirModalNovoPedido(tipo = 'orcamento') {
     console.log('[Kanban] abrirModalNovoPedido - tipo:', tipo);
     const modal = document.getElementById('modal-novo-pedido');
     const form = document.getElementById('form-novo-pedido');
-    
+
     console.log('[Kanban] Modal encontrado:', !!modal);
     console.log('[Kanban] Form encontrado:', !!form);
-    
+
     if (form) {
         form.reset();
         form.dataset.modo = 'novo';
         form.dataset.pedidoId = '';
         form.dataset.tipo = tipo;
-        
+
         // Define título baseado no tipo
         const tituloH3 = modal.querySelector('.modal-head h3');
         const eyebrow = modal.querySelector('.modal-eyebrow');
-        
+
         if (tipo === 'venda') {
             if (tituloH3) tituloH3.textContent = 'Novo Pedido de Venda';
             if (eyebrow) eyebrow.textContent = 'Criar Pedido';
@@ -669,22 +485,22 @@ function abrirModalNovoPedido(tipo = 'orcamento') {
             if (tituloH3) tituloH3.textContent = 'Novo Orçamento';
             if (eyebrow) eyebrow.textContent = 'Criar Orçamento';
         }
-        
+
         // Limpa campo número e define data atual
         const numeroInput = form.querySelector('[name="numero"]');
         if (numeroInput) numeroInput.value = '';
-        
+
         const hoje = new Date().toISOString().split('T')[0];
         const dataSpan = modal.querySelector('.modal-resumo-data');
         if (dataSpan) dataSpan.textContent = hoje;
-        
+
         // Limpa status para orçamento por padrão
         const statusSelect = form.querySelector('[name="status"]');
         if (statusSelect) statusSelect.value = tipo === 'venda' ? 'analise' : 'orcamento';
     }
-    
+
     preencherResumoModal({});
-    
+
     if (modal) {
         modal.classList.add('aberto');
         console.log('[Kanban] Modal aberto com sucesso!');
@@ -715,22 +531,22 @@ function popularFormPedido(pedido) {
     const form = document.getElementById('form-novo-pedido');
     console.log('[Kanban] popularFormPedido - Form encontrado:', !!form);
     console.log('[Kanban] popularFormPedido - Dados recebidos:', pedido);
-    
+
     if (!form) {
         console.error('[Kanban] Form não encontrado!');
         return;
     }
-    
+
     // Definir IDs e modo
     form.dataset.pedidoId = pedido.id || '';
     form.dataset.modo = pedido.id ? 'editar' : 'novo';
-    
+
     // Campos hidden
     const clienteIdInput = form.querySelector('[name="cliente_id"]');
     const empresaIdInput = form.querySelector('[name="empresa_id"]');
     if (clienteIdInput) clienteIdInput.value = pedido.cliente_id || '';
     if (empresaIdInput) empresaIdInput.value = pedido.empresa_id || '';
-    
+
     // Campos do formulário - com verificação de existência
     const setInputValue = (name, value) => {
         const input = form.querySelector(`[name="${name}"]`);
@@ -739,13 +555,11 @@ function popularFormPedido(pedido) {
             input.value = value ?? '';
         }
     };
-        if (input) input.value = value ?? '';
-    };
-    
+
     // Número do pedido
     const numeroStr = pedido.numero || '';
     setInputValue('numero', numeroStr.replace(/^(Pedido|Orçamento) Nº /i, ''));
-    
+
     // Dados básicos
     setInputValue('cliente', pedido.cliente || pedido.cliente_nome || '');
     // Priorizar valor_total (soma dos itens) sobre valor do pedido
@@ -755,14 +569,14 @@ function popularFormPedido(pedido) {
     setInputValue('faturamento', pedido.faturamento || '');
     setInputValue('vendedor', pedido.vendedor || pedido.vendedor_nome || '');
     setInputValue('origem', pedido.origem || 'Sistema');
-    
+
     // Data
     let dataFormatada = pedido.data || '';
     if (pedido.created_at && !dataFormatada) {
         dataFormatada = new Date(pedido.created_at).toISOString().slice(0, 10);
     }
     setInputValue('data', dataFormatada);
-    
+
     // Campos adicionais
     setInputValue('vencimento', pedido.vencimento || pedido.prazo_entrega || '');
     setInputValue('transportadora', pedido.transportadora || pedido.metodo_envio || '');
@@ -772,19 +586,19 @@ function popularFormPedido(pedido) {
     setInputValue('frete', pedido.frete || 0);
     setInputValue('endereco_entrega', pedido.endereco_entrega || '');
     setInputValue('municipio_entrega', pedido.municipio_entrega || '');
-    
+
     // Produtos
     const produtosInput = form.querySelector('[name="produtos"]');
     if (produtosInput) {
         const produtos = pedido.produtos || [];
-        produtosInput.value = Array.isArray(produtos) && produtos.length > 0 
-            ? JSON.stringify(produtos, null, 2) 
+        produtosInput.value = Array.isArray(produtos) && produtos.length > 0
+            ? JSON.stringify(produtos, null, 2)
             : '';
     }
-    
+
     // Atualizar tabela de produtos na aba de impressão
     atualizarTabelaProdutos(pedido.produtos || []);
-    
+
     // Atualizar resumo do modal
     preencherResumoModal(pedido);
 }
@@ -793,7 +607,7 @@ function popularFormPedido(pedido) {
 function atualizarTabelaProdutos(produtos) {
     const tbody = document.querySelector('#tab-impressao .resumo-table tbody');
     if (!tbody) return;
-    
+
     if (!Array.isArray(produtos) || produtos.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -802,7 +616,7 @@ function atualizarTabelaProdutos(produtos) {
         `;
         return;
     }
-    
+
     let total = 0;
     const rows = produtos.map(p => {
         const qty = parseFloat(p.quantidade) || 1;
@@ -811,14 +625,14 @@ function atualizarTabelaProdutos(produtos) {
         total += subtotal;
         return `
             <tr>
-                <td>${p.descricao || p.nome || 'Produto'}</td>
+                <td>${escapeHtml(p.descricao || p.nome || 'Produto')}</td>
                 <td>${qty}</td>
                 <td>${formatarMoeda(preco)}</td>
                 <td>${formatarMoeda(subtotal)}</td>
             </tr>
         `;
     }).join('');
-    
+
     tbody.innerHTML = rows + `
         <tr>
             <td class="resumo-total-label" colspan="3">Valor Total</td>
@@ -847,23 +661,23 @@ function preencherResumoModal(pedido = {}) {
 async function abrirModalEditarPedido(id) {
     try {
         console.log('[Kanban] Abrindo modal para pedido ID:', id);
-        
+
         // Primeiro busca os dados locais do kanban (sempre disponíveis)
         const pedidoLocal = pedidos.find(p => p.id == id);
         console.log('[Kanban] Pedido local encontrado:', pedidoLocal);
-        
+
         // Tenta buscar dados atualizados da API
         let pedidoDetalhe = pedidoLocal || {};
-        
+
         try {
             const resp = await fetch(`/api/vendas/pedidos/${id}`, {
                 credentials: 'include'
             });
-            
+
             if (resp.ok) {
                 const dados = await resp.json();
                 console.log('[Kanban] Dados da API:', dados);
-                
+
                 // Se a API retornou dados válidos, usar eles
                 if (dados && (dados.id || dados.valor_total || dados.valor || dados.cliente_nome)) {
                     pedidoDetalhe = {
@@ -881,16 +695,16 @@ async function abrirModalEditarPedido(id) {
         } catch (apiError) {
             console.warn('[Kanban] Erro ao buscar API, usando dados locais:', apiError);
         }
-        
+
         console.log('[Kanban] Dados finais para o modal:', pedidoDetalhe);
-        
+
         // IMPORTANTE: Primeiro abre o modal (que reseta o form), depois popula os dados
         const modal = document.getElementById('modal-novo-pedido');
         if (modal) modal.classList.add('aberto');
-        
+
         // Agora popula o form com os dados do pedido
         popularFormPedido(pedidoDetalhe);
-        
+
     } catch (err) {
         console.error('Erro ao abrir edição', err);
         mostrarNotificacao('Erro ao carregar pedido para edição', 'error');
@@ -923,7 +737,7 @@ function salvarNovoPedido(event) {
     const form = event.target;
     const dados = Object.fromEntries(new FormData(form));
     const id = form.dataset.pedidoId || null;
-    
+
     // Construir payload com campos corretos da tabela
     const payload = {
         cliente_id: dados.cliente_id ? Number(dados.cliente_id) : null,
@@ -961,12 +775,12 @@ function salvarNovoPedido(event) {
                     };
                 }
             }
-            
+
             form.reset();
             form.dataset.pedidoId = '';
             form.dataset.modo = 'novo';
             fecharModalNovoPedido();
-            
+
             // Recarregar dados do servidor para garantir sincronização
             carregarPedidosDaAPI();
             mostrarNotificacao(id ? 'Pedido atualizado com sucesso!' : 'Pedido criado com sucesso!', 'success');
@@ -984,7 +798,7 @@ async function carregarUsuario() {
         usuarioLogado = await window.VendasAuth.inicializarAuth();
         if (usuarioLogado) return;
     }
-    
+
     // Buscar diretamente da API usando cookies
     try {
         const response = await fetch('/api/usuario/atual', { credentials: 'include' });
@@ -1018,8 +832,8 @@ function filtrarPedidos(base) {
     const vendedor = selectVendedor?.value || '';
 
     return base.filter(p => {
-        const matchTexto = !termo || 
-            (p.cliente && p.cliente.toLowerCase().includes(termo)) || 
+        const matchTexto = !termo ||
+            (p.cliente && p.cliente.toLowerCase().includes(termo)) ||
             (p.numero && p.numero.toLowerCase().includes(termo));
         const matchVendedor = !vendedor || (p.vendedor || '').toLowerCase().includes(vendedor.toLowerCase());
         const matchPeriodo = validarPeriodo(periodo, p.data);
@@ -1073,11 +887,11 @@ function limparFiltros() {
     const periodoSelect = document.getElementById('filtro-periodo');
     const vendedorSelect = document.getElementById('filtro-vendedor');
     const buscaInput = document.getElementById('filtro-busca');
-    
+
     if (periodoSelect) periodoSelect.selectedIndex = 0;
     if (vendedorSelect) vendedorSelect.selectedIndex = 0;
     if (buscaInput) buscaInput.value = '';
-    
+
     // Também limpar em filtros-bar se existir
     const inputs = document.querySelectorAll('.filtros-bar input, .filtros-bar select, .kanban-toolbar input, .kanban-toolbar select');
     inputs.forEach(input => {
@@ -1115,10 +929,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLimpar = document.querySelector('.btn-limpar');
     const buscaInput = document.querySelector('.filtros-bar input[type="text"]');
     const selects = document.querySelectorAll('.filtros-bar select');
-    
+
     if (btnFiltrar) btnFiltrar.addEventListener('click', aplicarFiltros);
     if (btnLimpar) btnLimpar.addEventListener('click', limparFiltros);
-    if (buscaInput) buscaInput.addEventListener('input', aplicarFiltros);
+    // Debounce no input de busca para evitar re-render a cada tecla
+    let _filterTimeout;
+    if (buscaInput) buscaInput.addEventListener('input', () => {
+        clearTimeout(_filterTimeout);
+        _filterTimeout = setTimeout(aplicarFiltros, 300);
+    });
     selects.forEach(sel => sel.addEventListener('change', aplicarFiltros));
 
     const tabButtons = document.querySelectorAll('.tab-btn');
@@ -1155,7 +974,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (modalClose) modalClose.addEventListener('click', fecharModalNovoPedido);
     if (modal) modal.addEventListener('click', e => { if (e.target === modal) fecharModalNovoPedido(); });
-    
+
     // EXPOR FUNÇÕES PARA O ESCOPO GLOBAL (para onclick no HTML)
     window.abrirModalNovoOrcamento = abrirModalNovoOrcamento;
     window.abrirModalNovoPedidoVenda = abrirModalNovoPedidoVenda;

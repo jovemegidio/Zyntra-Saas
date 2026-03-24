@@ -22,10 +22,10 @@
     // ── Configuração de Navegação ───────────────────
     const NAV_ITEMS = [
         { id: 'dashboard', href: 'index.html',       icon: 'fas fa-chart-pie',      label: 'Dashboard' },
-        { id: 'emitir',    href: 'emitir.html',      icon: 'fas fa-file-invoice',   label: 'Emitir NFe' },
+        // { id: 'emitir',    href: 'emitir.html',      icon: 'fas fa-file-invoice',   label: 'Emitir NFe' },
         { id: 'consultar', href: 'consultar.html',   icon: 'fas fa-search',         label: 'Consultar NFe' },
-        { id: 'nfse',      href: 'nfse.html',        icon: 'fas fa-file-contract',  label: 'NFSe - Serviços' },
-        { id: 'danfe',     href: 'danfe.html',       icon: 'fas fa-print',          label: 'Gerar DANFE' },
+        // { id: 'nfse',      href: 'nfse.html',        icon: 'fas fa-file-contract',  label: 'NFSe - Serviços' },
+        // { id: 'danfe',     href: 'danfe.html',       icon: 'fas fa-print',          label: 'Gerar DANFE' },
         { id: 'relatorios',href: 'relatorios.html',  icon: 'fas fa-chart-bar',      label: 'Relatórios' },
         { id: 'eventos',   href: 'eventos.html',     icon: 'fas fa-history',        label: 'Eventos' },
         { id: 'logistica', href: 'logistica.html',   icon: 'fas fa-truck',          label: 'Logística' },
@@ -36,7 +36,7 @@
 
     const TAB_ITEMS = [
         { id: 'dashboard', href: 'index.html',     icon: 'fas fa-chart-pie',      label: 'Dashboard' },
-        { id: 'emitir',    href: 'emitir.html',    icon: 'fas fa-file-invoice',   label: 'Emitir NFe' },
+        // { id: 'emitir',    href: 'emitir.html',    icon: 'fas fa-file-invoice',   label: 'Emitir NFe' },
         { id: 'consultar', href: 'consultar.html', icon: 'fas fa-search',         label: 'Consultar' },
     ];
 

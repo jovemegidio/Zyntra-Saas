@@ -35,19 +35,19 @@ class ComprasDashboard {
         try {
             // Buscar dados da API
             const response = await fetch('/api/compras/dashboard', { credentials: 'include' });
-            
+
             if (!response.ok) throw new Error('Erro na API');
-            
+
             const apiData = await response.json();
             console.log('📊 Dados da API:', apiData);
-            
+
             // Processar pedidos por status
             const statusMap = {};
             let totalPedidos = 0;
             let pedidosPendentes = 0;
             let pedidosAprovados = 0;
             let pedidosEntregues = 0;
-            
+
             if (apiData.pedidos_por_status) {
                 apiData.pedidos_por_status.forEach(s => {
                     statusMap[s.status] = s.quantidade;
@@ -57,7 +57,7 @@ class ComprasDashboard {
                     if (s.status === 'recebido' || s.status === 'entregue') pedidosEntregues += s.quantidade;
                 });
             }
-            
+
             // Métricas principais
             this.data.metricas = {
                 totalCompras: {
@@ -134,9 +134,9 @@ class ComprasDashboard {
             } else {
                 this.data.topFornecedores = [];
             }
-            
+
             console.log('✅ Dados carregados com sucesso da API');
-            
+
         } catch (error) {
             console.error('❌ Erro ao carregar dados da API:', error);
             // Inicializar com dados vazios
@@ -205,7 +205,7 @@ class ComprasDashboard {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         this.charts.evolucao = new Chart(ctx, {
             type: 'line',
             data: {
@@ -286,7 +286,7 @@ class ComprasDashboard {
         if (!canvas) return;
 
         const ctx = canvas.getContext('2d');
-        
+
         this.charts.categorias = new Chart(ctx, {
             type: 'doughnut',
             data: {
@@ -448,14 +448,14 @@ class ComprasDashboard {
     // Ações
     verDetalhesOrdem(ordemId) {
         console.log(`📋 Ver detalhes da ordem: ${ordemId}`);
-        
+
         // Buscar dados da ordem
         const ordem = this.data.ordensRecentes.find(o => o.id === ordemId);
         if (!ordem) {
             this.mostrarNotificacao('Ordem não encontrada', 'error');
             return;
         }
-        
+
         // Criar modal de detalhes
         const modalHTML = `
             <div class="modal-overlay" id="modal-detalhes-ordem" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
@@ -503,20 +503,20 @@ class ComprasDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
 
     editarOrdem(ordemId) {
         console.log(`✏️ Editar ordem: ${ordemId}`);
-        
+
         // Buscar dados da ordem
         const ordem = this.data.ordensRecentes.find(o => o.id === ordemId);
         if (!ordem) {
             this.mostrarNotificacao('Ordem não encontrada', 'error');
             return;
         }
-        
+
         // Criar modal de edição
         const modalHTML = `
             <div class="modal-overlay" id="modal-editar-ordem" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 9999;">
@@ -574,19 +574,19 @@ class ComprasDashboard {
                 </div>
             </div>
         `;
-        
+
         document.body.insertAdjacentHTML('beforeend', modalHTML);
     }
-    
+
     async salvarEdicaoOrdem(ordemId) {
         const fornecedor = document.getElementById('edit-fornecedor').value;
         const data = document.getElementById('edit-data').value;
         const prazo = document.getElementById('edit-prazo').value;
         const valor = document.getElementById('edit-valor').value;
         const status = document.getElementById('edit-status').value;
-        
+
         console.log('Salvando edição da ordem:', { ordemId, fornecedor, data, prazo, valor, status });
-        
+
         try {
             const response = await fetch(`/api/compras/pedidos/${ordemId}`, {
                 method: 'PUT',
@@ -594,7 +594,7 @@ class ComprasDashboard {
                 credentials: 'include',
                 body: JSON.stringify({ fornecedor, data, prazo, valor: parseFloat(valor), status })
             });
-            
+
             if (response.ok) {
                 this.mostrarNotificacao('Ordem atualizada com sucesso!', 'success');
                 document.getElementById('modal-editar-ordem').remove();
@@ -608,12 +608,12 @@ class ComprasDashboard {
             this.mostrarNotificacao('Erro ao conectar com o servidor', 'error');
         }
     }
-    
+
     imprimirOrdem(ordemId) {
         console.log('Imprimindo ordem:', ordemId);
         window.print();
     }
-    
+
     mostrarNotificacao(mensagem, tipo = 'info') {
         const cores = {
             success: '#6366f1',
@@ -621,7 +621,7 @@ class ComprasDashboard {
             warning: '#f59e0b',
             info: '#6366f1'
         };
-        
+
         const notif = document.createElement('div');
         notif.style.cssText = `
             position: fixed; top: 20px; right: 20px; z-index: 10000;
@@ -631,13 +631,13 @@ class ComprasDashboard {
         `;
         notif.innerHTML = `<i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'times-circle' : 'info-circle'}"></i> ${mensagem}`;
         document.body.appendChild(notif);
-        
+
         setTimeout(() => notif.remove(), 3000);
     }
 
     async atualizarDados(evt) {
         console.log('🔄 Atualizando dados do dashboard...');
-        
+
         // Simular loading
         const e = evt || window.event;
         const btn = e && e.target ? e.target.closest('button') : null;
@@ -658,16 +658,23 @@ class ComprasDashboard {
             btn.innerHTML = originalContent;
             btn.disabled = false;
         }
-        
+
         console.log('✅ Dados atualizados!');
     }
 
     iniciarAtualizacaoAutomatica() {
         // Atualizar dados a cada 5 minutos
-        setInterval(() => {
+        this._autoRefreshInterval = setInterval(() => {
             console.log('🔄 Atualização automática...');
             this.carregarDados();
         }, 300000);
+    }
+
+    pararAtualizacaoAutomatica() {
+        if (this._autoRefreshInterval) {
+            clearInterval(this._autoRefreshInterval);
+            this._autoRefreshInterval = null;
+        }
     }
 
     // Utilitários
@@ -701,7 +708,7 @@ function toggleDarkMode() {
     document.body.classList.toggle('dark-mode');
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('darkMode', isDark);
-    
+
     const btn = document.getElementById('btnModoEscuro');
     if (btn) {
         btn.querySelector('i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
@@ -711,7 +718,7 @@ function toggleDarkMode() {
 function toggleView(mode) {
     const btnGrid = document.getElementById('btnViewGrid');
     const btnList = document.getElementById('btnViewList');
-    
+
     if (mode === 'grid') {
         btnGrid?.classList.add('active');
         btnList?.classList.remove('active');
@@ -747,7 +754,7 @@ function inicializarUsuario() {
         let saudacao = 'Bom dia';
         if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
         else if (hora >= 18 || hora < 5) saudacao = 'Boa noite';
-        
+
         // Usar apelido se disponível, senão primeiro nome
         const primeiroNome = usuario.apelido || (usuario.nome ? usuario.nome.split(' ')[0] : 'Usuário');
         userGreeting.textContent = `${saudacao}, ${primeiroNome}`;
@@ -770,7 +777,7 @@ if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.dashboard = new ComprasDashboard();
         inicializarUsuario();
-        
+
         // Verificar dark mode salvo
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
@@ -781,7 +788,7 @@ if (document.readyState === 'loading') {
 } else {
     window.dashboard = new ComprasDashboard();
     inicializarUsuario();
-    
+
     if (localStorage.getItem('darkMode') === 'true') {
         document.body.classList.add('dark-mode');
         const btn = document.getElementById('btnModoEscuro');

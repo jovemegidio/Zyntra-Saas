@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zyntra - Sistema de Gestão Empresarial</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ===== SPLASH SCREEN ===== -->
+    <div class="splash" id="splash">
+        <!-- Background: wallpaper image + overlays -->
+        <div class="splash-bg">
+            <div class="splash-bg-image"></div>
+            <div class="splash-bg-overlay"></div>
+            <div class="splash-bg-vignette"></div>
+        </div>
+
+        <!-- Central content (positioned at bottom due to wallpaper having logo centered) -->
+        <div class="splash-main">
+            <!-- Tagline -->
+            <p class="tagline">Sistema de Gestão Empresarial</p>
+
+            <!-- Decorative line -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-diamond"></div>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- Progress section -->
+            <div class="progress-section" id="progressSection">
+                <div class="progress-track">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-info">
+                    <span class="progress-step" id="progressStep">Inicializando sistema...</span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+            </div>
+
+            <!-- Error state (hidden) -->
+            <div class="error-state" id="errorState" style="display:none;">
+                <div class="error-icon-wrap">
+                    <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                    </svg>
+                </div>
+                <p class="error-title">Falha na Conexão</p>
+                <p class="error-msg" id="errorMsg">Não foi possível conectar ao servidor.</p>
+                <div class="error-actions">
+                    <button class="btn-retry" onclick="retryConnection()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182"/>
+                        </svg>
+                        Tentar Novamente
+                    </button>
+                    <button class="btn-settings" onclick="openSettings()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        Configurações
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="splash-footer">
+            <span class="footer-version" id="versionText">v2.2.0</span>
+            <span class="footer-sep">·</span>
+            <span class="footer-brand">#ZyntraLovers</span>
+        </div>
+    </div>
+
+    <!-- ===== SETTINGS MODAL ===== -->
+    <div class="modal-overlay" id="settingsModal" style="display:none;" onclick="if(event.target===this)closeSettings()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Configurações de Conexão</h3>
+                <button class="modal-close" onclick="closeSettings()" aria-label="Fechar">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label class="field-label" for="serverUrl">Endereço do Servidor</label>
+                <input type="url" id="serverUrl" class="field-input" placeholder="http://servidor:3000" spellcheck="false" autocomplete="off">
+                <p class="field-hint">Endereço completo do servidor Zyntra incluindo a porta.</p>
+
+                <div class="conn-test" id="connectionTest" style="display:none;">
+                    <span class="test-icon" id="testIcon">⏳</span>
+                    <span class="test-result" id="testResult">Testando conexão...</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" onclick="testConnection()">Testar Conexão</button>
+                <button class="btn-primary" onclick="saveSettings()">Salvar e Conectar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  ZYNTRA — Desktop Splash Loader
+        // ============================================================
+        const DEFAULT_SERVER  = 'https://aluforce.api.br';
+        const SERVER_URL_KEY  = 'zyntra_server_url';
+
+        const STEPS = [
+            { text: 'Inicializando sistema...',       pct: 8  },
+            { text: 'Carregando configurações...',    pct: 18 },
+            { text: 'Verificando conectividade...',   pct: 32 },
+            { text: 'Conectando ao servidor...',      pct: 52 },
+            { text: 'Autenticando serviços...',       pct: 72 },
+            { text: 'Preparando interface...',        pct: 88 },
+            { text: 'Pronto!',                        pct: 100 },
+        ];
+
+        // ---- helpers ----
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        const getServerUrl = () => localStorage.getItem(SERVER_URL_KEY) || DEFAULT_SERVER;
+
+        function setProgress(text, pct) {
+            const fill = document.getElementById('progressFill');
+            const step = document.getElementById('progressStep');
+            const pctEl = document.getElementById('progressPct');
+            if (fill) fill.style.width = pct + '%';
+            if (step) step.textContent = text;
+            if (pctEl) pctEl.textContent = pct + '%';
+        }
+
+        function showError(msg) {
+            document.getElementById('progressSection').style.display = 'none';
+            const err = document.getElementById('errorState');
+            err.style.display = 'flex';
+            document.getElementById('errorMsg').textContent = msg;
+        }
+
+        function hideError() {
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('progressSection').style.display = 'block';
+        }
+
+        // ---- server check ----
+        async function checkHealth(url) {
+            try {
+                if (window.__TAURI__) {
+                    const res = await window.__TAURI__.core.invoke('check_server_health', { serverUrl: url });
+                    return { ok: true, data: JSON.parse(res) };
+                }
+                const r = await fetch(url + '/api/health', { method: 'GET', signal: AbortSignal.timeout(10000) });
+                const d = await r.json();
+                return { ok: r.ok, data: d };
+            } catch (e) {
+                return { ok: false, error: e.message };
+            }
+        }
+
+        // ---- startup sequence ----
+        async function startApp() {
+            const serverUrl = getServerUrl();
+            try {
+                setProgress(STEPS[0].text, STEPS[0].pct);
+                await sleep(350);
+
+                setProgress(STEPS[1].text, STEPS[1].pct);
+                await sleep(280);
+
+                setProgress(STEPS[2].text, STEPS[2].pct);
+                await sleep(200);
+
+                setProgress(STEPS[3].text, STEPS[3].pct);
+                const health = await checkHealth(serverUrl);
+                if (!health.ok) {
+                    throw new Error('Servidor não respondeu. Verifique a conexão e o endereço do servidor.');
+                }
+
+                setProgress(STEPS[4].text, STEPS[4].pct);
+                await sleep(300);
+
+                setProgress(STEPS[5].text, STEPS[5].pct);
+                await sleep(350);
+
+                setProgress(STEPS[6].text, STEPS[6].pct);
+                await sleep(500);
+
+                window.location.href = serverUrl + '/login.html';
+            } catch (err) {
+                console.error('Startup error:', err);
+                showError(err.message || 'Erro desconhecido ao conectar ao servidor.');
+            }
+        }
+
+        // ---- actions ----
+        function retryConnection() { hideError(); setProgress('Reconectando...', 0); startApp(); }
+
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'flex';
+            document.getElementById('serverUrl').value = getServerUrl();
+            document.getElementById('connectionTest').style.display = 'none';
+        }
+        function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+
+        async function testConnection() {
+            const url  = document.getElementById('serverUrl').value.trim();
+            const area = document.getElementById('connectionTest');
+            const icon = document.getElementById('testIcon');
+            const res  = document.getElementById('testResult');
+            area.style.display = 'flex';
+            icon.textContent = '⏳'; res.textContent = 'Testando conexão...';
+            res.className = 'test-result';
+            const h = await checkHealth(url);
+            if (h.ok) {
+                icon.textContent = '✅';
+                res.textContent = 'Conectado — ' + (h.data?.server || 'OK') + ' (' + (h.data?.database?.latency || '?') + ')';
+                res.className = 'test-result success';
+            } else {
+                icon.textContent = '❌';
+                res.textContent = 'Falha: ' + (h.error || 'Sem resposta');
+                res.className = 'test-result error';
+            }
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('serverUrl').value.trim();
+            if (url) localStorage.setItem(SERVER_URL_KEY, url);
+            closeSettings(); retryConnection();
+        }
+
+        // ---- version ----
+        async function loadVersion() {
+            try {
+                if (window.__TAURI__) {
+                    const v = await window.__TAURI__.core.invoke('get_app_version');
+                    document.getElementById('versionText').textContent = 'v' + v;
+                }
+            } catch (_) {}
+        }
+
+        // ---- init ----
+        document.addEventListener('DOMContentLoaded', () => {
+            loadVersion();
+            setTimeout(startApp, 500);
+        });
+    </script>
+</body>
+</html>

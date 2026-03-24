@@ -1,0 +1,89 @@
+[
+  {
+    "name": "13-followup-orcamentos",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 9 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 9h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/vendas/orcamentos-pendentes?dias=3",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "📋 Buscar Orçamentos",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem orçamentos?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fieldToSplitOut": "data"
+        },
+        "name": "Split por orçamento",
+        "type": "n8n-nodes-base.splitOut",
+        "position": [910, 250],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$json.vendedor_email}}",
+          "subject": "🔔 Follow-up: Orçamento #{{$json.numero_pedido}} — {{$json.dias_sem_resposta}} dias sem resposta",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#ff6f00;'>🔔 Orçamento Pendente</h2><p>O orçamento abaixo está <strong>{{$json.dias_sem_resposta}} dias</strong> sem retorno:</p><table style='width:100%;border-collapse:collapse;margin:16px 0;'><tr><td style='padding:8px;border:1px solid #ddd;background:#f5f5f5;'><strong>Pedido</strong></td><td style='padding:8px;border:1px solid #ddd;'>#{{$json.numero_pedido}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd;background:#f5f5f5;'><strong>Cliente</strong></td><td style='padding:8px;border:1px solid #ddd;'>{{$json.cliente}}</td></tr><tr><td style='padding:8px;border:1px solid #ddd;background:#f5f5f5;'><strong>Valor</strong></td><td style='padding:8px;border:1px solid #ddd;'>R$ {{$json.valor}}</td></tr></table><p>📞 Sugerimos entrar em contato para fechar a venda!</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Email Vendedor",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [1130, 250],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "13", "workflow_name": "Follow-up Orçamentos", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1350, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 9h Seg-Sex": { "main": [[{ "node": "📋 Buscar Orçamentos", "type": "main", "index": 0 }]] },
+      "📋 Buscar Orçamentos": { "main": [[{ "node": "Tem orçamentos?", "type": "main", "index": 0 }]] },
+      "Tem orçamentos?": { "main": [[{ "node": "Split por orçamento", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "Split por orçamento": { "main": [[{ "node": "📧 Email Vendedor", "type": "main", "index": 0 }]] },
+      "📧 Email Vendedor": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

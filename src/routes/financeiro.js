@@ -115,6 +115,27 @@ function authorizeFinanceiro(section) {
                 return next();
             }
 
+            // Verificar coluna 'areas' no banco — permite acesso se contém "financeiro"
+            try {
+                const [rows] = await pool.query(
+                    'SELECT areas FROM usuarios WHERE email = ? AND ativo = 1 LIMIT 1',
+                    [userEmail]
+                );
+                if (rows.length > 0 && rows[0].areas) {
+                    let areas = rows[0].areas;
+                    if (typeof areas === 'string') {
+                        try { areas = JSON.parse(areas); } catch(e) { areas = []; }
+                    }
+                    if (Array.isArray(areas) && areas.includes('financeiro')) {
+                        console.log(`[FINANCEIRO-AUTH] ✅ Acesso via areas[] para ${userEmail}`);
+                        req.userAccess = 'admin';
+                        return next();
+                    }
+                }
+            } catch (dbErr) {
+                console.error('[FINANCEIRO-AUTH] Erro ao consultar areas:', dbErr.message);
+            }
+
             // Outros usuários não autorizados
             console.log(`[FINANCEIRO-AUTH] ❌ Acesso negado para ${userEmail}`);
             
@@ -237,7 +258,7 @@ function optionalAuth(req, res, next) {
  * Rota pública para KPIs básicos do dashboard financeiro
  * Retorna apenas totais sem detalhes sensíveis
  */
-router.get('/resumo-kpis', optionalAuth, async (req, res) => {
+router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando resumo KPIs...');
         
@@ -259,16 +280,16 @@ router.get('/resumo-kpis', optionalAuth, async (req, res) => {
             WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
         `);
         
-        // Vencidos
+        // Vencidos - com contagem e valor separados por tipo
         const [vencidosReceber] = await pool.execute(`
-            SELECT COUNT(*) as quantidade
+            SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
             FROM contas_receber 
             WHERE COALESCE(data_vencimento, vencimento) < CURDATE()
             AND status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
         `);
         
         const [vencidosPagar] = await pool.execute(`
-            SELECT COUNT(*) as quantidade
+            SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
             FROM contas_pagar 
             WHERE COALESCE(data_vencimento, vencimento) < CURDATE()
             AND status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
@@ -277,7 +298,9 @@ router.get('/resumo-kpis', optionalAuth, async (req, res) => {
         const totalReceber = parseFloat(receberTotal[0]?.total || 0);
         const totalPagar = parseFloat(pagarTotal[0]?.total || 0);
         const saldo = totalReceber - totalPagar;
-        const totalVencidos = (vencidosReceber[0]?.quantidade || 0) + (vencidosPagar[0]?.quantidade || 0);
+        const vencReceber = vencidosReceber[0]?.quantidade || 0;
+        const vencPagar = vencidosPagar[0]?.quantidade || 0;
+        const totalVencidos = vencReceber + vencPagar;
         
         console.log('[Financeiro] KPIs:', { totalReceber, totalPagar, saldo, totalVencidos });
         
@@ -288,6 +311,10 @@ router.get('/resumo-kpis', optionalAuth, async (req, res) => {
                 totalPagar,
                 saldo,
                 vencidos: totalVencidos,
+                vencidosReceber: vencReceber,
+                vencidosPagar: vencPagar,
+                valorVencidosReceber: parseFloat(vencidosReceber[0]?.valor_total || 0),
+                valorVencidosPagar: parseFloat(vencidosPagar[0]?.valor_total || 0),
                 quantidadeReceber: receberTotal[0]?.quantidade || 0,
                 quantidadePagar: pagarTotal[0]?.quantidade || 0
             }
@@ -302,11 +329,11 @@ router.get('/resumo-kpis', optionalAuth, async (req, res) => {
  * GET /api/financeiro/proximos-vencimentos
  * Rota para vencimentos próximos - com autenticação opcional
  */
-router.get('/proximos-vencimentos', optionalAuth, async (req, res) => {
+router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         const limite = Math.min(Math.max(parseInt(req.query.limite) || 5, 1), 100);
         
-        // Buscar próximos vencimentos de contas a receber
+        // Buscar próximos vencimentos de contas a receber (últimos 30 dias vencidos + futuros)
         const [receber] = await pool.query(`
             SELECT 
                 cr.id,
@@ -318,11 +345,12 @@ router.get('/proximos-vencimentos', optionalAuth, async (req, res) => {
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
             WHERE cr.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+              AND COALESCE(cr.data_vencimento, cr.vencimento) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC
             LIMIT ?
         `, [limite]);
         
-        // Buscar próximos vencimentos de contas a pagar
+        // Buscar próximos vencimentos de contas a pagar (últimos 30 dias vencidos + futuros)
         const [pagar] = await pool.query(`
             SELECT 
                 cp.id,
@@ -334,6 +362,7 @@ router.get('/proximos-vencimentos', optionalAuth, async (req, res) => {
             FROM contas_pagar cp
             LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
             WHERE cp.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+              AND COALESCE(cp.data_vencimento, cp.vencimento) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC
             LIMIT ?
         `, [limite]);
@@ -354,7 +383,7 @@ router.get('/proximos-vencimentos', optionalAuth, async (req, res) => {
  * GET /api/financeiro/ultimos-lancamentos
  * Rota para lançamentos recentes - com autenticação opcional
  */
-router.get('/ultimos-lancamentos', optionalAuth, async (req, res) => {
+router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         const limite = Math.min(Math.max(parseInt(req.query.limite) || 10, 1), 100);
         
@@ -406,7 +435,7 @@ router.get('/ultimos-lancamentos', optionalAuth, async (req, res) => {
  * GET /api/financeiro/fluxo-caixa-resumo
  * Rota pública para fluxo de caixa (com autenticação opcional)
  */
-router.get('/fluxo-caixa-resumo', optionalAuth, async (req, res) => {
+router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('fluxo_caixa'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando fluxo de caixa...');
         
@@ -581,7 +610,7 @@ router.get('/fluxo-caixa-resumo', optionalAuth, async (req, res) => {
  * GET /api/financeiro/conciliacao-resumo
  * Rota para conciliação bancária (com autenticação opcional)
  */
-router.get('/conciliacao-resumo', optionalAuth, async (req, res) => {
+router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando dados de conciliação...');
         
@@ -803,7 +832,21 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
                 COALESCE(cr.numero_documento, cr.observacoes, cr.descricao) as numero_documento,
                 COALESCE(cr.conta_corrente_nome, '') as centro_receita,
                 3 as dias_lembrete,
-                NULL as recorrencia
+                NULL as recorrencia,
+                cr.empresa,
+                cr.portador,
+                cr.nota_fiscal,
+                cr.parcela_info,
+                cr.dias_vencido,
+                cr.situacao,
+                COALESCE(cr.cnpj_cliente, c.cnpj_cpf) as cnpj_cliente,
+                cr.data_operacao,
+                cr.posicao,
+                cr.recomprado,
+                cr.cartorio,
+                cr.aceita_troca,
+                cr.comissaria,
+                cr.origem_importacao
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
             LEFT JOIN categorias_financeiro cat ON cr.categoria_id = cat.id
@@ -938,8 +981,8 @@ router.post('/contas-receber', authenticateToken, authorizeFinanceiro('receber')
         const dataVencimento = new Date(vencimento).toISOString().split('T')[0];
 
         const [result] = await pool.execute(
-            'INSERT INTO contas_receber (cliente, descricao, valor, vencimento, status, tipo, data_criacao) VALUES (?, ?, ?, ?, "PENDENTE", ?, NOW())',
-            [sanitizeString(cliente), descricaoSanitizada, valorNumerico, dataVencimento, tipo || 'VENDA']
+            'INSERT INTO contas_receber (cliente_nome, descricao, valor, vencimento, data_vencimento, status, categoria_nome) VALUES (?, ?, ?, ?, ?, "PENDENTE", ?)',
+            [sanitizeString(cliente), descricaoSanitizada, valorNumerico, dataVencimento, dataVencimento, tipo || 'VENDA']
         );
 
         res.status(201).json({ 
@@ -962,7 +1005,7 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
         const { cliente, descricao, valor, vencimento, status, tipo } = req.body;
 
         const [result] = await pool.execute(
-            'UPDATE contas_receber SET cliente = ?, descricao = ?, valor = ?, vencimento = ?, status = ?, tipo = ? WHERE id = ?',
+            'UPDATE contas_receber SET cliente_nome = ?, descricao = ?, valor = ?, vencimento = ?, status = ?, tipo = ? WHERE id = ?',
             [cliente, descricao, valor, vencimento, status, tipo, id]
         );
 
@@ -1185,12 +1228,13 @@ router.get('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
  */
 router.post('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     try {
-        const { fornecedor_id, fornecedor, descricao, valor, vencimento, data_vencimento, data_vencimento_original, categoria_id, banco_id, forma_pagamento, observacoes, numero_documento, valor_total, categoria } = req.body;
+        const { fornecedor_id, fornecedor, descricao, valor, vencimento, data_vencimento, data_vencimento_original, categoria_id, banco_id, forma_pagamento, observacoes, numero_documento, valor_total, categoria, codigo_barras, conta_bancaria_id, data_emissao } = req.body;
 
         // Aceitar tanto 'vencimento' quanto 'data_vencimento'
         const dataVenc = data_vencimento || vencimento;
         const dataVencOriginal = data_vencimento_original || dataVenc;
         const valorFinal = valor_total || valor;
+        const bancoId = conta_bancaria_id || banco_id;
 
         // Validação robusta dos dados de entrada
         const validation = validateContaInput({ descricao: descricao || fornecedor, valor: valorFinal, vencimento: dataVencOriginal }, 'pagar');
@@ -1209,9 +1253,9 @@ router.post('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), as
         const obsSanitizada = sanitizeString(observacoes);
 
         const [result] = await pool.execute(
-            `INSERT INTO contas_pagar (fornecedor_id, descricao, valor, data_vencimento, data_vencimento_original, categoria_id, categoria, banco_id, forma_pagamento, observacoes, numero_documento, status) 
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pendente")`,
-            [fornecedor_id || null, descricaoSanitizada, valorNumerico, dataVencimento, dataVencimentoOriginal, categoria_id || null, categoria || null, banco_id || null, forma_pagamento || null, obsSanitizada || null, numero_documento || null]
+            `INSERT INTO contas_pagar (fornecedor_id, fornecedor_nome, descricao, valor, data_vencimento, data_vencimento_original, categoria_id, categoria_nome, banco_id, forma_pagamento, observacoes, numero_documento, codigo_barras_boleto, data_emissao, status) 
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pendente")`,
+            [fornecedor_id || null, fornecedor || null, descricaoSanitizada, valorNumerico, dataVencimento, dataVencimentoOriginal, categoria_id || null, categoria || null, bancoId || null, forma_pagamento || null, obsSanitizada || null, numero_documento || null, codigo_barras || null, data_emissao || null]
         );
 
         res.status(201).json({ 
@@ -1233,7 +1277,8 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
         const { id } = req.params;
         const { 
             fornecedor, descricao, valor, vencimento, data_vencimento, data_vencimento_original,
-            status, tipo, categoria, numero_documento, observacoes, forma_pagamento, valor_total
+            status, tipo, categoria, numero_documento, observacoes, forma_pagamento, valor_total,
+            codigo_barras, conta_bancaria_id, data_emissao
         } = req.body;
 
         const dataVenc = data_vencimento || vencimento;
@@ -1243,17 +1288,20 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
         const updates = [];
         const params = [];
         
-        if (fornecedor !== undefined) { updates.push('fornecedor = ?'); params.push(fornecedor); }
+        if (fornecedor !== undefined) { updates.push('fornecedor_nome = ?'); params.push(fornecedor); }
         if (descricao !== undefined) { updates.push('descricao = ?'); params.push(descricao); }
         if (valorFinal !== undefined) { updates.push('valor = ?'); params.push(valorFinal); }
         if (dataVenc !== undefined) { updates.push('data_vencimento = ?'); params.push(dataVenc); }
         if (data_vencimento_original !== undefined) { updates.push('data_vencimento_original = ?'); params.push(data_vencimento_original); }
         if (status !== undefined) { updates.push('status = ?'); params.push(status); }
         if (tipo !== undefined) { updates.push('tipo = ?'); params.push(tipo); }
-        if (categoria !== undefined) { updates.push('categoria = ?'); params.push(categoria); }
+        if (categoria !== undefined) { updates.push('categoria_nome = ?'); params.push(categoria); }
         if (numero_documento !== undefined) { updates.push('numero_documento = ?'); params.push(numero_documento); }
         if (observacoes !== undefined) { updates.push('observacoes = ?'); params.push(observacoes); }
         if (forma_pagamento !== undefined) { updates.push('forma_pagamento = ?'); params.push(forma_pagamento); }
+        if (codigo_barras !== undefined) { updates.push('codigo_barras_boleto = ?'); params.push(codigo_barras); }
+        if (conta_bancaria_id !== undefined) { updates.push('banco_id = ?'); params.push(conta_bancaria_id || null); }
+        if (data_emissao !== undefined) { updates.push('data_emissao = ?'); params.push(data_emissao); }
         
         if (updates.length === 0) {
             return res.status(400).json({ error: 'Nenhum campo para atualizar' });
@@ -1962,7 +2010,7 @@ router.get('/relatorios/por-fornecedor', authenticateToken, async (req, res) => 
                 SUM(CASE WHEN cp.status = 'pendente' THEN cp.valor ELSE 0 END) as pendente,
                 SUM(CASE WHEN cp.status = 'pago' THEN cp.valor ELSE 0 END) as pago
             FROM contas_pagar cp
-            LEFT JOIN fornecedores_financeiro f ON cp.fornecedor_id = f.id
+            LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
             GROUP BY fornecedor
             ORDER BY total DESC
             LIMIT 50
@@ -2637,6 +2685,164 @@ router.post('/transferencia-bancaria', authenticateToken, async (req, res) => {
         res.status(500).json({ error: 'Erro ao realizar transferência' });
     } finally {
         connection.release();
+    }
+});
+
+// =====================================================
+// IMPORTAÇÃO EM LOTE - Contas a Pagar
+// =====================================================
+router.post('/importar/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
+    try {
+        const { dados } = req.body;
+        if (!Array.isArray(dados) || dados.length === 0) {
+            return res.status(400).json({ error: 'Nenhum dado recebido para importação' });
+        }
+
+        let importados = 0;
+        const erros = [];
+
+        for (let i = 0; i < dados.length; i++) {
+            const item = dados[i];
+            try {
+                const descricao = sanitizeString(item.descricao || item.fornecedor_nome || item.favorecido || item.historico || '');
+                const valor = parseFloat(item.valor || item.valor_total || 0);
+                const vencimento = item.data_vencimento || item.vencimento || item.dt_vcto || null;
+                const categoria = sanitizeString(item.categoria || item.categoria_nome || item.conta_financeira || '');
+                const fornecedor = sanitizeString(item.fornecedor_nome || item.favorecido || item.fornecedor || descricao);
+                const empresa = sanitizeString(item.empresa || 'ALUFORCE');
+                const observacoes = sanitizeString(item.observacoes || item.descricao_obs || '');
+                const numero_documento = sanitizeString(item.numero_documento || item.nota_fiscal || '');
+                const forma_pagamento = sanitizeString(item.forma_pagamento || '');
+                const status = sanitizeString(item.status || 'pendente').toLowerCase();
+
+                if (!valor || valor <= 0) {
+                    erros.push({ linha: i + 2, erro: 'Valor inválido ou zero' });
+                    continue;
+                }
+
+                let dataVenc = null;
+                if (vencimento) {
+                    const d = new Date(vencimento);
+                    if (!isNaN(d.getTime())) {
+                        dataVenc = d.toISOString().split('T')[0];
+                    }
+                }
+                if (!dataVenc) {
+                    erros.push({ linha: i + 2, erro: 'Data de vencimento inválida' });
+                    continue;
+                }
+
+                await pool.execute(
+                    `INSERT INTO contas_pagar (descricao, valor, data_vencimento, data_vencimento_original, categoria_nome, forma_pagamento, observacoes, numero_documento, status) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [fornecedor + (descricao && descricao !== fornecedor ? ' - ' + descricao : ''), valor, dataVenc, dataVenc, categoria, forma_pagamento, (empresa + ' ' + observacoes).trim(), numero_documento, status]
+                );
+                importados++;
+            } catch (err) {
+                erros.push({ linha: i + 2, erro: err.message });
+            }
+        }
+
+        res.json({ success: true, importados, total: dados.length, erros });
+    } catch (error) {
+        console.error('[Financeiro] Erro na importação contas-pagar:', error);
+        res.status(500).json({ error: 'Erro na importação', details: error.message });
+    }
+});
+
+// =====================================================
+// IMPORTAÇÃO EM LOTE - Contas a Receber
+// =====================================================
+router.post('/importar/contas-receber', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
+    try {
+        const { dados } = req.body;
+        if (!Array.isArray(dados) || dados.length === 0) {
+            return res.status(400).json({ error: 'Nenhum dado recebido para importação' });
+        }
+
+        let importados = 0;
+        const erros = [];
+
+        for (let i = 0; i < dados.length; i++) {
+            const item = dados[i];
+            try {
+                const cliente = sanitizeString(item.cliente_nome || item.cliente || item.origem || '');
+                const descricao = sanitizeString(item.descricao || item.historico || item.conta_financeira || '');
+                const valor = parseFloat(item.valor || item.valor_bruto || 0);
+                const vencimento = item.data_vencimento || item.vencimento || item.dt_entrada || null;
+                const tipo = sanitizeString(item.tipo || item.tipo_documento || item.conta_financeira || 'VENDA');
+                const observacoes = sanitizeString(item.observacoes || '');
+
+                if (!valor || valor <= 0) {
+                    erros.push({ linha: i + 2, erro: 'Valor inválido ou zero' });
+                    continue;
+                }
+
+                let dataVenc = null;
+                if (vencimento) {
+                    const d = new Date(vencimento);
+                    if (!isNaN(d.getTime())) {
+                        dataVenc = d.toISOString().split('T')[0];
+                    }
+                }
+                if (!dataVenc) {
+                    erros.push({ linha: i + 2, erro: 'Data de vencimento inválida' });
+                    continue;
+                }
+
+                await pool.execute(
+                    'INSERT INTO contas_receber (cliente_nome, descricao, valor, vencimento, data_vencimento, status, categoria_nome) VALUES (?, ?, ?, ?, ?, "PENDENTE", ?)',
+                    [cliente, descricao, valor, dataVenc, dataVenc, tipo]
+                );
+                importados++;
+            } catch (err) {
+                erros.push({ linha: i + 2, erro: err.message });
+            }
+        }
+
+        res.json({ success: true, importados, total: dados.length, erros });
+    } catch (error) {
+        console.error('[Financeiro] Erro na importação contas-receber:', error);
+        res.status(500).json({ error: 'Erro na importação', details: error.message });
+    }
+});
+
+// =====================================================
+// IMPORTAÇÃO EM LOTE - Fluxo de Caixa / Bancos / Movimentações
+// =====================================================
+router.post('/importar/fluxo-caixa', authenticateToken, async (req, res) => {
+    try {
+        const { dados } = req.body;
+        if (!Array.isArray(dados) || dados.length === 0) {
+            return res.status(400).json({ error: 'Nenhum dado recebido' });
+        }
+        // Redirecionar para as tabelas apropriadas baseado no tipo
+        let importados = 0;
+        const erros = [];
+        for (let i = 0; i < dados.length; i++) {
+            const item = dados[i];
+            try {
+                const tipo = (item.tipo || '').toLowerCase();
+                const valor = parseFloat(item.valor || 0);
+                if (!valor) { erros.push({ linha: i+2, erro: 'Valor inválido' }); continue; }
+                const descricao = sanitizeString(item.descricao || item.cliente_fornecedor || '');
+                const data = item.data_prevista || item.data || null;
+                let dataFmt = null;
+                if (data) { const d = new Date(data); if (!isNaN(d.getTime())) dataFmt = d.toISOString().split('T')[0]; }
+                if (!dataFmt) { erros.push({ linha: i+2, erro: 'Data inválida' }); continue; }
+
+                if (tipo === 'entrada' || tipo === 'receita') {
+                    await pool.execute('INSERT INTO contas_receber (cliente_nome, descricao, valor, vencimento, data_vencimento, status) VALUES (?, ?, ?, ?, ?, "PENDENTE")', [descricao, descricao, valor, dataFmt, dataFmt]);
+                } else {
+                    await pool.execute('INSERT INTO contas_pagar (descricao, valor, data_vencimento, data_vencimento_original, status) VALUES (?, ?, ?, ?, "pendente")', [descricao, valor, dataFmt, dataFmt]);
+                }
+                importados++;
+            } catch (err) { erros.push({ linha: i+2, erro: err.message }); }
+        }
+        res.json({ success: true, importados, total: dados.length, erros });
+    } catch (error) {
+        console.error('[Financeiro] Erro importação fluxo-caixa:', error);
+        res.status(500).json({ error: 'Erro na importação' });
     }
 });
 

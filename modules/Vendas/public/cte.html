@@ -679,7 +679,7 @@
                     <div class="card cte-card" onclick="verDetalhes(${parseInt(cte.id) || 0})">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h6 class="card-title mb-0">CT-e #${esc(cte.numero)}</h6>
+                                <h6 class="card-title mb-0">CT-e #${esc(cte.número)}</h6>
                                 <span class="status-badge status-${statusSafe}">${statusSafe.toUpperCase()}</span>
                             </div>
                             <p class="card-text small mb-1">
@@ -716,7 +716,7 @@
                     document.getElementById('conteudoDetalhes').innerHTML = `
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <strong>Número:</strong> ${esc(cte.numero)}<br>
+                                <strong>Número:</strong> ${esc(cte.número)}<br>
                                 <strong>Série:</strong> ${esc(cte.serie)}<br>
                                 <strong>Status:</strong> <span class="status-badge status-${statusSafe}">${statusSafe.toUpperCase()}</span><br>
                                 <strong>Chave de Acesso:</strong> <small>${esc(cte.chave_acesso || '-')}</small>
@@ -782,7 +782,7 @@
                         <ul class="list-group">
                             ${cte.documentos.map(doc => `
                                 <li class="list-group-item">
-                                    <strong>${esc((doc.tipo_documento || '').toUpperCase())}:</strong> ${esc(doc.numero || '-')}<br>
+                                    <strong>${esc((doc.tipo_documento || '').toUpperCase())}:</strong> ${esc(doc.número || '-')}<br>
                                     <small>Chave: ${esc(doc.chave_acesso)}</small>
                                 </li>
                             `).join('')}
@@ -795,7 +795,7 @@
                         <ul class="list-group">
                             ${cte.eventos.map(evento => `
                                 <li class="list-group-item">
-                                    <strong>${esc(evento.tipo)}:</strong> ${esc(evento.descricao)}<br>
+                                    <strong>${esc(evento.tipo)}:</strong> ${esc(evento.descrição)}<br>
                                     <small class="text-muted">
                                         ${formatarDataSegura(evento.data_evento)} - ${esc(evento.usuario_nome)}
                                     </small>
@@ -877,7 +877,7 @@
                 });
 
                 if (data.sucesso) {
-                    showToast('CT-e emitido com sucesso! Número: ' + data.numero, 'success');
+                    showToast('CT-e emitido com sucesso! Número: ' + data.número, 'success');
                     bootstrap.Modal.getInstance(document.getElementById('modalEmissao')).hide();
                     carregarDashboard();
                     buscarCTes();
@@ -941,7 +941,7 @@
             try {
                 const headers = ['Número', 'Status', 'Remetente', 'Destinatário', 'Transportadora', 'Modal', 'Valor Serviço', 'Valor Carga', 'Data Emissão'];
                 const linhas = ctesCarregados.map(cte => [
-                    sanitizarCSV(cte.numero || ''),
+                    sanitizarCSV(cte.número || ''),
                     sanitizarCSV((cte.status || '').toUpperCase()),
                     `"${sanitizarCSV(cte.remetente_nome || '-').replace(/"/g, '""')}"`,
                     `"${sanitizarCSV(cte.destinatario_nome || '-').replace(/"/g, '""')}"`,

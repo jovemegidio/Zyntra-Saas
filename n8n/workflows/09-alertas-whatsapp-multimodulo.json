@@ -1,0 +1,208 @@
+{
+  "id": "wf09WhatsAppAlerts",
+  "name": "09-alertas-whatsapp-multimodulo",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 8,12,17 * * 1-5"
+            }
+          ]
+        }
+      },
+      "name": "⏰ 3x ao dia (8h, 12h, 17h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [200, 300],
+      "typeVersion": 1.1,
+      "id": "cron-wpp-01"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/estoque/criticos",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "name": "📦 Buscar Estoque Crítico",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [440, 150],
+      "typeVersion": 4.1,
+      "id": "http-estoque-01"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/financeiro/contas-vencer",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "name": "💳 Buscar Contas Vencer",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [440, 350],
+      "typeVersion": 4.1,
+      "id": "http-financeiro-01"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/compras/pedidos-atrasados",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "name": "🚚 Buscar Pedidos Atrasados",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [440, 550],
+      "typeVersion": 4.1,
+      "id": "http-compras-01"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Processar resultados e montar alertas WhatsApp\nconst items = $input.all();\nconst alertas = [];\n\nfor (const item of items) {\n  const data = item.json.data || item.json;\n  \n  // Estoque Crítico\n  if (data.produtos_criticos && data.produtos_criticos.length > 0) {\n    const prods = data.produtos_criticos.slice(0, 10);\n    let msg = '⚠️ *ALERTA: Estoque Crítico*\\n\\n';\n    msg += `📊 *${data.total_criticos || prods.length} produto(s) abaixo do mínimo:*\\n\\n`;\n    prods.forEach((p, i) => {\n      msg += `${i+1}. *${p.nome || p.descricao}*\\n`;\n      msg += `   📦 Atual: ${p.estoque_atual} | Mínimo: ${p.estoque_minimo}\\n`;\n    });\n    if (data.total_criticos > 10) msg += `\\n... e mais ${data.total_criticos - 10} produtos\\n`;\n    msg += '\\n_n8n Automação - ALUFORCE_';\n    alertas.push({ tipo: 'estoque_critico', mensagem: msg, prioridade: 'alta', destino: 'PCP,COMPRAS' });\n  }\n  \n  // Contas Vencidas\n  if (data.contas_vencidas && data.contas_vencidas.length > 0) {\n    const contas = data.contas_vencidas.slice(0, 8);\n    let msg = '🚨 *CONTAS VENCIDAS*\\n\\n';\n    msg += `💰 *${data.total_vencidas || contas.length} conta(s) em atraso:*\\n\\n`;\n    contas.forEach((c, i) => {\n      msg += `${i+1}. ${c.cliente_fornecedor || c.descricao}\\n`;\n      msg += `   💵 R$ ${c.valor} | ⏰ ${c.dias_atraso || '?'} dias\\n`;\n    });\n    msg += '\\n_n8n Automação - ALUFORCE_';\n    alertas.push({ tipo: 'conta_vencida', mensagem: msg, prioridade: 'alta', destino: 'FINANCEIRO' });\n  }\n  \n  // Contas a Vencer (próximos 3 dias)\n  if (data.contas_vencer && data.contas_vencer.length > 0) {\n    const contas = data.contas_vencer.slice(0, 5);\n    let msg = '💳 *Contas a Vencer (próximos 3 dias)*\\n\\n';\n    contas.forEach((c, i) => {\n      msg += `${i+1}. ${c.cliente_fornecedor || c.descricao}\\n`;\n      msg += `   💵 R$ ${c.valor} | 📅 ${c.vencimento}\\n`;\n    });\n    msg += '\\n_n8n Automação - ALUFORCE_';\n    alertas.push({ tipo: 'conta_vencer', mensagem: msg, prioridade: 'normal', destino: 'FINANCEIRO' });\n  }\n  \n  // Pedidos Atrasados\n  if (data.pedidos_atrasados && data.pedidos_atrasados.length > 0) {\n    const peds = data.pedidos_atrasados.slice(0, 8);\n    let msg = '🚨 *PEDIDOS DE COMPRA ATRASADOS*\\n\\n';\n    msg += `📋 *${data.total_atrasados || peds.length} pedido(s) atrasados:*\\n\\n`;\n    peds.forEach((p, i) => {\n      msg += `${i+1}. Pedido *#${p.numero || p.id}*\\n`;\n      msg += `   🏢 ${p.fornecedor} | ⏰ ${p.dias_atraso || '?'} dias\\n`;\n    });\n    msg += '\\n_n8n Automação - ALUFORCE_';\n    alertas.push({ tipo: 'pedido_atrasado', mensagem: msg, prioridade: 'alta', destino: 'COMPRAS' });\n  }\n}\n\n// Se não há alertas, registrar que tudo ok\nif (alertas.length === 0) {\n  alertas.push({ tipo: 'tudo_ok', mensagem: null, prioridade: 'none', destino: 'none' });\n}\n\nreturn alertas.map(a => ({ json: a }));"
+      },
+      "name": "⚙️ Processar Alertas",
+      "type": "n8n-nodes-base.code",
+      "position": [700, 350],
+      "typeVersion": 2,
+      "id": "proc-wpp-01"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.tipo}}",
+              "operation": "notEqual",
+              "value2": "tudo_ok"
+            }
+          ]
+        }
+      },
+      "name": "Tem alertas?",
+      "type": "n8n-nodes-base.if",
+      "position": [920, 350],
+      "typeVersion": 1,
+      "id": "if-wpp-01"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/whatsapp/alerta",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "body": {
+          "tipo": "={{$json.tipo}}",
+          "dados": {
+            "mensagem": "={{$json.mensagem}}"
+          },
+          "telefones": "={{$env.WHATSAPP_ALERTAS_TELEFONES ? $env.WHATSAPP_ALERTAS_TELEFONES.split(',') : []}}"
+        },
+        "options": { "timeout": 30000 }
+      },
+      "name": "📱 Enviar WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1140, 300],
+      "typeVersion": 4.1,
+      "id": "http-wpp-01"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "body": {
+          "workflow_id": "09",
+          "workflow_name": "Alertas WhatsApp Multi-Módulo",
+          "status": "success"
+        },
+        "options": {}
+      },
+      "name": "✅ Notificar Conclusão",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1140, 450],
+      "typeVersion": 4.1,
+      "id": "notify-wpp-01"
+    }
+  ],
+  "connections": {
+    "⏰ 3x ao dia (8h, 12h, 17h)": {
+      "main": [
+        [
+          { "node": "📦 Buscar Estoque Crítico", "type": "main", "index": 0 },
+          { "node": "💳 Buscar Contas Vencer", "type": "main", "index": 0 },
+          { "node": "🚚 Buscar Pedidos Atrasados", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "📦 Buscar Estoque Crítico": {
+      "main": [
+        [
+          { "node": "⚙️ Processar Alertas", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "💳 Buscar Contas Vencer": {
+      "main": [
+        [
+          { "node": "⚙️ Processar Alertas", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "🚚 Buscar Pedidos Atrasados": {
+      "main": [
+        [
+          { "node": "⚙️ Processar Alertas", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "⚙️ Processar Alertas": {
+      "main": [
+        [
+          { "node": "Tem alertas?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Tem alertas?": {
+      "main": [
+        [
+          { "node": "📱 Enviar WhatsApp", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "✅ Notificar Conclusão", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "📱 Enviar WhatsApp": {
+      "main": [
+        [
+          { "node": "✅ Notificar Conclusão", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo",
+    "executionOrder": "v1"
+  }
+}

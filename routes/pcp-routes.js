@@ -420,42 +420,24 @@ module.exports = function createPCPRoutes(deps) {
         } catch (error) { next(error); }
     });
 
-    // MATERIAIS
+    // MATERIAIS (com fallback para tabela produtos se materiais não existir)
     router.get('/materiais', async (req, res, next) => {
         try {
             const limit = parseInt(req.query.limit) || 1000;
             const offset = parseInt(req.query.offset) || 0;
-            const comRecebimento = req.query.com_recebimento === 'true';
 
-            let query, params;
-            if (comRecebimento) {
-                // Verificar se tabela recebimentos_compras existe antes de usar
-                try {
-                    const [tables] = await pool.query("SHOW TABLES LIKE 'recebimentos_compras'");
-                    if (tables.length === 0) {
-                        // Tabela não existe ainda - retornar lista normal com aviso
-                        const [rows] = await pool.query('SELECT id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao FROM materiais ORDER BY descricao ASC LIMIT ? OFFSET ?', [limit, offset]);
-                        return res.json({ data: rows, aviso: 'Tabela recebimentos_compras ainda não foi criada. Retornando todos os materiais.' });
-                    }
-                } catch (checkErr) {
-                    // Se falhar a verificação, seguir com query normal
-                    const [rows] = await pool.query('SELECT id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao FROM materiais ORDER BY descricao ASC LIMIT ? OFFSET ?', [limit, offset]);
-                    return res.json(rows);
-                }
-                // Apenas materiais com recebimento em compras
-                query = `
-                    SELECT DISTINCT m.id, m.codigo_material, m.descricao, m.unidade_medida, m.quantidade_estoque, m.fornecedor_padrao
-                    FROM materiais m
-                    INNER JOIN recebimentos_compras rc ON rc.material_id = m.id
-                    ORDER BY m.descricao ASC LIMIT ? OFFSET ?
-                `;
-                params = [limit, offset];
-            } else {
-                query = 'SELECT id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao FROM materiais ORDER BY descricao ASC LIMIT ? OFFSET ?';
-                params = [limit, offset];
+            // Detectar qual tabela existe
+            let tabela = 'materiais';
+            let colunas = 'id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao';
+            try {
+                await pool.query("SELECT 1 FROM materiais LIMIT 1");
+            } catch (e) {
+                // Tabela materiais não existe — usar produtos
+                tabela = 'produtos';
+                colunas = '*';
             }
 
-            const [rows] = await pool.query(query, params);
+            const [rows] = await pool.query(`SELECT ${colunas} FROM ${tabela} ORDER BY descricao ASC LIMIT ? OFFSET ?`, [limit, offset]);
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -1246,19 +1228,57 @@ module.exports = function createPCPRoutes(deps) {
 
     // POST - Criar nova ordem de produção (via modal)
     router.post('/ordens-kanban', async (req, res, next) => {
+        const connection = await pool.getConnection();
         try {
             const {
                 cliente, produto, codigo, quantidade, unidade,
                 data_previsao_entrega, vendedor, observacoes, observacoes_pedido, prioridade,
                 numero_orcamento, tipo_frete, prazo_entrega,
+                pedido_id, // Sprint 2 (P-01): vínculo real pedido→OP
                 produtos // Array de produtos do modal
             } = req.body;
 
-            // Gerar código da ordem
-            const [ultimaOrdem] = await pool.query(`
+            await connection.beginTransaction();
+
+            // Sprint 2 (P-02): Validar status do pedido antes de gerar OP
+            let pedidoVinculado = null;
+            if (pedido_id) {
+                const [pedidoRows] = await connection.query(
+                    'SELECT id, status, cliente_nome, valor FROM pedidos WHERE id = ? FOR UPDATE', [pedido_id]
+                );
+                if (pedidoRows.length === 0) {
+                    await connection.rollback();
+                    return res.status(404).json({ message: `Pedido #${pedido_id} não encontrado.` });
+                }
+                pedidoVinculado = pedidoRows[0];
+                const statusPermitidos = ['pedido-aprovado', 'faturar', 'aprovado'];
+                if (!statusPermitidos.includes(pedidoVinculado.status)) {
+                    await connection.rollback();
+                    return res.status(400).json({
+                        message: `Pedido #${pedido_id} está no status "${pedidoVinculado.status}". OP só pode ser gerada para pedidos com status: ${statusPermitidos.join(', ')}.`,
+                        status_atual: pedidoVinculado.status,
+                        status_permitidos: statusPermitidos
+                    });
+                }
+                // Verificar se já existe OP para este pedido
+                const [opExistente] = await connection.query(
+                    'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("cancelada") LIMIT 1', [pedido_id]
+                );
+                if (opExistente.length > 0) {
+                    await connection.rollback();
+                    return res.status(409).json({
+                        message: `Já existe uma OP ativa (${opExistente[0].codigo}) para o pedido #${pedido_id}.`,
+                        op_existente: opExistente[0]
+                    });
+                }
+            }
+
+            // Gerar código da ordem (com FOR UPDATE para evitar race condition P-04)
+            const [ultimaOrdem] = await connection.query(`
                 SELECT codigo FROM ordens_producao
                 WHERE codigo LIKE 'OP N° %'
                 ORDER BY id DESC LIMIT 1
+                FOR UPDATE
             `);
 
             let proximoNumero = 1;
@@ -1279,12 +1299,12 @@ module.exports = function createPCPRoutes(deps) {
             // Observações - aceita ambos os campos
             const obs = observacoes || observacoes_pedido || null;
 
-            const [result] = await pool.query(`
+            const [result] = await connection.query(`
                 INSERT INTO ordens_producao (
                     codigo, produto_nome, quantidade, unidade,
                     status, prioridade, data_prevista, responsavel, observacoes,
-                    progresso, quantidade_produzida, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, 'ativa', ?, ?, ?, ?, 0, 0, NOW(), NOW())
+                    progresso, quantidade_produzida, pedido_id, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, 'ativa', ?, ?, ?, ?, 0, 0, ?, NOW(), NOW())
             `, [
                 codigoOrdem,
                 `${nomeProduto}${codigoProduto ? ' - ' + codigoProduto : ''}`,
@@ -1293,8 +1313,18 @@ module.exports = function createPCPRoutes(deps) {
                 prioridade || 'media',
                 data_previsao_entrega || null,
                 vendedor || null,
-                obs
+                obs,
+                pedido_id || null
             ]);
+
+            // Sprint 2 (P-01): Marcar pedido com produção iniciada
+            if (pedido_id) {
+                await connection.query(
+                    'UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [pedido_id]
+                );
+            }
+
+            await connection.commit();
 
             const novaOrdem = {
                 id: result.insertId,
@@ -1308,14 +1338,18 @@ module.exports = function createPCPRoutes(deps) {
                 statusKanban: 'a_produzir',
                 statusTexto: 'Nova',
                 dataConclusao: data_previsao_entrega,
-                prioridade: prioridade || 'media'
+                prioridade: prioridade || 'media',
+                pedido_id: pedido_id || null
             };
 
-            console.log('✅ Ordem de produção criada:', codigoOrdem);
+            console.log('✅ Ordem de produção criada:', codigoOrdem, pedido_id ? `(Pedido #${pedido_id})` : '');
             res.status(201).json(novaOrdem);
         } catch (error) {
+            await connection.rollback();
             console.error('❌ Erro ao criar ordem Kanban:', error);
             next(error);
+        } finally {
+            connection.release();
         }
     });
 
@@ -1327,20 +1361,9 @@ module.exports = function createPCPRoutes(deps) {
         console.log(`[API_PCP] Atualizando ordem de produção ${id}...`);
 
         try {
-            // Mapear status do Kanban para status do banco
-            let dbStatus = status || statusKanban;
-            const statusMap = {
-                'a_produzir': 'ativa',
-                'produzindo': 'em_producao',
-                'qualidade': 'em_producao',
-                'conferido': 'em_producao',
-                'concluido': 'concluida',
-                'armazenado': 'concluida'
-            };
-
-            if (statusMap[dbStatus]) {
-                dbStatus = statusMap[dbStatus];
-            }
+            // Sprint 4.4: Usar mapKanbanToStatus centralizado (aceita kanban e DB status)
+            const rawStatus = status || statusKanban;
+            let dbStatus = rawStatus ? mapKanbanToStatus(rawStatus) : null;
 
             const updates = [];
             const values = [];
@@ -1348,6 +1371,10 @@ module.exports = function createPCPRoutes(deps) {
             if (dbStatus) {
                 updates.push('status = ?');
                 values.push(dbStatus);
+                // Se concluída, registrar data
+                if (dbStatus === 'concluida') {
+                    updates.push('data_conclusao = NOW()');
+                }
             }
 
             if (produzido !== undefined || quantidade_produzida !== undefined) {
@@ -1376,6 +1403,29 @@ module.exports = function createPCPRoutes(deps) {
 
                 if (result.affectedRows === 0) {
                     return res.status(404).json({ error: 'Ordem não encontrada' });
+                }
+
+                // Sprint E2E-S1 (E3-CRIT-04 fix): OP concluída → pedido para "faturar" COM transação + FOR UPDATE
+                if (dbStatus === 'concluida') {
+                    const pipeConn = await pool.getConnection();
+                    try {
+                        await pipeConn.beginTransaction();
+                        const [opData] = await pipeConn.query('SELECT pedido_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opData.length > 0 && opData[0].pedido_id) {
+                            const pedidoId = opData[0].pedido_id;
+                            const [pedido] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoId]);
+                            if (pedido.length > 0 && pedido[0].status === 'pedido-aprovado') {
+                                await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoId]);
+                                console.log(`[PIPELINE_AUTO] Pedido #${pedidoId} movido para "faturar" (OP #${id} concluída)`);
+                            }
+                        }
+                        await pipeConn.commit();
+                    } catch (pipeErr) {
+                        await pipeConn.rollback();
+                        console.error(`[PIPELINE_AUTO] Erro ao atualizar pedido após conclusão OP #${id}:`, pipeErr.message);
+                    } finally {
+                        pipeConn.release();
+                    }
                 }
 
                 console.log(`✅ Ordem ${id} atualizada`);
@@ -1443,6 +1493,32 @@ module.exports = function createPCPRoutes(deps) {
             await pool.query(`
                 UPDATE ordens_producao SET ${updates.join(', ')} WHERE id = ?
             `, params);
+
+            // Sprint E2E-S1 (E3-CRIT-04 fix): OP concluída via PATCH → pedido para "faturar" COM transação + FOR UPDATE
+            if (status) {
+                const statusDBPatch = mapKanbanToStatus(status);
+                if (statusDBPatch === 'concluida') {
+                    const pipeConn = await pool.getConnection();
+                    try {
+                        await pipeConn.beginTransaction();
+                        const [opDataPatch] = await pipeConn.query('SELECT pedido_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opDataPatch.length > 0 && opDataPatch[0].pedido_id) {
+                            const pedidoIdPatch = opDataPatch[0].pedido_id;
+                            const [pedidoPatch] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoIdPatch]);
+                            if (pedidoPatch.length > 0 && pedidoPatch[0].status === 'pedido-aprovado') {
+                                await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoIdPatch]);
+                                console.log(`[PIPELINE_AUTO] Pedido #${pedidoIdPatch} movido para "faturar" (OP #${id} concluída via PATCH)`);
+                            }
+                        }
+                        await pipeConn.commit();
+                    } catch (pipeErr) {
+                        await pipeConn.rollback();
+                        console.error(`[PIPELINE_AUTO] Erro ao atualizar pedido após conclusão OP #${id}:`, pipeErr.message);
+                    } finally {
+                        pipeConn.release();
+                    }
+                }
+            }
 
             // Buscar ordem atualizada
             const [ordemAtualizada] = await pool.query(`
@@ -1519,13 +1595,20 @@ module.exports = function createPCPRoutes(deps) {
 
     function mapKanbanToStatus(statusKanban) {
         const map = {
+            // Kanban → DB
             'a_produzir': 'ativa',
             'produzindo': 'em_producao',
             'qualidade': 'pendente',
             'conferido': 'pendente',
             'concluido': 'concluida',
             'armazenado': 'concluida',
-            'cancelado': 'cancelada'
+            'cancelado': 'cancelada',
+            // Identity (já é DB status)
+            'ativa': 'ativa',
+            'em_producao': 'em_producao',
+            'pendente': 'pendente',
+            'concluida': 'concluida',
+            'cancelada': 'cancelada'
         };
         return map[statusKanban] || 'ativa';
     }

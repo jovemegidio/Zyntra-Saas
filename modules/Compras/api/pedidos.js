@@ -8,6 +8,10 @@ router.get('/', async (req, res) => {
         const db = getDatabase();
         const { status, fornecedor_id, data_inicio, data_fim, limit = 50, offset = 0 } = req.query;
         
+        // SECURITY: Hard cap no limit para prevenir memory exhaustion (BATCH-002)
+        const safeLimitVal = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
+        
         let sql = 'SELECT pc.*, f.razao_social as fornecedor_nome FROM pedidos_compra pc LEFT JOIN fornecedores f ON pc.fornecedor_id = f.id WHERE 1=1';
         const params = [];
         
@@ -32,7 +36,7 @@ router.get('/', async (req, res) => {
         }
         
         sql += ' ORDER BY pc.data_pedido DESC LIMIT ? OFFSET ?';
-        params.push(parseInt(limit), parseInt(offset));
+        params.push(safeLimitVal, safeOffset);
         
         const [pedidos] = await db.query(sql, params);
         
@@ -63,7 +67,7 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao listar pedidos:', error);
-        res.status(500).json({ error: 'Erro ao buscar pedidos', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar pedidos' });
     }
 });
 
@@ -92,7 +96,7 @@ router.get('/:id', async (req, res) => {
         res.json(pedido);
     } catch (error) {
         console.error('Erro ao obter pedido:', error);
-        res.status(500).json({ error: 'Erro ao buscar pedido', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar pedido' });
     }
 });
 
@@ -117,6 +121,27 @@ router.post('/', async (req, res) => {
         if (!fornecedor_id || !itens || itens.length === 0) {
             await connection.rollback();
             return res.status(400).json({ error: 'Fornecedor e itens são obrigatórios' });
+        }
+        
+        // Validar fornecedor existe
+        const [fornecedorExists] = await connection.query(
+            'SELECT id FROM fornecedores WHERE id = ?', [fornecedor_id]
+        );
+        if (fornecedorExists.length === 0) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Fornecedor não encontrado' });
+        }
+        
+        // Validar itens: quantidade e preço devem ser positivos
+        for (const item of itens) {
+            if (!Number.isFinite(item.quantidade) || item.quantidade <= 0) {
+                await connection.rollback();
+                return res.status(400).json({ error: `Quantidade inválida: ${item.quantidade}. Deve ser > 0` });
+            }
+            if (!Number.isFinite(item.preco_unitario) || item.preco_unitario <= 0) {
+                await connection.rollback();
+                return res.status(400).json({ error: `Preço unitário inválido: ${item.preco_unitario}. Deve ser > 0` });
+            }
         }
         
         // Calcular valor total
@@ -173,7 +198,7 @@ router.post('/', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao criar pedido:', error);
-        res.status(500).json({ error: 'Erro ao criar pedido', message: error.message });
+        res.status(500).json({ error: 'Erro ao criar pedido' });
     } finally {
         connection.release();
     }
@@ -270,7 +295,7 @@ router.put('/:id', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao atualizar pedido:', error);
-        res.status(500).json({ error: 'Erro ao atualizar pedido', message: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar pedido' });
     } finally {
         connection.release();
     }
@@ -287,10 +312,36 @@ router.put('/:id/status', async (req, res) => {
             return res.status(400).json({ error: 'Status inválido' });
         }
         
-        await db.query(
-            'UPDATE pedidos_compra SET status = ? WHERE id = ?',
-            [status, req.params.id]
+        // Transições válidas: evita reapproval ou transições inválidas
+        const transicoesPermitidas = {
+            'pendente': ['aprovado', 'cancelado'],
+            'aprovado': ['enviado', 'cancelado'],
+            'enviado': ['recebido', 'cancelado'],
+            'recebido': [],
+            'cancelado': []
+        };
+        
+        // Guard clause atômica: só atualiza se o status atual permitir a transição
+        const statusOrigensValidas = Object.entries(transicoesPermitidas)
+            .filter(([_, destinos]) => destinos.includes(status))
+            .map(([origem]) => origem);
+        
+        if (statusOrigensValidas.length === 0) {
+            return res.status(400).json({ error: `Status '${status}' não pode ser definido como destino` });
+        }
+        
+        const placeholders = statusOrigensValidas.map(() => '?').join(', ');
+        const [result] = await db.query(
+            `UPDATE pedidos_compra SET status = ?, updated_at = NOW() WHERE id = ? AND status IN (${placeholders})`,
+            [status, req.params.id, ...statusOrigensValidas]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ 
+                error: 'Conflito de status', 
+                message: 'Pedido já foi alterado por outro usuário ou transição inválida' 
+            });
+        }
         
         res.json({
             success: true,
@@ -298,7 +349,7 @@ router.put('/:id/status', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao atualizar status:', error);
-        res.status(500).json({ error: 'Erro ao atualizar status', message: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar status' });
     }
 });
 
@@ -307,10 +358,15 @@ router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
         
-        await db.query(
-            "UPDATE pedidos_compra SET status = 'cancelado' WHERE id = ?",
+        // SECURITY FIX (PED-AUTHZ-001): Verificar status antes de cancelar — impedir cancelamento de pedidos já recebidos
+        const [result] = await db.query(
+            "UPDATE pedidos_compra SET status = 'cancelado', updated_at = NOW() WHERE id = ? AND status NOT IN ('recebido', 'cancelado')",
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Pedido não pode ser cancelado (já recebido, já cancelado, ou não encontrado)' });
+        }
         
         res.json({
             success: true,
@@ -318,7 +374,7 @@ router.delete('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao cancelar pedido:', error);
-        res.status(500).json({ error: 'Erro ao cancelar pedido', message: error.message });
+        res.status(500).json({ error: 'Erro ao cancelar pedido' });
     }
 });
 
@@ -327,10 +383,15 @@ router.post('/:id/cancelar', async (req, res) => {
     try {
         const db = getDatabase();
         
-        await db.query(
-            "UPDATE pedidos_compra SET status = 'cancelado' WHERE id = ?",
+        // SECURITY FIX (PED-AUTHZ-001): Verificar status antes de cancelar
+        const [result] = await db.query(
+            "UPDATE pedidos_compra SET status = 'cancelado', updated_at = NOW() WHERE id = ? AND status NOT IN ('recebido', 'cancelado')",
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Pedido não pode ser cancelado (já recebido, já cancelado, ou não encontrado)' });
+        }
         
         res.json({
             success: true,
@@ -338,7 +399,7 @@ router.post('/:id/cancelar', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao cancelar pedido:', error);
-        res.status(500).json({ error: 'Erro ao cancelar pedido', message: error.message });
+        res.status(500).json({ error: 'Erro ao cancelar pedido' });
     }
 });
 

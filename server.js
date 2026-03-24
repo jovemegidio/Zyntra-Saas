@@ -148,7 +148,7 @@ function safeParseJSON(str, fallback = null) {
 // console.error e console.warn continuam funcionando normalmente
 if (process.env.NODE_ENV === 'production') {
     const _originalLog = console.log;
-    console.log = function(...args) {
+    console.log = function (...args) {
         // Em produção, só loga se for startup crítico (primeiros 30s)
         // Depois disso, silencia para evitar logs volumosos
         if (process.uptime && process.uptime() < 30) {
@@ -542,10 +542,10 @@ const cacheClear = cacheService.cacheClear;
 
 // Funções de cache de sessão — delegam para services/cache.js
 function cacheClearByToken(token) {
-    cacheService.cacheClearByToken(token, jwt, JWT_SECRET).catch(() => {});
+    cacheService.cacheClearByToken(token, jwt, JWT_SECRET).catch(() => { });
 }
 function cacheClearAllUserSessions(userId) {
-    cacheService.cacheClearAllUserSessions(userId).catch(() => {});
+    cacheService.cacheClearAllUserSessions(userId).catch(() => { });
 }
 global.cacheClearAllUserSessions = cacheClearAllUserSessions;
 global.cacheClearByToken = cacheClearByToken;
@@ -573,7 +573,7 @@ async function enviarEmail(to, subject, text, html) {
         }
     }
     // Fallback: apenas log
-    console.log(`(simulado) enviarEmail -> to=${to} subject=${subject} text=${String(text).slice(0,200)}`);
+    console.log(`(simulado) enviarEmail -> to=${to} subject=${subject} text=${String(text).slice(0, 200)}`);
     return true;
 }
 
@@ -662,7 +662,7 @@ const allowedOrigins = [
 ].filter(Boolean);
 
 app.use(cors({
-    origin: function(origin, callback) {
+    origin: function (origin, callback) {
         // AUDIT-FIX: No-origin requests (mobile/server-to-server) allowed only in dev
         // In production, no-origin requests must use Bearer token (enforced by authenticateToken)
         if (!origin) {
@@ -672,17 +672,23 @@ app.use(cors({
             return callback(null, false);
         }
 
-        if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+        if (allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
+            // Em desenvolvimento, logar mas não permitir automaticamente
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(`⚠️ CORS DEV: Origem não listada permitida em dev: ${origin}`);
+                callback(null, true);
+                return;
+            }
             console.warn(`⚠️ CORS: Origem bloqueada: ${origin}`);
             callback(new Error('Origem não permitida pelo CORS'));
         }
     },
     credentials: true, // CRITICAL: Permite envio de cookies
-    exposedHeaders: ['set-cookie'],
+    exposedHeaders: ['set-cookie', 'X-CSRF-Token'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-CSRF-Token']
 }));
 
 // FIX 19/02/2026: cookieParser DEVE rodar ANTES do csrfProtection
@@ -809,12 +815,16 @@ app.get('/favicon.ico', (req, res) => {
 const GLOBAL_INJECT_SCRIPTS = [
     '\n<!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->',
     '<script src="/_shared/confirm-dialog.js?v=20260301"></script>',
+    '<!-- ALUFORCE: Accessibility Widget v1.0 - Acessibilidade global -->',
+    '<script src="/_shared/accessibility-widget.js?v=20260615"></script>',
     '<!-- ALUFORCE: Offline Sync Manager v4.0 - Sistema completo offline -->',
     '<script src="/js/offline-sync-manager.js?v=20260301"></script>',
     '<!-- ALUFORCE: Report Viewer v1.0 - Relatórios inline -->',
     '<script src="/js/report-viewer.js?v=20260301"></script>',
     '<!-- ALUFORCE: PWA Manager v3.0 -->',
     '<script src="/js/pwa-manager.js?v=20260301"></script>',
+    '<!-- ALUFORCE: Inactivity Manager v1.0 - Detecção de inatividade -->',
+    '<script src="/js/inactivity-manager.js?v=20260324" defer></script>',
     '<!-- ALUFORCE: Zyntra Chat Teams Widget v2.0 -->',
     '<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">',
     '<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>\n'
@@ -828,59 +838,62 @@ app.use((req, res, next) => {
     res.sendFile = function (filePath, opts, cb) {
         if (typeof filePath === 'string' && filePath.endsWith('.html')) {
             try {
-            fs.readFile(filePath, 'utf8', (err, html) => {
-                if (err || !html) return _origSendFile(filePath, opts, cb);
+                fs.readFile(filePath, 'utf8', (err, html) => {
+                    if (err || !html) return _origSendFile(filePath, opts, cb);
 
-                const fileName = path.basename(filePath);
-                const isLoginPage = SKIP_OFFLINE_INJECT.includes(fileName);
+                    const fileName = path.basename(filePath);
+                    const isLoginPage = SKIP_OFFLINE_INJECT.includes(fileName);
 
-                // Montar scripts a injetar
-                let injectTag = '';
-                if (isLoginPage) {
-                    // Login: só confirm-dialog, sem offline
-                    if (!html.includes('confirm-dialog.js')) {
-                        injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
-                    }
-                } else {
-                    // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
-                    if (!html.includes('offline-sync-manager.js')) {
-                        injectTag = GLOBAL_INJECT_SCRIPTS;
-                    } else {
-                        // Já tem offline-sync, verificar componentes faltantes
-                        let missing = '';
+                    // Montar scripts a injetar
+                    let injectTag = '';
+                    if (isLoginPage) {
+                        // Login: só confirm-dialog, sem offline
                         if (!html.includes('confirm-dialog.js')) {
-                            missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
+                            injectTag = '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>\n';
                         }
-                        if (!html.includes('report-viewer.js')) {
-                            missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
-                        }
-                        if (!html.includes('chat-widget.css')) {
-                            missing += '\n<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">';
-                        }
-                        if (!html.includes('chat-widget.js')) {
-                            missing += '\n<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>';
-                        }
-                        injectTag = missing;
-                    }
-                }
-
-                if (injectTag) {
-                    // IMPORTANTE: Usar lastIndexOf para injetar antes do ÚLTIMO </body>
-                    // (o primeiro pode estar dentro de um template literal JS)
-                    const bodyIdx = html.lastIndexOf('</body>');
-                    const htmlIdx = html.lastIndexOf('</html>');
-                    if (bodyIdx !== -1) {
-                        html = html.substring(0, bodyIdx) + injectTag + html.substring(bodyIdx);
-                    } else if (htmlIdx !== -1) {
-                        html = html.substring(0, htmlIdx) + injectTag + html.substring(htmlIdx);
                     } else {
-                        html += injectTag;
+                        // Todas as outras páginas: inject completo (confirm + offline + report-viewer + pwa + chat)
+                        if (!html.includes('offline-sync-manager.js')) {
+                            injectTag = GLOBAL_INJECT_SCRIPTS;
+                        } else {
+                            // Já tem offline-sync, verificar componentes faltantes
+                            let missing = '';
+                            if (!html.includes('confirm-dialog.js')) {
+                                missing += '\n<script src="/_shared/confirm-dialog.js?v=20260301"></script>';
+                            }
+                            if (!html.includes('report-viewer.js')) {
+                                missing += '\n<script src="/js/report-viewer.js?v=20260301"></script>';
+                            }
+                            if (!html.includes('inactivity-manager.js')) {
+                                missing += '\n<script src="/js/inactivity-manager.js?v=20260324" defer></script>';
+                            }
+                            if (!html.includes('chat-widget.css')) {
+                                missing += '\n<link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">';
+                            }
+                            if (!html.includes('chat-widget.js')) {
+                                missing += '\n<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>';
+                            }
+                            injectTag = missing;
+                        }
                     }
-                }
 
-                res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                res.send(html);
-            });
+                    if (injectTag) {
+                        // IMPORTANTE: Usar lastIndexOf para injetar antes do ÚLTIMO </body>
+                        // (o primeiro pode estar dentro de um template literal JS)
+                        const bodyIdx = html.lastIndexOf('</body>');
+                        const htmlIdx = html.lastIndexOf('</html>');
+                        if (bodyIdx !== -1) {
+                            html = html.substring(0, bodyIdx) + injectTag + html.substring(bodyIdx);
+                        } else if (htmlIdx !== -1) {
+                            html = html.substring(0, htmlIdx) + injectTag + html.substring(htmlIdx);
+                        } else {
+                            html += injectTag;
+                        }
+                    }
+
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.send(html);
+                });
             } catch (readErr) {
                 console.error('[INJECT] Erro ao ler HTML para injeção:', readErr.message);
                 _origSendFile(filePath, opts, cb);
@@ -1188,8 +1201,9 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
         let html = fs.readFileSync(htmlPath, 'utf8');
         // Evitar duplicação: só injetar se report-viewer não estiver presente
         if (!html.includes('report-viewer.js')) {
-            if (html.includes('</body>')) {
-                html = html.replace('</body>', AUTO_INJECT_SCRIPTS + '</body>');
+            const lastBody = html.lastIndexOf('</body>');
+            if (lastBody !== -1) {
+                html = html.slice(0, lastBody) + AUTO_INJECT_SCRIPTS + html.slice(lastBody);
             } else {
                 html += AUTO_INJECT_SCRIPTS;
             }
@@ -1197,11 +1211,10 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
         // Evitar duplicação do chat-widget
         if (!html.includes('chat-widget.js') && html.includes('report-viewer.js')) {
             // report-viewer já presente, mas chat-widget não — injetar só o chat
-            if (!html.includes('chat-widget.js')) {
-                const chatScripts = `<script src="/socket.io/socket.io.js"></script>\n<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>\n`;
-                if (html.includes('</body>')) {
-                    html = html.replace('</body>', chatScripts + '</body>');
-                }
+            const chatScripts = `<script src="/socket.io/socket.io.js"></script>\n<script src="/chat-teams/chat-widget.js?v=20260615" defer></script>\n`;
+            const lastBody = html.lastIndexOf('</body>');
+            if (lastBody !== -1) {
+                html = html.slice(0, lastBody) + chatScripts + html.slice(lastBody);
             }
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -1416,14 +1429,54 @@ const authorizeAdminOrComercial = (req, res, next) => {
 };
 
 // =================================================================
-// 📄 NFe API — Extracted to routes/nfe-api.js
+// � PROXY — Consulta CNPJ (BrasilAPI) e CEP (ViaCEP) sem CORS
+// =================================================================
+const axios = require('axios');
+
+app.get('/api/proxy/cnpj/:cnpj', authenticateToken, async (req, res) => {
+    const cnpj = req.params.cnpj.replace(/\D/g, '');
+    if (cnpj.length !== 14) return res.status(400).json({ error: 'CNPJ inválido' });
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, { timeout: 15000 });
+        res.json(data);
+    } catch (err) {
+        const status = err.response?.status || 502;
+        res.status(status).json({ error: 'Erro ao consultar CNPJ', message: err.response?.data?.message || err.message });
+    }
+});
+
+app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
+    const cep = req.params.cep.replace(/\D/g, '');
+    if (cep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
+    try {
+        const { data } = await axios.get(`https://viacep.com.br/ws/${cep}/json/`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        const status = err.response?.status || 502;
+        res.status(status).json({ error: 'Erro ao consultar CEP', message: err.message });
+    }
+});
+
+// =================================================================
+// �📄 NFe API — Extracted to routes/nfe-api.js
 // =================================================================
 const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
 app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
-// 🛒 COMPRAS API — Módulo de Compras (fornecedores, pedidos, etc.)
+// � FINANCEIRO API — Módulo Financeiro (contas, fluxo de caixa, etc.)
+// =================================================================
+try {
+    const financeiroRoutes = require('./src/routes/financeiro');
+    app.use('/api/financeiro', financeiroRoutes);
+    console.log('✅ Rotas Financeiro API carregadas: /api/financeiro/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Financeiro:', err.message);
+}
+
+// =================================================================
+// �🛒 COMPRAS API — Módulo de Compras (fornecedores, pedidos, etc.)
 // =================================================================
 try {
     const comprasDb = require('./modules/Compras/database');
@@ -1442,14 +1495,14 @@ try {
     const comprasRecebimentoRoutes = require('./modules/Compras/api/recebimento');
     const comprasRelatoriosRoutes = require('./modules/Compras/api/relatorios');
 
-    app.use('/api/compras/fornecedores', authenticateToken, comprasFornecedoresRoutes);
-    app.use('/api/compras/pedidos', authenticateToken, comprasPedidosRoutes);
-    app.use('/api/compras/cotacoes', authenticateToken, comprasCotacoesRoutes);
-    app.use('/api/compras/estoque', authenticateToken, comprasEstoqueRoutes);
-    app.use('/api/compras/materiais', authenticateToken, comprasMateriaisRoutes);
-    app.use('/api/compras/requisicoes', authenticateToken, comprasRequisicoesRoutes);
-    app.use('/api/compras/recebimento', authenticateToken, comprasRecebimentoRoutes);
-    app.use('/api/compras/relatorios', authenticateToken, comprasRelatoriosRoutes);
+    app.use('/api/compras/fornecedores', authenticateToken, authorizeArea('compras'), comprasFornecedoresRoutes);
+    app.use('/api/compras/pedidos', authenticateToken, authorizeArea('compras'), comprasPedidosRoutes);
+    app.use('/api/compras/cotacoes', authenticateToken, authorizeArea('compras'), comprasCotacoesRoutes);
+    app.use('/api/compras/estoque', authenticateToken, authorizeArea('compras'), comprasEstoqueRoutes);
+    app.use('/api/compras/materiais', authenticateToken, authorizeArea('compras'), comprasMateriaisRoutes);
+    app.use('/api/compras/requisicoes', authenticateToken, authorizeArea('compras'), comprasRequisicoesRoutes);
+    app.use('/api/compras/recebimento', authenticateToken, authorizeArea('compras'), comprasRecebimentoRoutes);
+    app.use('/api/compras/relatorios', authenticateToken, authorizeArea('compras'), comprasRelatoriosRoutes);
 
     console.log('✅ Rotas Compras API carregadas: /api/compras/*');
 } catch (err) {
@@ -1521,7 +1574,7 @@ const storage = multer.diskStorage({
     },
     filename: (req, file, cb) => {
         const ext = path.extname(file.originalname);
-        const unique = `${file.fieldname}-${Date.now()}-${Math.floor(Math.random()*1e9)}${ext}`;
+        const unique = `${file.fieldname}-${Date.now()}-${Math.floor(Math.random() * 1e9)}${ext}`;
         cb(null, unique);
     }
 });
@@ -1557,22 +1610,83 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'RH', 'public
 // ============================================================
 // PAGE AUTHENTICATION MIDDLEWARE
 // ============================================================
+const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET + '_refresh';
+
 function authenticatePage(req, res, next) {
     // SECURITY FIX: Exige token válido para servir páginas protegidas
     const token = req.cookies?.authToken || req.cookies?.token || req.headers['authorization']?.replace('Bearer ', '');
     if (!token) {
-        console.log('[AUTH] Sem token ao acessar página protegida:', req.path);
-        return res.redirect('/login.html');
+        // Sem access token — tentar refresh antes de redirecionar
+        return _tryRefreshOrRedirect(req, res, next);
     }
     // AUDIT-FIX HIGH-006: Enforce HS256 algorithm
     jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }, (err, user) => {
         if (err) {
+            if (err.name === 'TokenExpiredError') {
+                // Access token expirado — tentar renovar via refresh token
+                return _tryRefreshOrRedirect(req, res, next);
+            }
             console.log('[AUTH] Token inválido ao acessar página protegida:', err.message);
             return res.redirect('/login.html');
         }
         req.user = user;
         return next();
     });
+}
+
+/**
+ * Tenta renovar o access token usando o refresh token cookie.
+ * Se conseguir, seta novo cookie e continua; senão, redireciona para login.
+ */
+async function _tryRefreshOrRedirect(req, res, next) {
+    const refreshToken = req.cookies?.refreshToken;
+    if (!refreshToken) {
+        console.log('[AUTH] Sem token ao acessar página protegida:', req.path);
+        return res.redirect('/login.html');
+    }
+
+    try {
+        const refreshTokenModule = require('./src/auth/refresh-token');
+        const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
+        if (decoded.type !== 'refresh') throw new Error('Not a refresh token');
+
+        const result = await refreshTokenModule.refreshTokens(refreshToken, pool);
+        if (!result || !result.success) throw new Error('Refresh failed');
+
+        // Gerar novo access token com campos completos
+        const newAccessToken = jwt.sign({
+            id: result.user.id,
+            nome: result.user.nome,
+            email: result.user.username,
+            role: result.user.role,
+            deviceId: decoded.deviceId || 'default',
+            type: 'access'
+        }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
+
+        // Cookie options
+        const cookieOpts = { httpOnly: true, path: '/' };
+        if (process.env.NODE_ENV === 'production') {
+            cookieOpts.secure = true;
+            cookieOpts.sameSite = 'strict';
+        } else {
+            cookieOpts.sameSite = 'lax';
+        }
+
+        // Setar novos cookies
+        res.cookie('authToken', newAccessToken, Object.assign({}, cookieOpts, { maxAge: 1000 * 60 * 15 }));
+        res.cookie('refreshToken', result.refreshToken, Object.assign({}, cookieOpts, {
+            maxAge: 1000 * 60 * 60 * 24 * 7
+        }));
+
+        console.log(`[AUTH] ✅ Token renovado via refresh para userId ${result.user.id} ao acessar: ${req.path}`);
+
+        // Setar req.user com dados do novo token
+        req.user = jwt.verify(newAccessToken, JWT_SECRET, { algorithms: ['HS256'] });
+        return next();
+    } catch (refreshErr) {
+        console.log('[AUTH] Refresh token inválido/expirado ao acessar página protegida:', refreshErr.message);
+        return res.redirect('/login.html');
+    }
 }
 
 // =================================================================
@@ -1605,10 +1719,13 @@ app.get('/api/public/usuarios/foto/:email', async (req, res) => {
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
             return res.status(400).json({ success: false, message: 'Email inválido' });
         }
+        const loginPart = email.split('@')[0]; // e.g. "fabiano.marques"
         let nome = null, apelido = null, foto = null;
         try {
+            // Match by exact email OR by login field (allows alias logins like fabiano.marques@aluforce.ind.br)
             const [usuarios] = await pool.query(
-                'SELECT foto, avatar, nome, apelido FROM usuarios WHERE LOWER(email) = ?', [email]
+                'SELECT foto, avatar, nome, apelido FROM usuarios WHERE LOWER(email) = ? OR login = ? LIMIT 1',
+                [email, loginPart]
             );
             if (usuarios.length > 0) {
                 nome = usuarios[0].nome;
@@ -1840,175 +1957,181 @@ app.use(healthRouter);
 console.log('✅ Health/Status endpoints carregados (modular)');
 
 // ─── FOLHA DE PAGAMENTO MANUAL (RH) ───────────────────────────────
-const axios = require('axios');
 
 // GET /api/rh/folha-manual/competencia - Buscar folhas por mês/ano
-app.get('/api/rh/folha-manual/competencia', authenticateToken, async (req, res) => {
-  const mes = parseInt(req.query.mes);
-  const ano = parseInt(req.query.ano);
-  if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
-  try {
-    const [folhas] = await pool.query(
-      'SELECT * FROM rh_folha_manual WHERE mes = ? AND ano = ? ORDER BY FIELD(tipo, "SALARIO", "ADIANTAMENTO")',
-      [mes, ano]
-    );
-    for (const f of folhas) {
-      const [itens] = await pool.query('SELECT * FROM rh_folha_manual_itens WHERE folha_id = ? ORDER BY empresa, colaborador_nome', [f.id]);
-      f.itens = itens;
+app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    const mes = parseInt(req.query.mes);
+    const ano = parseInt(req.query.ano);
+    if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
+    try {
+        const [folhas] = await pool.query(
+            'SELECT * FROM rh_folha_manual WHERE mes = ? AND ano = ? ORDER BY FIELD(tipo, "SALARIO", "ADIANTAMENTO")',
+            [mes, ano]
+        );
+        for (const f of folhas) {
+            const [itens] = await pool.query('SELECT * FROM rh_folha_manual_itens WHERE folha_id = ? ORDER BY empresa, colaborador_nome', [f.id]);
+            f.itens = itens;
+        }
+        res.json(folhas);
+    } catch (error) {
+        logger.error('Erro ao buscar folha manual:', error);
+        res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
     }
-    res.json(folhas);
-  } catch (error) {
-    logger.error('Erro ao buscar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
-  }
 });
 
 // GET /api/rh/folha-manual/listar - Listar todas as folhas manuais
-app.get('/api/rh/folha-manual/listar', authenticateToken, async (req, res) => {
-  const { ano } = req.query;
-  try {
-    let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
-    const params = [];
-    if (ano) { sql += ' WHERE fm.ano = ?'; params.push(parseInt(ano)); }
-    sql += ' ORDER BY fm.ano DESC, fm.mes DESC, FIELD(fm.tipo, "SALARIO", "ADIANTAMENTO")';
-    const [folhas] = await pool.query(sql, params);
-    res.json(folhas);
-  } catch (error) {
-    logger.error('Erro ao listar folhas manuais:', error);
-    res.status(500).json({ error: 'Erro ao listar folhas' });
-  }
+app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    const { ano } = req.query;
+    try {
+        let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
+        const params = [];
+        if (ano) { sql += ' WHERE fm.ano = ?'; params.push(parseInt(ano)); }
+        sql += ' ORDER BY fm.ano DESC, fm.mes DESC, FIELD(fm.tipo, "SALARIO", "ADIANTAMENTO")';
+        const [folhas] = await pool.query(sql, params);
+        res.json(folhas);
+    } catch (error) {
+        logger.error('Erro ao listar folhas manuais:', error);
+        res.status(500).json({ error: 'Erro ao listar folhas' });
+    }
 });
 
 // POST /api/rh/folha-manual/salvar - Criar ou atualizar folha com todos os itens
 app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async (req, res) => {
-  const mes = parseInt(req.body.mes);
-  const ano = parseInt(req.body.ano);
-  const tipo = req.body.tipo;
-  const itens = req.body.itens;
-  if (!mes || !ano || !tipo) return res.status(400).json({ error: 'mes, ano e tipo são obrigatórios' });
-  if (!Array.isArray(itens)) return res.status(400).json({ error: 'itens deve ser um array' });
+    const mes = parseInt(req.body.mes);
+    const ano = parseInt(req.body.ano);
+    const tipo = req.body.tipo;
+    const itens = req.body.itens;
+    if (!mes || !ano || !tipo) return res.status(400).json({ error: 'mes, ano e tipo são obrigatórios' });
+    if (!Array.isArray(itens)) return res.status(400).json({ error: 'itens deve ser um array' });
 
-  const conn = await pool.getConnection();
-  try {
-    await conn.beginTransaction();
-    const [existing] = await conn.query(
-      'SELECT id, status FROM rh_folha_manual WHERE mes = ? AND ano = ? AND tipo = ?',
-      [mes, ano, tipo]
-    );
-    let folhaId;
-    if (existing.length > 0) {
-      if (existing[0].status === 'fechada') {
-        await conn.rollback();
-        return res.status(400).json({ error: 'Folha já fechada. Não é possível editar.' });
-      }
-      folhaId = existing[0].id;
-      await conn.query('DELETE FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
-    } else {
-      const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-      const titulo = tipo === 'SALARIO'
-        ? `${MESES[mes]} - SALÁRIO, POR FORA E HORA EXTRAS`
-        : `${MESES[mes]} - ADIANTAMENTO`;
-      const [result] = await conn.query(
-        'INSERT INTO rh_folha_manual (mes, ano, tipo, titulo, criado_por) VALUES (?, ?, ?, ?, ?)',
-        [mes, ano, tipo, titulo, req.user.nome || req.user.email]
-      );
-      folhaId = result.insertId;
-    }
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+        const [existing] = await conn.query(
+            'SELECT id, status FROM rh_folha_manual WHERE mes = ? AND ano = ? AND tipo = ?',
+            [mes, ano, tipo]
+        );
+        let folhaId;
+        if (existing.length > 0) {
+            if (existing[0].status === 'fechada') {
+                await conn.rollback();
+                return res.status(400).json({ error: 'Folha já fechada. Não é possível editar.' });
+            }
+            folhaId = existing[0].id;
+            await conn.query('DELETE FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+        } else {
+            const MESES = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            const titulo = tipo === 'SALARIO'
+                ? `${MESES[mes]} - SALÁRIO, POR FORA E HORA EXTRAS`
+                : `${MESES[mes]} - ADIANTAMENTO`;
+            const [result] = await conn.query(
+                'INSERT INTO rh_folha_manual (mes, ano, tipo, titulo, criado_por) VALUES (?, ?, ?, ?, ?)',
+                [mes, ano, tipo, titulo, req.user.nome || req.user.email]
+            );
+            folhaId = result.insertId;
+        }
 
-    let totalGeral = 0;
-    for (const item of itens) {
-      if (!item.colaborador_nome || !item.colaborador_nome.trim()) continue;
-      const vb = parseFloat(item.valor_base) || 0;
-      const spf = parseFloat(item.salario_por_fora) || 0;
-      const h50 = parseFloat(item.he_50) || 0;
-      const h100 = parseFloat(item.he_100) || 0;
-      const desc = parseFloat(item.desconto_emprestimo) || 0;
-      const totalItem = vb + spf + h50 + h100 - desc;
-      totalGeral += totalItem;
-      await conn.query(
-        `INSERT INTO rh_folha_manual_itens (folha_id, empresa, colaborador_nome, funcionario_id, valor_base, salario_por_fora, he_50, he_100, desconto_emprestimo, total)
+        let totalGeralCentavos = 0;
+        for (const item of itens) {
+            if (!item.colaborador_nome || !item.colaborador_nome.trim()) continue;
+            const vb = parseFloat(item.valor_base) || 0;
+            const spf = parseFloat(item.salario_por_fora) || 0;
+            const h50 = parseFloat(item.he_50) || 0;
+            const h100 = parseFloat(item.he_100) || 0;
+            const desc = parseFloat(item.desconto_emprestimo) || 0;
+            // Aritmética em centavos inteiros para evitar erro de ponto flutuante
+            const totalItemCentavos = Math.round(vb * 100) + Math.round(spf * 100) + Math.round(h50 * 100) + Math.round(h100 * 100) - Math.round(desc * 100);
+            const totalItem = totalItemCentavos / 100;
+            totalGeralCentavos += totalItemCentavos;
+            await conn.query(
+                `INSERT INTO rh_folha_manual_itens (folha_id, empresa, colaborador_nome, funcionario_id, valor_base, salario_por_fora, he_50, he_100, desconto_emprestimo, total)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [folhaId, item.empresa || '', item.colaborador_nome.trim(), item.funcionario_id || null, vb, spf, h50, h100, desc, totalItem]
-      );
+                [folhaId, item.empresa || '', item.colaborador_nome.trim(), item.funcionario_id || null, vb, spf, h50, h100, desc, totalItem]
+            );
+        }
+        const totalGeral = totalGeralCentavos / 100;
+        await conn.query('UPDATE rh_folha_manual SET total_geral = ? WHERE id = ?', [totalGeral, folhaId]);
+        await conn.commit();
+        res.json({ success: true, folha_id: folhaId, total_geral: totalGeral });
+    } catch (error) {
+        await conn.rollback();
+        logger.error('Erro ao salvar folha manual:', error);
+        res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
+    } finally {
+        conn.release();
     }
-    await conn.query('UPDATE rh_folha_manual SET total_geral = ? WHERE id = ?', [totalGeral, folhaId]);
-    await conn.commit();
-    res.json({ success: true, folha_id: folhaId, total_geral: totalGeral });
-  } catch (error) {
-    await conn.rollback();
-    logger.error('Erro ao salvar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
-  } finally {
-    conn.release();
-  }
 });
 
 // PUT /api/rh/folha-manual/:id/fechar - Fechar folha manual e enviar ao Contas a Pagar
 app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, async (req, res) => {
-  const folhaId = parseInt(req.params.id);
-  try {
-    const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
-    if (folhaRows.length === 0) return res.status(404).json({ error: 'Folha não encontrada' });
-    const folha = folhaRows[0];
-    if (folha.status === 'fechada') return res.status(400).json({ error: 'Folha já está fechada' });
-
-    const [itens] = await pool.query('SELECT total FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
-    const valorTotal = itens.reduce((acc, i) => acc + parseFloat(i.total || 0), 0);
-    if (valorTotal <= 0) return res.status(400).json({ error: 'Folha sem itens ou valor total zero' });
-
-    await pool.query("UPDATE rh_folha_manual SET status = 'fechada', fechado_em = NOW(), total_geral = ? WHERE id = ?", [valorTotal, folhaId]);
-
-    const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    const tipoLabel = folha.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
-    const descricao = `Folha ${tipoLabel} - ${MESES[folha.mes]} ${folha.ano}`;
-    const data_emissao = new Date().toISOString().slice(0, 10);
-    const vencimentoDate = new Date(folha.ano, folha.mes, 5);
-    const data_vencimento = vencimentoDate.toISOString().slice(0, 10);
-
-    const token = req.cookies?.authToken || req.cookies?.token || (req.headers['authorization'] ? req.headers['authorization'].replace('Bearer ', '') : null);
-    if (!token) return res.status(401).json({ error: 'Token de autenticação não encontrado.' });
-
-    const financeiroUrl = process.env.FINANCEIRO_URL || 'http://localhost:3006/api/financeiro/contas-pagar';
-    const payload = { descricao, valor_total: valorTotal, data_emissao, data_vencimento, observacoes: `Folha manual ${tipoLabel} integrada. ID: ${folhaId}` };
+    const folhaId = parseInt(req.params.id);
     try {
-      const financeiroResp = await axios.post(financeiroUrl, payload, { headers: { Authorization: `Bearer ${token}` } });
-      res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
-    } catch (err) {
-      logger.error('Erro ao integrar folha com Financeiro:', err?.response?.data || err.message);
-      res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+        const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
+        if (folhaRows.length === 0) return res.status(404).json({ error: 'Folha não encontrada' });
+        const folha = folhaRows[0];
+        if (folha.status === 'fechada') return res.status(400).json({ error: 'Folha já está fechada' });
+
+        const [itens] = await pool.query('SELECT total FROM rh_folha_manual_itens WHERE folha_id = ?', [folhaId]);
+        const valorTotalCentavos = itens.reduce((acc, i) => acc + Math.round((parseFloat(i.total || 0)) * 100), 0);
+        const valorTotal = valorTotalCentavos / 100;
+        if (valorTotal <= 0) return res.status(400).json({ error: 'Folha sem itens ou valor total zero' });
+
+        await pool.query("UPDATE rh_folha_manual SET status = 'fechada', fechado_em = NOW(), total_geral = ? WHERE id = ?", [valorTotal, folhaId]);
+
+        const MESES = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const tipoLabel = folha.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
+        const descricao = `Folha ${tipoLabel} - ${MESES[folha.mes]} ${folha.ano}`;
+        const data_emissao = new Date().toISOString().slice(0, 10);
+        const vencimentoDate = new Date(folha.ano, folha.mes, 5);
+        const data_vencimento = vencimentoDate.toISOString().slice(0, 10);
+
+        const token = req.cookies?.authToken || req.cookies?.token || (req.headers['authorization'] ? req.headers['authorization'].replace('Bearer ', '') : null);
+        if (!token) return res.status(401).json({ error: 'Token de autenticação não encontrado.' });
+
+        const financeiroUrl = process.env.FINANCEIRO_URL || 'http://localhost:3006/api/financeiro/contas-pagar';
+        const payload = { descricao, valor_total: valorTotal, data_emissao, data_vencimento, observacoes: `Folha manual ${tipoLabel} integrada. ID: ${folhaId}` };
+        try {
+            const financeiroResp = await axios.post(financeiroUrl, payload, { headers: { Authorization: `Bearer ${token}` } });
+            res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
+        } catch (err) {
+            logger.error('Erro ao integrar folha com Financeiro:', err?.response?.data || err.message);
+            res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+        }
+    } catch (error) {
+        logger.error('Erro ao fechar folha manual:', error);
+        res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
     }
-  } catch (error) {
-    logger.error('Erro ao fechar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
-  }
 });
 
 // PUT /api/rh/folha-manual/:id/reabrir - Reabrir folha fechada
 app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, async (req, res) => {
-  try {
-    await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ?", [parseInt(req.params.id)]);
-    res.json({ success: true });
-  } catch (error) {
-    logger.error('Erro ao reabrir folha:', error);
-    res.status(500).json({ error: 'Erro ao reabrir folha' });
-  }
+    try {
+        const [result] = await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ? AND status = 'fechada'", [parseInt(req.params.id)]);
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Folha não encontrada ou não está fechada' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao reabrir folha:', error);
+        res.status(500).json({ error: 'Erro ao reabrir folha' });
+    }
 });
 
 // GET /api/rh/funcionarios-empresas - Listar funcionários agrupados por empresa
-app.get('/api/rh/funcionarios-empresas', authenticateToken, async (req, res) => {
-  try {
-    const [rows] = await pool.query(`
+app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    try {
+        const [rows] = await pool.query(`
       SELECT f.id, f.nome_completo as nome, f.cargo, f.departamento, f.salario,
              COALESCE(f.departamento, 'SEM EMPRESA') as empresa
       FROM funcionarios f
       WHERE f.status = 'Ativo' OR f.ativo = 1
       ORDER BY f.departamento, f.nome_completo
     `);
-    res.json(rows);
-  } catch (error) {
-    logger.error('Erro ao buscar funcionários:', error);
-    res.status(500).json({ error: 'Erro ao buscar funcionários' });
-  }
+        res.json(rows);
+    } catch (error) {
+        logger.error('Erro ao buscar funcionários:', error);
+        res.status(500).json({ error: 'Erro ao buscar funcionários' });
+    }
 });
 
 // =====================================================
@@ -2345,9 +2468,9 @@ const startServer = async () => {
                     console.log('🔄 Executando verificações de schema...');
                     console.log('💡 Defina SKIP_MIGRATIONS=1 no .env para inicialização mais rápida\n');
 
-                // Inline migrations extracted to database/migrations/startup-inline-migrations.js
-                const { runInlineMigrations } = require('./database/migrations/startup-inline-migrations');
-                await runInlineMigrations(pool);
+                    // Inline migrations extracted to database/migrations/startup-inline-migrations.js
+                    const { runInlineMigrations } = require('./database/migrations/startup-inline-migrations');
+                    await runInlineMigrations(pool);
 
                 } // ⚡ Fim do bloco SKIP_MIGRATIONS
 
@@ -2406,14 +2529,8 @@ const startServer = async () => {
                 const io = setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool });
                 app.set('io', io);
 
-                // Chat Teams — REST routes (Socket.IO is handled in config/socket-setup.js)
-                try {
-                    const registerChatRoutes = require('./routes/chat-routes');
-                    registerChatRoutes(app, { pool, authenticateToken });
-                    console.log('[SERVER] ✅ Chat Teams REST routes registradas');
-                } catch (chatErr) {
-                    console.warn('[SERVER] ⚠️ Chat Teams routes não carregadas:', chatErr.message);
-                }
+                // Chat Teams — REST routes já registradas via routes/index.js (evitar duplicação)
+                // Socket.IO handlers são configurados em config/socket-setup.js
 
                 httpServer.listen(portToTry, HOST)
                     .on('listening', () => {

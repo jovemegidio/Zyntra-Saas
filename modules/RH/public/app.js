@@ -2805,15 +2805,16 @@ function setupEmployeeEventListeners(userData) {
     
     // Funçáo para recarregar dados do usuário
     reloadUserData() {
-        if (!token) {
-            console.log('Náo há token de autenticaçáo');
+        const userData = JSON.parse(localStorage.getItem('userData') || 'null');
+        if (!userData) {
+            console.log('Não há dados de autenticação');
             return;
         }
 
         fetch('/api/user-data', {
                     credentials: 'include',
                     headers: this.getAuthHeaders()
-                }))
+                })
         .then(response => response.json())
         .then(data => {
             if (data.success && data.userData) {

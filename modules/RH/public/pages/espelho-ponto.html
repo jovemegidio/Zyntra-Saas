@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
     
     <style>
-        /* === ESPELHO DE PONTO - CSS ESPECÍFICO === */
+        /* === ESPELHO DE PONTO - CSS ESPECFICO === */
 
         /* CONTENT AREA */
         .content-area {
@@ -54,23 +54,34 @@
         .card-body { padding: 24px; }
 
         /* Controls */
+        .controls-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
+            margin-bottom: 24px;
+        }
+
         .controls-bar {
             display: flex; gap: 16px; align-items: flex-end;
-            margin-bottom: 24px; flex-wrap: wrap;
+            flex-wrap: wrap;
         }
 
         .form-group { display: flex; flex-direction: column; gap: 6px; }
-        .form-label { font-size: 0.875rem; font-weight: 500; color: #64748b; }
+        .form-label { font-size: 0.875rem; font-weight: 600; color: #1e293b; }
 
         .form-select, .form-input {
-            padding: 10px 16px; border: 1px solid #e2e8f0;
+            padding: 10px 16px; border: 2px solid #e2e8f0;
             border-radius: 10px; font-size: 0.875rem;
-            color: #1e293b; background: white; min-width: 180px;
+            color: #1e293b; background: #f8fafc; min-width: 180px;
+            transition: all 0.2s;
         }
 
         .form-select:focus, .form-input:focus {
             outline: none; border-color: var(--primary-pink);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: white;
         }
 
         .btn {
@@ -85,31 +96,50 @@
         .btn-outline { background: transparent; color: #64748b; border: 1px solid #e2e8f0; }
         .btn-outline:hover { background: #f8fafc; color: #1e293b; }
 
-        /* Stats Grid */
+        /* Stats Grid - Padro KPI Compras */
         .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 20px; margin-bottom: 24px;
         }
 
         .stat-card {
             background: white; border-radius: 16px;
-            border: 1px solid #f1f5f9; padding: 20px;
+            border: 1px solid transparent; padding: 20px;
             display: flex; align-items: center; gap: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+        }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+        @keyframes slideInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            border-color: rgba(99, 102, 241, 0.2);
         }
 
         .stat-icon {
-            width: 48px; height: 48px; border-radius: 12px;
+            width: 56px; height: 56px; border-radius: 14px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.25rem;
+            font-size: 24px; flex-shrink: 0; color: white;
         }
 
-        .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-        .stat-icon.green { background: rgba(16, 185, 129, 0.1); color: #10b981; }
-        .stat-icon.yellow { background: rgba(234, 179, 8, 0.1); color: #eab308; }
-        .stat-icon.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
 
-        .stat-content h4 { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; }
-        .stat-content .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+        .stat-content { flex: 1; }
+        .stat-content h4 { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 6px; }
+        .stat-content .value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
 
         /* Table */
         .table-container { overflow-x: auto; }
@@ -139,12 +169,12 @@
         .status-badge.falta { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
         .status-badge.folga { background: rgba(100, 116, 139, 0.1); color: #64748b; }
     </style>
-    <script src="/js/anti-copy-protection.js"></script>
+    <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
-    <script src="/js/tooltips-professional.js?v=20260209"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
@@ -160,17 +190,17 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn active" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
                 <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="/ajuda/index.html" class="sidebar-btn" title="Ajuda"><i class="fas fa-question-circle"></i></a>
-                <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar à Área Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
+                <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar  rea Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
             </div>
         </aside>
 
@@ -186,16 +216,16 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Espelho de Ponto</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
+                            <img src="" alt="Foto do usurio" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -209,31 +239,33 @@
                         <i class="fas fa-clock"></i>
                         Espelho de Ponto
                     </h1>
-                    <p class="page-subtitle">Consulte suas marcações de ponto</p>
+                    <p class="page-subtitle">Consulte suas marcaes de ponto</p>
                 </div>
 
                 <!-- Controls -->
-                <div class="controls-bar">
-                    <div class="form-group">
-                        <label class="form-label" for="data-inicio">Data Início</label>
-                        <input type="date" class="form-input" id="data-inicio" title="Data início do período">
+                <div class="controls-card">
+                    <div class="controls-bar">
+                        <div class="form-group">
+                            <label class="form-label" for="data-inicio">Data Incio</label>
+                            <input type="date" class="form-input" id="data-inicio" title="Data incio do perodo">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="data-fim">Data Fim</label>
+                            <input type="date" class="form-input" id="data-fim" title="Data fim do perodo">
+                        </div>
+                        <button class="btn btn-primary" onclick="carregarEspelho()">
+                            <i class="fas fa-search"></i>
+                            Consultar
+                        </button>
+                        <button class="btn btn-outline" onclick="exportarPDF()">
+                            <i class="fas fa-download"></i>
+                            Exportar PDF
+                        </button>
+                        <a href="../funcionario.html" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i>
+                            Voltar
+                        </a>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label" for="data-fim">Data Fim</label>
-                        <input type="date" class="form-input" id="data-fim" title="Data fim do período">
-                    </div>
-                    <button class="btn btn-primary" onclick="carregarEspelho()">
-                        <i class="fas fa-search"></i>
-                        Consultar
-                    </button>
-                    <button class="btn btn-outline" onclick="exportarPDF()">
-                        <i class="fas fa-download"></i>
-                        Exportar PDF
-                    </button>
-                    <a href="../funcionario.html" class="btn btn-outline">
-                        <i class="fas fa-arrow-left"></i>
-                        Voltar
-                    </a>
                 </div>
 
                 <!-- Stats Grid -->
@@ -293,9 +325,9 @@
                                         <th>Data</th>
                                         <th>Dia</th>
                                         <th>Entrada</th>
-                                        <th>Saída Almoço</th>
-                                        <th>Retorno Almoço</th>
-                                        <th>Saída</th>
+                                        <th>Sada Almoo</th>
+                                        <th>Retorno Almoo</th>
+                                        <th>Sada</th>
                                         <th>Horas</th>
                                         <th>Status</th>
                                     </tr>
@@ -324,7 +356,7 @@
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
-            'antônio': '/avatars/Antonio.webp',
+            'antnio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
             'guilherme': '/avatars/Guilherme.webp',
             'marcelo': '/avatars/Marcelo.webp',
@@ -345,7 +377,7 @@
             return null;
         }
 
-        // Helper: Obtém headers de autenticação com o token
+        // Helper: Obtm headers de autenticao com o token
         function getAuthHeaders(additionalHeaders = {}) {
             const headers = { ...additionalHeaders };
             return headers;
@@ -360,7 +392,7 @@
                 if (response.ok) {
                     const user = await response.json();
                     
-                    // Atualizar saudação dinâmica baseada na hora
+                    // Atualizar saudao dinmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
                         const hour = new Date().getHours();
@@ -370,9 +402,9 @@
                         greetingTextEl.textContent = greeting;
                     }
                     
-                    // Usar apelido se disponível, senão primeiro nome
-                    const userName = user.apelido || user.nome || 'Usuário';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                    // Usar apelido se disponvel, seno primeiro nome
+                    const userName = user.apelido || user.nome || 'Usurio';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
                     if (!userAvatar) userAvatar = getAvatarFromEmail(user.email, userName);
                     
@@ -393,7 +425,7 @@
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
                     }
                     
-                    // Mostrar botão admin apenas para usuários específicos
+                    // Mostrar boto admin apenas para usurios especficos
                     const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
                     const btnAdmin = document.getElementById('btn-admin');
                     if (btnAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
@@ -401,7 +433,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usuário:', error);
+                console.error('Erro ao carregar usurio:', error);
             }
         }
 
@@ -435,7 +467,7 @@
             const tbody = document.getElementById('ponto-tbody');
             if (!tbody) return;
             if (!Array.isArray(data) || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px;">Nenhum registro encontrado para o período selecionado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px;">Nenhum registro encontrado para o perodo selecionado.</td></tr>';
                 return;
             }
             tbody.innerHTML = data.map(p => {
@@ -487,7 +519,7 @@
                     }
                 }
                 
-                // Se não retornou dados válidos
+                // Se no retornou dados vlidos
                 renderPonto([]);
                 atualizarResumo({ dias_trabalhados: 0, horas_trabalhadas: '0h', atrasos: 0, faltas: 0 });
 
@@ -517,15 +549,15 @@
         function exportarPDF() {
             const tbody = document.getElementById('ponto-tbody');
             if (!tbody || !tbody.innerHTML.trim()) {
-                showToast('Nenhum dado para exportar. Consulte um período primeiro.', 'warning');
+                showToast('Nenhum dado para exportar. Consulte um perodo primeiro.', 'warning');
                 return;
             }
 
             const dataInicio = document.getElementById('data-inicio')?.value || '';
             const dataFim = document.getElementById('data-fim')?.value || '';
-            const periodoTexto = dataInicio && dataFim
+            const períodoTexto = dataInicio && dataFim
                 ? `${new Date(dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')} a ${new Date(dataFim + 'T00:00:00').toLocaleDateString('pt-BR')}`
-                : 'Período completo';
+                : 'Perodo completo';
             const userName = document.getElementById('user-name')?.textContent || 'Colaborador';
             const dataGeracao = new Date().toLocaleString('pt-BR');
 
@@ -582,22 +614,23 @@
     <div class="header-line"></div>
     <div class="doc-title">
         <h1>ESPELHO DE PONTO</h1>
-        <div class="info">Colaborador: ${escHTML(userName)} | Período: ${escHTML(periodoTexto)}</div>
+        <div class="info">Colaborador: ${escHTML(userName)} | Perodo: ${escHTML(períodoTexto)}</div>
     </div>
     <table>
         <thead>
-            <tr><th>Data</th><th>Dia</th><th>Entrada</th><th>Saída Almoço</th><th>Retorno</th><th>Saída</th><th>Horas</th><th>Status</th></tr>
+            <tr><th>Data</th><th>Dia</th><th>Entrada</th><th>Sada Almoo</th><th>Retorno</th><th>Sada</th><th>Horas</th><th>Status</th></tr>
         </thead>
         <tbody>${tabelaHTML}</tbody>
     </table>
     <div class="footer">
-        <div style="font-weight:700;color:#1a365d;">ALUFORCE - Sistema de Gestão Empresarial</div>
+        <div style="font-weight:700;color:#1a365d;">ALUFORCE - Sistema de Gesto Empresarial</div>
         <div style="margin-top:3px;">Documento gerado em ${escHTML(dataGeracao)}</div>
     </div>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>`);
             doc.close();
@@ -613,7 +646,7 @@
             carregarUsuarioLogado();
             carregarDadosEmpresa();
 
-            // Definir datas padrão: mês atual
+            // Definir datas padro: ms atual
             const hoje = new Date();
             const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             const dataInicioEl = document.getElementById('data-inicio');
@@ -637,20 +670,21 @@
             setTimeout(function() { toast.remove(); }, 4000);
         }
     </script>
-    <!-- Sistema de Monitoramento de Conexão -->
-    <script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
-    <script src="/js/popup-confirmacao.js"></script>
+    <!-- Sistema de Monitoramento de Conexo -->
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
-    <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
     
     <!-- Sidebar Click Animation -->
-    <script src="/js/sidebar-click-animation.js?v=20260224"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/js/sidebar-click-animation.js?v=20260224" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

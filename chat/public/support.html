@@ -1,13 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Aluforce - Painel de Suporte</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
   <style>
     /* ============ CSS BASE (chat) ============ */
     :root {
@@ -149,6 +149,7 @@
       font-size: 14px;
       line-height: 1.5;
       word-wrap: break-word;
+      overflow-wrap: break-word;
     }
     .message.sent .message-bubble {
       background: var(--primary);
@@ -576,6 +577,7 @@
       .support-sidebar.open { left: 0; }
     }
   </style>
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
 
@@ -716,7 +718,11 @@
   <script>
     // ==================== ESTADO ====================
     const state = {
-      socket: io(),
+      socket: io({
+        transports: ['websocket'],
+        upgrade: false,
+        reconnection: true
+      }),
       agent: null,
       activeTicket: null,
       activeConversationId: null,
@@ -794,13 +800,13 @@
         // Renderizar mensagens anteriores - Fix: usar conversationHistory (do backend)
         const wrapper = document.getElementById('support-messages-wrapper');
         wrapper.innerHTML = '<div class="date-divider"><span>Hoje</span></div>';
-        
+
         if (data.conversationHistory && data.conversationHistory.length > 0) {
           data.conversationHistory.forEach(msg => {
             renderSupportMessage(msg);
           });
         }
-        
+
         scrollSupportToBottom();
       });
 
@@ -838,14 +844,14 @@
       document.getElementById('btn-end-chat').addEventListener('click', () => {
         if (!state.activeConversationId) return;
         if (!confirm('Deseja encerrar este atendimento?')) return;
-        
+
         // Enviar mensagem de encerramento
         state.socket.emit('message:send', {
           conversationId: state.activeConversationId,
           type: 'text',
           content: '🔴 Atendimento encerrado. Obrigado pelo contato!'
         });
-        
+
         // Voltar à tela de seleção
         backToQueue();
         showNotification('✅ Atendimento encerrado com sucesso');

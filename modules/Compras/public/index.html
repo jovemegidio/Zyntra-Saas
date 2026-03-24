@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,48 +9,65 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Compras</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    
+
     <!-- Preconnect para recursos externos -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!-- Fonte Inter (Padrão SaaS) -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        crossorigin="anonymous">
+
     <!-- CSS Compartilhado - Header e Sidebar Padrão -->
     <link rel="stylesheet" href="/modules/_shared/header-sidebar.css?v=20260131">
-    
+
     <!-- CSS SaaS Padrão do Módulo Compras -->
     <link rel="stylesheet" href="../css/compras-saas.css?v=20260131">
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
-    
+
     <!-- CSP Fix -->
     <script src="/js/csp-fix.js" defer></script>
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <script src="/js/tooltips-professional.js?v=20260216"></script>
-    
+
     <style>
         /* Estilos mínimos adicionais para Compras */
         .logo-section {
             display: flex;
             align-items: center;
         }
-        
+
         /* Badges extras */
-        .badge-success { background: #d1fae5; color: #065f46; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        .badge-danger { background: #fee2e2; color: #991b1b; }
-        .badge-info { background: #dbeafe; color: #1e40af; }
-        
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
         /* Botões do módulo */
         .btn-modern {
             display: inline-flex;
@@ -75,18 +93,18 @@
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
         }
-        
+
         /* Notification badge no header */
         .notification-badge {
             min-width: 18px;
         }
-        
+
         .notification-badge:empty,
         .notification-badge[data-count="0"] {
             display: none;
         }
     </style>
-    
+
     <script src="/js/anti-copy-protection.js"></script>
     <script src="/js/modal-title.js?v=20260210"></script>
     <!-- Chat Widget BOB AI -->
@@ -94,6 +112,7 @@
     <!-- Chat Corporativo (Teams) -->
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
 </head>
+
 <body>
     <!-- Container Principal — Padrão ALUFORCE -->
     <div class="app-container">
@@ -108,28 +127,36 @@
             </a>
 
             <nav class="sidebar-nav">
-                <button class="sidebar-btn nav-link active" title="Dashboard" data-section="dashboard" onclick="navigateSection('dashboard', this)">
+                <button class="sidebar-btn nav-link active" title="Dashboard" data-section="dashboard"
+                    onclick="navigateSection('dashboard', this)">
                     <i class="fas fa-chart-line"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Pedidos de Compra" data-section="pedidos" onclick="navigateSection('pedidos', this)">
+                <button class="sidebar-btn nav-link" title="Pedidos de Compra" data-section="pedidos"
+                    onclick="navigateSection('pedidos', this)">
                     <i class="fas fa-shopping-cart"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Cotações" data-section="cotacoes" onclick="navigateSection('cotacoes', this)">
+                <button class="sidebar-btn nav-link" title="Cotações" data-section="cotacoes"
+                    onclick="navigateSection('cotacoes', this)">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Fornecedores" data-section="fornecedores" onclick="navigateSection('fornecedores', this)">
+                <button class="sidebar-btn nav-link" title="Fornecedores" data-section="fornecedores"
+                    onclick="navigateSection('fornecedores', this)">
                     <i class="fas fa-truck"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Materiais" data-section="materiais" onclick="navigateSection('materiais', this)">
+                <button class="sidebar-btn nav-link" title="Materiais" data-section="materiais"
+                    onclick="navigateSection('materiais', this)">
                     <i class="fas fa-cubes"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Recebimento" data-section="recebimento" onclick="navigateSection('recebimento', this)">
+                <button class="sidebar-btn nav-link" title="Recebimento" data-section="recebimento"
+                    onclick="navigateSection('recebimento', this)">
                     <i class="fas fa-truck-loading"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Estoque" data-section="estoque" onclick="navigateSection('estoque', this)">
+                <button class="sidebar-btn nav-link" title="Estoque" data-section="estoque"
+                    onclick="navigateSection('estoque', this)">
                     <i class="fas fa-boxes"></i>
                 </button>
-                <button class="sidebar-btn nav-link" title="Relatórios" data-section="relatorios" onclick="navigateSection('relatorios', this)">
+                <button class="sidebar-btn nav-link" title="Relatórios" data-section="relatorios"
+                    onclick="navigateSection('relatorios', this)">
                     <i class="fas fa-chart-bar"></i>
                 </button>
             </nav>
@@ -150,11 +177,15 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
+                            style="height:22px;object-fit:contain;">
+                        <span
+                            style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Compras</span>
+                        <span
+                            style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span class="page-title"
+                            style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Compras</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -170,8 +201,10 @@
                             <div class="notification-header">
                                 <h3><i class="fas fa-bell"></i> Notificações</h3>
                                 <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button>
+                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i
+                                            class="fas fa-check-double"></i></button>
+                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i
+                                            class="fas fa-trash-alt"></i></button>
                                 </div>
                             </div>
                             <div class="notification-list" id="notification-list">
@@ -194,99 +227,100 @@
 
             <!-- Área Principal de Conteúdo -->
             <div class="content-area">
-        <main class="main-content">
+                <main class="main-content">
 
-                <!-- Dashboard Section -->
-                <div id="dashboard-section" class="content-section active">
-                    <div class="dashboard-grid" id="dashboardContainer">
-                        <!-- Cards serão inseridos aqui via JavaScript -->
+                    <!-- Dashboard Section -->
+                    <div id="dashboard-section" class="content-section active">
+                        <div class="dashboard-grid" id="dashboardContainer">
+                            <!-- Cards serão inseridos aqui via JavaScript -->
+                        </div>
                     </div>
-                </div>
 
-                <!-- Pedidos Section -->
-                <div id="pedidos-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-shopping-cart"></i> Pedidos de Compra</h2>
-                        <button class="btn btn-primary" onclick="novoPedido()">
-                            <i class="fas fa-plus"></i>
-                            Novo Pedido
-                        </button>
+                    <!-- Pedidos Section -->
+                    <div id="pedidos-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-shopping-cart"></i> Pedidos de Compra</h2>
+                            <button class="btn btn-primary" onclick="novoPedido()">
+                                <i class="fas fa-plus"></i>
+                                Novo Pedido
+                            </button>
+                        </div>
+                        <div id="pedidosContainer"></div>
                     </div>
-                    <div id="pedidosContainer"></div>
-                </div>
 
-                <!-- Cotações Section -->
-                <div id="cotacoes-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-file-invoice-dollar"></i> Cotações</h2>
-                        <button class="btn btn-primary" onclick="novaCotacao()">
-                            <i class="fas fa-plus"></i>
-                            Nova Cotação
-                        </button>
+                    <!-- Cotações Section -->
+                    <div id="cotacoes-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-file-invoice-dollar"></i> Cotações</h2>
+                            <button class="btn btn-primary" onclick="novaCotacao()">
+                                <i class="fas fa-plus"></i>
+                                Nova Cotação
+                            </button>
+                        </div>
+                        <div id="cotacoesContainer"></div>
                     </div>
-                    <div id="cotacoesContainer"></div>
-                </div>
 
-                <!-- Fornecedores Section -->
-                <div id="fornecedores-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-truck"></i> Fornecedores</h2>
-                        <button class="btn btn-primary" onclick="novoFornecedor()">
-                            <i class="fas fa-plus"></i>
-                            Novo Fornecedor
-                        </button>
+                    <!-- Fornecedores Section -->
+                    <div id="fornecedores-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-truck"></i> Fornecedores</h2>
+                            <button class="btn btn-primary" onclick="novoFornecedor()">
+                                <i class="fas fa-plus"></i>
+                                Novo Fornecedor
+                            </button>
+                        </div>
+                        <div id="fornecedoresContainer"></div>
                     </div>
-                    <div id="fornecedoresContainer"></div>
-                </div>
 
-                <!-- Materiais Section -->
-                <div id="materiais-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-cubes"></i> Materiais</h2>
-                        <button class="btn btn-primary" onclick="novoMaterial()">
-                            <i class="fas fa-plus"></i>
-                            Novo Material
-                        </button>
+                    <!-- Materiais Section -->
+                    <div id="materiais-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-cubes"></i> Materiais</h2>
+                            <button class="btn btn-primary" onclick="novoMaterial()">
+                                <i class="fas fa-plus"></i>
+                                Novo Material
+                            </button>
+                        </div>
+                        <div id="materiaisContainer"></div>
                     </div>
-                    <div id="materiaisContainer"></div>
-                </div>
 
-                <!-- Recebimento Section -->
-                <div id="recebimento-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-truck-loading"></i> Recebimento</h2>
-                        <button class="btn btn-primary" onclick="novoRecebimento()">
-                            <i class="fas fa-plus"></i>
-                            Registrar Recebimento
-                        </button>
+                    <!-- Recebimento Section -->
+                    <div id="recebimento-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-truck-loading"></i> Recebimento</h2>
+                            <button class="btn btn-primary" onclick="novoRecebimento()">
+                                <i class="fas fa-plus"></i>
+                                Registrar Recebimento
+                            </button>
+                        </div>
+                        <div id="recebimentoContainer"></div>
                     </div>
-                    <div id="recebimentoContainer"></div>
-                </div>
 
-                <!-- Estoque Section -->
-                <div id="estoque-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-boxes"></i> Estoque</h2>
+                    <!-- Estoque Section -->
+                    <div id="estoque-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-boxes"></i> Estoque</h2>
+                        </div>
+                        <div id="estoqueContainer"></div>
                     </div>
-                    <div id="estoqueContainer"></div>
-                </div>
 
-                <!-- Relatórios Section -->
-                <div id="relatorios-section" class="content-section">
-                    <div class="page-header-modern">
-                        <h2><i class="fas fa-chart-bar"></i> Relatórios</h2>
+                    <!-- Relatórios Section -->
+                    <div id="relatorios-section" class="content-section">
+                        <div class="page-header-modern">
+                            <h2><i class="fas fa-chart-bar"></i> Relatórios</h2>
+                        </div>
+                        <div id="relatoriosContainer"></div>
                     </div>
-                    <div id="relatoriosContainer"></div>
-                </div>
-            </main>
+                </main>
             </div><!-- /.content-area -->
         </main><!-- /.main-area -->
     </div><!-- /.app-container -->
 
     <!-- Auth Check -->
-    <script src="/js/auth-unified.js"></script>
+    <script src="/js/auth-unified.js?v=20260324"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="../../modules/PCP/auth-check-pcp.js"></script>
-    
+
     <!-- Scripts do Módulo -->
     <script src="js/compras-main.js"></script>
     <script src="js/dashboard-compras-novo.js"></script>
@@ -297,12 +331,12 @@
     <script src="js/recebimento-compras-novo.js"></script>
     <script src="js/estoque-compras-novo.js"></script>
     <script src="js/relatorios-compras-novo.js"></script>
-    
+
     <script>
         // =============================================
         // SISTEMA DE NAVEGAÇÃO E UI - LAYOUT PADRÃO ALUFORCE
         // =============================================
-        
+
         // Títulos das seções para breadcrumb
         const sectionTitles = {
             'dashboard': 'Dashboard',
@@ -314,18 +348,18 @@
             'estoque': 'Estoque',
             'relatorios': 'Relatórios'
         };
-        
+
         // Carregar dados do usuário no header — Padrão ALUFORCE
         function carregarDadosUsuario() {
             try {
                 const userData = localStorage.getItem('userData');
                 if (!userData) return;
-                
+
                 const user = JSON.parse(userData);
                 const nome = (user.nome || user.nome_completo || 'Usuário').trim();
                 const partes = nome.split(/\s+/);
                 const primeiroNome = partes.length > 1 ? partes[0] + ' ' + partes[partes.length - 1] : partes[0];
-                
+
                 // Atualizar saudação baseada na hora
                 const hora = new Date().getHours();
                 const saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
@@ -335,19 +369,19 @@
                 // Atualizar nome do usuário
                 const userNameEl = document.getElementById('user-name');
                 if (userNameEl) userNameEl.textContent = primeiroNome;
-                
+
                 // Atualizar avatar e iniciais
                 const userPhoto = document.getElementById('user-photo');
                 const userInitials = document.getElementById('user-initials');
                 if (userPhoto) {
                     const avatarPath = `/avatars/${primeiroNome}.webp`;
                     const img = new Image();
-                    img.onload = function() {
+                    img.onload = function () {
                         userPhoto.src = avatarPath;
                         userPhoto.style.display = 'block';
                         if (userInitials) userInitials.style.display = 'none';
                     };
-                    img.onerror = function() {
+                    img.onerror = function () {
                         userPhoto.style.display = 'none';
                         if (userInitials) {
                             userInitials.textContent = primeiroNome.charAt(0).toUpperCase();
@@ -365,18 +399,18 @@
         function navigateSection(sectionId, btn) {
             const navItems = document.querySelectorAll('.sidebar-btn.nav-link[data-section]');
             const sections = document.querySelectorAll('.content-section');
-            
+
             // Remove active de todos
             navItems.forEach(nav => nav.classList.remove('active'));
             sections.forEach(sec => sec.classList.remove('active'));
-            
+
             // Ativa o clicado
             if (btn) btn.classList.add('active');
-            
+
             // Mostra seção
             const section = document.getElementById(`${sectionId}-section`);
             if (section) section.classList.add('active');
-            
+
             // Fecha sidebar mobile
             closeMobileSidebar();
         }
@@ -427,7 +461,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             carregarDadosUsuario();
             setupNavigation();
-            
+
             // Fechar notificações ao clicar fora
             document.addEventListener('click', (e) => {
                 const panel = document.getElementById('notification-panel');
@@ -438,13 +472,13 @@
             });
         });
     </script>
-    
+
     <!-- Sistema de Notificações Global -->
     <script src="/js/notification-manager.js?v=20260129"></script>
-    
+
     <!-- Serviço de Dados da Empresa para Impressões -->
     <script src="/js/empresa-service.js?v=20260120"></script>
-    
+
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
     <script src="/js/popup-confirmacao.js"></script>
@@ -460,4 +494,5 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
+
 </html>

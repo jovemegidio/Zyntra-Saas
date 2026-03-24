@@ -109,6 +109,7 @@
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
     <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -218,7 +219,7 @@
     <div class="modal-overlay" id="modal-criar">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modal-titulo"><i class="fas fa-redo"></i> Nova Recorrência</h2>
+                <h2 id="modal-título"><i class="fas fa-redo"></i> Nova Recorrência</h2>
                 <button class="modal-close" onclick="fecharModal('modal-criar')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -226,7 +227,7 @@
                 <div class="form-section">
                     <h4><i class="fas fa-info-circle"></i> Dados Gerais</h4>
                     <div class="form-grid">
-                        <div class="form-group full"><label><i class="fas fa-tag"></i> Descrição <span class="req">*</span></label><input type="text" id="rec-descricao" placeholder="Ex: Aluguel do galpão, Mensalidade cliente X"></div>
+                        <div class="form-group full"><label><i class="fas fa-tag"></i> Descrição <span class="req">*</span></label><input type="text" id="rec-descrição" placeholder="Ex: Aluguel do galpão, Mensalidade cliente X"></div>
                         <div class="form-group"><label><i class="fas fa-exchange-alt"></i> Tipo <span class="req">*</span></label>
                             <select id="rec-tipo"><option value="pagar">A Pagar (despesa)</option><option value="receber">A Receber (receita)</option></select>
                         </div>
@@ -272,12 +273,12 @@
         function getToken() { return ''; /* Auth via httpOnly cookie */ }
         function hdrs() { return { 'Content-Type': 'application/json' }; /* Auth via httpOnly cookie */ }
         function fmtMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
-        function fmtData(d) { if (!d) return '-'; try { return new Date(d).toLocaleDateString('pt-BR'); } catch { return '-'; } }
+        function fmtData(d) { if (!d) return '-'; try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; } }
 
         const freqLabels = { semanal:'Semanal', quinzenal:'Quinzenal', mensal:'Mensal', bimestral:'Bimestral', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual' };
         const freqIcons = { semanal:'fa-calendar-week', quinzenal:'fa-calendar-check', mensal:'fa-calendar', bimestral:'fa-calendar-plus', trimestral:'fa-calendar-alt', semestral:'fa-calendar-minus', anual:'fa-calendar-day' };
 
-        let recorrencias = [];
+        let recorrências = [];
 
         function mostrarToast(msg, tipo) {
             const colors = { success:'#10b981', error:'#ef4444', warning:'#f59e0b', info:'#3b82f6' };
@@ -300,16 +301,16 @@
                 let url = `${API}/transacoes-recorrentes?`;
                 if (tipo) url += `tipo=${tipo}&`;
                 if (ativo) url += `ativo=${ativo}&`;
-                const r = await fetch(url, { credentials: 'include', headers: hdrs() }));
+                const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                recorrencias = data.data || [];
+                recorrências = data.data || [];
                 renderizar();
                 atualizarKPIs();
             } catch (e) { console.error('Erro:', e); }
         }
 
         function atualizarKPIs() {
-            const ativas = recorrencias.filter(r => r.ativo == 1);
+            const ativas = recorrências.filter(r => r.ativo == 1);
             document.getElementById('kpi-ativas').textContent = ativas.length;
             const pagar = ativas.filter(r => r.tipo === 'pagar').reduce((s, r) => s + Number(r.valor), 0);
             document.getElementById('kpi-pagar').textContent = fmtMoeda(pagar);
@@ -318,7 +319,7 @@
             const em7d = new Date(); em7d.setDate(em7d.getDate() + 7);
             const prox = ativas.filter(r => {
                 if (!r.proximo_vencimento) return false;
-                const d = new Date(r.proximo_vencimento);
+                const d = new Date(String(r.proximo_vencimento).slice(0,10) + 'T00:00:00');
                 return d <= em7d;
             }).length;
             document.getElementById('kpi-proximas').textContent = prox;
@@ -326,17 +327,17 @@
 
         function renderizar() {
             const tb = document.getElementById('tbody-rec');
-            document.getElementById('count-rec').textContent = `${recorrencias.length} registro(s)`;
-            if (recorrencias.length === 0) {
+            document.getElementById('count-rec').textContent = `${recorrências.length} registro(s)`;
+            if (recorrências.length === 0) {
                 tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência</h4><p>Crie sua primeira recorrência</p></div></td></tr>';
                 return;
             }
-            tb.innerHTML = recorrencias.map(r => {
-                const proxDate = r.proximo_vencimento ? new Date(r.proximo_vencimento) : null;
+            tb.innerHTML = recorrências.map(r => {
+                const proxDate = r.proximo_vencimento ? new Date(String(r.proximo_vencimento).slice(0,10) + 'T00:00:00') : null;
                 const isVencido = proxDate && proxDate < new Date();
                 return `
                 <tr>
-                    <td><strong>${r.descricao}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
+                    <td><strong>${r.descrição}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
                     <td><span class="badge badge-${r.tipo}">${r.tipo === 'pagar' ? '↑ Pagar' : '↓ Receber'}</span></td>
                     <td class="valor" style="color:${r.tipo === 'pagar' ? 'var(--danger)' : 'var(--success)'}">${fmtMoeda(r.valor)}</td>
                     <td><span class="freq-badge"><i class="fas ${freqIcons[r.frequencia]||'fa-calendar'}"></i> ${freqLabels[r.frequencia]||r.frequencia}</span></td>
@@ -353,7 +354,7 @@
         }
 
         function abrirModalCriar() {
-            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
             document.getElementById('rec-id').value = '';
             document.querySelectorAll('#modal-criar input[type="text"], #modal-criar input[type="number"]').forEach(el => el.value = '');
             document.getElementById('rec-tipo').value = 'pagar';
@@ -365,11 +366,11 @@
         }
 
         function editarRecorrencia(id) {
-            const r = recorrencias.find(x => x.id === id);
+            const r = recorrências.find(x => x.id === id);
             if (!r) return;
-            document.getElementById('modal-titulo').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
             document.getElementById('rec-id').value = r.id;
-            document.getElementById('rec-descricao').value = r.descricao || '';
+            document.getElementById('rec-descrição').value = r.descrição || '';
             document.getElementById('rec-tipo').value = r.tipo || 'pagar';
             document.getElementById('rec-valor').value = r.valor || '';
             document.getElementById('rec-frequencia').value = r.frequencia || 'mensal';
@@ -384,7 +385,7 @@
         async function salvarRecorrencia() {
             const id = document.getElementById('rec-id').value;
             const payload = {
-                descricao: document.getElementById('rec-descricao').value,
+                descrição: document.getElementById('rec-descrição').value,
                 tipo: document.getElementById('rec-tipo').value,
                 valor: parseFloat(document.getElementById('rec-valor').value),
                 frequencia: document.getElementById('rec-frequencia').value,
@@ -394,7 +395,7 @@
                 fornecedor_cliente: document.getElementById('rec-entidade').value,
                 categoria: document.getElementById('rec-categoria').value
             };
-            if (!payload.descricao || !payload.valor) {
+            if (!payload.descrição || !payload.valor) {
                 mostrarToast('Preencha descrição e valor', 'warning'); return;
             }
             try {
@@ -465,5 +466,6 @@
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

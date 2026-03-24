@@ -1,0 +1,101 @@
+[
+  {
+    "name": "16-meta-vendas-alerta",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 12 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 12h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/vendas/meta-mensal",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "📊 Buscar Meta",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.percentual}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem meta?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/whatsapp/alerta",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": {
+            "tipo": "geral",
+            "telefones": "={{($env.TELEFONES_VENDAS || '').split(',')}}",
+            "dados": {
+              "titulo": "📊 Progresso Meta Mensal",
+              "mensagem": "📅 *{{$json.mes}}*\n\n🎯 Meta: R$ {{$json.meta}}\n💰 Faturado: R$ {{$json.faturado}}\n📈 Progresso: *{{$json.percentual}}%*\n📋 Vendas: {{$json.total_vendas}}\n👥 Clientes: {{$json.clientes}}\n\n💪 Falta: R$ {{$json.falta}}"
+            }
+          },
+          "options": {}
+        },
+        "name": "📱 WhatsApp Vendas",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [910, 250],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_VENDAS || 'vendas4@aluforce.ind.br'}}",
+          "subject": "📊 Meta Mensal: {{$json.percentual}}% — {{$json.mes}}",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#1a73e8;'>📊 Progresso da Meta</h2><p><strong>{{$json.mes}}</strong></p><div style='background:#f5f5f5;padding:20px;border-radius:8px;margin:16px 0;text-align:center;'><div style='font-size:48px;font-weight:bold;color:{{$json.percentual >= 100 ? \"#2e7d32\" : $json.percentual >= 70 ? \"#f57f17\" : \"#c62828\"}};'>{{$json.percentual}}%</div><div style='background:#e0e0e0;height:20px;border-radius:10px;margin:16px 0;'><div style='background:{{$json.percentual >= 100 ? \"#4caf50\" : $json.percentual >= 70 ? \"#ff9800\" : \"#f44336\"}};height:100%;width:{{Math.min($json.percentual, 100)}}%;border-radius:10px;'></div></div></div><table style='width:100%;'><tr><td>🎯 Meta</td><td style='text-align:right;'><strong>R$ {{$json.meta}}</strong></td></tr><tr><td>💰 Faturado</td><td style='text-align:right;'><strong>R$ {{$json.faturado}}</strong></td></tr><tr><td>📋 Vendas</td><td style='text-align:right;'>{{$json.total_vendas}}</td></tr><tr><td>👥 Clientes</td><td style='text-align:right;'>{{$json.clientes}}</td></tr><tr><td>💪 Falta</td><td style='text-align:right;'><strong>R$ {{$json.falta}}</strong></td></tr></table><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Email Meta",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [910, 400],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "16", "workflow_name": "Meta Vendas Alerta", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1130, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 12h Seg-Sex": { "main": [[{ "node": "📊 Buscar Meta", "type": "main", "index": 0 }]] },
+      "📊 Buscar Meta": { "main": [[{ "node": "Tem meta?", "type": "main", "index": 0 }]] },
+      "Tem meta?": { "main": [[{ "node": "📱 WhatsApp Vendas", "type": "main", "index": 0 }, { "node": "📧 Email Meta", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "📱 WhatsApp Vendas": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

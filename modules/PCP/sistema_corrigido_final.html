@@ -175,7 +175,7 @@
                         <tbody>
                             ${produtos.map(p => {
                                 const codigo = p.codigo || '';
-                                const descricao = p.nome || p.descricao || '';
+                                const descrição = p.nome || p.descrição || '';
                                 const sku = p.sku || '';
                                 const gtin = p.gtin || '';
                                 const unidade = p.unidade_medida || p.unidade || '';
@@ -203,7 +203,7 @@
                                 return `
                                     <tr data-id="${p.id}">
                                         <td><strong>${codigo}</strong></td>
-                                        <td>${descricao}</td>
+                                        <td>${descrição}</td>
                                         <td><span class="sku-badge">${sku || '-'}</span></td>
                                         <td><span class="gtin-text">${gtin || '-'}</span></td>
                                         <td>${unidade}</td>
@@ -323,6 +323,7 @@
 
 <!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

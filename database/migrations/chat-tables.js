@@ -18,6 +18,8 @@ async function createChatTables(pool) {
             id INT AUTO_INCREMENT PRIMARY KEY,
             nome VARCHAR(100) NOT NULL UNIQUE,
             descricao VARCHAR(500) DEFAULT '',
+            departamento VARCHAR(100) DEFAULT 'todos',
+            somente_admin TINYINT(1) DEFAULT 0,
             criado_por INT NULL,
             criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
             ativo TINYINT(1) DEFAULT 1,

@@ -479,19 +479,40 @@ const NotificationsManager = (function() {
             saveNotifications();
             updateBadge();
             renderNotifications();
+
+            // Persistir no servidor (se veio do servidor)
+            if (notif.fromServer && Number.isInteger(notif.id)) {
+                fetch(`/api/notificacoes/${notif.id}/lida`, {
+                    method: 'PUT',
+                    credentials: 'include'
+                }).catch(() => {});
+            }
         }
     }
 
     /**
      * Marca todas como lidas
      */
-    function markAllAsRead() {
+    async function markAllAsRead() {
+        // Atualizar localmente
         notifications.forEach(n => n.read = true);
         unreadCount = 0;
         saveNotifications();
         updateBadge();
         renderNotifications();
         showToast('Todas as notificações foram marcadas como lidas', 'success');
+
+        // Persistir no servidor
+        try {
+            await fetch('/api/notificacoes/marcar-todas-lidas', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({})
+            });
+        } catch (e) {
+            console.log('Erro ao marcar todas como lidas no servidor:', e.message);
+        }
     }
 
     /**
@@ -512,6 +533,16 @@ const NotificationsManager = (function() {
         });
         
         if (confirmed) {
+            // Deletar do servidor primeiro
+            try {
+                await fetch('/api/notificacoes/limpar', {
+                    method: 'DELETE',
+                    credentials: 'include'
+                });
+            } catch (e) {
+                console.log('Erro ao limpar notificações no servidor:', e.message);
+            }
+
             notifications = [];
             unreadCount = 0;
             saveNotifications();

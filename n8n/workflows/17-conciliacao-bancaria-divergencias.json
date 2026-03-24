@@ -1,0 +1,79 @@
+[
+  {
+    "name": "17-conciliacao-bancaria-divergencias",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 11 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 11h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/financeiro/divergencias?dias=7",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "🏦 Buscar Divergências",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.total_divergencias}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem divergências?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_FINANCEIRO || 'financeiro2@aluforce.ind.br'}}",
+          "subject": "⚠️ {{$json.total_divergencias}} Divergência(s) Financeira(s) Detectada(s)",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#c62828;'>🏦 Divergências Financeiras</h2><p>Foram encontradas <strong>{{$json.total_divergencias}}</strong> divergência(s) nos últimos {{$json.periodo_dias}} dias:</p><h3>Pagos sem data de baixa: {{$json.pagos_sem_data.length}}</h3><h3>Possíveis duplicatas: {{$json.possiveis_duplicatas.length}}</h3><p>Acesse o módulo Financeiro no Zyntra para corrigir.</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Alerta Divergências",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [910, 250],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "17", "workflow_name": "Conciliação Bancária", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1130, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 11h Seg-Sex": { "main": [[{ "node": "🏦 Buscar Divergências", "type": "main", "index": 0 }]] },
+      "🏦 Buscar Divergências": { "main": [[{ "node": "Tem divergências?", "type": "main", "index": 0 }]] },
+      "Tem divergências?": { "main": [[{ "node": "📧 Alerta Divergências", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "📧 Alerta Divergências": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

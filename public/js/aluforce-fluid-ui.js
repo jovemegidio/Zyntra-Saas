@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ============================================================
  * ALUFORCE - SISTEMA DE UI FLUIDO
  * Utilitários para melhorar a fluidez visual e funcional
@@ -42,7 +42,7 @@
 
         init() {
             if (!CONFIG.ripple.enabled) return;
-            
+
             // Aplicar em botões e cards
             document.addEventListener('click', this.handleClick.bind(this), true);
         }
@@ -104,10 +104,10 @@
          * @param {Object} options - Configurações do skeleton
          */
         show(container, options = {}) {
-            const el = typeof container === 'string' 
-                ? document.querySelector(container) 
+            const el = typeof container === 'string'
+                ? document.querySelector(container)
                 : container;
-            
+
             if (!el) return;
 
             const config = {
@@ -129,14 +129,14 @@
 
         /**
          * Esconde skeleton e restaura ou insere novo conteúdo
-         * @param {HTMLElement|string} container 
+         * @param {HTMLElement|string} container
          * @param {string|null} newContent - Novo conteúdo (opcional)
          */
         hide(container, newContent = null) {
-            const el = typeof container === 'string' 
-                ? document.querySelector(container) 
+            const el = typeof container === 'string'
+                ? document.querySelector(container)
                 : container;
-            
+
             if (!el) return;
 
             const data = this.skeletons.get(el);
@@ -149,12 +149,12 @@
             setTimeout(() => {
                 el.classList.remove('skeleton-loading');
                 el.classList.add('skeleton-fade-out');
-                
+
                 setTimeout(() => {
                     el.innerHTML = newContent !== null ? newContent : data.originalContent;
                     el.classList.remove('skeleton-fade-out');
                     el.classList.add('content-loaded');
-                    
+
                     // Trigger animation de entrada
                     requestAnimationFrame(() => {
                         el.classList.add('content-visible');
@@ -172,7 +172,7 @@
 
         generateSkeleton(config) {
             let html = '';
-            
+
             for (let i = 0; i < config.count; i++) {
                 switch (config.type) {
                     case 'card':
@@ -194,7 +194,7 @@
                         html += this.genericSkeleton(config.height);
                 }
             }
-            
+
             return html;
         }
 
@@ -424,7 +424,7 @@
 
             clearTimeout(toast.dataset.timeout);
             toast.style.animation = 'toastSlideOut 0.2s ease forwards';
-            
+
             setTimeout(() => {
                 toast.remove();
                 this.toasts = this.toasts.filter(t => t !== toast);
@@ -458,11 +458,11 @@
 
             button.dataset.originalText = button.innerHTML;
             button.dataset.originalWidth = button.offsetWidth + 'px';
-            
+
             button.style.width = button.dataset.originalWidth;
             button.classList.add('btn-loading');
             button.disabled = true;
-            
+
             button.innerHTML = `
                 <span class="spinner small" style="
                     display: inline-block;
@@ -508,7 +508,7 @@
             document.addEventListener('click', (e) => {
                 const link = e.target.closest('a[href]');
                 if (!link || link.target === '_blank' || link.hasAttribute('data-no-transition')) return;
-                
+
                 const href = link.getAttribute('href');
                 if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('http')) return;
 
@@ -522,7 +522,7 @@
 
         navigate(url) {
             document.body.classList.add('page-transitioning');
-            
+
             setTimeout(() => {
                 window.location.href = url;
             }, 200);
@@ -544,7 +544,7 @@
 
                 const targetId = link.getAttribute('href').slice(1);
                 const target = document.getElementById(targetId);
-                
+
                 if (target) {
                     e.preventDefault();
                     this.scrollTo(target);
@@ -554,7 +554,7 @@
 
         scrollTo(element, offset = 80) {
             const top = element.getBoundingClientRect().top + window.pageYOffset - offset;
-            
+
             window.scrollTo({
                 top,
                 behavior: 'smooth'
@@ -602,7 +602,7 @@
         init() {
             window.addEventListener('resize', () => {
                 document.body.classList.add('resize-animation-stopper');
-                
+
                 clearTimeout(this.timeout);
                 this.timeout = setTimeout(() => {
                     document.body.classList.remove('resize-animation-stopper');
@@ -614,7 +614,7 @@
     // ============================================================
     // 10. INICIALIZAÇÍO
     // ============================================================
-    
+
     // Criar instncias globais
     window.AluforceUI = {
         ripple: new RippleEffect(),

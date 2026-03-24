@@ -1,6 +1,6 @@
-﻿// Arquivo: definir_nova_senha.js
+// Arquivo: definir_nova_senha.js
 const mysql = require('mysql2/promise');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const saltRounds = 10;
 
 // Pegando o e-mail e a nova senha dos argumentos da linha de comando
@@ -14,12 +14,14 @@ if (args.length < 2) {
 const userEmail = args[0];
 const newPlainPassword = args[1];
 
-// Configure com os dados do seu banco
+// Carrega variáveis de ambiente
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+
 const pool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'nova_senha', // Sua senha do MySQL
-    database: 'aluforce_vendas'
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || '',
+    database: process.env.DB_NAME || 'aluforce_vendas'
 });
 
 async function setNewPassword() {
@@ -42,8 +44,8 @@ async function setNewPassword() {
         if (result.affectedRows === 0) {
             console.error(`ERRO: Nenhum usuário encontrado com o e-mail: ${userEmail}`);
         } else {
-            console.log(`🎉 Senha para ${userEmail} foi atualizada com sucesso no banco de dados!`);
-            console.log(`O usuário agora pode fazer login com a senha: ${newPlainPassword}`);
+            console.log(`?? Senha para ${userEmail} foi atualizada com sucesso no banco de dados!`);
+            console.log(`Senha para ${userEmail} atualizada com sucesso.`);
         }
 
     } catch (error) {

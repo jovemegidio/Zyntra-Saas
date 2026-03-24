@@ -1,5 +1,5 @@
 ﻿// ========================================
-// OTIMIZAÇÍO DE ESTOQUE
+// OTIMIZAÇÃO DE ESTOQUE
 // Sistema Inteligente de Análise e Otimização
 // ========================================
 
@@ -13,11 +13,7 @@ class OtimizacaoEstoqueManager {
     }
 
     getAuthHeaders() {
-        const token = localStorage.getItem('token');
-        return {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
-        };
+        return { 'Content-Type': 'application/json' };
     }
 
     async init() {
@@ -34,9 +30,7 @@ class OtimizacaoEstoqueManager {
     async carregarDados() {
         try {
             // Tentar carregar materiais da API
-            const response = await fetch('/api/compras/materiais', {
-                headers: this.getAuthHeaders()
-            });
+            const response = await fetch('/api/compras/materiais', { credentials: 'include' });
             
             if (response.ok) {
                 const data = await response.json();

@@ -9,13 +9,12 @@ const router = express.Router();
 let pool;
 let authenticateToken;
 
-// Aplicar autentica??o em todas as rotas
+// Aplicar autenticação em todas as rotas (fail-safe: se auth indisponível, bloqueia)
 router.use((req, res, next) => {
-    if (authenticateToken) {
-        authenticateToken(req, res, next);
-    } else {
-        next();
+    if (!authenticateToken) {
+        return res.status(500).json({ success: false, error: 'Serviço de autenticação indisponível' });
     }
+    authenticateToken(req, res, next);
 });
 
 /**
@@ -27,7 +26,11 @@ router.post('/gerar-financeiro', async (req, res) => {
         const { ordem_compra_id, parcelas = 1, primeiro_vencimento, intervalo_dias = 30 } = req.body;
 
         if (!ordem_compra_id) {
-            return res.status(400).json({ success: false, error: 'ID da ordem de compra ? obrigat?rio' });
+            return res.status(400).json({ success: false, error: 'ID da ordem de compra é obrigatório' });
+        }
+
+        if (!Number.isInteger(parcelas) || parcelas < 1) {
+            return res.status(400).json({ success: false, error: 'Número de parcelas deve ser inteiro >= 1' });
         }
 
         // Buscar ordem de compra
@@ -43,13 +46,17 @@ router.post('/gerar-financeiro', async (req, res) => {
         }
 
         const ordem = ordens[0];
-        const valorParcela = ordem.valor_total / parcelas;
+        const valorTotalCentavos = Math.round((parseFloat(ordem.valor_total) || 0) * 100);
+        const valorBaseCentavos = Math.floor(valorTotalCentavos / parcelas);
         const dataBase = primeiro_vencimento ? new Date(primeiro_vencimento) : new Date();
         const contasCriadas = [];
 
         for (let i = 0; i < parcelas; i++) {
             const dataVencimento = new Date(dataBase);
             dataVencimento.setDate(dataVencimento.getDate() + (i * intervalo_dias));
+            // Última parcela absorve o resíduo de centavos
+            const centavos = (i === parcelas - 1) ? valorTotalCentavos - valorBaseCentavos * (parcelas - 1) : valorBaseCentavos;
+            const valorParcela = centavos / 100;
 
             const [result] = await pool.query(`
                 INSERT INTO contas_pagar (
@@ -72,7 +79,9 @@ router.post('/gerar-financeiro', async (req, res) => {
         // Atualizar ordem de compra
         await pool.query(`
             UPDATE ordens_compra SET financeiro_gerado = 1 WHERE id = ?
-        `, [ordem_compra_id]).catch(() => {});
+        `, [ordem_compra_id]).catch(err => {
+            console.error('[INTEGRAÇÃO C-F] Erro ao marcar financeiro_gerado:', err.message);
+        });
 
         res.json({
             success: true,
@@ -94,13 +103,17 @@ router.post('/pedido/gerar-financeiro', async (req, res) => {
         const { pedido_id, parcelas = 1, primeiro_vencimento, intervalo_dias = 30 } = req.body;
 
         if (!pedido_id) {
-            return res.status(400).json({ success: false, error: 'ID do pedido de compra ? obrigat?rio' });
+            return res.status(400).json({ success: false, error: 'ID do pedido de compra é obrigatório' });
         }
 
-        // Verificar se j? existe conta para este pedido
+        if (!Number.isInteger(parcelas) || parcelas < 1) {
+            return res.status(400).json({ success: false, error: 'Número de parcelas deve ser inteiro >= 1' });
+        }
+
+        // Verificar se já existe conta para este pedido (busca exata por pedido_compra_id, fallback LIKE)
         const [existente] = await pool.query(`
             SELECT id FROM contas_pagar WHERE descricao LIKE ? LIMIT 1
-        `, [`%Pedido Compra #${pedido_id}%`]);
+        `, [`Pedido Compra #${pedido_id} -%`]);
 
         if (existente.length > 0) {
             return res.status(400).json({ success: false, error: 'J? existe conta a pagar para este pedido' });
@@ -120,18 +133,26 @@ router.post('/pedido/gerar-financeiro', async (req, res) => {
 
         const pedido = pedidos[0];
 
-        if (!['aprovado', 'recebido'].includes(pedido.status)) {
-            return res.status(400).json({ success: false, error: 'Pedido precisa estar aprovado ou recebido' });
+        if (!['aprovado', 'recebido', 'parcial'].includes(pedido.status)) {
+            return res.status(400).json({ success: false, error: 'Pedido precisa estar aprovado, recebido ou parcial' });
         }
 
-        const valorTotal = parseFloat(pedido.valor_final) || parseFloat(pedido.valor_total) || 0;
-        const valorParcela = valorTotal / parcelas;
+        // Se recebimento parcial, usar valor_recebido proporcional (quando disponível)
+        let valorTotal = parseFloat(pedido.valor_final) || parseFloat(pedido.valor_total) || 0;
+        if (pedido.status === 'parcial' && pedido.valor_recebido) {
+            valorTotal = parseFloat(pedido.valor_recebido);
+        }
+        const valorTotalCentavos = Math.round(valorTotal * 100);
+        const valorBaseCentavos = Math.floor(valorTotalCentavos / parcelas);
         const dataBase = primeiro_vencimento ? new Date(primeiro_vencimento) : new Date();
         const contasCriadas = [];
 
         for (let i = 0; i < parcelas; i++) {
             const dataVencimento = new Date(dataBase);
             dataVencimento.setDate(dataVencimento.getDate() + (i * intervalo_dias));
+            // Última parcela absorve o resíduo de centavos
+            const centavos = (i === parcelas - 1) ? valorTotalCentavos - valorBaseCentavos * (parcelas - 1) : valorBaseCentavos;
+            const valorParcela = centavos / 100;
 
             const [result] = await pool.query(`
                 INSERT INTO contas_pagar (
@@ -153,7 +174,9 @@ router.post('/pedido/gerar-financeiro', async (req, res) => {
         await pool.query(`
             INSERT INTO compras_atividades (tipo, descricao, created_at)
             VALUES ('financeiro', ?, NOW())
-        `, [`Conta a pagar gerada para pedido ${pedido.numero_pedido} - R$ ${valorTotal.toFixed(2)}`]).catch(() => {});
+        `, [`Conta a pagar gerada para pedido ${pedido.numero_pedido} - R$ ${valorTotal.toFixed(2)}`]).catch(err => {
+            console.error('[INTEGRAÇÃO C-F] Erro ao registrar atividade:', err.message);
+        });
 
         res.json({
             success: true,
@@ -245,7 +268,9 @@ router.post('/sincronizar', async (req, res) => {
             if (todasPagas && contas.length > 0) {
                 await pool.query(`
                     UPDATE ordens_compra SET status_financeiro = 'quitado' WHERE id = ?
-                `, [o.ordem_compra_id]).catch(() => {});
+                `, [o.ordem_compra_id]).catch(err => {
+                    console.error('[INTEGRAÇÃO C-F] Erro ao atualizar status_financeiro:', err.message);
+                });
                 atualizados++;
             }
         }

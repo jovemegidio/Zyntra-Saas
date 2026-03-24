@@ -21,7 +21,18 @@ const {
     securityHeaders,
     cleanExpiredSessions
 } = require('../../security-middleware');
+const { authenticateToken: authCentralToken, optionalAuth: authCentralOptional, requireModule } = require('../../middleware/auth-central');
 const { adminRoles, adminUsers, rolesGestao } = require('./config/roles');
+
+// Middleware RBAC: restringe rotas administrativas a usuários com acesso ao módulo RH
+const requireRHAdmin = (req, res, next) => {
+    const user = req.user;
+    if (!user) return res.status(401).json({ error: 'Não autenticado' });
+    const isAdmin = user.role === 'admin' || user.is_admin === true || user.rh_admin === true
+        || adminRoles.includes(user.role) || adminUsers.includes(user.email);
+    if (!isAdmin) return res.status(403).json({ error: 'Acesso restrito a administradores RH' });
+    next();
+};
 
 const app = express()
 const PORT = process.env.PORT_RH || process.env.PORT || 3004
@@ -204,7 +215,8 @@ const adminAllowedFields = [
   // Campos importantes para RH completo
   'bairro', 'cep', 'cidade', 'estado', 'salario_base', 
   'email_corporativo', 'ramal', 'numero_matricula', 'tipo_contrato',
-  'centro_custo', 'jornada_trabalho', 'data_demissao', 'motivo_demissao'
+  'centro_custo', 'jornada_trabalho', 'data_demissao', 'motivo_demissao',
+  'contato_emergencia_nome', 'contato_emergencia_telefone', 'contato_emergencia_parentesco'
 ]
 
 // --- MIDDLEWARES ---
@@ -312,51 +324,12 @@ if (process.env.NODE_ENV === 'development' && process.env.ENABLE_DEBUG_ENDPOINTS
   logger.warn('⚠️ DEBUG ENDPOINTS HABILITADOS - NÃO USE EM PRODUÇÃO')
 }
 
-function authMiddleware (req, res, next) {
-  // SECURITY A4: Check cookie FIRST, then Authorization header
-  let token = null
-  if (req.cookies) {
-    token = req.cookies.authToken || req.cookies.token || null
-  }
-  if (!token) {
-    const auth = req.headers.authorization
-    if (!auth || !auth.startsWith('Bearer ')) return res.status(401).json({ message: 'Token ausente.' })
-    token = auth.split(' ')[1]
-  }
-  try {
-    // AUDIT-FIX ARCH-004: Enforce HS256 algorithm (audience enforced in sign, verify-side after token rotation)
-    const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] })
-    req.user = payload
-    return next()
-  } catch (err) {
-    return res.status(401).json({ message: 'Token inválido.' })
-  }
-}
+// v7.5 FIX: Delegar para auth-central.js (códigos padronizados AUTH_EXPIRED, AUTH_MISSING etc.)
+// O antigo authMiddleware local não retornava campo `code`, impedindo o refresh automático no frontend.
+const authMiddleware = authCentralToken;
 
-// optionalAuth: tries to verify a Bearer token but doesn't fail if absent/invalid.
-// When a valid token is present it sets req.user, otherwise continues without user.
-function optionalAuth (req, res, next) {
-  // SECURITY A4: Check cookie first, then Authorization header
-  let token = null
-  if (req.cookies) {
-    token = req.cookies.authToken || req.cookies.token || null
-  }
-  if (!token) {
-    const auth = req.headers.authorization
-    if (auth && auth.startsWith('Bearer ')) {
-      token = auth.split(' ')[1]
-    }
-  }
-  if (!token) return next()
-  try {
-    // AUDIT-FIX ARCH-004: Enforce HS256 algorithm (audience enforced in sign, verify-side after token rotation)
-    const payload = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] })
-    req.user = payload
-  } catch (e) {
-    // ignore invalid token for optional auth
-  }
-  return next()
-}
+// optionalAuth: delega para auth-central.js
+const optionalAuth = authCentralOptional;
 
 // --- ROTAS DA API ---
 
@@ -600,7 +573,7 @@ app.get('/api/rh/aniversario/hoje', authMiddleware, async (req, res) => {
 // =================== FIM SISTEMA DE EMAILS DE ANIVERSÁRIO ===================
 
 // Endpoint to check if a funcionario has holerite or ponto files attached
-app.get('/api/funcionarios/:id/doc-status', authMiddleware, async (req, res) => {
+app.get(['/api/funcionarios/:id/doc-status', '/api/rh/funcionarios/:id/doc-status'], authMiddleware, async (req, res) => {
   const id = Number(req.params.id || 0)
   if (!id) return res.status(400).json({ message: 'id inválido' })
   // allow self or admin
@@ -618,7 +591,7 @@ app.get('/api/funcionarios/:id/doc-status', authMiddleware, async (req, res) => 
 })
 
 // Rota para CADASTRAR um novo funcionário (campos mínimos)
-app.post('/api/funcionarios',
+app.post(['/api/funcionarios', '/api/rh/funcionarios'],
   authMiddleware,
   // somente admin pode criar funcionários
   (req, res, next) => {
@@ -716,8 +689,26 @@ app.post('/api/funcionarios',
   }
 )
 
+// Helper: sincronizar foto do funcionário para a tabela usuarios (sistema-wide)
+function syncFotoToUsuarios(funcionarioId, fotoUrl) {
+  // Buscar email do funcionário para encontrar o registro na tabela usuarios
+  db.query('SELECT email FROM funcionarios WHERE id = ?', [funcionarioId], (err, rows) => {
+    if (err || !rows || rows.length === 0) return
+    const email = rows[0].email
+    if (!email) return
+    // Atualizar foto e avatar na tabela usuarios (usado por login, saudações, chat, etc.)
+    db.query('UPDATE usuarios SET foto = ?, avatar = ? WHERE email = ?', [fotoUrl, fotoUrl, email], (uErr, uRes) => {
+      if (uErr) {
+        logger.error('Erro ao sincronizar foto para usuarios:', uErr)
+      } else if (uRes.affectedRows > 0) {
+        logger.info(`✅ Foto sincronizada para usuarios: ${email} -> ${fotoUrl}`)
+      }
+    })
+  })
+}
+
 // Rota para UPLOAD DE FOTO
-app.post('/api/funcionarios/:id/foto', authMiddleware, upload.single('foto'), (req, res) => {
+app.post(['/api/funcionarios/:id/foto', '/api/rh/funcionarios/:id/foto'], authMiddleware, upload.single('foto'), (req, res) => {
   const { id } = req.params
   // apenas admin ou o próprio usuário pode alterar a foto
   if (!isAdminUser(req.user) && Number(req.user.id) !== Number(id)) {
@@ -751,6 +742,8 @@ app.post('/api/funcionarios/:id/foto', authMiddleware, upload.single('foto'), (r
                 return res.status(500).json({ message: 'Erro ao guardar a foto.' })
               }
               if (fResults.affectedRows === 0) return res.status(404).json({ message: 'Funcionário não encontrado.' })
+              // Sync photo to usuarios table
+              syncFotoToUsuarios(id, fotoUrl)
               return res.json({ message: 'Foto atualizada com sucesso!', foto_url: fotoUrl, foto_thumb_url: thumbUrl })
             })
           } else {
@@ -759,6 +752,8 @@ app.post('/api/funcionarios/:id/foto', authMiddleware, upload.single('foto'), (r
           }
         } else {
           if (results.affectedRows === 0) return res.status(404).json({ message: 'Funcionário não encontrado.' })
+          // Sync photo to usuarios table
+          syncFotoToUsuarios(id, fotoUrl)
           return res.json({ message: 'Foto atualizada com sucesso!', foto_url: fotoUrl, foto_thumb_url: thumbUrl })
         }
       })
@@ -773,6 +768,7 @@ app.post('/api/funcionarios/:id/foto', authMiddleware, upload.single('foto'), (r
           return res.status(500).json({ message: 'Erro ao guardar a foto.' })
         }
         if (fResults.affectedRows === 0) return res.status(404).json({ message: 'Funcionário não encontrado.' })
+        syncFotoToUsuarios(id, fotoUrl)
         return res.json({ message: 'Foto enviada, thumbnail falhou.', foto_url: fotoUrl })
       })
     })
@@ -805,7 +801,7 @@ const atestadoFileFilter = (req, file, cb) => {
 
 const uploadAtestado = multer({ storage: atéstadoStorage, fileFilter: atestadoFileFilter, limits: { fileSize: 5 * 1024 * 1024 } }) // 5MB
 
-app.post('/api/funcionarios/:id/atéstado', authMiddleware, uploadAtestado.single('atéstado'), async (req, res) => {
+app.post(['/api/funcionarios/:id/atéstado', '/api/rh/funcionarios/:id/atéstado'], authMiddleware, uploadAtestado.single('atéstado'), async (req, res) => {
   const { id } = req.params
   // only admin or the owner can upload their atéstado
   if (!isAdminUser(req.user) && Number(req.user.id) !== Number(id)) {
@@ -848,7 +844,7 @@ function pdfFileFilter (req, file, cb) {
 const uploadHolerite = multer({ storage: holeriteStorage, fileFilter: pdfFileFilter, limits: { fileSize: 20 * 1024 * 1024 } })
 
 // Endpoint for admin to upload holerite for a funcionario
-app.post('/api/funcionarios/:id/holerite', authMiddleware, uploadHolerite.single('holerite'), async (req, res) => {
+app.post(['/api/funcionarios/:id/holerite', '/api/rh/funcionarios/:id/holerite'], authMiddleware, uploadHolerite.single('holerite'), async (req, res) => {
   const { id } = req.params
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado.' })
   if (!req.file) return res.status(400).json({ message: 'Nenhum ficheiro enviado.' })
@@ -916,7 +912,7 @@ const pontoFileFilter = (req, file, cb) => {
 const uploadPonto = multer({ storage: pontoStorage, fileFilter: pontoFileFilter, limits: { fileSize: 8 * 1024 * 1024 } })
 
 // Endpoint for RH to upload espelho de ponto for a funcionario
-app.post('/api/funcionarios/:id/ponto', authMiddleware, uploadPonto.single('ponto'), async (req, res) => {
+app.post(['/api/funcionarios/:id/ponto', '/api/rh/funcionarios/:id/ponto'], authMiddleware, uploadPonto.single('ponto'), async (req, res) => {
   const { id } = req.params
   // only RH or admin roles can upload ponto
   const allowed = ['rh', 'diretoria', 'financeiro']
@@ -991,7 +987,8 @@ app.get('/api/funcionarios/:id', authMiddleware, (req, res) => {
                telefone, data_nascimento, estado_civil, dependentes, ativo, status,
                data_admissao, data_demissao, cargo, endereco, cidade, uf, cep,
                cpf, rg, pis, ctps, banco, agencia, conta, tipo_conta,
-               observacoes, escolaridade, genero
+               observacoes, escolaridade, genero,
+               contato_emergencia_nome, contato_emergencia_telefone, contato_emergencia_parentesco
                FROM funcionarios WHERE id = ? LIMIT 1`
   db.query(sql, [id], async (err, results) => {
     if (err) {
@@ -1027,7 +1024,7 @@ app.get('/api/funcionarios/:id', authMiddleware, (req, res) => {
 })
 
 // Rota para ATUALIZAR dados do funcionário
-app.put('/api/funcionarios/:id', authMiddleware, (req, res) => {
+app.put(['/api/funcionarios/:id', '/api/rh/funcionarios/:id'], authMiddleware, async (req, res) => {
   const { id } = req.params
   // Apenas admin ou o próprio usuário pode atualizar
   if (!isAdminUser(req.user) && Number(req.user.id) !== Number(id)) {
@@ -1074,6 +1071,25 @@ app.put('/api/funcionarios/:id', authMiddleware, (req, res) => {
     }
   }
 
+  // Handle password update separately (senha_texto from frontend)
+  const novaSenha = req.body.senha_texto
+  let senhaHasheada = null
+  if (novaSenha && typeof novaSenha === 'string' && novaSenha.trim().length > 0) {
+    if (!isAdminUser(req.user)) {
+      return res.status(403).json({ message: 'Apenas administradores podem alterar senhas.' })
+    }
+    try {
+      senhaHasheada = await bcrypt.hash(novaSenha.trim(), 12)
+      updates.push('senha = ?')
+      params.push(senhaHasheada)
+      // Clear plaintext password from DB
+      updates.push('senha_texto = NULL')
+    } catch (hashErr) {
+      logger.error('Erro ao hashear senha:', hashErr)
+      return res.status(500).json({ message: 'Erro ao processar senha.' })
+    }
+  }
+
   if (updates.length === 0) return res.status(400).json({ message: 'Nenhum campo para atualizar.' })
 
   params.push(id)
@@ -1084,6 +1100,20 @@ app.put('/api/funcionarios/:id', authMiddleware, (req, res) => {
       return res.status(500).json({ message: 'Erro interno no servidor.' })
     }
     if (results.affectedRows === 0) return res.status(404).json({ message: 'Funcionário não encontrado.' })
+
+    // If password was changed, sync to usuarios table too
+    if (senhaHasheada) {
+      db.query('SELECT email FROM funcionarios WHERE id = ?', [id], (eErr, eRows) => {
+        if (!eErr && eRows && eRows.length > 0 && eRows[0].email) {
+          db.query('UPDATE usuarios SET senha_hash = ?, password_hash = ? WHERE email = ?',
+            [senhaHasheada, senhaHasheada, eRows[0].email], (uErr) => {
+              if (uErr) logger.error('Erro ao sincronizar senha para usuarios:', uErr)
+              else logger.info(`✅ Senha sincronizada para usuarios: ${eRows[0].email}`)
+            })
+        }
+      })
+    }
+
     res.json({ message: 'Dados atualizados com sucesso!', updatedData: req.body })
   })
 })
@@ -1207,13 +1237,13 @@ app.post('/api/avisos', authMiddleware, (req, res) => {
 app.delete('/api/avisos/:id', authMiddleware, (req, res) => {
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado.' })
   const { id } = req.params
-  // Buscar aviso antes de deletar para broadcast completo
-  db.query('SELECT id, titulo, conteudo AS mensagem, data_publicacao AS created_at FROM avisos WHERE id = ? LIMIT 1', [id], (fetchErr, rows) => {
+  // Buscar aviso antes de desativar para broadcast completo
+  db.query('SELECT id, titulo, conteudo AS mensagem, data_publicacao AS created_at FROM avisos WHERE id = ? AND (ativo IS NULL OR ativo = 1) LIMIT 1', [id], (fetchErr, rows) => {
     const aviso = (rows && rows[0]) ? rows[0] : { id: Number(id) }
-    const sql = 'DELETE FROM avisos WHERE id = ?'
+    const sql = 'UPDATE avisos SET ativo = 0 WHERE id = ? AND (ativo IS NULL OR ativo = 1)'
     db.query(sql, [id], (err, results) => {
       if (err) {
-        logger.error('Erro ao apagar aviso:', err)
+        logger.error('Erro ao desativar aviso:', err)
         return res.status(500).json({ message: 'Erro interno no servidor.' })
       }
       if (results.affectedRows === 0) return res.status(404).json({ message: 'Aviso não encontrado.' })
@@ -1286,7 +1316,7 @@ app.get('/api/avisos/:id', authMiddleware, (req, res) => {
 })
 
 // Rota para alterar senha
-app.post('/api/funcionarios/:id/senha',
+app.post(['/api/funcionarios/:id/senha', '/api/rh/funcionarios/:id/senha'],
   authMiddleware,
   body('senha').isLength({ min: 10 }).withMessage('Senha deve ter ao menos 10 caracteres')
     .matches(/[A-Z]/).withMessage('Senha deve conter letra maiúscula')
@@ -1646,7 +1676,7 @@ app.get('/api/rh/funcionarios', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/atividades - Atividades recentes do módulo RH
-app.get('/api/rh/atividades', authMiddleware, async (req, res) => {
+app.get('/api/rh/atividades', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const limit = req.query.limit ? Math.min(50, Math.max(1, parseInt(req.query.limit, 10))) : 10;
     
@@ -1745,7 +1775,7 @@ app.get('/api/rh/atividades', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/dashboard/kpis - KPIs principais do RH
-app.get('/api/rh/dashboard/kpis', authMiddleware, async (req, res) => {
+app.get('/api/rh/dashboard/kpis', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const hoje = new Date();
     const mesAtual = hoje.getMonth() + 1;
@@ -1809,7 +1839,7 @@ app.get('/api/rh/dashboard/kpis', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/stats - Estatísticas rápidas para o dashboard admin (chamado pelo frontend rh-admin.js)
-app.get('/api/rh/stats', authMiddleware, async (req, res) => {
+app.get('/api/rh/stats', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const totalFuncionariosStRows = await dbQuery(
       'SELECT COUNT(*) as total FROM funcionarios WHERE ativo = TRUE OR ativo IS NULL'
@@ -1848,7 +1878,7 @@ app.get('/api/rh/stats', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/funcionarios/recentes - Últimos funcionários admitidos (chamado pelo frontend rh-admin.js)
-app.get('/api/rh/funcionarios/recentes', authMiddleware, async (req, res) => {
+app.get('/api/rh/funcionarios/recentes', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const limite = parseInt(req.query.limit) || 5;
     
@@ -1878,7 +1908,8 @@ app.get('/api/rh/funcionarios/:id', authMiddleware, async (req, res) => {
                  telefone, data_nascimento, estado_civil, dependentes, ativo, status,
                  data_admissao, data_demissao, cargo, endereco, cidade, uf, cep,
                  cpf, rg, pis, ctps, banco, agencia, conta, tipo_conta,
-                 observacoes, escolaridade, genero
+                 observacoes, escolaridade, genero,
+                 contato_emergencia_nome, contato_emergencia_telefone, contato_emergencia_parentesco
                  FROM funcionarios WHERE id = ? LIMIT 1`;
     const results = await dbQuery(sql, [id]);
     if (!results || results.length === 0) return res.status(404).json({ message: 'Funcionário não encontrado.' });
@@ -1978,7 +2009,7 @@ app.put('/api/rh/notificacoes/:id/lida', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/dashboard/charts - Dados para gráficos
-app.get('/api/rh/dashboard/charts', authMiddleware, async (req, res) => {
+app.get('/api/rh/dashboard/charts', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     // Distribuição por faixa etária
     const faixasEtarias = await dbQuery(`
@@ -2037,7 +2068,7 @@ app.get('/api/rh/dashboard/charts', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/centro-custo - Listar centros de custo
-app.get('/api/rh/centro-custo', authMiddleware, async (req, res) => {
+app.get('/api/rh/centro-custo', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const centros = await dbQuery(
       'SELECT id, codigo, nome, descricao, ativo FROM centro_custo WHERE ativo = TRUE ORDER BY codigo LIMIT 500'
@@ -2050,7 +2081,7 @@ app.get('/api/rh/centro-custo', authMiddleware, async (req, res) => {
 });
 
 // POST /api/rh/centro-custo - Criar centro de custo (ADMIN ONLY)
-app.post('/api/rh/centro-custo', authMiddleware, async (req, res) => {
+app.post('/api/rh/centro-custo', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     // Verificação de permissão de administrador
     if (!isAdminUser(req.user)) {
@@ -2394,7 +2425,7 @@ app.get('/api/rh/ponto/histórico/:funcionarioId', authMiddleware, async (req, r
 });
 
 // GET /api/rh/ponto/relatório-mensal - Relatório mensal consolidado
-app.get('/api/rh/ponto/relatório-mensal', authMiddleware, async (req, res) => {
+app.get('/api/rh/ponto/relatório-mensal', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { mes, ano, departamento } = req.query;
 
@@ -2459,7 +2490,7 @@ app.post('/api/rh/ponto/justificativa', authMiddleware, async (req, res) => {
     await dbQuery(
       `UPDATE controle_ponto 
        SET justificativa = ?, tipo_registro = COALESCE(?, tipo_registro), aprovado = 'pendente'
-       WHERE id = ?`,
+       WHERE id = ? AND aprovado != 'aprovado'`,
       [justificativa, tipo_registro || null, ponto_id]
     );
 
@@ -2484,12 +2515,16 @@ app.post('/api/rh/ponto/aprovar', authMiddleware, async (req, res) => {
       return res.status(400).json({ message: 'Dados inválidos' });
     }
 
-    await dbQuery(
+    const [result] = await dbQuery(
       `UPDATE controle_ponto 
        SET aprovado = ?, aprovado_por = ?, data_aprovacao = NOW(), observacao = COALESCE(?, observacao)
-       WHERE id = ?`,
+       WHERE id = ? AND aprovado = 'pendente'`,
       [status, req.user.id, observacao || null, ponto_id]
     );
+
+    if (result && result.affectedRows === 0) {
+      return res.status(409).json({ message: 'Registro não encontrado ou não está pendente de aprovação' });
+    }
 
     res.json({ message: `Registro ${status} com sucesso` });
   } catch (error) {
@@ -2499,7 +2534,7 @@ app.post('/api/rh/ponto/aprovar', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/ponto/pendentes - Listar registros pendentes de aprovação
-app.get('/api/rh/ponto/pendentes', authMiddleware, async (req, res) => {
+app.get('/api/rh/ponto/pendentes', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { departamento } = req.query;
 
@@ -2531,7 +2566,7 @@ app.get('/api/rh/ponto/pendentes', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/ponto/dashboard - Dashboard com KPIs de ponto
-app.get('/api/rh/ponto/dashboard', authMiddleware, async (req, res) => {
+app.get('/api/rh/ponto/dashboard', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const hoje = new Date().toISOString().split('T')[0];
     const mesAtual = new Date().getMonth() + 1;
@@ -2604,7 +2639,7 @@ app.get('/api/rh/ponto/dashboard', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/jornadas - Listar jornadas de trabalho
-app.get('/api/rh/jornadas', authMiddleware, async (req, res) => {
+app.get('/api/rh/jornadas', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const jornadas = await dbQuery(
       'SELECT id, nome, carga_horaria, entrada, saida, intervalo, ativo FROM jornada_trabalho WHERE ativo = TRUE ORDER BY nome LIMIT 500'
@@ -2617,7 +2652,7 @@ app.get('/api/rh/jornadas', authMiddleware, async (req, res) => {
 });
 
 // POST /api/rh/jornadas - Criar nova jornada (ADMIN ONLY)
-app.post('/api/rh/jornadas', authMiddleware, async (req, res) => {
+app.post('/api/rh/jornadas', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     // Verificação de permissão de administrador
     if (!isAdminUser(req.user)) {
@@ -2807,7 +2842,7 @@ app.get('/api/rh/ferias/minhas/:funcionarioId', authMiddleware, async (req, res)
 });
 
 // GET /api/rh/ferias/pendentes - Listar solicitações pendentes de aprovação
-app.get('/api/rh/ferias/pendentes', authMiddleware, async (req, res) => {
+app.get('/api/rh/ferias/pendentes', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { departamento } = req.query;
 
@@ -2954,7 +2989,7 @@ app.post('/api/rh/ferias/cancelar', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/ferias/calendario - Calendário de férias
-app.get('/api/rh/ferias/calendario', authMiddleware, async (req, res) => {
+app.get('/api/rh/ferias/calendario', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { mes, ano, departamento } = req.query;
 
@@ -2994,7 +3029,7 @@ app.get('/api/rh/ferias/calendario', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/ferias/dashboard - Dashboard de férias
-app.get('/api/rh/ferias/dashboard', authMiddleware, async (req, res) => {
+app.get('/api/rh/ferias/dashboard', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     // Estatísticas gerais
     const statsRows = await dbQuery(`
@@ -3068,7 +3103,7 @@ app.get('/api/rh/ferias/dashboard', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/ferias/relatório-vencimentos - Relatório de vencimentos
-app.get('/api/rh/ferias/relatório-vencimentos', authMiddleware, async (req, res) => {
+app.get('/api/rh/ferias/relatório-vencimentos', authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { tipo } = req.query; // 'vencido', 'critico', 'todos'
 
@@ -5805,6 +5840,45 @@ db.query(ensureHistorico, (e) => {
   else logger.info('Tabela rh_historico_treinamentos pronta.');
 });
 
+const ensureRequisicoesCompra = `CREATE TABLE IF NOT EXISTS rh_requisicoes_compra (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero_requisicao VARCHAR(20) UNIQUE,
+    solicitante VARCHAR(255) NOT NULL,
+    departamento VARCHAR(100),
+    data_pedido DATE NOT NULL,
+    data_necessaria DATE NOT NULL,
+    prioridade ENUM('baixa','normal','alta','urgente') DEFAULT 'normal',
+    observacoes TEXT,
+    status ENUM('pendente','em_andamento','concluido','cancelado') DEFAULT 'pendente',
+    valor_total DECIMAL(12,2) DEFAULT 0,
+    criado_por INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_status (status),
+    INDEX idx_data (data_pedido)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+const ensureRequisicoesItens = `CREATE TABLE IF NOT EXISTS rh_requisicoes_compra_itens (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    requisicao_id INT NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    quantidade DECIMAL(10,3) DEFAULT 1,
+    unidade VARCHAR(20) DEFAULT 'UN',
+    preco_unitario DECIMAL(12,2) DEFAULT 0,
+    preco_total DECIMAL(12,2) DEFAULT 0,
+    FOREIGN KEY (requisicao_id) REFERENCES rh_requisicoes_compra(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+db.query(ensureRequisicoesCompra, (e) => {
+  if (e) logger.error('Erro ao criar tabela rh_requisicoes_compra:', e);
+  else logger.info('Tabela rh_requisicoes_compra pronta.');
+});
+
+db.query(ensureRequisicoesItens, (e) => {
+  if (e) logger.error('Erro ao criar tabela rh_requisicoes_compra_itens:', e);
+  else logger.info('Tabela rh_requisicoes_compra_itens pronta.');
+});
+
 // Listar treinamentos
 app.get('/api/rh/treinamentos', authMiddleware, async (req, res) => {
   try {
@@ -6193,6 +6267,145 @@ app.get('/api/rh/treinamentos-categorias', authMiddleware, async (req, res) => {
 });
 
 // ==================== FIM GESTÍO DE TREINAMENTOS ====================
+
+// ==================== REQUISIÇÕES DE COMPRA (RH → Compras) ====================
+
+// GET /api/rh/requisicoes-compra — listar todas
+app.get('/api/rh/requisicoes-compra', authMiddleware, async (req, res) => {
+  try {
+    const requisicoes = await dbQuery(`
+      SELECT r.*,
+             pc.numero_pedido AS numero_pedido_compras
+        FROM rh_requisicoes_compra r
+        LEFT JOIN pedidos_compra pc ON pc.origem = 'RH' AND pc.ordem_compra_pcp_id = r.id
+       ORDER BY r.created_at DESC
+    `);
+    res.json({ requisicoes });
+  } catch (err) {
+    logger.error('Erro ao listar requisições de compra RH:', err);
+    res.status(500).json({ error: 'Erro ao listar requisições' });
+  }
+});
+
+// GET /api/rh/requisicoes-compra/:id — detalhes com itens
+app.get('/api/rh/requisicoes-compra/:id', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const rows = await dbQuery(
+      'SELECT r.*, pc.numero_pedido AS numero_pedido_compras FROM rh_requisicoes_compra r LEFT JOIN pedidos_compra pc ON pc.origem = \'RH\' AND pc.ordem_compra_pcp_id = r.id WHERE r.id = ?',
+      [id]
+    );
+    if (!rows.length) return res.status(404).json({ error: 'Requisição não encontrada' });
+    const req_ = rows[0];
+    const itens = await dbQuery(
+      'SELECT * FROM rh_requisicoes_compra_itens WHERE requisicao_id = ? ORDER BY id',
+      [id]
+    );
+    res.json({ ...req_, itens });
+  } catch (err) {
+    logger.error('Erro ao buscar requisição:', err);
+    res.status(500).json({ error: 'Erro ao buscar requisição' });
+  }
+});
+
+// POST /api/rh/requisicoes-compra — criar e integrar com Compras
+app.post('/api/rh/requisicoes-compra', authMiddleware, async (req, res) => {
+  const { solicitante, departamento, data_necessaria, prioridade, observacoes, itens } = req.body;
+
+  if (!solicitante) return res.status(400).json({ error: 'Solicitante é obrigatório' });
+  if (!data_necessaria) return res.status(400).json({ error: 'Data necessária é obrigatória' });
+  if (!Array.isArray(itens) || !itens.length) return res.status(400).json({ error: 'Informe ao menos um item' });
+
+  const conn = await pool.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    // 1. Inserir requisição
+    const [resultReq] = await conn.query(`
+      INSERT INTO rh_requisicoes_compra
+        (solicitante, departamento, data_necessaria, prioridade, observacoes, status, data_pedido, criado_por)
+      VALUES (?, ?, ?, ?, ?, 'pendente', CURDATE(), ?)`,
+      [solicitante, departamento || null, data_necessaria, prioridade || 'normal', observacoes || null, req.user.id || null]
+    );
+    const reqId = resultReq.insertId;
+
+    // 2. Gerar número da requisição: RQ-RH-000001
+    const numero = 'RQ-RH-' + String(reqId).padStart(6, '0');
+    await conn.query('UPDATE rh_requisicoes_compra SET numero_requisicao = ? WHERE id = ?', [numero, reqId]);
+
+    // 3. Inserir itens e calcular total
+    let valorTotal = 0;
+    for (const it of itens) {
+      const preco = parseFloat(it.preco_unitario) || 0;
+      const qtd   = parseFloat(it.quantidade) || 0;
+      const sub   = preco * qtd;
+      valorTotal += sub;
+      await conn.query(`
+        INSERT INTO rh_requisicoes_compra_itens
+          (requisicao_id, descricao, quantidade, unidade, preco_unitario, preco_total)
+        VALUES (?, ?, ?, ?, ?, ?)`,
+        [reqId, it.descricao, qtd, it.unidade || 'UN', preco, sub]
+      );
+    }
+
+    // 4. Atualizar valor total na requisição
+    await conn.query('UPDATE rh_requisicoes_compra SET valor_total = ? WHERE id = ?', [valorTotal, reqId]);
+
+    // 5. INTEGRAÇÃO: criar pedido de compra no módulo Compras (mesma DB)
+    const [resultPedido] = await conn.query(`
+      INSERT INTO pedidos_compra
+        (numero_pedido, data_pedido, data_entrega_prevista, valor_total, valor_final,
+         observacoes, status, origem, ordem_compra_pcp_id)
+      VALUES (?, CURDATE(), ?, ?, ?, ?, 'aguardando_cotacao', 'RH', ?)`,
+      [numero, data_necessaria, valorTotal, valorTotal,
+       `[RH - ${departamento || 'N/A'}] ${observacoes || 'Sem observações'}`, reqId]
+    );
+    const pedidoId = resultPedido.insertId;
+
+    // 6. Inserir itens no pedido_compra
+    for (const it of itens) {
+      const preco = parseFloat(it.preco_unitario) || 0;
+      const qtd   = parseFloat(it.quantidade) || 0;
+      await conn.query(`
+        INSERT INTO itens_pedido
+          (pedido_id, codigo_produto, descricao, quantidade, unidade, preco_unitario, preco_total, observacoes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [pedidoId, `RH-${reqId}`, it.descricao, qtd, it.unidade || 'UN', preco, preco * qtd, solicitante]
+      );
+    }
+
+    await conn.commit();
+    res.status(201).json({ success: true, id: reqId, numero_requisicao: numero });
+  } catch (err) {
+    await conn.rollback();
+    logger.error('Erro ao criar requisição de compra:', err);
+    res.status(500).json({ error: 'Erro ao criar requisição' });
+  } finally {
+    conn.release();
+  }
+});
+
+// PUT /api/rh/requisicoes-compra/:id/cancelar
+app.put('/api/rh/requisicoes-compra/:id/cancelar', authMiddleware, async (req, res) => {
+  try {
+    const { id } = req.params;
+    await dbQuery(
+      "UPDATE rh_requisicoes_compra SET status = 'cancelado' WHERE id = ? AND status = 'pendente'",
+      [id]
+    );
+    // Cancelar também o pedido de compra vinculado
+    await dbQuery(
+      "UPDATE pedidos_compra SET status = 'cancelado' WHERE origem = 'RH' AND ordem_compra_pcp_id = ?",
+      [id]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    logger.error('Erro ao cancelar requisição:', err);
+    res.status(500).json({ error: 'Erro ao cancelar' });
+  }
+});
+
+// ==================== FIM REQUISIÇÕES DE COMPRA ====================
 
 
 // Error handler (Multer and general)

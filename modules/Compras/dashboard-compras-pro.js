@@ -33,15 +33,15 @@ class ComprasDashboard {
                 fetch('/api/compras/dashboard', {
                     credentials: 'include',
                     headers
-                })).catch(() => null),
+                }).catch(() => null),
                 fetch('/api/compras/pedidos', {
                     credentials: 'include',
                     headers
-                })).catch(() => null),
+                }).catch(() => null),
                 fetch('/api/compras/fornecedores', {
                     credentials: 'include',
                     headers
-                })).catch(() => null)
+                }).catch(() => null)
             ]);
 
             // Processar estatísticas

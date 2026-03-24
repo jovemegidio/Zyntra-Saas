@@ -1,0 +1,51 @@
+{
+  "name": "23-resumo-expedicao-diario",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 17, "triggerAtMinute": 30 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/logistica/resumo-expedicao",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Resumo Expedição",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'logistica', mensagem: '📦 *RESUMO EXPEDIÇÃO - ' + $json.data + '*\\n\\n✅ Expedidos hoje: ' + $json.expedidos_hoje + '\\n📬 Entregues hoje: ' + $json.entregues_hoje + '\\n\\nAcesse o painel para detalhes.' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Enviar Resumo WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [690, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Buscar Resumo Expedição", "type": "main", "index": 0 }]] },
+    "Buscar Resumo Expedição": { "main": [[{ "node": "Enviar Resumo WhatsApp", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

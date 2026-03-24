@@ -10,15 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260216">
-    <link rel="stylesheet" href="css/fin-components.css?v=20260216">
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/importar-xlsx.js"></script>
     <script src="/js/anti-copy-protection.js"></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
-    <script src="/js/modal-title.js?v=20260210"></script>
+    <script src="/js/modal-title.js?v=20260319"></script>
 
     <style>
         /* ===== CONTAS A PAGAR — ESTILOS ESPECÍFICOS ===== */
@@ -653,7 +653,7 @@
         }
     </style>
     <!-- Chat Widget BOB AI -->
-    <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
 </head>
 <body>
     <div class="app-container">
@@ -1104,7 +1104,7 @@
             }
         }
 
-        function formatarDataSegura(data) { if (!data) return 'Sem data'; const d = new Date(data); if (isNaN(d.getTime())) return 'Data inválida'; return d.toLocaleDateString('pt-BR'); }
+        function formatarDataSegura(data) { if (!data) return 'Sem data'; var s=String(data).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return 'Sem data'; var d=new Date(s+'T00:00:00'); if(isNaN(d.getTime())) return 'Sem data'; return d.toLocaleDateString('pt-BR'); }
 
         function renderizarTabela(dados, pesquisa = '') {
             const tbody = document.getElementById('tabela-contas');
@@ -1210,7 +1210,7 @@
         async function salvarConta(event) {
             event.preventDefault();
             const id = document.getElementById('conta-id').value;
-            const dados = { descrição: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseFloat(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
+            const dados = { descricao: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseFloat(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
             try {
                 const url = id ? `/api/financeiro/contas-pagar/${id}` : '/api/financeiro/contas-pagar';
                 const method = id ? 'PUT' : 'POST';
@@ -1238,7 +1238,7 @@
             const hoje = new Date(); hoje.setHours(0,0,0,0);
             if (periodo && periodo !== 'todas') {
                 filtradas = filtradas.filter(c => {
-                    const venc = new Date(c.data_vencimento); venc.setHours(0,0,0,0);
+                    const venc = new Date(String(c.data_vencimento).slice(0,10) + 'T00:00:00'); venc.setHours(0,0,0,0);
                     switch (periodo) {
                         case 'mes': return venc.getMonth() === hoje.getMonth() && venc.getFullYear() === hoje.getFullYear();
                         case 'proximos7': return venc >= hoje && venc <= new Date(hoje.getTime() + 7*86400000);
@@ -1275,7 +1275,7 @@
             document.getElementById('view-fornecedor').textContent = conta.fornecedor_nome || '-';
             document.getElementById('view-categoria').textContent = conta.categoria_nome || '-';
             document.getElementById('view-valor').textContent = `R$ ${(conta.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('view-vencimento').textContent = new Date(conta.data_vencimento).toLocaleDateString('pt-BR');
+            document.getElementById('view-vencimento').textContent = new Date(String(conta.data_vencimento).slice(0,10) + 'T00:00:00').toLocaleDateString('pt-BR');
             document.getElementById('view-forma').textContent = formatarFormaPagamento(conta.forma_pagamento);
             document.getElementById('view-documento').textContent = conta.numero_documento || '-';
             document.getElementById('view-observacoes').textContent = conta.observacoes || 'Nenhuma observação';
@@ -1288,7 +1288,7 @@
             const btnPagar = document.getElementById('btn-pagar-view');
             if (conta.status === 'pago') {
                 pagamentoInfo.style.display = 'block';
-                document.getElementById('view-data-pagamento').textContent = conta.data_pagamento ? new Date(conta.data_pagamento).toLocaleDateString('pt-BR') : '-';
+                document.getElementById('view-data-pagamento').textContent = conta.data_pagamento ? new Date(String(conta.data_pagamento).slice(0,10) + 'T00:00:00').toLocaleDateString('pt-BR') : '-';
                 document.getElementById('view-valor-pago').textContent = conta.valor_pago ? `R$ ${conta.valor_pago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}` : document.getElementById('view-valor').textContent;
                 btnPagar.style.display = 'none';
             } else { pagamentoInfo.style.display = 'none'; btnPagar.style.display = 'inline-flex'; }
@@ -1312,7 +1312,7 @@
             if (dadosExportar.length === 0) { alert('Não há dados para exportar com os filtros atuais'); return; }
             const csvSafe = (str) => { if (typeof str !== 'string') return String(str ?? ''); let s = str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ''); if (/^[=+\-@\t\r]/.test(s)) s = "'" + s; return s; };
             const headers = ['ID','Descrição','Fornecedor','Vencimento','Valor','Status','Forma Pagamento','Nº Documento'];
-            const linhas = dadosExportar.map(c => [c.id, `"${csvSafe(c.descrição || '').replace(/"/g, '""')}"`, `"${csvSafe(c.fornecedor_nome || '').replace(/"/g, '""')}"`, new Date(c.data_vencimento).toLocaleDateString('pt-BR'), (parseFloat(c.valor) || 0).toFixed(2).replace('.', ','), csvSafe(c.status || 'pendente'), csvSafe(formatarFormaPagamento(c.forma_pagamento)), csvSafe(c.numero_documento || '')]);
+            const linhas = dadosExportar.map(c => [c.id, `"${csvSafe(c.descrição || '').replace(/"/g, '""')}"`, `"${csvSafe(c.fornecedor_nome || '').replace(/"/g, '""')}"`, new Date(String(c.data_vencimento).slice(0,10) + 'T00:00:00').toLocaleDateString('pt-BR'), (parseFloat(c.valor) || 0).toFixed(2).replace('.', ','), csvSafe(c.status || 'pendente'), csvSafe(formatarFormaPagamento(c.forma_pagamento)), csvSafe(c.numero_documento || '')]);
             const csv = [headers.join(';'), ...linhas.map(l => l.join(';'))].join('\n');
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = `contas_pagar_${new Date().toISOString().split('T')[0]}.csv`; link.click();
@@ -1350,7 +1350,7 @@
                 const vencidas = contas.filter(c => c.status === 'vencido');
                 if (vencidas.length > 0) notifs.push({ id: 1, tipo: 'error', mensagem: `Você tem ${vencidas.length} conta(s) vencida(s)`, lida: false });
                 const hoje = new Date();
-                const vencendo = contas.filter(c => { const venc = new Date(c.data_vencimento); return c.status === 'pendente' && venc >= hoje && venc <= new Date(hoje.getTime() + 7*86400000); });
+                const vencendo = contas.filter(c => { const venc = new Date(String(c.data_vencimento).slice(0,10) + 'T00:00:00'); return c.status === 'pendente' && venc >= hoje && venc <= new Date(hoje.getTime() + 7*86400000); });
                 if (vencendo.length > 0) notifs.push({ id: 2, tipo: 'warning', mensagem: `${vencendo.length} conta(s) vencem nos próximos 7 dias`, lida: false });
                 notificacoes = notifs;
                 const badge = document.getElementById('notification-count');
@@ -1365,20 +1365,21 @@
         });
     </script>
 
-    <script src="/js/chat-suporte-widgets.js?v=20260103"></script>
-    <script src="../../_shared/connection-monitor.js?v=20251223"></script>
+    <script src="/js/chat-suporte-widgets.js?v=20260319"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
     <script src="/js/popup-confirmacao.js"></script>
-    <script src="/js/auth-unified.js?v=20260131"></script>
-    <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
-    <script src="../js/financeiro-sidebar.js?v=20260210"></script>
+    <script src="/js/auth-unified.js?v=20260319"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
+    <script src="../js/financeiro-sidebar.js?v=20260319"></script>
 
-<!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>
+<!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260319"></script>
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260218" defer></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/chat/widget.js?v=20260319" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

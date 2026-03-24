@@ -1,13 +1,31 @@
 /**
  * API de Consulta de Empresas - Integração com Dados Públicos
  * Fontes: BrasilAPI (Receita Federal), Simples Nacional, CNPJ.ws
+ * 
+ * ATENÇÃO: Este router NÃO está montado ativamente. As rotas de empresas
+ * estão inline em modules/Vendas/server.js. Se for remontado, todas as
+ * rotas já exigem authenticateToken via router.use().
  */
 
 const express = require('express');
 const router = express.Router();
+const jwt = require('jsonwebtoken');
 const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const fs = require('fs');
 const path = require('path');
+
+// Middleware de autenticação obrigatório para TODAS as rotas deste router
+router.use((req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    if (!token) return res.status(401).json({ error: 'Token não fornecido' });
+    if (!process.env.JWT_SECRET) return res.status(500).json({ error: 'Configuração de segurança ausente' });
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Token inválido ou expirado' });
+        req.user = user;
+        next();
+    });
+});
 
 // Cache de empresas consultadas
 const CACHE_FILE = path.join(__dirname, '../data/empresas-cache.json');

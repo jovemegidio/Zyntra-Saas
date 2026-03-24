@@ -2,6 +2,9 @@
 const router = express.Router();
 const path = require('path');
 
+// VULN-013 FIX: Audit trail para operações fiscais críticas
+const { logAuditEvent } = require('../../../middleware/audit-trail');
+
 // Serviços
 const CalculoTributosService = require('../services/calculo-tributos.service');
 const XmlNFeService = require('../services/xml-nfe.service');
@@ -19,7 +22,7 @@ const ReguaCobrancaService = require('../services/regua-cobranca.service');
  */
 
 module.exports = (pool, authenticateToken) => {
-    
+
     // Serviço compartilhado de faturamento (configuração centralizada, numeração, CFOP, admin check)
     const { getFaturamentoSharedService } = require('../../../services/faturamento-shared.service');
     const faturamentoShared = getFaturamentoSharedService(pool);
@@ -32,7 +35,7 @@ module.exports = (pool, authenticateToken) => {
 
     // Criar tabelas PIX na inicialização
     pixService.criarTabelas().catch(err => console.error('[PIX] Erro ao criar tabelas:', err));
-    
+
     // Criar tabelas e iniciar serviço da Régua
     reguaService.criarTabelas().then(() => {
         reguaService.configurarEmailTransporter();
@@ -42,7 +45,7 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // GERAR NF-e A PARTIR DE PEDIDO (COMPLETO)
     // ============================================================
-    
+
     router.post('/gerar-nfe', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
@@ -60,11 +63,11 @@ module.exports = (pool, authenticateToken) => {
                 autoValidarEstoque = true
             } = req.body;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Geração de NFe requer permissão fiscal
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_fiscal', 'faturista', 'fiscal', 'vendedor'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou gerar NF-e sem permissão`);
                 return res.status(403).json({
@@ -73,7 +76,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas usuários com permissão de faturamento podem gerar NF-e.'
                 });
             }
-            
+
             // VALIDAÇÃO: pedido_id obrigatório e numérico
             if (!pedido_id || isNaN(parseInt(pedido_id))) {
                 return res.status(400).json({
@@ -81,7 +84,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'ID do pedido é obrigatório e deve ser numérico'
                 });
             }
-            
+
             console.log(`[FATURAMENTO] Usuário ${usuario_id} iniciando geração de NF-e para pedido ${pedido_id}`);
 
             // Opcional: validar estoque antes de seguir
@@ -95,7 +98,7 @@ module.exports = (pool, authenticateToken) => {
 
             // 1. Buscar dados do pedido
             const [pedidos] = await connection.query(`
-                SELECT 
+                SELECT
                     p.*,
                     c.nome as cliente_nome,
                     c.cnpj as cliente_cnpj,
@@ -116,9 +119,9 @@ module.exports = (pool, authenticateToken) => {
 
             const pedido = pedidos[0];
 
-            // 2. Verificar se já existe NF-e para este pedido
+            // 2. Verificar se já existe NF-e para este pedido (lock pessimista para evitar duplicata)
             const [nfeExistente] = await connection.query(`
-                SELECT id, numero_nfe, status FROM nfe WHERE pedido_id = ?
+                SELECT id, numero_nfe, status FROM nfe WHERE pedido_id = ? FOR UPDATE
             `, [pedido_id]);
 
             if (nfeExistente.length > 0) {
@@ -127,7 +130,7 @@ module.exports = (pool, authenticateToken) => {
 
             // 3. Buscar itens do pedido
             const [itens] = await connection.query(`
-                SELECT 
+                SELECT
                     pi.*,
                     pr.codigo,
                     pr.descricao,
@@ -142,6 +145,29 @@ module.exports = (pool, authenticateToken) => {
                 throw new Error('Pedido sem itens');
             }
 
+            // VALIDAÇÃO: Quantidade e preço devem ser positivos
+            for (const item of itens) {
+                if (!item.quantidade || item.quantidade <= 0) {
+                    throw new Error(`Item "${item.descricao}" possui quantidade inválida (${item.quantidade}). Deve ser > 0.`);
+                }
+                if (!item.preco_unitario || item.preco_unitario <= 0) {
+                    throw new Error(`Item "${item.descricao}" possui preço unitário inválido (${item.preco_unitario}). Deve ser > 0.`);
+                }
+            }
+
+            // VALIDAÇÃO: CNPJ/CPF do destinatário
+            const cnpjCliente = (pedido.cliente_cnpj || '').replace(/\D/g, '');
+            const cpfCliente = (pedido.cliente_cpf || '').replace(/\D/g, '');
+            if (!cnpjCliente && !cpfCliente) {
+                throw new Error('Cliente sem CNPJ ou CPF cadastrado. Corrija o cadastro antes de faturar.');
+            }
+            if (cnpjCliente && cnpjCliente.length !== 14) {
+                throw new Error(`CNPJ do cliente inválido (${cnpjCliente.length} dígitos). Deve ter 14 dígitos.`);
+            }
+            if (!cnpjCliente && cpfCliente && cpfCliente.length !== 11) {
+                throw new Error(`CPF do cliente inválido (${cpfCliente.length} dígitos). Deve ter 11 dígitos.`);
+            }
+
             // 4. Gerar número da NF-e usando serviço compartilhado (série configurável)
             // O serviço verifica MAX entre nfe, pedidos faturamento e pedidos remessa, com FOR UPDATE
             const nfNumero = await faturamentoShared.gerarProximoNumeroNFe(connection);
@@ -151,13 +177,13 @@ module.exports = (pool, authenticateToken) => {
             // 5. Calcular totais usando CalculoTributosService (aritmética Decimal segura)
             // Buscar dados do emitente para cálculo correto de tributos
             const nfeConfig = require('../config/nfe.config');
-            
+
             // Buscar configurações da empresa emitente
             const [empresaRows] = await connection.query(
                 `SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1`
             ).catch(() => [[]]);
-            
-            const emitenteConfig = empresaRows.length > 0 
+
+            const emitenteConfig = empresaRows.length > 0
                 ? (typeof empresaRows[0].valor === 'string' ? JSON.parse(empresaRows[0].valor) : empresaRows[0].valor)
                 : { regimeTributario: 3, uf: 'MG', ie: '', cnpj: '' }; // Fallback: Lucro Real, MG (ALUFORCE)
 
@@ -228,7 +254,7 @@ module.exports = (pool, authenticateToken) => {
 
             const frete = parseFloat(pedido.frete) || 0;
             const desconto = parseFloat(pedido.desconto) || 0;
-            
+
             // Usar valores calculados pelo motor de tributos
             const valorProdutos = totaisNFe.valorProdutos;
             const baseICMS = totaisNFe.baseCalculoICMS;
@@ -396,24 +422,21 @@ module.exports = (pool, authenticateToken) => {
 
             // 8. Atualizar pedido com NF-e gerada (status → 'faturado' para logística capturar)
             await connection.query(`
-                UPDATE pedidos 
+                UPDATE pedidos
                 SET nfe_id = ?, faturado_em = NOW(), status = 'faturado'
                 WHERE id = ?
             `, [nfe_id, pedido_id]);
 
-            await connection.commit();
-            
-            // AUDITORIA ENTERPRISE: Log de geração de NF-e fiscal
-            console.log(`[FATURAMENTO-AUDIT] ✅ NF-e ${proximoNumero} gerada por usuário ${usuario_id} para pedido ${pedido_id}. Valor: R$ ${valorTotal.toFixed(2)}`);
-
-            // Integrações pós-emissão
+            // 9. Integrações PRÉ-COMMIT (dentro da transação para garantir ACID)
+            // VULN-011 FIX: Integrações são MANDATÓRIAS quando solicitadas — falha causa ROLLBACK
             const integracoes = { financeiro: null, estoque: null, avisos: [] };
 
             if (autoReservarEstoque && pedido_id) {
                 try {
                     integracoes.estoque = await vendasEstoqueService.reservarEstoque(pedido_id, usuario_id);
                 } catch (err) {
-                    integracoes.avisos.push(`Reserva de estoque não concluída: ${err.message}`);
+                    console.error(`[FATURAMENTO] ❌ Falha CRÍTICA ao reservar estoque para pedido ${pedido_id}:`, err.message);
+                    throw new Error(`Falha na reserva de estoque: ${err.message}. NF-e não gerada — rollback executado.`);
                 }
             }
 
@@ -425,9 +448,26 @@ module.exports = (pool, authenticateToken) => {
                         intervalo
                     });
                 } catch (err) {
-                    integracoes.avisos.push(`Integração financeira não concluída: ${err.message}`);
+                    console.error(`[FATURAMENTO] ❌ Falha CRÍTICA ao gerar contas a receber para NF-e ${nfe_id}:`, err.message);
+                    throw new Error(`Falha na integração financeira: ${err.message}. NF-e não gerada — rollback executado.`);
                 }
             }
+
+            await connection.commit();
+
+            // VULN-013 FIX: Audit trail explícito para geração de NF-e
+            logAuditEvent(pool, {
+                userId: usuario_id,
+                action: 'GERAR_NFE',
+                module: 'faturamento',
+                description: `NF-e ${proximoNumero} gerada para pedido ${pedido_id}. Valor: R$ ${valorTotal.toFixed(2)}`,
+                newData: { nfe_id, numero_nfe: proximoNumero, pedido_id, valor_total: valorTotal, chave_acesso: chaveAcesso },
+                ip: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
+            // AUDITORIA ENTERPRISE: Log de geração de NF-e fiscal
+            console.log(`[FATURAMENTO-AUDIT] ✅ NF-e ${proximoNumero} gerada por usuário ${usuario_id} para pedido ${pedido_id}. Valor: R$ ${valorTotal.toFixed(2)}`);
 
             res.json({
                 success: true,
@@ -445,11 +485,11 @@ module.exports = (pool, authenticateToken) => {
                         valor_ipi: valorIPI,
                         valor_pis: valorPIS,
                         valor_cofins: valorCOFINS,
-                        regime_tributario: emitente.regimeTributario === 1 ? 'Simples Nacional' 
+                        regime_tributario: emitente.regimeTributario === 1 ? 'Simples Nacional'
                             : emitente.regimeTributario === 2 ? 'Lucro Presumido' : 'Lucro Real'
                     },
                     status: 'pendente',
-                    proximos_passos: xmlNfe 
+                    proximos_passos: xmlNfe
                         ? ['Enviar para SEFAZ (XML já gerado)', 'Gerar DANFE em PDF']
                         : ['Corrigir dados para geração do XML', 'Enviar para SEFAZ', 'Gerar DANFE em PDF'],
                     integracoes
@@ -459,9 +499,9 @@ module.exports = (pool, authenticateToken) => {
         } catch (error) {
             await connection.rollback();
             console.error('[FATURAMENTO] Erro ao gerar NF-e:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: error.message 
+            res.status(500).json({
+                success: false,
+                message: error.message
             });
         } finally {
             connection.release();
@@ -471,13 +511,13 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // LISTAR NF-es
     // ============================================================
-    
+
     router.get('/nfes', authenticateToken, async (req, res) => {
         try {
             const { status, data_inicio, data_fim, cliente_id } = req.query;
-            
+
             let query = `
-                SELECT 
+                SELECT
                     n.*,
                     c.nome as cliente_nome,
                     p.id as pedido_numero,
@@ -488,43 +528,43 @@ module.exports = (pool, authenticateToken) => {
                 LEFT JOIN nfe_itens ni ON n.id = ni.nfe_id
                 WHERE 1=1
             `;
-            
+
             const params = [];
-            
+
             if (status) {
                 query += ' AND n.status = ?';
                 params.push(status);
             }
-            
+
             if (data_inicio) {
                 query += ' AND DATE(n.data_emissao) >= ?';
                 params.push(data_inicio);
             }
-            
+
             if (data_fim) {
                 query += ' AND DATE(n.data_emissao) <= ?';
                 params.push(data_fim);
             }
-            
+
             if (cliente_id) {
                 query += ' AND n.cliente_id = ?';
                 params.push(cliente_id);
             }
-            
+
             query += ' GROUP BY n.id ORDER BY n.data_emissao DESC LIMIT 100';
-            
+
             const [nfes] = await pool.query(query, params);
-            
+
             res.json({
                 success: true,
                 data: nfes
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao listar NF-es:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: error.message 
+            res.status(500).json({
+                success: false,
+                message: error.message
             });
         }
     });
@@ -532,13 +572,13 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // DETALHES DA NF-e
     // ============================================================
-    
+
     router.get('/nfes/:id', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
-            
+
             const [nfes] = await pool.query(`
-                SELECT 
+                SELECT
                     n.*,
                     c.nome as cliente_nome,
                     c.email as cliente_email,
@@ -549,18 +589,18 @@ module.exports = (pool, authenticateToken) => {
                 LEFT JOIN pedidos p ON n.pedido_id = p.id
                 WHERE n.id = ?
             `, [id]);
-            
+
             if (nfes.length === 0) {
                 return res.status(404).json({
                     success: false,
                     message: 'NF-e não encontrada'
                 });
             }
-            
+
             const [itens] = await pool.query(`
                 SELECT * FROM nfe_itens WHERE nfe_id = ?
             `, [id]);
-            
+
             res.json({
                 success: true,
                 data: {
@@ -568,12 +608,12 @@ module.exports = (pool, authenticateToken) => {
                     itens
                 }
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao buscar NF-e:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: error.message 
+            res.status(500).json({
+                success: false,
+                message: error.message
             });
         }
     });
@@ -581,7 +621,7 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // CANCELAR NF-e
     // ============================================================
-    
+
     router.post('/nfes/:id/cancelar', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
@@ -590,11 +630,11 @@ module.exports = (pool, authenticateToken) => {
             const { id } = req.params;
             const { motivo } = req.body;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Apenas gerentes/admin podem cancelar NF-e
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_fiscal', 'supervisor_fiscal'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou cancelar NF-e ${id} sem permissão`);
                 return res.status(403).json({
@@ -626,7 +666,7 @@ module.exports = (pool, authenticateToken) => {
             if (nfe.status === 'cancelada') {
                 throw new Error('NF-e já está cancelada');
             }
-            
+
             // VALIDAÇÃO FISCAL: Verificar prazo de cancelamento (24 horas após autorização)
             if (nfe.data_autorizacao) {
                 const horasDesdeAutorizacao = (Date.now() - new Date(nfe.data_autorizacao).getTime()) / (1000 * 60 * 60);
@@ -638,7 +678,7 @@ module.exports = (pool, authenticateToken) => {
 
             // Atualizar status
             await connection.query(`
-                UPDATE nfe 
+                UPDATE nfe
                 SET status = 'cancelada',
                     data_cancelamento = NOW(),
                     motivo_cancelamento = ?,
@@ -649,7 +689,7 @@ module.exports = (pool, authenticateToken) => {
             // Reverter faturamento do pedido (status volta a 'aprovado')
             if (nfe.pedido_id) {
                 await connection.query(`
-                    UPDATE pedidos 
+                    UPDATE pedidos
                     SET nfe_id = NULL, faturado_em = NULL, status = 'aprovado'
                     WHERE id = ?
                 `, [nfe.pedido_id]);
@@ -675,6 +715,18 @@ module.exports = (pool, authenticateToken) => {
 
             await connection.commit();
 
+            // VULN-013 FIX: Audit trail para cancelamento de NF-e (operação fiscal crítica)
+            logAuditEvent(pool, {
+                userId: usuario_id,
+                action: 'CANCELAR_NFE',
+                module: 'faturamento',
+                description: `NF-e ${nfe.numero_nfe} cancelada. Motivo: ${motivo.substring(0, 100)}`,
+                previousData: { nfe_id: id, numero_nfe: nfe.numero_nfe, status: nfe.status, valor_total: nfe.valor_total },
+                newData: { status: 'cancelada', motivo, integracoes },
+                ip: req.ip,
+                userAgent: req.headers['user-agent']
+            });
+
             res.json({
                 success: true,
                 message: integracoes.avisos.length === 0 ? 'NF-e cancelada com sucesso' : 'NF-e cancelada com avisos',
@@ -684,9 +736,9 @@ module.exports = (pool, authenticateToken) => {
         } catch (error) {
             await connection.rollback();
             console.error('[FATURAMENTO] Erro ao cancelar NF-e:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: error.message 
+            res.status(500).json({
+                success: false,
+                message: error.message
             });
         } finally {
             connection.release();
@@ -696,11 +748,11 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // ESTATÍSTICAS
     // ============================================================
-    
+
     router.get('/estatisticas', authenticateToken, async (req, res) => {
         try {
             const [stats] = await pool.query(`
-                SELECT 
+                SELECT
                     COUNT(*) as total_nfes,
                     SUM(CASE WHEN status = 'autorizada' THEN 1 ELSE 0 END) as autorizadas,
                     SUM(CASE WHEN status = 'pendente' THEN 1 ELSE 0 END) as pendentes,
@@ -709,17 +761,17 @@ module.exports = (pool, authenticateToken) => {
                     SUM(CASE WHEN status = 'autorizada' AND MONTH(data_emissao) = MONTH(NOW()) THEN valor_total ELSE 0 END) as valor_mes_atual
                 FROM nfe
             `);
-            
+
             res.json({
                 success: true,
                 data: stats[0]
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao buscar estatísticas:', error);
-            res.status(500).json({ 
-                success: false, 
-                message: error.message 
+            res.status(500).json({
+                success: false,
+                message: error.message
             });
         }
     });
@@ -727,17 +779,17 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // ENVIAR NF-e PARA SEFAZ
     // ============================================================
-    
+
     router.post('/nfes/:id/enviar-sefaz', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const { id } = req.params;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Envio à SEFAZ é operação fiscal crítica
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_fiscal', 'faturista', 'fiscal'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou enviar NFe ${id} à SEFAZ sem permissão`);
                 return res.status(403).json({
@@ -746,23 +798,23 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas usuários com permissão fiscal podem enviar NF-e à SEFAZ.'
                 });
             }
-            
+
             // Buscar NFe
             const [nfes] = await connection.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
-            
+
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
             }
-            
+
             const nfe = nfes[0];
-            
+
             if (nfe.status !== 'pendente') {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: `NFe não pode ser enviada. Status atual: ${nfe.status}` 
+                return res.status(400).json({
+                    success: false,
+                    message: `NFe não pode ser enviada. Status atual: ${nfe.status}`
                 });
             }
-            
+
             console.log(`[FATURAMENTO-SEFAZ] Usuário ${usuario_id} enviando NFe ${nfe.numero_nfe} à SEFAZ`);
 
             // Verificar se XML existe
@@ -785,15 +837,15 @@ module.exports = (pool, authenticateToken) => {
             } catch (certError) {
                 console.warn(`[FATURAMENTO] ⚠ Erro ao assinar XML: ${certError.message}. Enviando XML original.`);
             }
-            
+
             // Enviar para SEFAZ
             const resultado = await sefazService.autorizarNFe(xmlAssinado, nfe.emitente_uf);
-            
+
             if (resultado.autorizado) {
                 await connection.beginTransaction();
-                
+
                 await connection.query(`
-                    UPDATE nfe 
+                    UPDATE nfe
                     SET status = 'autorizada',
                         numero_protocolo = ?,
                         data_autorizacao = NOW(),
@@ -803,7 +855,7 @@ module.exports = (pool, authenticateToken) => {
                 `, [resultado.numeroProtocolo, resultado.xmlCompleto, usuario_id, id]);
 
                 await connection.commit();
-                
+
                 // AUDITORIA ENTERPRISE: Log de autorização SEFAZ
                 console.log(`[FATURAMENTO-AUDIT] ✅ NFe ${nfe.numero_nfe} AUTORIZADA pela SEFAZ. Protocolo: ${resultado.numeroProtocolo}. Usuário: ${usuario_id}`);
 
@@ -816,11 +868,11 @@ module.exports = (pool, authenticateToken) => {
                     integracoesSefaz.avisos.push(`Baixa de estoque não concluída: ${estoqueErr.message}`);
                     console.warn(`[FATURAMENTO] ⚠ Estoque não baixado para NFe ${id}: ${estoqueErr.message}`);
                 }
-                
+
                 res.json({
                     success: true,
-                    message: integracoesSefaz.avisos.length === 0 
-                        ? 'NFe autorizada pela SEFAZ e estoque baixado' 
+                    message: integracoesSefaz.avisos.length === 0
+                        ? 'NFe autorizada pela SEFAZ e estoque baixado'
                         : 'NFe autorizada pela SEFAZ (com avisos)',
                     protocolo: resultado.numeroProtocolo,
                     chaveAcesso: resultado.chaveAcesso,
@@ -834,7 +886,7 @@ module.exports = (pool, authenticateToken) => {
                     motivo: resultado.motivo
                 });
             }
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao enviar NFe:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -846,26 +898,26 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // GERAR E BAIXAR DANFE
     // ============================================================
-    
+
     router.get('/nfes/:id/danfe', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
-            
+
             const [nfes] = await pool.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
-            
+
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
             }
-            
+
             const nfe = nfes[0];
             const caminhoDANFE = path.join(__dirname, '../storage/nfe/danfes', `danfe_${nfe.numero_nfe}.pdf`);
-            
+
             // Gerar DANFE
             await danfeService.gerarDANFE(nfe, caminhoDANFE);
-            
+
             // Enviar arquivo
             res.download(caminhoDANFE, `DANFE_${nfe.numero_nfe}.pdf`);
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao gerar DANFE:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -875,18 +927,18 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // CARTA DE CORREÇÃO
     // ============================================================
-    
+
     router.post('/nfes/:id/carta-correcao', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
             const { id } = req.params;
             const { correcao } = req.body;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Carta de Correção é evento fiscal
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_fiscal', 'faturista', 'fiscal', 'contador'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou emitir CC-e para NFe ${id} sem permissão`);
                 return res.status(403).json({
@@ -895,14 +947,14 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas usuários com permissão fiscal podem emitir Carta de Correção.'
                 });
             }
-            
+
             if (!correcao || correcao.length < 15) {
                 return res.status(400).json({
                     success: false,
                     message: 'Correção deve ter no mínimo 15 caracteres'
                 });
             }
-            
+
             // VALIDAÇÃO FISCAL: Limite máximo de 1000 caracteres
             if (correcao.length > 1000) {
                 return res.status(400).json({
@@ -910,30 +962,30 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Correção não pode exceder 1000 caracteres conforme regra SEFAZ'
                 });
             }
-            
+
             const [nfes] = await connection.query(`SELECT * FROM nfe WHERE id = ?`, [id]);
-            
+
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
             }
-            
+
             const nfe = nfes[0];
-            
+
             if (nfe.status !== 'autorizada') {
                 return res.status(400).json({
                     success: false,
                     message: 'Apenas NFe autorizadas podem ter carta de correção'
                 });
             }
-            
+
             // Contar sequência de CC-e
             const [cces] = await connection.query(`
-                SELECT COUNT(*) as total FROM nfe_eventos 
+                SELECT COUNT(*) as total FROM nfe_eventos
                 WHERE nfe_id = ? AND tipo_evento = '110110'
             `, [id]);
-            
+
             const sequencia = cces[0].total + 1;
-            
+
             // Enviar CC-e
             const resultado = await sefazService.cartaCorrecao(
                 nfe.chave_acesso,
@@ -942,7 +994,7 @@ module.exports = (pool, authenticateToken) => {
                 nfe.emitente_cnpj,
                 sequencia
             );
-            
+
             if (resultado.sucesso) {
                 await connection.query(`
                     INSERT INTO nfe_eventos (
@@ -950,7 +1002,7 @@ module.exports = (pool, authenticateToken) => {
                         protocolo, xml_evento, created_at
                     ) VALUES (?, '110110', ?, ?, ?, ?, NOW())
                 `, [id, sequencia, correcao, resultado.numeroProtocolo, resultado.xmlCompleto]);
-                
+
                 res.json({
                     success: true,
                     message: 'Carta de correção registrada',
@@ -963,7 +1015,7 @@ module.exports = (pool, authenticateToken) => {
                     codigo: resultado.codigoStatus
                 });
             }
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro na carta de correção:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -975,16 +1027,16 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // INUTILIZAR NUMERAÇÃO
     // ============================================================
-    
+
     router.post('/inutilizar-numeracao', authenticateToken, async (req, res) => {
         try {
             const { serie, numeroInicial, numeroFinal, justificativa } = req.body;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Inutilização é operação crítica fiscal
             const rolesPermitidas = ['admin', 'administrador', 'gerente_fiscal', 'contador'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou inutilizar numeração sem permissão`);
                 return res.status(403).json({
@@ -993,7 +1045,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Inutilização de numeração é uma operação fiscal crítica. Apenas administradores, gerentes fiscais ou contadores podem executar.'
                 });
             }
-            
+
             // VALIDAÇÃO FISCAL: Justificativa obrigatória (15-255 caracteres)
             if (!justificativa || justificativa.trim().length < 15) {
                 return res.status(400).json({
@@ -1007,7 +1059,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Justificativa excede o limite de 255 caracteres'
                 });
             }
-            
+
             // VALIDAÇÃO: Range de numeração válido
             if (!numeroInicial || !numeroFinal || numeroInicial > numeroFinal) {
                 return res.status(400).json({
@@ -1015,7 +1067,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Range de numeração inválido. O número inicial deve ser menor ou igual ao final.'
                 });
             }
-            
+
             // VALIDAÇÃO: Limite máximo de 1000 números por inutilização
             if ((numeroFinal - numeroInicial) > 1000) {
                 return res.status(400).json({
@@ -1023,9 +1075,9 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Não é permitido inutilizar mais de 1000 números por operação'
                 });
             }
-            
+
             console.log(`[FATURAMENTO] Usuário ${usuario_id} solicitando inutilização: série ${serie}, ${numeroInicial}-${numeroFinal}`);
-            
+
             const resultado = await sefazService.inutilizarNumeracao({
                 ano: new Date().getFullYear().toString().substring(2),
                 cnpj: req.user.empresa_cnpj,
@@ -1035,16 +1087,16 @@ module.exports = (pool, authenticateToken) => {
                 numeroFinal,
                 justificativa
             }, req.user.empresa_uf);
-            
+
             if (resultado.sucesso) {
                 // Registrar inutilização com auditoria
                 await pool.query(`
                     INSERT INTO nfe_inutilizacoes (
-                        serie, numero_inicial, numero_final, 
+                        serie, numero_inicial, numero_final,
                         justificativa, xml_inutilizacao, usuario_id, created_at
                     ) VALUES (?, ?, ?, ?, ?, ?, NOW())
                 `, [serie, numeroInicial, numeroFinal, justificativa, resultado.xmlCompleto, usuario_id]);
-                
+
                 res.json({
                     success: true,
                     message: 'Numeração inutilizada'
@@ -1055,7 +1107,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Inutilização rejeitada'
                 });
             }
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao inutilizar:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1065,17 +1117,17 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // CONSULTAR STATUS SEFAZ
     // ============================================================
-    
+
     router.get('/sefaz/status', authenticateToken, async (req, res) => {
         try {
             const resultado = await sefazService.consultarStatusServico(req.user.empresa_uf);
-            
+
             res.json({
                 success: true,
                 online: resultado.online,
                 mensagem: resultado.motivo
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao consultar status:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1085,24 +1137,24 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // INTEGRAÇÃO FINANCEIRO - GERAR CONTAS A RECEBER
     // ============================================================
-    
+
     router.post('/nfes/:id/gerar-financeiro', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
             const { numeroParcelas, diaVencimento, intervalo } = req.body;
-            
+
             const resultado = await financeiroService.gerarContasReceber(id, {
                 numeroParcelas: numeroParcelas || 1,
                 diaVencimento: diaVencimento || 30,
                 intervalo: intervalo || 30
             });
-            
+
             res.json({
                 success: true,
                 message: 'Contas a receber geradas',
                 ...resultado
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao gerar financeiro:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1112,13 +1164,13 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // RELATÓRIO DE FATURAMENTO
     // ============================================================
-    
+
     router.get('/relatorios/faturamento', authenticateToken, async (req, res) => {
         try {
             const { data_inicio, data_fim } = req.query;
-            
+
             const [faturamento] = await pool.query(`
-                SELECT 
+                SELECT
                     DATE(n.data_emissao) as data,
                     COUNT(*) as total_nfes,
                     SUM(n.valor_total) as valor_total,
@@ -1134,12 +1186,12 @@ module.exports = (pool, authenticateToken) => {
                 GROUP BY DATE(n.data_emissao)
                 ORDER BY data DESC
             `, [data_inicio, data_fim]);
-            
+
             res.json({
                 success: true,
                 data: faturamento
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro no relatório:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1149,18 +1201,18 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // VALIDAR ESTOQUE ANTES DE FATURAR
     // ============================================================
-    
+
     router.get('/pedidos/:id/validar-estoque', authenticateToken, async (req, res) => {
         try {
             const { id } = req.params;
-            
+
             const resultado = await vendasEstoqueService.validarEstoqueParaFaturamento(id);
-            
+
             res.json({
                 success: true,
                 ...resultado
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao validar estoque:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1170,22 +1222,22 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // PRODUTOS MAIS FATURADOS
     // ============================================================
-    
+
     router.get('/relatorios/produtos-mais-faturados', authenticateToken, async (req, res) => {
         try {
             const { data_inicio, data_fim, limite } = req.query;
-            
+
             const produtos = await vendasEstoqueService.relatorioProdutosMaisFaturados({
                 data_inicio,
                 data_fim,
                 limite
             });
-            
+
             res.json({
                 success: true,
                 data: produtos
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro no relatório:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1195,16 +1247,16 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // CONFIGURAR CERTIFICADO DIGITAL
     // ============================================================
-    
+
     router.post('/configuracao/certificado', authenticateToken, async (req, res) => {
         try {
             const { caminhoArquivo, senha } = req.body;
             const usuario_id = req.user.id;
-            
+
             // AUDITORIA ENTERPRISE: RBAC - Configuração de certificado é operação ultra-crítica
             const rolesPermitidas = ['admin', 'administrador'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[FATURAMENTO-SEGURANÇA] ⚠️ Usuário ${usuario_id} (${userRole}) tentou carregar certificado digital sem permissão!`);
                 return res.status(403).json({
@@ -1213,7 +1265,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Configuração de certificado digital é uma operação de segurança máxima. Apenas administradores podem executar.'
                 });
             }
-            
+
             // VALIDAÇÃO: Campos obrigatórios
             if (!caminhoArquivo || !senha) {
                 return res.status(400).json({
@@ -1221,7 +1273,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Caminho do arquivo e senha são obrigatórios'
                 });
             }
-            
+
             // SEGURANÇA: Path traversal protection
             const path = require('path');
             const normalizedPath = path.normalize(caminhoArquivo);
@@ -1232,19 +1284,19 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Caminho de arquivo inválido'
                 });
             }
-            
+
             console.log(`[FATURAMENTO] Usuário ${usuario_id} carregando certificado digital`);
-            
+
             const resultado = await certificadoService.carregarCertificadoA1(caminhoArquivo, senha);
-            
+
             console.log(`[FATURAMENTO] ✅ Certificado carregado com sucesso por usuário ${usuario_id}. Validade: ${resultado.validade?.fim}`);
-            
+
             res.json({
                 success: true,
                 message: 'Certificado carregado com sucesso',
                 ...resultado
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao carregar certificado:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1254,18 +1306,18 @@ module.exports = (pool, authenticateToken) => {
     // ============================================================
     // VERIFICAR VALIDADE DO CERTIFICADO
     // ============================================================
-    
+
     router.get('/configuracao/certificado/validade', authenticateToken, async (req, res) => {
         try {
             const validade = certificadoService.verificarValidade();
             const info = certificadoService.getInfoCertificado();
-            
+
             res.json({
                 success: true,
                 ...validade,
                 ...info
             });
-            
+
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao verificar certificado:', error);
             res.status(500).json({ success: false, message: error.message });
@@ -1303,7 +1355,7 @@ module.exports = (pool, authenticateToken) => {
         try {
             const [configs] = await pool.query('SELECT id, provedor, ativo, chave_pix, tipo_chave, ambiente, criado_em FROM pix_config');
             const ativo = configs.find(c => c.ativo);
-            
+
             res.json({
                 success: true,
                 configuracoes: configs,
@@ -1322,11 +1374,11 @@ module.exports = (pool, authenticateToken) => {
     router.post('/pix/config', authenticateToken, async (req, res) => {
         try {
             const usuario_id = req.user.id;
-            
+
             // RBAC - Apenas administradores e gerentes financeiros podem configurar PIX
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_financeiro'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[PIX-RBAC] Usuário ${usuario_id} (${userRole}) tentou alterar configuração PIX sem permissão`);
                 return res.status(403).json({
@@ -1335,7 +1387,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas administradores ou gerentes financeiros podem configurar gateway PIX.'
                 });
             }
-            
+
             console.log(`[PIX] Usuário ${usuario_id} alterando configuração PIX`);
             const resultado = await pixService.salvarConfiguracao(req.body);
             res.json(resultado);
@@ -1364,7 +1416,7 @@ module.exports = (pool, authenticateToken) => {
     router.post('/pix/cobranca/nfe/:nfeId', authenticateToken, async (req, res) => {
         try {
             const { nfeId } = req.params;
-            
+
             // Buscar dados da NF-e
             const [nfe] = await pool.query(`
                 SELECT n.*, c.nome as cliente_nome, c.cnpj as cliente_cnpj, c.cpf as cliente_cpf, c.email as cliente_email
@@ -1403,7 +1455,7 @@ module.exports = (pool, authenticateToken) => {
     router.post('/pix/cobranca/conta/:contaId', authenticateToken, async (req, res) => {
         try {
             const { contaId } = req.params;
-            
+
             const [conta] = await pool.query(`
                 SELECT cr.*, c.nome as cliente_nome, c.cnpj, c.cpf, c.email
                 FROM contas_receber cr
@@ -1495,16 +1547,16 @@ module.exports = (pool, authenticateToken) => {
         try {
             const { provedor } = req.params;
             const crypto = require('crypto');
-            
+
             // SEGURANÇA: Validar assinatura HMAC do webhook
             const signature = req.headers['x-webhook-signature'] || req.headers['x-signature'];
-            
+
             // Buscar secret do provedor para validação
             const [configs] = await pool.query(
-                'SELECT webhook_secret FROM pix_config WHERE provedor = ? AND ativo = 1', 
+                'SELECT webhook_secret FROM pix_config WHERE provedor = ? AND ativo = 1',
                 [provedor]
             );
-            
+
             if (configs.length > 0 && configs[0].webhook_secret) {
                 const webhookSecret = configs[0].webhook_secret;
                 const payload = JSON.stringify(req.body);
@@ -1512,42 +1564,42 @@ module.exports = (pool, authenticateToken) => {
                     .createHmac('sha256', webhookSecret)
                     .update(payload)
                     .digest('hex');
-                
+
                 // Validar assinatura (se fornecida)
                 if (signature && signature !== expectedSignature && signature !== `sha256=${expectedSignature}`) {
                     console.log(`[PIX] ⚠️ Webhook com assinatura inválida de ${provedor}. IP: ${req.ip}`);
-                    return res.status(401).json({ 
-                        success: false, 
-                        message: 'Assinatura do webhook inválida' 
+                    return res.status(401).json({
+                        success: false,
+                        message: 'Assinatura do webhook inválida'
                     });
                 }
             }
-            
+
             // Rate limiting básico - máx 100 webhooks/minuto por provedor
             const rateLimitKey = `pix_webhook_${provedor}`;
             if (!global.pixWebhookRateLimit) global.pixWebhookRateLimit = {};
             const now = Date.now();
             const windowStart = now - 60000; // 1 minuto
-            
+
             if (!global.pixWebhookRateLimit[rateLimitKey]) {
                 global.pixWebhookRateLimit[rateLimitKey] = [];
             }
-            
+
             // Limpar registros antigos
             global.pixWebhookRateLimit[rateLimitKey] = global.pixWebhookRateLimit[rateLimitKey].filter(t => t > windowStart);
-            
+
             if (global.pixWebhookRateLimit[rateLimitKey].length >= 100) {
                 console.log(`[PIX] ⚠️ Rate limit excedido para webhook ${provedor}. IP: ${req.ip}`);
-                return res.status(429).json({ 
-                    success: false, 
-                    message: 'Limite de requisições excedido' 
+                return res.status(429).json({
+                    success: false,
+                    message: 'Limite de requisições excedido'
                 });
             }
-            
+
             global.pixWebhookRateLimit[rateLimitKey].push(now);
-            
+
             console.log(`[PIX] Webhook recebido de ${provedor}:`, JSON.stringify(req.body).substring(0, 500));
-            
+
             const resultado = await pixService.processarWebhook(provedor, req.body);
             res.json(resultado);
         } catch (error) {
@@ -1603,11 +1655,11 @@ module.exports = (pool, authenticateToken) => {
     router.post('/regua/config', authenticateToken, async (req, res) => {
         try {
             const usuario_id = req.user.id;
-            
+
             // RBAC - Apenas administradores e gerentes podem configurar régua
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_financeiro', 'gerente_vendas'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[RÉGUA-RBAC] Usuário ${usuario_id} (${userRole}) tentou alterar configuração da régua sem permissão`);
                 return res.status(403).json({
@@ -1616,7 +1668,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas administradores ou gerentes podem configurar régua de cobrança.'
                 });
             }
-            
+
             console.log(`[RÉGUA] Usuário ${usuario_id} alterando configuração da régua`);
             const resultado = await reguaService.salvarConfig(req.body);
             res.json(resultado);
@@ -1646,11 +1698,11 @@ module.exports = (pool, authenticateToken) => {
     router.post('/regua/templates', authenticateToken, async (req, res) => {
         try {
             const usuario_id = req.user.id;
-            
+
             // RBAC - Apenas administradores e gerentes podem alterar templates
             const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_financeiro'];
             const userRole = (req.user.role || req.user.cargo || '').toLowerCase();
-            
+
             if (!rolesPermitidas.includes(userRole)) {
                 console.log(`[RÉGUA-RBAC] Usuário ${usuario_id} (${userRole}) tentou alterar template sem permissão`);
                 return res.status(403).json({
@@ -1659,7 +1711,7 @@ module.exports = (pool, authenticateToken) => {
                     message: 'Apenas administradores ou gerentes podem alterar templates de cobrança.'
                 });
             }
-            
+
             console.log(`[RÉGUA] Usuário ${usuario_id} alterando template`);
             const resultado = await reguaService.salvarTemplate(req.body);
             res.json(resultado);
@@ -1715,7 +1767,7 @@ module.exports = (pool, authenticateToken) => {
         try {
             const { contaId } = req.params;
             const { tipo = 'dia', dias = 0 } = req.body;
-            
+
             // Buscar conta
             const [contas] = await pool.query(`
                 SELECT cr.*, c.nome as cliente_nome, c.email as cliente_email, c.telefone as cliente_telefone
@@ -1730,11 +1782,67 @@ module.exports = (pool, authenticateToken) => {
 
             const config = await reguaService.getConfig();
             const resultado = await reguaService.enviarCobranca(contas[0], tipo, dias, config);
-            
+
             res.json({ success: true, ...resultado });
         } catch (error) {
             console.error('[RÉGUA] Erro ao enviar cobrança:', error);
             res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
+    // ATIVIDADES RECENTES (Audit Log contextual do Faturamento)
+    // ============================================================
+
+    router.get('/atividades', authenticateToken, async (req, res) => {
+        try {
+            const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 50);
+
+            // Busca atividades de tabelas do domínio Faturamento via auditoria_logs
+            // + eventos de NF-e (nfe_eventos) — união cronológica reversa
+            const [rows] = await pool.query(`
+                (
+                    SELECT
+                        al.id,
+                        al.operacao AS tipo,
+                        al.tabela,
+                        al.registro_id,
+                        al.descricao,
+                        al.created_at AS data,
+                        u.nome AS usuario_nome
+                    FROM auditoria_logs al
+                    LEFT JOIN usuarios u ON u.id = al.usuario_id
+                    WHERE al.tabela IN ('nfe', 'nfe_itens', 'contas_receber', 'contas_receber_parcelas', 'faturamento_config')
+                    ORDER BY al.created_at DESC
+                    LIMIT ?
+                )
+                UNION ALL
+                (
+                    SELECT
+                        ne.id,
+                        ne.tipo_evento AS tipo,
+                        'nfe_eventos' AS tabela,
+                        ne.nfe_id AS registro_id,
+                        ne.descricao,
+                        COALESCE(ne.data_evento, ne.created_at) AS data,
+                        u2.nome AS usuario_nome
+                    FROM nfe_eventos ne
+                    LEFT JOIN usuarios u2 ON u2.id = ne.usuario_id
+                    ORDER BY COALESCE(ne.data_evento, ne.created_at) DESC
+                    LIMIT ?
+                )
+                ORDER BY data DESC
+                LIMIT ?
+            `, [limit, limit, limit]);
+
+            res.json({ success: true, data: rows });
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao buscar atividades:', error.message);
+            // Fallback: se as tabelas não existem, retorna vazio graciosamente
+            if (error.code === 'ER_NO_SUCH_TABLE') {
+                return res.json({ success: true, data: [] });
+            }
+            res.status(500).json({ success: false, message: 'Erro ao buscar atividades recentes' });
         }
     });
 

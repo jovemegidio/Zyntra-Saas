@@ -1563,3 +1563,51 @@ _Relatório gerado automaticamente via auditoria de código._
 _Total de arquivos analisados: 24 HTML + 1 CSS = 25 arquivos._
 _Total aproximado de linhas auditadas: ~28.000 linhas._
 _Correções aplicadas: 11 categorias, 24/24 páginas validadas com zero erros._
+
+---
+
+## CORREÇÕES APLICADAS — SEGUNDA ONDA (2025-06-16)
+
+### Fase A — Correções Pontuais
+
+| # | Categoria | Arquivo(s) | Detalhe |
+|---|-----------|-----------|---------|
+| 1 | **Segurança** | `areaadm.html` | Adicionado `controle-acesso-rh.js?v=20260319` (era a ÚNICA página sem) |
+| 2 | **Cor inconsistente** | `dados-pessoais.html` | `--rh-primary: #6366f1` → `#ec4899` (indigo→pink), `--rh-primary-dark: #4f46e5` → `#db2777` |
+| 3 | **Versão tooltips** | `dados-pessoais.html`, `index.html` | tooltips JS v20260216 → v20260209 (padronizado) |
+| 4 | **HTML malformado** | `dados-cadastrais.html`, `funcionarios.html`, `meus-holerites.html`, `holerites.html` | `</script>    <link` separado em duas linhas |
+
+### Fase B — Defer em scripts não-críticos (performance)
+
+**Escopo**: Adicionado atributo `defer` em TODOS os scripts utilitários não-críticos de TODOS os 29 HTMLs ativos do módulo RH:
+
+| Script | Arquivos afetados |
+|--------|------------------|
+| `anti-copy-protection.js` | 16 arquivos |
+| `tooltips-professional.js?v=20260209` | 22 arquivos |
+| `modal-title.js?v=20260210` | 6 arquivos |
+| `connection-monitor.js?v=20260111` | 25 arquivos |
+| `popup-confirmacao.js` | 14 arquivos |
+| `unsaved-changes.js?v=20260108` | 4 arquivos |
+| `modal-integration.js?v=20260108` | 4 arquivos |
+| `rh-ui-common.js` | 26 arquivos |
+| `sidebar-click-animation.js?v=20260224` | 9 arquivos |
+| `accessibility-widget.js?v=20260226` | 25 arquivos |
+| `controle-acesso-rh.js?v=20260319` | 26 arquivos |
+| `notification-manager.js?v=20260119` | 1 arquivo |
+| `confirm-dialog.js?v=20260217` | 4 arquivos |
+| `chat-suporte-widgets.js?v=20251217` | 1 arquivo |
+
+**Scripts intencionalmente SEM defer**:
+- `socket.io.js` — dependência síncrona do chat-teams
+- `dashboard-numbers-script.js` — lógica principal da página dashboard
+
+**Arquivos NÃO modificados** (inativos/backup):
+- `importar-ponto_backup.html`, `importar-ponto_new.html`
+
+### Totalizador Segunda Onda
+
+- **Total de substituições aplicadas**: ~155 edições
+- **Arquivos modificados**: 29 HTMLs ativos
+- **Taxa de sucesso**: 100% (0 falhas em arquivos ativos)
+- **Categorias**: Segurança (1), Cor (1), Versão (1), HTML (1), Performance/Defer (14 scripts × 29 arquivos)

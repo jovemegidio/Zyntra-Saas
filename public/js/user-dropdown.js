@@ -14,6 +14,7 @@
             user-select: none;
         }
         .user-dropdown-menu {
+            display: none;
             position: absolute;
             top: calc(100% + 8px);
             right: 0;
@@ -25,11 +26,12 @@
             opacity: 0;
             visibility: hidden;
             transform: translateY(-8px);
-            transition: all 0.2s ease;
+            transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
             z-index: 9999;
             overflow: hidden;
         }
         .user-dropdown-menu.active {
+            display: block;
             opacity: 1;
             visibility: visible;
             transform: translateY(0);
@@ -150,6 +152,7 @@
         const dropdown = document.createElement('div');
         dropdown.className = 'user-dropdown-menu';
         dropdown.id = 'user-dropdown-menu';
+        dropdown.style.display = 'none';
         dropdown.innerHTML = `
             <div class="dropdown-user-info">
                 <div class="dropdown-avatar" id="dropdown-avatar-icon">U</div>
@@ -176,13 +179,21 @@
         // Toggle ao clicar no greeting
         greetingEl.addEventListener('click', function(e) {
             e.stopPropagation();
-            dropdown.classList.toggle('active');
+            if (dropdown.classList.contains('active')) {
+                dropdown.classList.remove('active');
+                dropdown.style.display = 'none';
+            } else {
+                dropdown.style.display = 'block';
+                void dropdown.offsetHeight;
+                dropdown.classList.add('active');
+            }
         });
 
         // Fechar ao clicar fora
         document.addEventListener('click', function(e) {
             if (!greetingEl.contains(e.target)) {
                 dropdown.classList.remove('active');
+                dropdown.style.display = 'none';
             }
         });
 
@@ -227,51 +238,77 @@
             if (nameEl) nameEl.textContent = nomeExibicao;
             if (emailEl) emailEl.textContent = user.email || '';
 
-            if (avatarEl) {
-                // Avatar mapping completo
-                var avatarMap = {
-                    'clemerson': '/avatars/Clemerson.webp',
-                    'isabela': '/avatars/Isabela.webp',
-                    'thaina': '/avatars/Thaina.webp',
-                    'thiago': '/avatars/Thiago.webp',
-                    'nicolas': '/avatars/NicolasDaniel.webp',
-                    'nicolasdaniel': '/avatars/NicolasDaniel.webp',
-                    'rh': '/avatars/Rh.webp',
-                    'admin': '/avatars/admin.webp',
-                    'ti': '/avatars/TI.webp',
-                    'tialuforce': '/avatars/TI.webp',
-                    'antonio': '/avatars/Antonio.webp',
-                    'andreia': '/avatars/Andreia.webp',
-                    'guilherme': '/avatars/Guilherme.webp',
-                    'augusto': '/avatars/Augusto.jpg',
-                    'renata': '/avatars/Renata.jpg',
-                    'fabiano': '/avatars/Fabiano.webp',
-                    'fabiola': '/avatars/Fabiola.webp',
-                    'marcia': '/avatars/Marcia.webp',
-                    'ronaldo': '/avatars/RonaldoTorres.jpg',
-                    'joao': '/avatars/JoaoVictor.jpg',
-                    'douglas': '/avatars/Douglas.webp',
-                    'fernando': '/avatars/Fernando.webp'
-                };
+            // Avatar mapping completo
+            var avatarMap = {
+                'clemerson': '/avatars/Clemerson.webp',
+                'isabela': '/avatars/Isabela.webp',
+                'thaina': '/avatars/Thaina.webp',
+                'thiago': '/avatars/Thiago.webp',
+                'nicolas': '/avatars/NicolasDaniel.webp',
+                'nicolasdaniel': '/avatars/NicolasDaniel.webp',
+                'rh': '/avatars/Rh.webp',
+                'admin': '/avatars/admin.webp',
+                'ti': '/avatars/TI.webp',
+                'tialuforce': '/avatars/TI.webp',
+                'antonio': '/avatars/Antonio.webp',
+                'andreia': '/avatars/Andreia.webp',
+                'guilherme': '/avatars/Guilherme.webp',
+                'augusto': '/avatars/Augusto.jpg',
+                'renata': '/avatars/Renata.jpg',
+                'fabiano': '/avatars/Fabiano.webp',
+                'fabiola': '/avatars/Fabiola.webp',
+                'marcia': '/avatars/Marcia.webp',
+                'ronaldo': '/avatars/RonaldoTorres.jpg',
+                'joao': '/avatars/JoaoVictor.jpg',
+                'douglas': '/avatars/Douglas.webp',
+                'fernando': '/avatars/Fernando.webp'
+            };
 
-                var foto = user.avatar || user.foto || user.foto_perfil_url;
-                if (!foto || foto === '/avatars/default.webp') {
-                    // Tentar pelo email
-                    var username = (user.email || '').split('@')[0].split('.')[0].toLowerCase();
-                    foto = avatarMap[username];
-                    if (!foto && user.nome) {
-                        var firstName = user.nome.split(' ')[0].toLowerCase();
-                        foto = avatarMap[firstName];
-                    }
+            var foto = user.avatar || user.foto || user.foto_perfil_url;
+            if (!foto || foto === '/avatars/default.webp') {
+                // Tentar pelo email
+                var username = (user.email || '').split('@')[0].split('.')[0].toLowerCase();
+                foto = avatarMap[username];
+                if (!foto && user.nome) {
+                    var firstName = user.nome.split(' ')[0].toLowerCase();
+                    foto = avatarMap[firstName];
                 }
+            }
 
+            var nomeFull = user.apelido || user.nome || 'U';
+            var iniciais = nomeFull.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
+
+            if (avatarEl) {
                 if (foto) {
                     avatarEl.innerHTML = '<img src="' + foto + '" alt="Foto">';
                 } else {
-                    var nome = user.apelido || user.nome || 'U';
-                    var iniciais = nome.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
                     avatarEl.textContent = iniciais;
                 }
+            }
+
+            // Preencher elementos de cabeçalho da página
+            var hora = new Date().getHours();
+            var saudacao = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
+            var primeiroNome = nomeExibicao.split(' ')[0];
+
+            var hNameEl = document.getElementById('user-name');
+            var hGreetEl = document.getElementById('greeting-text');
+            var hInitEl = document.getElementById('user-initials');
+            var hAvatarEl = document.getElementById('user-avatar');
+            var hPhotoEl = document.getElementById('user-photo');
+
+            if (hNameEl) hNameEl.textContent = primeiroNome;
+            if (hGreetEl) hGreetEl.textContent = saudacao;
+            if (hInitEl) hInitEl.textContent = iniciais;
+            if (hAvatarEl) {
+                if (foto) {
+                    hAvatarEl.innerHTML = '<img src="' + foto + '" alt="Avatar" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
+                } else {
+                    hAvatarEl.textContent = iniciais;
+                }
+            }
+            if (hPhotoEl && hPhotoEl.tagName === 'IMG' && foto) {
+                hPhotoEl.src = foto;
             }
         } catch (err) {
             console.log('[Dropdown] Erro ao carregar dados:', err.message);

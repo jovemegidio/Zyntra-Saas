@@ -1,0 +1,1308 @@
+/* ============================================================
+   RH PAGES CSS — Estilos comuns do módulo RH
+   Extraído das 18 páginas com CSS inline duplicado
+   Compatível com modern-saas.css + global-header-sidebar.css
+   v1.0 — 2026
+   ============================================================ */
+
+/* ============================================================
+   1. VARIÁVEIS RH — Bridge com Design System
+   ============================================================ */
+:root {
+    /* Layout (mesmos valores do global-header-sidebar.css) */
+    --sidebar-width: 48px;
+    --header-height: 42px;
+
+    /* Brand RH — Institucional Indigo */
+    --primary-dark: #1a1a2e;
+    --primary-pink: #6366f1;
+    --primary-orange: #f97316;
+
+    /* Cores de Estado (bridge para modern-saas.css) */
+    --success-green: #22c55e;
+    --warning-yellow: #eab308;
+    --danger-red: #ef4444;
+    --info-blue: #3b82f6;
+
+    /* Neutros */
+    --bg-gray: #f5f5f5;
+    --border-color: #e5e5e5;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666;
+}
+
+/* ============================================================
+   2. RESET & BASE (complementar ao modern-saas.css)
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f4f6f9;
+    color: var(--text-primary);
+    margin: 0;
+    overflow-x: hidden;
+}
+
+/* ============================================================
+   3. LAYOUT BASE — Fallbacks (global-header-sidebar.css tem !important)
+   ============================================================ */
+.app-container { display: flex; min-height: 100vh; }
+
+.sidebar {
+    width: var(--sidebar-width);
+    background: var(--primary-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    z-index: 100;
+}
+
+.sidebar-logo {
+    width: 36px; height: 36px;
+    background: var(--primary-pink);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+.sidebar-logo:hover { transform: scale(1.05); }
+.sidebar-logo i { color: white; font-size: 18px; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 4px; }
+
+.sidebar-btn {
+    width: 40px; height: 40px;
+    border: none; background: transparent;
+    color: #8b8b9a; border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    transition: all 0.2s;
+    text-decoration: none;
+    position: relative;
+}
+.sidebar-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.sidebar-btn.active { background: var(--primary-pink); color: white; }
+
+/* Tooltips sidebar (complementados pelo global-header-sidebar.css) */
+.sidebar-btn::after {
+    content: attr(title);
+    position: absolute; left: 54px;
+    background: #1a1a2e; color: white;
+    padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; font-weight: 500;
+    white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 1001;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.sidebar-btn::before {
+    content: '';
+    position: absolute; left: 46px;
+    border: 6px solid transparent;
+    border-right-color: #1a1a2e;
+    opacity: 0; pointer-events: none;
+    transition: all 0.2s ease;
+    z-index: 1001;
+}
+.sidebar-btn:hover::after,
+.sidebar-btn:hover::before { opacity: 1; }
+
+/* Main Area */
+.main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    height: var(--header-height);
+    background: var(--primary-dark);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 16px;
+    flex-shrink: 0;
+}
+
+.header-left { display: flex; align-items: center; gap: 24px; }
+.header-brand { display: flex; align-items: center; gap: 8px; color: white; }
+.header-brand img { height: 24px; }
+.header-brand span { font-size: 14px; font-weight: 600; color: #8b8b9a; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+
+.header-btn {
+    width: 36px; height: 36px;
+    border: none; background: transparent;
+    color: #8b8b9a; border-radius: 8px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all 0.2s;
+}
+.header-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+
+.user-avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 14px; font-weight: 600;
+    overflow: hidden;
+}
+.user-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: none;
+}
+.user-avatar img.visible { display: block; }
+
+.user-greeting {
+    display: flex; align-items: center; gap: 12px;
+    margin-left: 16px;
+    color: #8b8b9a; font-size: 13px;
+}
+.user-greeting strong { color: white; }
+
+.page-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+}
+
+/* ============================================================
+   4. MODAIS — Padrão RH
+   ============================================================ */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 2% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-50px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    padding: 24px;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background-color 0.2s;
+}
+.modal-close:hover { background: rgba(255,255,255,0.3); }
+
+.modal-body { padding: 32px; }
+
+.modal-footer {
+    padding: 24px 32px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+/* ============================================================
+   5. FORMULÁRIOS — Padrão RH
+   ============================================================ */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.form-section {
+    background: #f8fafc;
+    padding: 24px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.form-section h3 {
+    margin: 0 0 20px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #374151;
+    font-size: 14px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-group.required label::after {
+    content: " *";
+    color: #ef4444;
+}
+
+/* ============================================================
+   6. BOTÕES — Bridge com modern-saas.css
+   Classes .btn funcionam como fallback para .saas-btn
+   ============================================================ */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: #6366f1;
+    color: white;
+}
+.btn-primary:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #6b7280;
+    color: white;
+}
+.btn-secondary:hover { background: #4b5563; }
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+.btn-success:hover { background: #059669; }
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+.btn-danger:hover { background: #dc2626; }
+
+.btn-outline {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+.btn-outline:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+.btn-action {
+    padding: 8px 16px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+/* ============================================================
+   7. LOADING SPINNER
+   ============================================================ */
+.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: "";
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: rh-spin 1s ease-in-out infinite;
+    margin-left: 8px;
+}
+
+@keyframes rh-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   8. TOAST NOTIFICATIONS
+   ============================================================ */
+.toast {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    background: #111827;
+    color: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.2s;
+    z-index: 9999;
+}
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ============================================================
+   9. TABELAS — Padrão RH
+   ============================================================ */
+.table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #f8fafc;
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #1f2937;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+table tr:hover td {
+    background: #f9fafb;
+}
+
+/* ============================================================
+   10. CARDS GENÉRICOS
+   ============================================================ */
+.dashboard-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+}
+
+.card-header h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1a202c;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.card-body {
+    padding: 24px;
+}
+
+/* ============================================================
+   11. SIDEBAR OVERLAY (Mobile)
+   ============================================================ */
+.sidebar-overlay {
+    display: none;
+}
+.sidebar-overlay.show {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 50;
+}
+
+/* ============================================================
+   12. MOBILE RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        left: -60px;
+        top: 0; bottom: 0;
+        z-index: 60;
+        transition: left 0.2s;
+    }
+    .sidebar.open { left: 0; }
+
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: 20px;
+    }
+
+    .page-content {
+        padding: 14px;
+    }
+}
+
+/* ============================================================
+   13. FILTER / TOOLBAR
+   ============================================================ */
+.filters-bar,
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+/* ============================================================
+   14. VISUAL POLISH — Enterprise Professional Look
+   Estilos globais para unificar todas as páginas do RH
+   ============================================================ */
+
+/* Suporte a .content (páginas de férias, avaliações) */
+.content,
+.content-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #f4f6f9;
+}
+
+/* Page Title unificado */
+.page-title,
+.section-title,
+h1.title,
+.content > h2:first-child,
+.content-area > h2:first-child {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-title i,
+.section-title i {
+    color: #6366f1;
+    font-size: 20px;
+}
+
+/* Cards modernos com hover elegante */
+.card,
+.dashboard-card,
+.section-card,
+.info-card,
+[class*="card-"] {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.card:hover,
+.dashboard-card:hover,
+.section-card:hover {
+    box-shadow: 0 4px 12px rgba(99,102,241,0.08);
+}
+
+/* Stats cards (cards de KPIs) */
+.stat-card,
+.kpi-card,
+.metric-card,
+.summary-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    transition: all 0.2s ease;
+}
+
+.stat-card:hover,
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(99,102,241,0.1);
+}
+
+/* Botões com visual refinado */
+.btn,
+button[class*="btn-"],
+.action-btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn:active,
+button[class*="btn-"]:active {
+    transform: scale(0.97);
+}
+
+.btn-primary-blue {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary-blue:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+    transform: translateY(-1px);
+}
+
+/* Status badges profissionais */
+.badge,
+.status-badge,
+[class*="badge-"],
+.status-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+/* Inputs mais limpos */
+input.form-input,
+select.form-input,
+textarea.form-input,
+.form-control {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: white;
+    color: #1e293b;
+    width: 100%;
+}
+
+input.form-input:focus,
+select.form-input:focus,
+textarea.form-input:focus,
+.form-control:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+}
+
+input.form-input::placeholder,
+textarea.form-input::placeholder {
+    color: #94a3b8;
+}
+
+/* Tabelas profissionais */
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+table thead th {
+    background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #475569;
+    padding: 12px 16px;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+table tbody tr:hover td {
+    background-color: #f8fafc;
+}
+
+table tbody td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* Empty states elegantes */
+.empty-state,
+.no-data,
+.no-results {
+    text-align: center;
+    padding: 48px 24px;
+    color: #94a3b8;
+}
+
+.empty-state i,
+.no-data i {
+    font-size: 48px;
+    opacity: 0.3;
+    margin-bottom: 16px;
+    display: block;
+}
+
+/* Switch toggle (usado em VT, salário família) */
+.switch-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.switch-toggle input[type="checkbox"] {
+    display: none;
+}
+
+.switch-slider {
+    width: 44px;
+    height: 24px;
+    background: #cbd5e1;
+    border-radius: 12px;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.switch-slider::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.switch-toggle input:checked + .switch-slider {
+    background: #6366f1;
+}
+
+.switch-toggle input:checked + .switch-slider::after {
+    transform: translateX(20px);
+}
+
+.switch-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #475569;
+}
+
+/* Scrollbars profissionais */
+.content::-webkit-scrollbar,
+.content-area::-webkit-scrollbar,
+.page-content::-webkit-scrollbar,
+.modal-body::-webkit-scrollbar,
+.view-tabs-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.content::-webkit-scrollbar-track,
+.content-area::-webkit-scrollbar-track,
+.page-content::-webkit-scrollbar-track,
+.modal-body::-webkit-scrollbar-track,
+.view-tabs-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.content::-webkit-scrollbar-thumb,
+.content-area::-webkit-scrollbar-thumb,
+.page-content::-webkit-scrollbar-thumb,
+.modal-body::-webkit-scrollbar-thumb,
+.view-tabs-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+.content::-webkit-scrollbar-thumb:hover,
+.content-area::-webkit-scrollbar-thumb:hover,
+.page-content::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* View tabs styling (modal visualizar) */
+.view-tab {
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748b;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.view-tab:hover {
+    color: #6366f1;
+    background: rgba(99,102,241,0.04);
+}
+
+.view-tab.active {
+    color: #6366f1;
+    border-bottom-color: #6366f1;
+    font-weight: 600;
+}
+
+.tab-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+/* Animações sutis */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.view-tab-panel.active {
+    animation: fadeIn 0.25s ease-out;
+}
+
+/* Modal overlay melhorado */
+.modal-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+}
+
+/* Modal header h3 fix */
+.modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Modal footer melhorado */
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+.modal-footer-info {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.modal-footer-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* View sections no modal */
+.view-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.view-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.view-section-title i {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: #eff6ff;
+    color: #6366f1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+}
+
+.view-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.view-item {
+    background: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #f1f5f9;
+}
+
+.view-item label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+
+.view-item span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1e293b;
+}
+
+/* Modal sections (edit) */
+.modal-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.modal-section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Form rows */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.form-row .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 4px;
+}
+
+.form-row .form-group {
+    margin-bottom: 0;
+}
+
+.form-row .full-width {
+    grid-column: 1 / -1;
+}
+
+.form-row.cols-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+.required {
+    color: #ef4444;
+}
+
+/* View header (perfil) */
+.view-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.view-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e2e8f0;
+}
+
+.view-header-info h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.view-header-info p {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+/* Foto upload section */
+.foto-section-compact {
+    background: linear-gradient(135deg, #f8fafc, #eff6ff) !important;
+}
+
+.foto-compact-container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.foto-compact-preview {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+}
+
+.foto-compact-preview img {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e2e8f0;
+}
+
+.foto-compact-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: #6366f1;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+.foto-compact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.foto-compact-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.foto-compact-hint {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.foto-compact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #6366f1;
+    color: white;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    width: fit-content;
+}
+
+.foto-compact-btn:hover {
+    background: #4f46e5;
+}
+
+/* Input group money */
+.input-group-money {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+}
+
+.input-prefix {
+    background: #f1f5f9;
+    border: 1.5px solid #e2e8f0;
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.input-group-money .form-input {
+    border-radius: 0 8px 8px 0;
+}
+
+/* Campo senha wrapper */
+.campo-senha-wrapper {
+    display: flex;
+    gap: 4px;
+}
+
+.campo-senha-wrapper .form-input {
+    flex: 1;
+}
+
+.btn-toggle-senha,
+.btn-copiar-senha,
+.btn-gerar-senha {
+    padding: 6px 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    color: #64748b;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-toggle-senha:hover,
+.btn-copiar-senha:hover,
+.btn-gerar-senha:hover {
+    background: #f1f5f9;
+    color: #6366f1;
+}
+
+/* Sistema Access Section */
+.sistema-access-section {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+}
+
+/* Demissão fields styling */
+.demissao-fields {
+    background: #fef2f2;
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid #fecaca;
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    .view-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .view-tab {
+        padding: 10px 12px;
+        font-size: 12px;
+    }
+    .view-tabs {
+        overflow-x: auto;
+    }
+}
+
+.filter-input,
+.search-input {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.filter-input:focus,
+.search-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+/* ============================================================
+   14. STATUS BADGES
+   ============================================================ */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 9999px;
+    line-height: 1;
+    gap: 4px;
+}
+
+.status-badge.ativo,
+.status-badge.success,
+.status-badge.aprovado {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-badge.inativo,
+.status-badge.danger,
+.status-badge.rejeitado {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.status-badge.warning,
+.status-badge.pendente {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-badge.info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+/* ============================================================
+   15. EMPTY STATE
+   ============================================================ */
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #6b7280;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.empty-state p {
+    font-size: 15px;
+    margin: 0;
+}

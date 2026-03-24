@@ -44,7 +44,7 @@ router.get('/stats', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao buscar estatísticas de recebimento:', error);
-        res.status(500).json({ error: 'Erro ao buscar estatísticas', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar estatísticas' });
     }
 });
 
@@ -87,18 +87,25 @@ router.get('/pedidos', async (req, res) => {
         }
         
         sql += ` ORDER BY 
-            CASE WHEN pc.data_entrega_prevista < '${hoje}' AND pc.status != 'recebido' THEN 0 ELSE 1 END,
+            CASE WHEN pc.data_entrega_prevista < ? AND pc.status != 'recebido' THEN 0 ELSE 1 END,
             pc.data_entrega_prevista ASC, pc.data_pedido DESC
         `;
+        // SECURITY FIX (SQL-INJECT-001): Usar parametrized query em vez de string interpolation
+        params.push(hoje);
         
         // Count total
         const countSql = sql.replace('pc.*, f.razao_social as fornecedor_nome', 'COUNT(*) as total');
-        const [countResult] = await db.query(countSql, params);
+        const countParams = [...params];
+        const [countResult] = await db.query(countSql, countParams);
         const total = countResult[0].total;
+        
+        // SECURITY: Hard cap no limit para prevenir memory exhaustion
+        const safeLimitVal = Math.min(Math.max(parseInt(limit) || 50, 1), 200);
+        const safeOffset = Math.max(parseInt(offset) || 0, 0);
         
         // Adicionar paginação
         sql += ` LIMIT ? OFFSET ?`;
-        params.push(parseInt(limit), parseInt(offset));
+        params.push(safeLimitVal, safeOffset);
         
         const [pedidos] = await db.query(sql, params);
         
@@ -110,7 +117,7 @@ router.get('/pedidos', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao listar pedidos para recebimento:', error);
-        res.status(500).json({ error: 'Erro ao buscar pedidos', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar pedidos' });
     }
 });
 
@@ -160,6 +167,19 @@ router.post('/registrar', async (req, res) => {
         // Determinar novo status
         const novoStatus = tipo_recebimento === 'parcial' ? 'parcial' : 'recebido';
         
+        // Calcular valor recebido (proporcional para parcial, total para completo)
+        const valorTotal = parseFloat(pedido.valor_final) || parseFloat(pedido.valor_total) || 0;
+        let valorRecebidoAgora = valorTotal;
+        if (tipo_recebimento === 'parcial' && itens.length > 0) {
+            // Calcular proporção: soma (qty_recebida * preco_unitario) dos itens recebidos
+            valorRecebidoAgora = itens.reduce((acc, item) => {
+                const qty = parseFloat(item.quantidade_recebida) || 0;
+                const preco = parseFloat(item.preco_unitario) || 0;
+                return acc + (qty * preco);
+            }, 0);
+        }
+        const valorRecebidoAcumulado = (parseFloat(pedido.valor_recebido) || 0) + valorRecebidoAgora;
+        
         // Atualizar pedido
         await connection.query(`
             UPDATE pedidos_compra SET 
@@ -168,6 +188,7 @@ router.post('/registrar', async (req, res) => {
                 numero_nfe = COALESCE(?, numero_nfe),
                 status = ?,
                 estoque_atualizado = ?,
+                valor_recebido = ?,
                 observacoes = CONCAT(COALESCE(observacoes, ''), '', ?)
             WHERE id = ?
         `, [
@@ -176,6 +197,7 @@ router.post('/registrar', async (req, res) => {
             numero_nfe,
             novoStatus,
             atualizar_estoque ? 1 : 0,
+            valorRecebidoAcumulado,
             `[${new Date().toLocaleString('pt-BR')}] Recebimento: ${observacoes || 'Sem observações'}`,
             pedido_id
         ]);
@@ -226,17 +248,13 @@ router.post('/registrar', async (req, res) => {
                         `, [item.material_id, item.quantidade_recebida, data_recebimento]);
                     }
                     
-                    // Registrar movimentação
-                    try {
-                        await connection.query(`
-                            INSERT INTO movimentacoes_estoque (
-                                material_id, tipo_movimentacao, quantidade, 
-                                motivo, documento, data_movimentacao
-                            ) VALUES (?, 'entrada', ?, 'Recebimento de compra', ?, ?)
-                        `, [item.material_id, item.quantidade_recebida, `Pedido #${pedido_id}`, data_recebimento]);
-                    } catch (e) {
-                        console.log('Erro ao registrar movimentação:', e.message);
-                    }
+                    // Registrar movimentação (dentro da transação — falha causa rollback)
+                    await connection.query(`
+                        INSERT INTO movimentacoes_estoque (
+                            material_id, tipo_movimentacao, quantidade, 
+                            motivo, documento, data_movimentacao
+                        ) VALUES (?, 'entrada', ?, 'Recebimento de compra', ?, ?)
+                    `, [item.material_id, item.quantidade_recebida, `Pedido #${pedido_id}`, data_recebimento]);
                 }
             }
         }
@@ -252,7 +270,7 @@ router.post('/registrar', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao registrar recebimento:', error);
-        res.status(500).json({ error: 'Erro ao registrar recebimento', message: error.message });
+        res.status(500).json({ error: 'Erro ao registrar recebimento' });
     } finally {
         connection.release();
     }
@@ -290,7 +308,7 @@ router.get('/historico', async (req, res) => {
         res.json({ recebimentos });
     } catch (error) {
         console.error('Erro ao buscar histórico:', error);
-        res.status(500).json({ error: 'Erro ao buscar histórico', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar histórico' });
     }
 });
 
@@ -377,7 +395,7 @@ router.post('/:id/cancelar', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao cancelar recebimento:', error);
-        res.status(500).json({ error: 'Erro ao cancelar recebimento', message: error.message });
+        res.status(500).json({ error: 'Erro ao cancelar recebimento' });
     } finally {
         connection.release();
     }

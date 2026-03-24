@@ -1,0 +1,120 @@
+{
+  "name": "05-health-check-monitoramento",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "*/5 * * * *" }]
+        }
+      },
+      "name": "⏰ A cada 5 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/status",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 10000 }
+      },
+      "name": "🏥 Health Check",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1,
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            { "value1": "={{$json.status}}", "operation": "equal", "value2": "healthy" }
+          ]
+        }
+      },
+      "name": "Saudável?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            { "value1": "={{$json.memory.heap_used_mb}}", "operation": "larger", "value2": 1200 }
+          ]
+        }
+      },
+      "name": "Memória alta?",
+      "type": "n8n-nodes-base.if",
+      "position": [910, 200],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "embeds": [{
+            "title": "❌ SERVIDOR FORA DO AR",
+            "description": "O ALUFORCE ERP não respondeu ao health check!",
+            "color": 15158332,
+            "fields": [
+              { "name": "Status", "value": "{{$json.status || 'OFFLINE'}}", "inline": true },
+              { "name": "DB", "value": "{{$json.database || 'unknown'}}", "inline": true },
+              { "name": "Cache", "value": "{{$json.cache || 'unknown'}}", "inline": true }
+            ],
+            "timestamp": "{{new Date().toISOString()}}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "🔴 Discord: OFFLINE",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [910, 450],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DISCORD_WEBHOOK_URL}}",
+        "method": "POST",
+        "body": {
+          "embeds": [{
+            "title": "⚠️ Memória Alta no Servidor",
+            "description": "Heap usado: {{$json.memory.heap_used_mb}}MB / {{$json.memory.heap_total_mb}}MB",
+            "color": 16750848,
+            "timestamp": "{{new Date().toISOString()}}"
+          }]
+        },
+        "options": {}
+      },
+      "name": "🟡 Discord: Memória Alta",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1130, 100],
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "⏰ A cada 5 minutos": { "main": [[{ "node": "🏥 Health Check", "type": "main", "index": 0 }]] },
+    "🏥 Health Check": { "main": [[{ "node": "Saudável?", "type": "main", "index": 0 }]] },
+    "Saudável?": {
+      "main": [
+        [{ "node": "Memória alta?", "type": "main", "index": 0 }],
+        [{ "node": "🔴 Discord: OFFLINE", "type": "main", "index": 0 }]
+      ]
+    },
+    "Memória alta?": {
+      "main": [
+        [{ "node": "🟡 Discord: Memória Alta", "type": "main", "index": 0 }],
+        []
+      ]
+    }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "monitoramento" }, { "name": "devops" }, { "name": "health" }]
+}

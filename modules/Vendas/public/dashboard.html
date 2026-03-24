@@ -373,68 +373,82 @@
             font-weight: 700;
         }
 
-        /* ==================== STATS GRID ==================== */
+        /* ==================== STATS GRID - Padrão Compras ==================== */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            gap: 20px;
             margin-bottom: 24px;
         }
-
-        @media (max-width: 1200px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border-radius: 16px;
+            padding: 24px 24px 20px 28px;
+            border: 1px solid #f0f0f5;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
             position: relative;
             overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
-        .stat-card.meta-card {
-            border-left: 4px solid var(--primary-orange);
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03);
+            border-color: #e8e8f0;
         }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 12px; left: 0; bottom: 12px;
+            width: 4px;
+            border-radius: 0 4px 4px 0;
+        }
+        .stat-card.amber::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+        .stat-card.green::before { background: linear-gradient(180deg, #10b981, #34d399); }
+        .stat-card.blue::before { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
+        .stat-card.purple::before { background: linear-gradient(180deg, #8b5cf6, #a78bfa); }
 
-        .stat-card-header {
+        .stat-card.amber { background: linear-gradient(135deg, #fffbeb 0%, white 40%); }
+        .stat-card.green { background: linear-gradient(135deg, #ecfdf5 0%, white 40%); }
+        .stat-card.blue { background: linear-gradient(135deg, #eff6ff 0%, white 40%); }
+        .stat-card.purple { background: linear-gradient(135deg, #f5f3ff 0%, white 40%); }
+
+        .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
-
         .stat-icon {
-            width: 44px;
-            height: 44px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            width: 48px; height: 48px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
         }
-
-        .stat-icon.orange { background: #fff7ed; color: #f97316; }
-        .stat-icon.green { background: #f0fdf4; color: #22c55e; }
-        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
-        .stat-icon.purple { background: #faf5ff; color: #a855f7; }
+        .stat-icon.amber { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #b45309; }
+        .stat-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #047857; }
+        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
+        .stat-icon.purple { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #6d28d9; }
 
         .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1a1a1a;
+            font-size: 30px;
+            font-weight: 800;
+            color: #111827;
+            margin-bottom: 4px;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
         }
-
         .stat-label {
+            color: #6b7280;
             font-size: 13px;
-            color: #7f8c8d;
-            margin-top: 4px;
+            font-weight: 500;
+            line-height: 1.3;
+            letter-spacing: 0.01em;
         }
+        .stat-trend { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; color: #9ca3af; }
 
         /* ==================== META PROGRESS ==================== */
         .meta-progress {
@@ -586,7 +600,7 @@
             flex: 1;
         }
 
-        .atividade-titulo {
+        .atividade-título {
             font-weight: 600;
             color: #1a1a1a;
             font-size: 14px;
@@ -598,7 +612,7 @@
             margin-top: 2px;
         }
 
-        .atividade-horario {
+        .atividade-horário {
             font-size: 12px;
             color: var(--primary-orange);
             font-weight: 600;
@@ -758,7 +772,7 @@
     <script src="js/vendas-admin-check.js"></script>
 
     <!-- Controle de Acesso por Permissões -->
-    <script src="js/vendas-access-control.js?v=20260114" defer></script>
+    <script src="js/vendas-access-control.js?v=20260319" defer></script>
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
@@ -827,7 +841,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">|</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Meu Dashboard</span>
                     </div>
                 </div>
@@ -890,11 +904,9 @@
 
                 <!-- Stats Grid -->
                 <div class="stats-grid">
-                    <div class="stat-card meta-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon orange">
-                                <i class="fas fa-bullseye"></i>
-                            </div>
+                    <div class="stat-card amber">
+                        <div class="stat-header">
+                            <div class="stat-icon amber"><i class="fas fa-bullseye"></i></div>
                         </div>
                         <div class="stat-value" id="metaAtual">Carregando...</div>
                         <div class="stat-label">Meta do Mês</div>
@@ -909,31 +921,25 @@
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon green">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
+                    <div class="stat-card green">
+                        <div class="stat-header">
+                            <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
                         </div>
                         <div class="stat-value" id="vendasMes">R$ 0,00</div>
                         <div class="stat-label">Vendas no Mês</div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon blue">
-                                <i class="fas fa-shopping-cart"></i>
-                            </div>
+                    <div class="stat-card blue">
+                        <div class="stat-header">
+                            <div class="stat-icon blue"><i class="fas fa-shopping-cart"></i></div>
                         </div>
                         <div class="stat-value" id="pedidosMes">0</div>
                         <div class="stat-label">Pedidos no Mês</div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-icon purple">
-                                <i class="fas fa-trophy"></i>
-                            </div>
+                    <div class="stat-card purple">
+                        <div class="stat-header">
+                            <div class="stat-icon purple"><i class="fas fa-trophy"></i></div>
                         </div>
                         <div class="stat-value" id="posicaoRanking">-</div>
                         <div class="stat-label">Posição no Ranking</div>
@@ -1339,10 +1345,10 @@
                                         <i class="fas ${icon}"></i>
                                     </div>
                                     <div class="atividade-content">
-                                        <div class="atividade-titulo">${n.titulo || 'Atividade'}</div>
+                                        <div class="atividade-título">${n.título || 'Atividade'}</div>
                                         <div class="atividade-desc">${n.mensagem || ''}</div>
                                     </div>
-                                    <div class="atividade-horario">${n.prioridade === 'alta' ? '??' : ''}</div>
+                                    <div class="atividade-horário">${n.prioridade === 'alta' ? '??' : ''}</div>
                                 </div>
                             `;
                         }).join('');
@@ -1551,7 +1557,7 @@
                         data: [],
                         backgroundColor: [
                             '#22c55e', // Verde - Faturados
-                            '#f97316', // Laranja - Negociação
+                            '#f97316', // Laranja - Negociaçõeso
                             '#3b82f6', // Azul - Aprovados
                             '#ef4444'  // Vermelho - Perdidos
                         ],
@@ -1613,7 +1619,7 @@
             }
         }
 
-        // Inicialização
+        // Inicializaçõeso
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
             inicializarGraficos(); // Inicializar gráficos vazios primeiro
@@ -1650,7 +1656,7 @@
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
 

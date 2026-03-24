@@ -1,0 +1,637 @@
+<!-- ============================================
+     MODAL DE EDIÇÃO DE PRODUTO ENRIQUECIDO
+     Copie este código e substitua o modal existente no index.html
+     ============================================ -->
+
+<!-- Modal: Editar Produto ENRIQUECIDO -->
+<div id="modal-editar-produto" class="modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-editar-produto-title" aria-describedby="modal-editar-produto-desc" tabindex="-1">
+    <div class="modal-dialog modal-produto-extra-large" role="document">
+        <!-- HEADER -->
+        <div class="modal-header-produto-enriquecido">
+            <div class="modal-title-produto">
+                <h3 id="modal-editar-produto-title">
+                    <i class="fas fa-box-open"></i>
+                    <span>Editar Produto</span>
+                    <span class="produto-codigo-badge" id="modal-produto-id-display">POT70BR</span>
+                </h3>
+                <div class="modal-subtitle-produto">Informações completas e gerenciamento do produto</div>
+            </div>
+            <button id="close-editar-produto" type="button" class="modal-close-produto" aria-label="Fechar">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- SISTEMA DE ABAS -->
+        <div class="produto-tabs">
+            <button class="produto-tab active" data-tab="definicao" type="button">
+                <i class="fas fa-info-circle"></i>
+                Definição do Produto
+            </button>
+            <button class="produto-tab" data-tab="estoque" type="button">
+                <i class="fas fa-warehouse"></i>
+                Estoque
+                <span class="tab-badge" id="estoque-alert-badge" style="display: none;">!</span>
+            </button>
+            <button class="produto-tab" data-tab="custo" type="button">
+                <i class="fas fa-dollar-sign"></i>
+                Custo do Estoque
+            </button>
+            <button class="produto-tab" data-tab="fornecedores" type="button">
+                <i class="fas fa-truck"></i>
+                Fornecedores
+            </button>
+            <button class="produto-tab" data-tab="caracteristicas" type="button">
+                <i class="fas fa-list-ul"></i>
+                Características
+            </button>
+            <button class="produto-tab" data-tab="recomendacoes" type="button">
+                <i class="fas fa-lightbulb"></i>
+                Recomendações Fiscais
+            </button>
+        </div>
+        
+        <p id="modal-editar-produto-desc" class="sr-only">Formulário avançado para Edição completa de informações do produto selecionado.</p>
+        
+        <!-- BODY COM CONTEÚDO DAS ABAS -->
+        <div class="modal-body-produto-enriquecido">
+            <form id="form-editar-produto">
+            
+            <!-- ========== ABA: DEFINIÇÃO DO PRODUTO ========== -->
+            <div class="produto-tab-content active" data-content="definicao">
+                <!-- Cards Informativos -->
+                <div class="info-cards-grid">
+                    <div class="info-card">
+                        <div class="info-card-icon primary">
+                            <i class="fas fa-barcode"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">SKU</div>
+                            <div class="info-card-value" id="info-sku">—</div>
+                            <div class="info-card-subvalue">Identificador único</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon success">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">GTIN/EAN</div>
+                            <div class="info-card-value" id="info-gtin">—</div>
+                            <div class="info-card-subvalue">Código de barras</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon warning">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Categoria</div>
+                            <div class="info-card-value" id="info-categoria">—</div>
+                            <div class="info-card-subvalue">Classificação</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon danger">
+                            <i class="fas fa-toggle-on"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Status</div>
+                            <div class="info-card-value">
+                                <span class="status-badge status-ativo" id="info-status">
+                                    <i class="fas fa-check-circle"></i>
+                                    Ativo
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de Identificação -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-tag"></i>
+                        <h4>Identificação do Produto</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-3">
+                        <div class="form-group-produto">
+                            <label for="edit-codigo">
+                                <i class="fas fa-barcode"></i>
+                                Código do Produto
+                            </label>
+                            <input type="text" id="edit-codigo" name="codigo" readonly class="form-control-produto" placeholder="Código automático">
+                            <small class="form-help-produto"><i class="fas fa-lock"></i> Gerado automaticamente</small>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-sku">
+                                <i class="fas fa-qrcode"></i>
+                                SKU
+                            </label>
+                            <input type="text" id="edit-sku" name="sku" readonly class="form-control-produto" placeholder="SKU único">
+                            <small class="form-help-produto"><i class="fas fa-lock"></i> Identificador único</small>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-gtin">
+                                <i class="fas fa-barcode"></i>
+                                GTIN/EAN-13
+                            </label>
+                            <input type="text" id="edit-gtin" name="gtin" maxlength="13" pattern="[0-9]{13}" class="form-control-produto" placeholder="7896819200XXX">
+                            <small class="form-help-produto"><i class="fas fa-barcode"></i> 13 dígitos numéricos</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de Informações Básicas -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-info-circle"></i>
+                        <h4>Informações Básicas</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-2">
+                        <div class="form-group-produto">
+                            <label for="edit-nome">
+                                <i class="fas fa-cube"></i>
+                                Nome do Produto *
+                            </label>
+                            <input type="text" id="edit-nome" name="nome" required maxlength="255" class="form-control-produto" placeholder="Ex: ENERGY CB DE POTÊNCIA 70MM">
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-marca">
+                                <i class="fas fa-industry"></i>
+                                Marca
+                            </label>
+                            <input type="text" id="edit-marca" name="marca" readonly value="Aluforce" class="form-control-produto">
+                            <small class="form-help-produto"><i class="fas fa-industry"></i> Marca Padrão Aluforce</small>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group-produto">
+                        <label for="edit-descrição">
+                            <i class="fas fa-align-left"></i>
+                            Descrição Técnica
+                        </label>
+                        <textarea id="edit-descricao" name="descrição" rows="4" maxlength="1000" class="form-control-produto" placeholder="Descrição detalhada das especificações técnicas do produto..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Seção de Especificações Técnicas -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-cogs"></i>
+                        <h4>Especificações Técnicas</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-3">
+                        <div class="form-group-produto">
+                            <label for="edit-categoria">
+                                <i class="fas fa-layer-group"></i>
+                                Categoria
+                            </label>
+                            <select id="edit-categoria" name="categoria" class="form-control-produto">
+                                <option value="">Selecione uma categoria</option>
+                                <option value="cabo_duplex">Cabo Duplex</option>
+                                <option value="cabo_triplex">Cabo Triplex</option>
+                                <option value="cabo_quadruplex">Cabo Quadruplex</option>
+                                <option value="cabo_unipolar">Cabo Unipolar</option>
+                                <option value="cabo_potencia">Cabo de Potência</option>
+                                <option value="cabo_protegido">Cabo Protegido</option>
+                                <option value="cabo_ca">Cabo CA</option>
+                                <option value="acessorios">Acessórios</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-tensao">
+                                <i class="fas fa-bolt"></i>
+                                Tensão Nominal
+                            </label>
+                            <select id="edit-tensao" name="tensao" class="form-control-produto">
+                                <option value="">Selecione a tensão</option>
+                                <option value="0.6/1kV">0,6/1 kV</option>
+                                <option value="15kV">15 kV</option>
+                                <option value="baixa">Baixa Tensão</option>
+                                <option value="media">Média Tensão</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-secao">
+                                <i class="fas fa-ruler"></i>
+                                Seção Nominal (mm²)
+                            </label>
+                            <input type="text" id="edit-secao" name="secao" class="form-control-produto" placeholder="Ex: 16, 25, 35, 50">
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-2">
+                        <div class="form-group-produto">
+                            <label for="edit-isolamento">
+                                <i class="fas fa-shield-alt"></i>
+                                Tipo de Isolamento
+                            </label>
+                            <select id="edit-isolamento" name="isolamento" class="form-control-produto">
+                                <option value="">Selecione o isolamento</option>
+                                <option value="XLPE">XLPE (Polietileno Reticulado)</option>
+                                <option value="PVC">PVC (Policloreto de Vinila)</option>
+                                <option value="EPR">EPR (Borracha Etileno Propileno)</option>
+                                <option value="PE">PE (Polietileno)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-condutor">
+                                <i class="fas fa-circle"></i>
+                                Material do Condutor
+                            </label>
+                            <select id="edit-condutor" name="condutor" class="form-control-produto">
+                                <option value="aluminio">Alumínio</option>
+                                <option value="cobre">Cobre</option>
+                                <option value="aluminio_liga">Liga de Alumínio</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seção de Unidade e Dimensões -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-weight"></i>
+                        <h4>Unidade de Medida e Dimensões</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-3">
+                        <div class="form-group-produto">
+                            <label for="edit-unidade">
+                                <i class="fas fa-weight"></i>
+                                Unidade de Medida
+                            </label>
+                            <select id="edit-unidade" name="unidade" class="form-control-produto">
+                                <option value="metro">Metro (m)</option>
+                                <option value="quilometro">Quilômetro (km)</option>
+                                <option value="bobina">Bobina</option>
+                                <option value="rolo">Rolo</option>
+                                <option value="unidade">Unidade</option>
+                                <option value="kit">Kit</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-peso">
+                                <i class="fas fa-balance-scale"></i>
+                                Peso (kg/unidade)
+                            </label>
+                            <input type="number" id="edit-peso" name="peso" step="0.001" min="0" class="form-control-produto" placeholder="0,000">
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-variacao">
+                                <i class="fas fa-code-branch"></i>
+                                Variações
+                            </label>
+                            <input type="text" id="edit-variacao" name="variacao" class="form-control-produto" placeholder='["Cor: Preto", "Cor: Azul"]'>
+                            <small class="form-help-produto"><i class="fas fa-lightbulb"></i> Formato JSON</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========== ABA: ESTOQUE ========== -->
+            <div class="produto-tab-content" data-content="estoque">
+                <!-- Cards de Estoque -->
+                <div class="info-cards-grid">
+                    <div class="info-card">
+                        <div class="info-card-icon success">
+                            <i class="fas fa-boxes"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Quantidade Disponível</div>
+                            <div class="info-card-value" id="estq-disponivel">0,00</div>
+                            <div class="info-card-subvalue">Em estoque</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Estoque Mínimo</div>
+                            <div class="info-card-value" id="estq-minimo">0,00</div>
+                            <div class="info-card-subvalue">Limite de alerta</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon primary">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Estoque Máximo</div>
+                            <div class="info-card-value" id="estq-maximo">0,00</div>
+                            <div class="info-card-subvalue">Capacidade máxima</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon danger">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Status do Estoque</div>
+                            <div class="info-card-value" id="estq-status-text">Normal</div>
+                            <span class="status-badge status-ativo" id="estq-status-badge">
+                                <i class="fas fa-check-circle"></i> OK
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Barra de Progresso do Estoque -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-chart-bar"></i>
+                        <h4>Nível do Estoque</h4>
+                    </div>
+                    
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-label">
+                            <span id="estoque-progress-label">0 / 0 metros</span>
+                            <span>Capacidade</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill success" id="estoque-progress-fill" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulário de Controle de Estoque -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-warehouse"></i>
+                        <h4>Controle de Estoque</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-3">
+                        <div class="form-group-produto">
+                            <label for="edit-quantidade">
+                                <i class="fas fa-cubes"></i>
+                                Quantidade em Estoque
+                            </label>
+                            <input type="number" id="edit-quantidade" name="quantidade" step="0.001" min="0" class="form-control-produto" placeholder="0,000">
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-estoque-minimo">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Estoque Mínimo
+                            </label>
+                            <input type="number" id="edit-estoque-minimo" name="estoque_minimo" step="0.001" min="0" class="form-control-produto" placeholder="0,000">
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-estoque-maximo">
+                                <i class="fas fa-chart-line"></i>
+                                Estoque Máximo
+                            </label>
+                            <input type="number" id="edit-estoque-maximo" name="estoque_maximo" step="0.001" min="0" class="form-control-produto" placeholder="0,000">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========== ABA: CUSTO DO ESTOQUE ========== -->
+            <div class="produto-tab-content" data-content="custo">
+                <!-- Cards de Custo -->
+                <div class="info-cards-grid">
+                    <div class="info-card">
+                        <div class="info-card-icon warning">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Custo Unitário</div>
+                            <div class="info-card-value" id="custo-unitario-display">R$ 0,00</div>
+                            <div class="info-card-subvalue">Por unidade</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon danger">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Custo Total do Estoque</div>
+                            <div class="info-card-value" id="custo-total-display">R$ 0,00</div>
+                            <div class="info-card-subvalue">Valor total investido</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon success">
+                            <i class="fas fa-tag"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Preço de Venda</div>
+                            <div class="info-card-value" id="preco-venda-display">R$ 0,00</div>
+                            <div class="info-card-subvalue">Preço ao cliente</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-card-icon primary">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="info-card-content">
+                            <div class="info-card-label">Margem de Lucro</div>
+                            <div class="info-card-value" id="margem-lucro-display">0%</div>
+                            <div class="info-card-subvalue">Percentual de lucro</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulário de Preços -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-dollar-sign"></i>
+                        <h4>Informações de Preço</h4>
+                    </div>
+                    
+                    <div class="form-grid-produto cols-2">
+                        <div class="form-group-produto">
+                            <label for="edit-custo">
+                                <i class="fas fa-coins"></i>
+                                Custo Unitário (R$)
+                            </label>
+                            <input type="number" id="edit-custo" name="custo_unitario" step="0.01" min="0" class="form-control-produto" placeholder="0,00">
+                            <small class="form-help-produto"><i class="fas fa-dollar-sign"></i> Custo de Produção/aquisição</small>
+                        </div>
+                        
+                        <div class="form-group-produto">
+                            <label for="edit-preco">
+                                <i class="fas fa-tag"></i>
+                                Preço de Venda (R$)
+                            </label>
+                            <input type="number" id="edit-preco" name="preco" step="0.01" min="0" class="form-control-produto" placeholder="0,00">
+                            <small class="form-help-produto"><i class="fas fa-dollar-sign"></i> Preço de venda ao cliente</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========== ABA: FORNECEDORES ========== -->
+            <div class="produto-tab-content" data-content="fornecedores">
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-truck"></i>
+                        <h4>Fornecedor Principal</h4>
+                    </div>
+                    
+                    <div class="form-group-produto">
+                        <label for="edit-fornecedor">
+                            <i class="fas fa-handshake"></i>
+                            Nome do Fornecedor
+                        </label>
+                        <input type="text" id="edit-fornecedor" name="fornecedor" maxlength="255" class="form-control-produto" placeholder="Nome do fornecedor principal">
+                    </div>
+                </div>
+                
+                <!-- Tabela de Fornecedores (Futuro) -->
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-list"></i>
+                        <h4>Lista de Fornecedores</h4>
+                    </div>
+                    
+                    <table class="historico-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Fornecedor</th>
+                                <th>Contato</th>
+                                <th>Prazo</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fornecedores-tbody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 24px; color: #64748b;">
+                                    <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 8px; opacity: 0.5;"></i><br>
+                                    Nenhum fornecedor cadastrado
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- ========== ABA: CARACTERÍSTICAS ========== -->
+            <div class="produto-tab-content" data-content="caracteristicas">
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-clipboard-list"></i>
+                        <h4>Características Técnicas Resumidas</h4>
+                    </div>
+                    
+                    <div class="info-cards-grid">
+                        <div class="info-card">
+                            <div class="info-card-icon primary">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <div class="info-card-label">Categoria</div>
+                                <div class="info-card-value" style="font-size: 14px;" id="carac-categoria">—</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-card-icon warning">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <div class="info-card-label">Tensão</div>
+                                <div class="info-card-value" style="font-size: 14px;" id="carac-tensao">—</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-card-icon success">
+                                <i class="fas fa-ruler"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <div class="info-card-label">Seção</div>
+                                <div class="info-card-value" style="font-size: 14px;" id="carac-secao">—</div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <div class="info-card-icon danger">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="info-card-content">
+                                <div class="info-card-label">Isolamento</div>
+                                <div class="info-card-value" style="font-size: 14px;" id="carac-isolamento">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ========== ABA: RECOMENDAÇÕES FISCAIS ========== -->
+            <div class="produto-tab-content" data-content="recomendacoes">
+                <div class="produto-section">
+                    <div class="produto-section-header">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <h4>Observações Fiscais</h4>
+                    </div>
+                    
+                    <div style="padding: 24px; background: #eff6ff; border-radius: 8px; border-left: 4px solid #3b82f6;">
+                        <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
+                            <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                            <strong>Lembre-se:</strong> Esta Seção pode ser expandida para incluir informações fiscais como NCM, CEST, alíquotas de impostos e outras recomendações relevantes para a Gestão fiscal do produto.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <input type="hidden" id="edit-produto-id" name="id">
+            </form>
+        </div>
+        
+        <!-- FOOTER -->
+        <div class="modal-footer-produto-enriquecido">
+            <div class="footer-info-produto">
+                <i class="fas fa-clock"></i>
+                <span id="last-modified-info">Última modificação: Hoje, 14:30</span>
+            </div>
+            <div class="footer-actions-produto">
+                <button type="button" class="btn-produto btn-produto-secondary" id="btn-cancelar-edicao">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn-produto btn-produto-success" id="btn-duplicar-produto">
+                    <i class="fas fa-copy"></i>
+                    Duplicar
+                </button>
+                <button type="submit" form="form-editar-produto" class="btn-produto btn-produto-primary">
+                    <i class="fas fa-save"></i>
+                    Salvar Alterações
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Adicione estes scripts no final do body do index.html -->
+<script src="modal-produto-enriquecido.js"></script>
+
+
+
+
+
+

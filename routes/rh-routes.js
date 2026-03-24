@@ -781,9 +781,12 @@ module.exports = function createRHRoutes(deps) {
     });
 
     // ATESTADOS
-    router.get('/atestados', async (req, res, next) => {
+    router.get('/atestados', authenticateToken, async (req, res, next) => {
         try {
-            const funcionario_id = req.query.funcionario_id || req.user.id;
+            const isAdmin = req.user.role === 'admin' || req.user.role === 'Admin' || req.user.role === 'administrador' || req.user.role === 'Administrador';
+            const isRH = isAdmin || (req.user.areas && (req.user.areas.includes('rh') || req.user.areas.includes('RH')));
+            // Only admins/RH can query other employees' medical certificates
+            const funcionario_id = (isRH && req.query.funcionario_id) ? req.query.funcionario_id : req.user.id;
             const [rows] = await pool.query('SELECT * FROM atestados WHERE funcionario_id = ? ORDER BY data_atestado DESC', [funcionario_id]);
             // A tabela já tem arquivo_url; apenas garantir que está preenchida
             rows.forEach(a => {
@@ -1492,7 +1495,7 @@ module.exports = function createRHRoutes(deps) {
     });
 
     // GET /api/rh/holerites/:id - Buscar holerite por ID
-    router.get('/holerites/:id', async (req, res) => {
+    router.get('/holerites/:id', authenticateToken, async (req, res) => {
         try {
             const [rows] = await pool.query(`
                 SELECT h.*, f.nome_completo as funcionario_nome, f.cpf, f.cargo, f.departamento
@@ -1504,6 +1507,14 @@ module.exports = function createRHRoutes(deps) {
             if (rows.length === 0) return res.status(404).json({ message: 'Holerite não encontrado' });
 
             const h = rows[0];
+
+            // Access control: only the owner or admin/RH can view this holerite
+            const isAdmin = req.user.role === 'admin' || req.user.role === 'Admin' || req.user.role === 'administrador' || req.user.role === 'Administrador';
+            const isRH = isAdmin || (req.user.areas && (req.user.areas.includes('rh') || req.user.areas.includes('RH')));
+            const isOwner = String(req.user.id) === String(h.funcionario_id);
+            if (!isAdmin && !isRH && !isOwner) {
+                return res.status(403).json({ message: 'Acesso negado' });
+            }
             try { h.proventos = typeof h.proventos === 'string' ? JSON.parse(h.proventos) : (h.proventos || []); } catch(e) { h.proventos = []; }
             try { h.descontos = typeof h.descontos === 'string' ? JSON.parse(h.descontos) : (h.descontos || []); } catch(e) { h.descontos = []; }
 
@@ -1767,12 +1778,17 @@ module.exports = function createRHRoutes(deps) {
     });
 
     // POST /api/rh/holerites/:id/visualizar - Registrar visualização do holerite
-    router.post('/holerites/:id/visualizar', async (req, res) => {
+    router.post('/holerites/:id/visualizar', authenticateToken, async (req, res) => {
         try {
-            const [rows] = await pool.query('SELECT id, visualizado FROM rh_holerites_gestao WHERE id = ?', [req.params.id]);
+            const [rows] = await pool.query('SELECT id, funcionario_id, visualizado FROM rh_holerites_gestao WHERE id = ?', [req.params.id]);
             if (rows.length === 0) return res.status(404).json({ message: 'Holerite não encontrado' });
 
             const h = rows[0];
+            // Only the holerite owner can trigger a view registration
+            const isAdmin = req.user.role === 'admin' || req.user.role === 'Admin' || req.user.role === 'administrador' || req.user.role === 'Administrador';
+            if (!isAdmin && String(req.user.id) !== String(h.funcionario_id)) {
+                return res.status(403).json({ message: 'Acesso negado' });
+            }
             const ip = req.headers['x-forwarded-for'] || req.connection?.remoteAddress || '';
 
             if (!h.visualizado) {

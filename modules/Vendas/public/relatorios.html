@@ -896,7 +896,7 @@
     <script src="js/vendas-admin-check.js"></script>
 
     <!-- Controle de Acesso por Permissões -->
-    <script src="js/vendas-access-control.js?v=20260114" defer></script>
+    <script src="js/vendas-access-control.js?v=20260319" defer></script>
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
@@ -964,7 +964,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">›</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatórios</span>
                     </div>
                 </div>
@@ -1189,7 +1189,7 @@
                     <div class="report-card" onclick="abrirModalRelatorio('comissoes')">
                         <div class="report-icon green"><i class="fas fa-coins"></i></div>
                         <h4>Relatório de Comissões</h4>
-                        <p>Comissões por vendedor • Power 2% • Multiplex 1%</p>
+                        <p>Comissões por vendedor é Power 2% é Multiplex 1%</p>
                         <span class="report-arrow"><i class="fas fa-arrow-right"></i></span>
                     </div>
                     <div class="report-card" onclick="abrirModalRelatorio('clientes')">
@@ -1330,7 +1330,7 @@
                                     <div style="background:#1e40af;color:#fff;padding:4px 10px;border-radius:6px;font-weight:700;font-size:13px;">2%</div>
                                     <div>
                                         <div style="font-weight:600;font-size:12px;color:#1e293b;">Cabos de Potência (Power)</div>
-                                        <div style="font-size:10px;color:#64748b;">NBR 7285/7286 • 0,6/1KV • Cabos de potência</div>
+                                        <div style="font-size:10px;color:#64748b;">NBR 7285/7286 – 0,6/1KV – Cabos de potência</div>
                                     </div>
                                 </div>
                                 <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0;">
@@ -1881,13 +1881,13 @@
 
     <script>
         // Versão: 2026-01-14-v3 - Autenticação via cookies httpOnly
-        console.log('🔵 Script de relatórios iniciado - v4 (com PDFs)');
+        console.log('?? Script de relatórios iniciado - v4 (com PDFs)');
         
         // ==================== MODAIS DE RELATÓRIO PDF ====================
         
         // Mapeamento dos modais por tipo
         const modalMap = {
-            'vendas-periodo': 'modalVendasPeriodo',
+            'vendas-periodo': 'modalVendasPeríodo',
             'comissoes': 'modalComissoes',
             'clientes': 'modalClientes',
             'produtos': 'modalProdutos'
@@ -1948,7 +1948,7 @@
                     const supervisor = isSupervisor();
                     const meuVendedorId = getVendedorIdUsuarioLogado();
                     
-                    console.log('🔒 [MODAL] Carregando vendedores - Supervisor:', supervisor, '| Meu ID:', meuVendedorId);
+                    console.log('?? [MODAL] Carregando vendedores - Supervisor:', supervisor, '| Meu ID:', meuVendedorId);
                     
                     if (supervisor) {
                         // Supervisores podem ver todos os vendedores
@@ -1989,7 +1989,7 @@
                             select.appendChild(option);
                         }
                         
-                        console.log('🔒 [MODAL] Vendedor filtrado para:', select.options[0]?.textContent || 'nenhum');
+                        console.log('?? [MODAL] Vendedor filtrado para:', select.options[0]?.textContent || 'nenhum');
                     }
                 }
             } catch (e) {
@@ -2029,13 +2029,13 @@
                 'clientes': 'Análise de Clientes',
                 'produtos': 'Performance de Produtos'
             };
-            const titulo = tiposRelatorio[tipo] || tipo;
+            const título = tiposRelatorio[tipo] || tipo;
             
             // Toast de loading
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10001;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
             toast.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#6366f1;"></i> ';
-            toast.appendChild(document.createTextNode('Gerando PDF de ' + titulo + '...'));
+            toast.appendChild(document.createTextNode('Gerando PDF de ' + título + '...'));
             document.body.appendChild(toast);
             
             try {
@@ -2094,10 +2094,10 @@
                 
                 toast.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e;"></i> PDF gerado com sucesso!`;
                 setTimeout(() => toast.remove(), 3000);
-                console.log(`✅ Relatório PDF ${tipo} gerado`);
+                console.log(`? Relatório PDF ${tipo} gerado`);
                 
             } catch (error) {
-                console.error(`❌ Erro ao gerar PDF ${tipo}:`, error);
+                console.error(`? Erro ao gerar PDF ${tipo}:`, error);
                 toast.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Erro ao gerar PDF`;
                 setTimeout(() => toast.remove(), 4000);
             }
@@ -2138,7 +2138,7 @@
                 document.getElementById('modalProdDataFim').value = dataHoje;
                 document.getElementById('modalProdOrdenar').selectedIndex = 0;
             }
-            console.log('🧹 Filtros limpos para:', tipo);
+            console.log('?? Filtros limpos para:', tipo);
         }
 
         // Pré-visualizar relatório (gera e abre em nova aba sem fechar modal)
@@ -2150,12 +2150,12 @@
                 'clientes': 'Análise de Clientes',
                 'produtos': 'Performance de Produtos'
             };
-            const titulo = tiposRelatorio[tipo] || tipo;
+            const título = tiposRelatorio[tipo] || tipo;
 
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10001;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
             toast.innerHTML = '<i class="fas fa-eye" style="color:#6366f1;"></i> ';
-            toast.appendChild(document.createTextNode('Pré-visualizando ' + titulo + '...'));
+            toast.appendChild(document.createTextNode('Pré-visualizando ' + título + '...'));
             document.body.appendChild(toast);
 
             try {
@@ -2204,13 +2204,13 @@
                 toast.innerHTML = `<i class="fas fa-check-circle" style="color:#22c55e;"></i> Pré-visualização aberta!`;
                 setTimeout(() => toast.remove(), 2500);
             } catch (error) {
-                console.error(`❌ Erro ao pré-visualizar ${tipo}:`, error);
+                console.error(`? Erro ao pré-visualizar ${tipo}:`, error);
                 toast.innerHTML = `<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> Erro ao pré-visualizar`;
                 setTimeout(() => toast.remove(), 4000);
             }
         }
         
-        // ==================== AUTENTICAÇÁO ====================
+        // ==================== AUTENTICAÇÃO ====================
         // Sistema usa cookies httpOnly para autenticação
         // Verificar autenticação via /api/me em vez de localStorage
         
@@ -2227,12 +2227,12 @@
                     credentials: 'include'
                 });
                 if (response.status === 401) {
-                    console.warn('⚠️ não autorizado - sessão inválida ou expirada');
+                    console.warn('?? não autorizado - sessão inválida ou expirada');
                     return response;
                 }
                 return response;
             } catch (error) {
-                console.error('❌ Erro de rede:', error);
+                console.error('? Erro de rede:', error);
                 throw error;
             }
         }
@@ -2243,12 +2243,12 @@
                 const response = await fetchAutenticado('/api/me');
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('✅ Usuário autenticado:', data.email || data.nome);
+                    console.log('? Usuário autenticado:', data.email || data.nome);
                     return true;
                 }
                 return false;
             } catch (error) {
-                console.log('❌ Erro ao verificar autenticação:', error);
+                console.log('? Erro ao verificar autenticação:', error);
                 return false;
             }
         }
@@ -2280,10 +2280,10 @@
                             SUPERVISORES_NOMES.push((v.nome || '').split(' ')[0].toLowerCase());
                         }
                     });
-                    console.log('✅ Mapeamento vendedores carregado:', Object.keys(VENDEDORES_IDS).length, 'vendedores,', SUPERVISORES_IDS.length, 'supervisores');
+                    console.log('? Mapeamento vendedores carregado:', Object.keys(VENDEDORES_IDS).length, 'vendedores,', SUPERVISORES_IDS.length, 'supervisores');
                 }
             } catch (e) {
-                console.warn('⚠️ Erro ao carregar mapeamento de vendedores:', e);
+                console.warn('?? Erro ao carregar mapeamento de vendedores:', e);
             }
         }
         
@@ -2292,7 +2292,7 @@
             if (!usuarioLogado) return false;
             
             // Verificar por ID de funcionário
-            if (usuarioLogado.funcionario_id && SUPERVISORES_IDS.includes(usuarioLogado.funcionario_id)) {
+            if (usuarioLogado.funcionário_id && SUPERVISORES_IDS.includes(usuarioLogado.funcionario_id)) {
                 return true;
             }
             
@@ -2391,9 +2391,9 @@
                 if (resp.ok) {
                     const d = await resp.json();
                     dadosEmpresa = d.empresa || d;
-                    console.log('🏢 Dados empresa carregados:', dadosEmpresa.razao_social);
+                    console.log('?? Dados empresa carregados:', dadosEmpresa.razao_social);
                 }
-            } catch(e) { console.warn('⚠️ Erro ao carregar dados empresa:', e); }
+            } catch(e) { console.warn('?? Erro ao carregar dados empresa:', e); }
         }
         function getEmpresaRazao() { return dadosEmpresa?.razao_social || 'ALUFORCE'; }
         function getEmpresaCnpj()  { return dadosEmpresa?.cnpj || ''; }
@@ -2411,7 +2411,7 @@
                     
                     // Salvar usuário globalmente
                     usuarioLogado = user;
-                    console.log('👤 Usuário logado:', user.nome, '| Email:', user.email, '| Supervisor:', isSupervisor());
+                    console.log('?? Usuário logado:', user.nome, '| Email:', user.email, '| Supervisor:', isSupervisor());
                     
                     // Usar apelido se disponível, senão primeiro+último nome
                     const userName = user.apelido || user.nome || 'Usuário';
@@ -2463,7 +2463,7 @@
             const dataFim = document.getElementById('filterDataFim').value;
             const vendedor = document.getElementById('filterVendedor').value;
 
-            console.log('📊 Iniciando carregamento de dados...', { dataInicio, dataFim, vendedor });
+            console.log('?? Iniciando carregamento de dados...', { dataInicio, dataFim, vendedor });
 
             // Mostrar loading nos cards
             const statsElements = ['totalPedidos', 'faturamentoTotal', 'ticketMedio', 'vendedoresAtivos'];
@@ -2477,12 +2477,12 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 30;
 
             try {
-                console.log('📡 Carregando dados de múltiplas APIs...');
+                console.log('?? Carregando dados de múltiplas APIs...');
                 console.time('Carregamento Relatório');
 
                 // Executar todas as chamadas em paralelo
                 const [adminRes, vendedoresRes, topVendRes, topProdRes, monthlyRes] = await Promise.allSettled([
-                    fetchAutenticado(`/api/vendas/dashboard/admin?período=${diffDays}`),
+                    fetchAutenticado(`/api/vendas/dashboard/admin?periodo=${diffDays}`),
                     fetchAutenticado('/api/vendas/vendedores'),
                     fetchAutenticado(`/api/vendas/dashboard/top-vendedores?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10`),
                     fetchAutenticado(`/api/vendas/dashboard/top-produtos?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10`),
@@ -2496,17 +2496,17 @@
                 let vendedoresCount = 0;
                 if (adminRes.status === 'fulfilled' && adminRes.value.ok) {
                     statsData = await adminRes.value.json();
-                    console.log('✅ Dashboard admin dados:', statsData);
+                    console.log('? Dashboard admin dados:', statsData);
                 } else {
                     // Fallback: tentar dashboard-stats
-                    console.warn('⚠️ dashboard/admin falhou, tentando fallback...');
+                    console.warn('?? dashboard/admin falhou, tentando fallback...');
                     try {
                         const fallback = await fetchAutenticado('/api/vendas/dashboard-stats');
                         if (fallback.ok) {
                             const fb = await fallback.json();
                             statsData = {
                                 metricas: {
-                                    total_pedidos: (fb.pedidosPendentes || 0) + (fb.orçamentosAberto || 0),
+                                    total_pedidos: (fb.pedidosPendentes || 0) + (fb.orcamentosAberto || 0),
                                     valor_faturado: fb.totalFaturadoMes || 0,
                                     ticket_medio: 0
                                 },
@@ -2521,7 +2521,7 @@
                     const vendedoresList = await vendedoresRes.value.json();
                     const arr = vendedoresList.vendedores || vendedoresList || [];
                     vendedoresCount = Array.isArray(arr) ? arr.length : 0;
-                    console.log('✅ Vendedores carregados:', vendedoresCount);
+                    console.log('? Vendedores carregados:', vendedoresCount);
                 }
 
                 // Atualizar estatísticas
@@ -2540,7 +2540,7 @@
                 // ---- GRÁFICO EVOLUÇÃO (monthly) ----
                 if (monthlyRes.status === 'fulfilled' && monthlyRes.value.ok) {
                     const monthlyData = await monthlyRes.value.json();
-                    console.log('✅ Evolução mensal:', monthlyData);
+                    console.log('? Evolução mensal:', monthlyData);
                     renderizarGraficoVendas({
                         labels: monthlyData.labels || [],
                         valores: monthlyData.values || []
@@ -2551,7 +2551,7 @@
 
                 // ---- GRÁFICO CATEGORIAS (conversão por status) ----
                 if (statsData && statsData.conversaoPorStatus && statsData.conversaoPorStatus.length > 0) {
-                    const statusLabels = { 'faturado': 'Faturado', 'orçamento': 'Orçamento', 'analise': 'Em Análise', 'aprovado': 'Aprovado', 'cancelado': 'Cancelado', 'recibo': 'Recibo' };
+                    const statusLabels = { 'faturado': 'Faturado', 'orcamento': 'Orçamento', 'analise': 'Em Análise', 'aprovado': 'Aprovado', 'cancelado': 'Cancelado', 'recibo': 'Recibo' };
                     renderizarGraficoCategorias({
                         labels: statsData.conversaoPorStatus.map(s => statusLabels[s.status] || s.status),
                         valores: statsData.conversaoPorStatus.map(s => s.quantidade)
@@ -2563,7 +2563,7 @@
                 // ---- TOP VENDEDORES ----
                 if (topVendRes.status === 'fulfilled' && topVendRes.value.ok) {
                     const topVend = await topVendRes.value.json();
-                    console.log('✅ Top vendedores:', topVend);
+                    console.log('? Top vendedores:', topVend);
                     // Use topVendedores from admin dashboard if available (has more data)
                     const vendedoresRank = statsData?.topVendedores || topVend || [];
                     renderizarTopVendedores(vendedoresRank);
@@ -2576,7 +2576,7 @@
                 // ---- TOP PRODUTOS ----
                 if (topProdRes.status === 'fulfilled' && topProdRes.value.ok) {
                     const topProd = await topProdRes.value.json();
-                    console.log('✅ Top produtos:', topProd);
+                    console.log('? Top produtos:', topProd);
                     renderizarTopProdutos(topProd);
                 } else {
                     renderizarTopProdutos([]);
@@ -2585,10 +2585,10 @@
                 // ---- MAPA ----
                 await carregarMapaBrasil();
 
-                console.log('✅ Carregamento completo!');
+                console.log('? Carregamento completo!');
 
             } catch (error) {
-                console.error('❌ Erro ao carregar dados:', error);
+                console.error('? Erro ao carregar dados:', error);
                 mostrarEstadoVazio('Erro ao carregar dados. Verifique sua conexão e tente novamente.');
             }
         }
@@ -2603,7 +2603,7 @@
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 30;
                 
                 // Usar API dashboard/admin que já existe
-                const url = `/api/vendas/dashboard/admin?período=${diffDays}`;
+                const url = `/api/vendas/dashboard/admin?periodo=${diffDays}`;
                 const res = await fetchAutenticado(url);
                 
                 if (res.ok) {
@@ -2639,7 +2639,7 @@
         }
 
         function mostrarEstadoVazio(mensagem) {
-            console.log('📊 Exibindo estado vazio:', mensagem);
+            console.log('?? Exibindo estado vazio:', mensagem);
             
             // Zerar estatísticas
             atualizarEstatisticas({ totalPedidos: 0, faturamento: 0, ticketMedio: 0, vendedoresAtivos: 0 });
@@ -2655,12 +2655,12 @@
             // Mensagem ao usuário
             if (mensagem) {
                 const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert-info-relatorio';
+                alertDiv.className = 'alert-info-relatório';
                 alertDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${mensagem}`;
                 alertDiv.style.cssText = 'background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 16px;border-radius:8px;margin:8px 24px;font-size:14px;display:flex;align-items:center;gap:8px;';
                 
                 // Remover alerta anterior se existir
-                const alertaAnterior = document.querySelector('.alert-info-relatorio');
+                const alertaAnterior = document.querySelector('.alert-info-relatório');
                 if (alertaAnterior) alertaAnterior.remove();
                 
                 const mainContent = document.querySelector('.main-content') || document.querySelector('.content-area');
@@ -2762,7 +2762,7 @@
                 const diffTime = Math.abs(fim - inicio);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 30;
                 
-                const url = `/api/vendas/dashboard/admin?período=${diffDays}`;
+                const url = `/api/vendas/dashboard/admin?periodo=${diffDays}`;
                 const res = await fetchAutenticado(url);
                 
                 if (res.ok) {
@@ -2930,7 +2930,7 @@
             tbody.innerHTML = produtos.map((p, i) => `
                 <tr>
                     <td><span class="rank-badge ${getRankClass(i)}">${i + 1}</span></td>
-                    <td>${p.nome || p.codigo || p.produto || 'Produto'}</td>
+                    <td>${p.nome || p.código || p.produto || 'Produto'}</td>
                     <td>${p.quantidade || 0}</td>
                     <td class="valor-positivo">${formatarMoeda(p.valor || p.valor_total || 0)}</td>
                 </tr>
@@ -2953,7 +2953,7 @@
                     const supervisor = isSupervisor();
                     const meuVendedorId = getVendedorIdUsuarioLogado();
                     
-                    console.log('🔒 [FILTRO] Carregando vendedores - Supervisor:', supervisor, '| Meu ID:', meuVendedorId);
+                    console.log('?? [FILTRO] Carregando vendedores - Supervisor:', supervisor, '| Meu ID:', meuVendedorId);
                     
                     if (supervisor) {
                         // Supervisores podem ver todos os vendedores
@@ -2996,7 +2996,7 @@
                             select.appendChild(option);
                         }
                         
-                        console.log('🔒 [FILTRO] Vendedor filtrado para:', select.options[0]?.textContent || 'nenhum');
+                        console.log('?? [FILTRO] Vendedor filtrado para:', select.options[0]?.textContent || 'nenhum');
                     }
                 }
             } catch (error) {
@@ -3036,7 +3036,7 @@
             const dataFim = document.getElementById('filterDataFim')?.value || '';
             const vendedorSelecionado = document.getElementById('filterVendedor')?.selectedOptions[0]?.text || 'Todos os vendedores';
             
-            const periodoTexto = dataInicio && dataFim 
+            const períodoTexto = dataInicio && dataFim 
                 ? `${new Date(dataInicio).toLocaleDateString('pt-BR')} a ${new Date(dataFim).toLocaleDateString('pt-BR')}`
                 : 'Período completo';
             
@@ -3117,23 +3117,23 @@ tbody tr:nth-child(even) { background: #f8fafc; }
 </head>
 <body>
 <div class="print-bar">
-    <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-    <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+    <button class="btn-print" onclick="window.print()">??? Imprimir / Salvar PDF</button>
+    <button class="btn-close" onclick="window.close()">? Fechar</button>
 </div>
 <div class="rpt-header">
     <div>
         <div class="brand-name">ALUFORCE</div>
-        <div class="brand-sub">Zyntra — Módulo de Vendas</div>
+        <div class="brand-sub">Zyntra é Módulo de Vendas</div>
     </div>
     <div class="rpt-meta">
         <div class="doc-tag">Relatório</div>
         <div class="meta-line">Emitido em: ${dataEmissao} às ${horaEmissao}</div>
-        <div class="meta-line">${periodoTexto} | ${vendedorSelecionado}</div>
+        <div class="meta-line">${períodoTexto} | ${vendedorSelecionado}</div>
     </div>
 </div>
 <div class="rpt-title">
     <h1>Relatório de Vendas</h1>
-    <div class="subtitle">Módulo Vendas — Análise de desempenho e faturamento</div>
+    <div class="subtitle">Módulo Vendas é Análise de desempenho e faturamento</div>
 </div>
 <div class="summary-row">
     <div class="summary-card"><div class="s-value">${totalVendas}</div><div class="s-label">Total em Vendas</div></div>
@@ -3156,10 +3156,10 @@ tbody tr:nth-child(even) { background: #f8fafc; }
     </table>
 </div>
 <div class="rpt-footer">
-    <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
+    <span>ALUFORCE é Sistema Integrado de Gestão Empresarial</span>
     <span>Documento gerado automaticamente pelo Zyntra ERP</span>
 </div>
-<div class="confidential">Documento Confidencial — Uso Interno</div>
+<div class="confidential">Documento Confidencial é Uso Interno</div>
 </body>
 </html>`);
             win.document.close();
@@ -3181,7 +3181,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
             const dataInicio = document.getElementById('filterDataInicio')?.value || '';
             const dataFim = document.getElementById('filterDataFim')?.value || '';
             const vendedorSelecionado = document.getElementById('filterVendedor')?.selectedOptions[0]?.text || 'Todos os vendedores';
-            const periodoTexto = dataInicio && dataFim
+            const períodoTexto = dataInicio && dataFim
                 ? new Date(dataInicio).toLocaleDateString('pt-BR') + ' a ' + new Date(dataFim).toLocaleDateString('pt-BR')
                 : 'Período completo';
             const escXml = (s) => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -3220,7 +3220,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
 <Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
  xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
 <Styles>
- <Style ss:ID="titulo"><Font ss:Bold="1" ss:Color="#1A365D" ss:Size="16" ss:FontName="Segoe UI"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
+ <Style ss:ID="título"><Font ss:Bold="1" ss:Color="#1A365D" ss:Size="16" ss:FontName="Segoe UI"/><Alignment ss:Horizontal="Left" ss:Vertical="Center"/></Style>
  <Style ss:ID="subtitulo"><Font ss:Color="#64748B" ss:Size="10" ss:FontName="Segoe UI"/></Style>
  <Style ss:ID="kpiLabel"><Font ss:Bold="1" ss:Color="#334155" ss:Size="10" ss:FontName="Segoe UI"/><Interior ss:Color="#F1F5F9" ss:Pattern="Solid"/><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
  <Style ss:ID="kpiValor"><Font ss:Bold="1" ss:Color="#1E40AF" ss:Size="12" ss:FontName="Segoe UI"/><Interior ss:Color="#F1F5F9" ss:Pattern="Solid"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#E2E8F0"/></Borders></Style>
@@ -3231,7 +3231,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
  <Style ss:ID="valor"><Font ss:Size="10" ss:FontName="Segoe UI" ss:Color="#059669"/><Alignment ss:Horizontal="Right" ss:Vertical="Center"/><Borders><Border ss:Position="Bottom" ss:LineStyle="Continuous" ss:Weight="1" ss:Color="#F1F5F9"/></Borders></Style>
  <Style ss:ID="rodape"><Font ss:Color="#94A3B8" ss:Size="9" ss:FontName="Segoe UI" ss:Italic="1"/><Alignment ss:Horizontal="Center" ss:Vertical="Center"/></Style>
 </Styles>
-<Worksheet ss:Name="Relatorio Vendas">
+<Worksheet ss:Name="Relatório Vendas">
  <Table ss:DefaultRowHeight="22">
   <Column ss:Index="1" ss:Width="50"/>
   <Column ss:Index="2" ss:Width="250"/>
@@ -3239,9 +3239,9 @@ tbody tr:nth-child(even) { background: #f8fafc; }
   <Column ss:Index="4" ss:Width="150"/>
 `;
             // Título
-            xml += `  <Row ss:Height="35"><Cell ss:StyleID="titulo" ss:MergeAcross="3"><Data ss:Type="String">ALUFORCE  |  Relatório de Vendas</Data></Cell></Row>
+            xml += `  <Row ss:Height="35"><Cell ss:StyleID="título" ss:MergeAcross="3"><Data ss:Type="String">ALUFORCE  |  Relatório de Vendas</Data></Cell></Row>
   <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">${escXml(getEmpresaRazao())} | CNPJ: ${escXml(getEmpresaCnpj())}</Data></Cell></Row>
-  <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">Período: ${escXml(periodoTexto)} | Vendedor: ${escXml(vendedorSelecionado)} | Gerado em ${dataHoje} às ${horaAtual}</Data></Cell></Row>
+  <Row ss:Height="18"><Cell ss:StyleID="subtitulo" ss:MergeAcross="3"><Data ss:Type="String">Período: ${escXml(períodoTexto)} | Vendedor: ${escXml(vendedorSelecionado)} | Gerado em ${dataHoje} às ${horaAtual}</Data></Cell></Row>
   <Row ss:Height="10"></Row>
 `;
             // KPIs
@@ -3294,7 +3294,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
             }
             // Rodapé
             xml += `  <Row ss:Height="10"></Row>
-  <Row ss:Height="20"><Cell ss:StyleID="rodape" ss:MergeAcross="3"><Data ss:Type="String">ALUFORCE — Sistema de Gestão Empresarial | Relatório gerado em ${dataHoje} às ${horaAtual}</Data></Cell></Row>
+  <Row ss:Height="20"><Cell ss:StyleID="rodape" ss:MergeAcross="3"><Data ss:Type="String">ALUFORCE é Sistema de Gestão Empresarial | Relatório gerado em ${dataHoje} às ${horaAtual}</Data></Cell></Row>
 `;
             xml += ` </Table>
  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
@@ -3325,13 +3325,13 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                 'clientes': 'Análise de Clientes',
                 'produtos': 'Performance de Produtos'
             };
-            const titulo = tiposRelatorio[tipo] || tipo;
+            const título = tiposRelatorio[tipo] || tipo;
             
             // Mostrar toast de loading
             const toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#1e293b;color:white;padding:16px 24px;border-radius:12px;z-index:10000;display:flex;align-items:center;gap:12px;box-shadow:0 10px 40px rgba(0,0,0,0.2);';
             toast.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ';
-            toast.appendChild(document.createTextNode('Gerando ' + titulo + '...'));
+            toast.appendChild(document.createTextNode('Gerando ' + título + '...'));
             document.body.appendChild(toast);
             
             try {
@@ -3369,7 +3369,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                             const valor = parseFloat(p.valor_total || p.valor || 0);
                             totalValor += valor;
                             if (p.status === 'faturado') totalVendas++;
-                            csvContent += `${dataFormatada};${p.numero || p.id || ''};${p.cliente_nome || ''};${p.vendedor_nome || ''};${valor.toFixed(2).replace('.', ',')};${p.status || ''}\n`;
+                            csvContent += `${dataFormatada};${p.número || p.id || ''};${p.cliente_nome || ''};${p.vendedor_nome || ''};${valor.toFixed(2).replace('.', ',')};${p.status || ''}\n`;
                         });
                         csvContent += `\nTOTAL DE PEDIDOS: ${pedidos.length}\n`;
                         csvContent += `PEDIDOS FATURADOS: ${totalVendas}\n`;
@@ -3377,7 +3377,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                     } else {
                         csvContent += 'Nenhum registro encontrado no período\n';
                     }
-                    filename = `vendas_periodo_${dataInicio}_${dataFim}.csv`;
+                    filename = `vendas_período_${dataInicio}_${dataFim}.csv`;
                     
                 } else if (tipo === 'comissoes') {
                     // Relatório de comissões por vendedor
@@ -3454,7 +3454,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                             const valor = parseFloat(p.valor || 0);
                             totalQtd += qtd;
                             totalValor += valor;
-                            csvContent += `${p.nome || ''};${p.codigo || ''};${qtd};${valor.toFixed(2).replace('.', ',')}\n`;
+                            csvContent += `${p.nome || ''};${p.código || ''};${qtd};${valor.toFixed(2).replace('.', ',')}\n`;
                         });
                         csvContent += `\nTOTAL;;${totalQtd};${totalValor.toFixed(2).replace('.', ',')}\n`;
                     } else {
@@ -3473,14 +3473,14 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                 URL.revokeObjectURL(link.href);
                 
                 toast.innerHTML = '<i class="fas fa-check-circle" style="color:#22c55e;"></i> ';
-                toast.appendChild(document.createTextNode(titulo + ' gerado com sucesso!'));
+                toast.appendChild(document.createTextNode(título + ' gerado com sucesso!'));
                 setTimeout(() => toast.remove(), 3000);
-                console.log(`✅ Relatório ${tipo} gerado e baixado: ${filename}`);
+                console.log(`? Relatório ${tipo} gerado e baixado: ${filename}`);
                 
             } catch (error) {
-                console.error(`❌ Erro ao gerar relatório ${tipo}:`, error);
+                console.error(`? Erro ao gerar relatório ${tipo}:`, error);
                 toast.innerHTML = '<i class="fas fa-exclamation-circle" style="color:#ef4444;"></i> ';
-                toast.appendChild(document.createTextNode('Erro ao gerar ' + titulo));
+                toast.appendChild(document.createTextNode('Erro ao gerar ' + título));
                 setTimeout(() => toast.remove(), 4000);
             }
         }
@@ -3493,7 +3493,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
 
         // ==================== INICIALIZAÇÃO ====================
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('🚀 Inicializando página de relatórios...');
+            console.log('?? Inicializando página de relatórios...');
             
             try {
                 // Definir datas padrão (últimos 30 dias)
@@ -3504,14 +3504,14 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                 document.getElementById('filterDataFim').value = hoje.toISOString().split('T')[0];
                 document.getElementById('filterDataInicio').value = inicio.toISOString().split('T')[0];
                 
-                console.log('📅 Datas definidas:', inicio.toISOString().split('T')[0], '-', hoje.toISOString().split('T')[0]);
+                console.log('?? Datas definidas:', inicio.toISOString().split('T')[0], '-', hoje.toISOString().split('T')[0]);
 
                 // Verificar autenticação via API (cookies httpOnly)
-                console.log('🔍 Verificando autenticação...');
+                console.log('?? Verificando autenticação...');
                 const isAutenticado = await verificarAutenticacao();
                 
                 if (isAutenticado) {
-                    console.log('🔑 Usuário autenticado - carregando dados reais...');
+                    console.log('?? Usuário autenticado - carregando dados reais...');
                     
                     // Carregar dados do usuário e empresa em paralelo
                     try {
@@ -3520,14 +3520,14 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                             carregarDadosEmpresa()
                         ]);
                     } catch (e) {
-                        console.warn('⚠️ Erro ao carregar dados iniciais:', e);
+                        console.warn('?? Erro ao carregar dados iniciais:', e);
                     }
                     
                     // Carregar lista de vendedores
                     try {
                         await carregarVendedores();
                     } catch (e) {
-                        console.warn('⚠️ Erro ao carregar vendedores:', e);
+                        console.warn('?? Erro ao carregar vendedores:', e);
                     }
                     
                     // Carregar mapeamento de vendedores/supervisores dinamicamente
@@ -3539,7 +3539,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                     // Carregar mapa do Brasil
                     await carregarMapaBrasil();
                 } else {
-                    console.log('⚠️ Sem token - redirecionando para login');
+                    console.log('?? Sem token - redirecionando para login');
                     mostrarEstadoVazio('Você precisa estar autenticado para visualizar os relatórios. Faça login para continuar.');
                     
                     // Mostrar estado vazio no mapa
@@ -3553,9 +3553,9 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                     }
                 }
                 
-                console.log('✅ Inicialização concluída');
+                console.log('? Inicialização concluída');
             } catch (error) {
-                console.error('❌ Erro na inicialização:', error);
+                console.error('? Erro na inicialização:', error);
                 mostrarEstadoVazio('Erro ao inicializar o módulo de relatórios. Tente recarregar a página.');
             }
         });
@@ -3584,7 +3584,7 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                 const res = await fetchAutenticado(`/api/vendas/relatorio/mapa-brasil?${params}`);
                 
                 if (res.status === 401 || res.status === 403 || res.status === 404) {
-                    console.log('ℹ️ Mapa do Brasil: endpoint não disponível ou sem permissão');
+                    console.log('?? Mapa do Brasil: endpoint não disponível ou sem permissão');
                     mostrarVazio();
                     return;
                 }
@@ -3624,11 +3624,11 @@ tbody tr:nth-child(even) { background: #f8fafc; }
                     renderizarMapaBrasil({ estados });
                     renderizarTopEstados(top5);
                 } else {
-                    console.warn('⚠️ Mapa do Brasil: API retornou status', res.status);
+                    console.warn('?? Mapa do Brasil: API retornou status', res.status);
                     mostrarVazio();
                 }
             } catch (error) {
-                console.warn('⚠️ Erro ao carregar mapa:', error.message);
+                console.warn('?? Erro ao carregar mapa:', error.message);
                 mostrarVazio();
             }
         }
@@ -3831,7 +3831,7 @@ function getCorIntensidade(intensidade) {
             const maxValor = Math.max(...top5.map(e => e.faturamento), 1);
             const cores = ['#1e40af', '#2563eb', '#3b82f6', '#60a5fa', '#93c5fd'];
             const bgCores = ['#eff6ff', '#f0f7ff', '#f5f9ff', '#f8fafc', '#f8fafc'];
-            const medalhas = ['🥇', '🥈', '🥉', '', ''];
+            const medalhas = ['??', '??', '??', '', ''];
             
             container.innerHTML = top5.map((estado, i) => {
                 const percentual = (estado.faturamento / maxValor * 100).toFixed(0);
@@ -3885,7 +3885,7 @@ function getCorIntensidade(intensidade) {
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
 

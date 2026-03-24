@@ -57,7 +57,7 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao listar requisições:', error);
-        res.status(500).json({ error: 'Erro ao buscar requisições', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar requisições' });
     }
 });
 
@@ -107,7 +107,7 @@ router.get('/:id', async (req, res) => {
         res.json(requisicao);
     } catch (error) {
         console.error('Erro ao obter requisição:', error);
-        res.status(500).json({ error: 'Erro ao buscar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar requisição' });
     }
 });
 
@@ -193,7 +193,7 @@ router.post('/', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao criar requisição:', error);
-        res.status(500).json({ error: 'Erro ao criar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao criar requisição' });
     } finally {
         connection.release();
     }
@@ -277,7 +277,7 @@ router.put('/:id', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao atualizar requisição:', error);
-        res.status(500).json({ error: 'Erro ao atualizar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao atualizar requisição' });
     } finally {
         connection.release();
     }
@@ -289,12 +289,16 @@ router.put('/:id/aprovar', async (req, res) => {
         const db = getDatabase();
         const { aprovador, observacoes_aprovacao } = req.body;
         
-        await db.query(
+        const [result] = await db.query(
             `UPDATE requisicoes_compras SET 
                 status = 'aprovada'
-            WHERE id = ?`,
+            WHERE id = ? AND status = 'pendente'`,
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Requisição não encontrada ou não está pendente' });
+        }
         
         res.json({
             success: true,
@@ -302,7 +306,7 @@ router.put('/:id/aprovar', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao aprovar requisição:', error);
-        res.status(500).json({ error: 'Erro ao aprovar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao aprovar requisição' });
     }
 });
 
@@ -316,12 +320,16 @@ router.put('/:id/reprovar', async (req, res) => {
             return res.status(400).json({ error: 'Motivo da reprovação é obrigatório' });
         }
         
-        await db.query(
+        const [result] = await db.query(
             `UPDATE requisicoes_compras SET 
                 status = 'rejeitada'
-            WHERE id = ?`,
+            WHERE id = ? AND status = 'pendente'`,
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Requisição não encontrada ou não está pendente' });
+        }
         
         res.json({
             success: true,
@@ -329,7 +337,7 @@ router.put('/:id/reprovar', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao reprovar requisição:', error);
-        res.status(500).json({ error: 'Erro ao reprovar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao reprovar requisição' });
     }
 });
 
@@ -338,10 +346,14 @@ router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
         
-        await db.query(
-            "UPDATE requisicoes_compras SET status = 'rejeitada' WHERE id = ?",
+        const [result] = await db.query(
+            "UPDATE requisicoes_compras SET status = 'rejeitada' WHERE id = ? AND status IN ('pendente','aprovada')",
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Requisição não encontrada ou já finalizada' });
+        }
         
         res.json({
             success: true,
@@ -349,7 +361,7 @@ router.delete('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao cancelar requisição:', error);
-        res.status(500).json({ error: 'Erro ao cancelar requisição', message: error.message });
+        res.status(500).json({ error: 'Erro ao cancelar requisição' });
     }
 });
 

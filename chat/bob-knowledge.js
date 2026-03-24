@@ -23,6 +23,10 @@ const HELP_LINKS = {
   novidades: 'https://aluforce.api.br/Ajuda/colecoes/novidades.html',
   cenarios: 'https://aluforce.api.br/Ajuda/colecoes/cenarios.html',
   contabilidade: 'https://aluforce.api.br/Ajuda/colecoes/contabilidade.html',
+  pcp: 'https://aluforce.api.br/Ajuda/colecoes/pcp.html',
+  rh: 'https://aluforce.api.br/Ajuda/colecoes/rh.html',
+  faturamento: 'https://aluforce.api.br/Ajuda/colecoes/faturamento.html',
+  logistica: 'https://aluforce.api.br/Ajuda/colecoes/logistica.html',
 };
 
 // ==================== BASE DE CONHECIMENTO COMPLETA ====================
@@ -1378,6 +1382,564 @@ Automatize a cobrança de títulos em atraso com uma sequência programada de a�
 📖 Régua: https://aluforce.api.br/Ajuda/artigos/tutorial-regua-cobranca.html
 📚 Tutoriais: ${HELP_LINKS.tutoriais}`
   },
+
+  // ============================================================
+  // BOLETOS BANCÁRIOS (NOVO)
+  // ============================================================
+  {
+    keywords: ['boleto', 'boletos', 'boleto bancário', 'boletos bancários', 'emitir boleto', 'gerar boleto', 'boleto cobrança', 'nosso número', 'linha digitável', 'baixa boleto'],
+    category: 'Financeiro',
+    question: 'Como emitir e gerenciar boletos bancários?',
+    answer: `Para **emitir e gerenciar boletos bancários** no Aluforce: 🏦
+
+**Funcionalidades:**
+• Emissão de boletos com dados do sacado
+• Acompanhamento de status (emitido, pago, vencido, cancelado)
+• KPIs automáticos: total emitidos, pagos, vencidos, valor em aberto
+• Exportação da listagem em CSV
+• Baixa manual de boletos
+
+**Emitindo um boleto:**
+1️⃣ Acesse **Financeiro > Boletos**
+2️⃣ Clique em **"Emitir Boleto"**
+3️⃣ Preencha os dados do sacado (Nome, CPF/CNPJ, endereço)
+4️⃣ Configure: valor, data de vencimento, descrição e conta bancária de destino
+5️⃣ Revise e clique em **"Emitir Boleto"** — o sistema gera automaticamente o nosso número e a linha digitável
+
+**Status dos boletos:**
+🟢 Pago — Compensado pelo banco
+🟡 Emitido — Aguardando pagamento
+🔴 Vencido — Prazo expirou
+⚪ Cancelado — Cancelado manualmente
+
+**Baixa manual:** Quando um boleto é pago por outro meio (PIX, transferência), clique no ícone de check na coluna de ações.
+
+💡 **Dica:** Configure as contas bancárias no módulo Bancos antes de emitir boletos.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/boletos-bancarios.html
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-boletos.html`
+  },
+
+  // ============================================================
+  // RECORRÊNCIAS FINANCEIRAS (NOVO)
+  // ============================================================
+  {
+    keywords: ['recorrência', 'recorrências', 'recorrente', 'transação recorrente', 'lançamento recorrente', 'despesa fixa', 'receita fixa', 'aluguel', 'assinatura', 'mensalidade', 'recorrências financeiras', 'processar pendentes'],
+    category: 'Financeiro',
+    question: 'Como configurar transações recorrentes?',
+    answer: `Para configurar **transações recorrentes** no Aluforce: 🔄
+
+As recorrências automatizam a criação de lançamentos que se repetem, como aluguéis, assinaturas, mensalidades e salários.
+
+**Frequências disponíveis:**
+| Frequência | Exemplo |
+|-----------|---------|
+| Semanal | Frete semanal |
+| Quinzenal | Adiantamento salarial |
+| Mensal | Aluguel, internet |
+| Bimestral | Conta de água |
+| Trimestral | Impostos trimestrais |
+| Semestral | IPVA, seguros |
+| Anual | Licenças, IPTU |
+
+**Criando uma recorrência:**
+1️⃣ Acesse **Financeiro > Recorrências**
+2️⃣ Clique em **"Nova Recorrência"**
+3️⃣ Preencha: descrição, tipo (pagar ou receber), valor, frequência e dia de vencimento
+4️⃣ Configure data de início e término (opcional)
+5️⃣ Salve — o sistema gera lançamentos automaticamente nos vencimentos
+
+**Processar Pendentes:** Clique para gerar imediatamente lançamentos de recorrências cujo vencimento já passou.
+
+**KPIs:**
+• Total Ativas | A Pagar/Mês | A Receber/Mês | Próx. 7 Dias
+
+⚠️ Alterar valor ou frequência afeta apenas lançamentos futuros.
+💡 Recorrências sem data de término ficam ativas indefinidamente. Pause ou encerre a qualquer momento.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/recorrencias-financeiras.html
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-recorrencias.html`
+  },
+
+  // ============================================================
+  // IMPOSTOS / CONFIGURAÇÃO TRIBUTÁRIA (NOVO)
+  // ============================================================
+  {
+    keywords: ['imposto', 'impostos', 'tributário', 'tributação', 'alíquota', 'icms', 'iss', 'pis', 'cofins', 'ipi', 'irpj', 'csll', 'simples nacional', 'lucro presumido', 'lucro real', 'regime tributário', 'configurar impostos', 'impostos configuração'],
+    category: 'Financeiro',
+    question: 'Como configurar impostos no sistema?',
+    answer: `Para **configurar impostos** no Aluforce: 🧾
+
+O módulo de Impostos centraliza todas as configurações tributárias da empresa.
+
+**Categorias de impostos:**
+| Categoria | Exemplos | Incidência |
+|-----------|----------|------------|
+| Federais | IRPJ, CSLL, PIS, COFINS, IPI | Faturamento / Lucro |
+| Estaduais | ICMS, ICMS-ST | Circulação de mercadorias |
+| Municipais | ISS, IPTU, Taxa de Licença | Serviços / Imóveis |
+
+**Cadastrando um imposto:**
+1️⃣ Acesse **Financeiro > Impostos**
+2️⃣ Clique em **"Novo Imposto"**
+3️⃣ Preencha: nome, sigla, alíquota (%), categoria, base de cálculo e observações
+4️⃣ Defina a vigência (início e término)
+5️⃣ Salve — o imposto fica disponível para NFS-e, boletos e relatórios
+
+**Filtros:** Use as abas **Todos**, **Federais**, **Estaduais** e **Municipais**.
+
+**Regimes tributários:**
+• **Simples Nacional** — Alíquota unificada em DAS
+• **Lucro Presumido** — Base presumida (IRPJ, CSLL, PIS, COFINS)
+• **Lucro Real** — Base no lucro efetivo
+
+💡 **Dica:** Consulte seu contador para as alíquotas corretas. Exportar em CSV para enviar ao escritório.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/impostos-configuracao.html
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-impostos.html`
+  },
+
+  // ============================================================
+  // CENTROS DE CUSTO (NOVO)
+  // ============================================================
+  {
+    keywords: ['centro custo', 'centros custo', 'centro de custo', 'centros de custo', 'departamento', 'setor', 'rateio', 'classificar despesa', 'custo departamento'],
+    category: 'Financeiro',
+    question: 'Como usar centros de custo?',
+    answer: `Para usar **centros de custo** no Aluforce: 🏢
+
+Centros de custo classificam receitas e despesas por setor, projeto ou departamento.
+
+**Para que servem:**
+• Controlar gastos por departamento (Administrativo, Comercial, Produção)
+• Analisar rentabilidade de projetos
+• Comparar orçado vs. realizado por setor
+• Gerar relatórios gerenciais segmentados
+• Facilitar o rateio de custos compartilhados
+
+**Estrutura hierárquica (até 3 níveis):**
+| Nível | Exemplo |
+|-------|---------|
+| 1 — Grupo | Operacional |
+| 2 — Centro | Produção |
+| 3 — Subcentro | Linha de Montagem A |
+
+**Criando um centro de custo:**
+1️⃣ Acesse **Financeiro > Centros de Custo**
+2️⃣ Clique em **"Novo Centro"**
+3️⃣ Preencha: código, nome, centro pai (se subcentro), responsável e status
+4️⃣ Defina o orçamento mensal (opcional)
+5️⃣ Salve — disponível para uso em lançamentos financeiros
+
+**Uso:** Ao criar contas a pagar/receber, selecione o centro de custo no campo correspondente.
+
+**KPIs:** Total de Centros | Centros Ativos | Receita Total | Despesa Total
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/centros-custo.html
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-centros-custo.html`
+  },
+
+  // ============================================================
+  // ORÇAMENTOS FINANCEIROS (NOVO)
+  // ============================================================
+  {
+    keywords: ['orçamento financeiro', 'orçamentos financeiros', 'orçamento empresa', 'planejamento financeiro', 'orçado realizado', 'budget', 'meta financeira', 'desvio orçamentário'],
+    category: 'Financeiro',
+    question: 'Como criar orçamentos financeiros?',
+    answer: `Para criar **orçamentos financeiros** no Aluforce: 📋
+
+O módulo de Orçamentos permite planejar receitas e despesas por período, comparando previsto vs. realizado.
+
+**Para que servem:**
+• Planejar gastos e investimentos
+• Definir metas de receita por departamento
+• Comparar orçado vs. realizado em tempo real
+• Identificar desvios orçamentários
+
+**Criando um orçamento:**
+1️⃣ Acesse **Financeiro > Orçamentos**
+2️⃣ Clique em **"Novo Orçamento"**
+3️⃣ Defina o período (mês, trimestre ou ano)
+4️⃣ Preencha: categoria, descrição, valor previsto e centro de custo (opcional)
+5️⃣ Salve — o sistema mostra automaticamente realizado vs. previsto
+
+**Visualização:** Use os botões **Este Mês**, **Trimestre** e **Ano** para alternar períodos. Gráfico de barras com comparação visual.
+
+**Indicadores:**
+| Indicador | Descrição |
+|-----------|-----------|
+| % Executado | Quanto do orçamento já foi utilizado |
+| Saldo Disponível | Valor restante |
+| Desvio | Diferença entre realizado e orçado |
+
+⚠️ Orçamentos aprovados não podem ser excluídos, apenas cancelados.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/orcamentos-financeiros.html
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-orcamentos.html`
+  },
+
+  // ============================================================
+  // DASHBOARD FINANCEIRO (NOVO)
+  // ============================================================
+  {
+    keywords: ['dashboard financeiro', 'painel financeiro', 'visão financeira', 'indicadores financeiros', 'kpi financeiro', 'saldo total', 'resultado mês'],
+    category: 'Financeiro',
+    question: 'Como funciona o dashboard financeiro?',
+    answer: `O **Dashboard Financeiro** do Aluforce: 📊
+
+É a tela inicial do módulo, oferecendo visão consolidada da saúde financeira.
+
+**KPIs exibidos:**
+| Indicador | Descrição |
+|-----------|-----------|
+| Saldo Total | Soma dos saldos de todas as contas bancárias |
+| Contas a Receber | Total de recebíveis em aberto |
+| Contas a Pagar | Total de obrigações pendentes |
+| Resultado do Mês | Receitas menos despesas no período |
+
+**Gráficos disponíveis:**
+• 📊 **Fluxo de Caixa** — Barras com entradas e saídas por período
+• 📈 **Evolução do Saldo** — Linha mostrando a tendência
+• 🥧 **Despesas por Categoria** — Pizza com distribuição de gastos
+
+**Ações rápidas do dashboard:**
+• Incluir novo cliente/fornecedor
+• Criar nova conta a receber ou a pagar
+• Acessar relatórios financeiros
+
+**Filtros:** Mês atual | Trimestre | Semestre | Ano
+
+💡 Acesse o dashboard diariamente para visão rápida. Dados atualizados em tempo real.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/dashboard-financeiro.html`
+  },
+
+  // ============================================================
+  // NFS-E EMISSÃO (NOVO)
+  // ============================================================
+  {
+    keywords: ['nfse emissão', 'emitir nfse', 'nota serviço emitir', 'nfs-e emitir', 'emissão nfse', 'nota fiscal serviço emitir', 'iss nfse', 'tomador serviço'],
+    category: 'Financeiro',
+    question: 'Como emitir NFS-e (Nota de Serviço)?',
+    answer: `Para **emitir NFS-e** (Nota Fiscal de Serviço) no Aluforce: 📄
+
+**Funcionalidades:**
+• Emissão com dados do tomador
+• Cálculo automático de ISS, PIS, COFINS, INSS, IR e CSLL
+• Acompanhamento de status (emitida, cancelada, pendente)
+• KPIs: total, emitidas, faturamento, ISS retido
+• Exportação em CSV
+
+**Emitindo uma NFS-e:**
+1️⃣ Acesse **Financeiro > NFS-e**
+2️⃣ Clique em **"Emitir NFS-e"**
+3️⃣ Informe dados do tomador (razão social, CNPJ/CPF, e-mail)
+4️⃣ Descreva o serviço, código de serviço municipal, valor e competência (mês/ano)
+5️⃣ Informe a alíquota do ISS (demais impostos são calculados automaticamente)
+6️⃣ Revise e clique em **"Emitir NFS-e"**
+
+**Impostos calculados:**
+| Imposto | Alíquota típica |
+|---------|----------------|
+| ISS | 2% a 5% (varia por município) |
+| PIS | 0,65% a 1,65% |
+| COFINS | 3% a 7,6% |
+| INSS | 11% (quando aplicável) |
+| IR | 1,5% (quando aplicável) |
+| CSLL | 1% (quando aplicável) |
+
+💡 A alíquota de ISS varia conforme o município. Consulte seu contador.
+
+📖 Artigo completo: https://aluforce.api.br/Ajuda/artigos/nfse-emissao.html
+📖 Migração NFS-e Nacional: https://aluforce.api.br/Ajuda/artigos/nfs-e-nacional.html`
+  },
+
+  // ============================================================
+  // GESTÃO DE CONTAS BANCÁRIAS (NOVO)
+  // ============================================================
+  {
+    keywords: ['conta bancária', 'contas bancárias', 'banco', 'bancos', 'cadastrar banco', 'saldo bancário', 'extrato', 'gestão bancária'],
+    category: 'Financeiro',
+    question: 'Como gerenciar contas bancárias?',
+    answer: `Para **gerenciar contas bancárias** no Aluforce: 🏦
+
+**Passo a passo:**
+1️⃣ Acesse **Financeiro > Bancos** (ou Contas Bancárias)
+2️⃣ Clique em **"Nova Conta"**
+3️⃣ Preencha: banco, agência, conta, tipo (corrente/poupança), saldo inicial
+4️⃣ Salve — a conta fica disponível para movimentações, boletos e conciliação
+
+**Funcionalidades:**
+• Cadastro de múltiplas contas bancárias
+• Saldo atualizado em tempo real
+• Histórico de movimentações
+• Conciliação bancária por OFX
+• Integração com boletos e pagamentos
+
+💡 Mantenha os dados bancários atualizados para boletos e conciliação funcionarem corretamente.
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-gestao-contas-bancarias.html
+📚 Finanças: ${HELP_LINKS.financas}`
+  },
+
+  // ============================================================
+  // LOGÍSTICA E TRANSPORTE (NOVO)
+  // ============================================================
+  {
+    keywords: ['logística', 'logistica', 'transporte', 'expedição', 'frete', 'entrega', 'rastreio', 'ct-e', 'cte', 'transportadora', 'romaneio', 'embarque'],
+    category: 'Logística',
+    question: 'Como funciona o módulo de Logística?',
+    answer: `O **módulo de Logística** do Aluforce: 🚚
+
+Gerencia toda a cadeia de expedição e transporte — da separação do pedido até a entrega.
+
+**Funcionalidades:**
+• 📦 **Expedição** — Separação, conferência e liberação de pedidos
+• 🚛 **Transporte** — Gestão de fretes e transportadoras
+• 📄 **CT-e** — Emissão de Conhecimento de Transporte Eletrônico
+• 📍 **Rastreio** — Acompanhamento de entregas em tempo real
+• 📋 **Romaneio** — Lista de embarque com detalhes da carga
+• 💰 **Tabela de Frete** — Cálculo automático por peso, distância ou valor
+
+**Fluxo de expedição:**
+📝 Pedido Aprovado → 📦 Separação → ✅ Conferência → 🚛 Embarque → 📍 Em Trânsito → ✅ Entregue
+
+**CT-e (Conhecimento de Transporte):**
+1️⃣ Acesse **Logística > CT-e**
+2️⃣ Vincule a NF-e e transportadora
+3️⃣ Configure rota, peso e valores
+4️⃣ Emita — transmissão à SEFAZ
+
+📖 Visão geral: https://aluforce.api.br/Ajuda/artigos/visao-geral-logistica.html
+📖 Transporte: https://aluforce.api.br/Ajuda/artigos/tutorial-logistica-transporte.html
+📖 CT-e: https://aluforce.api.br/Ajuda/artigos/tutorial-cte-transporte.html
+📚 Logística: ${HELP_LINKS.logistica}`
+  },
+
+  // ============================================================
+  // FATURAMENTO VISÃO GERAL (NOVO)
+  // ============================================================
+  {
+    keywords: ['faturamento módulo', 'módulo faturamento', 'visão faturamento', 'fatura', 'faturas', 'faturar lote', 'faturamento integrado'],
+    category: 'Faturamento',
+    question: 'Como funciona o módulo de Faturamento?',
+    answer: `O **módulo de Faturamento** do Aluforce: 💳
+
+Integra vendas, notas fiscais e financeiro em um único fluxo.
+
+**Funcionalidades:**
+• Faturamento de pedidos aprovados em faturas
+• Cobrança PIX com QR Code para pagamento instantâneo
+• Régua de cobrança automática (e-mail e WhatsApp)
+• Emissão de NF-e vinculada ao faturamento
+• Dashboard consolidado de faturamento
+
+**Fluxo:**
+📝 Pedido Aprovado → 📄 Faturar → 🧾 NF-e Emitida → 💰 Cobrança Gerada → ✅ Recebido
+
+📖 Visão geral: https://aluforce.api.br/Ajuda/artigos/visao-geral-faturamento.html
+📖 PIX: https://aluforce.api.br/Ajuda/artigos/tutorial-pix-cobranca.html
+📖 Régua: https://aluforce.api.br/Ajuda/artigos/tutorial-regua-cobranca.html
+📚 Faturamento: ${HELP_LINKS.faturamento}`
+  },
+
+  // ============================================================
+  // AÇÕES DE VENDAS — DUPLICAR, ORÇAMENTO, EXPORTAR PDF, PROSPECÇÃO (NOVO)
+  // ============================================================
+  {
+    keywords: ['duplicar pedido', 'copiar pedido', 'clonar pedido', 'orçamento venda', 'gerar orçamento', 'proposta comercial', 'exportar pdf', 'pdf pedido', 'imprimir pedido'],
+    category: 'Vendas',
+    question: 'Como duplicar pedido, gerar orçamento ou exportar PDF?',
+    answer: `Ações rápidas de **Vendas** no Aluforce: ⚡
+
+**Duplicar Pedido:**
+1️⃣ Acesse o pedido desejado → 2️⃣ Clique em **"Duplicar"** → 3️⃣ Um novo pedido é criado com os mesmos dados (cliente, produtos, condições). Ajuste o que precisar e salve.
+
+**Gerar Orçamento:**
+1️⃣ Crie um novo pedido normalmente → 2️⃣ Salve como **"Orçamento"** → 3️⃣ Envie o PDF ao cliente. Se aprovado, converta em pedido com um clique.
+
+**Exportar Pedido em PDF:**
+1️⃣ Abra o pedido → 2️⃣ Clique em **"Exportar PDF"** ou **"Imprimir"** → 3️⃣ Baixe ou envie por e-mail/WhatsApp.
+
+📖 Duplicar: https://aluforce.api.br/Ajuda/artigos/tutorial-duplicar-pedido.html
+📖 Orçamento: https://aluforce.api.br/Ajuda/artigos/tutorial-gerar-orcamento.html
+📖 Exportar PDF: https://aluforce.api.br/Ajuda/artigos/tutorial-exportar-pedido-pdf.html`
+  },
+  {
+    keywords: ['prospecção', 'prospecção b2b', 'lead', 'leads', 'prospect', 'captar cliente', 'funil vendas'],
+    category: 'Vendas',
+    question: 'Como usar a prospecção B2B?',
+    answer: `Sobre **Prospecção B2B** no Aluforce: 🎯
+
+Ferramenta para captar novos clientes e gerenciar o funil de vendas.
+
+**Funcionalidades:**
+• Cadastro de leads e prospects
+• Funil de vendas visual
+• Acompanhamento de atividades
+• Conversão de lead em cliente
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-prospeccao-b2b.html
+📚 Vendas: ${HELP_LINKS.vendas}`
+  },
+
+  // ============================================================
+  // NOTAS FISCAIS EXTRAS (NOVO)
+  // ============================================================
+  {
+    keywords: ['inutilizar', 'inutilizar numeração', 'inutilizar nfe', 'faixa numeração', 'número nfe'],
+    category: 'Notas Fiscais',
+    question: 'Como inutilizar numeração de NF-e?',
+    answer: `Para **inutilizar numeração** de NF-e: 🔢
+
+**Quando usar:** Quebra na sequência numérica (ex: notas 100 a 105 foram puladas).
+
+**Passo a passo:**
+1️⃣ Acesse **Notas Fiscais > Inutilizar Numeração**
+2️⃣ Informe a série, número inicial e número final
+3️⃣ Informe a justificativa (mínimo 15 caracteres)
+4️⃣ Transmita à SEFAZ
+
+⚠️ A inutilização deve ser feita até o dia **5 do mês seguinte** à quebra de sequência.
+⚠️ Números já utilizados em NF-e emitidas não podem ser inutilizados.
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-inutilizar-numeracao.html
+📚 Notas Fiscais: ${HELP_LINKS.notasFiscais}`
+  },
+  {
+    keywords: ['consultar nfe', 'consultar nota', 'pesquisar nfe', 'buscar nota', 'status nfe', 'xml nfe', 'danfe consulta'],
+    category: 'Notas Fiscais',
+    question: 'Como consultar NF-e emitidas?',
+    answer: `Para **consultar NF-e** emitidas: 🔍
+
+1️⃣ Acesse **Notas Fiscais > Consulta**
+2️⃣ Use os filtros: número, série, cliente, período, status
+3️⃣ Clique na nota para ver detalhes, DANFE, XML e eventos
+
+**Ações disponíveis:** Reimprimir DANFE | Baixar XML | Enviar por e-mail | Cancelar | Carta de Correção
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-consultar-nfe.html
+📚 Notas Fiscais: ${HELP_LINKS.notasFiscais}`
+  },
+
+  // ============================================================
+  // COMPRAS EXTRAS (NOVO)
+  // ============================================================
+  {
+    keywords: ['requisição compra', 'requisição', 'solicitar material', 'requisitar compra', 'pedido interno'],
+    category: 'Compras',
+    question: 'Como criar uma requisição de compra?',
+    answer: `Para criar uma **requisição de compra**: 📝
+
+Requisições são pedidos internos de materiais que precisam ser aprovados antes de virar pedido de compra.
+
+1️⃣ Acesse **Compras > Requisições**
+2️⃣ Clique em **"Nova Requisição"**
+3️⃣ Adicione os materiais necessários com quantidade e justificativa
+4️⃣ Envie para aprovação — o gestor aprova ou reprova
+5️⃣ Após aprovada, converta em pedido de compra com um clique
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-requisicao-compra.html
+📚 Compras: ${HELP_LINKS.compras}`
+  },
+  {
+    keywords: ['relatório compras', 'relatórios compras', 'relatório fornecedor', 'desempenho compras', 'análise compras'],
+    category: 'Relatórios',
+    question: 'Como gerar relatórios de compras?',
+    answer: `Para gerar **relatórios de compras**: 📊
+
+**Relatórios disponíveis:**
+• Por Período — Todas as compras em um intervalo de datas
+• Por Fornecedor — Volume, valores e desempenho
+• Por Produto — Itens mais comprados, evolução de preço
+• Cotações — Comparativo de propostas
+
+1️⃣ Acesse **Relatórios > Compras**
+2️⃣ Selecione o tipo e configure filtros
+3️⃣ Gere e exporte (Excel/PDF)
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-relatorios-compras.html
+📚 Compras: ${HELP_LINKS.compras}`
+  },
+
+  // ============================================================
+  // RELATÓRIOS PCP (NOVO)
+  // ============================================================
+  {
+    keywords: ['relatório pcp', 'relatórios pcp', 'relatório produção', 'oee', 'eficiência produção', 'custo produção'],
+    category: 'Relatórios',
+    question: 'Como gerar relatórios de PCP/Produção?',
+    answer: `Para gerar **relatórios de PCP/Produção**: 🏭
+
+**Relatórios disponíveis:**
+• **OEE** — Eficiência Global dos Equipamentos
+• **Eficiência por etapa** — Produtividade de cada fase
+• **Custo de produção** — Matéria-prima + mão de obra
+• **Rastreabilidade** — Histórico completo de OPs
+• **Análise de perdas** — Materiais desperdiçados
+
+1️⃣ Acesse **Relatórios > Produção (PCP)**
+2️⃣ Selecione o tipo de relatório
+3️⃣ Configure filtros (período, produto, máquina)
+4️⃣ Gere e exporte
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-relatorios-pcp.html
+📚 PCP: ${HELP_LINKS.pcp}`
+  },
+
+  // ============================================================
+  // MOVIMENTAÇÃO DE ESTOQUE (NOVO)
+  // ============================================================
+  {
+    keywords: ['movimentação estoque', 'transferência estoque', 'transferir estoque', 'mover estoque', 'entrada saída estoque', 'movimentar produto'],
+    category: 'Estoque',
+    question: 'Como fazer movimentação de estoque?',
+    answer: `Para fazer **movimentação de estoque**: 📦
+
+**Tipos de movimentação:**
+| Tipo | Descrição |
+|------|-----------|
+| Entrada | Compras, devoluções, produção |
+| Saída | Vendas, consumo, avarias |
+| Transferência | Entre depósitos/locais |
+
+**Passo a passo (transferência entre depósitos):**
+1️⃣ Acesse **Estoque > Movimentações**
+2️⃣ Clique em **"Nova Movimentação"**
+3️⃣ Selecione: tipo (transferência), origem, destino
+4️⃣ Adicione os produtos e quantidades
+5️⃣ Confirme — saldos atualizados automaticamente
+
+💡 Todas as movimentações ficam registradas no histórico do produto com data/hora e usuário.
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-movimentacao-estoque.html
+📚 Estoque: ${HELP_LINKS.estoque}`
+  },
+
+  // ============================================================
+  // DASHBOARD DE VENDAS (NOVO)
+  // ============================================================
+  {
+    keywords: ['dashboard vendas', 'painel vendas', 'indicadores vendas', 'kpi vendas', 'meta vendas', 'ranking vendedor'],
+    category: 'Vendas',
+    question: 'Como funciona o dashboard de vendas?',
+    answer: `O **Dashboard de Vendas** do Aluforce: 📈
+
+Visão consolidada do desempenho comercial.
+
+**Indicadores exibidos:**
+• 💰 Faturamento total do período
+• 📊 Ticket médio por pedido
+• 🏆 Ranking de vendedores
+• 📦 Produtos mais vendidos
+• 👥 Clientes com maior volume
+• 📈 Evolução mensal de vendas
+
+**Filtros:** Mês | Trimestre | Semestre | Ano | Vendedor | Região
+
+📖 Tutorial: https://aluforce.api.br/Ajuda/artigos/tutorial-dashboard-vendas.html
+📚 Vendas: ${HELP_LINKS.vendas}`
+  },
 ];
 
 // ==================== SINÔNIMOS E VARIAÇÕES ====================
@@ -1400,20 +1962,20 @@ const SYNONYMS = {
   'fornecimento': 'compras fornecedor',
   'fábrica': 'produção pcp',
   'manufatura': 'produção pcp',
-  'financeiro': 'conta pagar receber fluxo caixa conciliação',
-  'vendas': 'pedido venda faturar',
-  'compras': 'pedido compra fornecedor',
-  'estoque': 'inventário almoxarifado produto posição',
+  'financeiro': 'conta pagar receber fluxo caixa conciliação boleto recorrência imposto centro custo orçamento dashboard',
+  'vendas': 'pedido venda faturar duplicar orçamento prospecção',
+  'compras': 'pedido compra fornecedor requisição cotação',
+  'estoque': 'inventário almoxarifado produto posição movimentação transferência',
   'contábil': 'contabilidade plano contas dre',
   'fiscal': 'nota fiscal nfe imposto icms',
-  'imposto': 'fiscal icms pis cofins ipi',
-  'icms': 'imposto fiscal nota',
+  'imposto': 'fiscal icms pis cofins ipi iss alíquota tributário regime',
+  'icms': 'imposto fiscal nota estadual',
   'cadastro': 'cadastrar cliente fornecedor produto',
   'preço': 'tabela preços markup desconto',
   'comissão': 'vendedor vendas desempenho',
   'caixa': 'fluxo caixa financeiro',
-  'banco': 'conciliação bancária conta bancária ofx',
-  'dashboard': 'indicadores relatório painel',
+  'banco': 'conciliação bancária conta bancária ofx boleto',
+  'dashboard': 'indicadores relatório painel kpi',
   'app': 'aplicativo celular mobile',
   'wpp': 'whatsapp integração envio',
   'whats': 'whatsapp integração envio',
@@ -1423,16 +1985,24 @@ const SYNONYMS = {
   'sefaz': 'nota fiscal nfe emitir transmitir',
   'certificado': 'certificado digital a1 a3 fiscal',
   'duplicata': 'desconto antecipação recebível',
-  'pagamento': 'conta pagar financeiro',
-  'recebimento': 'conta receber financeiro',
+  'pagamento': 'conta pagar financeiro boleto',
+  'recebimento': 'conta receber financeiro boleto',
   'produto': 'cadastro produtos estoque ncm',
   'cliente': 'cadastro clientes vendas',
   'fornecedor': 'cadastro fornecedores compras',
-  'orçamento': 'pedido venda proposta',
-  'fatura': 'faturar pedido nfe',
+  'orçamento': 'pedido venda proposta orçamento financeiro',
+  'fatura': 'faturar pedido nfe módulo faturamento',
   'folha': 'folha pagamento holerite rh',
   'salário': 'holerite contracheque rh',
   'admissão': 'cadastrar funcionário rh',
+  'logística': 'transporte expedição frete entrega rastreio ct-e',
+  'frete': 'logística transporte expedição',
+  'entrega': 'logística transporte rastreio expedição',
+  'recorrência': 'recorrente lançamento automático mensal',
+  'aluguel': 'recorrência despesa fixa mensal',
+  'centro': 'centro custo departamento setor',
+  'departamento': 'centro custo setor',
+  'inutilizar': 'numeração nfe faixa',
 };
 
 // ==================== FUNÇÕES DE BUSCA ====================
@@ -1549,14 +2119,16 @@ Se precisar de mais alguma coisa, é só perguntar. Estou aqui para te ajudar co
 Posso te ajudar com qualquer dúvida sobre o sistema. Aqui estão os módulos que domino:
 
 📋 **Guia Inicial** — Primeiro acesso e configurações
-🛒 **Vendas** — Pedidos, faturamento, tabelas de preços
-📦 **Compras** — Pedidos de compra, cotações, entrada de NF-e
-💰 **Financeiro** — Contas a pagar/receber, fluxo de caixa, conciliação
-📄 **Notas Fiscais** — Emitir, cancelar NF-e, NFS-e, carta de correção
-📦 **Estoque** — Posição, inventário, ajustes
+🛒 **Vendas** — Pedidos, faturamento, tabelas de preços, prospecção B2B
+📦 **Compras** — Pedidos de compra, cotações, requisições, entrada de NF-e
+💰 **Financeiro** — Contas a pagar/receber, fluxo de caixa, conciliação, boletos, recorrências, impostos, centros de custo, orçamentos
+📄 **Notas Fiscais** — Emitir, cancelar NF-e, NFS-e, carta de correção, inutilizar numeração
+💳 **Faturamento** — Cobrança PIX, régua de cobrança, NFS-e
+📦 **Estoque** — Posição, inventário, ajustes, movimentações
 🏭 **PCP** — Ordens de produção, apontamento Kanban, BOM
-👤 **RH** — Holerite, férias, ponto, funcionários
-📊 **Relatórios** — Vendas, financeiro, estoque, DRE
+🚚 **Logística** — Expedição, transporte, CT-e, rastreio
+👤 **RH** — Holerite, férias, ponto, funcionários, treinamentos
+📊 **Relatórios** — Vendas, financeiro, estoque, produção, compras, DRE
 📱 **WhatsApp e App** — Integrações e app mobile
 🔒 **Segurança** — Usuários e permissões
 🔌 **Integrações** — API REST, webhooks

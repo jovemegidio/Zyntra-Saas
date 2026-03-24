@@ -1,0 +1,1076 @@
+﻿<!-- ============================================
+     MODAL RICO DE EDIÇÃO DE PRODUTO
+     ============================================ -->
+
+<div id="modal-produto-rico" class="modal-editar-produto-rico">
+    <div class="modal-produto-container">
+        <!-- Header -->
+        <div class="modal-produto-header">
+            <div class="modal-produto-title-section">
+                <h2 class="modal-produto-title">
+                    <i class="fas fa-box-open"></i>
+                    <span>Editar Produto</span>
+                    <span class="modal-produto-code" id="modal-produto-rico-code">POT70BR</span>
+                </h2>
+                <div class="modal-produto-subtitle">
+                    Gestão Completa de Produtos | Sistema Aluforce PCP
+                </div>
+            </div>
+            <button type="button" class="modal-produto-close" onclick="fecharModalProdutoRico()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="modal-produto-tabs">
+            <button class="modal-produto-tab active" data-tab="info" onclick="trocarAbaRico('info')">
+                <i class="fas fa-info-circle"></i>
+                Informações
+            </button>
+            <button class="modal-produto-tab" data-tab="estoque" onclick="trocarAbaRico('estoque')">
+                <i class="fas fa-boxes"></i>
+                Estoque
+            </button>
+            <button class="modal-produto-tab" data-tab="custos" onclick="trocarAbaRico('custos')">
+                <i class="fas fa-dollar-sign"></i>
+                Custos e Preços
+            </button>
+            <button class="modal-produto-tab" data-tab="fornecedores" onclick="trocarAbaRico('fornecedores')">
+                <i class="fas fa-truck"></i>
+                Fornecedores
+            </button>
+            <button class="modal-produto-tab" data-tab="caracteristicas" onclick="trocarAbaRico('caracteristicas')">
+                <i class="fas fa-sliders-h"></i>
+                Características
+            </button>
+            <button class="modal-produto-tab" data-tab="observacoes" onclick="trocarAbaRico('observacoes')">
+                <i class="fas fa-sticky-note"></i>
+                Observações
+            </button>
+            <button class="modal-produto-tab" data-tab="histórico" onclick="trocarAbaRico('histórico')">
+                <i class="fas fa-history"></i>
+                Histórico
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-produto-body">
+            <form id="form-produto-rico">
+                
+                <!-- ABA: INFORMAÇÕES -->
+                <div class="modal-produto-tab-content active" data-tab-content="info">
+                    
+                    <!-- Seção: Identificação -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-fingerprint"></i>
+                            </div>
+                            <h3 class="produto-section-title">Identificação</h3>
+                        </div>
+
+                        <div class="produto-form-grid-3">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-barcode"></i>
+                                    Código do Produto
+                                </label>
+                                <input type="text" id="rico-codigo" class="produto-form-input readonly" readonly>
+                                <span class="produto-form-help">
+                                    <i class="fas fa-lock"></i>
+                                    Campo protegido - gerado automaticamente
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-qrcode"></i>
+                                    SKU (Stock Keeping Unit)
+                                </label>
+                                <input type="text" id="rico-sku" class="produto-form-input readonly" readonly>
+                                <span class="produto-form-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    Código único de identificação
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-barcode"></i>
+                                    Código EAN (GTIN)
+                                </label>
+                                <input type="text" id="rico-gtin" class="produto-form-input" maxlength="13" pattern="[0-9]{13}">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-barcode"></i>
+                                    Código de barras internacional (13 dígitos)
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Descrição -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-align-left"></i>
+                            </div>
+                            <h3 class="produto-section-title">Descrição do Produto</h3>
+                        </div>
+
+                        <div class="produto-form-grid-2">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-tag"></i>
+                                    Nome do Produto
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="text" id="rico-nome" class="produto-form-input" required maxlength="255">
+                                <div class="produto-char-counter">
+                                    <span id="rico-nome-count">0</span>/255
+                                </div>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-layer-group"></i>
+                                    Família de Produto
+                                </label>
+                                <select id="rico-familia" class="produto-form-select">
+                                    <option value="">Selecione uma família</option>
+                                    <option value="cabos">Cabos Elétricos</option>
+                                    <option value="acessorios">Acessórios</option>
+                                    <option value="conectores">Conectores</option>
+                                    <option value="ferragens">Ferragens</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="produto-form-group">
+                            <label class="produto-form-label">
+                                <i class="fas fa-file-alt"></i>
+                                Descrição Técnica
+                            </label>
+                            <textarea id="rico-descrição" class="produto-form-textarea" rows="4" maxlength="1000"></textarea>
+                            <div class="produto-char-counter">
+                                <span id="rico-desc-count">0</span>/1000
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Definição -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <h3 class="produto-section-title">Definição do Produto</h3>
+                        </div>
+
+                        <div class="produto-form-grid-3">
+                            <div class="produto-toggle-group">
+                                <div class="produto-toggle-label">
+                                    <i class="fas fa-cube"></i>
+                                    Produto Simples
+                                    <i class="fas fa-info-circle" style="color: #94a3b8; cursor: help;" title="Produto sem variações"></i>
+                                </div>
+                                <label class="produto-toggle-switch">
+                                    <input type="checkbox" id="rico-simples" checked onchange="toggleProdutoTipo()">
+                                    <span class="produto-toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="produto-toggle-group">
+                                <div class="produto-toggle-label">
+                                    <i class="fas fa-box"></i>
+                                    Kit de Produtos
+                                    <i class="fas fa-info-circle" style="color: #94a3b8; cursor: help;" title="Conjunto de produtos vendidos juntos"></i>
+                                </div>
+                                <label class="produto-toggle-switch">
+                                    <input type="checkbox" id="rico-kit" onchange="toggleProdutoTipo()">
+                                    <span class="produto-toggle-slider"></span>
+                                </label>
+                            </div>
+
+                            <div class="produto-toggle-group">
+                                <div class="produto-toggle-label">
+                                    <i class="fas fa-code-branch"></i>
+                                    Com Variações
+                                    <i class="fas fa-info-circle" style="color: #94a3b8; cursor: help;" title="Produto com cores, tamanhos ou outras variações"></i>
+                                </div>
+                                <label class="produto-toggle-switch">
+                                    <input type="checkbox" id="rico-variacoes" onchange="toggleProdutoTipo()">
+                                    <span class="produto-toggle-slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção: Unidade -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-ruler"></i>
+                            </div>
+                            <h3 class="produto-section-title">Unidade de Medida</h3>
+                        </div>
+
+                        <div class="produto-form-grid-3">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-balance-scale"></i>
+                                    Unidade
+                                    <span class="required">*</span>
+                                </label>
+                                <select id="rico-unidade" class="produto-form-select" required>
+                                    <option value="">Selecione</option>
+                                    <option value="Metro (M)">Metro (M)</option>
+                                    <option value="Unidade (UN)">Unidade (UN)</option>
+                                    <option value="Rolo (RL)">Rolo (RL)</option>
+                                    <option value="Caixa (CX)">Caixa (CX)</option>
+                                    <option value="Bobina (BOB)">Bobina (BOB)</option>
+                                    <option value="Kit (KT)">Kit (KT)</option>
+                                </select>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-weight"></i>
+                                    Peso (kg)
+                                </label>
+                                <input type="number" id="rico-peso" class="produto-form-input" step="0.001" min="0">
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-cube"></i>
+                                    Volume (m³)
+                                </label>
+                                <input type="number" id="rico-volume" class="produto-form-input" step="0.001" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: ESTOQUE -->
+                <div class="modal-produto-tab-content" data-tab-content="estoque">
+                    
+                    <!-- Cards de Informação -->
+                    <div class="produto-info-cards">
+                        <div class="produto-info-card">
+                            <div class="produto-info-card-icon">
+                                <i class="fas fa-boxes"></i>
+                            </div>
+                            <div class="produto-info-card-value" id="rico-estoque-atual">0</div>
+                            <div class="produto-info-card-label">Estoque Atual</div>
+                        </div>
+
+                        <div class="produto-info-card">
+                            <div class="produto-info-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="produto-info-card-value" id="rico-estoque-minimo-display">0</div>
+                            <div class="produto-info-card-label">Estoque Mínimo</div>
+                        </div>
+
+                        <div class="produto-info-card">
+                            <div class="produto-info-card-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="produto-info-card-value" id="rico-estoque-maximo-display">0</div>
+                            <div class="produto-info-card-label">Estoque Máximo</div>
+                        </div>
+
+                        <div class="produto-info-card">
+                            <div class="produto-info-card-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="produto-info-card-value" id="rico-estoque-status">Normal</div>
+                            <div class="produto-info-card-label">Status</div>
+                        </div>
+                    </div>
+
+                    <!-- Controle de Estoque -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-warehouse"></i>
+                            </div>
+                            <h3 class="produto-section-title">Controle de Estoque</h3>
+                        </div>
+
+                        <div class="produto-toggle-group" style="margin-bottom: 24px;">
+                            <div class="produto-toggle-label">
+                                <i class="fas fa-clipboard-check"></i>
+                                Este produto possui controle de lote
+                                <i class="fas fa-info-circle" style="color: #94a3b8; cursor: help;" title="Ative para rastrear lotes individuais"></i>
+                            </div>
+                            <label class="produto-toggle-switch">
+                                <input type="checkbox" id="rico-controle-lote">
+                                <span class="produto-toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="produto-form-grid-3">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-arrow-down"></i>
+                                    Estoque Mínimo
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="number" id="rico-estoque-minimo" class="produto-form-input" min="0" step="0.01" required>
+                                <span class="produto-form-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    Nível de alerta para reposição
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-arrow-up"></i>
+                                    Estoque Máximo
+                                </label>
+                                <input type="number" id="rico-estoque-maximo" class="produto-form-input" min="0" step="0.01">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-info-circle"></i>
+                                    Capacidade máxima de armazenamento
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-clock"></i>
+                                    Prazo de Entrega (dias)
+                                </label>
+                                <input type="number" id="rico-prazo-entrega" class="produto-form-input" min="0">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-truck"></i>
+                                    Tempo médio de entrega do fornecedor
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Local de Estoque -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h3 class="produto-section-title">Localização no Estoque</h3>
+                        </div>
+
+                        <div class="produto-form-grid-3">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-building"></i>
+                                    Local de Estoque
+                                </label>
+                                <select id="rico-local-estoque" class="produto-form-select">
+                                    <option value="PADRAO">PADRÃO - Local de Estoque Padrão</option>
+                                    <option value="ALMOXARIFADO">Almoxarifado Central</option>
+                                    <option value="DEPOSITO">Depósito Secundário</option>
+                                    <option value="PRODUCAO">Área de Produção</option>
+                                </select>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-th"></i>
+                                    Corredor
+                                </label>
+                                <input type="text" id="rico-corredor" class="produto-form-input" maxlength="10">
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-layer-group"></i>
+                                    Prateleira
+                                </label>
+                                <input type="text" id="rico-prateleira" class="produto-form-input" maxlength="10">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: CUSTOS E PREÇOS -->
+                <div class="modal-produto-tab-content" data-tab-content="custos">
+                    
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-dollar-sign"></i>
+                            </div>
+                            <h3 class="produto-section-title">Preços e Custos</h3>
+                        </div>
+
+                        <div class="produto-form-grid-2">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    Preço Unitário de Venda
+                                    <span class="required">*</span>
+                                </label>
+                                <input type="number" id="rico-preco-venda" class="produto-form-input" step="0.01" min="0" required oninput="calcularMargemRica()">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-tag"></i>
+                                    Valor de venda ao cliente
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-industry"></i>
+                                    Custo Unitário
+                                </label>
+                                <input type="number" id="rico-custo-unitario" class="produto-form-input" step="0.01" min="0" oninput="calcularMargemRica()">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-calculator"></i>
+                                    Custo de aquisição ou Produção
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Margem de Lucro -->
+                        <div style="background: linear-gradient(135deg, #dbeafe, #bfdbfe); padding: 20px; border-radius: 12px; margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="font-weight: 600; color: #1e40af;">
+                                    <i class="fas fa-percentage"></i>
+                                    Margem de Lucro
+                                </span>
+                                <span style="font-size: 24px; font-weight: 700; color: #1e40af;" id="rico-margem-lucro">0%</span>
+                            </div>
+                            <div style="font-size: 13px; color: #1e40af;">
+                                <i class="fas fa-info-circle"></i>
+                                Calculada automaticamente: (Preço - Custo) / Preço × 100
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recomendações Fiscais -->
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                            </div>
+                            <h3 class="produto-section-title">Recomendações Fiscais</h3>
+                        </div>
+
+                        <div class="produto-form-grid-2">
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-list-ol"></i>
+                                    NCM (Nomenclatura Comum do Mercosul)
+                                </label>
+                                <input type="text" id="rico-ncm" class="produto-form-input" maxlength="10">
+                                <span class="produto-form-help">
+                                    <i class="fas fa-globe"></i>
+                                    Código de Classificação fiscal
+                                </span>
+                            </div>
+
+                            <div class="produto-form-group">
+                                <label class="produto-form-label">
+                                    <i class="fas fa-percentage"></i>
+                                    Alíquota de ICMS (%)
+                                </label>
+                                <input type="number" id="rico-icms" class="produto-form-input" step="0.01" min="0" max="100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: FORNECEDORES -->
+                <div class="modal-produto-tab-content" data-tab-content="fornecedores">
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-truck"></i>
+                            </div>
+                            <h3 class="produto-section-title">Fornecedores</h3>
+                        </div>
+
+                        <div class="produto-form-group">
+                            <label class="produto-form-label">
+                                <i class="fas fa-building"></i>
+                                Fornecedor Principal
+                            </label>
+                            <input type="text" id="rico-fornecedor" class="produto-form-input">
+                            <span class="produto-form-help">
+                                <i class="fas fa-info-circle"></i>
+                                Nome ou Razão social do fornecedor
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: CARACTERÍSTICAS -->
+                <div class="modal-produto-tab-content" data-tab-content="caracteristicas">
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <h3 class="produto-section-title">Características Técnicas</h3>
+                        </div>
+
+                        <div class="produto-form-group">
+                            <label class="produto-form-label">
+                                <i class="fas fa-list"></i>
+                                Características Adicionais
+                            </label>
+                            <textarea id="rico-caracteristicas" class="produto-form-textarea" rows="6" placeholder="Digite as características técnicas do produto..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: OBSERVAÇÕES -->
+                <div class="modal-produto-tab-content" data-tab-content="observacoes">
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-sticky-note"></i>
+                            </div>
+                            <h3 class="produto-section-title">Observações e Recomendações Fiscais</h3>
+                        </div>
+
+                        <div class="produto-form-group">
+                            <label class="produto-form-label">
+                                <i class="fas fa-comment-alt"></i>
+                                Observações Gerais
+                            </label>
+                            <textarea id="rico-observacoes" class="produto-form-textarea" rows="6" placeholder="Digite observações importantes sobre o produto..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA: HISTÓRICO -->
+                <div class="modal-produto-tab-content" data-tab-content="histórico">
+                    <div class="produto-section">
+                        <div class="produto-section-header">
+                            <div class="produto-section-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h3 class="produto-section-title">Histórico de Alterações</h3>
+                        </div>
+
+                        <div id="rico-historico-lista">
+                            <p style="text-align: center; color: #94a3b8; padding: 40px;">
+                                <i class="fas fa-clock" style="font-size: 48px; margin-bottom: 16px; display: block;"></i>
+                                Nenhuma Alteração registrada ainda
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-produto-footer">
+            <div class="modal-produto-actions-left">
+                <button type="button" class="btn-produto btn-produto-danger" onclick="excluirProdutoRico()">
+                    <i class="fas fa-trash"></i>
+                    Excluir
+                </button>
+                <button type="button" class="btn-produto btn-produto-secondary" onclick="duplicarProdutoRico()">
+                    <i class="fas fa-copy"></i>
+                    Duplicar
+                </button>
+                <button type="button" class="btn-produto btn-produto-secondary" onclick="inativarProdutoRico()">
+                    <i class="fas fa-ban"></i>
+                    Inativar
+                </button>
+            </div>
+
+            <div class="modal-produto-actions-right">
+                <button type="button" class="btn-produto btn-produto-secondary" onclick="fecharModalProdutoRico()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn-produto btn-produto-success" onclick="salvarProdutoRico()">
+                    <i class="fas fa-save"></i>
+                    Salvar Produto
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================
+// FUNÇÕES DO MODAL RICO
+// ============================================
+
+// Trocar entre abas
+function trocarAbaRico(nomeAba) {
+    // Remover active de todas as abas
+    document.querySelectorAll('.modal-produto-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    document.querySelectorAll('.modal-produto-tab-content').forEach(content => {
+        content.classList.remove('active');
+    });
+
+    // Ativar aba selecionada
+    document.querySelector(`.modal-produto-tab[data-tab="${nomeAba}"]`).classList.add('active');
+    document.querySelector(`.modal-produto-tab-content[data-tab-content="${nomeAba}"]`).classList.add('active');
+}
+
+// Abrir modal
+function abrirModalProdutoRico(produto) {
+    const modal = document.getElementById('modal-produto-rico');
+    modal.classList.add('active');
+
+    // Guardar ID do produto para uso no salvamento
+    window.currentProductId = produto?.id || null;
+
+    // Preencher dados se fornecido
+    if (produto) {
+        document.getElementById('modal-produto-rico-code').textContent = produto.codigo || '';
+        document.getElementById('rico-codigo').value = produto.codigo || '';
+        document.getElementById('rico-sku').value = produto.sku || '';
+        document.getElementById('rico-gtin').value = produto.gtin || '';
+        document.getElementById('rico-nome').value = produto.nome || '';
+        document.getElementById('rico-descrição').value = produto.descrição || '';
+        document.getElementById('rico-unidade').value = produto.unidade_medida || '';
+        
+        // Campos adicionais
+        if (document.getElementById('rico-familia')) {
+            document.getElementById('rico-familia').value = produto.familia || '';
+        }
+        if (document.getElementById('rico-peso')) {
+            document.getElementById('rico-peso').value = produto.peso || '';
+        }
+        if (document.getElementById('rico-volume')) {
+            document.getElementById('rico-volume').value = produto.volume || '';
+        }
+        
+        // Estoque
+        document.getElementById('rico-estoque-minimo').value = produto.estoque_minimo || 0;
+        document.getElementById('rico-estoque-maximo').value = produto.estoque_maximo || 0;
+        if (document.getElementById('rico-prazo-entrega')) {
+            document.getElementById('rico-prazo-entrega').value = produto.prazo_entrega || 0;
+        }
+        if (document.getElementById('rico-local-estoque')) {
+            document.getElementById('rico-local-estoque').value = produto.local_estoque || 'PADRAO';
+        }
+        if (document.getElementById('rico-corredor')) {
+            document.getElementById('rico-corredor').value = produto.corredor || '';
+        }
+        if (document.getElementById('rico-prateleira')) {
+            document.getElementById('rico-prateleira').value = produto.prateleira || '';
+        }
+        if (document.getElementById('rico-controle-lote')) {
+            document.getElementById('rico-controle-lote').checked = produto.controle_lote || false;
+        }
+        
+        // Preços
+        document.getElementById('rico-preco-venda').value = produto.preco_venda || 0;
+        document.getElementById('rico-custo-unitario').value = produto.custo_unitario || 0;
+        if (document.getElementById('rico-ncm')) {
+            document.getElementById('rico-ncm').value = produto.ncm || '';
+        }
+        if (document.getElementById('rico-icms')) {
+            document.getElementById('rico-icms').value = produto.icms || 0;
+        }
+        
+        // Fornecedor
+        if (document.getElementById('rico-fornecedor')) {
+            document.getElementById('rico-fornecedor').value = produto.fornecedor || '';
+        }
+        
+        // Características e Observações
+        if (document.getElementById('rico-caracteristicas')) {
+            document.getElementById('rico-caracteristicas').value = produto.caracteristicas || '';
+        }
+        if (document.getElementById('rico-observacoes')) {
+            document.getElementById('rico-observacoes').value = produto.observacoes || '';
+        }
+
+        // Atualizar cards de estoque
+        document.getElementById('rico-estoque-atual').textContent = produto.quantidade_estoque || 0;
+        document.getElementById('rico-estoque-minimo-display').textContent = produto.estoque_minimo || 0;
+        document.getElementById('rico-estoque-maximo-display').textContent = produto.estoque_maximo || 0;
+        
+        // Atualizar status do estoque
+        const estoqueAtual = produto.quantidade_estoque || 0;
+        const estoqueMinimo = produto.estoque_minimo || 0;
+        const statusEl = document.getElementById('rico-estoque-status');
+        if (statusEl) {
+            if (estoqueAtual <= 0) {
+                statusEl.textContent = 'Sem Estoque';
+                statusEl.style.color = '#ef4444';
+            } else if (estoqueAtual <= estoqueMinimo) {
+                statusEl.textContent = 'Baixo';
+                statusEl.style.color = '#f59e0b';
+            } else {
+                statusEl.textContent = 'Normal';
+                statusEl.style.color = '#10b981';
+            }
+        }
+
+        // Calcular margem
+        calcularMargemRica();
+
+        // Atualizar contadores
+        atualizarContadorRico('rico-nome', 'rico-nome-count');
+        atualizarContadorRico('rico-descrição', 'rico-desc-count');
+    } else {
+        // Limpar formulário para novo produto
+        document.getElementById('form-produto-rico').reset();
+        document.getElementById('modal-produto-rico-code').textContent = 'Novo Produto';
+    }
+
+    // Voltar para primeira aba
+    trocarAbaRico('info');
+
+    // Bloquear scroll do body
+    document.body.style.overflow = 'hidden';
+}
+
+// Fechar modal
+function fecharModalProdutoRico() {
+    const modal = document.getElementById('modal-produto-rico');
+    modal.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+// Calcular margem de lucro
+function calcularMargemRica() {
+    const preco = parseFloat(document.getElementById('rico-preco-venda').value) || 0;
+    const custo = parseFloat(document.getElementById('rico-custo-unitario').value) || 0;
+
+    if (preco > 0) {
+        const margem = ((preco - custo) / preco) * 100;
+        document.getElementById('rico-margem-lucro').textContent = margem.toFixed(2) + '%';
+    } else {
+        document.getElementById('rico-margem-lucro').textContent = '0%';
+    }
+}
+
+// Atualizar contador de caracteres
+function atualizarContadorRico(inputId, counterId) {
+    const input = document.getElementById(inputId);
+    const counter = document.getElementById(counterId);
+    if (input && counter) {
+        counter.textContent = input.value.length;
+    }
+}
+
+// Toggle tipo de produto
+function toggleProdutoTipo() {
+    const simples = document.getElementById('rico-simples');
+    const kit = document.getElementById('rico-kit');
+    const variacoes = document.getElementById('rico-variacoes');
+
+    // Apenas um pode estar ativo por vez
+    if (simples.checked) {
+        kit.checked = false;
+        variacoes.checked = false;
+    } else if (kit.checked) {
+        simples.checked = false;
+        variacoes.checked = false;
+    } else if (variacoes.checked) {
+        simples.checked = false;
+        kit.checked = false;
+    }
+
+    // Se nenhum estiver ativo, ativar simples
+    if (!simples.checked && !kit.checked && !variacoes.checked) {
+        simples.checked = true;
+    }
+}
+
+// Salvar produto
+async function salvarProdutoRico() {
+    const form = document.getElementById('form-produto-rico');
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const btn = event.target;
+    btn.classList.add('loading');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+    try {
+        // Montar payload completo
+        const produto = {
+            codigo: document.getElementById('rico-codigo').value.trim(),
+            sku: document.getElementById('rico-sku').value.trim(),
+            gtin: document.getElementById('rico-gtin').value.trim(),
+            nome: document.getElementById('rico-nome').value.trim(),
+            descrição: document.getElementById('rico-descrição').value.trim(),
+            unidade_medida: document.getElementById('rico-unidade').value,
+            familia: document.getElementById('rico-familia')?.value || '',
+            peso: parseFloat(document.getElementById('rico-peso')?.value) || 0,
+            volume: parseFloat(document.getElementById('rico-volume')?.value) || 0,
+            estoque_minimo: parseFloat(document.getElementById('rico-estoque-minimo').value) || 0,
+            estoque_maximo: parseFloat(document.getElementById('rico-estoque-maximo').value) || 0,
+            prazo_entrega: parseInt(document.getElementById('rico-prazo-entrega')?.value) || 0,
+            local_estoque: document.getElementById('rico-local-estoque')?.value || 'PADRAO',
+            corredor: document.getElementById('rico-corredor')?.value || '',
+            prateleira: document.getElementById('rico-prateleira')?.value || '',
+            preco_venda: parseFloat(document.getElementById('rico-preco-venda').value) || 0,
+            custo_unitario: parseFloat(document.getElementById('rico-custo-unitario').value) || 0,
+            ncm: document.getElementById('rico-ncm')?.value || '',
+            icms: parseFloat(document.getElementById('rico-icms')?.value) || 0,
+            fornecedor: document.getElementById('rico-fornecedor')?.value || '',
+            caracteristicas: document.getElementById('rico-caracteristicas')?.value || '',
+            observacoes: document.getElementById('rico-observacoes')?.value || '',
+            controle_lote: document.getElementById('rico-controle-lote')?.checked || false
+        };
+
+        // Validação mínima
+        if (!produto.codigo || !produto.nome) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('Preencha código e nome do produto', 'warning');
+            }
+            return;
+        }
+
+        // Determinar se é criação ou Atualização
+        const id = window.currentProductId || null;
+        const API_BASE_URL = window.API_BASE_URL || '/api/pcp';
+        
+        let response;
+        if (id) {
+            // Atualizar produto existente
+            response = await fetch(`${API_BASE_URL}/produtos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produto)
+            });
+        } else {
+            // Criar novo produto
+            response = await fetch(`${API_BASE_URL}/produtos`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(produto)
+            });
+        }
+
+        if (!response || !response.ok) {
+            const body = response ? await response.json().catch(() => null) : null;
+            const msg = (body && body.message) ? body.message : 'Erro ao salvar produto';
+            throw new Error(msg);
+        }
+
+        // Sucesso
+        if (typeof window.showToast === 'function') {
+            window.showToast(id ? 'Produto atualizado com sucesso!' : 'Produto criado com sucesso!', 'success');
+        }
+        
+        fecharModalProdutoRico();
+        
+        // Recarregar lista de produtos
+        if (typeof window.carregarProdutos === 'function') {
+            window.carregarProdutos();
+        }
+        
+        // Atualizar contadores
+        if (typeof window.atualizarContadoresPCP === 'function') {
+            window.atualizarContadoresPCP();
+        }
+        
+    } catch (error) {
+        console.error('Erro ao salvar produto:', error);
+        if (typeof window.showToast === 'function') {
+            window.showToast(error.message || 'Erro ao salvar produto', 'error');
+        }
+    } finally {
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-save"></i> Salvar Produto';
+    }
+}
+
+// Excluir produto
+async function excluirProdutoRico() {
+    const id = window.currentProductId;
+    
+    if (!id) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('não é possível excluir um produto não salvo', 'warning');
+        }
+        return;
+    }
+    
+    if (!confirm('Tem certeza que deseja excluir este produto? Esta Ação não pode ser desfeita.')) {
+        return;
+    }
+
+    try {
+        const API_BASE_URL = window.API_BASE_URL || '/api/pcp';
+        const response = await fetch(`${API_BASE_URL}/produtos/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (!response || !response.ok) {
+            const body = response ? await response.json().catch(() => null) : null;
+            const msg = (body && body.message) ? body.message : 'Erro ao excluir produto';
+            throw new Error(msg);
+        }
+
+        if (typeof window.showToast === 'function') {
+            window.showToast('Produto excluído com sucesso!', 'success');
+        }
+        
+        fecharModalProdutoRico();
+        
+        // Recarregar lista
+        if (typeof window.carregarProdutos === 'function') {
+            window.carregarProdutos();
+        }
+        
+        // Atualizar contadores
+        if (typeof window.atualizarContadoresPCP === 'function') {
+            window.atualizarContadoresPCP();
+        }
+    } catch (error) {
+        console.error('Erro ao excluir produto:', error);
+        if (typeof window.showToast === 'function') {
+            window.showToast(error.message || 'Erro ao excluir produto', 'error');
+        }
+    }
+}
+
+// Duplicar produto
+function duplicarProdutoRico() {
+    const id = window.currentProductId;
+    
+    if (!id) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('não é possível duplicar um produto não salvo', 'warning');
+        }
+        return;
+    }
+    
+    // Limpar o ID para criar um novo produto
+    window.currentProductId = null;
+    
+    // Atualizar campos para indicar que é cópia
+    const nomeEl = document.getElementById('rico-nome');
+    if (nomeEl && nomeEl.value) {
+        nomeEl.value = nomeEl.value + ' (Cópia)';
+    }
+    
+    const codigoEl = document.getElementById('rico-codigo');
+    if (codigoEl && codigoEl.value) {
+        codigoEl.value = codigoEl.value + '-COPIA';
+    }
+    
+    const skuEl = document.getElementById('rico-sku');
+    if (skuEl && skuEl.value) {
+        skuEl.value = skuEl.value + '-COPIA';
+    }
+    
+    document.getElementById('modal-produto-rico-code').textContent = 'Novo Produto (Duplicado)';
+    
+    if (typeof window.showToast === 'function') {
+        window.showToast('Produto duplicado! Edite os campos e salve.', 'info');
+    }
+}
+
+// Inativar produto
+async function inativarProdutoRico() {
+    const id = window.currentProductId;
+    
+    if (!id) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('não é possível inativar um produto não salvo', 'warning');
+        }
+        return;
+    }
+    
+    if (!confirm('Deseja inativar este produto? Ele não aparecerá mais nas listagens ativas.')) {
+        return;
+    }
+
+    try {
+        const API_BASE_URL = window.API_BASE_URL || '/api/pcp';
+        const response = await fetch(`${API_BASE_URL}/produtos/${id}/inativar`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ativo: false })
+        });
+
+        if (!response || !response.ok) {
+            // Se endpoint /inativar não existir, tentar atualizar com campo ativo
+            const responsePut = await fetch(`${API_BASE_URL}/produtos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ativo: false })
+            });
+            
+            if (!responsePut || !responsePut.ok) {
+                throw new Error('Erro ao inativar produto');
+            }
+        }
+
+        if (typeof window.showToast === 'function') {
+            window.showToast('Produto inativado com sucesso!', 'success');
+        }
+        
+        fecharModalProdutoRico();
+        
+        // Recarregar lista
+        if (typeof window.carregarProdutos === 'function') {
+            window.carregarProdutos();
+        }
+        
+        // Atualizar contadores
+        if (typeof window.atualizarContadoresPCP === 'function') {
+            window.atualizarContadoresPCP();
+        }
+    } catch (error) {
+        console.error('Erro ao inativar produto:', error);
+        if (typeof window.showToast === 'function') {
+            window.showToast(error.message || 'Erro ao inativar produto', 'error');
+        }
+    }
+}
+
+// Configurar listeners quando DOM carregar
+document.addEventListener('DOMContentLoaded', function() {
+    // Contadores de caracteres
+    const ricoNome = document.getElementById('rico-nome');
+    if (ricoNome) {
+        ricoNome.addEventListener('input', () => atualizarContadorRico('rico-nome', 'rico-nome-count'));
+    }
+
+    const ricoDesc = document.getElementById('rico-descrição');
+    if (ricoDesc) {
+        ricoDesc.addEventListener('input', () => atualizarContadorRico('rico-descrição', 'rico-desc-count'));
+    }
+
+    // Fechar modal ao clicar fora
+    const modal = document.getElementById('modal-produto-rico');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                fecharModalProdutoRico();
+            }
+        });
+    }
+
+    // ESC para fechar
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('modal-produto-rico');
+            if (modal && modal.classList.contains('active')) {
+                fecharModalProdutoRico();
+            }
+        }
+    });
+});
+</script>
+
+
+
+
+
+
+
+
+<!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>

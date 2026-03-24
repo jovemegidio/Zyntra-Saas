@@ -1,0 +1,89 @@
+[
+  {
+    "name": "11-resumo-financeiro-diario",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 7 * * 1-5" }]
+          }
+        },
+        "name": "⏰ Seg-Sex às 7h",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/financeiro/resumo-diario",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "💰 Buscar Resumo Financeiro",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/whatsapp/alerta",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": {
+            "tipo": "geral",
+            "telefones": "={{($env.TELEFONES_FINANCEIRO || '').split(',')}}",
+            "dados": {
+              "titulo": "💰 Resumo Financeiro do Dia",
+              "mensagem": "📅 *{{$json.data}}*\n\n💳 *A Receber Hoje:* {{$json.a_receber.total}} títulos — R$ {{$json.a_receber.valor_total}}\n💸 *A Pagar Hoje:* {{$json.a_pagar.total}} títulos — R$ {{$json.a_pagar.valor_total}}\n📊 *Saldo do dia:* R$ {{$json.saldo_dia}}\n\n🔴 *Vencidas (total):* {{$json.vencidas_total.total}} — R$ {{$json.vencidas_total.valor_total}}\n✅ *Recebido hoje:* {{$json.recebidos_hoje.total}} — R$ {{$json.recebidos_hoje.valor_total}}"
+            }
+          },
+          "options": { "timeout": 30000 }
+        },
+        "name": "📱 WhatsApp Financeiro",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [690, 250],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_FINANCEIRO || 'financeiro2@aluforce.ind.br'}}",
+          "subject": "💰 Resumo Financeiro — {{$json.data}}",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#1a73e8;'>💰 Resumo Financeiro Diário</h2><p>Data: <strong>{{$json.data}}</strong></p><table style='width:100%;border-collapse:collapse;'><tr style='background:#e8f5e9;'><td style='padding:12px;border:1px solid #ddd;'>A Receber</td><td style='padding:12px;border:1px solid #ddd;'><strong>{{$json.a_receber.total}}</strong> títulos</td><td style='padding:12px;border:1px solid #ddd;'><strong>R$ {{$json.a_receber.valor_total}}</strong></td></tr><tr style='background:#ffebee;'><td style='padding:12px;border:1px solid #ddd;'>A Pagar</td><td style='padding:12px;border:1px solid #ddd;'><strong>{{$json.a_pagar.total}}</strong> títulos</td><td style='padding:12px;border:1px solid #ddd;'><strong>R$ {{$json.a_pagar.valor_total}}</strong></td></tr><tr style='background:#fff3e0;'><td style='padding:12px;border:1px solid #ddd;'>Vencidas</td><td style='padding:12px;border:1px solid #ddd;'><strong>{{$json.vencidas_total.total}}</strong></td><td style='padding:12px;border:1px solid #ddd;'><strong style='color:red;'>R$ {{$json.vencidas_total.valor_total}}</strong></td></tr></table><p style='margin-top:16px;font-size:14px;color:#666;'>Saldo do dia: <strong>R$ {{$json.saldo_dia}}</strong></p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Email Resumo",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [690, 400],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "11", "workflow_name": "Resumo Financeiro Diário", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar Conclusão",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [910, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ Seg-Sex às 7h": { "main": [[{ "node": "💰 Buscar Resumo Financeiro", "type": "main", "index": 0 }]] },
+      "💰 Buscar Resumo Financeiro": { "main": [[{ "node": "📱 WhatsApp Financeiro", "type": "main", "index": 0 }, { "node": "📧 Email Resumo", "type": "main", "index": 0 }]] },
+      "📱 WhatsApp Financeiro": { "main": [[{ "node": "✅ Notificar Conclusão", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

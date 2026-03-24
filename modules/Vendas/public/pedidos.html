@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -249,34 +249,42 @@
         .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
 
         .stats-grid {
-            display: grid; grid-template-columns: repeat(5, 1fr);
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px; margin-bottom: 20px;
         }
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
         @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
 
         .stat-card {
-            background: white; border-radius: 12px;
-            padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            background: white; border-radius: 16px;
+            padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 20px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            border: 1px solid transparent;
+            animation: slideInUp 0.4s cubic-bezier(0.4,0,0.2,1) backwards;
         }
-        .stat-card.highlight { background: linear-gradient(135deg, #225cfa, #1a47c9); color: white; }
-        .stat-card.highlight .stat-label, .stat-card.highlight .stat-value { color: white; }
-
-        .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+        .stat-card:nth-child(5) { animation-delay: 0.25s; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); border-color: rgba(99,102,241,0.2); }
+        @keyframes slideInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
 
         .stat-icon {
-            width: 44px; height: 44px; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            width: 60px; height: 60px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 26px; flex-shrink: 0; color: white;
         }
-        .stat-icon.orange { background: #fff7ed; color: #f97316; }
-        .stat-icon.green { background: #f0fdf4; color: #22c55e; }
-        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
-        .stat-icon.yellow { background: #fefce8; color: #eab308; }
-        .stat-icon.purple { background: #faf5ff; color: #a855f7; }
-        .stat-icon.white { background: rgba(255,255,255,0.2); color: white; }
+        .stat-icon.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
 
-        .stat-value { font-size: 28px; font-weight: 700; color: #1a1a1a; }
-        .stat-label { font-size: 13px; color: #7f8c8d; margin-top: 4px; }
+        .stat-content { flex: 1; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
+        .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
+        .stat-trend { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
 
         .filters-bar {
             background: white; border-radius: 12px;
@@ -334,7 +342,7 @@
         }
         .pedidos-table tbody tr:hover { background: #f9fafb; }
 
-        .pedido-numero { font-weight: 600; color: var(--primary-orange); }
+        .pedido-número { font-weight: 600; color: var(--primary-orange); }
         .cliente-nome {
             font-weight: 600; color: #1a1a1a; max-width: 200px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -1424,7 +1432,7 @@
     <script src="js/vendas-admin-check.js"></script>
 
     <!-- Controle de Acesso por Permissões -->
-    <script src="js/vendas-access-control.js?v=20260114" defer></script>
+    <script src="js/vendas-access-control.js?v=20260319" defer></script>
 
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
@@ -1469,7 +1477,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">•</span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Pedidos</span>
                     </div>
                 </div>
@@ -1511,30 +1519,41 @@
                 </div>
 
                 <div class="stats-grid">
-                    <div class="stat-card highlight">
-                        <div class="stat-card-header"><div class="stat-icon white"><i class="fas fa-dollar-sign"></i></div></div>
-                        <div class="stat-value" id="valorTotal">R$ 0</div>
-                        <div class="stat-label">Valor Total (Mês)</div>
+                    <div class="stat-card">
+                        <div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Valor Total (Mês)</div>
+                            <div class="stat-value" id="valorTotal">R$ 0</div>
+                            <div class="stat-trend"><i class="fas fa-calendar-alt"></i> Mês atual</div>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon blue"><i class="fas fa-file-alt"></i></div></div>
-                        <div class="stat-value" id="totalPedidos">0</div>
-                        <div class="stat-label">Total de Pedidos</div>
+                        <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total de Pedidos</div>
+                            <div class="stat-value" id="totalPedidos">0</div>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon yellow"><i class="fas fa-clock"></i></div></div>
-                        <div class="stat-value" id="pedidosPendentes">0</div>
-                        <div class="stat-label">Pendentes</div>
+                        <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Pendentes</div>
+                            <div class="stat-value" id="pedidosPendentes">0</div>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
-                        <div class="stat-value" id="pedidosAprovados">0</div>
-                        <div class="stat-label">Aprovados</div>
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Aprovados</div>
+                            <div class="stat-value" id="pedidosAprovados">0</div>
+                        </div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-card-header"><div class="stat-icon purple"><i class="fas fa-file-invoice"></i></div></div>
-                        <div class="stat-value" id="pedidosFaturados">0</div>
-                        <div class="stat-label">Faturados</div>
+                        <div class="stat-icon orange"><i class="fas fa-file-invoice"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Faturados</div>
+                            <div class="stat-value" id="pedidosFaturados">0</div>
+                        </div>
                     </div>
                 </div>
 
@@ -1612,9 +1631,9 @@
     <script>
         let todosPedidos = [], pedidosFiltrados = [], paginaAtual = 1, itensPorPagina = 25, tabAtiva = '';
 
-        // Função para obter headers de autenticação (JWT token)
+        // Função para obter headers de autenticação (cookie-based)
         function getAuthHeaders() {
-            return token ? { 'Authorization': `Bearer ${token}` } : {};
+            return { 'Content-Type': 'application/json' };
         }
 
         // Função auxiliar para fetch com timeout
@@ -1625,7 +1644,7 @@
                 const response = await fetch(url, {
                     credentials: 'include',
                     ...options, signal: controller.signal
-                }));
+                });
                 clearTimeout(timeoutId);
                 return response;
             } catch (error) {
@@ -1745,7 +1764,7 @@
                 
                 return `
                 <tr>
-                    <td><span class="pedido-numero">#${p.numero || p.id}</span></td>
+                    <td><span class="pedido-número">#${p.número || p.id}</span></td>
                     <td><span class="cliente-nome" title="${p.cliente_nome || ''}">${p.cliente_nome || 'Cliente não informado'}</span></td>
                     <td>${formatarData(p.data_pedido || p.created_at)}</td>
                     <td><span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span></td>
@@ -1803,7 +1822,7 @@
                 <div id="modal-visualizar" class="modal-overlay">
                     <div class="modal-content-omie" style="max-width: 1100px;">
                         <div class="modal-header-omie">
-                            <h2 id="modal-titulo-visualizar"><i class="fas fa-file-alt" style="color: var(--primary-orange); margin-right: 8px;"></i> Detalhes do Pedido <span id="modal-pedido-numero" style="color: var(--primary-orange);"></span></h2>
+                            <h2 id="modal-título-visualizar"><i class="fas fa-file-alt" style="color: var(--primary-orange); margin-right: 8px;"></i> Detalhes do Pedido <span id="modal-pedido-número" style="color: var(--primary-orange);"></span></h2>
                             <button class="close-btn" onclick="fecharModalVisualizar()">Fechar <i class="fas fa-times"></i></button>
                         </div>
                         <div class="modal-container-omie">
@@ -1823,7 +1842,7 @@
                 modal = document.getElementById('modal-visualizar');
             }
             
-            document.getElementById('modal-pedido-numero').textContent = `#${pedido.numero || pedido.id}`;
+            document.getElementById('modal-pedido-número').textContent = `#${pedido.número || pedido.id}`;
             modal.classList.add('active');
             
             // Buscar itens do pedido
@@ -1845,7 +1864,7 @@
                     </div>
                     <div style="flex:1;">
                         <div style="font-size:16px;font-weight:700;color:#1e293b;">${pedido.cliente_nome || 'Cliente não informado'}</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Pedido #${pedido.numero || pedido.id} • ${formatarData(pedido.data_pedido || pedido.created_at)}</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Pedido #${pedido.número || pedido.id} — ${formatarData(pedido.data_pedido || pedido.created_at)}</div>
                     </div>
                     <span class="status-badge ${getStatusClass(pedido.status)}" style="font-size:12px;">${getStatusLabel(pedido.status)}</span>
                 </div>
@@ -1885,7 +1904,7 @@
                     <button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-info')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-info-circle"></i> Informações
                     </button>
-                    ${pedido.observacao ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    ${pedido.observação ? `<button class="modal-tab" onclick="switchDetalhesTab(this, 'tab-vis-obs')" style="padding:10px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                         <i class="fas fa-comment"></i> Observações
                     </button>` : ''}
                 </div>
@@ -1908,8 +1927,8 @@
                             ${itens.map((item, idx) => `
                                 <tr>
                                     <td style="color:#94a3b8;">${idx + 1}</td>
-                                    <td><span style="background:#f1f5f9;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">${item.codigo || '-'}</span></td>
-                                    <td style="font-weight:500;">${item.descricao || item.produto_nome || '-'}</td>
+                                    <td><span style="background:#f1f5f9;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">${item.código || '-'}</span></td>
+                                    <td style="font-weight:500;">${item.descrição || item.produto_nome || '-'}</td>
                                     <td style="text-align:center;">${item.quantidade || 0} ${item.unidade || 'UN'}</td>
                                     <td style="text-align:right;">R$ ${(parseFloat(item.preco_unitario || item.valor_unitario) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                                     <td style="text-align:right;font-weight:600;color:#059669;">R$ ${(parseFloat(item.valor_total || item.total || item.subtotal) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
@@ -1924,7 +1943,7 @@
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                         <div style="background:#f9fafb;border-radius:8px;padding:16px;">
                             <h4 style="font-size:13px;font-weight:600;color:#374151;margin-bottom:12px;display:flex;align-items:center;gap:8px;"><i class="fas fa-info-circle" style="color:var(--primary-orange);"></i> Dados do Pedido</h4>
-                            <div class="detail-row"><span class="label">Número:</span><span class="value">#${pedido.numero || pedido.id}</span></div>
+                            <div class="detail-row"><span class="label">Número:</span><span class="value">#${pedido.número || pedido.id}</span></div>
                             <div class="detail-row"><span class="label">Status:</span><span class="value"><span class="status-badge ${getStatusClass(pedido.status)}">${getStatusLabel(pedido.status)}</span></span></div>
                             <div class="detail-row"><span class="label">Criado em:</span><span class="value">${formatarData(pedido.created_at)}</span></div>
                             <div class="detail-row"><span class="label">Origem:</span><span class="value">${pedido.origem || '-'}</span></div>
@@ -1939,7 +1958,7 @@
                     </div>
                 </div>
 
-                ${pedido.observacao ? `
+                ${pedido.observação ? `
                 <!-- Tab: Observações -->
                 <div id="tab-vis-obs" class="tab-content-vis" style="display:none;">
                     <div style="background:#f9fafb;border-radius:8px;padding:20px;">
@@ -1959,7 +1978,7 @@
             document.getElementById('modal-visualizar-sidebar').innerHTML = `
                 <div style="text-align:center;padding:12px 0;border-bottom:1px solid #eee;margin-bottom:8px;">
                     <i class="fas fa-file-alt" style="font-size:28px;color:var(--primary-orange);"></i>
-                    <div style="font-size:11px;color:#888;margin-top:4px;">Pedido #${pedido.numero || pedido.id}</div>
+                    <div style="font-size:11px;color:#888;margin-top:4px;">Pedido #${pedido.número || pedido.id}</div>
                 </div>
                 ${podeEditar ? `<button class="sidebar-action-btn primary" onclick="editarPedido(${id})"><i class="fas fa-edit"></i> Editar</button>` : `<button class="sidebar-action-btn" disabled style="opacity:0.5;"><i class="fas fa-lock"></i> Somente Leitura</button>`}
                 <button class="sidebar-action-btn" onclick="imprimirPedido(${id})"><i class="fas fa-print"></i> Imprimir</button>
@@ -2058,7 +2077,7 @@
                     <div class="modal-content-omie">
                         <!-- Header -->
                         <div class="modal-header-omie">
-                            <h2 id="modal-titulo-pedido">Orçamento Nº</h2>
+                            <h2 id="modal-título-pedido">Orçamento Nº</h2>
                             <button class="close-btn" onclick="fecharModalEditar()">
                                 Fechar <i class="fas fa-times"></i>
                             </button>
@@ -2066,7 +2085,7 @@
 
                         <!-- Container Principal -->
                         <div class="modal-container-omie">
-                            <!-- área de Conteúdo Principal -->
+                            <!-- Área de Conteúdo Principal -->
                             <div class="modal-main-content">
                                 <!-- Seção do Cliente -->
                                 <div class="cliente-section">
@@ -2143,7 +2162,7 @@
                                 <div class="modal-tabs">
                                     <button class="modal-tab active" data-tab="itens" onclick="switchModalTabPedidos('itens')">Itens da Venda</button>
                                     <button class="modal-tab" data-tab="frete" onclick="switchModalTabPedidos('frete')">Frete e Outras Despesas</button>
-                                    <button class="modal-tab" data-tab="informacoes" onclick="switchModalTabPedidos('informacoes')">Informações Adicionais</button>
+                                    <button class="modal-tab" data-tab="informações" onclick="switchModalTabPedidos('informações')">Informações Adicionais</button>
                                     <button class="modal-tab" data-tab="parcelas" onclick="switchModalTabPedidos('parcelas')">Parcelas</button>
                                     <button class="modal-tab" data-tab="observacoes" onclick="switchModalTabPedidos('observacoes')">Observações</button>
                                 </div>
@@ -2272,7 +2291,7 @@
                                     <div class="form-row-omie" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px;">
                                         <div class="form-group-omie">
                                             <label>Nº Lacre</label>
-                                            <input type="text" id="edit-numero-lacre" placeholder="Lacre">
+                                            <input type="text" id="edit-número-lacre" placeholder="Lacre">
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Outras Despesas</label>
@@ -2284,7 +2303,7 @@
                                         </div>
                                         <div class="form-group-omie">
                                             <label>Cód. Rastreio</label>
-                                            <input type="text" id="edit-codigo-rastreio" placeholder="Rastreamento">
+                                            <input type="text" id="edit-código-rastreio" placeholder="Rastreamento">
                                         </div>
                                     </div>
 
@@ -2298,7 +2317,7 @@
                                 </div>
 
                                 <!-- Tab Content: Informações Adicionais -->
-                                <div class="tab-content" id="tab-informacoes">
+                                <div class="tab-content" id="tab-informações">
                                     <div class="form-row-omie">
                                         <div class="form-group-omie">
                                             <label>Nota Fiscal</label>
@@ -2347,7 +2366,7 @@
                                             </thead>
                                             <tbody id="parcelas-tbody">
                                                 <tr>
-                                                    <td><span class="situacao-previsao">Previsão</span></td>
+                                                    <td><span class="situação-previsao">Previsão</span></td>
                                                     <td>001/001</td>
                                                     <td id="parcela-vencimento-1">-</td>
                                                     <td id="parcela-valor-1">R$ 0,00</td>
@@ -2503,7 +2522,7 @@
             const clienteNome = pedido.cliente_nome || 'Cliente';
             const iniciais = clienteNome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
             
-            document.getElementById('modal-titulo-pedido').textContent = `Orçamento Nº ${pedido.numero || pedido.id}`;
+            document.getElementById('modal-título-pedido').textContent = `Orçamento Nº ${pedido.número || pedido.id}`;
             document.getElementById('modal-cliente-avatar').textContent = iniciais;
             document.getElementById('edit-cliente').value = clienteNome;
             document.getElementById('edit-vendedor').value = pedido.vendedor_nome || '';
@@ -2549,8 +2568,8 @@
                     const total = (parseFloat(item.quantidade) || 0) * (parseFloat(item.preco_unitario) || 0);
                     return `
                         <tr>
-                            <td>${item.codigo || '-'}</td>
-                            <td>${item.descricao || '-'}</td>
+                            <td>${item.código || '-'}</td>
+                            <td>${item.descrição || '-'}</td>
                             <td>${parseFloat(item.quantidade || 0).toFixed(2)} ${item.unidade || 'UN'}</td>
                             <td>R$ ${parseFloat(item.preco_unitario || 0).toFixed(2)}</td>
                             <td>R$ ${total.toFixed(2)}</td>
@@ -2603,7 +2622,7 @@
                         // Mesclar condições do banco com as padrão
                         const condicoesDB = data.map(c => c.nome || c.dias);
                         condicoesPagamento = [...new Set([...condicoesDB, ...condicoesPagamento])];
-                        console.log('✅ Condições de pagamento carregadas:', condicoesPagamento.length);
+                        console.log('? Condições de pagamento carregadas:', condicoesPagamento.length);
                     }
                 }
             } catch (error) {
@@ -2749,7 +2768,7 @@
                 });
                 
                 if (response.ok) {
-                    // Adicionar à lista local se não existir
+                    // Adicionar — lista local se não existir
                     if (!condicoesPagamento.includes(novoParcelamento)) {
                         condicoesPagamento.unshift(novoParcelamento); // Adiciona no início
                     }
@@ -2812,7 +2831,7 @@
                 
                 return `
                     <tr ondblclick="editarParcela(${i})">
-                        <td><span class="situacao-previsao">Previsão</span></td>
+                        <td><span class="situação-previsao">Previsão</span></td>
                         <td>${String(i + 1).padStart(3, '0')}/${String(dias.length).padStart(3, '0')}</td>
                         <td>${vencimentoStr}</td>
                         <td>R$ ${valorParcela.toFixed(2).replace('.', ',')}</td>
@@ -2892,10 +2911,10 @@
                 tipo_entrega: document.getElementById('edit-tipo-entrega')?.value || '',
                 
                 // Outros dados de frete
-                numero_lacre: document.getElementById('edit-numero-lacre')?.value || '',
+                numero_lacre: document.getElementById('edit-número-lacre')?.value || '',
                 outras_despesas: parseFloat(document.getElementById('edit-outras-despesas')?.value) || 0,
                 prazo_entrega: document.getElementById('edit-previsao-entrega')?.value || '',
-                codigo_rastreio: document.getElementById('edit-codigo-rastreio')?.value || '',
+                codigo_rastreio: document.getElementById('edit-código-rastreio')?.value || '',
                 veiculo_proprio: document.getElementById('edit-veiculo-proprio')?.checked ? 1 : 0,
                 
                 // ===== INFORMAÇÕES ADICIONAIS =====
@@ -2915,7 +2934,7 @@
                 }
             });
             
-            console.log('📝 Salvando edição do pedido:', pedidoAtualModal.id, dados);
+            console.log('?? Salvando edição do pedido:', pedidoAtualModal.id, dados);
             
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoAtualModal.id}`, { credentials: 'include', method: 'PATCH',
@@ -2932,7 +2951,7 @@
                 }
                 
                 const result = await response.json();
-                console.log('✅ Pedido atualizado:', result);
+                console.log('? Pedido atualizado:', result);
                 
                 showToast('Pedido atualizado com sucesso!', 'success');
                 fecharModalEditar();
@@ -2958,7 +2977,7 @@
             const confirmado = await showConfirmModal({
                 type: 'info',
                 title: 'Duplicar Pedido',
-                message: `Deseja duplicar o pedido <strong>#${pedidoAtualModal.numero || pedidoAtualModal.id}</strong>?<br><br>Um novo pedido será criado com os mesmos dados.`,
+                message: `Deseja duplicar o pedido <strong>#${pedidoAtualModal.número || pedidoAtualModal.id}</strong>?<br><br>Um novo pedido será criado com os mesmos dados.`,
                 confirmText: 'Duplicar',
                 cancelText: 'Cancelar'
             });
@@ -2975,7 +2994,7 @@
                 valor_total: pedidoAtualModal.valor_total,
                 valor_produtos: pedidoAtualModal.valor_produtos,
                 desconto: pedidoAtualModal.desconto || 0,
-                observacoes: `[DUPLICADO do pedido #${pedidoAtualModal.numero || pedidoAtualModal.id}] ${pedidoAtualModal.observacoes || ''}`,
+                observacoes: `[DUPLICADO do pedido #${pedidoAtualModal.número || pedidoAtualModal.id}] ${pedidoAtualModal.observacoes || ''}`,
                 itens: pedidoAtualModal.itens || []
             };
             
@@ -3012,7 +3031,7 @@
             }
             
             if (pedidoAtualModal.status === 'cancelado') {
-                showToast('Não é possível faturar um pedido cancelado!', 'warning');
+                showToast('Não — possível faturar um pedido cancelado!', 'warning');
                 return;
             }
             
@@ -3022,7 +3041,7 @@
             const confirmado = await showConfirmModal({
                 type: 'success',
                 title: 'Faturar Pedido',
-                message: `Faturar pedido <strong>#${pedidoAtualModal.numero || pedidoAtualModal.id}</strong>?<br><br>` +
+                message: `Faturar pedido <strong>#${pedidoAtualModal.número || pedidoAtualModal.id}</strong>?<br><br>` +
                     `<strong>Cliente:</strong> ${pedidoAtualModal.empresa_nome || 'Não informado'}<br>` +
                     `<strong>Valor:</strong> R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}<br><br>` +
                     `<small style="color:#64748b;">Isso irá: alterar o status para "Faturado", gerar registro financeiro e registrar data de faturamento.</small>`,
@@ -3084,35 +3103,35 @@
             })
             .then(res => res.json())
             .then(historico => {
-                let historicoHtml = `📋 HISTÓRICO DO PEDIDO #${pedidoAtualModal.numero || pedidoAtualModal.id}\n`;
-                historicoHtml += '━'.repeat(40) + '\n\n';
+                let historicoHtml = `?? HISTÓRICO DO PEDIDO #${pedidoAtualModal.número || pedidoAtualModal.id}\n`;
+                historicoHtml += '?'.repeat(40) + '\n\n';
                 
                 if (Array.isArray(historico) && historico.length > 0) {
                     historico.forEach(h => {
                         const data = new Date(h.data || h.created_at).toLocaleString('pt-BR');
-                        historicoHtml += `📅 ${data}\n`;
-                        historicoHtml += `   ${h.acao || h.descricao || 'Alteração'}\n`;
-                        if (h.usuario) historicoHtml += `   👤 ${h.usuario}\n`;
+                        historicoHtml += `?? ${data}\n`;
+                        historicoHtml += `   ${h.ação || h.descrição || 'Alteração'}\n`;
+                        if (h.usuario) historicoHtml += `   ?? ${h.usuario}\n`;
                         historicoHtml += '\n';
                     });
                 } else {
                     // Mostrar histórico básico baseado nos dados do pedido
-                    historicoHtml += `📅 ${new Date(pedidoAtualModal.created_at || pedidoAtualModal.data_criacao).toLocaleString('pt-BR')}\n`;
+                    historicoHtml += `?? ${new Date(pedidoAtualModal.created_at || pedidoAtualModal.data_criacao).toLocaleString('pt-BR')}\n`;
                     historicoHtml += `   Pedido criado\n`;
                     historicoHtml += `   Status: ${pedidoAtualModal.status}\n\n`;
                     
                     if (pedidoAtualModal.data_aprovacao) {
-                        historicoHtml += `📅 ${new Date(pedidoAtualModal.data_aprovacao).toLocaleString('pt-BR')}\n`;
+                        historicoHtml += `?? ${new Date(pedidoAtualModal.data_aprovacao).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido aprovado\n\n`;
                     }
                     
                     if (pedidoAtualModal.data_faturamento) {
-                        historicoHtml += `📅 ${new Date(pedidoAtualModal.data_faturamento).toLocaleString('pt-BR')}\n`;
+                        historicoHtml += `?? ${new Date(pedidoAtualModal.data_faturamento).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido faturado\n\n`;
                     }
                 }
                 
-                historicoHtml += '━'.repeat(40) + '\n';
+                historicoHtml += '?'.repeat(40) + '\n';
                 historicoHtml += `Status atual: ${pedidoAtualModal.status?.toUpperCase() || 'N/A'}`;
                 
                 showToast('Histórico do pedido carregado', 'info');
@@ -3198,7 +3217,7 @@
                 <html lang="pt-BR">
                 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-                    <title>Pedido #${pedido.numero || pedido.id} - ALUFORCE</title>
+                    <title>Pedido #${pedido.número || pedido.id} - ALUFORCE</title>
                     <style>
                         @page { margin: 12mm 15mm; size: A4; }
                         @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }
@@ -3233,8 +3252,8 @@
 </head>
                 <body>
                     <div class="print-bar">
-                        <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
-                        <button class="btn-close" onclick="window.close()">✕ Fechar</button>
+                        <button class="btn-print" onclick="window.print()">??? Imprimir / Salvar PDF</button>
+                        <button class="btn-close" onclick="window.close()">? Fechar</button>
                     </div>
                     <div class="rpt-header">
                         <div>
@@ -3243,7 +3262,7 @@
                         </div>
                         <div class="rpt-meta">
                             <div class="doc-tag">Pedido</div>
-                            <div class="meta-line">Pedido #${pedido.numero || pedido.id}</div>
+                            <div class="meta-line">Pedido #${pedido.número || pedido.id}</div>
                             <div class="meta-line">Emitido em: ${new Date().toLocaleString('pt-BR')}</div>
                         </div>
                     </div>
@@ -3251,7 +3270,7 @@
                     <div class="info-grid">
                         <div class="info-section">
                             <h3>INFORMAÇÕES DO PEDIDO</h3>
-                            <div class="info-row"><span class="label">Número:</span><span class="value">#${pedido.numero || pedido.id}</span></div>
+                            <div class="info-row"><span class="label">Número:</span><span class="value">#${pedido.número || pedido.id}</span></div>
                             <div class="info-row"><span class="label">Data:</span><span class="value">${formatarData(pedido.data_pedido || pedido.created_at)}</span></div>
                             <div class="info-row"><span class="label">Status:</span><span class="value"><span class="status ${getStatusClass(pedido.status)}">${getStatusLabel(pedido.status)}</span></span></div>
                             <div class="info-row"><span class="label">Vendedor:</span><span class="value">${pedido.vendedor_nome || '-'}</span></div>
@@ -3269,7 +3288,7 @@
                         <div class="info-row"><span class="label">Frete:</span><span class="value">${pedido.frete ? formatarValor(pedido.frete) : 'R$ 0,00'}</span></div>
                     </div>
                     
-                    ${pedido.observacao ? `<div class="info-section" style="margin-top: 16px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 11px; color: #64748b;">${pedido.observacao}</p></div>` : ''}
+                    ${pedido.observação ? `<div class="info-section" style="margin-top: 16px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 11px; color: #64748b;">${pedido.observacao}</p></div>` : ''}
                     
                     <div class="rpt-footer">
                         <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
@@ -3284,7 +3303,7 @@
 
         function exportarPedidos() {
             let csv = 'Número;Cliente;Data;Status;Valor;Vendedor';
-            pedidosFiltrados.forEach(p => { csv += `"${p.numero || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"`; });
+            pedidosFiltrados.forEach(p => { csv += `"${p.número || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"`; });
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -3509,7 +3528,7 @@
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
                                 <div>
                                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Pedido</div>
-                                    <div style="font-size: 18px; font-weight: 700; color: #059669;">#${pedido.numero || pedido.id}</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: #059669;">#${pedido.número || pedido.id}</div>
                                 </div>
                                 <div>
                                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Valor Total</div>
@@ -3690,7 +3709,7 @@
             const gerarNFe = document.getElementById('gerar-nfe')?.checked ?? false;
             const observacoes = document.getElementById('obs-faturamento')?.value || '';
             
-            // Validar se é faturamento normal
+            // Validar se — faturamento normal
             if (tipoFaturamento === 'normal') {
                 // Redirecionar para faturamento normal
                 fecharModalFaturamentoParcial();
@@ -3736,7 +3755,7 @@
                 
                 if (result.success) {
                     mostrarAlerta(
-                        `✅ Faturamento parcial realizado!<br><br>` +
+                        `? Faturamento parcial realizado!<br><br>` +
                         `<strong>NF:</strong> ${result.dados?.nf_numero || 'N/A'}<br>` +
                         `<strong>Valor:</strong> R$ ${valorFaturar.toLocaleString('pt-BR', {minimumFractionDigits: 2})}<br>` +
                         `<strong>Próximo passo:</strong> ${result.dados?.proximo_passo || 'Emitir remessa'}`,
@@ -3790,9 +3809,9 @@
                 
                 if (result.success) {
                     mostrarAlerta(
-                        `✅ Remessa emitida com sucesso!<br><br>` +
+                        `? Remessa emitida com sucesso!<br><br>` +
                         `<strong>NF Remessa:</strong> ${result.dados?.nf_remessa || 'N/A'}<br>` +
-                        `<strong>Estoque:</strong> Baixado ✓<br>` +
+                        `<strong>Estoque:</strong> Baixado ?<br>` +
                         `<strong>Status:</strong> ${result.dados?.status || 'Completo'}`,
                         'success'
                     );
@@ -3829,7 +3848,7 @@
             const opcao = await showConfirmModal({
                 type: 'info',
                 title: 'Tipo de Faturamento',
-                message: `Como deseja faturar o pedido <strong>#${pedidoAtualModal.numero || pedidoAtualModal.id}</strong>?<br><br>` +
+                message: `Como deseja faturar o pedido <strong>#${pedidoAtualModal.número || pedidoAtualModal.id}</strong>?<br><br>` +
                     `<button onclick="window._opcaoFaturamento='normal'; document.querySelector('.confirm-modal-confirm').click();" style="width:100%; padding:12px; margin-bottom:8px; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer;">` +
                     `<i class="fas fa-file-invoice"></i> Faturamento Normal (100%)</button>` +
                     `<button onclick="window._opcaoFaturamento='parcial'; document.querySelector('.confirm-modal-confirm').click();" style="width:100%; padding:12px; background:#059669; color:white; border:none; border-radius:8px; cursor:pointer;">` +
@@ -3878,6 +3897,6 @@
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>

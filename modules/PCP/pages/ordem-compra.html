@@ -375,7 +375,7 @@
                             <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">
                                 <i class="fas fa-calendar" style="color:#3b82f6;margin-right:4px;"></i> Data Emissão
                             </label>
-                            <input type="date" class="form-control-oc" id="oc-data-emissao" style="background:#f1f5f9;">
+                            <input type="date" class="form-control-oc" id="oc-data-emissão" style="background:#f1f5f9;">
                         </div>
                         <div>
                             <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">
@@ -426,9 +426,9 @@
                         <div>
                             <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px;">Departamento</label>
                             <select class="form-control-oc" id="oc-departamento">
-                                <option value="producao">Produção</option>
+                                <option value="produção">Produção</option>
                                 <option value="almoxarifado">Almoxarifado</option>
-                                <option value="manutencao">Manutenção</option>
+                                <option value="manutenção">Manutenção</option>
                             </select>
                         </div>
                     </div>
@@ -569,8 +569,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
 
                 console.log('?? Carregando ordens de compra...');
                 // Buscar pedidos da API de Compras (filtrar por origem PCP)
@@ -661,8 +659,8 @@
             tbody.innerHTML = ordensCompraData.map(oc => `
                 <tr>
                     <td>
-                        <strong>#${oc.numero || oc.id || '-'}</strong>
-                        ${oc.integracao ? '<i class="fas fa-link" style="color:#059669;margin-left:4px;" title="Integrado com Compras"></i>' : ''}
+                        <strong>#${oc.número || oc.id || '-'}</strong>
+                        ${oc.integração ? '<i class="fas fa-link" style="color:#059669;margin-left:4px;" title="Integrado com Compras"></i>' : ''}
                     </td>
                     <td>${oc.fornecedor || oc.fornecedor_nome || '-'}</td>
                     <td>${formatarData(oc.data || oc.data_emissao || oc.created_at)}</td>
@@ -699,7 +697,7 @@
 
             // Setar data de emissão (hoje)
             const hoje = new Date();
-            document.getElementById('oc-data-emissao').value = hoje.toISOString().slice(0, 10);
+            document.getElementById('oc-data-emissão').value = hoje.toISOString().slice(0, 10);
 
             // Setar data de previsão padrão (hoje + 15 dias)
             const hoje2 = new Date();
@@ -722,8 +720,7 @@
             document.getElementById('oc-parcelas').value = 'avista';
             document.getElementById('oc-total-mercadorias').textContent = 'R$ 0,00';
             document.getElementById('oc-total-desconto').textContent = 'R$ 0,00';
-            document.getElementById('oc-total-ipi').textContent = 'R$ 0,00';
-            document.getElementById('oc-total-icms-st').textContent = 'R$ 0,00';
+            document.getElementById('oc-total-impostos').textContent = 'R$ 0,00';
             document.getElementById('oc-valor-total').textContent = 'R$ 0,00';
             document.getElementById('oc-itens-tbody').innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: #9ca3af;"><i class="fas fa-filter" style="font-size: 20px; margin-bottom: 8px; display: block;"></i>Nenhum item adicionado</td></tr>`;
         }
@@ -811,8 +808,8 @@
             tbody.innerHTML = itensOC.map(item => `
                 <tr>
                     <td>${item.id}</td>
-                    <td>${item.codigo}</td>
-                    <td>${item.descricao}</td>
+                    <td>${item.código}</td>
+                    <td>${item.descrição}</td>
                     <td style="text-align: center;">${item.quantidade}</td>
                     <td style="text-align: right;">${formatarMoeda(item.precoUnit)}</td>
                     <td style="text-align: right; font-weight: 600;">${formatarMoeda(item.total)}</td>
@@ -976,7 +973,7 @@
             const dados = {
                 numero_pedido: numeroPedido,
                 fornecedor_id: parseInt(fornecedorId),
-                data_pedido: document.getElementById('oc-data-emissao')?.value || hoje.toISOString().slice(0,10),
+                data_pedido: document.getElementById('oc-data-emissão')?.value || hoje.toISOString().slice(0,10),
                 data_entrega_prevista: document.getElementById('oc-previsao-entrega').value || null,
                 observacoes: `[PCP] ${document.getElementById('oc-observacoes')?.value || 'Pedido originado do módulo PCP'}`,
                 itens: itensFormatados,
@@ -1047,7 +1044,7 @@
                 <div class="modal-overlay" id="modal-ver-oc" onclick="if(event.target===this)this.remove()">
                     <div class="modal" style="max-width:600px;">
                         <div class="modal-header">
-                            <h3><i class="fas fa-shopping-cart"></i> Ordem de Compra #${oc.numero || oc.id}</h3>
+                            <h3><i class="fas fa-shopping-cart"></i> Ordem de Compra #${oc.número || oc.id}</h3>
                             <button class="modal-close" onclick="document.getElementById('modal-ver-oc').remove()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -1077,7 +1074,7 @@
                 <div class="modal-overlay" id="modal-editar-oc" onclick="if(event.target===this)this.remove()">
                     <div class="modal" style="max-width:600px;">
                         <div class="modal-header">
-                            <h3><i class="fas fa-edit"></i> Editar OC #${oc.numero || oc.id}</h3>
+                            <h3><i class="fas fa-edit"></i> Editar OC #${oc.número || oc.id}</h3>
                             <button class="modal-close" onclick="document.getElementById('modal-editar-oc').remove()">&times;</button>
                         </div>
                         <div class="modal-body">
@@ -1180,5 +1177,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

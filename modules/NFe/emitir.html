@@ -205,42 +205,16 @@
         }
         .data-table td { vertical-align: middle; }
 
-        /* ===== Totals Cards ===== */
-        #section-itens .stats-grid {
-            gap: 12px !important;
-        }
-        #section-itens .stat-card {
-            background: #fff !important;
-            border: 1px solid #e2e8f0 !important;
-            border-radius: 12px !important;
-            padding: 16px 20px !important;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        #section-itens .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-        }
-        #section-itens .stat-card:nth-child(1)::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        #section-itens .stat-card:nth-child(2)::before { background: linear-gradient(90deg, #f97316, #fb923c); }
-        #section-itens .stat-card:nth-child(3)::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-        #section-itens .stat-card:nth-child(4)::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        #section-itens .stat-label {
-            font-size: 10px !important;
-            font-weight: 700 !important;
-            text-transform: uppercase !important;
-            letter-spacing: 0.5px !important;
-            color: #64748b !important;
-            margin-bottom: 6px !important;
-        }
-        #section-itens .stat-value {
-            font-size: 1.3rem !important;
-            font-weight: 800 !important;
-            color: #0f172a !important;
-        }
+        /* ===== Totals Cards — Compras Pattern ===== */
+        #section-itens .stat-card.blue::before { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
+        #section-itens .stat-card.amber::before { background: linear-gradient(180deg, #f59e0b, #fbbf24); }
+        #section-itens .stat-card.purple::before { background: linear-gradient(180deg, #8b5cf6, #a78bfa); }
+        #section-itens .stat-card.green::before { background: linear-gradient(180deg, #10b981, #34d399); }
+
+        #section-itens .stat-card.blue { background: linear-gradient(135deg, #eff6ff 0%, white 40%); }
+        #section-itens .stat-card.amber { background: linear-gradient(135deg, #fffbeb 0%, white 40%); }
+        #section-itens .stat-card.purple { background: linear-gradient(135deg, #f5f3ff 0%, white 40%); }
+        #section-itens .stat-card.green { background: linear-gradient(135deg, #ecfdf5 0%, white 40%); }
 
         /* ===== Remove Item Button ===== */
         .data-table .btn-danger {
@@ -309,10 +283,8 @@
         <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
         <nav class="sidebar-nav">
             <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-            <a href="emitir.html" class="sidebar-btn active" title="Emitir NFe"><i class="fas fa-file-invoice"></i></a>
             <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
             <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-            <a href="danfe.html" class="sidebar-btn" title="Gerar DANFE"><i class="fas fa-print"></i></a>
             <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
             <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
@@ -559,21 +531,33 @@
 
                             <!-- Totais -->
                             <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-top:20px;">
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Produtos</div>
+                                <div class="stat-card blue">
+                                    <div class="stat-header">
+                                        <div class="stat-icon blue"><i class="fas fa-box"></i></div>
+                                    </div>
                                     <div class="stat-value" id="totalProdutos">R$ 0,00</div>
+                                    <div class="stat-label">Total Produtos</div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Desconto</div>
+                                <div class="stat-card amber">
+                                    <div class="stat-header">
+                                        <div class="stat-icon amber"><i class="fas fa-tags"></i></div>
+                                    </div>
                                     <div class="stat-value" id="totalDesconto">R$ 0,00</div>
+                                    <div class="stat-label">Total Desconto</div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Total Frete</div>
+                                <div class="stat-card purple">
+                                    <div class="stat-header">
+                                        <div class="stat-icon purple"><i class="fas fa-truck"></i></div>
+                                    </div>
                                     <div class="stat-value" id="totalFrete">R$ 0,00</div>
+                                    <div class="stat-label">Total Frete</div>
                                 </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Valor Total NFe</div>
+                                <div class="stat-card green">
+                                    <div class="stat-header">
+                                        <div class="stat-icon green"><i class="fas fa-receipt"></i></div>
+                                    </div>
                                     <div class="stat-value" id="valorTotalNFe">R$ 0,00</div>
+                                    <div class="stat-label">Valor Total NFe</div>
                                 </div>
                             </div>
                         </div>
@@ -744,8 +728,8 @@
             itens.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${item.codigo}" onchange="atualizarItem(${index},'codigo',this.value)" placeholder="Código"></td>
-                    <td><input type="text" value="${item.descricao}" onchange="atualizarItem(${index},'descricao',this.value)" placeholder="Descrição do produto"></td>
+                    <td><input type="text" value="${item.código}" onchange="atualizarItem(${index},'código',this.value)" placeholder="Código"></td>
+                    <td><input type="text" value="${item.descrição}" onchange="atualizarItem(${index},'descrição',this.value)" placeholder="Descrição do produto"></td>
                     <td><input type="text" value="${item.ncm}" onchange="atualizarItem(${index},'ncm',this.value)" placeholder="00000000" style="width:100px;"></td>
                     <td><input type="text" value="${item.cfop}" onchange="atualizarItem(${index},'cfop',this.value)" placeholder="5102" style="width:80px;"></td>
                     <td><input type="text" value="${item.unidade}" onchange="atualizarItem(${index},'unidade',this.value)" placeholder="UN" style="width:60px;"></td>
@@ -1046,5 +1030,6 @@
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
     <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

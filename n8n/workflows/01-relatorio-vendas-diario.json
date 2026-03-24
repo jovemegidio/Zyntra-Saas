@@ -1,0 +1,97 @@
+{
+  "name": "01-relatorio-vendas-diario",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 7 * * *" }]
+        }
+      },
+      "name": "⏰ Todos os dias às 7h",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [250, 300],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/vendas/resumo-diario",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "options": { "timeout": 15000 }
+      },
+      "name": "📊 Buscar Resumo Vendas",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [470, 300],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [],
+          "number": [
+            {
+              "value1": "={{$json.data.total_vendas}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "Tem vendas?",
+      "type": "n8n-nodes-base.if",
+      "position": [690, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$env.EMAIL_RELATORIO_DIARIO || 'diretoria@aluforce.ind.br'}}",
+        "subject": "📊 Relatório Diário de Vendas - {{$json.data.data}}",
+        "html": "<div style='font-family: Arial; max-width: 600px; margin: 0 auto;'><h2 style='color: #1a73e8;'>📊 Relatório Diário de Vendas</h2><p style='color: #666;'>Data: <strong>{{$json.data.data}}</strong></p><div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'><table style='width: 100%;'><tr><td style='padding: 10px;'><h3 style='margin: 0; color: #1a73e8;'>{{$json.data.total_vendas}}</h3><small>Total de Vendas</small></td><td style='padding: 10px;'><h3 style='margin: 0; color: #28a745;'>R$ {{$json.data.faturamento}}</h3><small>Faturamento</small></td><td style='padding: 10px;'><h3 style='margin: 0; color: #fd7e14;'>R$ {{$json.data.ticket_medio}}</h3><small>Ticket Médio</small></td><td style='padding: 10px;'><h3 style='margin: 0; color: #6f42c1;'>{{$json.data.clientes_unicos}}</h3><small>Clientes</small></td></tr></table></div><p style='font-size: 12px; color: #999;'>Gerado automaticamente pelo n8n — ALUFORCE ERP</p></div>",
+        "options": {}
+      },
+      "name": "📧 Enviar Relatório",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [910, 250],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+        "headerParameters": {
+          "parameters": [
+            { "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }
+          ]
+        },
+        "body": {
+          "workflow_id": "01",
+          "workflow_name": "Relatório Vendas Diário",
+          "status": "success"
+        },
+        "options": {}
+      },
+      "name": "✅ Notificar Conclusão",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [1130, 300],
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "⏰ Todos os dias às 7h": { "main": [[{ "node": "📊 Buscar Resumo Vendas", "type": "main", "index": 0 }]] },
+    "📊 Buscar Resumo Vendas": { "main": [[{ "node": "Tem vendas?", "type": "main", "index": 0 }]] },
+    "Tem vendas?": {
+      "main": [
+        [{ "node": "📧 Enviar Relatório", "type": "main", "index": 0 }],
+        [{ "node": "✅ Notificar Conclusão", "type": "main", "index": 0 }]
+      ]
+    },
+    "📧 Enviar Relatório": { "main": [[{ "node": "✅ Notificar Conclusão", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "timezone": "America/Sao_Paulo" },
+  "tags": [{ "name": "vendas" }, { "name": "relatorio" }, { "name": "diario" }]
+}

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -1611,7 +1611,7 @@
                 </div>
                 <span class="filter-link" id="filterInfo" onclick="abrirModalFiltros()" style="cursor: pointer;">Exibindo Ordens de Produção de todos os períodos</span>
                 <div style="margin-left: auto; display: flex; gap: 12px;">
-                    <button class="btn-novo-apontamento" onclick="abrirNovoApontamento()">
+                    <button class="btn-novo-apontamento" onclick="window.location.href='../pages/apontamentos.html'">
                         <i class="fas fa-stopwatch"></i> Novo Apontamento
                     </button>
                 </div>
@@ -2185,8 +2185,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
 
                 console.log('?? Carregando dados do usuário...');
                 const response = await fetch('/api/me', {
@@ -2569,8 +2567,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
 
                 console.log('?? Carregando ordens de produção...');
                 const response = await fetch('/api/pcp/ordens-kanban', {
@@ -2662,7 +2658,7 @@
                 const response = await fetch('/api/pcp/ordens-kanban', { credentials: 'include', method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        
+
                     },
                     credentials: 'include',
                     body: JSON.stringify(novaOrdem)
@@ -2711,7 +2707,7 @@
                         credentials: 'include',
                         headers: {
                             'Content-Type': 'application/json',
-                            
+
                         },
                         body: JSON.stringify({ status: novoStatus, origem: ordem.origem || 'kanban' })
                     });
@@ -3011,12 +3007,8 @@
 
             // Buscar itens da API
             fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
-                    credentials: 'include',
-                    headers: {
-                    ,
-                    'Content-Type': 'application/json'
-                }),
-                credentials: 'include'
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
             })
             .then(response => {
                 if (!response.ok) {
@@ -3253,7 +3245,7 @@
                 const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/itens`, { credentials: 'include', method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        
+
                     },
                     credentials: 'include',
                     body: JSON.stringify(novoItem)
@@ -4503,7 +4495,7 @@
                 const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/tarefas`, { credentials: 'include', method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        
+
                     },
                     credentials: 'include',
                     body: JSON.stringify({ titulo, status: 'pendente' })
@@ -4529,7 +4521,7 @@
                 await fetch(`/api/pcp/tarefas/${tarefaId}`, { credentials: 'include', method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        
+
                     },
                     credentials: 'include',
                     body: JSON.stringify({ status: concluida ? 'concluida' : 'pendente' })
@@ -6230,8 +6222,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
 
                 const response = await fetch('/api/me', {
                     credentials: 'include',
@@ -6431,7 +6421,7 @@
                 await fetch('/api/pcp/configuracoes/etapas', { credentials: 'include', method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        
+
                     },
                     credentials: 'include',
                     body: JSON.stringify({ etapas: etapasPCP })
@@ -6490,5 +6480,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

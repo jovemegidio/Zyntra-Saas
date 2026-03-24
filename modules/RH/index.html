@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+<head>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <meta charset="UTF-8">
     <meta name="theme-color" content="#1a1a2e">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Módulo RH</title>
-    
+
     <!-- CSP Fix - Converter onclick inline para addEventListener -->
     <script src="/js/csp-fix.js" defer></script>
-    
+
     <!-- Favicon -->
-    
-    
+
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Modern SaaS UI -->
     <link rel="stylesheet" href="../_shared/modern-saas.css?v=3.0">
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css">
-    
+
     <style>
         :root {
             --primary-color: #2563eb;
@@ -319,27 +323,27 @@
             .version-grid {
                 grid-template-columns: 1fr;
             }
-            
+
             .header h1 {
                 font-size: 36px;
             }
-            
+
             .header p {
                 font-size: 18px;
             }
-            
+
             .version-card {
                 padding: 24px;
             }
-            
+
             .comparison-section {
                 padding: 24px;
             }
-            
+
             .comparison-table {
                 font-size: 14px;
             }
-            
+
             .comparison-table th,
             .comparison-table td {
                 padding: 12px 16px;
@@ -352,11 +356,19 @@
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
         }
 
-        .admin-section, .employee-section {
+        .admin-section,
+        .employee-section {
             margin-top: 24px;
         }
 
@@ -380,45 +392,88 @@
             padding: 12px 20px;
             font-size: 14px;
         }
-        
+
         /* TABLET RESPONSIVO - Portrait e Landscape */
         @media (min-width: 768px) and (max-width: 1024px) {
-            .version-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-            .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-            .main-grid { grid-template-columns: 1fr; }
-            .container { padding: 16px; }
-            .version-card { padding: 24px; }
-            .header h1 { font-size: 32px; }
-            .header p { font-size: 16px; }
-            table { display: block; overflow-x: auto; white-space: nowrap; }
+            .version-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 16px;
+            }
+
+            .version-card {
+                padding: 24px;
+            }
+
+            .header h1 {
+                font-size: 32px;
+            }
+
+            .header p {
+                font-size: 16px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
         }
-        
+
         @media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
-            .version-grid { grid-template-columns: 1fr; }
-            .container { padding: 20px; }
+            .version-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                padding: 20px;
+            }
         }
-        
+
         @media (min-width: 768px) and (max-width: 1280px) and (orientation: landscape) {
-            .version-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
-            .header h1 { font-size: 36px; }
+            .version-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 24px;
+            }
+
+            .header h1 {
+                font-size: 36px;
+            }
         }
     </style>
 
     <!-- ?? Sistema de Gerenciamento de Inatividade -->
     <!-- Sistema de Cache API -->
     <script src="api-cache.js" defer></script>
-    
+
     <script src="../_shared/inactivity-manager.js" defer></script>
-    <script src="/js/anti-copy-protection.js"></script>
+    <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
-    <!-- Correções Mobile - DEVE SER O ÃšLTIMO CSS -->    <!-- Chat Widget BOB AI -->
+    <!-- Correções Mobile - DEVE SER O ÃšLTIMO CSS --> <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Corporativo (Teams) -->
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
-    <script src="/js/tooltips-professional.js?v=20260216"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
 </head>
+
 <body>
     <a href="/dashboard" class="back-button">
         <i class="fas fa-arrow-left"></i>
@@ -443,10 +498,10 @@
                 <h2>RH Classic v1.0</h2>
                 <div class="version-badge">Estável</div>
                 <p class="version-description">
-                    Versão original do sistema RH com funcionalidades básicas e interface tradicional. 
+                    Versão original do sistema RH com funcionalidades básicas e interface tradicional.
                     Ideal para operações essenciais do dia a dia.
                 </p>
-                
+
                 <ul class="features-list">
                     <li><i class="fas fa-check"></i> Gestão básica de funcionários</li>
                     <li><i class="fas fa-check"></i> Controle de ponto simples</li>
@@ -490,10 +545,10 @@
                 <h2>RH Advanced v2.0</h2>
                 <div class="version-badge new-badge">Novo</div>
                 <p class="version-description">
-                    Nova versão modernizada com interface avançada, recursos aprimorados e 
+                    Nova versão modernizada com interface avançada, recursos aprimorados e
                     experiência do usuário completamente renovada.
                 </p>
-                
+
                 <ul class="features-list">
                     <li><i class="fas fa-check"></i> Interface moderna e responsiva</li>
                     <li><i class="fas fa-check"></i> Dashboard interativo avançado</li>
@@ -536,7 +591,7 @@
                 <h3>Comparação de Recursos</h3>
                 <p>Veja as diferenças entre as versões disponíveis</p>
             </div>
-            
+
             <table class="comparison-table">
                 <thead>
                     <tr>
@@ -607,12 +662,12 @@
 
     <script>
         // Animação de entrada
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const cards = document.querySelectorAll('.version-card');
             cards.forEach((card, index) => {
                 card.style.opacity = '0';
                 card.style.transform = 'translateY(20px)';
-                
+
                 setTimeout(() => {
                     card.style.transition = 'all 0.6s ease';
                     card.style.opacity = '1';
@@ -626,7 +681,7 @@
                 comparison.style.opacity = '0';
                 comparison.style.transform = 'translateY(20px)';
                 comparison.style.transition = 'all 0.6s ease';
-                
+
                 setTimeout(() => {
                     comparison.style.opacity = '1';
                     comparison.style.transform = 'translateY(0)';
@@ -637,37 +692,37 @@
         });
 
         // Analytics de cliques
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.closest('.btn')) {
                 const button = e.target.closest('.btn');
                 const version = button.href.includes('v2') ? 'v2.0' : 'v1.0';
-                const type = button.href.includes('areaadm') ? 'admin' : 'funcionario';
-                
+                const type = button.href.includes('areaadm') ? 'admin' : 'funcionário';
+
                 // Navegação registrada
             }
         });
     </script>
-    
-<!-- Sistema de Notificações Global -->
-<script src="/js/notification-manager.js?v=20260119"></script>
 
-<!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->
-<!-- ti@aluforce.ind.br = Central de Suporte | Outros usuários = Chat normal -->
+    <!-- Sistema de Notificações Global -->
+    <script src="/js/notification-manager.js?v=20260119" defer></script>
 
-<!-- Sistema de Monitoramento de Conexão -->
-<script src="../_shared/connection-monitor.js?v=20260111"></script>
-    <script src="/js/popup-confirmacao.js"></script>
-    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->
+    <!-- ti@aluforce.ind.br = Central de Suporte | Outros usuários = Chat normal -->
+
+    <!-- Sistema de Monitoramento de Conexão -->
+    <script src="../_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <!-- Performance Utilities -->
     <script src="/js/performance-utils.js" defer></script>
-    
+
     <!-- Mobile Enterprise Component -->
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
-        </body>
+</body>
+
 </html>
-
-

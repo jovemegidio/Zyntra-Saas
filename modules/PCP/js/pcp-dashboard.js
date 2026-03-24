@@ -25,7 +25,6 @@ async function carregarEstatisticas() {
         }
         
         const response = await fetch(`${API_BASE}/api/pcp/dashboard`, {
-            credentials: 'include',
             credentials: 'include'
         });
         

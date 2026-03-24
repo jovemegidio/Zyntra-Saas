@@ -1,4 +1,6 @@
-﻿/**
+/**
+ *
+ *
  * Integração Global de Alterações Não Salvas
  * ALUFORCE v2.0
  *
@@ -8,6 +10,10 @@
 
 (function() {
     'use strict';
+
+    // State vars declared at top to avoid TDZ when init() runs synchronously
+    let notificationSocket = null;
+    let _notificationListenersSetup = false;
 
     // Aguardar DOM
     if (document.readyState === 'loading') {
@@ -209,8 +215,11 @@
         }
 
         // Marcar modal visualmente quando houver alterações
+        // GUARD: só adiciona listener uma vez por input (evita memory leak)
         const inputs = form.querySelectorAll('input, select, textarea');
         inputs.forEach(input => {
+            if (input.dataset.modalChangeTracked) return;
+            input.dataset.modalChangeTracked = 'true';
             input.addEventListener('input', () => {
                 checkAndMarkModal(modal, form);
             });
@@ -248,6 +257,9 @@
     }
 
     function wrapCloseButton(btn) {
+        // Não interceptar botões marcados com data-no-unsaved
+        if (btn.dataset.noUnsaved === 'true') return;
+
         const originalOnclick = btn.getAttribute('onclick');
 
         btn.removeAttribute('onclick');
@@ -285,7 +297,7 @@
                     // Extrair nome da função e argumentos
                     const matchWithArgs = originalOnclick.match(/^(\w+)\(([^)]*)\)$/);
                     const matchSimple = originalOnclick.match(/^(\w+)\(\)$/);
-                    
+
                     if (matchSimple && typeof window[matchSimple[1]] === 'function') {
                         // Função sem argumentos: fecharModal()
                         window[matchSimple[1]]();
@@ -340,8 +352,12 @@
         });
     }
 
+    let _modalObserver = null;
     function observeNewModals() {
-        const observer = new MutationObserver((mutations) => {
+        // Desconectar observer anterior se existir (evita acumular)
+        if (_modalObserver) _modalObserver.disconnect();
+
+        _modalObserver = new MutationObserver((mutations) => {
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
                     if (node.nodeType === 1) {
@@ -356,7 +372,7 @@
             });
         });
 
-        observer.observe(document.body, { childList: true, subtree: true });
+        _modalObserver.observe(document.body, { childList: true, subtree: true });
     }
 
     // ========================================
@@ -382,7 +398,7 @@
         document.head.appendChild(script);
     }
 
-    let notificationSocket = null;
+    let _notifSetup_REMOVED = null; // placeholder - moved to top of IIFE
     function connectToNotifications() {
         try {
             if (typeof io === 'undefined') return;
@@ -415,8 +431,9 @@
                 console.log('📢 Conectado ao sistema de notificações em tempo real');
 
                 // Identificar usuário
-                if (token) {
-                    notificationSocket.emit('authenticate', { token });
+                const authToken = (typeof AluforceAuth !== 'undefined' && AluforceAuth.getTabToken()) || sessionStorage.getItem('tabAuthToken');
+                if (authToken) {
+                    notificationSocket.emit('authenticate', { token: authToken });
                 }
             });
 
@@ -438,8 +455,12 @@
         }
     }
 
+    let _notifListeners_REMOVED = null; // placeholder - moved to top of IIFE
     function setupNotificationListeners() {
         if (!notificationSocket) return;
+        // Evitar acumular listeners a cada reconexão
+        if (_notificationListenersSetup) return;
+        _notificationListenersSetup = true;
 
         try {
             notificationSocket.on('notification', (data) => {
@@ -777,6 +798,17 @@
             document.head.appendChild(script);
         });
     }
+
+    // Cleanup global ao sair da página
+    window.addEventListener('beforeunload', () => {
+        if (_modalObserver) { _modalObserver.disconnect(); _modalObserver = null; }
+        clearTimeout(toastTimeout);
+        if (notificationSocket) {
+            try { notificationSocket.off(); notificationSocket.disconnect(); } catch(e) {}
+            notificationSocket = null;
+        }
+        _notificationListenersSetup = false;
+    });
 
     // Solicitar permissão para notificações
     if ('Notification' in window && Notification.permission === 'default') {

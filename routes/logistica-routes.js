@@ -16,13 +16,20 @@ module.exports = function createLogisticaRoutes(deps) {
     router.get('/dashboard', async (req, res, next) => {
         console.log('[LOGISTICA/DASHBOARD] Requisição recebida');
         try {
-            // Contar pedidos faturados que ainda não foram despachados (status_logistica IS NULL ou 'pendente')
+            // Sprint E2E-S2 (E4-HIGH-06): Separar pendente de aguardando_separacao no dashboard
+            // Contar pedidos faturados pendentes (NULL, 'pendente' ou '')
             const [[aguardando]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
                 WHERE status IN ('faturado', 'recibo')
-                AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = 'aguardando_separacao' OR status_logistica = '')
+                AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
             `);
-            console.log('[LOGISTICA/DASHBOARD] Aguardando:', aguardando);
+            console.log('[LOGISTICA/DASHBOARD] Pendente:', aguardando);
+
+            const [[aguardandoSep]] = await pool.query(`
+                SELECT COUNT(*) as total FROM pedidos
+                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'aguardando_separacao'
+            `);
+            console.log('[LOGISTICA/DASHBOARD] Aguardando separação:', aguardandoSep);
     
             const [[separacao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
@@ -45,7 +52,8 @@ module.exports = function createLogisticaRoutes(deps) {
             `);
     
             const result = {
-                aguardando_separacao: aguardando?.total || 0,
+                pendente: aguardando?.total || 0,
+                aguardando_separacao: aguardandoSep?.total || 0,
                 em_separacao: separacao?.total || 0,
                 em_expedicao: expedicao?.total || 0,
                 em_transporte: transporte?.total || 0,
@@ -56,6 +64,7 @@ module.exports = function createLogisticaRoutes(deps) {
         } catch (error) {
             console.error('[LOGISTICA/DASHBOARD] Erro:', error);
             res.json({
+                pendente: 0,
                 aguardando_separacao: 0,
                 em_separacao: 0,
                 em_expedicao: 0,
@@ -89,10 +98,12 @@ module.exports = function createLogisticaRoutes(deps) {
                     p.nf,
                     p.numero_nf,
                     p.transportadora_id,
+                    p.endereco_entrega,
                     c.nome as cliente_nome,
                     c.nome_fantasia as cliente_fantasia,
                     c.cidade as cliente_cidade,
                     c.estado as cliente_uf,
+                    c.endereco as cliente_endereco,
                     t.nome_fantasia as transportadora_nome,
                     t.razao_social as transportadora_razao
                 FROM pedidos p
@@ -103,10 +114,10 @@ module.exports = function createLogisticaRoutes(deps) {
     
             const params = [];
     
-            // Tratar filtro de status - pendente/aguardando inclui NULL
+            // Sprint E2E-S2 (E4-HIGH-06): Tratar filtros separadamente
             if (status && status !== '' && status !== 'todos') {
-                if (status === 'pendente' || status === 'aguardando_separacao') {
-                    query += ' AND (p.status_logistica IS NULL OR p.status_logistica = "pendente" OR p.status_logistica = "aguardando_separacao" OR p.status_logistica = "")';
+                if (status === 'pendente') {
+                    query += ' AND (p.status_logistica IS NULL OR p.status_logistica = "pendente" OR p.status_logistica = "")';
                 } else {
                     query += ' AND p.status_logistica = ?';
                     params.push(status);
@@ -143,6 +154,8 @@ module.exports = function createLogisticaRoutes(deps) {
                 pedido_id: row.pedido_id,
                 nfe_numero: row.nf || row.numero_nf || '-',
                 cliente: row.cliente_fantasia || row.cliente_nome || 'Cliente não informado',
+                // Sprint 3 (F-05 fix): Priorizar endereco_entrega do pedido sobre endereço cadastral
+                endereco_entrega: row.endereco_entrega || null,
                 cidade_uf: row.cliente_cidade && row.cliente_uf ? `${row.cliente_cidade}/${row.cliente_uf}` : '-',
                 transportadora: row.transportadora_nome || row.transportadora_razao || 'Não definida',
                 transportadora_id: row.transportadora_id || null,

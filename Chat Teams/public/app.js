@@ -2,7 +2,11 @@
    CHAT CORPORATIVO - FRONTEND
    ═══════════════════════════════════════════════════════════ */
 
-const socket = io();
+const socket = io({
+  transports: ['websocket'],
+  upgrade: false,
+  reconnection: true
+});
 
 // ── Estado ────────────────────────────────────────────────
 let currentUser = null;

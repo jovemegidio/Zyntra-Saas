@@ -7,18 +7,14 @@ require('dotenv').config({ path: require('path').join(__dirname, '../../.env') }
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const mysql = require('mysql2/promise');
-const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
 
-// SEGURANÇA: Validar JWT_SECRET obrigatório
-if (!process.env.JWT_SECRET) {
-    console.error('❌ ERRO FATAL: JWT_SECRET não definido no .env');
-    console.error('Configure a variável de ambiente JWT_SECRET antes de iniciar o servidor');
-    process.exit(1);
-}
+// Auth centralizado (Sprint 7 — Consolidação de Arquitetura)
+const { authenticateToken } = require('../../middleware/auth-central');
+const { corsOptions } = require('../../config/cors');
+const { errorHandler } = require('../../middleware/error-handler');
 
 // Configurar multer para upload de anexos
 const uploadDir = path.join(__dirname, 'uploads');
@@ -72,46 +68,10 @@ const {
 const app = express();
 const PORT = process.env.PORT_FINANCEIRO || 3006;
 
-// Configuração do pool MySQL
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'aluforce_vendas',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306,
-    charset: 'utf8mb4',
-    connectionLimit: 20,
-    waitForConnections: true,
-    queueLimit: 0,
-    enableKeepAlive: true,
-    keepAliveInitialDelay: 0
-});
+// Pool MySQL centralizado (Sprint 7 — usa database/pool.js)
+const pool = require('../../database/pool');
 
-// Middleware de autenticação JWT
-const authenticateToken = (req, res, next) => {
-    // SECURITY A4: Check cookies FIRST, then Authorization header
-    let token = req.cookies?.authToken || req.cookies?.token || null;
-    if (!token) {
-        const authHeader = req.headers['authorization'];
-        token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    }
-
-    if (!token) {
-        return res.status(401).json({ error: 'Token não fornecido' });
-    }
-
-    // AUDIT-FIX ARCH-004: Enforce HS256 algorithm (audience enforced in sign, verify-side after token rotation)
-    jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] }, (err, user) => {
-        if (err) {
-            if (err.name === 'TokenExpiredError') {
-                return res.status(401).json({ error: 'Token expirado. Faça login novamente.' });
-            }
-            return res.status(403).json({ error: 'Token inválido' });
-        }
-        req.user = user;
-        next();
-    });
-};
+// 🔐 AUTHENTICATION: Delegado para middleware/auth-central.js (Sprint 7)
 
 // AUDITORIA ENTERPRISE: Verificação de papel de administrador
 function isAdminUser(user) {
@@ -157,40 +117,18 @@ const requireFinancePermission = (action) => {
     };
 };
 
-// Middlewares
+// Middlewares (Sprint 7: CORS centralizado em config/cors.js)
 app.use(securityHeaders());
 app.use(generalLimiter);
 app.use(sanitizeInput);
-app.use(cors({
-    origin: function(origin, callback) {
-        const allowedOrigins = [
-            'http://localhost:3000', 'http://localhost:5000',
-            'http://127.0.0.1:3000', 'http://127.0.0.1:5000',
-            'https://aluforce.api.br', 'https://www.aluforce.api.br',
-            'https://aluforce.ind.br', 'https://erp.aluforce.ind.br',
-            'https://www.aluforce.ind.br',
-            'http://tauri.localhost', 'https://tauri.localhost', 'tauri://localhost',
-            process.env.CORS_ORIGIN
-        ].filter(Boolean);
-        if (!origin && process.env.NODE_ENV === 'development') return callback(null, true);
-        if (!origin) return callback(null, false);
-        if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
-            callback(null, true);
-        } else {
-            callback(new Error('Origem não permitida pelo CORS'));
-        }
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
-}));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '2mb' })); // SEGURANÇA: Limite de payload
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(cookieParser());
 
-// Servir arquivos estáticos
-app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false }));
-app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false }));
+// Servir arquivos estáticos (HTML sem cache para deploy imediato)
+app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
+app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 
 // ============================================
 // ROTAS - CONTAS A PAGAR
@@ -443,14 +381,13 @@ app.get('/api/financeiro/contas-pagar/:id', authenticateToken, async (req, res) 
 // Listar contas a receber
 app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) => {
     try {
-        const { status, cliente_id, vencimento_inicio, vencimento_fim, limite = 100 } = req.query;
+        const { status, cliente_id, vencimento_inicio, vencimento_fim, limite = 2000 } = req.query;
         
         let sql = `SELECT cr.*, 
-                          c.nome as cliente_nome, c.cpf_cnpj as cnpj_cpf,
-                          cr.valor as valor_total, cr.observacoes as categoria,
-                          cr.forma_recebimento, '' as conta_bancaria, 
-                          '' as centro_receita, '' as numero_documento,
-                          3 as dias_lembrete, NULL as competencia, NULL as recorrencia
+                          COALESCE(cr.cliente_nome, c.nome) as cliente_nome, 
+                          COALESCE(cr.cnpj_cliente, c.cpf_cnpj) as cnpj_cpf,
+                          cr.valor as valor_total,
+                          cr.forma_recebimento
                    FROM contas_receber cr
                    LEFT JOIN clientes c ON cr.cliente_id = c.id
                    WHERE 1=1`;
@@ -855,6 +792,60 @@ app.get('/api/financeiro/fluxo-caixa', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('❌ Erro ao buscar fluxo de caixa:', error);
         res.status(500).json({ error: 'Erro ao buscar fluxo de caixa', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
+// Fluxo de caixa - Resumo (próximos N dias)
+app.get('/api/financeiro/fluxo-caixa-resumo', authenticateToken, async (req, res) => {
+    try {
+        const periodo = req.query.periodo || '30d';
+        const dias = parseInt(periodo) || 30;
+        const hoje = new Date();
+        const fim = new Date(hoje);
+        fim.setDate(fim.getDate() + dias);
+
+        const inicioStr = hoje.toISOString().slice(0, 10);
+        const fimStr = fim.toISOString().slice(0, 10);
+
+        const [bancos] = await pool.execute(
+            'SELECT COALESCE(SUM(saldo_atual), 0) as saldo FROM bancos WHERE status = "ativo" AND considera_fluxo = 1'
+        );
+        const saldoInicial = bancos[0]?.saldo || 0;
+
+        const [entradas] = await pool.execute(
+            `SELECT DATE(data_vencimento) as data, SUM(valor) as entradas
+             FROM contas_receber
+             WHERE status IN ('aberto','parcial') AND data_vencimento BETWEEN ? AND ?
+             GROUP BY DATE(data_vencimento) ORDER BY data`,
+            [inicioStr, fimStr]
+        );
+
+        const [saidas] = await pool.execute(
+            `SELECT DATE(data_vencimento) as data, SUM(valor) as saidas
+             FROM contas_pagar
+             WHERE status IN ('aberto','parcial') AND data_vencimento BETWEEN ? AND ?
+             GROUP BY DATE(data_vencimento) ORDER BY data`,
+            [inicioStr, fimStr]
+        );
+
+        const mapaFluxo = new Map();
+        for (const e of entradas) {
+            const d = String(e.data).slice(0, 10);
+            if (!mapaFluxo.has(d)) mapaFluxo.set(d, { data: d, entradas: 0, saidas: 0 });
+            mapaFluxo.get(d).entradas = parseFloat(e.entradas) || 0;
+        }
+        for (const s of saidas) {
+            const d = String(s.data).slice(0, 10);
+            if (!mapaFluxo.has(d)) mapaFluxo.set(d, { data: d, entradas: 0, saidas: 0 });
+            mapaFluxo.get(d).saidas = parseFloat(s.saidas) || 0;
+        }
+
+        const fluxoDiario = Array.from(mapaFluxo.values()).sort((a, b) => a.data.localeCompare(b.data));
+
+        res.json({ saldoInicial: parseFloat(saldoInicial), fluxoDiario });
+    } catch (error) {
+        console.error('❌ Erro ao buscar fluxo de caixa resumo:', error);
+        res.status(500).json({ error: 'Erro ao buscar fluxo de caixa resumo' });
     }
 });
 
@@ -1430,13 +1421,8 @@ app.get('/relatorios', (req, res) => {
 // ERROR HANDLERS
 // ============================================
 
-app.use((err, req, res, next) => {
-    console.error('❌ Erro:', err);
-    res.status(500).json({ 
-        error: 'Erro interno do servidor',
-        message: process.env.NODE_ENV === 'development' ? err.message : undefined 
-    });
-});
+// Error handling centralizado (Sprint 7)
+app.use(errorHandler);
 
 app.use((req, res) => {
     res.status(404).json({ error: 'Rota não encontrada' });

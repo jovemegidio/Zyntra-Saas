@@ -1,0 +1,67 @@
+{
+  "name": "24-ponto-inconsistencias-alerta",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "triggerAtHour": 8 }] }
+      },
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/rh/ponto-inconsistencias?dias=1",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "name": "Buscar Inconsistências Ponto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [470, 300],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            { "leftValue": "={{ $json.total_inconsistencias }}", "rightValue": "0", "operator": { "type": "number", "operation": "gt" } }
+          ],
+          "combinator": "and"
+        }
+      },
+      "name": "Tem Inconsistências?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [690, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/api/n8n/whatsapp/enviar-grupo",
+        "method": "POST",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "body": {
+          "mode": "json",
+          "json": "={{ JSON.stringify({ grupo: 'rh', mensagem: '⏰ *PONTO - INCONSISTÊNCIAS*\\n\\n' + $json.total_inconsistencias + ' inconsistências detectadas ontem.\\n\\n🔴 Marcações ímpares: ' + $json.marcacoes_impares.length + '\\n🟡 Sem marcação: ' + $json.sem_marcacao_ontem.length + '\\n\\nVerifique no RH!' }) }}"
+        },
+        "options": {}
+      },
+      "name": "Alerta RH Ponto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [910, 200],
+      "credentials": { "httpHeaderAuth": { "id": "1", "name": "N8N API Auth" } }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": { "main": [[{ "node": "Buscar Inconsistências Ponto", "type": "main", "index": 0 }]] },
+    "Buscar Inconsistências Ponto": { "main": [[{ "node": "Tem Inconsistências?", "type": "main", "index": 0 }]] },
+    "Tem Inconsistências?": { "main": [[{ "node": "Alerta RH Ponto", "type": "main", "index": 0 }], []] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": true
+}

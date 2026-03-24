@@ -319,4 +319,9 @@ if (typeof window !== 'undefined') {
     // Funções globais para compatibilidade
     window.debounce = AluforceUtils.debounce;
     window.throttle = AluforceUtils.throttle;
+    // S3-17: escapeHtml centralizado (usado por kanban, permission-modal, etc.)
+    window.escapeHtml = function(value) {
+        if (value === null || value === undefined) return '';
+        return AluforceUtils.escaparHTML(String(value));
+    };
 }

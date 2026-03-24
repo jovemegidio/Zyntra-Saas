@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aluforce: Aplicar Avaliacoes</title>
+  <title>Aluforce: Aplicar Avaliações</title>
   <link rel="icon" type="image/x-icon" href="/favicon.ico">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
   <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
@@ -35,12 +35,12 @@
       <nav class="sidebar-nav">
         <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
         <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-        <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
-        <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+        <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+        <a href="gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
         <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-        <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
-        <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
-        <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+        <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
+        <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
+        <a href="calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
       </nav>
       <div class="sidebar-bottom">
         <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -51,23 +51,29 @@
 
     <main class="main-area">
       <header class="header">
-        <div class="header-left"><button class="mobile-menu-btn" onclick="rhUiCommon.toggleMobileSidebar()" title="Abrir menu"><i class="fas fa-bars"></i></button><div class="header-brand">RH | Aplicar Avaliacoes</div></div>
+        <div class="header-left"><button class="mobile-menu-btn" onclick="rhUiCommon.toggleMobileSidebar()" title="Abrir menu"><i class="fas fa-bars"></i></button><div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Aplicar Avaliações</span>
+                    </div></div>
         <div class="header-right"><button class="header-btn" onclick="carregarBase()" title="Atualizar dados"><i class="fas fa-sync-alt"></i></button><div class="user-greeting"><span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span><div class="user-avatar"><img id="user-photo" alt="avatar"><span id="user-initials">U</span></div></div></div>
       </header>
 
       <section class="content">
         <div>
-          <h1 class="page-title">Aplicar Avaliacoes de Colaboradores</h1>
+          <h1 class="page-title">Aplicar Avaliações de Colaboradores</h1>
           <p class="page-subtitle">Fluxo exclusivo para gestores e administradores avaliarem equipes.</p>
         </div>
 
         <article class="saas-card">
-          <div class="saas-card-header"><h2 class="saas-card-title">Nova Avaliacao</h2></div>
+          <div class="saas-card-header"><h2 class="saas-card-title">Nova Avaliação</h2></div>
           <div class="saas-card-body card-layout">
             <div class="grid">
-              <div class="form-group"><label for="funcionario">Colaborador</label><select id="funcionario" class="form-input"></select></div>
-              <div class="form-group"><label for="periodo">Periodo</label><select id="periodo" class="form-input"></select></div>
-              <div class="form-group"><label for="tipo">Tipo de Avaliacao</label><select id="tipo" class="form-input"><option value="gestor">Gestor</option><option value="desempenho">Desempenho</option><option value="feedback_360">Feedback 360</option></select></div>
+              <div class="form-group"><label for="funcionário">Colaborador</label><select id="funcionário" class="form-input"></select></div>
+              <div class="form-group"><label for="período">Período</label><select id="período" class="form-input"></select></div>
+              <div class="form-group"><label for="tipo">Tipo de Avaliação</label><select id="tipo" class="form-input"><option value="gestor">Gestor</option><option value="desempenho">Desempenho</option><option value="feedback_360">Feedback 360</option></select></div>
             </div>
 
             <div class="grid">
@@ -83,7 +89,7 @@
             </div>
 
             <div class="action-row">
-              <button class="saas-btn saas-btn-primary" onclick="salvarAvaliacao()"><i class="fas fa-floppy-disk"></i> Salvar Avaliacao</button>
+              <button class="saas-btn saas-btn-primary" onclick="salvarAvaliacao()"><i class="fas fa-floppy-disk"></i> Salvar Avaliação</button>
               <button class="saas-btn saas-btn-outline" onclick="limparFormulario()"><i class="fas fa-eraser"></i> Limpar</button>
             </div>
           </div>
@@ -95,30 +101,30 @@
   <div class="toast" id="toast"><span id="toast-message"></span></div>
 
   <script src="/js/auth-unified.js?v=20260214" defer></script>
-  <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-  <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+  <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+  <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
   <script>
     let usuario = null;
 
     async function carregarBase() {
       const [funcResp, perResp, compResp] = await Promise.all([
         fetch('/api/rh/funcionarios', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' }),
-        fetch('/api/rh/avaliacoes/perÃ­odos', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' }),
+        fetch('/api/rh/avaliacoes/periodos', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' }),
         fetch('/api/rh/avaliacoes/competencias', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' })
       ]);
 
-      const funcionarios = await funcResp.json().catch(function () { return []; });
+      const funcionários = await funcResp.json().catch(function () { return []; });
       const periodos = await perResp.json().catch(function () { return []; });
       const competencias = await compResp.json().catch(function () { return []; });
 
-      const funcSelect = document.getElementById('funcionario');
-      funcSelect.innerHTML = Array.isArray(funcionarios) && funcionarios.length
-        ? funcionarios.map(function (f) { return `<option value='${Number(f.id)}'>${rhUiCommon.escapeHtml(f.nome_completo || f.nome || 'Funcionario')}</option>`; }).join('')
+      const funcSelect = document.getElementById('funcionário');
+      funcSelect.innerHTML = Array.isArray(funcionários) && funcionarios.length
+        ? funcionarios.map(function (f) { return `<option value='${Number(f.id)}'>${rhUiCommon.escapeHtml(f.nome_completo || f.nome || 'Funcionário')}</option>`; }).join('')
         : '<option value="">Sem colaboradores</option>';
 
-      const perSelect = document.getElementById('periodo');
+      const perSelect = document.getElementById('período');
       perSelect.innerHTML = Array.isArray(periodos) && periodos.length
-        ? periodos.map(function (p) { return `<option value='${Number(p.id)}'>${rhUiCommon.escapeHtml(p.nome || 'Periodo')}</option>`; }).join('')
+        ? periodos.map(function (p) { return `<option value='${Number(p.id)}'>${rhUiCommon.escapeHtml(p.nome || 'Período')}</option>`; }).join('')
         : '<option value="">Sem periodos</option>';
 
       const grid = document.getElementById('competencias-grid');
@@ -134,7 +140,7 @@
           <label>Nota (1-5)</label>
           <input class='form-input comp-nota' type='number' min='1' max='5' value='3'>
           <label>Comentario</label>
-          <input class='form-input comp-comentario' type='text' maxlength='220' placeholder='Observacao'>
+          <input class='form-input comp-comentario' type='text' maxlength='220' placeholder='Observação'>
         </div>`;
       }).join('');
     }
@@ -153,13 +159,13 @@
       });
     }
 
-    async function salvarAvaliacao() {
-      const funcionarioId = Number(document.getElementById('funcionario').value || 0);
-      const periodoId = Number(document.getElementById('periodo').value || 0);
+    async function salvarAvaliação() {
+      const funcionarioId = Number(document.getElementById('funcionário').value || 0);
+      const períodoId = Number(document.getElementById('período').value || 0);
       const tipo = document.getElementById('tipo').value;
 
       if (!funcionarioId || !periodoId) {
-        rhUiCommon.showToast('Selecione colaborador e periodo.', 'danger');
+        rhUiCommon.showToast('Selecione colaborador e período.', 'danger');
         return;
       }
 
@@ -167,7 +173,7 @@
         funcionario_id: funcionarioId,
         'per\u00edodo_id': periodoId,
         avaliador_id: Number(usuario.funcionario_id || usuario.id),
-        tipo_avaliacao: tipo,
+        tipo_avaliação: tipo,
         pontos_fortes: document.getElementById('pontosFortes').value.trim(),
         pontos_melhoria: document.getElementById('pontosMelhoria').value.trim(),
         comentarios_avaliador: document.getElementById('comentarios').value.trim(),
@@ -183,11 +189,11 @@
 
       const body = await resp.json().catch(function () { return {}; });
       if (!resp.ok) {
-        rhUiCommon.showToast(body.message || body.error || 'Falha ao criar avaliacao.', 'danger');
+        rhUiCommon.showToast(body.message || body.error || 'Falha ao criar avaliação.', 'danger');
         return;
       }
 
-      rhUiCommon.showToast('Avaliacao registrada com sucesso.', 'success');
+      rhUiCommon.showToast('Avaliação registrada com sucesso.', 'success');
       limparFormulario();
     }
 
@@ -205,11 +211,13 @@
         rhUiCommon.updateHeaderUser(usuario);
         await carregarBase();
       } catch (e) {
-        rhUiCommon.showToast(e.message || 'Acesso negado para aplicar avaliacoes.', 'danger');
-        setTimeout(function () { window.location.href = '/rh/pages/avaliacoes-recebidas'; }, 900);
+        rhUiCommon.showToast(e.message || 'Acesso negado para aplicar avaliações.', 'danger');
+        setTimeout(function () { window.location.href = '/rh/pages/avaliações-recebidas'; }, 900);
       }
     });
   </script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
 </html>
 

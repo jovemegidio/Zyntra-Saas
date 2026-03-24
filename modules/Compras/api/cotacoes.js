@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao listar cotações:', error);
-        res.status(500).json({ error: 'Erro ao buscar cotações', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar cotações' });
     }
 });
 
@@ -112,7 +112,7 @@ router.get('/:id', async (req, res) => {
         res.json(cotacao);
     } catch (error) {
         console.error('Erro ao obter cotação:', error);
-        res.status(500).json({ error: 'Erro ao buscar cotação', message: error.message });
+        res.status(500).json({ error: 'Erro ao buscar cotação' });
     }
 });
 
@@ -180,7 +180,7 @@ router.post('/', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao criar cotação:', error);
-        res.status(500).json({ error: 'Erro ao criar cotação', message: error.message });
+        res.status(500).json({ error: 'Erro ao criar cotação' });
     } finally {
         connection.release();
     }
@@ -276,7 +276,7 @@ router.post('/:id/proposta', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao adicionar proposta:', error);
-        res.status(500).json({ error: 'Erro ao adicionar proposta', message: error.message });
+        res.status(500).json({ error: 'Erro ao adicionar proposta' });
     } finally {
         connection.release();
     }
@@ -331,7 +331,7 @@ router.put('/:id/selecionar-vencedor', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('Erro ao selecionar vencedor:', error);
-        res.status(500).json({ error: 'Erro ao selecionar vencedor', message: error.message });
+        res.status(500).json({ error: 'Erro ao selecionar vencedor' });
     } finally {
         connection.release();
     }
@@ -343,14 +343,19 @@ router.put('/:id/encerrar', async (req, res) => {
         const db = getDatabase();
         const { motivo } = req.body;
         
-        await db.query(
+        // SECURITY FIX (COT-AUTHZ-002): Verificar que cotação está aberta antes de encerrar
+        const [result] = await db.query(
             `UPDATE cotacoes SET 
                 status = 'encerrada',
                 data_encerramento = NOW(),
                 motivo_encerramento = ?
-            WHERE id = ?`,
+            WHERE id = ? AND status = 'aberta'`,
             [motivo, req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Cotação não pode ser encerrada (não está aberta ou não encontrada)' });
+        }
         
         res.json({
             success: true,
@@ -358,7 +363,7 @@ router.put('/:id/encerrar', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao encerrar cotação:', error);
-        res.status(500).json({ error: 'Erro ao encerrar cotação', message: error.message });
+        res.status(500).json({ error: 'Erro ao encerrar cotação' });
     }
 });
 
@@ -367,10 +372,15 @@ router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
         
-        await db.query(
-            "UPDATE cotacoes SET status = 'cancelada' WHERE id = ?",
+        // SECURITY FIX (COT-AUTHZ-001): Verificar que cotação está aberta antes de cancelar
+        const [result] = await db.query(
+            "UPDATE cotacoes SET status = 'cancelada' WHERE id = ? AND status NOT IN ('encerrada', 'cancelada')",
             [req.params.id]
         );
+        
+        if (result.affectedRows === 0) {
+            return res.status(409).json({ error: 'Cotação não pode ser cancelada (já encerrada, já cancelada, ou não encontrada)' });
+        }
         
         res.json({
             success: true,
@@ -378,7 +388,7 @@ router.delete('/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('Erro ao cancelar cotação:', error);
-        res.status(500).json({ error: 'Erro ao cancelar cotação', message: error.message });
+        res.status(500).json({ error: 'Erro ao cancelar cotação' });
     }
 });
 

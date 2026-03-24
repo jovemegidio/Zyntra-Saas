@@ -1,4 +1,4 @@
-Ôªø<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -381,23 +381,23 @@
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('config')">
-                <i class="fas fa-cog"></i> Configura√ß√£o
+                <i class="fas fa-cog"></i> ConfiguraÁ„o
             </button>
             <button class="tab-btn" onclick="showTab('import')">
                 <i class="fas fa-download"></i> Importar
             </button>
             <button class="tab-btn" onclick="showTab('history')">
-                <i class="fas fa-history"></i> Hist√≥rico
+                <i class="fas fa-history"></i> HistÛrico
             </button>
         </div>
 
-        <!-- Tab: Configura√ß√£o -->
+        <!-- Tab: ConfiguraÁ„o -->
         <div id="tab-config" class="tab-content active">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-server"></i>
-                        Conex√£o com Control iD
+                        Conex„o com Control iD
                     </h3>
                     <div class="connection-status offline" id="connection-status">
                         <i class="fas fa-circle"></i>
@@ -409,7 +409,7 @@
                         <i class="fas fa-info-circle"></i>
                         <div>
                             <strong>Como encontrar o IP do Control iD:</strong><br>
-                            No equipamento, acesse Menu √¢‚Ä†‚Äô Comunica√ß√£o √¢‚Ä†‚Äô Ethernet/Wi-Fi para ver o IP configurado.
+                            No equipamento, acesse Menu ‚Üí ComunicaÁ„o ‚Üí Ethernet/Wi-Fi para ver o IP configurado.
                             O equipamento deve estar na mesma rede que este servidor.
                         </div>
                     </div>
@@ -423,12 +423,12 @@
                         <div class="form-group">
                             <label class="form-label">Porta</label>
                             <input type="number" class="form-input" id="device-port" value="80">
-                            <span class="help-text">Padr√£o: 80 (HTTP) ou 443 (HTTPS)</span>
+                            <span class="help-text">Padr„o: 80 (HTTP) ou 443 (HTTPS)</span>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Usu√°rio</label>
+                            <label class="form-label">Usu·rio</label>
                             <input type="text" class="form-input" id="device-user" value="admin">
-                            <span class="help-text">Usu√°rio de acesso ao equipamento</span>
+                            <span class="help-text">Usu·rio de acesso ao equipamento</span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Senha</label>
@@ -440,16 +440,16 @@
                     <div style="margin-top: 20px; display: flex; gap: 12px;">
                         <button class="btn btn-primary" onclick="testConnection()">
                             <i class="fas fa-plug"></i>
-                            Testar Conex√£o
+                            Testar Conex„o
                         </button>
                         <button class="btn btn-success" onclick="saveConfig()" id="btn-save-config" disabled>
                             <i class="fas fa-save"></i>
-                            Salvar Configura√ß√£o
+                            Salvar ConfiguraÁ„o
                         </button>
                     </div>
 
                     <div class="device-info" id="device-info" style="display: none;">
-                        <h4>Informa√ß√µes do Equipamento</h4>
+                        <h4>InformaÁıes do Equipamento</h4>
                         <div class="device-info-grid">
                             <div class="device-info-item">
                                 <span class="device-info-label">Modelo</span>
@@ -464,7 +464,7 @@
                                 <span class="device-info-value" id="info-firmware">-</span>
                             </div>
                             <div class="device-info-item">
-                                <span class="device-info-label">Usu√°rios</span>
+                                <span class="device-info-label">Usu·rios</span>
                                 <span class="device-info-value" id="info-users">-</span>
                             </div>
                             <div class="device-info-item">
@@ -472,7 +472,7 @@
                                 <span class="device-info-value" id="info-records">-</span>
                             </div>
                             <div class="device-info-item">
-                                <span class="device-info-label">√öltimo Registro</span>
+                                <span class="device-info-label">⁄ltimo Registro</span>
                                 <span class="device-info-value" id="info-last-record">-</span>
                             </div>
                         </div>
@@ -487,13 +487,13 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-file-import"></i>
-                        Importar Marca√ß√µes
+                        Importar MarcaÁıes
                     </h3>
                 </div>
                 <div class="card-body">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Data In√≠cio *</label>
+                            <label class="form-label">Data InÌcio *</label>
                             <input type="date" class="form-input" id="import-date-start">
                         </div>
                         <div class="form-group">
@@ -501,13 +501,13 @@
                             <input type="date" class="form-input" id="import-date-end">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Funcion√°rio</label>
+                            <label class="form-label">Funcion·rio</label>
                             <select class="form-select" id="import-employee">
-                                <option value="">Todos os funcion√°rios</option>
+                                <option value="">Todos os funcion·rios</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tipo de Importa√ß√£o</label>
+                            <label class="form-label">Tipo de ImportaÁ„o</label>
                             <select class="form-select" id="import-type">
                                 <option value="api">Via API (Control iD)</option>
                                 <option value="afd">Arquivo AFD</option>
@@ -528,13 +528,13 @@
                     <div style="margin-top: 20px;">
                         <button class="btn btn-primary" onclick="startImport()">
                             <i class="fas fa-play"></i>
-                            Iniciar Importa√ß√£o
+                            Iniciar ImportaÁ„o
                         </button>
                     </div>
 
                     <!-- Progress -->
                     <div id="import-progress" style="display: none; margin-top: 24px;">
-                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da Importa√ß√£o</h4>
+                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da ImportaÁ„o</h4>
                         <div class="progress-bar">
                             <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
                         </div>
@@ -562,7 +562,7 @@
 
                     <!-- Log -->
                     <div id="import-log-section" style="display: none; margin-top: 24px;">
-                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de Importa√ß√£o</h4>
+                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de ImportaÁ„o</h4>
                         <div class="log-container" id="import-log"></div>
                     </div>
                 </div>
@@ -573,7 +573,7 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-eye"></i>
-                        Pr√©-visualiza√ß√£o
+                        PrÈ-visualizaÁ„o
                     </h3>
                 </div>
                 <div class="card-body">
@@ -583,7 +583,7 @@
                                 <tr>
                                     <th>Data</th>
                                     <th>Hora</th>
-                                    <th>Funcion√°rio</th>
+                                    <th>Funcion·rio</th>
                                     <th>PIS</th>
                                     <th>Status</th>
                                 </tr>
@@ -595,13 +595,13 @@
             </div>
         </div>
 
-        <!-- Tab: Hist√≥rico -->
+        <!-- Tab: HistÛrico -->
         <div id="tab-history" class="tab-content">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-history"></i>
-                        Hist√≥rico de Importa√ß√µes
+                        HistÛrico de ImportaÁıes
                     </h3>
                 </div>
                 <div class="card-body">
@@ -610,18 +610,18 @@
                             <thead>
                                 <tr>
                                     <th>Data/Hora</th>
-                                    <th>Per√≠odo</th>
+                                    <th>PerÌodo</th>
                                     <th>Registros</th>
                                     <th>Sucesso</th>
                                     <th>Erros</th>
-                                    <th>Usu√°rio</th>
+                                    <th>Usu·rio</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody id="history-tbody">
                                 <tr>
                                     <td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">
-                                        Nenhuma importa√ß√£o realizada ainda
+                                        Nenhuma importaÁ„o realizada ainda
                                     </td>
                                 </tr>
                             </tbody>
@@ -637,7 +637,7 @@
         let isConnected = false;
         let deviceInfo = null;
 
-        // Inicializa√ß√£o
+        // InicializaÁ„o
         document.addEventListener('DOMContentLoaded', () => {
             loadConfig();
             loadEmployees();
@@ -657,7 +657,7 @@
             if (tabId === 'history') loadImportHistory();
         }
 
-        // Configura√ß√£o - carrega do servidor (Bug #4 fix)
+        // ConfiguraÁ„o - carrega do servidor (Bug #4 fix)
         async function loadConfig() {
             try {
                 const response = await fetch('/api/rh/controlid/config', {
@@ -702,7 +702,7 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    alert('Configura√ß√£o salva no servidor com sucesso!');
+                    alert('ConfiguraÁ„o salva no servidor com sucesso!');
                 } else {
                     alert('Erro ao salvar: ' + (result.message || 'Tente novamente'));
                 }
@@ -710,11 +710,11 @@
                 console.error('Erro ao salvar config:', error);
                 // Fallback localStorage
                 localStorage.setItem('controlid_config', JSON.stringify({ ip, port: porta, user: usuario }));
-                alert('Configura√ß√£o salva localmente (servidor indispon√≠vel)');
+                alert('ConfiguraÁ„o salva localmente (servidor indisponÌvel)');
             }
         }
 
-        // Testar Conex√£o
+        // Testar Conex„o
         async function testConnection() {
             const ip = document.getElementById('device-ip').value;
             const port = document.getElementById('device-port').value;
@@ -726,7 +726,7 @@
                 return;
             }
 
-            updateConnectionStatus('testing', 'Testando conex√£o...');
+            updateConnectionStatus('testing', 'Testando conex„o...');
 
             try {
                 const response = await fetch('/api/rh/controlid/test-connection', {
@@ -747,13 +747,13 @@
                     showDeviceInfo(result.device);
                     document.getElementById('btn-save-config').disabled = false;
                 } else {
-                    updateConnectionStatus('offline', 'Falha na conex√£o');
-                    alert('Erro: ' + (result.message || 'N√£o foi poss√≠vel conectar ao equipamento'));
+                    updateConnectionStatus('offline', 'Falha na conex„o');
+                    alert('Erro: ' + (result.message || 'N„o foi possÌvel conectar ao equipamento'));
                 }
             } catch (error) {
-                console.error('Erro ao testar conex√£o:', error);
-                updateConnectionStatus('offline', 'Erro de conex√£o');
-                alert('Erro ao conectar. Verifique se o servidor est√° configurado para acessar o Control iD.');
+                console.error('Erro ao testar conex„o:', error);
+                updateConnectionStatus('offline', 'Erro de conex„o');
+                alert('Erro ao conectar. Verifique se o servidor est· configurado para acessar o Control iD.');
             }
         }
 
@@ -773,7 +773,7 @@
             document.getElementById('info-last-record').textContent = device.lastRecord || '-';
         }
 
-        // Funcion√°rios
+        // Funcion·rios
         async function loadEmployees() {
             try {
                 const response = await fetch('/api/rh/funcionarios', {
@@ -790,11 +790,11 @@
                     select.appendChild(option);
                 });
             } catch (error) {
-                console.error('Erro ao carregar funcion√°rios:', error);
+                console.error('Erro ao carregar funcion·rios:', error);
             }
         }
 
-        // Datas padr√£o
+        // Datas padr„o
         function setDefaultDates() {
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -803,7 +803,7 @@
             document.getElementById('import-date-end').value = today.toISOString().split('T')[0];
         }
 
-        // Tipo de importa√ß√£o
+        // Tipo de importaÁ„o
         function setupImportTypeChange() {
             document.getElementById('import-type').addEventListener('change', (e) => {
                 const fileSection = document.getElementById('file-upload-section');
@@ -811,7 +811,7 @@
             });
         }
 
-        // Importa√ß√£o
+        // ImportaÁ„o
         async function startImport() {
             const importType = document.getElementById('import-type').value;
             const dateStart = document.getElementById('import-date-start').value;
@@ -819,12 +819,12 @@
             const employeeId = document.getElementById('import-employee').value;
 
             if (!dateStart || !dateEnd) {
-                alert('Informe o per√≠odo de importa√ß√£o');
+                alert('Informe o perÌodo de importaÁ„o');
                 return;
             }
 
             if (importType === 'api' && !isConnected) {
-                alert('Configure e teste a conex√£o com o Control iD primeiro');
+                alert('Configure e teste a conex„o com o Control iD primeiro');
                 showTab('config');
                 return;
             }
@@ -845,16 +845,16 @@
         async function importFromApi(dateStart, dateEnd, employeeId) {
             showProgress();
             clearLog();
-            addLog('Iniciando importa√ß√£o via API Control iD...', 'info');
+            addLog('Iniciando importaÁ„o via API Control iD...', 'info');
 
-            // Pegar config dos campos (j√° carregados do servidor)
+            // Pegar config dos campos (j· carregados do servidor)
             const ip = document.getElementById('device-ip').value;
             const port = document.getElementById('device-port').value;
             const user = document.getElementById('device-user').value;
             const password = document.getElementById('device-password').value;
 
             if (!ip) {
-                addLog('Erro: IP do equipamento n√£o configurado', 'error');
+                addLog('Erro: IP do equipamento n„o configurado', 'error');
                 return;
             }
 
@@ -881,16 +881,16 @@
                 if (result.success) {
                     updateProgress(100);
                     showSummary(result.summary);
-                    addLog(`Importa√ß√£o conclu√≠da! ${result.summary.success} registros importados.`, 'success');
+                    addLog(`ImportaÁ„o concluÌda! ${result.summary.success} registros importados.`, 'success');
                     
                     if (result.records && result.records.length > 0) {
                         showPreview(result.records);
                     }
                 } else {
-                    addLog('Erro na importa√ß√£o: ' + result.message, 'error');
+                    addLog('Erro na importaÁ„o: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('Erro na importa√ß√£o:', error);
+                console.error('Erro na importaÁ„o:', error);
                 addLog('Erro: ' + error.message, 'error');
             }
         }
@@ -935,13 +935,13 @@
                     if (result.success) {
                         updateProgress(100);
                         showSummary(result.summary);
-                        addLog(`Importa√ß√£o conclu√≠da! ${result.summary.success} registros importados.`, 'success');
+                        addLog(`ImportaÁ„o concluÌda! ${result.summary.success} registros importados.`, 'success');
                         
                         if (result.records && result.records.length > 0) {
                             showPreview(result.records);
                         }
                     } else {
-                        addLog('Erro na importa√ß√£o: ' + result.message, 'error');
+                        addLog('Erro na importaÁ„o: ' + result.message, 'error');
                     }
                 } catch (error) {
                     console.error('Erro ao processar arquivo:', error);
@@ -957,7 +957,7 @@
             const records = [];
 
             lines.forEach(line => {
-                // Tipo 3 = Marca√ß√£o de ponto
+                // Tipo 3 = MarcaÁ„o de ponto
                 if (line.length >= 34 && line.charAt(9) === '3') {
                     const nsr = line.substring(0, 9);
                     const data = line.substring(10, 18); // DDMMAAAA
@@ -984,7 +984,7 @@
             const lines = content.split('\n');
             const records = [];
             
-            // Pular cabe√ßalho
+            // Pular cabeÁalho
             for (let i = 1; i < lines.length; i++) {
                 const cols = lines[i].split(';');
                 if (cols.length >= 4) {
@@ -1009,7 +1009,7 @@
 
         function updateProgress(percent) {
             document.getElementById('progress-fill').style.width = percent + '%';
-            document.getElementById('progress-text').textContent = percent < 100 ? `Processando... ${percent}%` : 'Conclu√≠do!';
+            document.getElementById('progress-text').textContent = percent < 100 ? `Processando... ${percent}%` : 'ConcluÌdo!';
         }
 
         function showSummary(summary) {
@@ -1058,7 +1058,7 @@
             };
         }
 
-        // Bug #5 fix: Carregar hist√≥rico de importa√ß√µes do servidor
+        // Bug #5 fix: Carregar histÛrico de importaÁıes do servidor
         async function loadImportHistory() {
             try {
                 const response = await fetch('/api/rh/controlid/importacoes?limite=50', {
@@ -1068,7 +1068,7 @@
 
                 const tbody = document.getElementById('history-tbody');
                 if (!data.success || !data.importacoes || data.importacoes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">Nenhuma importa√ß√£o realizada ainda</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">Nenhuma importaÁ„o realizada ainda</td></tr>`;
                     return;
                 }
 
@@ -1078,7 +1078,7 @@
                         ? `${new Date(imp.periodo_inicio).toLocaleDateString('pt-BR')} a ${new Date(imp.periodo_fim).toLocaleDateString('pt-BR')}`
                         : '-';
                     const statusClass = imp.status === 'concluido' ? 'success' : (imp.status === 'erro' ? 'error' : 'pending');
-                    const statusText = imp.status === 'concluido' ? 'Conclu√≠do' : (imp.status === 'erro' ? 'Erro' : 'Pendente');
+                    const statusText = imp.status === 'concluido' ? 'ConcluÌdo' : (imp.status === 'erro' ? 'Erro' : 'Pendente');
                     const tipoLabel = imp.tipo === 'api_controlid' ? 'API' : (imp.tipo === 'arquivo' ? 'Arquivo' : imp.tipo);
 
                     return `<tr>
@@ -1092,12 +1092,12 @@
                     </tr>`;
                 }).join('');
             } catch (error) {
-                console.error('Erro ao carregar hist√≥rico:', error);
+                console.error('Erro ao carregar histÛrico:', error);
             }
         }
     </script>
     <script src="/js/auth-unified.js?v=20260211"></script>
-    <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319"></script>
     </body>
 </html>
 

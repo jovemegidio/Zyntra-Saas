@@ -1,0 +1,204 @@
+/* ============================================================
+   MODAL STANDARD COMPAT — ALUFORCE ERP v1.0 — 2026-03-23
+   Cobertura de todas as famílias de modal não-padrão.
+   Garante padrão visual unificado em 100% do sistema.
+   SOMENTE VISUAL — nenhuma funcionalidade foi alterada.
+   (posicionamento, display, overflow, z-index intactos)
+   ============================================================ */
+
+/* ============================================================
+   1. FAMÍLIA: .modal-overlay-omie / .modal-omie
+   Financeiro: contas-receber, contas-pagar, index
+   ============================================================ */
+.modal-overlay-omie {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-omie {
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: aluforceModalSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Container duplo omie */
+.modal-conta-receber {
+    border-radius: 16px;
+}
+
+/* ============================================================
+   2. FAMÍLIA: .modal-header-conta (Financeiro — header branco)
+   Header lateral do modal de conta: white → dark gradient
+   ============================================================ */
+.modal-header-conta {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border-bottom: none !important;
+    color: #ffffff;
+    border-radius: 16px 0 0 0 !important;
+}
+
+.modal-título-conta h2 {
+    color: #ffffff !important;
+}
+
+.modal-avatar-conta {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.btn-fechar-omie {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 8px !important;
+}
+
+.btn-fechar-omie:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: none !important;
+}
+
+/* ============================================================
+   3. FAMÍLIA: .modal-header-omie (Vendas — header branco)
+   pedidos.html, relatorios.html, index.html: white → dark
+   ============================================================ */
+.modal-header-omie {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+    color: #ffffff;
+}
+
+.modal-header-omie h2 {
+    color: #ffffff;
+}
+
+.modal-header-omie .close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+    transition: all 0.15s ease;
+}
+
+.modal-header-omie .close-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* ============================================================
+   4. FAMÍLIA: .modal-header-institucional (Financeiro)
+   Atualiza gradiente para padrão dark. Mantém variações de cor
+   semânticas (green/red/amber/purple) como overrides.
+   ============================================================ */
+.modal-header-institucional {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+/* Variações semânticas — mantidas */
+.modal-header-institucional.header-green  { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+.modal-header-institucional.header-red    { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); }
+.modal-header-institucional.header-amber  { background: linear-gradient(135deg, #92400e 0%, #b45309 100%); }
+.modal-header-institucional.header-purple { background: linear-gradient(135deg, #5b21b6 0%, #6d28d9 100%); }
+.modal-header-institucional.header-gray   { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+
+/* ============================================================
+   5. FAMÍLIA: .modal-receber-header (Financeiro — já gradiente)
+   Padroniza apenas o raio de borda
+   ============================================================ */
+.modal-receber-header {
+    border-radius: 16px 16px 0 0;
+}
+
+/* ============================================================
+   6. FAMÍLIA: .modal-perfil / .modal-preferencias
+   public/index.html — header branco → dark gradient
+   ============================================================ */
+.modal-perfil-content,
+.modal-preferencias-content {
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.modal-perfil-header,
+.modal-preferencias-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+}
+
+.modal-perfil-header h2,
+.modal-preferencias-header h2 {
+    color: #ffffff;
+}
+
+.modal-perfil-header h2 i,
+.modal-preferencias-header h2 i {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Botão fechar no header escuro */
+.modal-perfil-header .modal-close-btn,
+.modal-preferencias-header .modal-close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+}
+
+.modal-perfil-header .modal-close-btn:hover,
+.modal-preferencias-header .modal-close-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* ============================================================
+   7. FAMÍLIA: .modal-content .modal-header (genérico)
+   Para páginas sem global-header-sidebar.css que usam a
+   estrutura padrão .modal > .modal-content > .modal-header
+   (ex: public/admin/usuarios.html)
+   ============================================================ */
+.modal-content {
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+.modal-content .modal-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+    color: #ffffff;
+}
+
+.modal-content .modal-header h2,
+.modal-content .modal-header h3,
+.modal-content .modal-header h4,
+.modal-content .modal-header .modal-title {
+    color: #ffffff;
+}
+
+.modal-content .modal-header .modal-close,
+.modal-content .modal-header .close {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+}
+
+.modal-content .modal-header .modal-close:hover,
+.modal-content .modal-header .close:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}

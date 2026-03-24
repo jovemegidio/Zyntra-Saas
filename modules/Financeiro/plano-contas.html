@@ -865,7 +865,7 @@
                         <i class="fas fa-sitemap"></i>
                     </div>
                     <div class="modal-header-text-padrão">
-                        <h2 id="modal-titulo">Nova Conta</h2>
+                        <h2 id="modal-título">Nova Conta</h2>
                         <p>Configure a conta para o plano de contas</p>
                     </div>
                     <button class="modal-close-padrão" type="button" onclick="fecharModal()" title="Fechar">
@@ -958,7 +958,7 @@
                                 </label>
                                 <div class="valor-destaque-padrão">
                                     <span class="currency-symbol">R$</span>
-                                    <input type="text" id="conta-orcamento" placeholder="0,00" oninput="formatarMoeda(this)">
+                                    <input type="text" id="conta-orçamento" placeholder="0,00" oninput="formatarMoeda(this)">
                                 </div>
                             </div>
                         </div>
@@ -1172,7 +1172,7 @@
                             <i class="fas ${conta.icone || 'fa-folder'}"></i>
                         </div>
                         <div class="tree-info">
-                            <div class="codigo">${conta.id.toString().padStart(3, '0')}</div>
+                            <div class="código">${conta.id.toString().padStart(3, '0')}</div>
                             <div class="nome">${conta.nome}</div>
                         </div>
                         <span class="tree-badge ${conta.tipo}">${conta.tipo === 'receita' ? 'Receita' : 'Despesa'}</span>
@@ -1270,7 +1270,7 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-titulo').textContent = 'Nova Conta';
+            document.getElementById('modal-título').textContent = 'Nova Conta';
             document.getElementById('form-conta').reset();
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
             document.querySelector('.color-option[data-color="#22c55e"]').classList.add('selected');
@@ -1300,14 +1300,14 @@
             if (!conta) return;
 
             editandoId = id;
-            document.getElementById('modal-titulo').textContent = 'Editar Conta';
+            document.getElementById('modal-título').textContent = 'Editar Conta';
             document.getElementById('conta-id').value = conta.id;
             document.getElementById('conta-tipo').value = conta.tipo;
             document.getElementById('conta-pai').value = conta.pai_id || '';
             document.getElementById('conta-nome').value = conta.nome;
-            document.getElementById('conta-descrição').value = conta.descricao || conta.descrição || '';
+            document.getElementById('conta-descrição').value = conta.descrição || conta.descrição || '';
             document.getElementById('conta-icone').value = conta.icone || 'fa-folder';
-            document.getElementById('conta-orcamento').value = conta.orcamento_mensal ? (conta.orcamento_mensal / 1).toFixed(2).replace('.', ',') : '';
+            document.getElementById('conta-orçamento').value = conta.orçamento_mensal ? (conta.orçamento_mensal / 1).toFixed(2).replace('.', ',') : '';
             document.getElementById('conta-status').value = conta.ativo ? '1' : '0';
 
             // Selecionar cor
@@ -1328,7 +1328,7 @@
             const pai_id = document.getElementById('conta-pai').value || null;
             const descrição = document.getElementById('conta-descrição').value.trim();
             const icone = document.getElementById('conta-icone').value;
-            const orcamento = parseFloat(document.getElementById('conta-orcamento').value.replace(',', '.')) || 0;
+            const orçamento = parseFloat(document.getElementById('conta-orçamento').value.replace(',', '.')) || 0;
             const ativo = document.getElementById('conta-status').value === '1';
 
             if (!nome) {
@@ -1336,7 +1336,7 @@
                 return;
             }
 
-            const dados = { nome, tipo, pai_id: pai_id ? parseInt(pai_id) : null, descricao: descrição, icone, cor: corSelecionada, orcamento_mensal: orcamento, ativo };
+            const dados = { nome, tipo, pai_id: pai_id ? parseInt(pai_id) : null, descrição: descrição, icone, cor: corSelecionada, orçamento_mensal: orçamento, ativo };
 
             try {
                 const url = editandoId
@@ -1435,6 +1435,7 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

@@ -46,14 +46,25 @@ const PEDIDO_DETAIL_JOINS = `
 class PedidoRepository extends BaseRepository {
     /**
      * List pedidos with optional period filter and pagination.
+     * Sprint E2E-S1 (E1-HIGH-01 fix): Non-admin users only see their own pedidos.
+     * @param {Object} options - { period, page, limit, userId, isAdmin }
      */
-    async list({ period, page = 1, limit = 1000 } = {}) {
-        let whereClause = '';
+    async list({ period, page = 1, limit = 1000, userId, isAdmin } = {}) {
+        const conditions = [];
         const params = [];
+
         if (period && period !== 'all') {
-            whereClause = 'WHERE p.created_at >= CURDATE() - INTERVAL ? DAY';
+            conditions.push('p.created_at >= CURDATE() - INTERVAL ? DAY');
             params.push(parseInt(period));
         }
+
+        // Sprint E2E-S1: Filtro por vendedor — non-admin só vê pedidos próprios
+        if (userId && !isAdmin) {
+            conditions.push('p.vendedor_id = ?');
+            params.push(userId);
+        }
+
+        const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';
         params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
 
         return this.query(

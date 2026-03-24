@@ -144,7 +144,7 @@ async function abrirConfiguracao(tipo) {
         'nfse': 'NFS-e'
     };
     if (titleMap[tipo]) {
-        document.title = 'Aluforce: Configurações — ' + titleMap[tipo];
+        document.title = 'Zyntra: Configurações — ' + titleMap[tipo];
     }
     
     console.log('[Config Modal] Modal ativado. Classes:', modal.classList.toString(), 'Style display:', modal.style.display);
@@ -279,7 +279,7 @@ function closeConfigModal(modalId) {
         // Restaurar título para Configurações do Sistema ao fechar sub-modal
         const mainModal = document.getElementById('modal-configuracoes');
         if (mainModal && mainModal.classList.contains('active')) {
-            document.title = 'Aluforce: Configurações do Sistema';
+            document.title = 'Zyntra: Configurações do Sistema';
         } else if (window._originalPageTitle) {
             document.title = window._originalPageTitle;
         }
@@ -303,7 +303,7 @@ function closeAllConfigModals() {
     // Restaurar título
     const mainModal = document.getElementById('modal-configuracoes');
     if (mainModal && mainModal.classList.contains('active')) {
-        document.title = 'Aluforce: Configurações do Sistema';
+        document.title = 'Zyntra: Configurações do Sistema';
     } else if (window._originalPageTitle) {
         document.title = window._originalPageTitle;
     }
@@ -3256,7 +3256,7 @@ function fecharModal(modalId) {
         // Restaurar título para Configurações do Sistema ao fechar sub-modal
         const mainModal = document.getElementById('modal-configuracoes');
         if (mainModal && mainModal.classList.contains('active')) {
-            document.title = 'Aluforce: Configurações do Sistema';
+            document.title = 'Zyntra: Configurações do Sistema';
         } else if (window._originalPageTitle) {
             document.title = window._originalPageTitle;
         }
@@ -8084,7 +8084,7 @@ function abrirSobreLancamentos(event) {
         modal.style.setProperty('z-index', '200000', 'important');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        document.title = 'Aluforce: Sobre os Lançamentos';
+        document.title = 'Zyntra: Sobre os Lançamentos';
     } else {
         console.warn('[Config Modal] Modal modal-sobre-lancamentos não encontrado');
         if (typeof showNotification === 'function') {
@@ -8110,7 +8110,7 @@ function abrirHistoricoAlteracoes(event) {
         modal.style.setProperty('z-index', '200000', 'important');
         modal.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
-        document.title = 'Aluforce: Histórico de Alterações';
+        document.title = 'Zyntra: Histórico de Alterações';
         
         // Carregar dados do histórico via API
         carregarHistoricoAlteracoes();

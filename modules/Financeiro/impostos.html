@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1a2e">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -190,10 +191,11 @@
     </style>
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
         <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
 <body>
     <div class="app-container">
@@ -405,7 +407,7 @@
                         <i class="fas fa-percent" id="modal-icon"></i>
                     </div>
                     <div class="modal-header-text-saas">
-                        <h2 id="modal-titulo">Novo Imposto</h2>
+                        <h2 id="modal-título">Novo Imposto</h2>
                         <p id="modal-subtitulo">Configure um novo imposto ou tributo</p>
                     </div>
                     <button class="modal-close-saas" onclick="fecharModal()"><i class="fas fa-times"></i></button>
@@ -425,7 +427,7 @@
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
                                 <label><i class="fas fa-hashtag"></i> Código <span class="required">*</span></label>
-                                <input type="text" id="imposto-codigo" placeholder="Ex: ICMS, ISS, PIS" required>
+                                <input type="text" id="imposto-código" placeholder="Ex: ICMS, ISS, PIS" required>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-layer-group"></i> Tipo <span class="required">*</span></label>
@@ -469,7 +471,7 @@
                             </div>
                             <div class="form-group-saas full">
                                 <label><i class="fas fa-align-left"></i> Descrição</label>
-                                <textarea id="imposto-descricao" rows="3" placeholder="Descrição detalhada do imposto e suas regras de aplicação..."></textarea>
+                                <textarea id="imposto-descrição" rows="3" placeholder="Descrição detalhada do imposto e suas regras de aplicação..."></textarea>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-toggle-on"></i> Status</label>
@@ -598,7 +600,7 @@
 
             tbody.innerHTML = dados.map(i => `
                 <tr>
-                    <td><strong>${i.codigo}</strong></td>
+                    <td><strong>${i.código}</strong></td>
                     <td>${i.nome}</td>
                     <td><span class="badge badge-purple">${i.tipo.charAt(0).toUpperCase() + i.tipo.slice(1)}</span></td>
                     <td><strong>${i.aliquota}%</strong></td>
@@ -648,7 +650,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-titulo').textContent = 'Novo Imposto';
+            document.getElementById('modal-título').textContent = 'Novo Imposto';
             document.getElementById('formImposto').reset();
             document.getElementById('imposto-id').value = '';
             document.getElementById('modalImposto').classList.add('active');
@@ -663,27 +665,27 @@
             if (!imposto) return;
 
             editandoId = id;
-            document.getElementById('modal-titulo').textContent = 'Editar Imposto';
+            document.getElementById('modal-título').textContent = 'Editar Imposto';
             document.getElementById('imposto-id').value = imposto.id;
-            document.getElementById('imposto-codigo').value = imposto.codigo || '';
+            document.getElementById('imposto-código').value = imposto.codigo || '';
             document.getElementById('imposto-nome').value = imposto.nome || '';
             document.getElementById('imposto-tipo').value = imposto.tipo || 'federal';
             document.getElementById('imposto-aliquota').value = imposto.aliquota || 0;
             document.getElementById('imposto-base').value = imposto.base || 'faturamento';
-            document.getElementById('imposto-descricao').value = imposto.descricao || '';
+            document.getElementById('imposto-descrição').value = imposto.descrição || '';
             document.getElementById('imposto-ativo').value = imposto.ativo ? '1' : '0';
             document.getElementById('modalImposto').classList.add('active');
         }
 
         async function salvarImposto() {
             const dados = {
-                codigo: document.getElementById('imposto-codigo').value,
+                codigo: document.getElementById('imposto-código').value,
                 tipo: document.getElementById('imposto-tipo').value,
                 nome: document.getElementById('imposto-nome').value,
                 aliquota: parseFloat(document.getElementById('imposto-aliquota').value) || 0,
                 base: document.getElementById('imposto-base').value,
-                descricao: document.getElementById('imposto-descricao').value,
-                observacoes: document.getElementById('imposto-descricao').value,
+                descrição: document.getElementById('imposto-descrição').value,
+                observacoes: document.getElementById('imposto-descrição').value,
                 ativo: document.getElementById('imposto-ativo').value === '1'
             };
 
@@ -756,8 +758,8 @@
                         <button onclick="this.closest('.imposto-detail-modal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">&times;</button>
                     </div>
                     <div style="display:grid;gap:12px;">
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descricao}</strong></div>
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Código</span><strong style="color:#1e293b;font-size:13px;">${imposto.codigo || imposto.tipo}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descrição}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Código</span><strong style="color:#1e293b;font-size:13px;">${imposto.código || imposto.tipo}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Tipo</span><strong style="color:#1e293b;font-size:13px;">${imposto.tipo}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Alíquota</span><strong style="color:#8b5cf6;font-size:13px;">${imposto.aliquota}%</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Base</span><strong style="color:#1e293b;font-size:13px;">${formatarBase(imposto.base)}</strong></div>
@@ -776,7 +778,7 @@
 
             let csv = 'Código,Nome,Tipo,Alíquota,Base,Status\n';
             impostos.forEach(i => {
-                csv += `"${i.codigo}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${i.código}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -805,6 +807,7 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

@@ -12,6 +12,13 @@ const {
     securityHeaders
 } = require('../../security-middleware');
 
+// v7.5 FIX: Usar auth-central.js para retornar códigos padronizados (AUTH_EXPIRED etc.)
+const { authenticateToken } = require('../../middleware/auth-central');
+// VULN-013 FIX: Audit trail para operações fiscais
+const { auditTrail } = require('../../middleware/audit-trail');
+// VULN-006 FIX: Idempotency keys para prevenir replay attacks
+const { idempotency } = require('../../middleware/idempotency');
+
 const app = express();
 const PORT = process.env.FATURAMENTO_PORT || 3003;
 
@@ -54,37 +61,25 @@ app.use('/modules/Faturamento/public', express.static(path.join(__dirname, 'publ
 // Pool MySQL centralizado
 const pool = require('../../database/pool');
 
-// CRITICAL: JWT_SECRET must be defined — no hardcoded fallback
-const jwt = require('jsonwebtoken');
-if (!process.env.JWT_SECRET) {
-    console.error('❌ ERRO FATAL [Faturamento]: JWT_SECRET não definido no .env');
-    process.exit(1);
-}
-const JWT_SECRET = process.env.JWT_SECRET;
+// Disponibilizar pool para audit trail middleware
+app.locals.pool = pool;
 
-const authenticateToken = (req, res, next) => {
-    // SECURITY A4: Check cookies FIRST, then Authorization header
-    let token = req.cookies?.authToken || req.cookies?.token || null;
-    if (!token) {
-        const authHeader = req.headers['authorization'];
-        token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-    }
-    if (!token) return res.status(401).json({ error: 'Token não fornecido' });
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-        req.user = decoded;
-        next();
-    } catch (err) {
-        if (err.name === 'TokenExpiredError') {
-            return res.status(401).json({ error: 'Token expirado. Faça login novamente.' });
-        }
-        return res.status(403).json({ error: 'Token inválido' });
-    }
-};
+// Garantir tabela de auditoria existe (fire-and-forget)
+pool.query(`CREATE TABLE IF NOT EXISTS auditoria_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    usuario_id INT DEFAULT NULL, acao VARCHAR(50) NOT NULL, modulo VARCHAR(50) NOT NULL,
+    descricao VARCHAR(500) DEFAULT NULL, dados_anteriores JSON DEFAULT NULL, dados_novos JSON DEFAULT NULL,
+    ip_address VARCHAR(45) DEFAULT NULL, user_agent VARCHAR(500) DEFAULT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_modulo_acao (modulo, acao), INDEX idx_usuario (usuario_id), INDEX idx_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`).catch(() => {});
+
+// authenticateToken já importado de auth-central.js acima
 
 // Rota API de faturamento — passa pool e authenticateToken
+// + idempotency para POST critícos + audit trail para operações fiscais
 const faturamentoRouter = require('./api/faturamento');
-app.use('/api/faturamento', faturamentoRouter(pool, authenticateToken));
+app.use('/api/faturamento', idempotency(), auditTrail('faturamento'), faturamentoRouter(pool, authenticateToken));
 
 // Rota inicial
 app.get('/', (req, res) => {

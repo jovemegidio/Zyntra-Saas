@@ -54,15 +54,16 @@ router.get('/alertas', async (req, res) => {
             const [vencidas] = await pool.query(`
                 SELECT COUNT(*) as total, COALESCE(SUM(valor), 0) as valor_total
                 FROM contas_receber
-                WHERE status = 'pendente' AND vencimento < CURDATE()
+                WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+                AND COALESCE(data_vencimento, vencimento) < CURDATE()
             `);
             if (vencidas[0]?.total > 0) {
                 alertas.push({
                     modulo: 'financeiro',
                     titulo: `${vencidas[0].total} conta(s) a receber vencida(s)`,
-                    mensagem: `Valor total: R$ ${Number(vencidas[0].valor_total).toFixed(2).replace('.', ',')}`,
+                    mensagem: `Valor total: R$ ${Number(vencidas[0].valor_total).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`,
                     tipo: 'danger',
-                    link: '/modules/Financeiro/contas-receber.html',
+                    link: '/modules/Financeiro/contas-receber.html?filtro=vencidos',
                     icone: 'exclamation-triangle'
                 });
             }
@@ -73,15 +74,16 @@ router.get('/alertas', async (req, res) => {
             const [vencidas] = await pool.query(`
                 SELECT COUNT(*) as total, COALESCE(SUM(valor), 0) as valor_total
                 FROM contas_pagar
-                WHERE status = 'pendente' AND vencimento < CURDATE()
+                WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+                AND COALESCE(data_vencimento, vencimento) < CURDATE()
             `);
             if (vencidas[0]?.total > 0) {
                 alertas.push({
                     modulo: 'financeiro',
                     titulo: `${vencidas[0].total} conta(s) a pagar vencida(s)`,
-                    mensagem: `Valor total: R$ ${Number(vencidas[0].valor_total).toFixed(2).replace('.', ',')}`,
+                    mensagem: `Valor total: R$ ${Number(vencidas[0].valor_total).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`,
                     tipo: 'danger',
-                    link: '/modules/Financeiro/contas-pagar.html',
+                    link: '/modules/Financeiro/contas-pagar.html?filtro=vencidos',
                     icone: 'exclamation-triangle'
                 });
             }
@@ -92,7 +94,8 @@ router.get('/alertas', async (req, res) => {
             const [vencendo] = await pool.query(`
                 SELECT COUNT(*) as total
                 FROM contas_pagar
-                WHERE status = 'pendente' AND vencimento BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
+                WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+                AND COALESCE(data_vencimento, vencimento) BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
             `);
             if (vencendo[0]?.total > 0) {
                 alertas.push({
@@ -102,6 +105,26 @@ router.get('/alertas', async (req, res) => {
                     tipo: 'warning',
                     link: '/modules/Financeiro/contas-pagar.html',
                     icone: 'clock'
+                });
+            }
+        } catch (e) { /* tabela pode não existir */ }
+
+        // Alertas de pedidos pendentes (Vendas)
+        try {
+            const [pendentes] = await pool.query(`
+                SELECT COUNT(*) as total
+                FROM pedidos
+                WHERE status IN ('pendente', 'aprovado', 'em_producao')
+                AND created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)
+            `);
+            if (pendentes[0]?.total > 0) {
+                alertas.push({
+                    modulo: 'vendas',
+                    titulo: `${pendentes[0].total} pedido(s) pendente(s) há mais de 7 dias`,
+                    mensagem: 'Pedidos aguardando ação',
+                    tipo: 'warning',
+                    link: '/Vendas/',
+                    icone: 'shopping-cart'
                 });
             }
         } catch (e) { /* tabela pode não existir */ }

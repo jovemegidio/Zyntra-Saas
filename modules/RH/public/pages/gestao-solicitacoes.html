@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Gestão de Solicitações</title>
+    <title>Aluforce: Gesto de Solicitaes</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
 
     <style>
-        /* === GESTÃO DE SOLICITAÇÕES - CSS ESPECÍFICO === */
+        /* === GESTO DE SOLICITAES - CSS ESPECFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #f8fafc; }
@@ -25,29 +25,45 @@
         .page-title i { color: var(--primary-pink); }
         .page-subtitle { color: #64748b; margin-top: 4px; font-size: 14px; }
 
-        /* STATS GRID */
+        /* STATS GRID - Padrão KPI */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
             margin-bottom: 24px;
         }
 
         .stat-card {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--primary-pink);
-            transition: all 0.3s ease;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
+            animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) backwards;
         }
+        .stat-card:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card:nth-child(3) { animation-delay: 0.15s; }
+        .stat-card:nth-child(4) { animation-delay: 0.2s; }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .stat-card.pending { border-left-color: var(--warning-yellow); }
-        .stat-card.approved { border-left-color: var(--success-green); }
-        .stat-card.rejected { border-left-color: var(--danger-red); }
-        .stat-label { color: #64748b; font-size: 13px; margin-bottom: 4px; font-weight: 500; }
-        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1); border-color: rgba(99, 102, 241, 0.2); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; color: white; }
+        .stat-icon.purple { background: linear-gradient(135deg, #6366f1, #4f46e5); }
+        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .stat-icon.red { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .stat-content { flex: 1; }
+        .stat-label { color: #64748b; font-size: 13px; margin-bottom: 6px; font-weight: 500; }
+        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; margin-bottom: 4px; }
+        .stat-trend { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 4px; }
+        .stat-trend.positive { color: #10b981; }
+        .stat-trend.negative { color: #ef4444; }
 
         /* FILTERS */
         .filters-card {
@@ -182,7 +198,7 @@
         .btn-reject { background: #fee2e2; color: #991b1b; }
         .btn-reject:hover { background: #fecaca; transform: scale(1.05); }
 
-        /* MODAL SAAS EMPRESARIAL - PADRÃO UNIFICADO */
+        /* MODAL SAAS EMPRESARIAL - PADRO UNIFICADO */
         .modal {
             display: none;
             position: fixed;
@@ -378,7 +394,7 @@
             background: #f8fafc;
         }
 
-        /* MODAL DE CONFIRMAÇÃO */
+        /* MODAL DE CONFIRMAO */
         .confirm-modal {
             max-width: 400px;
             text-align: center;
@@ -485,7 +501,7 @@
     <!-- Tooltips Profissionais -->
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
-    <script src="/js/tooltips-professional.js?v=20260209"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
@@ -500,13 +516,13 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn active" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
-                <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn active" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -527,15 +543,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gestão de Solicitações</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gesto de Solicitaes</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
+                            <img src="" alt="Foto do usurio" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -549,9 +565,9 @@
                     <div>
                         <h1 class="page-title">
                             <i class="fas fa-inbox"></i>
-                            Gestão de Solicitações
+                            Gesto de Solicitaes
                         </h1>
-                        <p class="page-subtitle">Gerencie as solicitações dos colaboradores</p>
+                        <p class="page-subtitle">Gerencie as solicitaes dos colaboradores</p>
                     </div>
                     <button class="btn btn-primary" onclick="carregarSolicitacoes()">
                         <i class="fas fa-sync-alt"></i> Atualizar
@@ -561,23 +577,38 @@
                 <!-- Stats -->
                 <div class="stats-grid">
                     <div class="stat-card">
-                        <div class="stat-label">Total de Solicitações</div>
-                        <div class="stat-value" id="statTotal">0</div>
+                        <div class="stat-icon blue"><i class="fas fa-list-alt"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Total de Solicitações</div>
+                            <div class="stat-value" id="statTotal">0</div>
+                            <div class="stat-trend"><i class="fas fa-check"></i> Atualizado</div>
+                        </div>
                     </div>
-                    <div class="stat-card pending">
-                        <div class="stat-label">Pendentes</div>
-                        <div class="stat-value" id="statPendente">0</div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Pendentes</div>
+                            <div class="stat-value" id="statPendente">0</div>
+                            <div class="stat-trend"><i class="fas fa-hourglass-half"></i> Aguardando</div>
+                        </div>
                     </div>
-                    <div class="stat-card approved">
-                        <div class="stat-label">Aprovadas</div>
-                        <div class="stat-value" id="statAprovado">0</div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Aprovadas</div>
+                            <div class="stat-value" id="statAprovado">0</div>
+                            <div class="stat-trend positive"><i class="fas fa-check"></i> Aprovadas</div>
+                        </div>
                     </div>
-                    <div class="stat-card rejected">
-                        <div class="stat-label">Rejeitadas</div>
-                        <div class="stat-value" id="statRejeitado">0</div>
+                    <div class="stat-card">
+                        <div class="stat-icon red"><i class="fas fa-times-circle"></i></div>
+                        <div class="stat-content">
+                            <div class="stat-label">Rejeitadas</div>
+                            <div class="stat-value" id="statRejeitado">0</div>
+                            <div class="stat-trend negative"><i class="fas fa-times"></i> Rejeitadas</div>
+                        </div>
                     </div>
                 </div>
-
                 <!-- Filters -->
                 <div class="filters-card">
                     <div class="filter-group">
@@ -585,19 +616,19 @@
                         <select id="filterStatus">
                             <option value="">Todos os status</option>
                             <option value="Pendente">Pendente</option>
-                            <option value="Em Análise">Em Análise</option>
+                            <option value="Em Anlise">Em Anlise</option>
                             <option value="Aprovado">Aprovado</option>
                             <option value="Rejeitado">Rejeitado</option>
-                            <option value="Concluído">Concluído</option>
+                            <option value="Concludo">Concludo</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Tipo</label>
                         <select id="filterTipo">
                             <option value="">Todos os tipos</option>
-                            <option value="Alteração de Dados Cadastrais">Alteração de Dados</option>
-                            <option value="Atestado Médico">Atestado Médico</option>
-                            <option value="Férias">Férias</option>
+                            <option value="Alterao de Dados Cadastrais">Alterao de Dados</option>
+                            <option value="Atestado Mdico">Atestado Mdico</option>
+                            <option value="Frias">Frias</option>
                             <option value="Folga">Folga</option>
                             <option value="Hora Extra">Hora Extra</option>
                             <option value="Outros">Outros</option>
@@ -620,7 +651,7 @@
                 <!-- Table -->
                 <div class="table-card">
                     <div class="table-header">
-                        <span class="table-title"><i class="fas fa-list"></i> Lista de Solicitações</span>
+                        <span class="table-title"><i class="fas fa-list"></i> Lista de Solicitaes</span>
                     </div>
                     <table>
                         <thead>
@@ -632,15 +663,15 @@
                                 <th>Prioridade</th>
                                 <th>Data</th>
                                 <th>Status</th>
-                                <th>Ações</th>
+                                <th>Aes</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaSolicitacoes"></tbody>
                     </table>
                     <div class="empty-state" id="emptyState" style="display: none;">
                         <i class="fas fa-inbox"></i>
-                        <h3>Nenhuma solicitação encontrada</h3>
-                        <p>Não há solicitações com os filtros selecionados.</p>
+                        <h3>Nenhuma solicitao encontrada</h3>
+                        <p>No h solicitaes com os filtros selecionados.</p>
                     </div>
                 </div>
             </div>
@@ -652,7 +683,7 @@
         <div class="modal-overlay" onclick="fecharModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-file-alt"></i> Detalhes da Solicitação</h3>
+                <h3><i class="fas fa-file-alt"></i> Detalhes da Solicitao</h3>
                 <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" id="modalBody"></div>
@@ -670,43 +701,43 @@
         </div>
     </div>
 
-    <!-- Modal Confirmar Aprovação -->
+    <!-- Modal Confirmar Aprovao -->
     <div class="modal" id="modalAprovar">
         <div class="modal-overlay" onclick="fecharModalAprovar()"></div>
         <div class="modal-content" style="max-width:440px;">
             <div class="modal-header" style="background:linear-gradient(135deg, #059669 0%, #10b981 100%);">
-                <h3><i class="fas fa-check-circle"></i> Aprovar Solicitação</h3>
+                <h3><i class="fas fa-check-circle"></i> Aprovar Solicitao</h3>
                 <button class="modal-close" onclick="fecharModalAprovar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <p style="color:#475569;margin-bottom:16px;">Tem certeza que deseja aprovar esta solicitação?</p>
-                <textarea id="respostaAprovar" class="confirm-input" placeholder="Observação (opcional)..." rows="3" style="resize: vertical;"></textarea>
+                <p style="color:#475569;margin-bottom:16px;">Tem certeza que deseja aprovar esta solicitao?</p>
+                <textarea id="respostaAprovar" class="confirm-input" placeholder="Observao (opcional)..." rows="3" style="resize: vertical;"></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="fecharModalAprovar()">Cancelar</button>
                 <button class="btn btn-success" onclick="confirmarAprovacao()">
-                    <i class="fas fa-check"></i> Confirmar Aprovação
+                    <i class="fas fa-check"></i> Confirmar Aprovao
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Modal Confirmar Rejeição -->
+    <!-- Modal Confirmar Rejeio -->
     <div class="modal" id="modalRejeitar">
         <div class="modal-overlay" onclick="fecharModalRejeitar()"></div>
         <div class="modal-content" style="max-width:440px;">
             <div class="modal-header" style="background:linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
-                <h3><i class="fas fa-times-circle"></i> Rejeitar Solicitação</h3>
+                <h3><i class="fas fa-times-circle"></i> Rejeitar Solicitao</h3>
                 <button class="modal-close" onclick="fecharModalRejeitar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
-                <p style="color:#475569;margin-bottom:16px;">Informe o motivo da rejeição para o colaborador.</p>
-                <textarea id="motivoRejeicao" class="confirm-input" placeholder="Motivo da rejeição..." rows="3" style="resize: vertical;" required></textarea>
+                <p style="color:#475569;margin-bottom:16px;">Informe o motivo da rejeio para o colaborador.</p>
+                <textarea id="motivoRejeicao" class="confirm-input" placeholder="Motivo da rejeio..." rows="3" style="resize: vertical;" required></textarea>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="fecharModalRejeitar()">Cancelar</button>
                 <button class="btn btn-danger" onclick="confirmarRejeicao()">
-                    <i class="fas fa-times"></i> Confirmar Rejeição
+                    <i class="fas fa-times"></i> Confirmar Rejeio
                 </button>
             </div>
         </div>
@@ -716,10 +747,10 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        let solicitacoes = [];
-        let solicitacaoAtual = null;
+        let solicitações = [];
+        let solicitaçãoAtual = null;
 
-        // Sanitização XSS
+        // Sanitizao XSS
         function escapeHtml(value) {
             if (value === null || value === undefined) return '';
             const div = document.createElement('div');
@@ -727,14 +758,14 @@
             return div.innerHTML;
         }
 
-        // Obter token de autenticação
+        // Obter token de autenticao
         function getAuthHeaders() {
             return {
                 'Content-Type': 'application/json',
             };
         }
 
-        // Carregar dados do usuário
+        // Carregar dados do usurio
         function carregarUsuario() {
             try {
                 const userData = JSON.parse(localStorage.getItem('userData') || '{}');
@@ -762,7 +793,7 @@
             const datePart = str.substring(0, 10);
             const parts = datePart.split('-');
             const dataFormatada = parts.length === 3 ? parts[2] + '/' + parts[1] + '/' + parts[0] : datePart;
-            // Extrair hora se disponível (ex: 2024-09-02T14:30:00)
+            // Extrair hora se disponvel (ex: 2024-09-02T14:30:00)
             const timeMatch = str.match(/T(\d{2}):(\d{2})/);
             if (timeMatch) return dataFormatada + ' ' + timeMatch[1] + ':' + timeMatch[2];
             return dataFormatada;
@@ -772,14 +803,14 @@
         function getStatusClass(status) {
             const s = (status || '').toLowerCase().replace(/\s+/g, '-');
             if (s.includes('pendente')) return 'pendente';
-            if (s.includes('analise') || s.includes('análise')) return 'em-analise';
+            if (s.includes('analise') || s.includes('anlise')) return 'em-analise';
             if (s.includes('aprovad')) return 'aprovado';
             if (s.includes('rejeitad')) return 'rejeitado';
             if (s.includes('conclu')) return 'concluido';
             return 'pendente';
         }
 
-        // Carregar solicitações
+        // Carregar solicitaes
         async function carregarSolicitacoes() {
             try {
                 const status = document.getElementById('filterStatus').value;
@@ -798,21 +829,21 @@
 
                 if (!response.ok) throw new Error('Erro ao carregar');
 
-                solicitacoes = await response.json();
+                solicitações = await response.json();
                 renderizarTabela();
                 atualizarStats();
             } catch (error) {
                 console.error('Erro:', error);
-                showToast('error', 'Erro ao carregar solicitações');
+                showToast('error', 'Erro ao carregar solicitaes');
             }
         }
 
-        // Atualizar estatísticas
+        // Atualizar estatsticas
         function atualizarStats() {
-            const total = solicitacoes.length;
-            const pendentes = solicitacoes.filter(s => s.status === 'Pendente' || s.status === 'Em Análise').length;
-            const aprovados = solicitacoes.filter(s => s.status === 'Aprovado' || s.status === 'Concluído').length;
-            const rejeitados = solicitacoes.filter(s => s.status === 'Rejeitado').length;
+            const total = solicitações.length;
+            const pendentes = solicitações.filter(s => s.status === 'Pendente' || s.status === 'Em Anlise').length;
+            const aprovados = solicitações.filter(s => s.status === 'Aprovado' || s.status === 'Concludo').length;
+            const rejeitados = solicitações.filter(s => s.status === 'Rejeitado').length;
 
             document.getElementById('statTotal').textContent = total;
             document.getElementById('statPendente').textContent = pendentes;
@@ -825,19 +856,19 @@
             const tbody = document.getElementById('tabelaSolicitacoes');
             const empty = document.getElementById('emptyState');
 
-            if (solicitacoes.length === 0) {
+            if (solicitações.length === 0) {
                 tbody.innerHTML = '';
                 empty.style.display = 'block';
                 return;
             }
 
             empty.style.display = 'none';
-            tbody.innerHTML = solicitacoes.map(s => `
+            tbody.innerHTML = solicitações.map(s => `
                 <tr>
                     <td><strong>#${s.id}</strong></td>
                     <td>
-                        <div style="font-weight: 500;">${escapeHtml(s.funcionario_nome || '-')}</div>
-                        <small style="color: #64748b;">${escapeHtml(s.funcionario_email || '')}</small>
+                        <div style="font-weight: 500;">${escapeHtml(s.funcionário_nome || '-')}</div>
+                        <small style="color: #64748b;">${escapeHtml(s.funcionário_email || '')}</small>
                     </td>
                     <td>${escapeHtml(s.tipo || '-')}</td>
                     <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(s.assunto || '-')}</td>
@@ -849,7 +880,7 @@
                             <button class="btn-action btn-view" onclick="verDetalhes(${s.id})" title="Ver detalhes">
                                 <i class="fas fa-eye"></i>
                             </button>
-                            ${s.status === 'Pendente' || s.status === 'Em Análise' ? `
+                            ${s.status === 'Pendente' || s.status === 'Em Anlise' ? `
                                 <button class="btn-action btn-approve" onclick="aprovarRapido(${s.id})" title="Aprovar">
                                     <i class="fas fa-check"></i>
                                 </button>
@@ -865,92 +896,92 @@
 
         // Ver detalhes
         function verDetalhes(id) {
-            solicitacaoAtual = solicitacoes.find(s => s.id === id);
-            if (!solicitacaoAtual) return;
+            solicitaçãoAtual = solicitações.find(s => s.id === id);
+            if (!solicitaçãoAtual) return;
 
             const body = document.getElementById('modalBody');
             const footer = document.getElementById('modalFooter');
-            const isPendente = solicitacaoAtual.status === 'Pendente' || solicitacaoAtual.status === 'Em Análise';
+            const isPendente = solicitaçãoAtual.status === 'Pendente' || solicitaçãoAtual.status === 'Em Anlise';
 
             body.innerHTML = `
                 <div class="detail-grid">
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
                         <div class="detail-content">
-                            <div class="detail-label">ID da Solicitação</div>
-                            <div class="detail-value">#${solicitacaoAtual.id}</div>
+                            <div class="detail-label">ID da Solicitao</div>
+                            <div class="detail-value">#${solicitaçãoAtual.id}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-user"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Colaborador</div>
-                            <div class="detail-value">${escapeHtml(solicitacaoAtual.funcionario_nome || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionário_nome || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-envelope"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Email</div>
-                            <div class="detail-value">${escapeHtml(solicitacaoAtual.funcionario_email || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.funcionário_email || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-tag"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Tipo</div>
-                            <div class="detail-value">${escapeHtml(solicitacaoAtual.tipo || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.tipo || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-folder"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Categoria</div>
-                            <div class="detail-value">${escapeHtml(solicitacaoAtual.categoria || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.categoria || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-heading"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Assunto</div>
-                            <div class="detail-value">${escapeHtml(solicitacaoAtual.assunto || '-')}</div>
+                            <div class="detail-value">${escapeHtml(solicitaçãoAtual.assunto || '-')}</div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-flag"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Prioridade</div>
-                            <div class="detail-value"><span class="priority-badge ${solicitacaoAtual.prioridade || 'normal'}">${(solicitacaoAtual.prioridade || 'normal').toUpperCase()}</span></div>
+                            <div class="detail-value"><span class="priority-badge ${solicitaçãoAtual.prioridade || 'normal'}">${(solicitaçãoAtual.prioridade || 'normal').toUpperCase()}</span></div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-info-circle"></i></div>
                         <div class="detail-content">
                             <div class="detail-label">Status</div>
-                            <div class="detail-value"><span class="status-badge ${getStatusClass(solicitacaoAtual.status)}">${escapeHtml(solicitacaoAtual.status || 'Pendente')}</span></div>
+                            <div class="detail-value"><span class="status-badge ${getStatusClass(solicitaçãoAtual.status)}">${escapeHtml(solicitaçãoAtual.status || 'Pendente')}</span></div>
                         </div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-icon"><i class="fas fa-calendar"></i></div>
                         <div class="detail-content">
-                            <div class="detail-label">Data da Solicitação</div>
-                            <div class="detail-value">${formatarData(solicitacaoAtual.created_at)}</div>
+                            <div class="detail-label">Data da Solicitao</div>
+                            <div class="detail-value">${formatarData(solicitaçãoAtual.created_at)}</div>
                         </div>
                     </div>
                 </div>
                 <div class="detail-description">
-                    <div class="detail-description-label"><i class="fas fa-align-left"></i> Descrição</div>
-                    <div class="detail-description-text">${escapeHtml(solicitacaoAtual.descricao || 'Sem descrição')}</div>
+                    <div class="detail-description-label"><i class="fas fa-align-left"></i> Descrio</div>
+                    <div class="detail-description-text">${escapeHtml(solicitaçãoAtual.descrição || 'Sem descrio')}</div>
                 </div>
-                ${solicitacaoAtual.resposta ? `
+                ${solicitaçãoAtual.resposta ? `
                 <div class="detail-description" style="background: #dcfce7; margin-top: 12px;">
                     <div class="detail-description-label" style="color: #166534;"><i class="fas fa-reply"></i> Resposta do RH</div>
-                    <div class="detail-description-text" style="color: #166534;">${escapeHtml(solicitacaoAtual.resposta)}</div>
+                    <div class="detail-description-text" style="color: #166534;">${escapeHtml(solicitaçãoAtual.resposta)}</div>
                 </div>
                 ` : ''}
             `;
 
-            // Mostrar/ocultar botões de ação baseado no status
+            // Mostrar/ocultar botes de ao baseado no status
             footer.innerHTML = `
                 <button class="btn btn-outline" onclick="fecharModal()">
                     <i class="fas fa-times"></i> Fechar
@@ -983,7 +1014,7 @@
             document.getElementById('motivoRejeicao').value = '';
         }
 
-        // Mostrar modais de confirmação
+        // Mostrar modais de confirmao
         function mostrarConfirmAprovar() {
             document.getElementById('modalAprovar').classList.add('show');
         }
@@ -992,14 +1023,14 @@
             document.getElementById('modalRejeitar').classList.add('show');
         }
 
-        // Confirmar aprovação
+        // Confirmar aprovao
         async function confirmarAprovacao() {
-            if (!solicitacaoAtual) return;
+            if (!solicitaçãoAtual) return;
 
             const resposta = document.getElementById('respostaAprovar').value;
 
             try {
-                const response = await fetch(`/api/rh/solicitacoes/${solicitacaoAtual.id}/status`, { credentials: 'include', method: 'PUT',
+                const response = await fetch(`/api/rh/solicitacoes/${solicitaçãoAtual.id}/status`, { credentials: 'include', method: 'PUT',
                     headers: getAuthHeaders(),
                     credentials: 'include',
                     body: JSON.stringify({ status: 'Aprovado', resposta })
@@ -1007,22 +1038,22 @@
 
                 if (!response.ok) throw new Error('Erro');
 
-                showToast('success', 'Solicitação aprovada com sucesso!');
+                showToast('success', 'Solicitao aprovada com sucesso!');
                 fecharModalAprovar();
                 fecharModal();
                 carregarSolicitacoes();
             } catch (error) {
-                showToast('error', 'Erro ao aprovar solicitação');
+                showToast('error', 'Erro ao aprovar solicitao');
             }
         }
 
-        // Confirmar rejeição
+        // Confirmar rejeio
         async function confirmarRejeicao() {
-            if (!solicitacaoAtual) return;
+            if (!solicitaçãoAtual) return;
 
             const motivo = document.getElementById('motivoRejeicao').value.trim();
             if (!motivo) {
-                showToast('error', 'Informe o motivo da rejeição');
+                showToast('error', 'Informe o motivo da rejeio');
                 return;
             }
 
@@ -1035,24 +1066,24 @@
 
                 if (!response.ok) throw new Error('Erro');
 
-                showToast('success', 'Solicitação rejeitada');
+                showToast('success', 'Solicitao rejeitada');
                 fecharModalRejeitar();
                 fecharModal();
                 carregarSolicitacoes();
             } catch (error) {
-                showToast('error', 'Erro ao rejeitar solicitação');
+                showToast('error', 'Erro ao rejeitar solicitao');
             }
         }
 
-        // Aprovar rápido (da tabela)
+        // Aprovar rpido (da tabela)
         async function aprovarRapido(id) {
-            solicitacaoAtual = solicitacoes.find(s => s.id === id);
+            solicitaçãoAtual = solicitações.find(s => s.id === id);
             mostrarConfirmAprovar();
         }
 
-        // Rejeitar rápido (da tabela)
+        // Rejeitar rpido (da tabela)
         async function rejeitarRapido(id) {
-            solicitacaoAtual = solicitacoes.find(s => s.id === id);
+            solicitaçãoAtual = solicitações.find(s => s.id === id);
             mostrarConfirmRejeitar();
         }
 
@@ -1081,28 +1112,22 @@
             carregarUsuario();
             carregarSolicitacoes();
 
-            // WebSocket para atualização em tempo real
-            try {
-                if (typeof io !== 'undefined') {
-                    const socket = io({ transports: ['polling', 'websocket'], reconnectionAttempts: 3 });
-                    socket.on('solicitacao-created', () => carregarSolicitacoes());
-                    socket.on('solicitacao-updated', () => carregarSolicitacoes());
-                    socket.on('connect_error', () => {});
-                }
-            } catch (e) { /* Socket.IO não disponível */ }
+            // Auto-refresh a cada 30s (sem socket.io para evitar erros de polling)
+            setInterval(() => carregarSolicitacoes(), 30000);
         });
     </script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
-    <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
         <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
-    <script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

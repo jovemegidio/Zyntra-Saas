@@ -236,7 +236,10 @@
 
             // Título e mensagem
             document.getElementById('alu-cf-title').textContent = title;
-            document.getElementById('alu-cf-msg').innerHTML = message;
+            // Permite HTML seguro (já escapado nos atalhos via _escapeHtml)
+            // mas sanitiza tags <script> por segurança
+            var safeMsg = String(message || '').replace(/<script[\s\S]*?<\/script>/gi, '');
+            document.getElementById('alu-cf-msg').innerHTML = safeMsg;
 
             // Botão Cancelar
             var cancelBtn = document.getElementById('alu-cf-cancel');

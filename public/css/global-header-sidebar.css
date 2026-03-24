@@ -782,3 +782,188 @@ body > main:not(.main-area) {
     visibility: visible;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ============================================================
+   MODAL VISUAL STANDARD — Padronização Visual Global v1.0
+   Aplicado a todos os módulos via global-header-sidebar.css
+   Não altera funcionalidades, apenas padroniza o visual.
+   ============================================================ */
+
+/* --- Overlay backdrop --- */
+.modal-overlay {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* --- Container principal --- */
+.modal {
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* --- Header padronizado (dark gradient) --- */
+.modal-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    color: #ffffff;
+    border-bottom: none;
+    padding: 18px 24px;
+}
+
+.modal-header h2,
+.modal-header h3,
+.modal-header h4,
+.modal-header .modal-title {
+    color: #ffffff;
+    font-weight: 600;
+    margin: 0;
+}
+
+.modal-header i,
+.modal-header .fas,
+.modal-header .far,
+.modal-header .fab {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* --- Botão fechar (no header escuro) --- */
+.modal-close {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.85);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    transform: scale(1.08);
+}
+
+/* --- Modal body --- */
+.modal-body {
+    background: #f8fafc;
+}
+
+/* --- Modal footer --- */
+.modal-footer {
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+/* --- Animação de entrada --- */
+@keyframes aluforceModalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal {
+    animation: aluforceModalSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   MODAL COMPAT — Famílias não-padrão
+   Cobertura completa para módulos Financeiro e Vendas
+   ============================================================ */
+
+/* overlay-omie */
+.modal-overlay-omie {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-omie {
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05);
+    animation: aluforceModalSlideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-conta-receber {
+    border-radius: 16px;
+}
+
+/* header-conta: white → dark gradient */
+.modal-header-conta {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border-bottom: none !important;
+    color: #ffffff;
+    border-radius: 16px 0 0 0 !important;
+}
+
+.modal-título-conta h2 { color: #ffffff !important; }
+
+.modal-avatar-conta {
+    background: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.btn-fechar-omie {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
+    border-radius: 8px !important;
+}
+
+.btn-fechar-omie:hover {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
+    transform: none !important;
+}
+
+/* header-omie: Vendas white → dark gradient */
+.modal-header-omie {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-bottom: none;
+    color: #ffffff;
+}
+
+.modal-header-omie h2 { color: #ffffff; }
+
+.modal-header-omie .close-btn {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.modal-header-omie .close-btn:hover {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+}
+
+/* modal-header-institucional: blue → dark + mantém variações semânticas */
+.modal-header-institucional {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.modal-header-institucional.header-green  { background: linear-gradient(135deg, #065f46 0%, #047857 100%); }
+.modal-header-institucional.header-red    { background: linear-gradient(135deg, #991b1b 0%, #b91c1c 100%); }
+.modal-header-institucional.header-amber  { background: linear-gradient(135deg, #92400e 0%, #b45309 100%); }
+.modal-header-institucional.header-purple { background: linear-gradient(135deg, #5b21b6 0%, #6d28d9 100%); }
+.modal-header-institucional.header-gray   { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); }
+
+/* modal-receber-header: já é gradiente, só padroniza raio */
+.modal-receber-header {
+    border-radius: 16px 16px 0 0;
+}

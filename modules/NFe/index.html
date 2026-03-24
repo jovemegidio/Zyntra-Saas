@@ -1,14 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
-    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+
 
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1e1e1e">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -17,18 +18,21 @@
     <title>Aluforce: Faturamento</title>
 
     <!-- Sistema de Autenticação Unificado — DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260301" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
     <!-- CSP Fix - Converter onclick inline para addEventListener -->
     <script src="/js/csp-fix.js" defer></script>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- Design System — Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
@@ -51,7 +55,9 @@
     <!-- Page-specific styles (notification panel, modal config, certificate) -->
     <style>
         /* Notification Panel */
-        .notification-container { position: relative; }
+        .notification-container {
+            position: relative;
+        }
 
         .notification-panel {
             position: absolute;
@@ -61,12 +67,15 @@
             max-height: 480px;
             background: white;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             z-index: 10000;
             display: none;
             overflow: hidden;
         }
-        .notification-panel.active { display: block; }
+
+        .notification-panel.active {
+            display: block;
+        }
 
         .notification-header {
             display: flex;
@@ -76,254 +85,890 @@
             background: linear-gradient(135deg, #10b981, #059669);
             color: white;
         }
-        .notification-header h3 {
-            margin: 0; font-size: 16px; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .notification-actions { display: flex; gap: 8px; }
-        .notification-actions button {
-            background: rgba(255,255,255,0.2); border: none; color: white;
-            width: 32px; height: 32px; border-radius: 8px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; transition: all 0.2s;
-        }
-        .notification-actions button:hover { background: rgba(255,255,255,0.3); }
 
-        .notification-list { max-height: 340px; overflow-y: auto; }
+        .notification-header h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .notification-actions button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .notification-actions button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .notification-list {
+            max-height: 340px;
+            overflow-y: auto;
+        }
 
         .notification-empty {
-            padding: 40px 20px; text-align: center; color: #888;
+            padding: 40px 20px;
+            text-align: center;
+            color: #888;
         }
-        .notification-empty i { font-size: 40px; margin-bottom: 12px; color: #10b981; }
-        .notification-empty p { margin: 0; font-size: 14px; }
+
+        .notification-empty i {
+            font-size: 40px;
+            margin-bottom: 12px;
+            color: #10b981;
+        }
+
+        .notification-empty p {
+            margin: 0;
+            font-size: 14px;
+        }
 
         /* Config Content Toggle */
-        .config-content { display: none; padding: 24px; }
-        .config-content.active { display: block; }
+        .config-content {
+            display: none;
+            padding: 24px;
+        }
+
+        .config-content.active {
+            display: block;
+        }
 
         /* Config Section */
         .config-section h3 {
-            font-size: 16px; font-weight: 600; color: #333; margin: 0 0 8px;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .config-desc { font-size: 13px; color: #666; margin: 0 0 20px; }
+
+        .config-desc {
+            font-size: 13px;
+            color: #666;
+            margin: 0 0 20px;
+        }
 
         /* Certificate Status */
         .cert-status {
-            display: flex; align-items: center; gap: 16px; padding: 16px;
-            background: #f8f9fa; border-radius: 12px; margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            margin-bottom: 20px;
         }
+
         .cert-status-icon {
-            width: 48px; height: 48px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
         }
-        .cert-status-icon.warning { background: #fef3c7; color: #d97706; }
-        .cert-status-icon.success { background: #d1fae5; color: #059669; }
-        .cert-status-icon.error { background: #fee2e2; color: #dc2626; }
-        .cert-status-info { display: flex; flex-direction: column; }
-        .cert-status-label { font-weight: 600; color: #333; font-size: 14px; }
-        .cert-status-detail { font-size: 12px; color: #666; margin-top: 2px; }
+
+        .cert-status-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .cert-status-icon.success {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .cert-status-icon.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .cert-status-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cert-status-label {
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .cert-status-detail {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
 
         /* Upload Zone */
         .upload-zone {
-            border: 2px dashed #d1d5db; border-radius: 12px; padding: 40px 20px;
-            text-align: center; cursor: pointer; transition: all 0.3s; background: #fafafa;
+            border: 2px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #fafafa;
         }
-        .upload-zone:hover { border-color: #10b981; background: #ecfdf5; }
-        .upload-zone i { font-size: 40px; color: #9ca3af; display: block; margin-bottom: 12px; }
-        .upload-zone span { display: block; color: #374151; font-weight: 500; margin-bottom: 4px; }
-        .upload-zone small { color: #9ca3af; font-size: 12px; }
+
+        .upload-zone:hover {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
+        .upload-zone i {
+            font-size: 40px;
+            color: #9ca3af;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        .upload-zone span {
+            display: block;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .upload-zone small {
+            color: #9ca3af;
+            font-size: 12px;
+        }
 
         /* Certificate File Selected */
         .cert-file-selected {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 16px; background: #ecfdf5; border: 1px solid #10b981;
-            border-radius: 8px; margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #ecfdf5;
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            margin-bottom: 16px;
         }
-        .file-info { display: flex; align-items: center; gap: 10px; color: #059669; font-weight: 500; }
-        .file-info i { font-size: 18px; }
-        .btn-remove-file { background: none; border: none; color: #dc2626; cursor: pointer; padding: 4px 8px; }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #059669;
+            font-weight: 500;
+        }
+
+        .file-info i {
+            font-size: 18px;
+        }
+
+        .btn-remove-file {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
 
         /* Password Input */
-        .cert-password-area { margin-bottom: 20px; }
-        .cert-password-area label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-        .password-input-wrapper {
-            display: flex; border: 1px solid #d1d5db; border-radius: 8px; overflow: hidden;
+        .cert-password-area {
+            margin-bottom: 20px;
         }
-        .password-input-wrapper input { flex: 1; padding: 12px; border: none; font-size: 14px; outline: none; }
-        .toggle-password { background: #f3f4f6; border: none; padding: 0 14px; cursor: pointer; color: #6b7280; }
+
+        .cert-password-area label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .password-input-wrapper {
+            display: flex;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .password-input-wrapper input {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .toggle-password {
+            background: #f3f4f6;
+            border: none;
+            padding: 0 14px;
+            cursor: pointer;
+            color: #6b7280;
+        }
 
         /* Config Buttons */
-        .cert-actions { display: flex; gap: 12px; margin-top: 20px; }
+        .cert-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
 
         .btn-config {
-            padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500;
-            cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            border: none;
         }
-        .btn-config:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-primary { background: #10b981; color: white; }
-        .btn-primary:hover:not(:disabled) { background: #059669; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        .btn-secondary:hover { background: #d1d5db; }
-        .btn-cancel { background: #f3f4f6; color: #6b7280; }
-        .btn-cancel:hover { background: #e5e7eb; }
-        .btn-save { background: #10b981; color: white; }
-        .btn-save:hover { background: #059669; }
+
+        .btn-config:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #059669;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-cancel {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .btn-cancel:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-save {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-save:hover {
+            background: #059669;
+        }
 
         /* Config Form Grid */
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .form-group { display: flex; flex-direction: column; }
-        .form-group.full-width { grid-column: span 2; }
-        .form-group label { font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
-        .form-group input {
-            padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 8px;
-            font-size: 14px; transition: border-color 0.2s;
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
         }
-        .form-group input:focus { outline: none; border-color: #10b981; }
-        .form-group input[readonly] { background: #f9fafb; color: #6b7280; }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .form-group input[readonly] {
+            background: #f9fafb;
+            color: #6b7280;
+        }
 
         /* Ambiente Options */
-        .ambiente-options { display: flex; flex-direction: column; gap: 12px; }
-        .ambiente-option { cursor: pointer; }
-        .ambiente-option input { display: none; }
+        .ambiente-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .ambiente-option {
+            cursor: pointer;
+        }
+
+        .ambiente-option input {
+            display: none;
+        }
+
         .ambiente-card {
-            display: flex; align-items: center; gap: 16px; padding: 16px;
-            border: 2px solid #e5e7eb; border-radius: 12px; transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.2s;
         }
-        .ambiente-option input:checked + .ambiente-card { border-color: #10b981; background: #ecfdf5; }
+
+        .ambiente-option input:checked+.ambiente-card {
+            border-color: #10b981;
+            background: #ecfdf5;
+        }
+
         .ambiente-icon {
-            width: 48px; height: 48px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
         }
-        .ambiente-icon.warning { background: #fef3c7; color: #d97706; }
-        .ambiente-icon.success { background: #d1fae5; color: #059669; }
-        .ambiente-info { display: flex; flex-direction: column; }
-        .ambiente-title { font-weight: 600; color: #333; }
-        .ambiente-desc { font-size: 12px; color: #666; }
+
+        .ambiente-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .ambiente-icon.success {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .ambiente-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ambiente-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .ambiente-desc {
+            font-size: 12px;
+            color: #666;
+        }
 
         /* Config Warning */
         .config-warning {
-            display: flex; align-items: center; gap: 10px; padding: 12px 16px;
-            background: #fef3c7; border-radius: 8px; margin-top: 20px; font-size: 13px; color: #92400e;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            background: #fef3c7;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #92400e;
         }
-        .config-warning i { color: #d97706; }
+
+        .config-warning i {
+            color: #d97706;
+        }
 
         /* ============================================ */
-        /* ========= PCP-STYLE DASHBOARD ============= */
+        /* ========= STAT CARDS (Compras Pattern) ===== */
         /* ============================================ */
 
-        .stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-bottom:28px; }
-
-        .stat-card {
-            background:white; border-radius:16px; padding:22px 24px;
-            box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.03);
-            border:1px solid rgba(0,0,0,0.06); display:flex; align-items:center; gap:18px;
-            transition:all 0.3s cubic-bezier(0.4,0,0.2,1); position:relative; overflow:hidden;
+        /* faturamento-layout.css already provides the Compras pattern */
+        /* Only add color mappings not in the base CSS */
+        .stat-card.cyan::before {
+            background: linear-gradient(180deg, #06b6d4, #22d3ee);
         }
-        .stat-card::before { content:''; position:absolute; top:0; right:0; width:120px; height:120px; border-radius:50%; opacity:0.06; transform:translate(30px,-30px); transition:all 0.4s ease; }
-        .stat-card::after { content:''; position:absolute; bottom:0; left:0; width:100%; height:3px; border-radius:0 0 16px 16px; transition:height 0.3s ease; }
 
-        .stat-card.purple::before { background:#a78bfa; }
-        .stat-card.green::before { background:#2dd4a0; }
-        .stat-card.cyan::before { background:#22d3ee; }
-        .stat-card.yellow::before { background:#ffb340; }
+        .stat-card.yellow::before {
+            background: linear-gradient(180deg, #f59e0b, #fbbf24);
+        }
 
-        .stat-card.purple::after { background:linear-gradient(90deg,#7c5cf5,#a78bfa); }
-        .stat-card.green::after { background:linear-gradient(90deg,#0fb884,#2dd4a0); }
-        .stat-card.cyan::after { background:linear-gradient(90deg,#06b6d4,#22d3ee); }
-        .stat-card.yellow::after { background:linear-gradient(90deg,#f59e0b,#ffb340); }
+        .stat-card.cyan {
+            background: linear-gradient(135deg, #ecfeff 0%, white 40%);
+        }
 
-        .stat-card:hover { transform:translateY(-6px); box-shadow:0 8px 30px rgba(0,0,0,0.08),0 2px 8px rgba(0,0,0,0.04); border-color:rgba(0,0,0,0.08); }
-        .stat-card:hover::before { opacity:0.1; transform:translate(20px,-20px) scale(1.2); }
-        .stat-card:hover::after { height:4px; }
+        .stat-card.yellow {
+            background: linear-gradient(135deg, #fffbeb 0%, white 40%);
+        }
 
-        .stat-icon { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:22px; color:white; flex-shrink:0; position:relative; z-index:1; }
-        .stat-icon.purple { background:linear-gradient(135deg,#a78bfa,#7c5cf5); box-shadow:0 4px 14px rgba(124,92,245,0.30); }
-        .stat-icon.green { background:linear-gradient(135deg,#2dd4a0,#0fb884); box-shadow:0 4px 14px rgba(15,184,132,0.30); }
-        .stat-icon.cyan { background:linear-gradient(135deg,#22d3ee,#06b6d4); box-shadow:0 4px 14px rgba(6,182,212,0.30); }
-        .stat-icon.yellow { background:linear-gradient(135deg,#ffb340,#f59e0b); box-shadow:0 4px 14px rgba(245,158,11,0.30); }
+        .stat-icon.cyan {
+            background: linear-gradient(135deg, #cffafe, #a5f3fc);
+            color: #0e7490;
+        }
 
-        /* Override faturamento-layout.css flat icons → gradient icons */
-        .stat-icon.purple { background: linear-gradient(135deg,#a78bfa,#7c5cf5) !important; color: #fff !important; box-shadow: 0 4px 14px rgba(124,92,245,0.30) !important; width: 52px !important; height: 52px !important; border-radius: 14px !important; font-size: 22px !important; }
-        .stat-icon.green { background: linear-gradient(135deg,#2dd4a0,#0fb884) !important; color: #fff !important; box-shadow: 0 4px 14px rgba(15,184,132,0.30) !important; width: 52px !important; height: 52px !important; border-radius: 14px !important; font-size: 22px !important; }
-        .stat-icon.cyan { background: linear-gradient(135deg,#22d3ee,#06b6d4) !important; color: #fff !important; box-shadow: 0 4px 14px rgba(6,182,212,0.30) !important; width: 52px !important; height: 52px !important; border-radius: 14px !important; font-size: 22px !important; }
-        .stat-icon.yellow { background: linear-gradient(135deg,#ffb340,#f59e0b) !important; color: #fff !important; box-shadow: 0 4px 14px rgba(245,158,11,0.30) !important; width: 52px !important; height: 52px !important; border-radius: 14px !important; font-size: 22px !important; }
-
-        .stat-content { flex:1; position:relative; z-index:1; }
-        .stat-label { font-size:12px; font-weight:600; color:#94a3b8; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.04em; }
-        .stat-value { font-size:30px; font-weight:800; color:#0f172a; line-height:1.1; letter-spacing:-0.02em; }
-        .stat-trend { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; margin-top:6px; padding:2px 8px; border-radius:6px; }
-        .stat-trend.up { color:#059669; background:#ecfdf5; }
-        .stat-trend.down { color:#dc2626; background:#fef2f2; }
-        .stat-trend.neutral { color:#64748b; background:#f1f5f9; }
+        .stat-icon.yellow {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #b45309;
+        }
 
         /* Quick Actions — PCP Style */
-        .quick-actions-list { display:flex; flex-direction:column; gap:6px; }
-        .quick-action-btn {
-            display:flex; align-items:center; gap:14px; padding:14px 16px; background:white;
-            border:1px solid rgba(0,0,0,0.06); border-radius:12px; cursor:pointer;
-            transition:all 0.3s cubic-bezier(0.4,0,0.2,1); text-decoration:none; color:inherit;
-            position:relative; overflow:hidden;
+        .quick-actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        .quick-action-btn::before { content:''; position:absolute; top:0; left:0; width:0; height:100%; background:linear-gradient(90deg,rgba(16,185,129,0.06),rgba(16,185,129,0.02)); transition:width 0.3s ease; z-index:0; }
-        .quick-action-btn:hover { border-color:rgba(16,185,129,0.3); box-shadow:0 2px 8px rgba(0,0,0,0.04); }
-        .quick-action-btn:hover::before { width:100%; }
-        .quick-action-icon { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:18px; color:white; flex-shrink:0; position:relative; z-index:1; }
-        .quick-action-icon.blue { background:linear-gradient(135deg,#4f8cff,#2d6ce6); box-shadow:0 4px 12px rgba(45,108,230,0.25); }
-        .quick-action-icon.purple { background:linear-gradient(135deg,#a78bfa,#7c5cf5); box-shadow:0 4px 12px rgba(124,92,245,0.25); }
-        .quick-action-icon.cyan { background:linear-gradient(135deg,#22d3ee,#06b6d4); box-shadow:0 4px 12px rgba(6,182,212,0.25); }
-        .quick-action-icon.green { background:linear-gradient(135deg,#2dd4a0,#0fb884); box-shadow:0 4px 12px rgba(15,184,132,0.25); }
-        .quick-action-content { flex:1; position:relative; z-index:1; }
-        .quick-action-title { font-size:14px; font-weight:700; color:#0f172a; display:block; }
-        .quick-action-desc { font-size:12px; color:#94a3b8; display:block; margin-top:2px; }
-        .quick-action-btn .chevron { width:28px; height:28px; border-radius:50%; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-size:12px; color:#94a3b8; flex-shrink:0; transition:all 0.3s ease; z-index:1; }
-        .quick-action-btn:hover .chevron { background:#10b981; color:white; transform:translateX(3px); }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 16px;
+            background: white;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quick-action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.06), rgba(16, 185, 129, 0.02));
+            transition: width 0.3s ease;
+            z-index: 0;
+        }
+
+        .quick-action-btn:hover {
+            border-color: rgba(16, 185, 129, 0.3);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .quick-action-btn:hover::before {
+            width: 100%;
+        }
+
+        .quick-action-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-action-icon.blue {
+            background: linear-gradient(135deg, #4f8cff, #2d6ce6);
+            box-shadow: 0 4px 12px rgba(45, 108, 230, 0.25);
+        }
+
+        .quick-action-icon.purple {
+            background: linear-gradient(135deg, #a78bfa, #7c5cf5);
+            box-shadow: 0 4px 12px rgba(124, 92, 245, 0.25);
+        }
+
+        .quick-action-icon.cyan {
+            background: linear-gradient(135deg, #22d3ee, #06b6d4);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.25);
+        }
+
+        .quick-action-icon.green {
+            background: linear-gradient(135deg, #2dd4a0, #0fb884);
+            box-shadow: 0 4px 12px rgba(15, 184, 132, 0.25);
+        }
+
+        .quick-action-content {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quick-action-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0f172a;
+            display: block;
+        }
+
+        .quick-action-desc {
+            font-size: 12px;
+            color: #94a3b8;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .quick-action-btn .chevron {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: #94a3b8;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .quick-action-btn:hover .chevron {
+            background: #10b981;
+            color: white;
+            transform: translateX(3px);
+        }
 
         /* Content Grid */
-        .content-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:24px; }
-        .content-grid .card { border:none; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.06); transition:box-shadow 0.3s ease; }
-        .content-grid .card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.08); }
-        .content-grid .card-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; }
-        .content-grid .card-header h3 { font-size:15px; font-weight:700; color:#0f172a; display:flex; align-items:center; gap:10px; }
-        .content-grid .card-header h3 i { width:32px; height:32px; background:#d1fae5; color:#059669; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
-        .content-grid .card-header a { font-size:12px; color:#059669; text-decoration:none; font-weight:600; padding:4px 12px; border-radius:20px; background:#ecfdf5; transition:all 0.2s; }
-        .content-grid .card-header a:hover { background:#d1fae5; }
-        .content-grid .card-body { padding:16px 24px; }
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .content-grid .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .content-grid .card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .content-grid .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .content-grid .card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .content-grid .card-header h3 i {
+            width: 32px;
+            height: 32px;
+            background: #d1fae5;
+            color: #059669;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .content-grid .card-header a {
+            font-size: 12px;
+            color: #059669;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #ecfdf5;
+            transition: all 0.2s;
+        }
+
+        .content-grid .card-header a:hover {
+            background: #d1fae5;
+        }
+
+        .content-grid .card-body {
+            padding: 16px 24px;
+        }
 
         /* Full-width table card */
-        .full-width-card { border:none; border-radius:16px; box-shadow:0 1px 3px rgba(0,0,0,0.04),0 4px 12px rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.06); background:white; overflow:hidden; }
-        .full-width-card .card-header { padding:18px 24px; border-bottom:1px solid #f1f5f9; }
-        .full-width-card .card-header h3 { font-size:15px; font-weight:700; color:#0f172a; display:flex; align-items:center; gap:10px; margin:0; }
-        .full-width-card .card-header h3 i { width:32px; height:32px; background:#dbeafe; color:#2563eb; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:14px; }
-        .full-width-card .card-header a { font-size:12px; color:#fff; text-decoration:none; font-weight:600; padding:6px 16px; border-radius:20px; background:linear-gradient(135deg,#3b82f6,#2563eb); transition:all 0.2s; box-shadow:0 2px 8px rgba(37,99,235,0.25); }
-        .full-width-card .card-header a:hover { background:linear-gradient(135deg,#2563eb,#1d4ed8); box-shadow:0 4px 12px rgba(37,99,235,0.35); transform:translateY(-1px); }
+        .full-width-card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            background: white;
+            overflow: hidden;
+        }
 
-        .data-table th { font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; font-weight:600; }
-        .data-table td { font-size:13px; padding:12px 16px; }
-        .data-table tbody tr { transition:background 0.2s; }
-        .data-table tbody tr:hover { background:#f8fafc; }
+        .full-width-card .card-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
 
-        .badge.emitida,.badge.autorizada { background:#d1fae5; color:#065f46; font-weight:600; font-size:11px; padding:4px 10px; border-radius:20px; }
-        .badge.pendente,.badge.rejeitada { background:#fef3c7; color:#92400e; font-weight:600; font-size:11px; padding:4px 10px; border-radius:20px; }
-        .badge.cancelada { background:#fee2e2; color:#991b1b; font-weight:600; font-size:11px; padding:4px 10px; border-radius:20px; }
+        .full-width-card .card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
 
-        .activity-item { display:flex; align-items:flex-start; gap:12px; padding:14px 0; border-bottom:1px solid #f1f5f9; }
-        .activity-item:last-child { border-bottom:none; }
-        .activity-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0; }
-        .activity-icon.success { background:#d1fae5; color:#059669; }
-        .activity-icon.info { background:#dbeafe; color:#2563eb; }
-        .activity-icon.warning { background:#fef3c7; color:#d97706; }
-        .activity-icon.error { background:#fee2e2; color:#dc2626; }
-        .activity-content { flex:1; }
-        .activity-title { font-weight:600; font-size:13px; color:#1e293b; }
-        .activity-time { font-size:11px; color:#94a3b8; margin-top:2px; }
+        .full-width-card .card-header h3 i {
+            width: 32px;
+            height: 32px;
+            background: #dbeafe;
+            color: #2563eb;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
 
-        @media (max-width:1200px) { .stats-grid { grid-template-columns:repeat(2,1fr); } .content-grid { grid-template-columns:1fr; } }
-        @media (max-width:768px) { .stats-grid { grid-template-columns:1fr; } .stat-card { padding:16px; } .stat-icon { width:44px; height:44px; } .stat-value { font-size:24px; } .content-grid { grid-template-columns:1fr; } .form-grid { grid-template-columns:1fr; } .form-group.full-width { grid-column:span 1; } }
-        @media (max-width:600px) { .tabs-bar { flex-wrap:wrap; } .tab-btn { flex:none; width:100%; } .modal.modal-lg { max-height:95vh; border-radius:12px; } }
+        .full-width-card .card-header a {
+            font-size: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .full-width-card .card-header a:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .data-table th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .data-table td {
+            font-size: 13px;
+            padding: 12px 16px;
+        }
+
+        .data-table tbody tr {
+            transition: background 0.2s;
+        }
+
+        .data-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+        .badge.emitida,
+        .badge.autorizada {
+            background: #d1fae5;
+            color: #065f46;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .badge.pendente,
+        .badge.rejeitada {
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .badge.cancelada {
+            background: #fee2e2;
+            color: #991b1b;
+            font-weight: 600;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.success {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .activity-icon.info {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .activity-icon.warning {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .activity-icon.error {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #1e293b;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        @media (max-width:1200px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width:768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+            }
+
+            .stat-value {
+                font-size: 24px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width:600px) {
+            .tabs-bar {
+                flex-wrap: wrap;
+            }
+
+            .tab-btn {
+                flex: none;
+                width: 100%;
+            }
+
+            .modal.modal-lg {
+                max-height: 95vh;
+                border-radius: 12px;
+            }
+        }
     </style>
     <!-- Zyntra Chat Teams -->
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260615">
+    <script>
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification toast-' + type;
+            var span = document.createElement('span');
+            span.textContent = message;
+            toast.appendChild(span);
+            var closeBtn = document.createElement('button');
+            closeBtn.textContent = '\u00D7';
+            closeBtn.style.cssText = 'background:none;border:none;color:inherit;font-size:18px;cursor:pointer;margin-left:12px';
+            closeBtn.addEventListener('click', function () { toast.remove(); });
+            toast.appendChild(closeBtn);
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);animation:slideIn 0.3s ease;max-width:400px;';
+            if (type === 'success') toast.style.background = '#10b981';
+            else if (type === 'error') toast.style.background = '#ef4444';
+            else if (type === 'warning') toast.style.background = '#f59e0b';
+            else toast.style.background = '#3b82f6';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+    </script>
 </head>
+
 <body>
     <div class="app-container">
         <!-- Overlay Mobile -->
@@ -339,17 +984,8 @@
                 <a href="index.html" class="sidebar-btn active" title="Dashboard">
                     <i class="fas fa-chart-pie"></i>
                 </a>
-                <a href="emitir.html" class="sidebar-btn" title="Emitir NFe">
-                    <i class="fas fa-file-invoice"></i>
-                </a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe">
                     <i class="fas fa-search"></i>
-                </a>
-                <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços">
-                    <i class="fas fa-file-contract"></i>
-                </a>
-                <a href="danfe.html" class="sidebar-btn" title="Gerar DANFE">
-                    <i class="fas fa-print"></i>
                 </a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
@@ -381,11 +1017,15 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
+                            style="height:22px;object-fit:contain;">
+                        <span
+                            style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Faturamento</span>
+                        <span
+                            style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span
+                            style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Faturamento</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -401,8 +1041,10 @@
                             <div class="notification-header">
                                 <h3><i class="fas fa-bell"></i> Notificações</h3>
                                 <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button>
+                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i
+                                            class="fas fa-check-double"></i></button>
+                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i
+                                            class="fas fa-trash-alt"></i></button>
                                 </div>
                             </div>
                             <div class="notification-list" id="notification-list">
@@ -430,45 +1072,47 @@
                     <div class="page-header">
                         <div class="page-header-top" style="justify-content:flex-end;">
                             <div class="page-actions">
-                                <button class="btn btn-secondary" onclick="location.reload()"><i class="fas fa-sync-alt"></i> Atualizar</button>
-                                <a href="emitir.html" class="btn btn-primary"><i class="fas fa-plus"></i> Nova NFe</a>
+                                <button class="btn btn-secondary" onclick="location.reload()"><i
+                                        class="fas fa-sync-alt"></i> Atualizar</button>
+                                <a href="consultar.html" class="btn btn-primary"><i class="fas fa-search"></i> Consultar
+                                    NFe</a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KPI Cards — PCP Style (horizontal) -->
+                    <!-- KPI Cards — Compras Pattern (vertical) -->
                     <div class="stats-grid">
                         <div class="stat-card purple">
-                            <div class="stat-icon purple"><i class="fas fa-file-invoice" style="color:#fff !important;font-size:22px;"></i></div>
-                            <div class="stat-content">
-                                <div class="stat-label">NFes Emitidas</div>
-                                <div class="stat-value" id="kpi-emitidas">-</div>
-                                <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Mês atual</div>
+                            <div class="stat-header">
+                                <div class="stat-icon purple"><i class="fas fa-file-invoice"></i></div>
+                                <span class="stat-trend">Mês atual</span>
                             </div>
+                            <div class="stat-value" id="kpi-emitidas">-</div>
+                            <div class="stat-label">NFes Emitidas</div>
                         </div>
                         <div class="stat-card green">
-                            <div class="stat-icon green"><i class="fas fa-check-circle" style="color:#fff !important;font-size:22px;"></i></div>
-                            <div class="stat-content">
-                                <div class="stat-label">Autorizadas SEFAZ</div>
-                                <div class="stat-value" id="kpi-autorizadas">-</div>
-                                <div class="stat-trend up"><i class="fas fa-circle" style="font-size:5px;"></i> Aprovadas</div>
+                            <div class="stat-header">
+                                <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
+                                <span class="stat-trend">Aprovadas</span>
                             </div>
+                            <div class="stat-value" id="kpi-autorizadas">-</div>
+                            <div class="stat-label">Autorizadas SEFAZ</div>
                         </div>
                         <div class="stat-card cyan">
-                            <div class="stat-icon cyan"><i class="fas fa-dollar-sign" style="color:#fff !important;font-size:22px;"></i></div>
-                            <div class="stat-content">
-                                <div class="stat-label">Valor Faturado</div>
-                                <div class="stat-value" id="kpi-valor">-</div>
-                                <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Mês atual</div>
+                            <div class="stat-header">
+                                <div class="stat-icon cyan"><i class="fas fa-dollar-sign"></i></div>
+                                <span class="stat-trend">Mês atual</span>
                             </div>
+                            <div class="stat-value" id="kpi-valor">-</div>
+                            <div class="stat-label">Valor Faturado</div>
                         </div>
                         <div class="stat-card yellow">
-                            <div class="stat-icon yellow"><i class="fas fa-exclamation-triangle" style="color:#fff !important;font-size:22px;"></i></div>
-                            <div class="stat-content">
-                                <div class="stat-label">Pendências</div>
-                                <div class="stat-value" id="kpi-pendentes">-</div>
-                                <div class="stat-trend down"><i class="fas fa-exclamation" style="font-size:8px;"></i> Requer atenção</div>
+                            <div class="stat-header">
+                                <div class="stat-icon yellow"><i class="fas fa-exclamation-triangle"></i></div>
+                                <span class="stat-trend">Requer atenção</span>
                             </div>
+                            <div class="stat-value" id="kpi-pendentes">-</div>
+                            <div class="stat-label">Pendências</div>
                         </div>
                     </div>
 
@@ -481,27 +1125,11 @@
                             </div>
                             <div class="card-body">
                                 <div class="quick-actions-list">
-                                    <a href="emitir.html" class="quick-action-btn">
-                                        <div class="quick-action-icon blue"><i class="fas fa-plus"></i></div>
-                                        <div class="quick-action-content">
-                                            <span class="quick-action-title">Emitir Nova NFe</span>
-                                            <span class="quick-action-desc">Criar e emitir nota fiscal eletrônica</span>
-                                        </div>
-                                        <div class="chevron"><i class="fas fa-chevron-right"></i></div>
-                                    </a>
                                     <a href="consultar.html" class="quick-action-btn">
                                         <div class="quick-action-icon purple"><i class="fas fa-search"></i></div>
                                         <div class="quick-action-content">
                                             <span class="quick-action-title">Consultar NFe</span>
                                             <span class="quick-action-desc">Pesquisar e gerenciar notas emitidas</span>
-                                        </div>
-                                        <div class="chevron"><i class="fas fa-chevron-right"></i></div>
-                                    </a>
-                                    <a href="danfe.html" class="quick-action-btn">
-                                        <div class="quick-action-icon cyan"><i class="fas fa-print"></i></div>
-                                        <div class="quick-action-content">
-                                            <span class="quick-action-title">Gerar DANFE</span>
-                                            <span class="quick-action-desc">Imprimir documento auxiliar da NFe</span>
                                         </div>
                                         <div class="chevron"><i class="fas fa-chevron-right"></i></div>
                                     </a>
@@ -535,7 +1163,8 @@
                     <div class="card full-width-card">
                         <div class="card-header">
                             <h3><i class="fas fa-file-invoice"></i> Notas Fiscais Recentes</h3>
-                            <a href="consultar.html"><i class="fas fa-arrow-right" style="font-size:10px;"></i> Ver todas</a>
+                            <a href="consultar.html"><i class="fas fa-arrow-right" style="font-size:10px;"></i> Ver
+                                todas</a>
                         </div>
                         <div class="card-body">
                             <table class="data-table">
@@ -587,16 +1216,19 @@
                 <div class="config-content active" id="config-certificado">
                     <div class="config-section">
                         <h3><i class="fas fa-certificate"></i> Certificado Digital A1</h3>
-                        <p class="config-desc">Importe seu certificado digital para emissão de NFe/NFSe. Formatos aceitos: .pfx, .p12</p>
+                        <p class="config-desc">Importe seu certificado digital para emissão de NFe/NFSe. Formatos
+                            aceitos: .pfx, .p12</p>
                         <div class="cert-status" id="cert-status">
                             <div class="cert-status-icon warning"><i class="fas fa-exclamation-triangle"></i></div>
                             <div class="cert-status-info">
                                 <span class="cert-status-label">Nenhum certificado configurado</span>
-                                <span class="cert-status-detail">Importe um certificado para começar a emitir notas</span>
+                                <span class="cert-status-detail">Importe um certificado para começar a emitir
+                                    notas</span>
                             </div>
                         </div>
                         <div class="cert-upload-area" id="cert-upload-area">
-                            <input type="file" id="cert-file-input" accept=".pfx,.p12" style="display:none;" onchange="handleCertFileSelect(event)">
+                            <input type="file" id="cert-file-input" accept=".pfx,.p12" style="display:none;"
+                                onchange="handleCertFileSelect(event)">
                             <div class="upload-zone" onclick="document.getElementById('cert-file-input').click()">
                                 <i class="fas fa-cloud-upload-alt"></i>
                                 <span>Clique para selecionar ou arraste o certificado</span>
@@ -604,21 +1236,26 @@
                             </div>
                         </div>
                         <div class="cert-file-selected" id="cert-file-selected" style="display:none;">
-                            <div class="file-info"><i class="fas fa-file-signature"></i><span id="cert-file-name">certificado.pfx</span></div>
-                            <button class="btn-remove-file" onclick="removerCertificadoSelecionado()"><i class="fas fa-times"></i></button>
+                            <div class="file-info"><i class="fas fa-file-signature"></i><span
+                                    id="cert-file-name">certificado.pfx</span></div>
+                            <button class="btn-remove-file" onclick="removerCertificadoSelecionado()"><i
+                                    class="fas fa-times"></i></button>
                         </div>
                         <div class="cert-password-area" id="cert-password-area" style="display:none;">
                             <label for="cert-password">Senha do Certificado</label>
                             <div class="password-input-wrapper">
                                 <input type="password" id="cert-password" placeholder="Digite a senha do certificado">
-                                <button type="button" class="toggle-password" onclick="toggleCertPassword()"><i class="fas fa-eye"></i></button>
+                                <button type="button" class="toggle-password" onclick="toggleCertPassword()"><i
+                                        class="fas fa-eye"></i></button>
                             </div>
                         </div>
                         <div class="cert-actions">
-                            <button class="btn-config btn-primary" onclick="importarCertificado()" id="btn-importar-cert" disabled>
+                            <button class="btn-config btn-primary" onclick="importarCertificado()"
+                                id="btn-importar-cert" disabled>
                                 <i class="fas fa-upload"></i> Importar Certificado
                             </button>
-                            <button class="btn-config btn-secondary" onclick="verificarCertificado()" id="btn-verificar-cert" style="display:none;">
+                            <button class="btn-config btn-secondary" onclick="verificarCertificado()"
+                                id="btn-verificar-cert" style="display:none;">
                                 <i class="fas fa-check-circle"></i> Verificar Validade
                             </button>
                         </div>
@@ -630,10 +1267,14 @@
                         <h3><i class="fas fa-building"></i> Dados do Emitente</h3>
                         <p class="config-desc">Configure os dados da empresa que aparecerão nas notas fiscais</p>
                         <div class="form-grid">
-                            <div class="form-group"><label>CNPJ</label><input type="text" id="config-cnpj" placeholder="00.000.000/0000-00" readonly></div>
-                            <div class="form-group"><label>Inscrição Estadual</label><input type="text" id="config-ie" placeholder="000.000.000.000"></div>
-                            <div class="form-group full-width"><label>Razão Social</label><input type="text" id="config-razao" placeholder="Razão Social da Empresa"></div>
-                            <div class="form-group full-width"><label>Nome Fantasia</label><input type="text" id="config-fantasia" placeholder="Nome Fantasia"></div>
+                            <div class="form-group"><label>CNPJ</label><input type="text" id="config-cnpj"
+                                    placeholder="00.000.000/0000-00" readonly></div>
+                            <div class="form-group"><label>Inscrição Estadual</label><input type="text" id="config-ie"
+                                    placeholder="000.000.000.000"></div>
+                            <div class="form-group full-width"><label>Razão Social</label><input type="text"
+                                    id="config-razao" placeholder="Razão Social da Empresa"></div>
+                            <div class="form-group full-width"><label>Nome Fantasia</label><input type="text"
+                                    id="config-fantasia" placeholder="Nome Fantasia"></div>
                         </div>
                     </div>
                 </div>
@@ -647,14 +1288,17 @@
                                 <input type="radio" name="ambiente" value="2" checked>
                                 <div class="ambiente-card">
                                     <div class="ambiente-icon warning"><i class="fas fa-flask"></i></div>
-                                    <div class="ambiente-info"><span class="ambiente-title">Homologação</span><span class="ambiente-desc">Ambiente de testes (notas sem valor fiscal)</span></div>
+                                    <div class="ambiente-info"><span class="ambiente-title">Homologação</span><span
+                                            class="ambiente-desc">Ambiente de testes (notas sem valor fiscal)</span>
+                                    </div>
                                 </div>
                             </label>
                             <label class="ambiente-option">
                                 <input type="radio" name="ambiente" value="1">
                                 <div class="ambiente-card">
                                     <div class="ambiente-icon success"><i class="fas fa-check-circle"></i></div>
-                                    <div class="ambiente-info"><span class="ambiente-title">Produção</span><span class="ambiente-desc">Ambiente real (notas com valor fiscal)</span></div>
+                                    <div class="ambiente-info"><span class="ambiente-title">Produção</span><span
+                                            class="ambiente-desc">Ambiente real (notas com valor fiscal)</span></div>
                                 </div>
                             </label>
                         </div>
@@ -666,8 +1310,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-config btn-cancel" onclick="fecharModalConfiguracoes()"><i class="fas fa-times"></i> Cancelar</button>
-                <button class="btn-config btn-save" onclick="salvarConfiguracoes()"><i class="fas fa-save"></i> Salvar Configurações</button>
+                <button class="btn-config btn-cancel" onclick="fecharModalConfiguracoes()"><i class="fas fa-times"></i>
+                    Cancelar</button>
+                <button class="btn-config btn-save" onclick="salvarConfiguracoes()"><i class="fas fa-save"></i> Salvar
+                    Configurações</button>
             </div>
         </div>
     </div>
@@ -685,34 +1331,42 @@
             const panel = document.getElementById('notification-panel');
             panel.classList.toggle('active');
         }
-        function marcarTodasLidas() {}
-        function limparNotificacoes() {}
+        function marcarTodasLidas() { }
+        function limparNotificacoes() { }
 
         // ===== MAPEAMENTO DE AVATARES =====
         const avatarNameMap = {
-            'clemerson': '/avatars/Clemerson.webp',
-            'isabela': '/avatars/Isabela.webp',
+            'clemerson': '/avatars/Clemerson.png',
+            'isabela': '/avatars/Isabela.png', 'isabella': '/avatars/Isabela.png',
             'thaina': '/avatars/Thaina.webp',
-            'thiago': '/avatars/Thiago.webp',
+            'thiago': '/avatars/Thiago.png',
             'nicolas': '/avatars/NicolasDaniel.webp',
             'nicolasdaniel': '/avatars/NicolasDaniel.webp',
             'rh': '/avatars/Rh.webp',
             'admin': '/avatars/admin.webp',
             'ti': '/avatars/TI.webp',
             'tialuforce': '/avatars/TI.webp',
-            'antonio': '/avatars/Antonio.webp',
-            'andreia': '/avatars/Andreia.webp',
-            'guilherme': '/avatars/Guilherme.webp',
+            'antonio': '/avatars/Antonio.webp', 'antônio': '/avatars/Antonio.webp',
+            'andreia': '/avatars/Andreia.webp', 'andréia': '/avatars/Andreia.webp',
+            'guilherme': '/avatars/GuilhermeBastos.png',
             'marcelo': '/avatars/Marcelo.webp',
             'financeiro': '/avatars/Financeiro.webp',
             'douglas': '/avatars/Douglas.webp',
-            'hellen': '/avatars/Hellen.webp',
-            'helen': '/avatars/Hellen.webp',
-            'marcia': '/avatars/Marcia.webp',
-            'augusto': '/avatars/Augusto.webp',
-            'renata': '/avatars/Renata.webp',
-            'fabiano': '/avatars/Fabiano.webp',
-            'fabiola': '/avatars/Fabiola.webp'
+            'hellen': '/avatars/Hellen.webp', 'helen': '/avatars/Hellen.webp',
+            'marcia': '/avatars/Marcia.png', 'márcia': '/avatars/Marcia.png',
+            'augusto': '/avatars/Augusto.png',
+            'renata': '/avatars/Renata.png',
+            'fabiano': '/avatars/Fabiano.png',
+            'fabiola': '/avatars/Fabiola.webp',
+            'ronaldo': '/avatars/Ronaldo.png',
+            'joao': '/avatars/JoaoVitor.png', 'joão': '/avatars/JoaoVitor.png',
+            'fernando': '/avatars/Fernando.png',
+            'robson': '/avatars/Robson.png', 'junior': '/avatars/Junior.png',
+            'bruno': '/avatars/Bruno.png', 'tatiane': '/avatars/Tatiane.png',
+            'felipesimoes': '/avatars/FelipeSimoes.png', 'felipe': '/avatars/FelipeSimoes.png',
+            'jamesson': '/avatars/jamerson.svg',
+            'sergio': '/avatars/Sergio.png', 'lucas': '/avatars/Lucas.png',
+            'miqueias': '/avatars/Miqueias.png', 'lucio': '/avatars/Lucio.png', 'lúcio': '/avatars/Lucio.png'
         };
 
         // ===== CARREGAR USUÁRIO =====
@@ -800,8 +1454,8 @@
             const file = event.target.files[0];
             if (!file) return;
             const ext = file.name.split('.').pop().toLowerCase();
-            if (!['pfx', 'p12'].includes(ext)) { alert('Formato inválido. Use arquivos .pfx ou .p12'); return; }
-            if (file.size > 5 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 5MB.'); return; }
+            if (!['pfx', 'p12'].includes(ext)) { showToast('Formato inválido. Use arquivos .pfx ou .p12', 'warning'); return; }
+            if (file.size > 5 * 1024 * 1024) { showToast('Arquivo muito grande. Máximo 5MB', 'warning'); return; }
             const reader = new FileReader();
             reader.onload = (e) => {
                 certFileData = { name: file.name, data: e.target.result.split(',')[1], size: file.size };
@@ -834,9 +1488,9 @@
         }
 
         async function importarCertificado() {
-            if (!certFileData) { alert('Selecione um certificado primeiro.'); return; }
+            if (!certFileData) { showToast('Selecione um certificado primeiro', 'warning'); return; }
             const senha = document.getElementById('cert-password').value;
-            if (!senha) { alert('Digite a senha do certificado.'); return; }
+            if (!senha) { showToast('Digite a senha do certificado', 'warning'); return; }
             const btn = document.getElementById('btn-importar-cert');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importando...';
@@ -850,9 +1504,9 @@
                 if (response.ok && result.success) {
                     atualizarStatusCertificado(result.certificado);
                     limparFormCertificado();
-                    alert('Certificado importado com sucesso!');
-                } else { alert(result.message || 'Erro ao importar certificado. Verifique a senha.'); }
-            } catch (error) { console.error('Erro ao importar certificado:', error); alert('Erro ao importar certificado.'); }
+                    showToast('Certificado importado com sucesso!', 'success');
+                } else { showToast(result.message || 'Erro ao importar certificado. Verifique a senha', 'error'); }
+            } catch (error) { console.error('Erro ao importar certificado:', error); showToast('Erro ao importar certificado', 'error'); }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-upload"></i> Importar Certificado'; }
         }
 
@@ -875,9 +1529,9 @@
             try {
                 const response = await fetch('/api/nfe/certificado/verificar', { credentials: 'include' });
                 const result = await response.json();
-                if (result.success) { atualizarStatusCertificado(result.certificado); alert('Certificado válido!\n\nTitular: ' + result.certificado.nome + '\nVálido até: ' + new Date(result.certificado.validade).toLocaleDateString('pt-BR')); }
-                else { alert(result.message || 'Erro ao verificar certificado.'); }
-            } catch (error) { alert('Erro ao verificar certificado.'); }
+                if (result.success) { atualizarStatusCertificado(result.certificado); showToast('Certificado válido! Titular: ' + result.certificado.nome, 'success'); }
+                else { showToast(result.message || 'Erro ao verificar certificado', 'error'); }
+            } catch (error) { showToast('Erro ao verificar certificado', 'error'); }
         }
 
         async function carregarConfiguracoes() {
@@ -909,9 +1563,9 @@
                 };
                 const response = await fetch('/api/nfe/configuracoes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(config) });
                 const result = await response.json();
-                if (response.ok && result.success) { alert('Configurações salvas com sucesso!'); fecharModalConfiguracoes(); }
-                else { alert(result.message || 'Erro ao salvar configurações.'); }
-            } catch (error) { alert('Erro ao salvar configurações.'); }
+                if (response.ok && result.success) { showToast('Configurações salvas com sucesso!', 'success'); fecharModalConfiguracoes(); }
+                else { showToast(result.message || 'Erro ao salvar configurações', 'error'); }
+            } catch (error) { showToast('Erro ao salvar configurações', 'error'); }
             finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-save"></i> Salvar Configurações'; }
         }
 
@@ -1035,8 +1689,8 @@
                     const container = document.getElementById('activity-list');
                     if (data.atividades && data.atividades.length > 0) {
                         container.innerHTML = data.atividades.map(ativ => {
-                            const iconClass = ativ.tipo === 'autorizacao' ? 'success' : ativ.tipo === 'emissao' ? 'info' : ativ.tipo === 'rejeicao' ? 'warning' : ativ.tipo === 'cancelamento' ? 'error' : ativ.tipo === 'entrega' ? 'success' : 'info';
-                            const icon = ativ.tipo === 'autorizacao' ? 'fa-check' : ativ.tipo === 'emissao' ? 'fa-file-invoice' : ativ.tipo === 'rejeicao' ? 'fa-exclamation' : ativ.tipo === 'cancelamento' ? 'fa-times' : ativ.tipo === 'entrega' ? 'fa-truck' : 'fa-info';
+                            const iconClass = ativ.tipo === 'autorizacao' ? 'success' : ativ.tipo === 'emissão' ? 'info' : ativ.tipo === 'rejeicao' ? 'warning' : ativ.tipo === 'cancelamento' ? 'error' : ativ.tipo === 'entrega' ? 'success' : 'info';
+                            const icon = ativ.tipo === 'autorizacao' ? 'fa-check' : ativ.tipo === 'emissão' ? 'fa-file-invoice' : ativ.tipo === 'rejeicao' ? 'fa-exclamation' : ativ.tipo === 'cancelamento' ? 'fa-times' : ativ.tipo === 'entrega' ? 'fa-truck' : 'fa-info';
                             const dataAtiv = new Date(ativ.data);
                             const diffMs = Date.now() - dataAtiv;
                             const diffMin = Math.floor(diffMs / 60000);
@@ -1056,6 +1710,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             carregarUsuario();
             carregarDados();
+
+            // Abrir modal de configurações se redirecionado com ?openConfig=true
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('openConfig') === 'true') {
+                abrirModalConfiguracoes();
+                // Limpar o parâmetro da URL sem recarregar
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         });
     </script>
 
@@ -1068,13 +1730,15 @@
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 
-    <!-- Zyntra Chat Teams -->    <script src="/socket.io/socket.io.js"></script>
+    <!-- Zyntra Chat Teams -->
+    <script src="/socket.io/socket.io.js"></script>
 
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
     <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
-</html>
 
+</html>

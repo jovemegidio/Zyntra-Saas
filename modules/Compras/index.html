@@ -1,11 +1,12 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <!-- Favicon -->
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-    
+
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
@@ -17,16 +18,19 @@
     <title>Aluforce: Compras</title>
 
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
-    <script src="/js/auth-unified.js?v=20260301" defer></script>
+    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fontes -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="/js/csp-fix.js" defer></script>
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
     <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
@@ -35,19 +39,30 @@
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1" defer integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1" defer
+        integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
+        crossorigin="anonymous"></script>
     <script src="/js/anti-copy-protection.js" defer></script>
 
     <!-- Garantir ícones Font Awesome -->
     <style>
-        .fas, .far, .fab, .fa {
+        .fas,
+        .far,
+        .fab,
+        .fa {
             font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands', FontAwesome !important;
             font-style: normal;
             display: inline-block !important;
             visibility: visible !important;
         }
-        .fas { font-weight: 900; }
-        .far { font-weight: 400; }
+
+        .fas {
+            font-weight: 900;
+        }
+
+        .far {
+            font-weight: 400;
+        }
     </style>
 
     <!-- Funções stub para evitar erros antes do carregamento -->
@@ -62,7 +77,9 @@
 
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260301">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
+
 <body>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
@@ -113,11 +130,15 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE"
+                            style="height:22px;object-fit:contain;">
+                        <span
+                            style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Compras</span>
+                        <span
+                            style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span
+                            style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Compras</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -133,14 +154,19 @@
                             <div class="notification-header">
                                 <h3><i class="fas fa-bell"></i> Notificações</h3>
                                 <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button>
+                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i
+                                            class="fas fa-check-double"></i></button>
+                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i
+                                            class="fas fa-trash-alt"></i></button>
                                 </div>
                             </div>
                             <div class="notification-tabs">
-                                <button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button>
-                                <button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button>
-                                <button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button>
+                                <button class="notif-tab active"
+                                    onclick="filtrarNotificacoes('todas', this)">Todas</button>
+                                <button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não
+                                    lidas</button>
+                                <button class="notif-tab"
+                                    onclick="filtrarNotificacoes('importantes', this)">Importantes</button>
                             </div>
                             <div class="notification-list" id="notification-list"></div>
                             <div class="notification-footer">
@@ -167,7 +193,8 @@
                             <button class="btn btn-secondary" onclick="window.location.href='relatorios.html'">
                                 <i class="fas fa-chart-bar"></i> Relatórios
                             </button>
-                            <button class="btn btn-primary" onclick="window.location.href='requisicoes.html?action=new'">
+                            <button class="btn btn-primary"
+                                onclick="window.location.href='requisicoes.html?action=new'">
                                 <i class="fas fa-plus"></i> Nova Requisição
                             </button>
                         </div>
@@ -179,9 +206,9 @@
                     <div class="stat-card amber">
                         <div class="stat-header">
                             <div class="stat-icon amber"><i class="fas fa-clipboard-list"></i></div>
-                            <span class="stat-trend" id="trend-requisicoes">&mdash;</span>
+                            <span class="stat-trend" id="trend-requisições">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="kpi-requisicoes">--</div>
+                        <div class="stat-value" id="kpi-requisições">--</div>
                         <div class="stat-label">Requisições Pendentes</div>
                         <div class="stat-footer">
                             <a href="requisicoes.html">Ver todas <i class="fas fa-arrow-right"></i></a>
@@ -191,9 +218,9 @@
                     <div class="stat-card indigo">
                         <div class="stat-header">
                             <div class="stat-icon indigo"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <span class="stat-trend" id="trend-cotacoes">&mdash;</span>
+                            <span class="stat-trend" id="trend-cotações">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="kpi-cotacoes">--</div>
+                        <div class="stat-value" id="kpi-cotações">--</div>
                         <div class="stat-label">Cotações em Análise</div>
                         <div class="stat-footer">
                             <a href="cotacoes.html">Ver cotações <i class="fas fa-arrow-right"></i></a>
@@ -233,7 +260,8 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Requisições Recentes</h3>
-                                <a href="requisicoes.html" class="card-link">Ver Todas <i class="fas fa-arrow-right"></i></a>
+                                <a href="requisicoes.html" class="card-link">Ver Todas <i
+                                        class="fas fa-arrow-right"></i></a>
                             </div>
                             <div class="card-body no-padding">
                                 <table class="data-table">
@@ -246,11 +274,13 @@
                                             <th>Status</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="tbody-requisicoes">
+                                    <tbody id="tbody-requisições">
                                         <tr>
                                             <td colspan="5" style="text-align:center;padding:40px;">
-                                                <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary-500);"></i>
-                                                <p style="margin-top:12px;color:var(--gray-400);">Carregando requisições...</p>
+                                                <i class="fas fa-spinner fa-spin fa-2x"
+                                                    style="color:var(--primary-500);"></i>
+                                                <p style="margin-top:12px;color:var(--gray-400);">Carregando
+                                                    requisições...</p>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -261,7 +291,8 @@
                         <!-- Chart -->
                         <div class="card mt-6">
                             <div class="card-header">
-                                <h3 class="card-title"><i class="fas fa-chart-area"></i> Volume de Compras — Últimos 6 Meses</h3>
+                                <h3 class="card-title"><i class="fas fa-chart-area"></i> Volume de Compras — Últimos 6
+                                    Meses</h3>
                             </div>
                             <div class="card-body">
                                 <div class="chart-container">
@@ -349,8 +380,8 @@
                 if (response.ok) {
                     const data = await response.json();
                     const stats = data.stats || data.data || data;
-                    document.getElementById('kpi-requisicoes').textContent = stats.pedidos_pendentes || stats.requisicoes_pendentes || 0;
-                    document.getElementById('kpi-cotacoes').textContent = stats.total_pedidos || stats.cotacoes_analise || 0;
+                    document.getElementById('kpi-requisições').textContent = stats.pedidos_pendentes || stats.requisicoes_pendentes || 0;
+                    document.getElementById('kpi-cotações').textContent = stats.total_pedidos || stats.cotações_analise || 0;
                     document.getElementById('kpi-pedidos').textContent = formatarMoeda(stats.compras_mes || stats.total_mes_atual || stats.volume_mes || 0);
                     document.getElementById('kpi-fornecedores').textContent = stats.fornecedores_ativos || 0;
 
@@ -363,15 +394,15 @@
                         atualizarGraficoReal(data);
                     }
                 } else {
-                    document.getElementById('kpi-requisicoes').textContent = '0';
-                    document.getElementById('kpi-cotacoes').textContent = '0';
+                    document.getElementById('kpi-requisições').textContent = '0';
+                    document.getElementById('kpi-cotações').textContent = '0';
                     document.getElementById('kpi-pedidos').textContent = 'R$ 0';
                     document.getElementById('kpi-fornecedores').textContent = '0';
                 }
-            } catch(e) {
+            } catch (e) {
                 console.log('Erro ao carregar KPIs:', e);
-                document.getElementById('kpi-requisicoes').textContent = '0';
-                document.getElementById('kpi-cotacoes').textContent = '0';
+                document.getElementById('kpi-requisições').textContent = '0';
+                document.getElementById('kpi-cotações').textContent = '0';
                 document.getElementById('kpi-pedidos').textContent = 'R$ 0';
                 document.getElementById('kpi-fornecedores').textContent = '0';
             }
@@ -386,7 +417,7 @@
                 'aprovado': { icon: 'fa-check', color: 'green' },
                 'recebido': { icon: 'fa-truck', color: 'blue' },
                 'cancelado': { icon: 'fa-times', color: 'red' },
-                'em_cotacao': { icon: 'fa-file-alt', color: 'indigo' }
+                'em_cotação': { icon: 'fa-file-alt', color: 'indigo' }
             };
             list.innerHTML = pedidos.slice(0, 5).map(p => {
                 const cfg = iconMap[(p.status || '').toLowerCase()] || iconMap['pendente'];
@@ -394,7 +425,7 @@
                 return `<li class="activity-item">
                     <div class="activity-icon ${cfg.color}"><i class="fas ${cfg.icon}"></i></div>
                     <div class="activity-content">
-                        <div class="activity-title">Pedido ${p.numero || '#' + p.id} — ${p.fornecedor_nome || 'Fornecedor'} (${p.status || 'pendente'})</div>
+                        <div class="activity-title">Pedido ${p.número || '#' + p.id} — ${p.fornecedor_nome || 'Fornecedor'} (${p.status || 'pendente'})</div>
                         <div class="activity-time">${tempo}</div>
                     </div>
                 </li>`;
@@ -427,23 +458,23 @@
                 } else {
                     renderizarRequisicoes([]);
                 }
-            } catch(e) {
+            } catch (e) {
                 console.log('Erro ao carregar requisições:', e);
                 renderizarRequisicoes([]);
             }
         }
 
         function renderizarRequisicoes(requisicoes) {
-            const tbody = document.getElementById('tbody-requisicoes');
+            const tbody = document.getElementById('tbody-requisições');
             if (!requisicoes.length) {
                 tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-inbox"></i><p>Nenhuma requisição encontrada</p></td></tr>';
                 return;
             }
             tbody.innerHTML = requisicoes.slice(0, 5).map(req => `
                 <tr>
-                    <td class="code">${req.numero || req.codigo || req.id}</td>
-                    <td>${req.descricao || req.material || '-'}</td>
-                    <td>${req.solicitante || req.usuario_nome || '-'}</td>
+                    <td class="code">${req.número || req.código || req.id}</td>
+                    <td>${req.descrição || req.material || '-'}</td>
+                    <td>${req.solicitante || req.usuário_nome || '-'}</td>
                     <td>${formatarData(req.data || req.created_at)}</td>
                     <td><span class="badge ${getStatusClass(req.status)}">${req.status || 'Pendente'}</span></td>
                 </tr>
@@ -559,7 +590,7 @@
         }
 
         // === Inicialização ===
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             atualizarSaudacao();
             carregarKPIs();
             carregarRequisicoes();
@@ -587,5 +618,7 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
+
 </html>

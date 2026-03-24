@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -10,7 +10,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Aluforce: Meus Dados Pessoais</title>
     
-    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticao Unificado - DEVE ser carregado primeiro -->
     
     <!-- Favicon -->
     
@@ -19,12 +19,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     
-    <!-- Estilos específicos -->
+    <!-- Estilos especficos -->
     <style>
         /* Variables CSS personalizadas para RH */
         :root {
-            --rh-primary: #6366f1;
-            --rh-primary-dark: #4f46e5;
+            --rh-primary: #ec4899;
+            --rh-primary-dark: #db2777;
             --rh-secondary: #64748b;
             --rh-success: #10b981;
             --rh-warning: #f59e0b;
@@ -37,7 +37,7 @@
             --rh-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Animações de entrada */
+        /* Animaes de entrada */
         @keyframes slideInUp {
             from {
                 opacity: 0;
@@ -90,14 +90,14 @@
             padding: 32px;
         }
         
-        .funcionario-info-grid {
+        .funcionário-info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 24px;
             margin-top: 24px;
         }
         
-        .funcionario-info-item {
+        .funcionário-info-item {
             background: var(--rh-light);
             padding: 24px;
             border-radius: var(--rh-radius);
@@ -107,7 +107,7 @@
             overflow: hidden;
         }
 
-        .funcionario-info-item::before {
+        .funcionário-info-item::before {
             content: '';
             position: absolute;
             top: 0;
@@ -117,13 +117,13 @@
             background: linear-gradient(90deg, var(--rh-primary) 0%, var(--rh-primary-dark) 100%);
         }
 
-        .funcionario-info-item:hover {
+        .funcionário-info-item:hover {
             transform: translateY(-2px);
             box-shadow: var(--rh-shadow-lg);
             border-color: var(--rh-primary);
         }
         
-        .funcionario-info-label {
+        .funcionário-info-label {
             font-size: 0.75rem;
             font-weight: 700;
             color: var(--rh-secondary);
@@ -135,7 +135,7 @@
             gap: 6px;
         }
 
-        .funcionario-info-label::before {
+        .funcionário-info-label::before {
             content: '';
             width: 3px;
             height: 3px;
@@ -143,7 +143,7 @@
             border-radius: 50%;
         }
         
-        .funcionario-info-value {
+        .funcionário-info-value {
             font-size: 1.1rem;
             font-weight: 600;
             color: #1e293b;
@@ -186,7 +186,7 @@
 
         /* Responsividade aprimorada */
         @media (max-width: 1200px) {
-            .funcionario-info-grid {
+            .funcionário-info-grid {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                 gap: 20px;
             }
@@ -201,12 +201,12 @@
                 padding: 20px;
             }
 
-            .funcionario-info-grid {
+            .funcionário-info-grid {
                 grid-template-columns: 1fr;
                 gap: 16px;
             }
 
-            .funcionario-info-item {
+            .funcionário-info-item {
                 padding: 20px;
             }
 
@@ -222,7 +222,7 @@
         }
 
         /* Estados de loading */
-        .funcionario-info-value:empty::after {
+        .funcionário-info-value:empty::after {
             content: 'Carregando...';
             color: var(--rh-secondary);
             font-style: italic;
@@ -234,7 +234,7 @@
             to { opacity: 1; }
         }
 
-        /* Sistema de notificações aprimorado */
+        /* Sistema de notificaes aprimorado */
         .notification {
             position: fixed;
             top: 20px;
@@ -373,18 +373,18 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-    <script src="/js/anti-copy-protection.js"></script>
+    <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
-    <script src="/js/modal-title.js?v=20260210"></script>
+    <script src="/js/modal-title.js?v=20260210" defer></script>
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
-    <script src="/js/tooltips-professional.js?v=20260216"></script>
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
 
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
 </head>
 <body>
-    <a href="#main-content" class="skip-link">Pular para o conteúdo</a>
+    <a href="#main-content" class="skip-link">Pular para o contedo</a>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
@@ -392,18 +392,18 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionrios"><i class="fas fa-users"></i></a>
+                <a href="gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/ferias.html" class="sidebar-btn" title="Férias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="pages/beneficios.html" class="sidebar-btn" title="Benefícios"><i class="fas fa-gift"></i></a>
-                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="pages/ferias.html" class="sidebar-btn" title="Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="pages/beneficios.html" class="sidebar-btn" title="Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+                <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
+                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionrio"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -417,16 +417,16 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Dados Pessoais</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
+                            <img src="" alt="Foto do usurio" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -441,7 +441,7 @@
                             <div class="funcionario-info-grid">
                                 <div class="funcionario-info-item">
                                     <div class="funcionario-info-label">Nome Completo</div>
-                                    <div class="funcionario-info-value" id="dados-nome">João Silva Santos</div>
+                                    <div class="funcionario-info-value" id="dados-nome">Joo Silva Santos</div>
                                 </div>
                                 <div class="funcionario-info-item">
                                     <div class="funcionario-info-label">CPF</div>
@@ -464,7 +464,7 @@
                                     <div class="funcionario-info-value" id="dados-telefone">(11) 99999-9999</div>
                                 </div>
                                 <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Endereço</div>
+                                    <div class="funcionario-info-label">Endereo</div>
                                     <div class="funcionario-info-value" id="dados-endereco">Rua das Flores, 123 - Centro</div>
                                 </div>
                                 <div class="funcionario-info-item">
@@ -473,7 +473,7 @@
                                 </div>
                                 <div class="funcionario-info-item">
                                     <div class="funcionario-info-label">Cidade</div>
-                                    <div class="funcionario-info-value" id="dados-cidade">São Paulo - SP</div>
+                                    <div class="funcionario-info-value" id="dados-cidade">So Paulo - SP</div>
                                 </div>
                                 <div class="funcionario-info-item">
                                     <div class="funcionario-info-label">Estado Civil</div>
@@ -488,7 +488,7 @@
                                     <div class="funcionario-info-value" id="dados-departamento">Carregando...</div>
                                 </div>
                                 <div class="funcionario-info-item">
-                                    <div class="funcionario-info-label">Data de Admissão</div>
+                                    <div class="funcionario-info-label">Data de Admisso</div>
                                     <div class="funcionario-info-value" id="dados-admissao">Carregando...</div>
                                 </div>
                                 <div class="funcionario-info-item">
@@ -497,7 +497,7 @@
                                 </div>
                             </div>
                             <button class="editar-dados-btn" onclick="editarDados()">
-                                <i class="fas fa-edit"></i> Solicitar Alteração de Dados
+                                <i class="fas fa-edit"></i> Solicitar Alterao de Dados
                             </button>
                         </div>
                     </div>
@@ -508,11 +508,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar dados do usuário
+            // Carregar dados do usurio
             carregarDadosUsuario();
         });
 
-        // Helper: Obtém headers de autenticação com o token
+        // Helper: Obtm headers de autenticao com o token
         function getAuthHeaders() {
             return { 'Content-Type': 'application/json' }; /* Auth via httpOnly cookie */
         }
@@ -524,7 +524,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Dados do usuário:', data);
+                console.log('Dados do usurio:', data);
                 const greetingEl = document.getElementById('greeting-text');
                 const userNameEl = document.getElementById('user-name');
                 const userInitialEl = document.getElementById('user-initial');
@@ -547,41 +547,42 @@
             .catch(error => {
                 console.error('Erro ao carregar dados:', error);
                 const userNameEl = document.getElementById('user-name');
-                if (userNameEl) userNameEl.textContent = 'Usuário';
+                if (userNameEl) userNameEl.textContent = 'Usurio';
             });
         }
 
         function editarDados() {
-            // Redirecionar para a página de dados cadastrais que tem o formulário completo de solicitação
+            // Redirecionar para a pgina de dados cadastrais que tem o formulrio completo de solicitao
             window.location.href = '/rh/pages/dados-cadastrais.html';
         }
 
         function toggleUserMenu() {
-            // Implementar menu do usuário se necessário
-            console.log('Menu do usuário clicado');
+            // Implementar menu do usurio se necessrio
+            console.log('Menu do usurio clicado');
         }
     </script>
 
-<!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->
-<!-- ti@aluforce.ind.br = Central de Suporte | Outros usuários = Chat normal -->
-    <!-- Sistema de Monitoramento de Conexão -->
-    <script src="/modules/_shared/connection-monitor.js?v=20260111"></script>
-    <script src="/js/popup-confirmacao.js"></script>
-    <script src="/js/unsaved-changes.js?v=20260108"></script>
-    <script src="/js/modal-integration.js?v=20260108"></script>
+<!-- Sistema de Chat e Suporte (widgets condicionais por usurio) -->
+<!-- ti@aluforce.ind.br = Central de Suporte | Outros usurios = Chat normal -->
+    <!-- Sistema de Monitoramento de Conexo -->
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
+    <script src="/js/unsaved-changes.js?v=20260108" defer></script>
+    <script src="/js/modal-integration.js?v=20260323" defer></script>
     <script src="/js/auth-unified.js?v=20260214" defer></script>
-    <script src="/modules/RH/public/js/controle-acesso-rh.js"></script>
-    <script src="/modules/RH/public/js/rh-ui-common.js"></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
         <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!-- 
     <script src="/chat/widget.js?v=20260218" defer></script> -->
 
     <!-- Sidebar Click Animation -->
-    <script src="/js/sidebar-click-animation.js?v=20260224"></script>
-    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+    <script src="/js/sidebar-click-animation.js?v=20260224" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
 

@@ -437,10 +437,7 @@ class NotificationSystem {
     async verificarNovasNotificacoes() {
         // Buscar notificações reais da API
         try {
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-            const response = await fetch('/api/compras/dashboard', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await fetch('/api/compras/dashboard', { credentials: 'include' });
             if (response.ok) {
                 const data = await response.json();
                 const stats = data.dashboard || data || {};
@@ -488,18 +485,31 @@ class NotificationSystem {
         // Criar toast notification
         const toast = document.createElement('div');
         toast.className = 'notification-toast';
-        toast.innerHTML = `
-            <div style="display: flex; align-items: start; gap: 12px;">
-                <i class="fas fa-bell" style="color: #8b5cf6; font-size: 20px; margin-top: 2px;"></i>
-                <div style="flex: 1;">
-                    <div style="font-weight: 600; margin-bottom: 4px;">${title}</div>
-                    <div style="font-size: 14px; color: var(--text-secondary);">${message}</div>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px;">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-        `;
+        var wrapper = document.createElement('div');
+        wrapper.style.cssText = 'display: flex; align-items: start; gap: 12px;';
+        var bellIcon = document.createElement('i');
+        bellIcon.className = 'fas fa-bell';
+        bellIcon.style.cssText = 'color: #8b5cf6; font-size: 20px; margin-top: 2px;';
+        wrapper.appendChild(bellIcon);
+        var contentDiv = document.createElement('div');
+        contentDiv.style.flex = '1';
+        var titleDiv = document.createElement('div');
+        titleDiv.style.cssText = 'font-weight: 600; margin-bottom: 4px;';
+        titleDiv.textContent = title;
+        contentDiv.appendChild(titleDiv);
+        var msgDiv = document.createElement('div');
+        msgDiv.style.cssText = 'font-size: 14px; color: var(--text-secondary);';
+        msgDiv.textContent = message;
+        contentDiv.appendChild(msgDiv);
+        wrapper.appendChild(contentDiv);
+        var closeBtn = document.createElement('button');
+        closeBtn.style.cssText = 'background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px;';
+        closeBtn.addEventListener('click', function() { toast.remove(); });
+        var closeIcon = document.createElement('i');
+        closeIcon.className = 'fas fa-times';
+        closeBtn.appendChild(closeIcon);
+        wrapper.appendChild(closeBtn);
+        toast.appendChild(wrapper);
 
         document.body.appendChild(toast);
 

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Zyntra iOS OTA Distribution Manifest
+  
+  INSTRUÇÕES:
+  1. Substitua SEU_DOMINIO pela URL real (ex: zyntra.com.br)
+  2. Hospede este arquivo em: https://SEU_DOMINIO/app/manifest.plist
+  3. Hospede o .ipa em: https://SEU_DOMINIO/app/Zyntra.ipa
+  4. O link de instalação é: itms-services://?action=download-manifest&url=https://SEU_DOMINIO/app/manifest.plist
+  
+  IMPORTANTE: O servidor DEVE usar HTTPS (SSL) para funcionar.
+-->
+<plist version="1.0">
+<dict>
+    <key>items</key>
+    <array>
+        <dict>
+            <key>assets</key>
+            <array>
+                <!-- IPA do App -->
+                <dict>
+                    <key>kind</key>
+                    <string>software-package</string>
+                    <key>url</key>
+                    <string>https://SEU_DOMINIO/app/Zyntra.ipa</string>
+                </dict>
+                <!-- Ícone para o popup de instalação -->
+                <dict>
+                    <key>kind</key>
+                    <string>display-image</string>
+                    <key>url</key>
+                    <string>https://SEU_DOMINIO/icons/icon-192x192.png</string>
+                </dict>
+                <!-- Ícone grande -->
+                <dict>
+                    <key>kind</key>
+                    <string>full-size-image</string>
+                    <key>url</key>
+                    <string>https://SEU_DOMINIO/icons/icon-512x512.png</string>
+                </dict>
+            </array>
+            <key>metadata</key>
+            <dict>
+                <key>bundle-identifier</key>
+                <string>br.com.zyntra.erp</string>
+                <key>bundle-version</key>
+                <string>2.1.7</string>
+                <key>kind</key>
+                <string>software</string>
+                <key>platform-identifier</key>
+                <string>com.apple.platform.iphoneos</string>
+                <key>title</key>
+                <string>Zyntra - Sistema de Gestão</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

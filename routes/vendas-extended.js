@@ -42,33 +42,112 @@ module.exports = function createVendasExtendedRoutes(deps) {
         vendasPool = pool; // fallback to main pool
     }
     // ======================================
-    
-    
+
+
     // === DASHBOARD VENDAS ===
-    router.get('/dashboard/admin', authorizeArea('vendas'), cacheMiddleware('vendas_dash_admin', CACHE_CONFIG.dashboardVendas), async (req, res) => {
+
+    // Dashboard Admin: métricas completas e avançadas
+    router.get('/dashboard/admin', authorizeArea('vendas'), cacheMiddleware('vendas_dash_admin', CACHE_CONFIG.dashboardVendas, true), async (req, res) => {
         try {
-            const [results] = await vendasPool.query(`
+            const user = req.user;
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) return res.status(403).json({ message: 'Acesso negado: apenas administradores.' });
+
+            const periodo = req.query.periodo || req.query.período || '30';
+            const dias = parseInt(periodo) || 30;
+
+            // Métricas gerais
+            const [metricsRows] = await pool.query(`
                 SELECT
-                    COUNT(p.id) as total_pedidos,
-                    SUM(CASE WHEN p.status = 'convertido' THEN 1 ELSE 0 END) as total_vendas,
-                    SUM(CASE WHEN p.status = 'convertido' THEN p.valor_total ELSE 0 END) as faturamento_total,
-                    COUNT(DISTINCT p.cliente_id) as total_clientes,
-                    COUNT(DISTINCT p.empresa_id) as total_empresas
-                FROM pedidos p
-                WHERE p.data_criacao >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as total_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado,
+                    COUNT(CASE WHEN status = 'orcamento' THEN 1 END) as total_orcamentos,
+                    SUM(CASE WHEN status = 'orcamento' THEN valor ELSE 0 END) as valor_orcamentos,
+                    COUNT(CASE WHEN status = 'analise' THEN 1 END) as total_analise,
+                    SUM(CASE WHEN status = 'analise' THEN valor ELSE 0 END) as valor_analise,
+                    COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
+                    COUNT(*) as total_pedidos,
+                    AVG(valor) as ticket_medio
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL ? DAY
+            `, [dias]);
+
+            // Top vendedores (faturamento)
+            const [topVendedores] = await pool.query(`
+                SELECT
+                    u.id, u.nome, u.email,
+                    COUNT(p.id) as total_vendas,
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado,
+                    SUM(p.valor) as valor_total
+                FROM usuarios u
+                LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                WHERE u.role = 'vendedor' OR u.is_admin = 0
+                GROUP BY u.id, u.nome, u.email
+                ORDER BY valor_faturado DESC
+                LIMIT 10
+            `, [dias]);
+
+            // Faturamento mensal (últimos 12 meses)
+            const [faturamentoMensal] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(created_at, '%Y-%m') as mes,
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as qtd_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL 12 MONTH
+                GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                ORDER BY mes ASC
             `);
-            res.json(results[0]);
+
+            // Conversão por status
+            const [conversao] = await pool.query(`
+                SELECT
+                    status,
+                    COUNT(*) as quantidade,
+                    SUM(valor) as valor_total
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL ? DAY
+                GROUP BY status
+            `, [dias]);
+
+            // Pedidos por empresa (top 10)
+            const [topEmpresas] = await pool.query(`
+                SELECT
+                    e.id, e.nome_fantasia, e.cnpj,
+                    COUNT(p.id) as total_pedidos,
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado
+                FROM empresas e
+                LEFT JOIN pedidos p ON e.id = p.empresa_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                GROUP BY e.id, e.nome_fantasia, e.cnpj
+                ORDER BY valor_faturado DESC
+                LIMIT 10
+            `, [dias]);
+
+            // Taxa de conversão
+            const totalOrcamentos = metricsRows[0].total_orcamentos || 0;
+            const totalFaturado = metricsRows[0].total_faturado || 0;
+            const taxaConversao = totalOrcamentos > 0 ? ((totalFaturado / totalOrcamentos) * 100).toFixed(2) : 0;
+
+            res.json({
+                periodo: dias,
+                metricas: metricsRows[0],
+                taxaConversao: parseFloat(taxaConversao),
+                topVendedores,
+                faturamentoMensal,
+                conversaoPorStatus: conversao,
+                topEmpresas
+            });
         } catch (error) {
-            console.error('Erro dashboard vendas:', error);
-            res.status(500).json({ error: 'Erro ao carregar dashboard' });
+            console.error('Erro dashboard admin:', error);
+            res.status(500).json({ error: 'Erro ao carregar dashboard admin' });
         }
     });
-    
+
     router.get('/dashboard/vendedor', authorizeArea('vendas'), cacheMiddleware('vendas_dash_vend', CACHE_CONFIG.dashboardVendas, true), async (req, res) => {
         try {
             const vendedorId = req.user.id;
             const período = req.query.período || '30'; // dias
-    
+
             // Métricas pessoais do vendedor
             const [metricsRows] = await pool.query(`
                 SELECT
@@ -83,7 +162,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 FROM pedidos
                 WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL ? DAY
             `, [vendedorId, parseInt(período)]);
-    
+
             // Pipeline do vendedor (valor por status)
             const [pipeline] = await pool.query(`
                 SELECT
@@ -94,7 +173,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL ? DAY
                 GROUP BY status
             `, [vendedorId, parseInt(período)]);
-    
+
             // Histórico mensal do vendedor (últimos 6 meses)
             const [históricoMensal] = await pool.query(`
                 SELECT
@@ -106,7 +185,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 GROUP BY DATE_FORMAT(created_at, '%Y-%m')
                 ORDER BY mes ASC
             `, [vendedorId]);
-    
+
             // Meus clientes (empresas com mais pedidos)
             // AUDIT-FIX HIGH-001: Fixed broken SQL — added FROM/JOIN/WHERE, removed trailing comma
             const [meusClientes] = await pool.query(`
@@ -121,12 +200,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 ORDER BY valor_faturado DESC
                 LIMIT 10
             `, [vendedorId, parseInt(período) || 6]);
-    
+
             // Taxa de conversão pessoal
             const totalOrcamentos = metricsRows[0]?.total_orcamentos || 0;
             const totalFaturado = metricsRows[0]?.total_faturado || 0;
             const taxaConversao = totalOrcamentos > 0 ? ((totalFaturado / totalOrcamentos) * 100).toFixed(2) : 0;
-    
+
             // Buscar meta do vendedor
             let metaAtual = { valor: 32500, atingido: 0, percentual: 0 };
             try {
@@ -148,7 +227,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 metaAtual.atingido = metricsRows[0]?.valor_faturado || 0;
                 metaAtual.percentual = metaAtual.valor > 0 ? ((metaAtual.atingido / metaAtual.valor) * 100).toFixed(1) : 0;
             }
-    
+
             res.json({
                 metricas: metricsRows[0] || {},
                 pipeline,
@@ -162,13 +241,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao carregar dashboard do vendedor' });
         }
     });
-    
+
     // GET: top vendedores by faturamento
     router.get('/dashboard/top-vendedores', authenticateToken, cacheMiddleware('vendas_top_vend', CACHE_CONFIG.dashboardVendas), async (req, res) => {
         try {
             const limit = Math.max(parseInt(req.query.limit || '5'), 1);
             const periodDays = Math.max(parseInt(req.query.period || req.query.days || '30'), 1);
-    
+
             const [rows] = await pool.query(
                 `SELECT
                     u.id,
@@ -194,13 +273,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json([]);
         }
     });
-    
+
     // GET: top produtos mais vendidos
     router.get('/dashboard/top-produtos', authenticateToken, cacheMiddleware('vendas_top_prod', CACHE_CONFIG.dashboardVendas), async (req, res) => {
         try {
             const limit = Math.max(parseInt(req.query.limit || '5'), 1);
             const periodDays = Math.max(parseInt(req.query.period || req.query.days || '30'), 1);
-    
+
             try {
                 const [rows] = await pool.query(
                     `SELECT
@@ -231,7 +310,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json([]);
         }
     });
-    
+
     // === PEDIDOS ===
     router.get('/pedidos', authorizeArea('vendas'), async (req, res) => {
         try {
@@ -250,16 +329,16 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 LEFT JOIN empresas e ON p.empresa_id = e.id
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
             `;
-    
+
             const params = [];
             if (status) {
                 query += ' WHERE p.status = ?';
                 params.push(status);
             }
-    
+
             query += ' ORDER BY p.id DESC LIMIT ?';
             params.push(parseInt(limite));
-    
+
             const [pedidos] = await pool.query(query, params);
             res.json(pedidos);
         } catch (error) {
@@ -267,23 +346,23 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao listar pedidos' });
         }
     });
-    
+
     // ========================================
     // PDF GENERATION - ORÇAMENTO PROFISSIONAL INSTITUCIONAL
     // ========================================
     const PDFDocument = require('pdfkit');
-    
+
     // Rota alternativa para /imprimir (redireciona para /pdf)
     router.get('/pedidos/:id/imprimir', authenticateToken, authorizeArea('vendas'), (req, res, next) => {
         req.url = `/api/vendas/pedidos/${req.params.id}/pdf`;
         next('route');
     });
-    
+
     router.get('/pedidos/:id/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         console.log('[PDF] Gerando documento para pedido:', req.params.id);
         try {
             const { id } = req.params;
-    
+
             const [pedidos] = await vendasPool.query(`
                 SELECT p.*,
                        p.valor as valor_total,
@@ -315,13 +394,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 LEFT JOIN transportadoras t ON p.transportadora_id = t.id
                 WHERE p.id = ?
             `, [id]);
-    
+
             if (pedidos.length === 0) return res.status(404).json({ error: 'Pedido não encontrado' });
-    
+
             const pedido = pedidos[0];
-    
+
             let [itens] = await vendasPool.query(`SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC`, [id]);
-    
+
             if (itens.length === 0 && pedido.produtos_preview) {
                 try {
                     const preview = JSON.parse(pedido.produtos_preview);
@@ -338,7 +417,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     }
                 } catch(e) {}
             }
-    
+
             const emp = {
                 razao: 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
                 cnpj: '08.192.479/0001-60', ie: '103.385.861-110',
@@ -346,13 +425,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 cidUf: 'Ferraz de Vasconcelos/SP', cep: '08527-400',
                 tel: '(11) 94723-8729', email: 'contato@aluforce.com.br'
             };
-    
+
             let geradoPor = 'Sistema';
             if (req.user?.id) {
                 const [u] = await vendasPool.query('SELECT nome FROM usuarios WHERE id = ?', [req.user.id]);
                 if (u.length > 0) geradoPor = u[0].nome;
             }
-    
+
             // ========== MAPEAR STATUS PARA NOME AMIGAVEL ==========
             const statusMap = {
                 'orcamento': 'Orcamento', 'em-analise': 'Em Analise', 'negociacao': 'Negociacao',
@@ -363,16 +442,16 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const statusRaw = (pedido.status || 'orcamento').toLowerCase().trim();
             const statusNome = statusMap[statusRaw] || statusRaw.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             const nomeCliente = pedido.cliente_razao_social || pedido.cliente_nome_fantasia || pedido.cliente_nome_real || pedido.cliente_nome || 'Cliente';
-    
+
             // ========== NOME DO ARQUIVO ==========
             const nomeArquivoCliente = nomeCliente.replace(/[^a-zA-Z0-9\s\-]/g, '').trim();
             const nomeArquivo = `${statusNome} - ${nomeArquivoCliente} - N${pedido.id}`;
             const nomeArquivoSafe = nomeArquivo.replace(/[\\/:*?"<>|]/g, '_');
-    
+
             // ========== HELPERS ==========
             function moeda(v) { return 'R$ ' + (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
             function fmtData(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '--'; }
-    
+
             // ========== CRIAR PDF - DOCUMENTO PROFISSIONAL A4 ==========
             const doc = new PDFDocument({
                 size: 'A4',
@@ -381,11 +460,11 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 bufferPages: false,
                 info: { Title: nomeArquivo, Author: 'ALUFORCE', Creator: 'ALUFORCE ERP V.2', Producer: 'ALUFORCE', Subject: 'Proposta Comercial / Orcamento' }
             });
-    
+
             res.setHeader('Content-Type', 'application/pdf');
             res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(nomeArquivoSafe)}.pdf"`);
             doc.pipe(res);
-    
+
             // ===== PALETA CORPORATIVA PREMIUM =====
             const C = {
                 navy:       '#0A1929',    // azul marinho profundo
@@ -404,14 +483,14 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 red:        '#C53030',
                 green:      '#276749'
             };
-    
+
             const ML = 42;          // margem esquerda
             const MR = 553;         // margem direita
             const MW = MR - ML;     // largura util
             const PW = 595;         // largura pagina
             const PH = 842;         // altura pagina
             let y = 0;
-    
+
             // ================================================================
             //  HEADER BAND - faixa topo premium
             // ================================================================
@@ -419,9 +498,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.rect(0, 0, PW, 8).fillColor(C.navy).fill();
             // Filete dourado elegante
             doc.rect(0, 8, PW, 1.5).fillColor(C.gold).fill();
-    
+
             y = 20;
-    
+
             // ================================================================
             //  CABECALHO - Logo | Empresa | Documento
             // ================================================================
@@ -429,7 +508,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             if (fs.existsSync(logoPath)) {
                 try { doc.image(logoPath, ML, y, { width: 70 }); } catch(e) {}
             }
-    
+
             // Dados da empresa
             const exL = ML + 78;
             doc.fontSize(6.8).fillColor(C.navy).font('Helvetica-Bold')
@@ -438,7 +517,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                .text(`CNPJ: ${emp.cnpj}  |  IE: ${emp.ie}`, exL, y + 18)
                .text(`${emp.end} - ${emp.cidUf} - CEP: ${emp.cep}`, exL, y + 26)
                .text(`${emp.tel}  |  ${emp.email}`, exL, y + 34);
-    
+
             // ---- Caixa tipo documento (lado direito) ----
             const dbW = 138;
             const dbX = MR - dbW;
@@ -450,19 +529,19 @@ module.exports = function createVendasExtendedRoutes(deps) {
             // Borda dourada superior da caixa
             doc.roundedRect(dbX, y - 1, dbW, 4, 4).fillColor(C.gold).fill();
             doc.rect(dbX, y + 1, dbW, 2).fillColor(C.gold).fill();
-    
+
             doc.fontSize(9.5).fillColor(C.white).font('Helvetica-Bold')
                .text('ORCAMENTO', dbX, y + 8, { width: dbW, align: 'center' });
             doc.fontSize(18).fillColor(C.gold).font('Helvetica-Bold')
                .text(`N. ${pedido.id}`, dbX, y + 21, { width: dbW, align: 'center' });
-    
+
             y += 52;
-    
+
             // Separador dourado duplo
             doc.moveTo(ML, y).lineTo(MR, y).strokeColor(C.gold).lineWidth(1.5).stroke();
             doc.moveTo(ML, y + 3).lineTo(MR, y + 3).strokeColor(C.borderLight).lineWidth(0.3).stroke();
             y += 9;
-    
+
             // ================================================================
             //  BARRA DE METADADOS
             // ================================================================
@@ -470,17 +549,17 @@ module.exports = function createVendasExtendedRoutes(deps) {
             // Fundo com borda
             doc.rect(ML, y, MW, metaH).fillColor(C.bg).fill();
             doc.rect(ML, y, MW, metaH).strokeColor(C.border).lineWidth(0.3).stroke();
-    
+
             const dataValidade = new Date(pedido.created_at);
             dataValidade.setDate(dataValidade.getDate() + 15);
-    
+
             const metaFields = [
                 { label: 'EMISSAO',   value: fmtData(pedido.created_at) },
                 { label: 'VENDEDOR',  value: pedido.vendedor_nome || '--' },
                 { label: 'VALIDADE',  value: fmtData(dataValidade) },
                 { label: 'STATUS',    value: statusNome.toUpperCase() }
             ];
-    
+
             const mColW = MW / 4;
             metaFields.forEach((f, i) => {
                 const fx = ML + mColW * i + 12;
@@ -496,7 +575,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 }
             });
             y += metaH + 7;
-    
+
             // ================================================================
             //  DADOS DO CLIENTE
             // ================================================================
@@ -506,49 +585,49 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
                .text('DADOS DO CLIENTE', ML + 14, y + 4);
             y += 15;
-    
+
             // Montar endereco completo
             const endParts = [pedido.cliente_endereco, pedido.cliente_bairro].filter(Boolean);
             const cidParts = [pedido.cliente_cidade, pedido.cliente_estado].filter(Boolean);
             let endCompleto = endParts.join(', ');
             if (cidParts.length > 0) endCompleto += (endCompleto ? ' - ' : '') + cidParts.join('/');
-    
+
             // Box cliente com borda esquerda dourada sutil
             const cliH = 50;
             doc.rect(ML, y, MW, cliH).fillColor(C.white).fill();
             doc.rect(ML, y, MW, cliH).strokeColor(C.border).lineWidth(0.4).stroke();
             doc.rect(ML, y, 2, cliH).fillColor(C.goldLight).fill();
-    
+
             // Razao Social em destaque
             doc.fontSize(8.5).fillColor(C.navy).font('Helvetica-Bold')
                .text(nomeCliente, ML + 12, y + 5, { width: MW - 24 });
-    
+
             // Linha divisoria elegante
             doc.moveTo(ML + 12, y + 16).lineTo(MR - 12, y + 16)
                .strokeColor(C.borderLight).lineWidth(0.3).stroke();
-    
+
             // Campos em grid 2 colunas
             const c1 = ML + 12;
             const c2 = ML + MW / 2 + 8;
             const lbW = 60;
             const v1W = MW / 2 - lbW - 20;
             const v2W = MW / 2 - lbW - 16;
-    
+
             function campo(label, valor, cx, cy, vw) {
                 doc.fontSize(5.8).fillColor(C.textMid).font('Helvetica-Bold')
                    .text(label, cx, cy, { width: lbW });
                 doc.fontSize(6.2).fillColor(C.text).font('Helvetica')
                    .text(valor || '--', cx + lbW, cy, { width: vw || v1W, lineBreak: false });
             }
-    
+
             campo('CNPJ/CPF:', pedido.cliente_cnpj, c1, y + 21);
             campo('IE:', pedido.cliente_ie || 'Isento', c2, y + 21, v2W);
             campo('Endereco:', endCompleto || '--', c1, y + 30, MW - lbW - 24);
             campo('Telefone:', pedido.cliente_telefone, c1, y + 39);
             campo('CEP:', pedido.cliente_cep, c2, y + 39, v2W);
-    
+
             y += cliH + 6;
-    
+
             // ================================================================
             //  TABELA DE ITENS
             // ================================================================
@@ -560,11 +639,11 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.fontSize(6.5).fillColor(C.goldLight).font('Helvetica-Bold')
                .text(`${itens.length} ${itens.length === 1 ? 'item' : 'itens'}`, MR - 70, y + 4, { width: 58, align: 'right' });
             y += 15;
-    
+
             // ---- Cabecalho da tabela ----
             const thH = 15;
             doc.rect(ML, y, MW, thH).fillColor(C.navy).fill();
-    
+
             const col = {
                 n:    { x: ML,        w: 22 },
                 cod:  { x: ML + 22,   w: 70 },
@@ -575,7 +654,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 dsc:  { x: ML + 421,  w: 48 },
                 tot:  { x: ML + 469,  w: 42 }
             };
-    
+
             const thY = y + 4.5;
             doc.fontSize(5.8).fillColor(C.white).font('Helvetica-Bold');
             doc.text('#',          col.n.x + 2,   thY, { width: col.n.w,    align: 'center' });
@@ -587,28 +666,28 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.text('DESC.',      col.dsc.x,       thY, { width: col.dsc.w,  align: 'right' });
             doc.text('TOTAL',      col.tot.x,       thY, { width: col.tot.w,  align: 'right' });
             y += thH;
-    
+
             // ---- Linhas dos itens ----
             let totalProdutos = 0, totalDescontos = 0;
             const rowH = itens.length > 20 ? 10 : itens.length > 12 ? 11 : 13;
-    
+
             if (itens.length > 0) {
                 itens.forEach((item, idx) => {
                     const isEven = idx % 2 === 0;
                     doc.rect(ML, y, MW, rowH).fillColor(isEven ? C.white : C.bg).fill();
                     // Linhas horizontais suaves
                     doc.moveTo(ML, y + rowH).lineTo(MR, y + rowH).strokeColor(C.borderLight).lineWidth(0.15).stroke();
-    
+
                     const qtd = parseFloat(item.quantidade) || 0;
                     const unit = parseFloat(item.preco_unitario) || 0;
                     const desc = parseFloat(item.desconto) || 0;
                     const tot = (qtd * unit) - desc;
                     totalProdutos += (qtd * unit);
                     totalDescontos += desc;
-    
+
                     const fs = rowH <= 10 ? 5.2 : rowH <= 11 ? 5.5 : 6;
                     const ty = y + (rowH - 6) / 2;
-    
+
                     doc.fontSize(fs).fillColor(C.textLight).font('Helvetica')
                        .text(String(idx + 1).padStart(2, '0'), col.n.x + 2, ty, { width: col.n.w, align: 'center' });
                     doc.fillColor(C.navy).font('Helvetica-Bold')
@@ -622,7 +701,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                        .text(desc > 0 ? moeda(desc).replace('R$ ', '') : '\u2014', col.dsc.x, ty, { width: col.dsc.w, align: 'right' });
                     doc.fillColor(C.navy).font('Helvetica-Bold')
                        .text(moeda(tot).replace('R$ ', ''), col.tot.x, ty, { width: col.tot.w, align: 'right' });
-    
+
                     y += rowH;
                 });
             } else {
@@ -632,11 +711,11 @@ module.exports = function createVendasExtendedRoutes(deps) {
                    .text('Nenhum item adicionado a este orcamento.', ML + 12, y + 7);
                 y += 20;
             }
-    
+
             // Borda inferior da tabela
             doc.moveTo(ML, y).lineTo(MR, y).strokeColor(C.navy).lineWidth(0.8).stroke();
             y += 2;
-    
+
             // ================================================================
             //  RESUMO FINANCEIRO
             // ================================================================
@@ -644,19 +723,19 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const ipi = parseFloat(pedido.total_ipi) || 0;
             const totalGeral = totalProdutos - totalDescontos + frete + ipi;
             const valorFinal = totalGeral > 0 ? totalGeral : (parseFloat(pedido.valor_total) || 0);
-    
+
             // Resumo de valores lado a lado com box total
             const resumoW = 210;
             const resumoX = MR - resumoW;
             let rY = y + 2;
-    
+
             // Subtotal
             doc.fontSize(6).fillColor(C.textMid).font('Helvetica')
                .text('Subtotal:', resumoX, rY, { width: 80, align: 'right' });
             doc.fillColor(C.text).font('Helvetica')
                .text(moeda(totalProdutos), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
             rY += 9;
-    
+
             if (totalDescontos > 0) {
                 doc.fillColor(C.textMid).font('Helvetica').text('Descontos:', resumoX, rY, { width: 80, align: 'right' });
                 doc.fillColor(C.red).font('Helvetica').text('- ' + moeda(totalDescontos), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
@@ -672,24 +751,24 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 doc.fillColor(C.text).font('Helvetica').text(moeda(ipi), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
                 rY += 9;
             }
-    
+
             // Linha separadora
             rY += 1;
             doc.moveTo(resumoX, rY).lineTo(MR, rY).strokeColor(C.gold).lineWidth(1).stroke();
             rY += 4;
-    
+
             // TOTAL em destaque
             doc.rect(resumoX - 5, rY - 2, resumoW + 5, 22).fillColor(C.navy).fill();
             // Barra dourada lateral
             doc.rect(resumoX - 5, rY - 2, 3, 22).fillColor(C.gold).fill();
-    
+
             doc.fontSize(9).fillColor(C.white).font('Helvetica-Bold')
                .text('TOTAL:', resumoX + 8, rY + 4, { width: 55 });
             doc.fontSize(12).fillColor(C.gold).font('Helvetica-Bold')
                .text(moeda(valorFinal), resumoX + 60, rY + 2, { width: resumoW - 65, align: 'right' });
-    
+
             y = rY + 28;
-    
+
             // ================================================================
             //  CONDICOES COMERCIAIS
             // ================================================================
@@ -698,23 +777,23 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
                .text('CONDICOES COMERCIAIS', ML + 14, y + 4);
             y += 15;
-    
+
             const condicaoPag = pedido.condicao_pagamento || pedido.condicoes_pagamento || '--';
             const transportadora = pedido.transportadora_nome || pedido.transp_razao_social || pedido.cliente_transportadora || '--';
             const tipoFrete = pedido.tipo_frete === 'CIF' ? 'CIF (Remetente)' : pedido.tipo_frete === 'FOB' ? 'FOB (Destinatario)' : pedido.tipo_frete || '--';
-    
+
             const condH = 24;
             doc.rect(ML, y, MW, condH).fillColor(C.white).fill();
             doc.rect(ML, y, MW, condH).strokeColor(C.border).lineWidth(0.4).stroke();
             doc.rect(ML, y, 2, condH).fillColor(C.goldLight).fill();
-    
+
             campo('Pagamento:', condicaoPag, c1, y + 4);
             campo('Frete:', tipoFrete, c2, y + 4, v2W);
             campo('Transportadora:', transportadora, c1, y + 14);
             campo('Prazo:', pedido.prazo_entrega || 'A combinar', c2, y + 14, v2W);
-    
+
             y += condH + 5;
-    
+
             // ================================================================
             //  OBSERVACOES (condicional)
             // ================================================================
@@ -725,7 +804,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
                    .text('OBSERVACOES', ML + 14, y + 4);
                 y += 15;
-    
+
                 const obsH = Math.min(32, Math.max(16, Math.ceil(obsTexto.length / 110) * 9 + 8));
                 doc.rect(ML, y, MW, obsH).fillColor(C.white).fill();
                 doc.rect(ML, y, MW, obsH).strokeColor(C.border).lineWidth(0.4).stroke();
@@ -734,7 +813,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                    .text(obsTexto, ML + 12, y + 5, { width: MW - 24, lineBreak: true });
                 y += obsH + 5;
             }
-    
+
             // ================================================================
             //  TERMOS E CONDICOES
             // ================================================================
@@ -746,7 +825,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                .text('Orcamento valido por 15 dias  |  Precos sujeitos a alteracao apos a validade  |  Prazo de entrega apos confirmacao do pedido  |  Documento sem valor fiscal',
                      ML + 8, y + 5, { width: MW - 16, align: 'center' });
             y += termosH + 6;
-    
+
             // ================================================================
             //  ASSINATURAS
             // ================================================================
@@ -754,19 +833,19 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const footerStart = 790;
             const assSpace = 35;
             const assY = Math.min(Math.max(y + 8, 690), footerStart - assSpace - 10);
-    
+
             // Assinatura Cliente (esquerda)
             doc.moveTo(ML + 15, assY).lineTo(ML + 230, assY)
                .strokeColor(C.navy).lineWidth(0.6).stroke();
             doc.fontSize(5.5).fillColor(C.textMid).font('Helvetica')
                .text('Assinatura / Carimbo do Cliente', ML + 15, assY + 4, { width: 215, align: 'center' });
-    
+
             // Assinatura Vendedor (direita)
             doc.moveTo(MR - 230, assY).lineTo(MR - 15, assY)
                .strokeColor(C.navy).lineWidth(0.6).stroke();
             doc.fontSize(5.5).fillColor(C.textMid).font('Helvetica')
                .text('Assinatura do Vendedor', MR - 230, assY + 4, { width: 215, align: 'center' });
-    
+
             // ================================================================
             //  RODAPE INSTITUCIONAL
             // ================================================================
@@ -775,23 +854,23 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.rect(0, fY, PW, 2).fillColor(C.gold).fill();
             // Barra navy
             doc.rect(0, fY + 2, PW, 50).fillColor(C.navy).fill();
-    
+
             doc.fontSize(5.2).fillColor('#7A8FA3').font('Helvetica')
                .text(`Documento gerado em ${new Date().toLocaleString('pt-BR')} por ${geradoPor}`, ML, fY + 8, { width: MW, align: 'center' });
             doc.fontSize(4.5).fillColor('#5B6E82')
                .text(`${nomeArquivo}`, ML, fY + 17, { width: MW, align: 'center' });
             doc.fontSize(4.2).fillColor('#4A5D71')
                .text('ALUFORCE - Industria e Comercio de Condutores  |  Sistema de Gestao Empresarial V.2  |  Documento sem valor fiscal', ML, fY + 25, { width: MW, align: 'center' });
-    
+
             doc.end();
             console.log('[PDF] Documento gerado: ' + nomeArquivo);
-    
+
         } catch (error) {
             console.error('[PDF] Erro:', error);
             res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: error.message });
         }
     });
-    
+
     router.get('/pedidos/:id', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
@@ -820,21 +899,21 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 LEFT JOIN transportadoras t ON p.transportadora_id = t.id
                 WHERE p.id = ?
             `, [id]);
-    
+
             if (pedidos.length === 0) {
                 return res.status(404).json({ error: 'Pedido não encontrado' });
             }
-    
+
             // Formatar o pedido para compatibilidade com o frontend
             const pedido = pedidos[0];
-    
+
             // Buscar itens da tabela pedido_itens
             let itensDB = [];
             try {
                 const [rows] = await vendasPool.query('SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]);
                 itensDB = rows;
             } catch (e) { console.log('[GET pedido] Erro ao buscar itens:', e.message); }
-    
+
             // Auto-repair: se pedido_itens vazio mas produtos_preview tem dados, inserir automaticamente
             // AUDIT-FIX HIGH-007: Wrapped auto-repair in transaction to prevent partial inserts
             const previewItens = safeParseJSON(pedido.produtos_preview, []);
@@ -866,7 +945,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     repairConn.release();
                 }
             }
-    
+
             const pedidoFormatado = {
                 ...pedido,
                 numero: `Pedido Nº ${pedido.id}`,
@@ -880,14 +959,14 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 produtos: itensDB.length > 0 ? itensDB : previewItens,
                 itens: itensDB
             };
-    
+
             res.json(pedidoFormatado);
         } catch (error) {
             console.error('Erro ao buscar pedido:', error);
             res.status(500).json({ error: 'Erro ao buscar pedido' });
         }
     });
-    
+
     router.post('/pedidos', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         const connection = await vendasPool.getConnection();
         try {
@@ -898,10 +977,10 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio
             } = req.body;
             const vendedor_id = req.user.id;
-    
+
             // empresa_id padrão = 1 (ALUFORCE) se não fornecido
             const empresaIdFinal = empresa_id || 1;
-    
+
             // Buscar nomes do cliente e vendedor
             let clienteNome = null;
             let vendedorNome = null;
@@ -913,7 +992,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 const [vRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [vendedor_id]);
                 if (vRows.length > 0) vendedorNome = vRows[0].nome;
             } catch (e) { /* nomes opcionais */ }
-    
+
             const [result] = await connection.query(`
                 INSERT INTO pedidos
                 (cliente_id, empresa_id, vendedor_id, valor, descricao, status,
@@ -926,9 +1005,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio,
                 clienteNome, vendedorNome
             ]);
-    
+
             const pedidoId = result.insertId;
-    
+
             // Inserir itens na tabela pedido_itens (dentro da mesma transação)
             const itensArray = produtos || [];
             if (itensArray.length > 0) {
@@ -945,7 +1024,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     );
                 }
             }
-    
+
             await connection.commit();
             res.json({ success: true, id: pedidoId, message: 'Pedido criado com sucesso' });
         } catch (error) {
@@ -956,29 +1035,44 @@ module.exports = function createVendasExtendedRoutes(deps) {
             connection.release();
         }
     });
-    
-    // Alias para /api/vendas/pedidos/novo -> cria novo pedido com itens
+
+    // Alias para /api/vendas/pedidos/novo -> cria novo pedido com itens (TODOS OS CAMPOS)
     router.post('/pedidos/novo', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();
+
+            const sanitize = (val) => (val === 'null' || val === 'undefined' || val === '' ? null : val);
+            const sanitizeNum = (val) => {
+                if (val === 'null' || val === 'undefined' || val === '' || val === null || val === undefined) return null;
+                const num = parseFloat(val);
+                return isNaN(num) ? null : num;
+            };
+
             const {
-                cliente_id, empresa_id, produtos, valor, descricao,
+                cliente_id, empresa_id, produtos, valor, descricao, cliente,
                 status = 'orcamento', frete = 0, prioridade = 'normal',
                 prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio,
-                parcelas, condicao_pagamento, cenario_fiscal, observacao, itens
+                parcelas, condicao_pagamento, cenario_fiscal, observacao, itens,
+                // Campos de transporte e entrega
+                transportadora, tipo_frete, placa_veiculo, veiculo_uf, rntrc,
+                qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                peso_liquido, peso_bruto, valor_seguro, outras_despesas, tipo_entrega,
+                // Campos adicionais
+                desconto_pct, vendedor_nome: vendedorNomeBody, origem, observacao_cliente,
+                nf
             } = req.body;
             const vendedor_id = req.user.id;
-    
+
             // Usar itens se disponivel, senao produtos
             const produtosData = itens || produtos || [];
-    
+
             // empresa_id padrão = 1 (ALUFORCE) se não fornecido
             const empresaIdFinal = empresa_id || 1;
-    
+
             // Buscar nomes do cliente e vendedor
-            let clienteNome = null;
-            let vendedorNome = null;
+            let clienteNome = sanitize(cliente) || null;
+            let vendedorNome = sanitize(vendedorNomeBody) || null;
             try {
                 if (cliente_id) {
                     const [cRows] = await connection.query('SELECT COALESCE(nome_fantasia, razao_social, nome) as nome FROM clientes WHERE id = ?', [cliente_id]);
@@ -987,25 +1081,35 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 const [vRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [vendedor_id]);
                 if (vRows.length > 0) vendedorNome = vRows[0].nome;
             } catch (e) { /* nomes opcionais */ }
-    
+
             const [result] = await connection.query(`
                 INSERT INTO pedidos
                 (cliente_id, empresa_id, vendedor_id, valor, descricao, status,
                  frete, prioridade, produtos_preview, prazo_entrega, endereco_entrega,
                  municipio_entrega, metodo_envio, parcelas, condicao_pagamento,
-                 cenario_fiscal, observacao, cliente_nome, vendedor_nome, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                 cenario_fiscal, observacao, cliente_nome, vendedor_nome,
+                 transportadora_nome, transportadora, tipo_frete, placa_veiculo, veiculo_uf, rntrc,
+                 qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                 peso_liquido, peso_bruto, valor_seguro, outras_despesas,
+                 desconto_pct, origem, observacao_cliente, nf, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             `, [
                 cliente_id || null, empresaIdFinal, vendedor_id, valor || 0, descricao || 'Novo Orçamento',
-                status, frete, prioridade, JSON.stringify(produtosData),
-                prazo_entrega || null, endereco_entrega || null, municipio_entrega || null, metodo_envio || null,
-                parcelas ? JSON.stringify(parcelas) : null, condicao_pagamento || null,
-                cenario_fiscal || null, observacao || null,
-                clienteNome, vendedorNome
+                status, sanitizeNum(frete) || 0, prioridade, JSON.stringify(produtosData),
+                sanitize(prazo_entrega), sanitize(endereco_entrega), sanitize(municipio_entrega), sanitize(metodo_envio),
+                parcelas ? (typeof parcelas === 'string' ? parcelas : JSON.stringify(parcelas)) : null,
+                sanitize(condicao_pagamento), sanitize(cenario_fiscal), sanitize(observacao),
+                clienteNome, vendedorNome,
+                sanitize(transportadora), sanitize(transportadora), sanitize(tipo_frete),
+                sanitize(placa_veiculo), sanitize(veiculo_uf), sanitize(rntrc),
+                sanitizeNum(qtd_volumes), sanitize(especie_volumes), sanitize(marca_volumes), sanitize(numeracao_volumes),
+                sanitizeNum(peso_liquido), sanitizeNum(peso_bruto), sanitizeNum(valor_seguro), sanitizeNum(outras_despesas),
+                sanitizeNum(desconto_pct) || 0, sanitize(origem), sanitize(observacao_cliente), sanitize(nf)
             ]);
-    
+
             const pedidoId = result.insertId;
-    
+
             // Inserir itens na tabela pedido_itens (dentro da mesma transação)
             if (produtosData.length > 0) {
                 for (const item of produtosData) {
@@ -1021,7 +1125,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     );
                 }
             }
-    
+
             await connection.commit();
             res.json({ success: true, id: pedidoId, message: 'Pedido criado com sucesso' });
         } catch (error) {
@@ -1032,7 +1136,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             connection.release();
         }
     });
-    
+
     router.put('/pedidos/:id', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
@@ -1041,11 +1145,11 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 frete, prioridade, prazo_entrega, endereco_entrega,
                 municipio_entrega, metodo_envio, observacao
             } = req.body;
-    
+
             // Construir query dinâmica apenas com campos fornecidos
             const updates = [];
             const params = [];
-    
+
             if (cliente_id !== undefined) { updates.push('cliente_id = ?'); params.push(cliente_id); }
             if (empresa_id !== undefined) { updates.push('empresa_id = ?'); params.push(empresa_id); }
             if (valor !== undefined) { updates.push('valor = ?'); params.push(valor); }
@@ -1059,44 +1163,44 @@ module.exports = function createVendasExtendedRoutes(deps) {
             if (municipio_entrega !== undefined) { updates.push('municipio_entrega = ?'); params.push(municipio_entrega); }
             if (metodo_envio !== undefined) { updates.push('metodo_envio = ?'); params.push(metodo_envio); }
             if (produtos !== undefined) { updates.push('produtos_preview = ?'); params.push(JSON.stringify(produtos)); }
-    
+
             if (updates.length === 0) {
                 return res.status(400).json({ error: 'Nenhum campo para atualizar' });
             }
-    
+
             params.push(id);
             await vendasPool.query(`UPDATE pedidos SET ${updates.join(', ')} WHERE id = ?`, params);
-    
+
             res.json({ success: true, message: 'Pedido atualizado com sucesso' });
         } catch (error) {
             console.error('Erro ao atualizar pedido:', error);
             res.status(500).json({ error: 'Erro ao atualizar pedido' });
         }
     });
-    
+
     // ROTA DUPLICADA REMOVIDA - /api/vendas/pedidos/:id/status já existe no apiVendasRouter
-    
+
     // AUDIT-FIX: REMOVED dangerous duplicate DELETE route that did NOT clean up child tables
     // (pedido_itens, pedido_anexos, pedido_historico) and had no transaction.
     // The correct DELETE handler is in apiVendasRouter at /pedidos/:id which uses proper
     // transaction, cascading deletes, and linked order/financial validation.
     // router.delete('/pedidos/:id', ...) — REMOVED
-    
+
     // === CLIENTES ===
     router.get('/clientes', authorizeArea('vendas'), async (req, res) => {
         try {
             const { search } = req.query;
             let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, email, telefone, celular, cidade, estado, vendedor_responsavel, vendedor_id, status, ativo FROM clientes';
             const params = [];
-    
+
             if (search) {
                 query += ' WHERE nome LIKE ? OR email LIKE ? OR telefone LIKE ?';
                 const searchTerm = `%${search}%`;
                 params.push(searchTerm, searchTerm, searchTerm);
             }
-    
+
             query += ' ORDER BY nome LIMIT 100';
-    
+
             const [clientes] = await vendasPool.query(query, params);
             res.json(clientes);
         } catch (error) {
@@ -1104,54 +1208,54 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao listar clientes' });
         }
     });
-    
+
     router.get('/clientes/:id', authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
             const [clientes] = await vendasPool.query('SELECT * FROM clientes WHERE id = ?', [id]);
-    
+
             if (clientes.length === 0) {
                 return res.status(404).json({ error: 'Cliente não encontrado' });
             }
-    
+
             res.json(clientes[0]);
         } catch (error) {
             console.error('Erro ao buscar cliente:', error);
             res.status(500).json({ error: 'Erro ao buscar cliente' });
         }
     });
-    
+
     router.post('/clientes', authorizeArea('vendas'), async (req, res) => {
         try {
             const { nome, email, telefone, cpf, endereco } = req.body;
-    
+
             const [result] = await vendasPool.query(`
                 INSERT INTO clientes (nome, email, telefone, cpf, endereco, data_criacao)
                 VALUES (?, ?, ?, ?, ?, NOW())
             `, [nome, email, telefone, cpf, endereco]);
-    
+
             res.json({ success: true, id: result.insertId, message: 'Cliente criado com sucesso' });
         } catch (error) {
             console.error('Erro ao criar cliente:', error);
             res.status(500).json({ error: 'Erro ao criar cliente' });
         }
     });
-    
+
     // === EMPRESAS ===
     router.get('/empresas', authorizeArea('vendas'), async (req, res) => {
         try {
             const { search } = req.query;
             let query = 'SELECT * FROM empresas';
             const params = [];
-    
+
             if (search) {
                 query += ' WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?';
                 const searchTerm = `%${search}%`;
                 params.push(searchTerm, searchTerm, searchTerm);
             }
-    
+
             query += ' ORDER BY nome_fantasia LIMIT 100';
-    
+
             const [empresas] = await vendasPool.query(query, params);
             res.json(empresas);
         } catch (error) {
@@ -1159,58 +1263,58 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao listar empresas' });
         }
     });
-    
+
     router.get('/empresas/:id', authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
             const [empresas] = await vendasPool.query('SELECT * FROM empresas WHERE id = ?', [id]);
-    
+
             if (empresas.length === 0) {
                 return res.status(404).json({ error: 'Empresa não encontrada' });
             }
-    
+
             res.json(empresas[0]);
         } catch (error) {
             console.error('Erro ao buscar empresa:', error);
             res.status(500).json({ error: 'Erro ao buscar empresa' });
         }
     });
-    
+
     router.post('/empresas', authorizeArea('vendas'), async (req, res) => {
         try {
             const { nome_fantasia, razao_social, cnpj, email, telefone, endereco } = req.body;
             const vendedor_id = req.user?.id || null;
-    
+
             const [result] = await vendasPool.query(`
                 INSERT INTO empresas (nome_fantasia, razao_social, cnpj, email, telefone, endereco, data_criacao, vendedor_id, ultima_movimentacao, status_cliente)
                 VALUES (?, ?, ?, ?, ?, ?, NOW(), ?, NOW(), 'ativo')
             `, [nome_fantasia, razao_social, cnpj, email, telefone, endereco, vendedor_id]);
-    
+
             res.json({ success: true, id: result.insertId, message: 'Empresa criada com sucesso' });
         } catch (error) {
             console.error('Erro ao criar empresa:', error);
             res.status(500).json({ error: 'Erro ao criar empresa' });
         }
     });
-    
+
     // === API para reativar cliente inativo (permite outro vendedor "conquistar") ===
     router.post('/empresas/:id/reativar', authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
             const vendedor_id = req.user?.id;
-    
+
             // Verificar se empresa está inativa
             const [empresa] = await vendasPool.query('SELECT status_cliente, vendedor_id FROM empresas WHERE id = ?', [id]);
-    
+
             if (!empresa || empresa.length === 0) {
                 return res.status(404).json({ error: 'Empresa não encontrada' });
             }
-    
+
             // Se está ativa e pertence a outro vendedor, não pode reativar
             if (empresa[0].status_cliente === 'ativo' && empresa[0].vendedor_id && empresa[0].vendedor_id !== vendedor_id) {
                 return res.status(403).json({ error: 'Esta empresa pertence a outro vendedor' });
             }
-    
+
             // Reativar empresa e atribuir ao novo vendedor
             await vendasPool.query(`
                 UPDATE empresas
@@ -1220,33 +1324,33 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     data_inativacao = NULL
                 WHERE id = ?
             `, [vendedor_id, id]);
-    
+
             res.json({ success: true, message: 'Cliente reativado com sucesso' });
         } catch (error) {
             console.error('Erro ao reativar empresa:', error);
             res.status(500).json({ error: 'Erro ao reativar empresa' });
         }
     });
-    
+
     // === NOTIFICAÇÕES ===
     router.get('/notificacoes', authorizeArea('vendas'), async (req, res) => {
         try {
             const userId = req.user.id;
-    
+
             // Verificar estrutura da tabela e usar coluna correta de data
             let orderColumn = 'criado_em';
             try {
                 const [cols] = await pool.query(`SHOW COLUMNS FROM notificacoes LIKE 'created_at'`);
                 if (cols.length > 0) orderColumn = 'created_at';
             } catch(e) { /* usa criado_em como fallback */ }
-    
+
             const [notificacoes] = await pool.query(`
                 SELECT * FROM notificacoes
                 WHERE usuario_id = ? OR usuario_id IS NULL
                 ORDER BY ${orderColumn} DESC
                 LIMIT 20
             `, [userId]);
-    
+
             res.json(notificacoes);
         } catch (error) {
             console.error('Erro ao listar notificações:', error);
@@ -1254,13 +1358,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json([]);
         }
     });
-    
+
     // === DASHBOARD GRÁFICOS ===
     router.get('/dashboard/graficos', authorizeArea('vendas'), cacheMiddleware('vendas_graficos', CACHE_CONFIG.dashboardVendas), async (req, res) => {
         try {
             const { periodo } = req.query;
             const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
-    
+
             // Vendas por status
             const [vendasPorStatus] = await pool.query(`
                 SELECT status, COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor
@@ -1268,7 +1372,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
                 GROUP BY status
             `, [periodoAtual]);
-    
+
             // Vendas por vendedor
             const [vendasPorVendedor] = await pool.query(`
                 SELECT u.nome as vendedor, COUNT(*) as quantidade, COALESCE(SUM(p.valor), 0) as valor
@@ -1279,7 +1383,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 ORDER BY valor DESC
                 LIMIT 10
             `, [periodoAtual]);
-    
+
             // Evolução mensal (últimos 6 meses)
             const [evolucaoMensal] = await pool.query(`
                 SELECT
@@ -1291,7 +1395,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 GROUP BY DATE_FORMAT(created_at, '%Y-%m')
                 ORDER BY mes
             `);
-    
+
             res.json({
                 vendasPorStatus,
                 vendasPorVendedor,
@@ -1303,9 +1407,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.status(500).json({ error: 'Erro ao carregar gráficos' });
         }
     });
-    
+
     console.log('✅ Rotas do módulo Vendas carregadas com sucesso');
-    
+
     // ======================================
     // ROTAS ADICIONAIS — Migradas do legacy server.js
     // ======================================
@@ -1318,7 +1422,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const { cep } = req.params;
             const cleanCep = cep.replace(/\D/g, '');
             if (cleanCep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
-            
+
             const https = require('https');
             const data = await new Promise((resolve, reject) => {
                 https.get(`https://brasilapi.com.br/api/cep/v2/${cleanCep}`, (resp) => {
@@ -1347,7 +1451,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
 
             const [rows] = await vendasPool.query(
-                `SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, 
+                `SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
                  COALESCE(SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END), 0) AS total
                  FROM pedidos
                  WHERE created_at >= ?
@@ -1385,7 +1489,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
     function classificarProdutoComissao(descricao) {
         if (!descricao) return COMISSAO_CATEGORIAS['OUTROS'];
         const desc = descricao.toUpperCase();
-        if (COMISSAO_CATEGORIAS['POTENCIA'].keywords.some(k => desc.includes(k)) && 
+        if (COMISSAO_CATEGORIAS['POTENCIA'].keywords.some(k => desc.includes(k)) &&
             !COMISSAO_CATEGORIAS['MULTIPLEX'].keywords.some(k => desc.includes(k))) {
             return COMISSAO_CATEGORIAS['POTENCIA'];
         }
@@ -1843,9 +1947,9 @@ module.exports = function createVendasExtendedRoutes(deps) {
         try {
             const { periodo, formato } = req.query;
             const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
-            
+
             const [rows] = await vendasPool.query(`
-                SELECT 
+                SELECT
                     u.nome as 'Vendedor',
                     u.email as 'Email',
                     COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as 'Qtd Vendas',
@@ -1859,17 +1963,17 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 GROUP BY u.id, u.nome, u.email, u.comissao_percentual
                 ORDER BY u.nome
             `, [periodoAtual]);
-            
+
             if (formato === 'csv') {
                 const headers = Object.keys(rows[0] || {}).join(';');
                 const csvRows = rows.map(r => Object.values(r).join(';'));
                 const csv = [headers, ...csvRows].join('\n');
-                
+
                 res.setHeader('Content-Type', 'text/csv; charset=utf-8');
                 res.setHeader('Content-Disposition', `attachment; filename=comissoes_${periodoAtual}.csv`);
                 return res.send('\uFEFF' + csv);
             }
-            
+
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -1884,33 +1988,33 @@ module.exports = function createVendasExtendedRoutes(deps) {
             if (!isAdmin) {
                 return res.status(403).json({ message: 'Apenas administradores podem definir metas.' });
             }
-            
+
             const { periodo, valor_meta_padrao, metas_individuais } = req.body;
-            
+
             if (!periodo) {
                 return res.status(400).json({ message: 'Período é obrigatório' });
             }
-            
+
             const [vendedores] = await vendasPool.query(`
                 SELECT u.id, u.nome FROM usuarios u
                 LEFT JOIN departamentos d ON u.departamento_id = d.id
                 WHERE d.nome = 'Comercial' AND u.status = 'ativo'
             `);
-            
+
             let criadas = 0;
             let atualizadas = 0;
-            
+
             for (const vendedor of vendedores) {
                 const metaIndividual = metas_individuais?.find(m => m.vendedor_id === vendedor.id);
                 const valorMeta = metaIndividual ? metaIndividual.valor_meta : valor_meta_padrao;
-                
+
                 if (!valorMeta) continue;
-                
+
                 const [existing] = await vendasPool.query(
                     'SELECT id FROM metas_vendas WHERE vendedor_id = ? AND periodo = ?',
                     [vendedor.id, periodo]
                 );
-                
+
                 if (existing.length > 0) {
                     await vendasPool.query('UPDATE metas_vendas SET valor_meta = ? WHERE id = ?', [parseFloat(valorMeta), existing[0].id]);
                     atualizadas++;
@@ -1922,8 +2026,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     criadas++;
                 }
             }
-            
-            res.json({ 
+
+            res.json({
                 message: `Metas processadas: ${criadas} criadas, ${atualizadas} atualizadas`,
                 total_vendedores: vendedores.length,
                 criadas,
@@ -1938,17 +2042,17 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/empresas/buscar', authorizeArea('vendas'), async (req, res, next) => {
         try {
             const search = req.query.search || req.query.q || req.query.termo || '';
-            let query = `SELECT id, nome_fantasia, razao_social, cnpj, telefone, email 
+            let query = `SELECT id, nome_fantasia, razao_social, cnpj, telefone, email
                          FROM empresas WHERE 1=1`;
             const params = [];
-            
+
             if (search) {
                 query += ` AND (nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?)`;
                 params.push(`%${search}%`, `%${search}%`, `%${search}%`);
             }
-            
+
             query += ' ORDER BY nome_fantasia LIMIT 30';
-            
+
             const [rows] = await vendasPool.query(query, params);
             res.json(rows);
         } catch (error) { next(error); }
@@ -1986,13 +2090,13 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/ligacoes/cdr', authorizeArea('vendas'), async (req, res) => {
         try {
             const { data_inicio, data_fim, ramal, tipo } = req.query;
-            
+
             const hoje = new Date().toISOString().split('T')[0];
             const di = data_inicio || hoje;
             const df = data_fim || hoje;
-            
+
             let chamadas = await cdrScraper.fetchCDRData(di, df);
-            
+
             if (ramal) {
                 chamadas = chamadas.filter(c => c.ramal === ramal || c.origem === ramal);
             }
@@ -2001,7 +2105,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             } else if (tipo === 'fixo') {
                 chamadas = chamadas.filter(c => c.subtipo === 'fixo');
             }
-            
+
             res.json({
                 total: chamadas.length,
                 chamadas,
@@ -2022,15 +2126,15 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/ligacoes/resumo', authorizeArea('vendas'), async (req, res) => {
         try {
             const { data_inicio, data_fim } = req.query;
-            
+
             const hoje = new Date().toISOString().split('T')[0];
             const di = data_inicio || hoje;
             const df = data_fim || hoje;
-            
+
             const chamadas = await cdrScraper.fetchCDRData(di, df);
             const resumo = cdrScraper.gerarResumo(chamadas);
             resumo.periodo = { inicio: di, fim: df };
-            
+
             res.json(resumo);
         } catch (error) {
             console.error('Erro ao gerar resumo de ligações:', error.message);
@@ -2038,7 +2142,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json({
                 total: 0, realizadas: 0, atendidas: 0, nao_atendidas: 0,
                 duracao_total: '00:00:00', por_ramal: [],
-                periodo: { inicio: data_inicio || new Date().toISOString().split('T')[0], fim: data_fim || new Date().toISOString().split('T')[0] },
+                periodo: { inicio: di, fim: df },
                 erro: error.message
             });
         }
@@ -2047,7 +2151,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
     // ======================================
     // FIM DAS ROTAS DO MÓDULO VENDAS
     // ======================================
-    
-    
+
+
     return router;
 };

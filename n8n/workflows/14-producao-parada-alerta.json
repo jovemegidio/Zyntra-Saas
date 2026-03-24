@@ -1,0 +1,101 @@
+[
+  {
+    "name": "14-producao-parada-alerta",
+    "active": true,
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [{ "field": "cronExpression", "expression": "0 10,16 * * 1-5" }]
+          }
+        },
+        "name": "⏰ 10h e 16h Seg-Sex",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "position": [250, 300],
+        "typeVersion": 1.1
+      },
+      {
+        "parameters": {
+          "method": "GET",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/pcp/producao-parada?horas=24",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "options": { "timeout": 15000 }
+        },
+        "name": "🏭 Buscar OPs Paradas",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [470, 300],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "number": [{ "value1": "={{$json.total}}", "operation": "larger", "value2": 0 }]
+          }
+        },
+        "name": "Tem OPs paradas?",
+        "type": "n8n-nodes-base.if",
+        "position": [690, 300],
+        "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "fromEmail": "noreply@aluforce.ind.br",
+          "toEmail": "={{$env.EMAIL_PCP || 'pcp@aluforce.ind.br'}}",
+          "subject": "🚨 {{$json.total}} Produção(ões) Parada(s) há +24h",
+          "html": "<div style='font-family:Arial;max-width:600px;margin:0 auto;'><h2 style='color:#c62828;'>🏭 Produção Parada</h2><p><strong>{{$json.total}}</strong> ordem(ns) de produção sem movimentação há mais de 24 horas.</p><p>Verifique no módulo PCP do Zyntra.</p><p style='font-size:11px;color:#999;'>n8n Automação — ALUFORCE ERP</p></div>",
+          "options": {}
+        },
+        "name": "📧 Alerta PCP",
+        "type": "n8n-nodes-base.emailSend",
+        "position": [910, 250],
+        "typeVersion": 2.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/whatsapp/alerta",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": {
+            "tipo": "geral",
+            "telefones": "={{($env.TELEFONES_PCP || '').split(',')}}",
+            "dados": {
+              "titulo": "🏭 Produção Parada",
+              "mensagem": "⚠️ *{{$json.total}}* ordens de produção sem movimentação há +24h.\n\nVerifique no Zyntra → PCP"
+            }
+          },
+          "options": {}
+        },
+        "name": "📱 WhatsApp PCP",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [910, 400],
+        "typeVersion": 4.1
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "={{$env.ALUFORCE_API_URL}}/api/n8n/eventos/workflow-concluido",
+          "headerParameters": {
+            "parameters": [{ "name": "X-N8N-API-Key", "value": "={{$env.ALUFORCE_API_KEY}}" }]
+          },
+          "body": { "workflow_id": "14", "workflow_name": "Produção Parada Alerta", "status": "success" },
+          "options": {}
+        },
+        "name": "✅ Notificar",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [1130, 300],
+        "typeVersion": 4.1
+      }
+    ],
+    "connections": {
+      "⏰ 10h e 16h Seg-Sex": { "main": [[{ "node": "🏭 Buscar OPs Paradas", "type": "main", "index": 0 }]] },
+      "🏭 Buscar OPs Paradas": { "main": [[{ "node": "Tem OPs paradas?", "type": "main", "index": 0 }]] },
+      "Tem OPs paradas?": { "main": [[{ "node": "📧 Alerta PCP", "type": "main", "index": 0 }, { "node": "📱 WhatsApp PCP", "type": "main", "index": 0 }], [{ "node": "✅ Notificar", "type": "main", "index": 0 }]] },
+      "📧 Alerta PCP": { "main": [[{ "node": "✅ Notificar", "type": "main", "index": 0 }]] }
+    },
+    "settings": { "timezone": "America/Sao_Paulo" }
+  }
+]

@@ -1,0 +1,142 @@
+{
+  "name": "08-notificacao-relatorios-email",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "relatorio-gerado",
+        "options": {
+          "responseMode": "lastNode"
+        }
+      },
+      "name": "📥 Webhook Relatório Gerado",
+      "type": "n8n-nodes-base.webhook",
+      "position": [200, 300],
+      "typeVersion": 1.1,
+      "webhookId": "relatorio-gerado-aluforce",
+      "id": "wh-rel-01"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Mapeia módulo para emoji e cor\nconst moduleMap = {\n  'vendas': { emoji: '💰', color: '#1a73e8', label: 'Vendas' },\n  'financeiro': { emoji: '💵', color: '#28a745', label: 'Financeiro' },\n  'nfe': { emoji: '📄', color: '#fd7e14', label: 'NF-e / Fiscal' },\n  'pcp': { emoji: '🏭', color: '#6f42c1', label: 'PCP / Produção' },\n  'rh': { emoji: '👥', color: '#e83e8c', label: 'RH' },\n  'compras': { emoji: '🛒', color: '#20c997', label: 'Compras' },\n  'lgpd': { emoji: '🔒', color: '#6c757d', label: 'LGPD' },\n  'logistica': { emoji: '🚚', color: '#17a2b8', label: 'Logística' },\n  'dashboard': { emoji: '📊', color: '#343a40', label: 'Dashboard' }\n};\n\nconst typeMap = {\n  'pdf': { icon: '📕', label: 'PDF' },\n  'excel': { icon: '📗', label: 'Excel (XLSX)' },\n  'csv': { icon: '📋', label: 'CSV' },\n  'json': { icon: '📦', label: 'JSON' },\n  'xml': { icon: '📜', label: 'XML' },\n  'zip': { icon: '📁', label: 'ZIP' }\n};\n\nconst body = $input.first().json.body || $input.first().json;\nconst modulo = (body.modulo || 'sistema').toLowerCase();\nconst tipo = (body.tipo_relatorio || 'pdf').toLowerCase();\n\nconst modInfo = moduleMap[modulo] || { emoji: '📊', color: '#333', label: modulo };\nconst tipInfo = typeMap[tipo] || { icon: '📄', label: tipo.toUpperCase() };\n\nconst now = new Date();\nconst dataFormatada = now.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });\nconst horaFormatada = now.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo' });\n\nreturn [{\n  json: {\n    ...body,\n    modulo,\n    tipo_relatorio: tipo,\n    mod_emoji: modInfo.emoji,\n    mod_color: modInfo.color,\n    mod_label: modInfo.label,\n    tip_icon: tipInfo.icon,\n    tip_label: tipInfo.label,\n    data_formatada: dataFormatada,\n    hora_formatada: horaFormatada,\n    nome_relatorio: body.nome_relatorio || 'Relatório',\n    usuario: body.usuario || 'Sistema',\n    email_destino: body.email_destino || body.email_usuario || '',\n    descricao: body.descricao || '',\n    parametros: body.parametros || {},\n    link_download: body.link_download || ''\n  }\n}];"
+      },
+      "name": "⚙️ Processar Dados",
+      "type": "n8n-nodes-base.code",
+      "position": [420, 300],
+      "typeVersion": 2,
+      "id": "proc-rel-01"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.email_destino}}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "name": "Tem destinatário?",
+      "type": "n8n-nodes-base.if",
+      "position": [640, 300],
+      "typeVersion": 1,
+      "id": "if-rel-01"
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$json.email_destino}}",
+        "subject": "={{$json.mod_emoji}} Relatório Gerado: {{$json.nome_relatorio}} — {{$json.mod_label}}",
+        "html": "={{\"<div style='font-family: Arial, Helvetica, sans-serif; max-width: 640px; margin: 0 auto; background: #f5f7fa; padding: 0;'>\" +\n\"<div style='background: \" + $json.mod_color + \"; padding: 24px 32px; border-radius: 8px 8px 0 0;'>\" +\n\"<h2 style='color: white; margin: 0; font-size: 22px;'>\" + $json.mod_emoji + \" Relatório Gerado</h2>\" +\n\"<p style='color: rgba(255,255,255,0.85); margin: 6px 0 0 0; font-size: 14px;'>ALUFORCE ERP — Módulo \" + $json.mod_label + \"</p>\" +\n\"</div>\" +\n\"<div style='background: white; padding: 28px 32px; border: 1px solid #e0e0e0;'>\" +\n\"<table style='width: 100%; border-collapse: collapse;'>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888; width: 140px;'>Relatório</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold;'>\" + $json.nome_relatorio + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Módulo</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.mod_emoji + \" \" + $json.mod_label + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Formato</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.tip_icon + \" \" + $json.tip_label + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Gerado por</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.usuario + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Data / Hora</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.data_formatada + \" às \" + $json.hora_formatada + \"</td></tr>\" +\n($json.descricao ? \"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Descrição</td><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.descricao + \"</td></tr>\" : \"\") +\n\"</table>\" +\n($json.link_download ? \"<div style='margin-top: 20px; text-align: center;'><a href='\" + $json.link_download + \"' style='display: inline-block; background: \" + $json.mod_color + \"; color: white; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold;'>\" + $json.tip_icon + \" Baixar Relatório</a></div>\" : \"\") +\n\"</div>\" +\n\"<div style='padding: 16px 32px; text-align: center; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0; border-top: none;'>\" +\n\"<p style='color: #999; font-size: 12px; margin: 0;'>Notificação automática — ALUFORCE ERP via n8n</p>\" +\n\"</div></div>\"}}",
+        "options": {}
+      },
+      "name": "📧 Enviar Email Notificação",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [870, 250],
+      "typeVersion": 2.1,
+      "id": "email-rel-01"
+    },
+    {
+      "parameters": {
+        "fromEmail": "noreply@aluforce.ind.br",
+        "toEmail": "={{$env.EMAIL_RELATORIOS || 'diretoria@aluforce.ind.br'}}",
+        "subject": "={{$json.mod_emoji}} Relatório Gerado: {{$json.nome_relatorio}} — {{$json.mod_label}}",
+        "html": "={{\"<div style='font-family: Arial, Helvetica, sans-serif; max-width: 640px; margin: 0 auto; background: #f5f7fa; padding: 0;'>\" +\n\"<div style='background: \" + $json.mod_color + \"; padding: 24px 32px; border-radius: 8px 8px 0 0;'>\" +\n\"<h2 style='color: white; margin: 0; font-size: 22px;'>\" + $json.mod_emoji + \" Relatório Gerado</h2>\" +\n\"<p style='color: rgba(255,255,255,0.85); margin: 6px 0 0 0; font-size: 14px;'>ALUFORCE ERP — Módulo \" + $json.mod_label + \"</p>\" +\n\"</div>\" +\n\"<div style='background: white; padding: 28px 32px; border: 1px solid #e0e0e0;'>\" +\n\"<table style='width: 100%; border-collapse: collapse;'>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888; width: 140px;'>Relatório</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; font-weight: bold;'>\" + $json.nome_relatorio + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Módulo</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.mod_emoji + \" \" + $json.mod_label + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Formato</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.tip_icon + \" \" + $json.tip_label + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Gerado por</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.usuario + \"</td></tr>\" +\n\"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Data / Hora</td>\" +\n\"<td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.data_formatada + \" às \" + $json.hora_formatada + \"</td></tr>\" +\n($json.descricao ? \"<tr><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0; color: #888;'>Descrição</td><td style='padding: 10px 0; border-bottom: 1px solid #f0f0f0;'>\" + $json.descricao + \"</td></tr>\" : \"\") +\n\"</table>\" +\n($json.link_download ? \"<div style='margin-top: 20px; text-align: center;'><a href='\" + $json.link_download + \"' style='display: inline-block; background: \" + $json.mod_color + \"; color: white; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold;'>\" + $json.tip_icon + \" Baixar Relatório</a></div>\" : \"\") +\n\"</div>\" +\n\"<div style='padding: 16px 32px; text-align: center; border-radius: 0 0 8px 8px; border: 1px solid #e0e0e0; border-top: none;'>\" +\n\"<p style='color: #999; font-size: 12px; margin: 0;'>Notificação automática — ALUFORCE ERP via n8n</p>\" +\n\"</div></div>\"}}",
+        "options": {}
+      },
+      "name": "📧 Enviar Cópia Gestão",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [870, 400],
+      "typeVersion": 2.1,
+      "id": "email-rel-02"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "notificado"
+            },
+            {
+              "name": "message",
+              "value": "={{\"Relatório '\" + $json.nome_relatorio + \"' do módulo \" + $json.mod_label + \" notificado por email\"}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "✅ Resposta OK",
+      "type": "n8n-nodes-base.set",
+      "position": [1100, 300],
+      "typeVersion": 3.3,
+      "id": "resp-rel-01"
+    }
+  ],
+  "connections": {
+    "📥 Webhook Relatório Gerado": {
+      "main": [
+        [
+          { "node": "⚙️ Processar Dados", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "⚙️ Processar Dados": {
+      "main": [
+        [
+          { "node": "Tem destinatário?", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Tem destinatário?": {
+      "main": [
+        [
+          { "node": "📧 Enviar Email Notificação", "type": "main", "index": 0 },
+          { "node": "📧 Enviar Cópia Gestão", "type": "main", "index": 0 }
+        ],
+        [
+          { "node": "📧 Enviar Cópia Gestão", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "📧 Enviar Email Notificação": {
+      "main": [
+        [
+          { "node": "✅ Resposta OK", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "📧 Enviar Cópia Gestão": {
+      "main": [
+        [
+          { "node": "✅ Resposta OK", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "timezone": "America/Sao_Paulo",
+    "executionOrder": "v1"
+  }
+}

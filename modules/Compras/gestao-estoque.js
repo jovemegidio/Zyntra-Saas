@@ -5,6 +5,9 @@
  * v2.0 - 2025-06-10
  */
 
+function _escEst(s) { if (s == null) return ''; var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+ */
+
 // ============================================
 // STATE
 // ============================================
@@ -379,6 +382,11 @@ function abrirEntrada(id) {
 }
 
 async function confirmarEntrada() {
+    // SECURITY FIX: Idempotency guard - prevent double-click on stock entry
+    if (confirmarEntrada._running) return;
+    confirmarEntrada._running = true;
+    const _btnEnt = document.querySelector('[onclick="confirmarEntrada()"]');
+    if (_btnEnt) _btnEnt.disabled = true;
     const materialId = document.getElementById('entrada-id').value;
     const quantidade = parseFloat(document.getElementById('entrada-qtd').value);
     const custo = parseFloat(document.getElementById('entrada-custo').value);
@@ -386,12 +394,15 @@ async function confirmarEntrada() {
     const observacao = document.getElementById('entrada-obs').value.trim();
 
     if (!materialId || !quantidade || quantidade <= 0) {
+        confirmarEntrada._running = false; if (_btnEnt) _btnEnt.disabled = false;
         return mostrarToast('Preencha a quantidade corretamente', 'warning');
     }
     if (!custo || custo <= 0) {
+        confirmarEntrada._running = false; if (_btnEnt) _btnEnt.disabled = false;
         return mostrarToast('Preencha o custo unitário', 'warning');
     }
     if (!documento) {
+        confirmarEntrada._running = false; if (_btnEnt) _btnEnt.disabled = false;
         return mostrarToast('Preencha a nota fiscal / documento', 'warning');
     }
 
@@ -418,6 +429,9 @@ async function confirmarEntrada() {
         }
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        confirmarEntrada._running = false;
+        if (_btnEnt) _btnEnt.disabled = false;
     }
 }
 
@@ -463,6 +477,11 @@ function validarSaida() {
 }
 
 async function confirmarSaida() {
+    // SECURITY FIX: Idempotency guard - prevent double-click on stock exit
+    if (confirmarSaida._running) return;
+    confirmarSaida._running = true;
+    const _btnSaida = document.getElementById('btn-confirmar-saida');
+    if (_btnSaida) _btnSaida.disabled = true;
     const materialId = document.getElementById('saida-id').value;
     const quantidade = parseFloat(document.getElementById('saida-qtd').value);
     const destino = document.getElementById('saida-destino').value.trim();
@@ -470,6 +489,7 @@ async function confirmarSaida() {
     const observacao = document.getElementById('saida-obs').value.trim();
 
     if (!materialId || !quantidade || quantidade <= 0 || !destino) {
+        confirmarSaida._running = false; if (_btnSaida) _btnSaida.disabled = false;
         return mostrarToast('Preencha quantidade e destino', 'warning');
     }
 
@@ -496,6 +516,9 @@ async function confirmarSaida() {
         }
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        confirmarSaida._running = false;
+        if (_btnSaida) _btnSaida.disabled = false;
     }
 }
 
@@ -541,6 +564,11 @@ function calcularDiferencaAjuste() {
 }
 
 async function confirmarAjuste() {
+    // SECURITY FIX: Idempotency guard - prevent double-click on stock adjustment
+    if (confirmarAjuste._running) return;
+    confirmarAjuste._running = true;
+    const _btnAjuste = document.getElementById('btn-confirmar-ajuste');
+    if (_btnAjuste) _btnAjuste.disabled = true;
     const materialId = document.getElementById('ajuste-id').value;
     const qtdContada = parseFloat(document.getElementById('ajuste-qtd-contada').value);
     const motivo = document.getElementById('ajuste-motivo').value;
@@ -548,6 +576,7 @@ async function confirmarAjuste() {
     const observacao = document.getElementById('ajuste-obs').value;
 
     if (!materialId || qtdContada === undefined || !motivo) {
+        confirmarAjuste._running = false; if (_btnAjuste) _btnAjuste.disabled = false;
         return mostrarToast('Preencha todos os campos obrigatórios', 'warning');
     }
 
@@ -574,6 +603,9 @@ async function confirmarAjuste() {
         }
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        confirmarAjuste._running = false;
+        if (_btnAjuste) _btnAjuste.disabled = false;
     }
 }
 
@@ -614,6 +646,11 @@ function abrirEditar(id) {
 }
 
 async function salvarEdicao() {
+    // SECURITY FIX: Idempotency guard - prevent double-click
+    if (salvarEdicao._running) return;
+    salvarEdicao._running = true;
+    const _btnEdit = document.querySelector('[onclick="salvarEdicao()"]');
+    if (_btnEdit) _btnEdit.disabled = true;
     const id = document.getElementById('editar-id').value;
     const dados = {
         codigo_material: document.getElementById('editar-codigo').value.trim(),
@@ -626,8 +663,8 @@ async function salvarEdicao() {
         ncm: document.getElementById('editar-ncm').value.trim() || null
     };
 
-    if (!dados.codigo_material) return mostrarToast('Código é obrigatório', 'warning');
-    if (!dados.descricao) return mostrarToast('Descrição é obrigatória', 'warning');
+    if (!dados.codigo_material) { salvarEdicao._running = false; if (_btnEdit) _btnEdit.disabled = false; return mostrarToast('Código é obrigatório', 'warning'); }
+    if (!dados.descricao) { salvarEdicao._running = false; if (_btnEdit) _btnEdit.disabled = false; return mostrarToast('Descrição é obrigatória', 'warning'); }
 
     try {
         const resp = await fetch(`/api/compras/estoque/materiais-pcp/${id}`, {
@@ -643,6 +680,9 @@ async function salvarEdicao() {
         await carregarEstoque();
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        salvarEdicao._running = false;
+        if (_btnEdit) _btnEdit.disabled = false;
     }
 }
 
@@ -652,6 +692,9 @@ async function salvarEdicao() {
 async function excluirMaterial(id) {
     const m = EST.materiais.find(mat => mat.id === id);
     if (!confirm(`Excluir "${m?.descricao || id}" permanentemente?`)) return;
+    // SECURITY FIX: Idempotency guard - prevent double-click on delete
+    if (excluirMaterial._running) return;
+    excluirMaterial._running = true;
 
     try {
         const resp = await fetch('/api/compras/estoque/materiais-pcp/bulk-delete', {
@@ -667,6 +710,8 @@ async function excluirMaterial(id) {
         await carregarEstoque();
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        excluirMaterial._running = false;
     }
 }
 
@@ -687,6 +732,11 @@ function abrirModalNovoMaterial() {
 }
 
 async function salvarNovoMaterial() {
+    // SECURITY FIX: Idempotency guard - prevent double-click on material creation
+    if (salvarNovoMaterial._running) return;
+    salvarNovoMaterial._running = true;
+    const _btnNovo = document.querySelector('[onclick="salvarNovoMaterial()"]');
+    if (_btnNovo) _btnNovo.disabled = true;
     const codigo = document.getElementById('novo-material-codigo').value.trim();
     const descricao = document.getElementById('novo-material-descricao').value.trim();
     const tipo = document.getElementById('novo-material-tipo').value;
@@ -698,6 +748,7 @@ async function salvarNovoMaterial() {
     const qtdEstoque = parseFloat(document.getElementById('novo-material-qtd-estoque').value) || 0;
 
     if (!codigo || !descricao) {
+        salvarNovoMaterial._running = false; if (_btnNovo) _btnNovo.disabled = false;
         return mostrarToast('Preencha código e descrição', 'warning');
     }
 
@@ -731,6 +782,9 @@ async function salvarNovoMaterial() {
         }
     } catch (err) {
         mostrarToast(err.message, 'error');
+    } finally {
+        salvarNovoMaterial._running = false;
+        if (_btnNovo) _btnNovo.disabled = false;
     }
 }
 
@@ -774,15 +828,15 @@ async function carregarHistoricoMaterial(materialId, nome) {
                     <i class="fas fa-${mov.tipo === 'ENTRADA' ? 'arrow-down' : mov.tipo === 'SAIDA' ? 'arrow-up' : 'sliders-h'}"></i>
                 </div>
                 <div style="flex:1;">
-                    <div style="font-weight:600;color:#1e293b;margin-bottom:3px;">${mov.material_descricao || 'Material'}</div>
+                    <div style="font-weight:600;color:#1e293b;margin-bottom:3px;">${_escEst(mov.material_descricao || 'Material')}</div>
                     <div style="font-size:13px;color:#64748b;">
                         <span style="color:${mov.tipo === 'ENTRADA' ? '#16a34a' : '#dc2626'};font-weight:600;">
-                            ${mov.tipo === 'ENTRADA' ? '+' : '-'}${mov.quantidade}
+                            ${mov.tipo === 'ENTRADA' ? '+' : '-'}${_escEst(mov.quantidade)}
                         </span>
-                        ${mov.destino ? ` • ${mov.destino}` : ''}
-                        ${mov.documento ? ` • ${mov.documento}` : ''}
+                        ${mov.destino ? ` • ${_escEst(mov.destino)}` : ''}
+                        ${mov.documento ? ` • ${_escEst(mov.documento)}` : ''}
                     </div>
-                    ${mov.observacao ? `<div style="font-size:12px;color:#94a3b8;margin-top:3px;">${mov.observacao}</div>` : ''}
+                    ${mov.observacao ? `<div style="font-size:12px;color:#94a3b8;margin-top:3px;">${_escEst(mov.observacao)}</div>` : ''}
                 </div>
                 <div style="text-align:right;font-size:12px;color:#94a3b8;">
                     ${new Date(mov.created_at).toLocaleDateString('pt-BR')}<br>

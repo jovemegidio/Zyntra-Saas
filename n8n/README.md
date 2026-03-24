@@ -10,41 +10,13 @@ O [n8n](https://n8n.io) é uma plataforma de automação de workflows que substi
 n8n/
 ├── .env.example          # Variáveis de ambiente necessárias
 ├── workflows/
-│   ├── 01-relatorio-vendas-diario.json          # 📊 Relatório de vendas por email (7h)
-│   ├── 02-backup-banco-dados.json               # 💾 Backup DB + limpeza (2h)
-│   ├── 03-contas-vencer-cobranca.json           # 💰 Cobranças do dia (8h)
-│   ├── 04-estoque-critico-alerta.json           # 📦 Estoque mínimo (cada 6h)
-│   ├── 05-health-check-monitoramento.json       # 🏥 Health check (cada 5min)
-│   ├── 06-pedidos-atrasados-alerta.json         # 📋 Pedidos atrasados (9h)
-│   ├── 07-aniversariantes-email.json            # 🎂 Aniversários RH (8h)
-│   ├── 08-notificacao-relatorios-email.json     # 📧 Relatórios por email
-│   ├── 09-alertas-whatsapp-multimodulo.json     # 📱 Alertas WhatsApp multi-módulo
-│   ├── 10-whatsapp-alertas-automaticos-v2.json  # 📱 WhatsApp alertas v2
-│   ├── 11-resumo-financeiro-diario.json         # 💵 Resumo financeiro diário
-│   ├── 12-nfe-pendentes-alerta.json             # 📄 NF-e pendentes
-│   ├── 13-followup-orcamentos.json              # 🔄 Follow-up de orçamentos
-│   ├── 14-producao-parada-alerta.json           # ⚙️ Produção parada
-│   ├── 15-relatorio-semanal-rh.json             # 👥 Relatório semanal RH
-│   ├── 16-meta-vendas-alerta.json               # 🎯 Meta de vendas
-│   ├── 17-conciliacao-bancaria-divergencias.json # 🏦 Divergências bancárias
-│   ├── 18-escalonamento-aprovacoes.json         # ✅ Escalonamento de aprovações
-│   ├── 19-entregas-atrasadas-alerta.json        # 🚚 Entregas atrasadas
-│   ├── 20-faturamento-sem-nfe-alerta.json       # ⚠️ Faturamento sem NF-e
-│   ├── 21-transacoes-recorrentes-auto.json      # 🔁 Transações recorrentes
-│   ├── 22-boletos-vencidos-cobranca.json        # 📑 Boletos vencidos
-│   ├── 23-resumo-expedicao-diario.json          # 📦 Resumo expedição diário
-│   ├── 24-ponto-inconsistencias-alerta.json     # ⏰ Ponto inconsistências
-│   ├── 25-ferias-vencendo-alerta.json           # 🏖️ Férias vencendo
-│   ├── 26-requisicoes-compra-paradas.json       # 🛒 Requisições de compra paradas
-│   ├── 27-ops-sem-material-alerta.json          # 🏭 OPs sem material
-│   ├── 28-xml-contabilidade-export.json         # 📊 XML contabilidade export
-│   ├── 29-fluxo-caixa-projecao-semanal.json     # 💰 Projeção fluxo de caixa
-│   ├── 31-reativacao-clientes-campanha.json     # 🔄 Reativação de clientes
-│   ├── 32-retornos-bancarios-processamento.json # 🏦 Retornos bancários
-│   ├── 33-performance-transportadoras-mensal.json # 🚛 Performance transportadoras
-│   ├── 34-cleanup-usuarios-inativos.json        # 🧹 Limpeza usuários inativos
-│   ├── 35-resumo-diario-producao.json           # ⚙️ Resumo diário produção
-│   └── 36-audit-anomalias-seguranca.json        # 🔒 Auditoria de segurança
+│   ├── 01-relatorio-vendas-diario.json     # 📊 Relatório de vendas por email (7h)
+│   ├── 02-backup-banco-dados.json          # 💾 Backup DB + limpeza (2h)
+│   ├── 03-contas-vencer-cobranca.json      # 💰 Cobranças do dia (8h)
+│   ├── 04-estoque-critico-alerta.json      # 📦 Estoque mínimo (cada 6h)
+│   ├── 05-health-check-monitoramento.json  # 🏥 Health check (cada 5min)
+│   ├── 06-pedidos-atrasados-alerta.json    # 📋 Pedidos atrasados (9h)
+│   └── 07-aniversariantes-email.json       # 🎂 Aniversários RH (8h)
 ```
 
 ## 🚀 Como Subir no VPS

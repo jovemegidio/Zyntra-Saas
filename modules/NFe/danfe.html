@@ -230,7 +230,7 @@
             align-items: center;
             text-align: center;
         }
-        .danfe-header-right .nfe-numero {
+        .danfe-header-right .nfe-número {
             font-size: 10px;
             font-weight: 700;
         }
@@ -425,10 +425,8 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="emitir.html" class="sidebar-btn" title="Emitir NFe"><i class="fas fa-file-invoice"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
                 <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
-                <a href="danfe.html" class="sidebar-btn active" title="Gerar DANFE"><i class="fas fa-print"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
                 <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
@@ -546,7 +544,7 @@
                                         <div class="danfe-tipo">0 - ENTRADA &nbsp;/&nbsp; 1 - SAÍDA</div>
                                     </div>
                                     <div class="danfe-header-right">
-                                        <div class="nfe-numero" id="danfeNumero">Nº —</div>
+                                        <div class="nfe-número" id="danfeNumero">Nº —</div>
                                         <div class="nfe-serie" id="danfeSerie">Série —</div>
                                     </div>
                                 </div>
@@ -775,7 +773,7 @@
                 if (chave) {
                     url = `/api/nfe/${encodeURIComponent(chave)}`;
                 } else {
-                    url = `/api/nfe/buscar?numero=${encodeURIComponent(numero)}&serie=${encodeURIComponent(serie)}`;
+                    url = `/api/nfe/buscar?numero=${encodeURIComponent(número)}&serie=${encodeURIComponent(serie)}`;
                 }
 
                 const response = await fetch(url, { credentials: 'include' });
@@ -963,7 +961,7 @@
                 `Consulte em: https://www.nfe.fazenda.gov.br/portal/consultaRecaptcha.aspx`
             );
 
-            const whatsappUrl = `https://wa.me/55${numero}?text=${mensagem}`;
+            const whatsappUrl = `https://wa.me/55${número}?text=${mensagem}`;
             window.open(whatsappUrl, '_blank');
         }
 
@@ -1058,5 +1056,6 @@
     <!-- Enterprise Shared -->
     <script src="/js/sidebar-click-animation.js?v=20260301"></script>
     <script src="/_shared/accessibility-widget.js?v=20260301"></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>

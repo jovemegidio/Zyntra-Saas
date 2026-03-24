@@ -9,10 +9,10 @@ router.get('/', async (req, res) => {
         
         let sql = 'SELECT * FROM fornecedores WHERE 1=1';
         const params = [];
+        const searchParam = search ? `%${search}%` : null;
         
         if (search) {
             sql += ' AND (razao_social LIKE ? OR nome_fantasia LIKE ? OR cnpj LIKE ?)';
-            const searchParam = `%${search}%`;
             params.push(searchParam, searchParam, searchParam);
         }
         
@@ -149,16 +149,33 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-// ============ EXCLUIR FORNECEDOR ============
+// ============ EXCLUIR FORNECEDOR (SOFT-DELETE) ============
 router.delete('/:id', async (req, res) => {
     try {
-        const result = await run('DELETE FROM fornecedores WHERE id = ?', [req.params.id]);
+        // Verificar se há pedidos de compra ativos vinculados
+        const pedidosVinculados = await get(
+            `SELECT COUNT(*) as total FROM pedidos_compra 
+             WHERE fornecedor_id = ? AND status NOT IN ('cancelado', 'recebido')`,
+            [req.params.id]
+        );
+        
+        if (pedidosVinculados && pedidosVinculados.total > 0) {
+            return res.status(400).json({ 
+                error: `Fornecedor possui ${pedidosVinculados.total} pedido(s) de compra ativo(s). Finalize ou cancele antes de excluir.` 
+            });
+        }
+        
+        // Soft-delete: desativa em vez de remover fisicamente
+        const result = await run(
+            'UPDATE fornecedores SET ativo = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?', 
+            [req.params.id]
+        );
         
         if (result.changes === 0) {
             return res.status(404).json({ error: 'Fornecedor não encontrado' });
         }
         
-        res.json({ message: 'Fornecedor excluído com sucesso' });
+        res.json({ message: 'Fornecedor desativado com sucesso' });
     } catch (error) {
         console.error('Erro ao excluir fornecedor:', error);
         res.status(500).json({ error: 'Erro ao excluir fornecedor' });

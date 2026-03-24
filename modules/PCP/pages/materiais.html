@@ -239,8 +239,6 @@
 
                 // Preparar headers - usar credentials: 'include' para sessão via cookie
                 const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'unified-session-active') {
-                }
 
                 console.log('?? Carregando materiais...');
                 // Buscar apenas materiais com recebimento em compras
@@ -313,8 +311,8 @@
 
             tbody.innerHTML = filtrados.map(m => `
                 <tr>
-                    <td><strong>${m.codigo || '-'}</strong></td>
-                    <td>${m.descricao || '-'}</td>
+                    <td><strong>${m.código || '-'}</strong></td>
+                    <td>${m.descrição || '-'}</td>
                     <td><span class="badge badge-purple">${m.tipo || '-'}</span></td>
                     <td>${m.ncm || '-'}</td>
                     <td>${m.gtin || '-'}</td>
@@ -364,5 +362,6 @@
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
