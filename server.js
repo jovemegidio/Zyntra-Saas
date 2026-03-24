@@ -1174,7 +1174,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'Vendas', 'pu
 
 // Scripts injetados automaticamente em todas as páginas HTML dos módulos
 const AUTO_INJECT_SCRIPTS = `
-<!-- Auto-injected: Report Viewer + Chat Teams -->
+<!-- Auto-injected: Report Viewer + Inactivity Manager + Chat Teams -->
+<script src="/js/inactivity-manager.js?v=20260324" defer></script>
 <script src="/js/report-viewer.js?v=20260615" defer></script>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
@@ -1215,6 +1216,14 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
             const lastBody = html.lastIndexOf('</body>');
             if (lastBody !== -1) {
                 html = html.slice(0, lastBody) + chatScripts + html.slice(lastBody);
+            }
+        }
+        // Garantir inactivity-manager em páginas que já tinham report-viewer mas não tinham inactivity
+        if (!html.includes('inactivity-manager.js') && html.includes('report-viewer.js')) {
+            const inactScript = `<script src="/js/inactivity-manager.js?v=20260324" defer></script>\n`;
+            const lastBody = html.lastIndexOf('</body>');
+            if (lastBody !== -1) {
+                html = html.slice(0, lastBody) + inactScript + html.slice(lastBody);
             }
         }
         res.setHeader('Content-Type', 'text/html; charset=utf-8');
