@@ -161,7 +161,7 @@ function createCTeRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao criar CT-e:', error);
-            res.status(500).json({ error: 'Erro ao criar CT-e: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -204,7 +204,7 @@ function createCTeRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao gerar XML CT-e:', error);
-            res.status(500).json({ error: 'Erro ao gerar XML: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

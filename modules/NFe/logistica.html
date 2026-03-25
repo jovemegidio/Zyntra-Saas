@@ -1,9 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -12,7 +10,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Log�stica</title>
+    <title>Zyntra: Logística</title>
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/csp-fix.js" defer></script>
@@ -384,14 +382,14 @@
         <nav class="sidebar-nav">
             <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
             <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-            <a href="nfse.html" class="sidebar-btn" title="NFSe Servi�os"><i class="fas fa-file-contract"></i></a>
-            <a href="relatorios.html" class="sidebar-btn" title="Relat�rios"><i class="fas fa-chart-bar"></i></a>
+            <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
+            <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
-            <a href="logistica.html" class="sidebar-btn active" title="Log�stica"><i class="fas fa-truck"></i></a>
-            <a href="inutilizacao.html" class="sidebar-btn" title="Inutiliza��o"><i class="fas fa-ban"></i></a>
+            <a href="logistica.html" class="sidebar-btn active" title="Logística"><i class="fas fa-truck"></i></a>
+            <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
         </nav>
         <div class="sidebar-bottom">
-            <button class="sidebar-btn" title="Configura��es" data-action="config"><i class="fas fa-cog"></i></button>
+            <button class="sidebar-btn" title="Configurações" data-action="config"><i class="fas fa-cog"></i></button>
         </div>
     </aside>
 
@@ -403,15 +401,15 @@
                     <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                     <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                     <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                    <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
-                    <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Log�stica</span>
+                    <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                    <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Logística</span>
                 </div>
             </div>
             <div class="header-right">
                 <button class="header-btn" title="Atualizar" data-action="reload"><i class="fas fa-sync-alt"></i></button>
-                <button class="header-btn" title="Notifica��es" data-action="notifications"><i class="fas fa-bell"></i></button>
+                <button class="header-btn" title="Notificações" data-action="notifications"><i class="fas fa-bell"></i></button>
                 <div class="user-greeting">
-                    <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                    <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     <div class="user-avatar" id="user-avatar">
                         <img alt="Foto" id="user-photo" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover;">
                         <span id="user-initials">U</span>
@@ -431,31 +429,31 @@
                         <div class="page-title-wrapper">
                             <div class="page-icon cyan"><i class="fas fa-truck"></i></div>
                             <div>
-                                <h1 class="page-title">Log�stica & Expedi��o</h1>
-                                <p class="page-subtitle">Gerenciamento de entregas, expedi��o e transportadoras</p>
+                                <h1 class="page-title">Logística & Expedião</h1>
+                                <p class="page-subtitle">Gerenciamento de entregas, expedião e transportadoras</p>
                             </div>
                         </div>
                         <div class="page-actions">
-                            <button class="btn btn-primary" data-action="new-expedicao"><i class="fas fa-plus"></i> Nova Expedi��o</button>
+                            <button class="btn btn-primary" data-action="new-expedicao"><i class="fas fa-plus"></i> Nova Expedião</button>
                             <button class="btn btn-secondary" data-action="manage-transportadoras"><i class="fas fa-truck-moving"></i> Transportadoras</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- --- KPI Stats Grid � PCP Style --- -->
+                <!-- --- KPI Stats Grid é PCP Style --- -->
                 <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);">
                     <div class="stat-card yellow fade-in-delay-1">
                         <div class="stat-icon yellow"><i class="fas fa-clock" style="color:#fff !important;font-size:22px;"></i></div>
                         <div class="stat-content">
                             <div class="stat-label">Aguardando</div>
                             <div class="stat-value" id="statAguardando">0</div>
-                            <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Separa��o</div>
+                            <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Separação</div>
                         </div>
                     </div>
                     <div class="stat-card blue fade-in-delay-2">
                         <div class="stat-icon blue"><i class="fas fa-box-open" style="color:#fff !important;font-size:22px;"></i></div>
                         <div class="stat-content">
-                            <div class="stat-label">Em Separa��o</div>
+                            <div class="stat-label">Em Separação</div>
                             <div class="stat-value" id="statSeparacao">0</div>
                             <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Em andamento</div>
                         </div>
@@ -463,7 +461,7 @@
                     <div class="stat-card cyan fade-in-delay-3">
                         <div class="stat-icon cyan"><i class="fas fa-dolly" style="color:#fff !important;font-size:22px;"></i></div>
                         <div class="stat-content">
-                            <div class="stat-label">Em Expedi��o</div>
+                            <div class="stat-label">Em Expedião</div>
                             <div class="stat-value" id="statExpedicao">0</div>
                             <div class="stat-trend neutral"><i class="fas fa-circle" style="font-size:5px;"></i> Processando</div>
                         </div>
@@ -502,8 +500,8 @@
                         <select class="filter-btn" id="filtroStatus" data-filter="status" title="Filtrar por status">
                             <option value="">Todos os Status</option>
                             <option value="aguardando">Aguardando</option>
-                            <option value="em_separacao">Em Separa��o</option>
-                            <option value="em_expedicao">Em Expedi��o</option>
+                            <option value="em_separacao">Em Separação</option>
+                            <option value="em_expedicao">Em Expedião</option>
                             <option value="em_transporte">Em Transporte</option>
                             <option value="entregue">Entregue</option>
                         </select>
@@ -513,7 +511,7 @@
                         <select class="filter-btn" id="filtroPrioridade" data-filter="prioridade" title="Filtrar por prioridade">
                             <option value="">Todas Prioridades</option>
                             <option value="alta">?? Alta</option>
-                            <option value="media">?? M�dia</option>
+                            <option value="media">?? Média</option>
                             <option value="baixa">?? Baixa</option>
                         </select>
                         <button class="btn btn-outline btn-sm" data-action="export"><i class="fas fa-file-csv"></i> Exportar</button>
@@ -532,8 +530,8 @@
                                             <th>Cidade/UF</th>
                                             <th>Transportadora</th>
                                             <th>Status</th>
-                                            <th>Previs�o</th>
-                                            <th style="text-align:center;">A��es</th>
+                                            <th>Previsão</th>
+                                            <th style="text-align:center;">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="pedidosTableBody">
@@ -545,8 +543,8 @@
                     </div>
                     <div class="pagination" id="paginacao" style="display:none;">
                         <button data-action="prev-page" title="Anterior"><i class="fas fa-chevron-left"></i></button>
-                        <span class="pagination-info" id="paginacaoInfo">P�gina 1 de 1</span>
-                        <button data-action="next-page" title="Pr�xima"><i class="fas fa-chevron-right"></i></button>
+                        <span class="pagination-info" id="paginacaoInfo">Página 1 de 1</span>
+                        <button data-action="next-page" title="Próxima"><i class="fas fa-chevron-right"></i></button>
                     </div>
                 </div>
 
@@ -569,7 +567,7 @@
                                             <th>Telefone</th>
                                             <th>Email</th>
                                             <th>Contato</th>
-                                            <th style="text-align:center;">A��es</th>
+                                            <th style="text-align:center;">Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody id="transportadorasBody">
@@ -587,23 +585,23 @@
 </div>
 
 <!-- -----------------------------------------------------------
-     MODAL: Nova Expedi��o
+     MODAL: Nova Expedião
      ----------------------------------------------------------- -->
 <div class="modal-overlay" id="modalExpedicao">
     <div class="modal modal-lg">
         <div class="modal-header">
-            <h3><i class="fas fa-dolly" style="margin-right:8px;color:var(--primary-500);"></i> Nova Expedi��o</h3>
+            <h3><i class="fas fa-dolly" style="margin-right:8px;color:var(--primary-500);"></i> Nova Expedião</h3>
             <button class="modal-close" data-action="close-modal-expedicao"><i class="fas fa-times"></i></button>
         </div>
         <div class="modal-body">
             <div class="form-row">
                 <div class="form-group">
                     <label>Pedido ID</label>
-                    <input type="text" class="form-control" id="expPedidoId" placeholder="N�mero do pedido">
+                    <input type="text" class="form-control" id="expPedidoId" placeholder="Número do pedido">
                 </div>
                 <div class="form-group">
                     <label>NF-e</label>
-                    <input type="text" class="form-control" id="expNfeId" placeholder="N�mero da NF-e">
+                    <input type="text" class="form-control" id="expNfeId" placeholder="Número da NF-e">
                 </div>
             </div>
             <div class="form-group">
@@ -611,13 +609,13 @@
                 <input type="text" class="form-control" id="expCliente" placeholder="Nome do cliente">
             </div>
             <div class="form-group">
-                <label>Endere�o</label>
-                <input type="text" class="form-control" id="expEndereco" placeholder="Endere�o completo de entrega">
+                <label>Endereço</label>
+                <input type="text" class="form-control" id="expEndereco" placeholder="Endereço completo de entrega">
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Cidade/UF</label>
-                    <input type="text" class="form-control" id="expCidadeUF" placeholder="Ex: S�o Paulo/SP">
+                    <input type="text" class="form-control" id="expCidadeUF" placeholder="Ex: São Paulo/SP">
                 </div>
                 <div class="form-group">
                     <label>Transportadora *</label>
@@ -630,24 +628,24 @@
                 <div class="form-group">
                     <label>Prioridade</label>
                     <select class="form-control" id="expPrioridade">
-                        <option value="media">?? M�dia</option>
+                        <option value="media">?? Média</option>
                         <option value="alta">?? Alta</option>
                         <option value="baixa">?? Baixa</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Previs�o de Entrega</label>
+                    <label>Previsão de Entrega</label>
                     <input type="date" class="form-control" id="expPrevisao">
                 </div>
             </div>
             <div class="form-group">
-                <label>Observa��es</label>
-                <textarea class="form-control" id="expObservacoes" rows="3" placeholder="Observa��es sobre a expedi��o..."></textarea>
+                <label>Observações</label>
+                <textarea class="form-control" id="expObservacoes" rows="3" placeholder="Observações sobre a expedião..."></textarea>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" data-action="close-modal-expedicao">Cancelar</button>
-            <button class="btn btn-primary" data-action="save-expedicao"><i class="fas fa-save"></i> Salvar Expedi��o</button>
+            <button class="btn btn-primary" data-action="save-expedicao"><i class="fas fa-save"></i> Salvar Expedião</button>
         </div>
     </div>
 </div>
@@ -665,8 +663,8 @@
             <div class="modal-section-title"><i class="fas fa-building"></i> Dados da Empresa</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Raz�o Social / Nome *</label>
-                    <input type="text" class="form-control" id="transpNome" placeholder="Nome ou Raz�o Social da transportadora">
+                    <label>Razão Social / Nome *</label>
+                    <input type="text" class="form-control" id="transpNome" placeholder="Nome ou Razão Social da transportadora">
                 </div>
                 <div class="form-group">
                     <label>Nome Fantasia</label>
@@ -679,16 +677,16 @@
                     <input type="text" class="form-control" id="transpCNPJ" placeholder="00.000.000/0000-00" maxlength="18">
                 </div>
                 <div class="form-group">
-                    <label>Inscri��o Estadual</label>
-                    <input type="text" class="form-control" id="transpIE" placeholder="Inscri��o Estadual">
+                    <label>Inscrião Estadual</label>
+                    <input type="text" class="form-control" id="transpIE" placeholder="Inscrião Estadual">
                 </div>
             </div>
 
-            <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Endere�o</div>
+            <div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Endereço</div>
             <div class="form-row">
                 <div class="form-group" style="flex:2;">
-                    <label>Endere�o</label>
-                    <input type="text" class="form-control" id="transpEndereco" placeholder="Rua, Av, n�mero...">
+                    <label>Endereço</label>
+                    <input type="text" class="form-control" id="transpEndereco" placeholder="Rua, Av, número...">
                 </div>
                 <div class="form-group" style="flex:1;">
                     <label>CEP</label>
@@ -731,7 +729,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Pessoa de Contato</label>
-                    <input type="text" class="form-control" id="transpContato" placeholder="Nome do respons�vel">
+                    <input type="text" class="form-control" id="transpContato" placeholder="Nome do responsável">
                 </div>
                 <div class="form-group">
                     <label>Telefone do Contato</label>
@@ -742,41 +740,41 @@
             <div class="modal-section-title"><i class="fas fa-truck"></i> Dados de Transporte</div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Tipo de Ve�culo</label>
+                    <label>Tipo de Veículo</label>
                     <select class="form-control" id="transpTipoVeiculo">
                         <option value="">Selecione...</option>
                         <option value="van">Van</option>
-                        <option value="caminhao_toco">Caminh�o Toco</option>
-                        <option value="caminhao_truck">Caminh�o Truck</option>
+                        <option value="caminhao_toco">Caminhão Toco</option>
+                        <option value="caminhao_truck">Caminhão Truck</option>
                         <option value="carreta">Carreta</option>
                         <option value="bitrem">Bitrem</option>
-                        <option value="utilitario">Utilit�rio</option>
+                        <option value="utilitario">Utilitário</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Placa do Ve�culo</label>
+                    <label>Placa do Veículo</label>
                     <input type="text" class="form-control" id="transpPlaca" placeholder="ABC-1234" maxlength="8">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>RNTRC (ANTT)</label>
-                    <input type="text" class="form-control" id="transpRNTRC" placeholder="N�mero do registro ANTT">
+                    <input type="text" class="form-control" id="transpRNTRC" placeholder="Número do registro ANTT">
                 </div>
                 <div class="form-group">
                     <label>Modalidade de Frete</label>
                     <select class="form-control" id="transpModalidade">
                         <option value="">Selecione...</option>
                         <option value="cif">CIF (Remetente paga)</option>
-                        <option value="fob">FOB (Destinat�rio paga)</option>
+                        <option value="fob">FOB (Destinatério paga)</option>
                         <option value="terceiros">Terceiros</option>
                     </select>
                 </div>
             </div>
 
-            <div class="modal-section-title"><i class="fas fa-sticky-note"></i> Observa��es</div>
+            <div class="modal-section-title"><i class="fas fa-sticky-note"></i> Observações</div>
             <div class="form-group">
-                <textarea class="form-control" id="transpObservacoes" rows="3" placeholder="Observa��es gerais sobre a transportadora..."></textarea>
+                <textarea class="form-control" id="transpObservacoes" rows="3" placeholder="Observações gerais sobre a transportadora..."></textarea>
             </div>
         </div>
         <div class="modal-footer">
@@ -835,29 +833,29 @@
             <div class="modal-section-title"><i class="fas fa-route"></i> Fluxo do Pedido</div>
             <div class="status-timeline" id="statusTimelinePreview" style="margin-bottom:var(--space-4);"></div>
 
-            <div class="modal-section-title"><i class="fas fa-arrow-circle-right"></i> Nova Atualiza��o</div>
+            <div class="modal-section-title"><i class="fas fa-arrow-circle-right"></i> Nova Atualização</div>
             <div class="form-group">
                 <label>Novo Status *</label>
                 <select class="form-control" id="statusNovoSelect">
-                    <option value="aguardando">? Aguardando Separa��o</option>
-                    <option value="em_separacao">?? Em Separa��o</option>
-                    <option value="em_expedicao">?? Em Expedi��o</option>
+                    <option value="aguardando">? Aguardando Separação</option>
+                    <option value="em_separacao">?? Em Separação</option>
+                    <option value="em_expedicao">?? Em Expedião</option>
                     <option value="em_transporte">?? Em Transporte</option>
                     <option value="entregue">? Entregue</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>C�digo de Rastreio <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
+                <label>Código de Rastreio <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
                 <input type="text" class="form-control" id="statusRastreio" placeholder="Ex: BR123456789BR">
             </div>
             <div class="form-group">
-                <label>Observa��o <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
-                <textarea class="form-control" id="statusObservacao" rows="2" placeholder="Motivo da mudan�a de status..."></textarea>
+                <label>Observação <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
+                <textarea class="form-control" id="statusObservacao" rows="2" placeholder="Motivo da mudança de status..."></textarea>
             </div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" data-action="close-modal-status">Cancelar</button>
-            <button class="btn btn-primary" data-action="confirm-status"><i class="fas fa-check"></i> Confirmar Mudan�a</button>
+            <button class="btn btn-primary" data-action="confirm-status"><i class="fas fa-check"></i> Confirmar Mudança</button>
         </div>
     </div>
 </div>
@@ -887,7 +885,7 @@
 <script src="/js/popup-confirmacao.js"></script>
 <script>
 // ---------------------------------------------------------------
-// LOG�STICA � JavaScript Principal
+// LOGÍSTICA é JavaScript Principal
 // ---------------------------------------------------------------
 
 var FetchUtil = {
@@ -902,7 +900,7 @@ var FetchUtil = {
             return response;
         } catch (error) {
             clearTimeout(timeoutId);
-            if (error.name === 'AbortError') throw new Error('Tempo limite de requisi��o excedido');
+            if (error.name === 'AbortError') throw new Error('Tempo limite de requisião excedido');
             throw error;
         }
     },
@@ -936,8 +934,8 @@ function getStatusBadgeClass(status) {
 function getStatusLabel(status) {
     var map = {
         'pendente': 'Aguardando', 'aguardando_separacao': 'Aguardando', 'aguardando': 'Aguardando',
-        'em_separacao': 'Em Separa��o', 'separacao': 'Em Separa��o',
-        'em_expedicao': 'Em Expedi��o', 'expedicao': 'Em Expedi��o',
+        'em_separacao': 'Em Separação', 'separacao': 'Em Separação',
+        'em_expedicao': 'Em Expedião', 'expedicao': 'Em Expedião',
         'em_transporte': 'Em Transporte', 'transporte': 'Em Transporte',
         'entregue': 'Entregue'
     };
@@ -951,7 +949,7 @@ function getStatusBadge(status) {
 function getPrioridadeBadge(prioridade) {
     var p = (prioridade || 'media').toLowerCase();
     var classMap = { 'alta': 'danger', 'media': 'warning', 'baixa': 'success' };
-    var labelMap = { 'alta': 'Alta', 'media': 'M�dia', 'baixa': 'Baixa' };
+    var labelMap = { 'alta': 'Alta', 'media': 'Média', 'baixa': 'Baixa' };
     return '<span class="badge ' + (classMap[p] || 'info') + '">' + (labelMap[p] || prioridade) + '</span>';
 }
 
@@ -1010,7 +1008,7 @@ function normalizarTransportadora(t) {
     };
 }
 
-// --- Carregar Usu�rio ---
+// --- Carregar Usuário ---
 var avatarNameMap = {
     'clemerson':'CM','isabela':'IB','thaina':'TH','thiago':'TG','nicolas':'NC',
     'nicolasdaniel':'ND','rh':'RH','admin':'AD','ti':'TI','tialuforce':'TI',
@@ -1022,7 +1020,7 @@ var avatarNameMap = {
 function carregarUsuario() {
     FetchUtil.request('/api/me').then(function(r) { return r.json(); }).then(function(user) {
         var d = user.dados || user;
-        var nome = (d.nome || d.name || 'Usu�rio').split(' ')[0];
+        var nome = (d.nome || d.name || 'Usuário').split(' ')[0];
         document.getElementById('user-name').textContent = nome;
         var h = new Date().getHours();
         document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -1090,14 +1088,14 @@ function renderizarPedidos() {
     var pagInfo = document.getElementById('paginacaoInfo');
 
     if (filtrados.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-truck" style="font-size:28px;"></i><p>Nenhum pedido de expedi��o encontrado</p></div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-truck" style="font-size:28px;"></i><p>Nenhum pedido de expedião encontrado</p></div></td></tr>';
         pag.style.display = 'none';
         return;
     }
 
     if (filtrados.length > itensPorPagina) {
         pag.style.display = 'flex';
-        pagInfo.textContent = 'P�gina ' + paginaAtual + ' de ' + totalPaginas + ' � ' + filtrados.length + ' pedido(s)';
+        pagInfo.textContent = 'Página ' + paginaAtual + ' de ' + totalPaginas + ' é ' + filtrados.length + ' pedido(s)';
     } else {
         pag.style.display = 'none';
     }
@@ -1128,11 +1126,11 @@ function renderizarPedidos() {
 // --- Ver Detalhes (Modal Profissional Rico) ---
 function verDetalhes(pedidoId) {
     var p = pedidos.find(function(x) { return x.id == pedidoId; });
-    if (!p) { showAlert('Pedido n�o encontrado', 'danger'); return; }
+    if (!p) { showAlert('Pedido não encontrado', 'danger'); return; }
 
     var esc = FetchUtil.escapeHtml;
     var statusOrder = ['aguardando', 'em_separacao', 'em_expedicao', 'em_transporte', 'entregue'];
-    var statusLabels = { 'aguardando': 'Aguardando Separa��o', 'em_separacao': 'Em Separa��o', 'em_expedicao': 'Em Expedi��o', 'em_transporte': 'Em Transporte', 'entregue': 'Entregue' };
+    var statusLabels = { 'aguardando': 'Aguardando Separação', 'em_separacao': 'Em Separação', 'em_expedicao': 'Em Expedião', 'em_transporte': 'Em Transporte', 'entregue': 'Entregue' };
     var statusIcons = { 'aguardando': 'fa-clock', 'em_separacao': 'fa-box-open', 'em_expedicao': 'fa-dolly', 'em_transporte': 'fa-truck', 'entregue': 'fa-check-circle' };
     var currentIdx = statusOrder.indexOf((p.status || '').toLowerCase());
 
@@ -1142,13 +1140,13 @@ function verDetalhes(pedidoId) {
         var cls = i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : '');
         timelineHtml += '<div class="timeline-item ' + cls + '">' +
             '<div class="tl-title"><i class="fas ' + (statusIcons[s] || 'fa-circle') + '" style="margin-right:6px;font-size:11px;"></i>' + (statusLabels[s] || s) + '</div>' +
-            (i <= currentIdx ? '<div class="tl-desc">' + (i < currentIdx ? 'Conclu�do' : 'Etapa atual') + '</div>' : '<div class="tl-desc">Pendente</div>') +
+            (i <= currentIdx ? '<div class="tl-desc">' + (i < currentIdx ? 'Concluído' : 'Etapa atual') + '</div>' : '<div class="tl-desc">Pendente</div>') +
         '</div>';
     });
     timelineHtml += '</div>';
 
     document.getElementById('detalhesBody').innerHTML =
-        '<div class="modal-section-title"><i class="fas fa-file-invoice"></i> Informa��es do Pedido</div>' +
+        '<div class="modal-section-title"><i class="fas fa-file-invoice"></i> Informações do Pedido</div>' +
         '<div class="detail-grid">' +
             '<div class="detail-item">' +
                 '<label>Pedido</label>' +
@@ -1171,8 +1169,8 @@ function verDetalhes(pedidoId) {
         '<div class="modal-section-title"><i class="fas fa-map-marker-alt"></i> Dados de Entrega</div>' +
         '<div class="detail-grid">' +
             '<div class="detail-item">' +
-                '<label>Endere�o</label>' +
-                '<p>' + esc(p.endereco || 'N�o informado') + '</p>' +
+                '<label>Endereço</label>' +
+                '<p>' + esc(p.endereco || 'Não informado') + '</p>' +
             '</div>' +
             '<div class="detail-item">' +
                 '<label>Cidade / UF</label>' +
@@ -1183,7 +1181,7 @@ function verDetalhes(pedidoId) {
                 '<p>' + esc(p.transportadora) + '</p>' +
             '</div>' +
             '<div class="detail-item">' +
-                '<label>Previs�o de Entrega</label>' +
+                '<label>Previsão de Entrega</label>' +
                 '<p>' + formatarData(p.previsao) + '</p>' +
             '</div>' +
         '</div>' +
@@ -1209,7 +1207,7 @@ function verDetalhes(pedidoId) {
         '<div class="modal-section-title"><i class="fas fa-route"></i> Rastreamento de Status</div>' +
         timelineHtml +
 
-        (p.observacao ? '<div class="modal-section-title"><i class="fas fa-sticky-note"></i> Observa��es</div>' +
+        (p.observacao ? '<div class="modal-section-title"><i class="fas fa-sticky-note"></i> Observações</div>' +
         '<div class="detail-item full"><div class="obs-box">' + esc(p.observacao) + '</div></div>' : '');
 
     document.getElementById('btnDetalhesImprimir').setAttribute('data-id', p.id);
@@ -1233,7 +1231,7 @@ function abrirModalStatus(pedidoId) {
 
     // Render timeline preview
     var statusOrder = ['aguardando', 'em_separacao', 'em_expedicao', 'em_transporte', 'entregue'];
-    var statusLabels = { 'aguardando': 'Aguardando', 'em_separacao': 'Separa��o', 'em_expedicao': 'Expedi��o', 'em_transporte': 'Transporte', 'entregue': 'Entregue' };
+    var statusLabels = { 'aguardando': 'Aguardando', 'em_separacao': 'Separação', 'em_expedicao': 'Expedião', 'em_transporte': 'Transporte', 'entregue': 'Entregue' };
     var currentIdx = statusOrder.indexOf((p.status || '').toLowerCase());
     var tlContainer = document.getElementById('statusTimelinePreview');
     if (tlContainer) {
@@ -1276,7 +1274,7 @@ async function confirmarMudancaStatus() {
 // --- Imprimir Etiqueta (Modal + Print Window) ---
 function abrirModalEtiqueta(pedidoId) {
     var p = pedidos.find(function(x) { return x.id == pedidoId; });
-    if (!p) { showAlert('Pedido n�o encontrado', 'danger'); return; }
+    if (!p) { showAlert('Pedido não encontrado', 'danger'); return; }
 
     etiquetaPedidoId = pedidoId;
     var esc = FetchUtil.escapeHtml;
@@ -1289,13 +1287,13 @@ function abrirModalEtiqueta(pedidoId) {
     }
 
     var priorClass = (p.prioridade || 'media').toLowerCase();
-    var priorLabel = { 'alta': 'ALTA', 'media': 'M�DIA', 'baixa': 'BAIXA' }[priorClass] || 'M�DIA';
+    var priorLabel = { 'alta': 'ALTA', 'media': 'MÉDIA', 'baixa': 'BAIXA' }[priorClass] || 'MÉDIA';
 
     document.getElementById('etiquetaBody').innerHTML =
         '<div class="label-preview" id="labelContent">' +
             '<div class="label-header">' +
                 '<h4>ALUFORCE</h4>' +
-                '<span>LOG�STICA</span>' +
+                '<span>LOGÍSTICA</span>' +
             '</div>' +
             '<div class="label-section">' +
                 '<div class="label-section-title">Remetente</div>' +
@@ -1303,7 +1301,7 @@ function abrirModalEtiqueta(pedidoId) {
                 '<p>Barueri, SP</p>' +
             '</div>' +
             '<div class="label-section">' +
-                '<div class="label-section-title">Destinat�rio</div>' +
+                '<div class="label-section-title">Destinatério</div>' +
                 '<p><strong>' + esc(p.cliente) + '</strong></p>' +
                 (p.endereco ? '<p>' + esc(p.endereco) + '</p>' : '') +
                 '<p>' + esc(p.cidade) + (p.uf ? ' / ' + esc(p.uf) : '') + '</p>' +
@@ -1327,7 +1325,7 @@ function abrirModalEtiqueta(pedidoId) {
                         '<p>' + esc(p.transportadora) + '</p>' +
                     '</div>' +
                     '<div>' +
-                        '<div class="label-section-title">Previs�o</div>' +
+                        '<div class="label-section-title">Previsão</div>' +
                         '<p>' + formatarData(p.previsao) + '</p>' +
                     '</div>' +
                 '</div>' +
@@ -1387,14 +1385,14 @@ function imprimirEtiquetaPopup() {
             '.lbl-barcode-number { font-family:monospace; font-size:11px; font-weight:600; letter-spacing:2px; }' +
             '@media print { body { padding:0; } }' +
         '</style></head><body>' +
-        '<div class="lbl-header"><h4>ALUFORCE</h4><span>LOG�STICA</span></div>' +
+        '<div class="lbl-header"><h4>ALUFORCE</h4><span>LOGÍSTICA</span></div>' +
         '<div class="lbl-section"><div class="lbl-title">Remetente</div><p><strong>Aluforce Esquadrias</strong></p><p>Barueri, SP</p></div>' +
-        '<div class="lbl-section"><div class="lbl-title">Destinat�rio</div><p><strong>' + esc(p.cliente) + '</strong></p>' +
+        '<div class="lbl-section"><div class="lbl-title">Destinatério</div><p><strong>' + esc(p.cliente) + '</strong></p>' +
         (p.endereco ? '<p>' + esc(p.endereco) + '</p>' : '') +
         '<p>' + esc(p.cidade) + (p.uf ? ' / ' + esc(p.uf) : '') + '</p></div>' +
         '<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">NF-e</div><p><strong>' + esc(p.nfe) + '</strong></p></div><div><div class="lbl-title">Pedido</div><p><strong>#' + esc(p.pedido || p.id) + '</strong></p></div></div></div>' +
-        '<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Transportadora</div><p>' + esc(p.transportadora) + '</p></div><div><div class="lbl-title">Previs�o</div><p>' + formatarData(p.previsao) + '</p></div></div></div>' +
-        '<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Prioridade</div><span class="lbl-priority ' + (p.prioridade || 'media').toLowerCase() + '">' + esc(p.prioridade || 'M�dia') + '</span></div><div><div class="lbl-title">Volumes</div><p>1</p></div></div></div>' +
+        '<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Transportadora</div><p>' + esc(p.transportadora) + '</p></div><div><div class="lbl-title">Previsão</div><p>' + formatarData(p.previsao) + '</p></div></div></div>' +
+        '<div class="lbl-section"><div class="lbl-row"><div><div class="lbl-title">Prioridade</div><span class="lbl-priority ' + (p.prioridade || 'media').toLowerCase() + '">' + esc(p.prioridade || 'Média') + '</span></div><div><div class="lbl-title">Volumes</div><p>1</p></div></div></div>' +
         '<div class="lbl-barcode"><div class="lbl-barcode-lines">' + gerarBarcodeHtml() + '</div>' +
         '<div class="lbl-barcode-number">ALU-' + String(p.pedido || p.id).padStart(6, '0') + '</div></div>' +
         '<script>window.onload=function(){window.print();}<\/script>' +
@@ -1461,7 +1459,7 @@ function carregarSelectTransportadoras(selectId) {
 
 async function salvarTransportadora() {
     var nomeVal = document.getElementById('transpNome').value.trim();
-    if (!nomeVal) return showAlert('Nome / Raz�o Social � obrigat�rio', 'warning');
+    if (!nomeVal) return showAlert('Nome / Razão Social é obrigatório', 'warning');
 
     var dados = {
         razao_social: nomeVal,
@@ -1545,7 +1543,7 @@ function editarTransportadora(id) {
 
 async function excluirTransportadora(id) {
     if (typeof ConfirmDialog !== 'undefined') {
-        var confirmed = await ConfirmDialog.show({ message: 'Excluir esta transportadora?', type: 'danger', title: 'Confirmar Exclus�o' });
+        var confirmed = await ConfirmDialog.show({ message: 'Excluir esta transportadora?', type: 'danger', title: 'Confirmar Exclusão' });
         if (!confirmed) return;
     } else if (!confirm('Excluir esta transportadora?')) return;
 
@@ -1553,7 +1551,7 @@ async function excluirTransportadora(id) {
         var response = await FetchUtil.request('/api/logistica/transportadoras/' + id, { method: 'DELETE' });
         if (!response.ok) throw new Error('Erro');
         await response.json();
-        showAlert('Transportadora exclu�da', 'success');
+        showAlert('Transportadora excluída', 'success');
         carregarTransportadoras();
     } catch (error) {
         showAlert('Erro ao excluir: ' + error.message, 'danger');
@@ -1577,7 +1575,7 @@ function limparFormTransportadora() {
     });
 }
 
-// --- Nova Expedi��o ---
+// --- Nova Expedião ---
 async function salvarExpedicao() {
     var dados = {
         pedido_id: document.getElementById('expPedidoId').value,
@@ -1590,7 +1588,7 @@ async function salvarExpedicao() {
         previsao: document.getElementById('expPrevisao').value,
         observacoes: document.getElementById('expObservacoes').value
     };
-    if (!dados.cliente || !dados.transportadora_id) return showAlert('Preencha os campos obrigat�rios (Cliente e Transportadora)', 'warning');
+    if (!dados.cliente || !dados.transportadora_id) return showAlert('Preencha os campos obrigatórios (Cliente e Transportadora)', 'warning');
 
     try {
         var response = await FetchUtil.request('/api/logistica/expedicao', {
@@ -1603,7 +1601,7 @@ async function salvarExpedicao() {
             throw new Error(err.message || err.error || 'Erro ao criar');
         }
         await response.json();
-        showAlert('Expedi��o criada com sucesso!', 'success');
+        showAlert('Expedião criada com sucesso!', 'success');
         fecharModal('modalExpedicao');
         ['expPedidoId', 'expNfeId', 'expCliente', 'expEndereco', 'expCidadeUF', 'expObservacoes'].forEach(function(id) {
             document.getElementById(id).value = '';
@@ -1612,14 +1610,14 @@ async function salvarExpedicao() {
         carregarPedidos();
         carregarDashboard();
     } catch (error) {
-        showAlert('Erro ao criar expedi��o: ' + error.message, 'danger');
+        showAlert('Erro ao criar expedião: ' + error.message, 'danger');
     }
 }
 
 // --- Exportar CSV ---
 function exportarExcel() {
     if (pedidos.length === 0) return showAlert('Nenhum dado para exportar', 'warning');
-    var headers = ['Prioridade', 'NF-e', 'Pedido', 'Cliente', 'Cidade', 'UF', 'Transportadora', 'Status', 'Previs�o', 'Valor'];
+    var headers = ['Prioridade', 'NF-e', 'Pedido', 'Cliente', 'Cidade', 'UF', 'Transportadora', 'Status', 'Previsão', 'Valor'];
     var rows = pedidos.map(function(p) {
         return [
             p.prioridade || '',
@@ -1700,8 +1698,8 @@ function trocarTab(tab) {
     document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
 }
 
-// --- Configura��es placeholder ---
-function abrirModalConfiguracoes() { showAlert('Configura��es � Em desenvolvimento', 'info'); }
+// --- Configurações placeholder ---
+function abrirModalConfiguracoes() { showAlert('Configurações é Em desenvolvimento', 'info'); }
 
 // --- Sidebar toggle ---
 function toggleMobileSidebar() {
@@ -1710,7 +1708,7 @@ function toggleMobileSidebar() {
 }
 
 // ---------------------------------------------------------------
-// EVENT DELEGATION � todas as intera��es do usu�rio
+// EVENT DELEGATION é todas as interações do usuário
 // ---------------------------------------------------------------
 document.addEventListener('click', function(e) {
     var target = e.target.closest('[data-action]');

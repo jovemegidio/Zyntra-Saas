@@ -1223,7 +1223,7 @@ Equipe de Recursos Humanos
                     }
                 } else {
                     const error = await response.json();
-                    showToast('Erro ao cadastrar funcionário: ' + (error.message || 'Erro desconhecido'), 'error');
+                    showToast('Erro ao cadastrar funcionário. Tente novamente.', 'error');
                 }
             } catch (error) {
                 console.error('Erro:', error);
@@ -1415,7 +1415,7 @@ Equipe de Recursos Humanos
                     closeGerarHoleritesModal();
                 } else {
                     const error = await response.json();
-                    showToast('Erro ao gerar holerites: ' + (error.message || 'Erro desconhecido'), 'error');
+                    showToast('Erro ao gerar holerites. Tente novamente.', 'error');
                 }
             } catch (error) {
                 console.error('Erro:', error);

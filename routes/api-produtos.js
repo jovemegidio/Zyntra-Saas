@@ -236,7 +236,7 @@ function createProdutosRouter(pool, authenticateToken, io) {
             
         } catch (error) {
             console.error('❌ Erro ao criar produto:', error);
-            res.status(500).json({ error: 'Erro ao criar produto: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

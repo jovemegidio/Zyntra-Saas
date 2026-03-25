@@ -276,7 +276,7 @@ module.exports = function createPostExportsRoutes(deps) {
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao criar conta bancária:', err.message);
             console.error('[FINANCEIRO] Stack:', err.stack);
-            res.status(500).json({ message: 'Erro ao criar conta bancária', error: err.message });
+            res.status(500).json({ message: 'Erro ao criar conta bancária', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -1140,7 +1140,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao buscar dashboard:', err);
             console.error('[FINANCEIRO] Stack:', err.stack);
-            res.status(500).json({ message: 'Erro ao buscar dados do dashboard', error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar dados do dashboard', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -1294,7 +1294,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao buscar fluxo de caixa completo:', err);
-            res.status(500).json({ message: 'Erro ao buscar fluxo de caixa', error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar fluxo de caixa', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -1370,7 +1370,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao buscar gráfico:', err);
             console.error('[FINANCEIRO] Stack:', err.stack);
-            res.status(500).json({ message: 'Erro ao buscar gráfico', error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar gráfico', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -1400,7 +1400,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao buscar fluxo dashboard:', err);
             console.error('[FINANCEIRO] Stack:', err.stack);
-            res.status(500).json({ message: 'Erro ao buscar fluxo de caixa', error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar fluxo de caixa', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -1987,7 +1987,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao criar reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2089,7 +2089,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao consumir reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2128,7 +2128,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao cancelar reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2293,7 +2293,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao aprovar pedido:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2442,7 +2442,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao receber pedido de compra:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2524,7 +2524,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao consumir materiais:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2603,7 +2603,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao finalizar OP:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -2651,7 +2651,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (error) {
             logger.error('[INTEGRAÇÃO] Erro ao gerar relatório:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -2702,7 +2702,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (error) {
             logger.error('[INTEGRAÇÃO] Erro ao carregar dashboard:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -3972,7 +3972,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             const result = await releaseEditLock(pool, tabela, registro_id, req.user.userId);
             res.json(result);
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -3991,7 +3991,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
                 tabelas_sensiveis: encryption.SENSITIVE_FIELDS
             });
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     

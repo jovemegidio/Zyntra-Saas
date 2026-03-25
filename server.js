@@ -599,10 +599,10 @@ app.use(compression({
 const { forceHttpsMiddleware } = require('./config/https.config');
 app.use(forceHttpsMiddleware);
 
-// � ENTERPRISE: Request-ID tracing — end-to-end observability
+// é ENTERPRISE: Request-ID tracing — end-to-end observability
 app.use(requestIdMiddleware());
 
-// �📊 ENTERPRISE: Prometheus metrics middleware — tracks request duration, status, active connections
+// 📊 ENTERPRISE: Prometheus metrics middleware — tracks request duration, status, active connections
 app.use(metricsMiddleware);
 
 // Middleware para interpretar JSON no corpo das requisições
@@ -627,7 +627,7 @@ app.use((req, res, next) => {
 
 app.use(sanitizeInput);
 
-// � ENTERPRISE: Swagger/OpenAPI documentation at /api-docs
+// é ENTERPRISE: Swagger/OpenAPI documentation at /api-docs
 try {
     const { setupSwagger } = require('./config/swagger');
     setupSwagger(app);
@@ -635,7 +635,7 @@ try {
     logger.warn('Swagger docs not available: ' + e.message);
 }
 
-// �📊 N8N: Interceptor global — detecta automaticamente quando relatórios
+// 📊 N8N: Interceptor global — detecta automaticamente quando relatórios
 // (PDF, Excel, CSV, XML, ZIP) são gerados e notifica por email via n8n
 if (reportInterceptorMiddleware) {
     app.use(reportInterceptorMiddleware);
@@ -1434,7 +1434,7 @@ const authorizeAdminOrComercial = (req, res, next) => {
 };
 
 // =================================================================
-// � PROXY — Consulta CNPJ (BrasilAPI) e CEP (ViaCEP) sem CORS
+// é PROXY — Consulta CNPJ (BrasilAPI) e CEP (ViaCEP) sem CORS
 // =================================================================
 const axios = require('axios');
 
@@ -1463,14 +1463,14 @@ app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
 });
 
 // =================================================================
-// �📄 NFe API — Extracted to routes/nfe-api.js
+// 📄 NFe API — Extracted to routes/nfe-api.js
 // =================================================================
 const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
 app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
-// � FINANCEIRO API — Módulo Financeiro (contas, fluxo de caixa, etc.)
+// é FINANCEIRO API — Módulo Financeiro (contas, fluxo de caixa, etc.)
 // =================================================================
 try {
     const financeiroRoutes = require('./src/routes/financeiro');
@@ -1481,7 +1481,7 @@ try {
 }
 
 // =================================================================
-// �🛒 COMPRAS API — Módulo de Compras (fornecedores, pedidos, etc.)
+// 🛒 COMPRAS API — Módulo de Compras (fornecedores, pedidos, etc.)
 // =================================================================
 try {
     const comprasDb = require('./modules/Compras/database');

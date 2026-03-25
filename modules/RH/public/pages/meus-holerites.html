@@ -1407,7 +1407,7 @@
                     await carregarHolerites();
                 } else {
                     const err = await resp.json();
-                    showToast(err.message || 'Erro ao registrar autorizao', 'error');
+                    showToast('Erro ao registrar autorizao', 'error');
                     btnAssinar.disabled = false;
                     btnAssinar.innerHTML = '<i class="fas fa-file-signature"></i> Assinar e Autorizar';
                 }

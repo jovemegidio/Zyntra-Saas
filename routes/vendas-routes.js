@@ -2631,8 +2631,7 @@ module.exports = function createVendasRoutes(deps) {
                         COALESCE(mva_st, 0) as mva_st,
                         COALESCE(ncm, '') as ncm
                  FROM produtos
-                 WHERE COALESCE(ativo, 1) = 1 
-                   AND (codigo LIKE ? OR COALESCE(descricao,'') LIKE ? OR COALESCE(nome,'') LIKE ? OR COALESCE(gtin,'') LIKE ?)
+                 WHERE (codigo LIKE ? OR COALESCE(descricao,'') LIKE ? OR COALESCE(nome,'') LIKE ? OR COALESCE(gtin,'') LIKE ?)
                  ORDER BY
                     CASE
                         WHEN codigo = ? THEN 1

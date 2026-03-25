@@ -114,7 +114,7 @@ router.post('/start', async (req, res) => {
             status: rhidSync.getStatus()
         });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -126,7 +126,7 @@ router.post('/stop', async (req, res) => {
         await rhidSync.shutdown();
         res.json({ success: true, message: 'Serviço RHiD Browser Sync encerrado' });
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -299,7 +299,7 @@ router.get('/logs', (req, res) => {
             showing: lastLines.length
         });
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

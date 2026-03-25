@@ -645,7 +645,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
         } catch (err) {
             console.error('[FINANCEIRO] Erro ao criar conta a pagar:', err);
             console.error('[FINANCEIRO] Stack:', err.stack);
-            return res.status(500).json({ message: 'Erro ao criar conta a pagar', error: err.message });
+            return res.status(500).json({ message: 'Erro ao criar conta a pagar', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

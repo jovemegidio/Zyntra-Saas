@@ -7,9 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: NFS-e</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
@@ -112,7 +110,7 @@
         @media (max-width:1200px) { .kpi-grid { grid-template-columns:repeat(2,1fr); } }
         @media (max-width:768px) { .kpi-grid { grid-template-columns:1fr; } .form-grid { grid-template-columns:1fr; } .impostos-grid { grid-template-columns:repeat(2,1fr); } }
     
-    /* ===== COMPRAS STANDARD � STAT CARDS ===== */
+    /* ===== COMPRAS STANDARD é STAT CARDS ===== */
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -242,9 +240,9 @@
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
                 <a href="boletos.html" class="sidebar-btn" title="Boletos"><i class="fas fa-barcode"></i></a>
                 <a href="nfse.html" class="sidebar-btn active" title="NFS-e"><i class="fas fa-file-invoice"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn" title="Recorr�ncias"><i class="fas fa-redo"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia��o"><i class="fas fa-balance-scale"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat�rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="recorrencias.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo"><i class="fas fa-sitemap"></i></a>
@@ -265,7 +263,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar"><img alt="Foto" id="user-photo" style="display:none"><span id="user-initials">U</span></div>
                     </div>
                 </div>
@@ -300,7 +298,7 @@
                         <span class="stat-trend">&mdash;</span>
                     </div>
                     <div class="stat-value" id="kpi-faturamento">--</div>
-                    <div class="stat-label">Faturamento Servi�os</div>
+                    <div class="stat-label">Faturamento Serviços</div>
                 </div>
                 <div class="stat-card purple">
                     <div class="stat-header">
@@ -321,7 +319,7 @@
                         </select>
                         <label>De</label>
                         <input type="date" id="filtro-inicio" onchange="carregarNfse()">
-                        <label>At�</label>
+                        <label>Até</label>
                         <input type="date" id="filtro-fim" onchange="carregarNfse()">
                         <button class="btn btn-secondary" onclick="carregarNfse()" style="margin-left:auto"><i class="fas fa-filter"></i> Filtrar</button>
                     </div>
@@ -333,9 +331,9 @@
                         </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
-                                <thead><tr><th>N�mero</th><th>Tomador</th><th>Servi�o</th><th>Emiss�o</th><th>Valor</th><th>ISS</th><th>L�quido</th><th>Status</th><th style="width:80px">A��es</th></tr></thead>
+                                <thead><tr><th>Número</th><th>Tomador</th><th>Serviço</th><th>Emissão</th><th>Valor</th><th>ISS</th><th>Líquido</th><th>Status</th><th style="width:80px">Ações</th></tr></thead>
                                 <tbody id="tbody-nfse">
-                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><h4>Nenhuma NFS-e encontrada</h4><p>Emita sua primeira nota fiscal clicando no bot�o acima</p></div></td></tr>
+                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><h4>Nenhuma NFS-e encontrada</h4><p>Emita sua primeira nota fiscal clicando no botão acima</p></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -354,9 +352,9 @@
             </div>
             <div class="modal-body">
                 <div class="form-section">
-                    <h4><i class="fas fa-user"></i> Tomador do Servi�o</h4>
+                    <h4><i class="fas fa-user"></i> Tomador do Serviço</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-user"></i> Nome/Raz�o Social <span class="req">*</span></label><input type="text" id="nf-tomador-nome" placeholder="Nome completo ou Raz�o Social"></div>
+                        <div class="form-group"><label><i class="fas fa-user"></i> Nome/Razão Social <span class="req">*</span></label><input type="text" id="nf-tomador-nome" placeholder="Nome completo ou Razão Social"></div>
                         <div class="form-group"><label><i class="fas fa-id-card"></i> CPF/CNPJ</label><input type="text" id="nf-tomador-cpf" placeholder="000.000.000-00"></div>
                         <div class="form-group"><label><i class="fas fa-envelope"></i> E-mail</label><input type="email" id="nf-tomador-email" placeholder="email@exemplo.com"></div>
                         <div class="form-group"><label><i class="fas fa-city"></i> Cidade</label><input type="text" id="nf-tomador-cidade"></div>
@@ -364,16 +362,16 @@
                     </div>
                 </div>
                 <div class="form-section">
-                    <h4><i class="fas fa-cogs"></i> Dados do Servi�o</h4>
+                    <h4><i class="fas fa-cogs"></i> Dados do Serviço</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-hashtag"></i> C�digo do Servi�o</label><input type="text" id="nf-cod-servico" placeholder="Ex: 01.07"></div>
+                        <div class="form-group"><label><i class="fas fa-hashtag"></i> Código do Serviço</label><input type="text" id="nf-cod-servico" placeholder="Ex: 01.07"></div>
                         <div class="form-group"><label><i class="fas fa-dollar-sign"></i> Valor <span class="req">*</span></label><input type="number" id="nf-valor" step="0.01" min="0.01" placeholder="0,00"></div>
-                        <div class="form-group"><label><i class="fas fa-minus-circle"></i> Dedu��es</label><input type="number" id="nf-deducoes" step="0.01" value="0" placeholder="0,00"></div>
-                        <div class="form-group"><label><i class="fas fa-percent"></i> Al�quota ISS (%)</label><input type="number" id="nf-aliquota" step="0.01" value="5" placeholder="5.00"></div>
-                        <div class="form-group"><label><i class="fas fa-exchange-alt"></i> ISS Retido?</label><select id="nf-iss-retido"><option value="0">N�o</option><option value="1">Sim</option></select></div>
-                        <div class="form-group"><label><i class="fas fa-calendar"></i> Compet�ncia</label><input type="date" id="nf-competencia"></div>
-                        <div class="form-group full"><label><i class="fas fa-align-left"></i> Descri��o do Servi�o <span class="req">*</span></label><textarea id="nf-descri��o" rows="3" placeholder="Descreva o servi�o prestado..."></textarea></div>
-                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observa��es</label><textarea id="nf-obs" rows="2" placeholder="Observa��es adicionais..."></textarea></div>
+                        <div class="form-group"><label><i class="fas fa-minus-circle"></i> Deduães</label><input type="number" id="nf-deducoes" step="0.01" value="0" placeholder="0,00"></div>
+                        <div class="form-group"><label><i class="fas fa-percent"></i> Alíquota ISS (%)</label><input type="number" id="nf-aliquota" step="0.01" value="5" placeholder="5.00"></div>
+                        <div class="form-group"><label><i class="fas fa-exchange-alt"></i> ISS Retido?</label><select id="nf-iss-retido"><option value="0">Não</option><option value="1">Sim</option></select></div>
+                        <div class="form-group"><label><i class="fas fa-calendar"></i> Competência</label><input type="date" id="nf-competencia"></div>
+                        <div class="form-group full"><label><i class="fas fa-align-left"></i> Descrição do Serviço <span class="req">*</span></label><textarea id="nf-descrição" rows="3" placeholder="Descreva o serviço prestado..."></textarea></div>
+                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observações</label><textarea id="nf-obs" rows="2" placeholder="Observações adicionais..."></textarea></div>
                     </div>
                 </div>
             </div>
@@ -456,9 +454,9 @@
             }
             tb.innerHTML = notas.map(n => `
                 <tr>
-                    <td><strong>${n.n�mero_nfse || '-'}</strong></td>
+                    <td><strong>${n.número_nfse || '-'}</strong></td>
                     <td>${n.tomador_nome}</td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.descri��o_servico}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.descrição_servico}</td>
                     <td>${fmtData(n.data_emissao)}</td>
                     <td class="valor">${fmtMoeda(n.valor_servico)}</td>
                     <td class="valor">${fmtMoeda(n.valor_iss)}</td>
@@ -478,20 +476,20 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="nfse-detail">
                     <div class="detail-header">
-                        <h3>NFS-e N� ${n.n�mero_nfse}</h3>
-                        <p>Protocolo: ${n.protocolo || '-'} � Verifica��o: ${n.codigo_verificacao || '-'}</p>
+                        <h3>NFS-e Nº ${n.número_nfse}</h3>
+                        <p>Protocolo: ${n.protocolo || '-'} é Verificação: ${n.codigo_verificacao || '-'}</p>
                     </div>
                     <div class="detail-body">
                         <div class="info-row"><span class="label">Tomador</span><span class="value">${n.tomador_nome}</span></div>
                         <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${n.tomador_cpf_cnpj || '-'}</span></div>
                         <div class="info-row"><span class="label">E-mail</span><span class="value">${n.tomador_email || '-'}</span></div>
-                        <div class="info-row"><span class="label">Servi�o</span><span class="value">${n.descri��o_servico}</span></div>
-                        <div class="info-row"><span class="label">Compet�ncia</span><span class="value">${fmtData(n.data_competencia)}</span></div>
-                        <div class="info-row"><span class="label">Data Emiss�o</span><span class="value">${fmtData(n.data_emissao)}</span></div>
-                        <div class="info-row"><span class="label">Valor do Servi�o</span><span class="value" style="font-size:16px">${fmtMoeda(n.valor_servico)}</span></div>
-                        <div class="info-row"><span class="label">Base de C�lculo</span><span class="value">${fmtMoeda(n.base_calculo)}</span></div>
-                        <div class="info-row"><span class="label">Al�quota ISS</span><span class="value">${n.aliquota_iss}%</span></div>
-                        <div class="info-row"><span class="label">ISS Retido</span><span class="value">${n.iss_retido ? 'Sim' : 'N�o'}</span></div>
+                        <div class="info-row"><span class="label">Serviço</span><span class="value">${n.descrição_servico}</span></div>
+                        <div class="info-row"><span class="label">Competência</span><span class="value">${fmtData(n.data_competencia)}</span></div>
+                        <div class="info-row"><span class="label">Data Emissão</span><span class="value">${fmtData(n.data_emissao)}</span></div>
+                        <div class="info-row"><span class="label">Valor do Serviço</span><span class="value" style="font-size:16px">${fmtMoeda(n.valor_servico)}</span></div>
+                        <div class="info-row"><span class="label">Base de Cálculo</span><span class="value">${fmtMoeda(n.base_calculo)}</span></div>
+                        <div class="info-row"><span class="label">Alíquota ISS</span><span class="value">${n.aliquota_iss}%</span></div>
+                        <div class="info-row"><span class="label">ISS Retido</span><span class="value">${n.iss_retido ? 'Sim' : 'Não'}</span></div>
                         <h4 style="margin-top:16px;font-size:14px;font-weight:600;">Tributos</h4>
                         <div class="impostos-grid">
                             <div class="imposto-item"><div class="sigla">ISS</div><div class="val">${fmtMoeda(n.valor_iss)}</div></div>
@@ -502,7 +500,7 @@
                             <div class="imposto-item"><div class="sigla">CSLL</div><div class="val">${fmtMoeda(n.valor_csll)}</div></div>
                         </div>
                         <div class="info-row" style="margin-top:16px;padding-top:16px;border-top:2px solid var(--border-color)">
-                            <span class="label" style="font-size:15px;font-weight:600">Valor L�quido</span>
+                            <span class="label" style="font-size:15px;font-weight:600">Valor Líquido</span>
                             <span class="value" style="font-size:20px;color:var(--success)">${fmtMoeda(n.valor_liquido)}</span>
                         </div>
                         <div class="info-row"><span class="label">Status</span><span class="value"><span class="badge badge-${n.status}">${n.status}</span></span></div>
@@ -519,7 +517,7 @@
                 tomador_cidade: document.getElementById('nf-tomador-cidade').value,
                 tomador_uf: document.getElementById('nf-tomador-uf').value,
                 codigo_servico: document.getElementById('nf-cod-servico').value,
-                descri��o_servico: document.getElementById('nf-descri��o').value,
+                descrição_servico: document.getElementById('nf-descrição').value,
                 valor_servico: parseFloat(document.getElementById('nf-valor').value),
                 valor_deducoes: parseFloat(document.getElementById('nf-deducoes').value) || 0,
                 aliquota_iss: parseFloat(document.getElementById('nf-aliquota').value) || 5,
@@ -527,19 +525,19 @@
                 data_competencia: document.getElementById('nf-competencia').value,
                 observacoes: document.getElementById('nf-obs').value
             };
-            if (!payload.tomador_nome || !payload.descri��o_servico || !payload.valor_servico) {
-                mostrarToast('Preencha tomador, descri��o e valor', 'warning'); return;
+            if (!payload.tomador_nome || !payload.descrição_servico || !payload.valor_servico) {
+                mostrarToast('Preencha tomador, descrição e valor', 'warning'); return;
             }
             try {
                 const r = await fetch(`${API}/emitir-nfse`, { method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToast(`NFS-e #${data.nfse.n�mero} emitida com sucesso!`, 'success');
+                    mostrarToast(`NFS-e #${data.nfse.número} emitida com sucesso!`, 'success');
                     fecharModal('modal-emitir');
                     carregarNfse();
                     document.querySelectorAll('#modal-emitir input, #modal-emitir textarea').forEach(el => { if (el.type !== 'number' || !el.value) el.value = ''; });
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToast('Erro de conex�o', 'error'); }
+            } catch (e) { mostrarToast('Erro de conexão', 'error'); }
         }
 
         async function cancelarNfse(id) {
@@ -554,9 +552,9 @@
 
         function exportarNfse() {
             if (notas.length === 0) { mostrarToast('Nenhuma NFS-e para exportar', 'warning'); return; }
-            let csv = 'N�mero,Tomador,CPF/CNPJ,Servi�o,Valor,ISS,L�quido,Status,Emiss�o\n';
+            let csv = 'Número,Tomador,CPF/CNPJ,Serviço,Valor,ISS,Líquido,Status,Emissão\n';
             notas.forEach(n => {
-                csv += `"${n.n�mero_nfse}","${n.tomador_nome}","${n.tomador_cpf_cnpj||''}","${n.descri��o_servico}","${n.valor_servico}","${n.valor_iss}","${n.valor_liquido}","${n.status}","${fmtData(n.data_emissao)}"\n`;
+                csv += `"${n.número_nfse}","${n.tomador_nome}","${n.tomador_cpf_cnpj||''}","${n.descrição_servico}","${n.valor_servico}","${n.valor_iss}","${n.valor_liquido}","${n.status}","${fmtData(n.data_emissao)}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement('a');
@@ -573,7 +571,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usu�rio');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
                     const h = new Date().getHours();
                     document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                     document.getElementById('user-name').textContent = nome;

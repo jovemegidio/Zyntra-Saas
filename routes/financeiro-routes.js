@@ -1,6 +1,6 @@
 /**
  * FINANCEIRO ROUTES (PART 1 - Professional) - Extracted from server.js (Lines 3199-4017)
- * Dashboard, clientes, contas, conciliac�o, fluxo de caixa
+ * Dashboard, clientes, contas, conciliaco, fluxo de caixa
  * @module routes/financeiro-routes
  */
 const express = require('express');
@@ -67,7 +67,7 @@ module.exports = function createFinanceiroRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao carregar dashboard financeiro',
-                error: error.message
+                error: 'Erro interno no servidor. Tente novamente.'
             });
         }
     });
@@ -1843,7 +1843,7 @@ module.exports = function createFinanceiroRoutes(deps) {
             res.json({ success: true, data: fornecedores, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
         } catch (error) {
             console.error('❌ Erro ao buscar fornecedores:', error);
-            res.status(500).json({ error: 'Erro ao buscar fornecedores', message: error.message });
+            res.status(500).json({ error: 'Erro ao buscar fornecedores', message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -1860,7 +1860,7 @@ module.exports = function createFinanceiroRoutes(deps) {
             res.json({ success: true, data: clientes, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
         } catch (error) {
             console.error('❌ Erro ao buscar clientes:', error);
-            res.status(500).json({ error: 'Erro ao buscar clientes', message: error.message });
+            res.status(500).json({ error: 'Erro ao buscar clientes', message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

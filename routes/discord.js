@@ -46,7 +46,7 @@ router.post('/notify', async (req, res) => {
         res.json({ success: true, sent, message: sent ? 'Notificação enviada' : 'Salvo localmente' });
     } catch (error) {
         console.error('[Discord API] Erro em /notify:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -72,7 +72,7 @@ router.post('/deploy', async (req, res) => {
         res.json({ success: true, sent });
     } catch (error) {
         console.error('[Discord API] Erro em /deploy:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -96,7 +96,7 @@ router.post('/commits', async (req, res) => {
         res.json({ success: true, sent, count: commits.length });
     } catch (error) {
         console.error('[Discord API] Erro em /commits:', error.message);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

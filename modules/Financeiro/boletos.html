@@ -7,9 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Boletos</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
@@ -149,9 +147,9 @@
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
                 <a href="boletos.html" class="sidebar-btn active" title="Boletos"><i class="fas fa-barcode"></i></a>
                 <a href="nfse.html" class="sidebar-btn" title="NFS-e"><i class="fas fa-file-invoice"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn" title="Recorr�ncias"><i class="fas fa-redo"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia��o"><i class="fas fa-balance-scale"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat�rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="recorrencias.html" class="sidebar-btn" title="Recorrências"><i class="fas fa-redo"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo"><i class="fas fa-sitemap"></i></a>
@@ -172,7 +170,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -219,7 +217,7 @@
                         </select>
                         <label>De</label>
                         <input type="date" id="filtro-inicio" onchange="carregarBoletos()">
-                        <label>At�</label>
+                        <label>Até</label>
                         <input type="date" id="filtro-fim" onchange="carregarBoletos()">
                         <button class="btn btn-secondary" onclick="carregarBoletos()" style="margin-left:auto"><i class="fas fa-filter"></i> Filtrar</button>
                     </div>
@@ -234,17 +232,17 @@
                             <table class="data-table">
                                 <thead>
                                     <tr>
-                                        <th>N� Doc</th>
+                                        <th>Nº Doc</th>
                                         <th>Sacado</th>
-                                        <th>Emiss�o</th>
+                                        <th>Emissão</th>
                                         <th>Vencimento</th>
                                         <th>Valor</th>
                                         <th>Status</th>
-                                        <th style="width:100px">A��es</th>
+                                        <th style="width:100px">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody-boletos">
-                                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no bot�o acima</p></div></td></tr>
+                                    <tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -265,9 +263,9 @@
                 <div class="form-section">
                     <h4><i class="fas fa-user"></i> Dados do Sacado (Pagador)</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-user"></i> Nome <span class="req">*</span></label><input type="text" id="bol-sacado-nome" placeholder="Nome completo ou Raz�o Social"></div>
+                        <div class="form-group"><label><i class="fas fa-user"></i> Nome <span class="req">*</span></label><input type="text" id="bol-sacado-nome" placeholder="Nome completo ou Razão Social"></div>
                         <div class="form-group"><label><i class="fas fa-id-card"></i> CPF/CNPJ</label><input type="text" id="bol-sacado-cpf" placeholder="000.000.000-00"></div>
-                        <div class="form-group full"><label><i class="fas fa-map-marker-alt"></i> Endere�o</label><input type="text" id="bol-sacado-endereco" placeholder="Rua, n�mero, bairro"></div>
+                        <div class="form-group full"><label><i class="fas fa-map-marker-alt"></i> Endereço</label><input type="text" id="bol-sacado-endereco" placeholder="Rua, número, bairro"></div>
                         <div class="form-group"><label><i class="fas fa-city"></i> Cidade</label><input type="text" id="bol-sacado-cidade"></div>
                         <div class="form-group"><label><i class="fas fa-map"></i> UF</label><select id="bol-sacado-uf"><option value="">--</option><option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option></select></div>
                     </div>
@@ -277,9 +275,9 @@
                     <div class="form-grid">
                         <div class="form-group"><label><i class="fas fa-dollar-sign"></i> Valor <span class="req">*</span></label><input type="number" id="bol-valor" step="0.01" min="0.01" placeholder="0,00"></div>
                         <div class="form-group"><label><i class="fas fa-calendar"></i> Vencimento <span class="req">*</span></label><input type="date" id="bol-vencimento"></div>
-                        <div class="form-group"><label><i class="fas fa-university"></i> Conta Banc�ria</label><select id="bol-conta"><option value="">Selecione...</option></select></div>
+                        <div class="form-group"><label><i class="fas fa-university"></i> Conta Bancária</label><select id="bol-conta"><option value="">Selecione...</option></select></div>
                         <div class="form-group"><label><i class="fas fa-link"></i> Conta a Receber</label><select id="bol-conta-receber"><option value="">Nenhuma</option></select></div>
-                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observa��es</label><textarea id="bol-obs" rows="2" placeholder="Observa��es adicionais..."></textarea></div>
+                        <div class="form-group full"><label><i class="fas fa-sticky-note"></i> Observações</label><textarea id="bol-obs" rows="2" placeholder="Observações adicionais..."></textarea></div>
                     </div>
                 </div>
             </div>
@@ -360,13 +358,13 @@
             document.getElementById('count-boletos').textContent = `${boletos.length} registro(s)`;
 
             if (boletos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no bot�o acima</p></div></td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>';
                 return;
             }
 
             tbody.innerHTML = boletos.map(b => `
                 <tr>
-                    <td><strong>${b.n�mero_documento || '-'}</strong></td>
+                    <td><strong>${b.número_documento || '-'}</strong></td>
                     <td>${b.sacado_nome}</td>
                     <td>${formatarData(b.data_emissao)}</td>
                     <td>${formatarData(b.data_vencimento)}</td>
@@ -387,14 +385,14 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="boleto-detail">
                     <div class="linha-digitavel">${b.linha_digitavel || 'N/A'}</div>
-                    <div class="info-row"><span class="label">N� Documento</span><span class="value">${b.n�mero_documento}</span></div>
-                    <div class="info-row"><span class="label">Nosso N�mero</span><span class="value">${b.nosso_n�mero}</span></div>
+                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${b.número_documento}</span></div>
+                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${b.nosso_número}</span></div>
                     <div class="info-row"><span class="label">Sacado</span><span class="value">${b.sacado_nome}</span></div>
                     <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${b.sacado_cpf_cnpj || '-'}</span></div>
                     <div class="info-row"><span class="label">Valor</span><span class="value" style="color:var(--success)">${formatarMoeda(b.valor)}</span></div>
                     <div class="info-row"><span class="label">Multa</span><span class="value">${formatarMoeda(b.valor_multa)}</span></div>
                     <div class="info-row"><span class="label">Juros/dia</span><span class="value">${formatarMoeda(b.valor_juros_dia)}</span></div>
-                    <div class="info-row"><span class="label">Emiss�o</span><span class="value">${formatarData(b.data_emissao)}</span></div>
+                    <div class="info-row"><span class="label">Emissão</span><span class="value">${formatarData(b.data_emissao)}</span></div>
                     <div class="info-row"><span class="label">Vencimento</span><span class="value">${formatarData(b.data_vencimento)}</span></div>
                     <div class="info-row"><span class="label">Status</span><span class="value"><span class="badge badge-${b.status}">${b.status}</span></span></div>
                     ${b.data_pagamento ? `<div class="info-row"><span class="label">Data Pagamento</span><span class="value">${formatarData(b.data_pagamento)}</span></div>` : ''}
@@ -436,7 +434,7 @@
                     mostrarToast(data.message || 'Erro ao emitir boleto', 'error');
                 }
             } catch (e) {
-                mostrarToast('Erro de conex�o', 'error');
+                mostrarToast('Erro de conexão', 'error');
             }
         }
 
@@ -463,9 +461,9 @@
 
         function exportarBoletos() {
             if (boletos.length === 0) { mostrarToast('Nenhum boleto para exportar', 'warning'); return; }
-            let csv = 'N� Documento,Sacado,CPF/CNPJ,Valor,Emiss�o,Vencimento,Status\n';
+            let csv = 'Nº Documento,Sacado,CPF/CNPJ,Valor,Emissão,Vencimento,Status\n';
             boletos.forEach(b => {
-                csv += `"${b.n�mero_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
+                csv += `"${b.número_documento}","${b.sacado_nome}","${b.sacado_cpf_cnpj || ''}","${b.valor}","${formatarData(b.data_emissao)}","${formatarData(b.data_vencimento)}","${b.status}"\n`;
             });
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
@@ -498,7 +496,7 @@
                 contas.forEach(c => {
                     const opt = document.createElement('option');
                     opt.value = c.id;
-                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descri��o} - ${formatarMoeda(c.valor)}`;
+                    opt.textContent = `#${c.id} - ${c.cliente_nome || c.descrição} - ${formatarMoeda(c.valor)}`;
                     sel.appendChild(opt);
                 });
             } catch (e) { console.error('Erro contas receber:', e); }
@@ -512,7 +510,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usu�rio');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
                     const h = new Date().getHours();
                     document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                     document.getElementById('user-name').textContent = nome;

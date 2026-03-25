@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -16,7 +14,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Recebimento</title>
 
-    <!-- Sistema de Autentica��o Unificado -->
+    <!-- Sistema de Autenticação Unificado -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -29,7 +27,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS Padr�o Global -->
+    <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -115,14 +113,14 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cota��es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisi��es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn active" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="Relat�rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -135,26 +133,26 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Recebimento</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="atualizarLista()"><i class="fas fa-sync-alt"></i></button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica��es" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge hidden" id="notification-count">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notifica��es</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
-                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">N�o lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
+                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notificações</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
+                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
                             <div class="notification-list" id="notification-list"></div>
-                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver hist�rico completo</a></div>
+                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a></div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar"><img src="" alt="" id="user-photo" style="display:none;"><span id="user-initial">U</span></div>
                     </div>
                 </div>
@@ -173,9 +171,9 @@
                 <!-- ==================== TAB: XML IMPORT ==================== -->
                 <div class="tab-content" id="tab-xml-import">
                     <div class="xml-import-section">
-                        <h3><i class="fas fa-file-code"></i> Entrada Autom�tica � Importar NF-e de Fornecedor</h3>
+                        <h3><i class="fas fa-file-code"></i> Entrada Automática é Importar NF-e de Fornecedor</h3>
                         <p style="font-size:0.8rem; color:var(--gray-600); margin-bottom:var(--space-3);">
-                            Cole o XML da NF-e abaixo ou fa�a upload do arquivo. O sistema extrai automaticamente todos os dados: emitente, itens, impostos e valores.
+                            Cole o XML da NF-e abaixo ou faça upload do arquivo. O sistema extrai automaticamente todos os dados: emitente, itens, impostos e valores.
                         </p>
 
                         <div class="xml-tabs">
@@ -185,7 +183,7 @@
 
                         <!-- Colar XML -->
                         <div id="xmlTabColar">
-                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o conte�do completo do XML da NF-e...&#10;&#10;Exemplo: &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;nfeProc ...&gt;"></textarea>
+                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o contedo completo do XML da NF-e...&#10;&#10;Exemplo: &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;nfeProc ...&gt;"></textarea>
                             <div style="display:flex; gap:var(--space-2); margin-top:var(--space-2);">
                                 <button class="btn-import-xml" id="btnImportarXml" onclick="importarXmlTexto()">
                                     <i class="fas fa-magic"></i> Processar e Importar
@@ -205,7 +203,7 @@
                                  ondrop="event.preventDefault(); this.style.borderColor='var(--gray-300)'; this.style.background='#fff'; handleXmlUpload(event.dataTransfer.files);">
                                 <i class="fas fa-cloud-upload-alt" style="font-size:2rem; color:var(--success-400); margin-bottom:var(--space-2);"></i>
                                 <p style="font-size:0.85rem; font-weight:600; color:var(--gray-700);">Arraste o XML aqui ou clique para selecionar</p>
-                                <p style="font-size:0.7rem; color:var(--gray-500);">Aceita apenas arquivos .xml (m�x. 5MB)</p>
+                                <p style="font-size:0.7rem; color:var(--gray-500);">Aceita apenas arquivos .xml (máx. 5MB)</p>
                             </div>
                             <input type="file" id="xmlFileInput" accept=".xml" style="display:none;" onchange="handleXmlUpload(this.files)">
                         </div>
@@ -229,11 +227,11 @@
                                 <table class="data-table">
                                     <thead>
                                         <tr>
-                                            <th>N� NF-e</th>
+                                            <th>Nº NF-e</th>
                                             <th>Fornecedor</th>
                                             <th>CNPJ</th>
                                             <th>Valor Total</th>
-                                            <th>Data Emiss�o</th>
+                                            <th>Data Emissão</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -296,13 +294,13 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>N� Pedido</th>
+                                <th>Nº Pedido</th>
                                 <th>Fornecedor</th>
                                 <th>Data Pedido</th>
-                                <th>Previs�o Entrega</th>
+                                <th>Previsão Entrega</th>
                                 <th>Valor</th>
                                 <th>Status</th>
-                                <th style="width:120px">A��es</th>
+                                <th style="width:120px">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="pedidosTableBody">
@@ -341,7 +339,7 @@
 
                     <div class="form-grid cols-3">
                         <div class="form-group"><label>Data Recebimento *</label><input type="date" id="dataRecebimento" required></div>
-                        <div class="form-group"><label>N� NF-e *</label><input type="text" id="numeroNfe" required placeholder="N�mero da nota fiscal"></div>
+                        <div class="form-group"><label>Nº NF-e *</label><input type="text" id="numeroNfe" required placeholder="Número da nota fiscal"></div>
                         <div class="form-group">
                             <label>Tipo</label>
                             <select id="tipoRecebimento">
@@ -356,7 +354,7 @@
                         <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-700); margin-bottom:var(--space-2);"><i class="fas fa-barcode"></i> Consulta NF-e (SEFAZ)</h4>
                         <div class="form-grid cols-1">
                             <div class="form-group">
-                                <label>Chave de Acesso (44 d�gitos)</label>
+                                <label>Chave de Acesso (44 dígitos)</label>
                                 <div style="display:flex; gap:var(--space-2);">
                                     <input type="text" id="chaveAcessoNfe" maxlength="44" placeholder="Informe a chave de acesso da NF-e..." style="flex:1;">
                                     <button type="button" class="btn-sefaz" id="btnBuscarSefaz" onclick="buscarNfeSefaz()"><i class="fas fa-search"></i> Consultar</button>
@@ -381,13 +379,13 @@
 
                     <!-- Responsible + Options -->
                     <div class="form-grid cols-2" style="margin-top:var(--space-3);">
-                        <div class="form-group"><label>Respons�vel *</label><input type="text" id="responsavelRecebimento" required></div>
-                        <div class="form-group"><label>Local Armazenamento</label><input type="text" id="localArmazenamento" placeholder="Almoxarifado, Galp�o, etc."></div>
+                        <div class="form-group"><label>Responsável *</label><input type="text" id="responsavelRecebimento" required></div>
+                        <div class="form-group"><label>Local Armazenamento</label><input type="text" id="localArmazenamento" placeholder="Almoxarifado, Galpão, etc."></div>
                         <div class="form-group">
                             <label>Atualizar Estoque?</label>
-                            <select id="atualizarEstoque"><option value="sim">Sim</option><option value="nao">N�o</option></select>
+                            <select id="atualizarEstoque"><option value="sim">Sim</option><option value="nao">Não</option></select>
                         </div>
-                        <div class="form-group"><label>Observa��es</label><textarea id="observacoesRecebimento" rows="2"></textarea></div>
+                        <div class="form-group"><label>Observações</label><textarea id="observacoesRecebimento" rows="2"></textarea></div>
                     </div>
 
                     <!-- Attachments -->
@@ -459,9 +457,9 @@
     /* ========== XML Import ========== */
     async function importarXmlTexto() {
         const xml = document.getElementById('xmlTextoInput').value.trim();
-        if (!xml) { alert('Cole o conte�do XML primeiro'); return; }
+        if (!xml) { alert('Cole o contedo XML primeiro'); return; }
         if (!xml.includes('<nfeProc') && !xml.includes('<NFe') && !xml.includes('<infNFe')) {
-            alert('O conte�do n�o parece ser um XML de NF-e v�lido'); return;
+            alert('O contedo não parece ser um XML de NF-e válido'); return;
         }
         const btn = document.getElementById('btnImportarXml');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
@@ -477,8 +475,8 @@
             if (d.duplicada) {
                 document.getElementById('xmlResultado').innerHTML = `
                     <div class="xml-result-card error">
-                        <h4 style="font-size:0.85rem; color:var(--danger-600);"><i class="fas fa-exclamation-triangle"></i> NF-e j� importada</h4>
-                        <p style="font-size:0.8rem; color:var(--gray-600);">Esta nota fiscal j� existe no sistema (ID: ${d.id}).</p>
+                        <h4 style="font-size:0.85rem; color:var(--danger-600);"><i class="fas fa-exclamation-triangle"></i> NF-e já importada</h4>
+                        <p style="font-size:0.8rem; color:var(--gray-600);">Esta nota fiscal já existe no sistema (ID: ${d.id}).</p>
                     </div>`;
                 return;
             }
@@ -488,7 +486,7 @@
                 <div class="xml-result-card">
                     <h4 style="font-size:0.85rem; color:var(--success-700); margin-bottom:var(--space-2);"><i class="fas fa-check-circle"></i> NF-e Importada com Sucesso!</h4>
                     <div class="xml-result-grid">
-                        <div class="field"><label>N� NF-e</label><p><strong>${d.n�mero_nfe}</strong></p></div>
+                        <div class="field"><label>Nº NF-e</label><p><strong>${d.número_nfe}</strong></p></div>
                         <div class="field"><label>Chave de Acesso</label><p style="font-size:0.7rem; word-break:break-all;">${d.chave_acesso}</p></div>
                         <div class="field"><label>Fornecedor</label><p>${d.fornecedor?.razao_social || d.fornecedor || '-'}</p></div>
                         <div class="field"><label>CNPJ</label><p>${formatarCNPJ(d.fornecedor?.cnpj)}</p></div>
@@ -524,7 +522,7 @@
     function handleXmlUpload(files) {
         if (!files || !files.length) return;
         const file = files[0];
-        if (!file.name.endsWith('.xml')) { alert('Apenas arquivos XML s�o aceitos'); return; }
+        if (!file.name.endsWith('.xml')) { alert('Apenas arquivos XML são aceitos'); return; }
         if (file.size > 5 * 1024 * 1024) { alert('Arquivo excede 5MB'); return; }
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -549,7 +547,7 @@
                 return;
             }
             tbody.innerHTML = notas.map(nf => `<tr>
-                <td><strong>${nf.n�mero_nfe || '-'}</strong></td>
+                <td><strong>${nf.número_nfe || '-'}</strong></td>
                 <td>${nf.fornecedor_razao_social || '-'}</td>
                 <td>${formatarCNPJ(nf.fornecedor_cnpj)}</td>
                 <td>${formatarMoeda(nf.valor_total)}</td>
@@ -639,7 +637,7 @@
         tbody.innerHTML = pedidosData.map(p => {
             const atrasado = p.atrasado || (p.data_entrega && new Date(p.data_entrega) < new Date() && p.status !== 'recebido');
             return `<tr>
-                <td><strong>${p.n�mero || p.id}</strong></td>
+                <td><strong>${p.número || p.id}</strong></td>
                 <td>${p.fornecedor || p.fornecedor_nome || '-'}</td>
                 <td>${formatarData(p.data_pedido || p.created_at)}</td>
                 <td>${formatarData(p.data_entrega)}${atrasado ? ' <span class="badge badge-urgent">Atrasado</span>' : ''}</td>
@@ -667,7 +665,7 @@
         const termo = document.getElementById('searchInput').value.toLowerCase();
         if (!termo) { carregarPedidos(); return; }
         const filtrados = pedidosData.filter(p =>
-            (p.n�mero || '').toLowerCase().includes(termo) ||
+            (p.número || '').toLowerCase().includes(termo) ||
             (p.fornecedor || p.fornecedor_nome || '').toLowerCase().includes(termo)
         );
         const tbody = document.getElementById('pedidosTableBody');
@@ -690,19 +688,19 @@
             let itensHtml = '';
             if (p.itens && p.itens.length) {
                 itensHtml = '<table class="data-table" style="font-size:0.8rem;"><thead><tr><th>Material</th><th>Qtd</th><th>Valor Unit</th><th>Total</th></tr></thead><tbody>' +
-                    p.itens.map(it => `<tr><td>${it.material || it.descri��o}</td><td>${it.quantidade}</td><td>${formatarMoeda(it.valor_unitario || it.preco_unitario)}</td><td>${formatarMoeda((it.quantidade || 0) * (it.valor_unitario || it.preco_unitario || 0))}</td></tr>`).join('') + '</tbody></table>';
+                    p.itens.map(it => `<tr><td>${it.material || it.descrição}</td><td>${it.quantidade}</td><td>${formatarMoeda(it.valor_unitario || it.preco_unitario)}</td><td>${formatarMoeda((it.quantidade || 0) * (it.valor_unitario || it.preco_unitario || 0))}</td></tr>`).join('') + '</tbody></table>';
             }
             document.getElementById('modalDetalhesBody').innerHTML =
-                '<div class="view-section"><h4>Informa��es do Pedido</h4><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:var(--space-3);">' +
-                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">N�mero</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.n�mero || p.id) + '</p></div>' +
+                '<div class="view-section"><h4>Informações do Pedido</h4><div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px,1fr)); gap:var(--space-3);">' +
+                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Número</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.número || p.id) + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Fornecedor</label><p style="font-size:0.85rem; color:var(--gray-800);">' + (p.fornecedor || p.fornecedor_nome || '-') + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Data Pedido</label><p style="font-size:0.85rem;">' + formatarData(p.data_pedido || p.created_at) + '</p></div>' +
-                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Previs�o</label><p style="font-size:0.85rem;">' + formatarData(p.data_entrega) + '</p></div>' +
+                '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Previsão</label><p style="font-size:0.85rem;">' + formatarData(p.data_entrega) + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Valor Total</label><p style="font-size:0.85rem; font-weight:600;">' + formatarMoeda(p.valor_total) + '</p></div>' +
                 '<div><label style="font-size:0.65rem; color:var(--gray-500); text-transform:uppercase;">Status</label><p><span class="badge badge-' + traduzirStatus(p.status).class + '">' + traduzirStatus(p.status).label + '</span></p></div>' +
                 '</div></div>' +
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
-                (p.observacoes ? '<div class="view-section"><h4>Observa��es</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + p.observacoes + '</p></div>' : '');
+                (p.observacoes ? '<div class="view-section"><h4>Observações</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + p.observacoes + '</p></div>' : '');
             document.getElementById('modalDetalhes').classList.add('active');
         } catch (e) { alert('Erro ao carregar detalhes'); }
     }
@@ -717,7 +715,7 @@
             const d = await r.json();
             const p = d.pedido || d;
             document.getElementById('pedidoId').value = p.id;
-            document.getElementById('infoPedidoNumero').textContent = p.n�mero || p.id;
+            document.getElementById('infoPedidoNumero').textContent = p.número || p.id;
             document.getElementById('infoPedidoFornecedor').textContent = p.fornecedor || p.fornecedor_nome || '-';
             document.getElementById('infoPedidoValor').textContent = formatarMoeda(p.valor_total);
             document.getElementById('dataRecebimento').value = new Date().toISOString().split('T')[0];
@@ -733,7 +731,7 @@
             if (p.itens && p.itens.length) {
                 itensBody.innerHTML = p.itens.map((it, i) =>
                     `<tr>
-                        <td>${it.material || it.descri��o}</td>
+                        <td>${it.material || it.descrição}</td>
                         <td style="text-align:center;">${it.quantidade}</td>
                         <td><input type="number" id="qtdRec-${i}" value="${it.quantidade}" min="0" max="${it.quantidade}"></td>
                         <td style="text-align:center;"><input type="checkbox" id="conforme-${i}" checked></td>
@@ -757,7 +755,7 @@
         if (!pedidoId) return;
         const body = {
             data_recebimento: document.getElementById('dataRecebimento').value,
-            n�mero_nfe: document.getElementById('numeroNfe').value,
+            número_nfe: document.getElementById('numeroNfe').value,
             tipo: document.getElementById('tipoRecebimento').value,
             chave_acesso: document.getElementById('chaveAcessoNfe').value || document.getElementById('chaveNfeSalvar').value,
             responsavel: document.getElementById('responsavelRecebimento').value,
@@ -766,7 +764,7 @@
             observacoes: document.getElementById('observacoesRecebimento').value,
             dados_sefaz: dadosNfeSefaz
         };
-        if (!body.n�mero_nfe || !body.responsavel) { alert('Preencha NF-e e Respons�vel'); return; }
+        if (!body.número_nfe || !body.responsavel) { alert('Preencha NF-e e Responsável'); return; }
         // Collect items received
         const itensRows = document.getElementById('itensRecebimentoBody').querySelectorAll('tr');
         body.itens = [];
@@ -802,7 +800,7 @@
     /* ========== SEFAZ NF-e Lookup ========== */
     async function buscarNfeSefaz() {
         const chave = document.getElementById('chaveAcessoNfe').value.replace(/\D/g, '');
-        if (chave.length !== 44) { alert('Chave de acesso deve ter 44 d�gitos'); return; }
+        if (chave.length !== 44) { alert('Chave de acesso deve ter 44 dígitos'); return; }
         const btn = document.getElementById('btnBuscarSefaz');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando...';
         btn.disabled = true;
@@ -810,7 +808,7 @@
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`${API_BASE}/nfe/consultar/${chave}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) throw new Error('NF-e n�o encontrada');
+            if (!r.ok) throw new Error('NF-e não encontrada');
             const d = await r.json();
             dadosNfeSefaz = d;
             document.getElementById('chaveNfeSalvar').value = chave;
@@ -818,9 +816,9 @@
                 <div class="sefaz-card success">
                     <h5><i class="fas fa-check-circle" style="color:var(--success-500);"></i> NF-e Encontrada</h5>
                     <div class="sefaz-info-grid">
-                        <div><label>N�mero</label><p>${d.n�mero || d.nNF || '-'}</p></div>
-                        <div><label>S�rie</label><p>${d.serie || '-'}</p></div>
-                        <div><label>Emiss�o</label><p>${formatarDataHora(d.data_emissao || d.dhEmi)}</p></div>
+                        <div><label>Número</label><p>${d.número || d.nNF || '-'}</p></div>
+                        <div><label>Série</label><p>${d.serie || '-'}</p></div>
+                        <div><label>Emissão</label><p>${formatarDataHora(d.data_emissao || d.dhEmi)}</p></div>
                         <div><label>Emitente</label><p>${d.emitente?.razao_social || d.emit?.xNome || '-'}</p></div>
                         <div><label>CNPJ Emit.</label><p>${formatarCNPJ(d.emitente?.cnpj || d.emit?.CNPJ)}</p></div>
                         <div><label>Valor Total</label><p style="font-weight:600;">${formatarMoeda(d.valor_total || d.vNF)}</p></div>
@@ -828,7 +826,7 @@
                     <button type="button" class="btn-fill-nfe" onclick="preencherDadosNfe()"><i class="fas fa-magic"></i> Preencher dados da NF-e</button>
                 </div>`;
         } catch (e) {
-            resultado.innerHTML = '<div class="sefaz-card error"><h5><i class="fas fa-times-circle" style="color:var(--danger-500);"></i> NF-e n�o encontrada</h5><p style="font-size:0.8rem; color:var(--gray-600);">Verifique a chave de acesso e tente novamente.</p></div>';
+            resultado.innerHTML = '<div class="sefaz-card error"><h5><i class="fas fa-times-circle" style="color:var(--danger-500);"></i> NF-e não encontrada</h5><p style="font-size:0.8rem; color:var(--gray-600);">Verifique a chave de acesso e tente novamente.</p></div>';
         }
         btn.innerHTML = '<i class="fas fa-search"></i> Consultar';
         btn.disabled = false;
@@ -836,7 +834,7 @@
 
     function preencherDadosNfe() {
         if (!dadosNfeSefaz) return;
-        document.getElementById('numeroNfe').value = dadosNfeSefaz.n�mero || dadosNfeSefaz.nNF || '';
+        document.getElementById('numeroNfe').value = dadosNfeSefaz.número || dadosNfeSefaz.nNF || '';
     }
 
     /* ========== Files ========== */

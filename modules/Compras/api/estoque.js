@@ -243,30 +243,6 @@ router.get('/materiais-com-entrada', async (req, res) => {
     }
 });
 
-// ============ OBTER ESTOQUE DE UM MATERIAL ============
-router.get('/:material_id', async (req, res) => {
-    try {
-        const db = getDatabase();
-        const [estoque] = await db.query(
-            `SELECT e.*, m.codigo_material, m.descricao, m.unidade_medida,
-                    m.estoque_minimo, m.estoque_maximo
-             FROM estoque e
-             INNER JOIN materiais m ON e.material_id = m.id
-             WHERE e.material_id = ?`,
-            [req.params.material_id]
-        );
-        
-        if (estoque.length === 0) {
-            return res.status(404).json({ error: 'Estoque não encontrado para este material' });
-        }
-        
-        res.json(estoque[0]);
-    } catch (error) {
-        console.error('Erro ao obter estoque:', error);
-        res.status(500).json({ error: 'Erro ao buscar estoque' });
-    }
-});
-
 // ============ REGISTRAR MOVIMENTAÇÃO ============
 router.post('/movimentacao', async (req, res) => {
     const db = getDatabase();
@@ -593,6 +569,32 @@ router.get('/alertas/estoque-baixo', async (req, res) => {
     } catch (error) {
         console.error('Erro ao buscar alertas:', error);
         res.status(500).json({ error: 'Erro ao buscar alertas de estoque' });
+    }
+});
+
+// ============ OBTER ESTOQUE DE UM MATERIAL ============
+// IMPORTANTE: /:material_id DEVE vir DEPOIS de todas as rotas estáticas
+// para não capturar /movimentacoes, /alertas, etc.
+router.get('/:material_id', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const [estoque] = await db.query(
+            `SELECT e.*, m.codigo_material, m.descricao, m.unidade_medida,
+                    m.estoque_minimo, m.estoque_maximo
+             FROM estoque e
+             INNER JOIN materiais m ON e.material_id = m.id
+             WHERE e.material_id = ?`,
+            [req.params.material_id]
+        );
+        
+        if (estoque.length === 0) {
+            return res.status(404).json({ error: 'Estoque não encontrado para este material' });
+        }
+        
+        res.json(estoque[0]);
+    } catch (error) {
+        console.error('Erro ao obter estoque:', error);
+        res.status(500).json({ error: 'Erro ao buscar estoque' });
     }
 });
 

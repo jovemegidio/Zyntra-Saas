@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aluforce: Faturamento — Logística</title>
@@ -487,7 +487,7 @@
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert(err.message || 'Erro ao atualizar status');
+                    alert('Erro ao atualizar status');
                 }
             } catch (e) { alert('Erro de conexão'); }
         }
@@ -627,7 +627,7 @@
                     carregarDashboard();
                 } else {
                     const err = await r.json().catch(() => ({}));
-                    alert(err.message || err.error || 'Erro ao salvar expedição');
+                    alert('Erro ao salvar expedição');
                 }
             } catch (e) { alert('Erro de conexão'); }
         }

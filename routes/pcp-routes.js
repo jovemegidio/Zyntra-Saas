@@ -369,7 +369,7 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao buscar alertas',
-                error: error.message,
+                error: 'Erro interno no servidor. Tente novamente.',
                 alertas: [],
                 total: 0
             });
@@ -2164,7 +2164,7 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao buscar movimentações',
-                error: error.message
+                error: 'Erro interno no servidor. Tente novamente.'
             });
         }
     });
@@ -2209,7 +2209,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ page, limit, total, rows });
         } catch (error) {
             console.error('[API_PCP_PRODUTOS] Erro:', error.message);
-            res.status(500).json({ message: 'Erro ao buscar produtos.', error: error.message });
+            res.status(500).json({ message: 'Erro ao buscar produtos.', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2964,7 +2964,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('❌ Erro ao criar produto:', error);
-            res.status(500).json({ error: 'Erro ao criar produto: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -3080,7 +3080,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('❌ Erro ao atualizar produto:', error);
-            res.status(500).json({ error: 'Erro ao atualizar produto: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -3101,7 +3101,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('❌ Erro ao buscar produto:', error);
-            res.status(500).json({ error: 'Erro ao buscar produto: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -3296,7 +3296,7 @@ module.exports = function createPCPRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             console.error('[ESTOQUE_BAIXAR] Erro:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -3343,7 +3343,7 @@ module.exports = function createPCPRoutes(deps) {
             });
         } catch (error) {
             console.error('[PCP_ESTOQUE] Erro:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -3400,7 +3400,7 @@ module.exports = function createPCPRoutes(deps) {
             });
         } catch (error) {
             console.error('[PCP_ETAPAS] Erro ao buscar etapas:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -3462,7 +3462,7 @@ module.exports = function createPCPRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             console.error('[PCP_ETAPAS] Erro ao salvar etapas:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -4484,7 +4484,7 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao gerar ordem de produção',
-                error: error.message
+                error: 'Erro interno no servidor. Tente novamente.'
             });
         }
     });
@@ -5818,7 +5818,7 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao listar ordens de produção',
-                error: error.message
+                error: 'Erro interno no servidor. Tente novamente.'
             });
         }
     }
@@ -5866,7 +5866,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         } catch (error) {
             console.error('[API_CONTROLE_PCP] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao atualizar status', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao atualizar status', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -5895,7 +5895,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: materiais, total: materiais.length });
         } catch (error) {
             console.error('[API_CONTROLE_PCP] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar materiais', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar materiais', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6169,7 +6169,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: itens, total: itens.length });
         } catch (error) {
             console.error('[API_PCP] Erro ao buscar itens:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar itens da ordem', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar itens da ordem', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6189,7 +6189,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: rows });
         } catch (error) {
             console.error('[API_PCP] Erro ao listar colunas kanban:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao listar colunas', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao listar colunas', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6204,7 +6204,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: rows });
         } catch (error) {
             console.error('[API_PCP] Erro ao listar todas colunas kanban:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao listar colunas', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao listar colunas', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6236,7 +6236,7 @@ module.exports = function createPCPRoutes(deps) {
             if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ success: false, message: 'Já existe uma coluna com esse código' });
             }
-            res.status(500).json({ success: false, message: 'Erro ao criar coluna', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao criar coluna', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6252,7 +6252,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, message: 'Colunas reordenadas com sucesso' });
         } catch (error) {
             console.error('[API_PCP] Erro ao reordenar colunas:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao reordenar colunas', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao reordenar colunas', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6276,7 +6276,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, message: 'Coluna atualizada com sucesso' });
         } catch (error) {
             console.error('[API_PCP] Erro ao atualizar coluna kanban:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao atualizar coluna', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao atualizar coluna', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6312,7 +6312,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, message: 'Coluna excluída com sucesso' });
         } catch (error) {
             console.error('[API_PCP] Erro ao excluir coluna kanban:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao excluir coluna', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao excluir coluna', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6370,7 +6370,7 @@ module.exports = function createPCPRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             console.error('[API_PCP] Erro ao excluir ordem:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao excluir ordem', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao excluir ordem', error: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -6432,7 +6432,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         } catch (error) {
             console.error('[API_PCP] Erro ao atualizar ordem:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao atualizar ordem', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao atualizar ordem', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6495,7 +6495,7 @@ module.exports = function createPCPRoutes(deps) {
             });
         } catch (error) {
             console.error('[API_PCP] Erro ao duplicar ordem:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao duplicar ordem', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao duplicar ordem', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6522,7 +6522,7 @@ module.exports = function createPCPRoutes(deps) {
             }
         } catch (error) {
             console.error('[API_PCP] Erro ao concluir ordem:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao concluir ordem', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao concluir ordem', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6541,7 +6541,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: anexos || [] });
         } catch (error) {
             console.error('[API_PCP] Erro ao buscar anexos:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar anexos', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar anexos', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6561,7 +6561,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: historico || [] });
         } catch (error) {
             console.error('[API_PCP] Erro ao buscar histórico:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar histórico', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar histórico', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6583,7 +6583,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: tarefas || [] });
         } catch (error) {
             console.error('[API_PCP] Erro ao buscar tarefas:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar tarefas', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar tarefas', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6602,7 +6602,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, message: 'Tarefa criada com sucesso', data: { id: result.insertId } });
         } catch (error) {
             console.error('[API_PCP] Erro ao criar tarefa:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao criar tarefa', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao criar tarefa', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -6782,7 +6782,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[ETIQUETA_BOBINA] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao gerar etiqueta', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao gerar etiqueta', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7045,7 +7045,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[ETIQUETA_PRODUTO] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao gerar etiqueta', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao gerar etiqueta', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7178,7 +7178,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[ETIQUETA_PRODUTO_PDF] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7232,7 +7232,7 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 success: false,
                 message: 'Erro ao salvar dados multiplexado',
-                error: error.message
+                error: 'Erro interno no servidor. Tente novamente.'
             });
         }
     });
@@ -7343,7 +7343,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[API_COMPOSICAO] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao buscar composição', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao buscar composição', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7456,7 +7456,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[API_COMPOSICAO] Erro calcular:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao calcular materiais', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao calcular materiais', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7536,7 +7536,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[API_COMPOSICAO] Erro atualizar:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao atualizar composição', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao atualizar composição', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7592,7 +7592,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[API_COMPOSICAO] Erro listar:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao listar composições', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao listar composições', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7825,7 +7825,7 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('[API_MATERIAIS_PEDIDO] Erro:', error.message);
-            res.status(500).json({ error: 'Erro ao calcular materiais', message: error.message });
+            res.status(500).json({ error: 'Erro ao calcular materiais', message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7876,7 +7876,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ funcionarios, total: funcionarios.length });
         } catch (error) {
             console.error('[API_OPERADORES] Erro:', error.message);
-            res.status(500).json({ message: 'Erro ao listar operadores', error: error.message });
+            res.status(500).json({ message: 'Erro ao listar operadores', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -7920,7 +7920,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, data: materias, total: materias.length });
         } catch (error) {
             console.error('[API_MATERIAS_PRIMAS] Erro:', error.message);
-            res.status(500).json({ success: false, message: 'Erro ao listar matérias-primas', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao listar matérias-primas', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -8208,7 +8208,7 @@ module.exports = function createPCPRoutes(deps) {
             res.json({ success: true, id: result.insertId });
         } catch (error) {
             console.error('[API_APONTAMENTOS] Erro ao salvar:', error.message, error.stack);
-            res.status(500).json({ success: false, message: 'Erro ao salvar apontamento', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao salvar apontamento', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

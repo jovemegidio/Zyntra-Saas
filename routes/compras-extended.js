@@ -411,7 +411,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             });
         } catch (err) {
             console.error('[COMPRAS] Erro ao listar materiais PCP:', err);
-            res.status(500).json({ message: 'Erro ao listar materiais PCP', error: err.message });
+            res.status(500).json({ message: 'Erro ao listar materiais PCP', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -531,7 +531,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             res.json({ success: true, message: `${importados} materiais importados, ${jaExistem} já existiam`, importados, jaExistem });
         } catch (err) {
             console.error('[COMPRAS] Erro ao importar materiais:', err);
-            res.status(500).json({ message: 'Erro ao importar materiais', error: err.message });
+            res.status(500).json({ message: 'Erro ao importar materiais', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -675,7 +675,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             res.json({ materiais, stats });
         } catch (err) {
             console.error('[COMPRAS] Erro ao buscar materiais com entrada:', err);
-            res.status(500).json({ message: 'Erro ao buscar materiais', error: err.message });
+            res.status(500).json({ message: 'Erro ao buscar materiais', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -1494,7 +1494,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             res.json(resultado);
         } catch (error) {
             console.error('[COMPRAS] Erro ao importar XML:', error);
-            res.status(500).json({ error: 'Erro ao importar XML: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2569,7 +2569,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             res.json({ success: true, results });
         } catch (error) {
             console.error('Erro ao configurar permissões:', error);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2669,7 +2669,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             });
         } catch (error) {
             console.error('Erro ao configurar permissões:', error);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2712,7 +2712,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             });
         } catch (error) {
             console.error('Erro ao remover permissões:', error);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2793,7 +2793,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
             });
         } catch (error) {
             console.error('Erro ao corrigir permissões:', error);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

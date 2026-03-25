@@ -135,7 +135,7 @@ function createNFEntradaRouter(pool, authenticateToken) {
             if (req.file && fs.existsSync(req.file.path)) {
                 fs.unlinkSync(req.file.path);
             }
-            res.status(500).json({ error: 'Erro ao importar XML: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -153,7 +153,7 @@ function createNFEntradaRouter(pool, authenticateToken) {
             res.json(resultado);
         } catch (error) {
             console.error('❌ Erro ao importar XML:', error);
-            res.status(500).json({ error: 'Erro ao importar XML: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -252,7 +252,7 @@ function createNFEntradaRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao escriturar NF:', error);
-            res.status(500).json({ error: 'Erro ao escriturar: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

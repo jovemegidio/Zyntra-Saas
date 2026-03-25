@@ -191,7 +191,7 @@ router.post('/contas-pagar', async (req, res) => {
         res.json({ success: true, total: contas.length, vencidas: vencidas.length, urgentes: urgentes.length, resultados });
     } catch (err) {
         console.error('[Alerta Contas Pagar]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -250,7 +250,7 @@ router.post('/contas-receber', async (req, res) => {
         res.json({ success: true, total: contas.length, vencidas: vencidas.length, resultados });
     } catch (err) {
         console.error('[Alerta Contas Receber]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -361,7 +361,7 @@ router.post('/aniversariantes', async (req, res) => {
         });
     } catch (err) {
         console.error('[Alerta Aniversariantes]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -400,7 +400,7 @@ router.post('/estoque', async (req, res) => {
         res.json({ success: true, total: items.length, resultados });
     } catch (err) {
         console.error('[Alerta Estoque]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -433,7 +433,7 @@ router.post('/pedidos-atrasados', async (req, res) => {
         res.json({ success: true, total: pedidos.length, resultados });
     } catch (err) {
         console.error('[Alerta Pedidos]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -465,7 +465,7 @@ router.post('/nfe-pendentes', async (req, res) => {
         res.json({ success: true, total: nfes.length, resultados });
     } catch (err) {
         console.error('[Alerta NFe]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -505,7 +505,7 @@ router.post('/resumo-diario', async (req, res) => {
         res.json({ success: true, resumo: { pagar: pagar[0].t, receber: receber[0].t, estoque: estoque[0].t, atrasados: atrasados[0].t, nfes: nfes[0].t, aniversariantes: aniver[0].t }, resultados });
     } catch (err) {
         console.error('[Resumo Diário]', err);
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -518,7 +518,7 @@ router.get('/config', async (req, res) => {
         const [configs] = await getPool().query('SELECT chave, valor, descricao, ativo FROM whatsapp_config ORDER BY chave');
         res.json({ success: true, configs });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -538,7 +538,7 @@ router.put('/config', async (req, res) => {
         
         res.json({ success: true, message: `Config ${chave} atualizada` });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -562,7 +562,7 @@ router.get('/log', async (req, res) => {
         const [logs] = await getPool().query(query, params);
         res.json({ success: true, total: logs.length, logs });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -589,7 +589,7 @@ router.post('/teste', async (req, res) => {
 
         res.json({ success: true, destinatarios, resultados });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

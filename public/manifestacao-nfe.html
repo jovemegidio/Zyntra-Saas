@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
   <meta charset="UTF-8">
-  <title>Aluforce: Manifesta��o do Destinat�rio NFe</title>
+  <title>Aluforce: Manifestação do Destinatério NFe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Mobile Enterprise Design System -->
     <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
@@ -17,23 +17,23 @@
 </head>
 <body class="bg-light">
   <div class="container py-4">
-    <h1 class="mb-4">Manifesta��o do Destinat�rio NFe</h1>
+    <h1 class="mb-4">Manifestação do Destinatério NFe</h1>
     <form id="manifestacaoForm" class="card p-4 mb-4">
       <div class="mb-3">
         <label for="chave" class="form-label">Chave de Acesso NFe</label>
         <input type="text" class="form-control" id="chave" required maxlength="44">
       </div>
       <div class="mb-3">
-        <label for="tipo" class="form-label">Tipo de Manifesta��o</label>
+        <label for="tipo" class="form-label">Tipo de Manifestação</label>
         <select class="form-select" id="tipo" required>
           <option value="">Selecione...</option>
-          <option value="210200">Confirma��o da Opera��o</option>
-          <option value="210210">Ci�ncia da Opera��o</option>
-          <option value="210220">Desconhecimento da Opera��o</option>
-          <option value="210240">Opera��o n�o Realizada</option>
+          <option value="210200">Confirmação da Operação</option>
+          <option value="210210">Ciência da Operação</option>
+          <option value="210220">Desconhecimento da Operação</option>
+          <option value="210240">Operação não Realizada</option>
         </select>
       </div>
-      <button type="submit" class="btn btn-primary">Enviar Manifesta��o</button>
+      <button type="submit" class="btn btn-primary">Enviar Manifestação</button>
     </form>
     <div id="alerta"></div>
     <div id="resultado"></div>
@@ -54,10 +54,10 @@
       });
       const data = await resp.json();
       if (data.success) {
-        mostrarAlerta('Manifesta��o enviada com sucesso!', 'success');
+        mostrarAlerta('Manifestação enviada com sucesso!', 'success');
         document.getElementById('resultado').innerHTML = `<pre>${JSON.stringify(data.resultado, null, 2)}</pre>`;
       } else {
-        mostrarAlerta(data.message || 'Erro ao enviar manifesta��o', 'danger');
+        mostrarAlerta(data.message || 'Erro ao enviar manifestação', 'danger');
       }
     };
     function mostrarAlerta(msg, tipo) {

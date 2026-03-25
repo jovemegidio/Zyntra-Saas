@@ -867,7 +867,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
         } catch (error) {
             console.error('[PDF] Erro:', error);
-            res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: error.message });
+            res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -2113,7 +2113,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             });
         } catch (error) {
             console.error('Erro ao buscar CDR:', error.message);
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

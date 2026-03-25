@@ -114,7 +114,7 @@ router.get('/config', authenticateToken, async (req, res) => {
         }
     } catch (error) {
         console.error('[Control iD] Erro ao buscar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -150,7 +150,7 @@ router.post('/config', authenticateToken, async (req, res) => {
         res.json({ success: true, message: 'Configuração salva com sucesso' });
     } catch (error) {
         console.error('[Control iD] Erro ao salvar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -523,7 +523,7 @@ router.get('/importacoes', authenticateToken, async (req, res) => {
             );
             res.json({ success: true, importacoes });
         } catch (e2) {
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     }
 });

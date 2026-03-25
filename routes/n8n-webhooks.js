@@ -106,7 +106,7 @@ router.get('/vendas/resumo-diario', async (req, res) => {
             }
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -138,7 +138,7 @@ router.get('/financeiro/contas-vencer', async (req, res) => {
             data: contas
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -170,7 +170,7 @@ router.get('/compras/pedidos-atrasados', async (req, res) => {
             data: pedidos
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -224,7 +224,7 @@ router.get('/compras/fornecedores-docs-vencendo', async (req, res) => {
 
         res.json({ success: true, total: result.length, data: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -253,7 +253,7 @@ router.get('/compras/aprovacoes-pendentes', async (req, res) => {
 
         res.json({ success: true, total: aprovacoes.length, data: aprovacoes });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -278,7 +278,7 @@ router.get('/estoque/criticos', async (req, res) => {
 
         res.json({ success: true, total: produtos.length, data: produtos });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -310,7 +310,7 @@ router.get('/rh/aniversariantes', async (req, res) => {
 
         res.json({ success: true, total: aniversariantes.length, periodo, data: aniversariantes });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -338,7 +338,7 @@ router.get('/clientes/inativos', async (req, res) => {
 
         res.json({ success: true, total: clientes.length, dias_limite: dias, data: clientes });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -373,7 +373,7 @@ router.post('/acoes/inativar-clientes', async (req, res) => {
             affected: result.affectedRows
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -407,7 +407,7 @@ router.post('/acoes/atualizar-avaliacoes-fornecedores', async (req, res) => {
             affected: result.affectedRows
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -421,7 +421,7 @@ router.post('/acoes/verificar-estoque-minimo', async (req, res) => {
         await pool.query('CALL sp_verificar_estoque_minimo()');
         res.json({ success: true, message: 'Verificação de estoque mínimo executada' });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -446,7 +446,7 @@ router.post('/acoes/marcar-lembrete-enviado', async (req, res) => {
 
         res.json({ success: true, message: `${ids.length} lembretes marcados como enviados` });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -472,7 +472,7 @@ router.post('/acoes/criar-notificacao-compra', async (req, res) => {
 
         res.json({ success: true, message: 'Notificação criada' });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -532,7 +532,7 @@ router.post('/acoes/backup-database', async (req, res) => {
             backups_removidos: removidos
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -565,7 +565,7 @@ router.post('/eventos/workflow-concluido', async (req, res) => {
 
         res.json({ success: true, received: true });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -594,7 +594,7 @@ router.post('/eventos/alerta', async (req, res) => {
 
         res.json({ success: true, received: true });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -644,7 +644,7 @@ router.get('/status', async (req, res) => {
             pid: process.pid
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -681,7 +681,7 @@ router.get('/sql', async (req, res) => {
         const [rows] = await pool.query(sqlQuery);
         res.json({ success: true, total: rows.length, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -725,7 +725,7 @@ router.get('/financeiro/resumo-diario', async (req, res) => {
             saldo_dia: (receber[0].valor_total - pagar[0].valor_total).toFixed(2)
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -754,7 +754,7 @@ router.get('/nfe/pendentes', async (req, res) => {
 
         res.json({ success: true, total: nfePendentes.length, data: nfePendentes });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -787,7 +787,7 @@ router.get('/vendas/orcamentos-pendentes', async (req, res) => {
 
         res.json({ success: true, total: orcamentos.length, data: orcamentos });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -839,7 +839,7 @@ router.get('/vendas/meta-mensal', async (req, res) => {
             falta: Math.max(0, meta - faturado).toFixed(2)
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -868,7 +868,7 @@ router.get('/pcp/producao-parada', async (req, res) => {
 
         res.json({ success: true, total: ops.length, horas_limite: horas, data: ops });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -921,7 +921,7 @@ router.get('/rh/resumo-semanal', async (req, res) => {
             ferias_proximas: feriasProximas
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -968,7 +968,7 @@ router.get('/financeiro/divergencias', async (req, res) => {
             total_divergencias: semBaixa.length + duplicatas.length
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1001,7 +1001,7 @@ router.get('/compras/aprovacoes-escalar', async (req, res) => {
 
         res.json({ success: true, total: escalar.length, horas_limite: horasLimite, data: escalar });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1050,7 +1050,7 @@ router.post('/whatsapp/enviar', async (req, res) => {
 
         res.json({ success: true, whatsapp: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1095,7 +1095,7 @@ router.post('/whatsapp/enviar-grupo', async (req, res) => {
 
         res.json({ success: true, whatsapp: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1122,7 +1122,7 @@ router.get('/whatsapp/status', async (req, res) => {
 
         res.json({ success: true, whatsapp: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1191,7 +1191,7 @@ router.post('/whatsapp/alerta', async (req, res) => {
 
         res.json({ success: true, tipo, destinatarios: destinos.length, whatsapp: result });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1219,7 +1219,7 @@ router.get('/logistica/entregas-atrasadas', async (req, res) => {
         `);
         res.json({ success: true, total: rows.length, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1256,7 +1256,7 @@ router.get('/logistica/resumo-expedicao', async (req, res) => {
             entregues_hoje: hojeEntregues[0].total
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1285,7 +1285,7 @@ router.get('/logistica/performance-transportadoras', async (req, res) => {
         `, [meses]);
         res.json({ success: true, periodo_meses: meses, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1315,7 +1315,7 @@ router.get('/faturamento/sem-nfe', async (req, res) => {
         `, [horas]);
         res.json({ success: true, total: rows.length, horas_limite: horas, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1360,7 +1360,7 @@ router.post('/financeiro/processar-recorrencias', async (req, res) => {
         }
         res.json({ success: true, processadas, total_ativas: recorrencias.length });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1387,7 +1387,7 @@ router.get('/financeiro/boletos-vencidos', async (req, res) => {
         `, [dias + 30]);
         res.json({ success: true, total: rows.length, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1424,7 +1424,7 @@ router.get('/financeiro/fluxo-caixa-projecao', async (req, res) => {
             detalhamento: { a_receber: receber, a_pagar: pagar }
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1454,7 +1454,7 @@ router.get('/financeiro/retornos-bancarios-pendentes', async (req, res) => {
             extrato_nao_conciliado: naoConc[0]
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1507,7 +1507,7 @@ router.get('/rh/ponto-inconsistencias', async (req, res) => {
             total_inconsistencias: impares.length + semMarcacao.length
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1557,7 +1557,7 @@ router.get('/rh/ferias-vencendo', async (req, res) => {
             total_alertas: vencendo.length
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1586,7 +1586,7 @@ router.get('/compras/requisicoes-paradas', async (req, res) => {
         `, [dias]);
         res.json({ success: true, total: rows.length, dias_limite: dias, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1626,7 +1626,7 @@ router.get('/pcp/ordens-sem-material', async (req, res) => {
         }
         res.json({ success: true, total: semMaterial.length, data: semMaterial });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1672,7 +1672,7 @@ router.get('/pcp/resumo-diario-producao', async (req, res) => {
             ops_iniciadas: opsIniciadas[0].total
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1706,7 +1706,7 @@ router.get('/vendas/clientes-reativacao', async (req, res) => {
         `, [diasMin, diasMax]);
         res.json({ success: true, total: rows.length, janela: `${diasMin}-${diasMax} dias`, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1735,7 +1735,7 @@ router.get('/admin/usuarios-inativos', async (req, res) => {
         `, [dias, dias]);
         res.json({ success: true, total: rows.length, dias_limite: dias, data: rows });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1790,7 +1790,7 @@ router.get('/admin/audit-anomalias', async (req, res) => {
             total_anomalias: exclusoes.length + foraHorario.length + altoVolume.length
         });
     } catch (err) {
-        res.status(500).json({ success: false, error: err.message });
+        res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

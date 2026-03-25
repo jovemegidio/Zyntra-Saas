@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 
 <head>
-    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -2887,7 +2885,7 @@
             try {
                 const response = await fetch('/api/financeiro/clientes-fornecedores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (response.ok) { showToast('Cliente/Fornecedor salvo com sucesso!', 'success'); fecharCadastroCompleto(); document.querySelectorAll('#modalCadastroCompleto input').forEach(i => i.value = ''); }
-                else { const err = await response.json(); showToast('Erro ao salvar: ' + (err.message || 'Erro desconhecido'), 'error'); }
+                else { const err = await response.json(); showToast('Erro ao salvar. Tente novamente.', 'error'); }
             } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexão.', 'error'); }
         }
 

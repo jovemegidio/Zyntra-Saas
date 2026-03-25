@@ -8,9 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Impostos</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
@@ -68,7 +66,7 @@
 
 
 
-        /* ======================================== SISTEMA DE NOTIFICA��ES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
 
 
 
@@ -203,7 +201,7 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADR�O PCP (HTML est�tico, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÃO PCP (HTML estático, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -228,13 +226,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Or�amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia��o">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat�rios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -246,7 +244,7 @@
                 <a href="impostos.html" class="sidebar-btn active" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configura��es" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -254,7 +252,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADR�O PCP (HTML est�tico) -->
+            <!-- HEADER - PADRÃO PCP (HTML estático) -->
             <header class="header">
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
@@ -274,13 +272,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica��es" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notifica��es</h3>
+                                <h3><i class="fas fa-bell"></i> Notificações</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -293,22 +291,22 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notifica��o</p>
+                                    <p>Nenhuma notificação</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usu�rio" id="user-photo" style="display:none">
+                            <img alt="Foto do usuário" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - Padr�o PCP -->
+            <!-- Main Content - Padrão PCP -->
             <div class="main-content">
 
             <div class="page-content">
@@ -350,7 +348,7 @@
                             <div class="kpi-icon orange"><i class="fas fa-calculator"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>Al�quota M�dia</h3>
+                            <h3>Alíquota Média</h3>
                             <div class="kpi-value" id="kpi-aliquota">0%</div>
                         </div>
                     </div>
@@ -359,7 +357,7 @@
                             <div class="kpi-icon blue"><i class="fas fa-clock"></i></div>
                         </div>
                         <div class="kpi-content">
-                            <h3>Vencendo Este M�s</h3>
+                            <h3>Vencendo Este Mês</h3>
                             <div class="kpi-value" id="kpi-vencendo">0</div>
                         </div>
                     </div>
@@ -375,13 +373,13 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>C�digo</th>
+                                    <th>Código</th>
                                     <th>Nome</th>
                                     <th>Tipo</th>
-                                    <th>Al�quota</th>
-                                    <th>Base de C�lculo</th>
+                                    <th>Alíquota</th>
+                                    <th>Base de Cálculo</th>
                                     <th>Status</th>
-                                    <th>A��es</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-impostos">
@@ -400,7 +398,7 @@
         </main>
     </div>
 
-    <!-- Modal Novo/Editar - Padr�o SaaS Empresarial -->
+    <!-- Modal Novo/Editar - Padrão SaaS Empresarial -->
     <div class="modal-overlay-saas" id="modalImposto" onclick="if(event.target === this) fecharModal()">
         <div class="modal-saas modal-sm">
             <div class="modal-header-saas header-purple">
@@ -409,7 +407,7 @@
                         <i class="fas fa-percent" id="modal-icon"></i>
                     </div>
                     <div class="modal-header-text-saas">
-                        <h2 id="modal-t�tulo">Novo Imposto</h2>
+                        <h2 id="modal-título">Novo Imposto</h2>
                         <p id="modal-subtitulo">Configure um novo imposto ou tributo</p>
                     </div>
                     <button class="modal-close-saas" onclick="fecharModal()"><i class="fas fa-times"></i></button>
@@ -419,17 +417,17 @@
                 <form id="formImposto">
                     <input type="hidden" id="imposto-id">
 
-                    <!-- Se��o: Identifica��o -->
+                    <!-- Seção: Identificação -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-tag icon-purple"></i>
-                            <span>Identifica��o</span>
-                            <span class="section-badge-saas">Obrigat�rio</span>
+                            <span>Identificação</span>
+                            <span class="section-badge-saas">Obrigatório</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-hashtag"></i> C�digo <span class="required">*</span></label>
-                                <input type="text" id="imposto-c�digo" placeholder="Ex: ICMS, ISS, PIS" required>
+                                <label><i class="fas fa-hashtag"></i> Código <span class="required">*</span></label>
+                                <input type="text" id="imposto-código" placeholder="Ex: ICMS, ISS, PIS" required>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-layer-group"></i> Tipo <span class="required">*</span></label>
@@ -446,15 +444,15 @@
                         </div>
                     </div>
 
-                    <!-- Se��o: Configura��o -->
+                    <!-- Seção: Configuração -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-cog icon-orange"></i>
-                            <span>Configura��o de C�lculo</span>
+                            <span>Configuração de Cálculo</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-percentage"></i> Al�quota (%)</label>
+                                <label><i class="fas fa-percentage"></i> Alíquota (%)</label>
                                 <input type="number" id="imposto-aliquota" placeholder="0.00" step="0.01" min="0" max="100">
                                 <div class="field-hint-saas">
                                     <i class="fas fa-info-circle"></i>
@@ -462,18 +460,18 @@
                                 </div>
                             </div>
                             <div class="form-group-saas">
-                                <label><i class="fas fa-calculator"></i> Base de C�lculo</label>
+                                <label><i class="fas fa-calculator"></i> Base de Cálculo</label>
                                 <select id="imposto-base">
                                     <option value="faturamento">Faturamento Bruto</option>
                                     <option value="lucro">Lucro</option>
                                     <option value="folha">Folha de Pagamento</option>
-                                    <option value="servicos">Servi�os Prestados</option>
+                                    <option value="servicos">Serviços Prestados</option>
                                     <option value="mercadorias">Valor das Mercadorias</option>
                                 </select>
                             </div>
                             <div class="form-group-saas full">
-                                <label><i class="fas fa-align-left"></i> Descri��o</label>
-                                <textarea id="imposto-descri��o" rows="3" placeholder="Descri��o detalhada do imposto e suas regras de aplica��o..."></textarea>
+                                <label><i class="fas fa-align-left"></i> Descrição</label>
+                                <textarea id="imposto-descrição" rows="3" placeholder="Descrição detalhada do imposto e suas regras de aplicação..."></textarea>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-toggle-on"></i> Status</label>
@@ -490,7 +488,7 @@
                 <div class="modal-footer-left-saas">
                     <div class="footer-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Campos com <span style="color:#dc2626">*</span> s�o obrigat�rios</span>
+                        <span>Campos com <span style="color:#dc2626">*</span> são obrigatórios</span>
                     </div>
                 </div>
                 <div class="modal-footer-right-saas">
@@ -515,22 +513,22 @@
 
         // Dados mockados (substituir por API real)
         const impostosIniciais = [
-            { id: 1, codigo: 'ICMS', nome: 'Imposto sobre Circula��o de Mercadorias', tipo: 'estadual', aliquota: 18, base: 'mercadorias', ativo: true },
-            { id: 2, codigo: 'ISS', nome: 'Imposto Sobre Servi�os', tipo: 'municipal', aliquota: 5, base: 'servicos', ativo: true },
-            { id: 3, codigo: 'PIS', nome: 'Programa de Integra��o Social', tipo: 'federal', aliquota: 1.65, base: 'faturamento', ativo: true },
-            { id: 4, codigo: 'COFINS', nome: 'Contribui��o para Financiamento da Seguridade Social', tipo: 'federal', aliquota: 7.6, base: 'faturamento', ativo: true },
-            { id: 5, codigo: 'IRPJ', nome: 'Imposto de Renda Pessoa Jur�dica', tipo: 'federal', aliquota: 15, base: 'lucro', ativo: true },
-            { id: 6, codigo: 'CSLL', nome: 'Contribui��o Social sobre o Lucro L�quido', tipo: 'federal', aliquota: 9, base: 'lucro', ativo: true },
+            { id: 1, codigo: 'ICMS', nome: 'Imposto sobre Circulação de Mercadorias', tipo: 'estadual', aliquota: 18, base: 'mercadorias', ativo: true },
+            { id: 2, codigo: 'ISS', nome: 'Imposto Sobre Serviços', tipo: 'municipal', aliquota: 5, base: 'servicos', ativo: true },
+            { id: 3, codigo: 'PIS', nome: 'Programa de Integração Social', tipo: 'federal', aliquota: 1.65, base: 'faturamento', ativo: true },
+            { id: 4, codigo: 'COFINS', nome: 'Contribuião para Financiamento da Seguridade Social', tipo: 'federal', aliquota: 7.6, base: 'faturamento', ativo: true },
+            { id: 5, codigo: 'IRPJ', nome: 'Imposto de Renda Pessoa Jurídica', tipo: 'federal', aliquota: 15, base: 'lucro', ativo: true },
+            { id: 6, codigo: 'CSLL', nome: 'Contribuião Social sobre o Lucro Líquido', tipo: 'federal', aliquota: 9, base: 'lucro', ativo: true },
             { id: 7, codigo: 'INSS', nome: 'Instituto Nacional do Seguro Social', tipo: 'federal', aliquota: 20, base: 'folha', ativo: true },
         ];
 
-        // Carregar usu�rio
+        // Carregar usuário
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu�rio');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
 
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
@@ -555,7 +553,7 @@
                         fotoEl.onerror = () => { fotoEl.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.error('Erro ao carregar usu�rio:', e); }
+            } catch (e) { console.error('Erro ao carregar usuário:', e); }
         }
 
         // Carregar impostos
@@ -602,7 +600,7 @@
 
             tbody.innerHTML = dados.map(i => `
                 <tr>
-                    <td><strong>${i.c�digo}</strong></td>
+                    <td><strong>${i.código}</strong></td>
                     <td>${i.nome}</td>
                     <td><span class="badge badge-purple">${i.tipo.charAt(0).toUpperCase() + i.tipo.slice(1)}</span></td>
                     <td><strong>${i.aliquota}%</strong></td>
@@ -622,7 +620,7 @@
                 'faturamento': 'Faturamento Bruto',
                 'lucro': 'Lucro',
                 'folha': 'Folha de Pagamento',
-                'servicos': 'Servi�os',
+                'servicos': 'Serviços',
                 'mercadorias': 'Mercadorias'
             };
             return map[base] || base;
@@ -652,7 +650,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-t�tulo').textContent = 'Novo Imposto';
+            document.getElementById('modal-título').textContent = 'Novo Imposto';
             document.getElementById('formImposto').reset();
             document.getElementById('imposto-id').value = '';
             document.getElementById('modalImposto').classList.add('active');
@@ -667,32 +665,32 @@
             if (!imposto) return;
 
             editandoId = id;
-            document.getElementById('modal-t�tulo').textContent = 'Editar Imposto';
+            document.getElementById('modal-título').textContent = 'Editar Imposto';
             document.getElementById('imposto-id').value = imposto.id;
-            document.getElementById('imposto-c�digo').value = imposto.codigo || '';
+            document.getElementById('imposto-código').value = imposto.codigo || '';
             document.getElementById('imposto-nome').value = imposto.nome || '';
             document.getElementById('imposto-tipo').value = imposto.tipo || 'federal';
             document.getElementById('imposto-aliquota').value = imposto.aliquota || 0;
             document.getElementById('imposto-base').value = imposto.base || 'faturamento';
-            document.getElementById('imposto-descri��o').value = imposto.descri��o || '';
+            document.getElementById('imposto-descrição').value = imposto.descrição || '';
             document.getElementById('imposto-ativo').value = imposto.ativo ? '1' : '0';
             document.getElementById('modalImposto').classList.add('active');
         }
 
         async function salvarImposto() {
             const dados = {
-                codigo: document.getElementById('imposto-c�digo').value,
+                codigo: document.getElementById('imposto-código').value,
                 tipo: document.getElementById('imposto-tipo').value,
                 nome: document.getElementById('imposto-nome').value,
                 aliquota: parseFloat(document.getElementById('imposto-aliquota').value) || 0,
                 base: document.getElementById('imposto-base').value,
-                descri��o: document.getElementById('imposto-descri��o').value,
-                observacoes: document.getElementById('imposto-descri��o').value,
+                descrição: document.getElementById('imposto-descrição').value,
+                observacoes: document.getElementById('imposto-descrição').value,
                 ativo: document.getElementById('imposto-ativo').value === '1'
             };
 
             if (!dados.tipo) {
-                mostrarToastFinanceiro('Tipo do imposto � obrigat�rio', 'warning');
+                mostrarToastFinanceiro('Tipo do imposto é obrigatório', 'warning');
                 return;
             }
 
@@ -733,7 +731,7 @@
 
                 if (response.ok) {
                     carregarImpostos();
-                    mostrarToastFinanceiro('Imposto exclu�do com sucesso!', 'success');
+                    mostrarToastFinanceiro('Imposto excludo com sucesso!', 'success');
                 } else {
                     mostrarToastFinanceiro('Erro ao excluir imposto', 'error');
                 }
@@ -760,10 +758,10 @@
                         <button onclick="this.closest('.imposto-detail-modal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">&times;</button>
                     </div>
                     <div style="display:grid;gap:12px;">
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descri��o}</strong></div>
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">C�digo</span><strong style="color:#1e293b;font-size:13px;">${imposto.c�digo || imposto.tipo}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Nome</span><strong style="color:#1e293b;font-size:13px;">${imposto.nome || imposto.descrição}</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Código</span><strong style="color:#1e293b;font-size:13px;">${imposto.código || imposto.tipo}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Tipo</span><strong style="color:#1e293b;font-size:13px;">${imposto.tipo}</strong></div>
-                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Al�quota</span><strong style="color:#8b5cf6;font-size:13px;">${imposto.aliquota}%</strong></div>
+                        <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Alíquota</span><strong style="color:#8b5cf6;font-size:13px;">${imposto.aliquota}%</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Base</span><strong style="color:#1e293b;font-size:13px;">${formatarBase(imposto.base)}</strong></div>
                         <div style="display:flex;justify-content:space-between;padding:10px 14px;background:#f8fafc;border-radius:8px;"><span style="color:#64748b;font-size:13px;">Status</span><span style="padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;${imposto.ativo ? 'background:#dcfce7;color:#16a34a' : 'background:#fee2e2;color:#dc2626'};">${imposto.ativo ? 'Ativo' : 'Inativo'}</span></div>
                     </div>
@@ -774,13 +772,13 @@
 
         function exportarImpostos() {
             if (impostos.length === 0) {
-                mostrarToastFinanceiro('N�o h� dados para exportar', 'warning');
+                mostrarToastFinanceiro('Não há dados para exportar', 'warning');
                 return;
             }
 
-            let csv = 'C�digo,Nome,Tipo,Al�quota,Base,Status\n';
+            let csv = 'Código,Nome,Tipo,Alíquota,Base,Status\n';
             impostos.forEach(i => {
-                csv += `"${i.c�digo}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${i.código}","${i.nome}","${i.tipo}","${i.aliquota}","${formatarBase(i.base)}","${i.ativo ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -790,7 +788,7 @@
             link.click();
         }
 
-        // Inicializa��o
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarImpostos();

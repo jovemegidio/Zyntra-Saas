@@ -840,9 +840,9 @@ module.exports = function createMiscRoutes(deps) {
             const limit = parseInt(req.query.limit) || 15;
     
             const [rows] = await pool.query(
-                `SELECT id, codigo, nome as descricao, unidade_medida as unidade, preco_venda, estoque_atual, localizacao as local_estoque
+                `SELECT id, codigo, nome as descricao, unidade_medida as unidade, preco_venda, COALESCE(estoque_atual, 0) as estoque_atual, localizacao as local_estoque
                  FROM produtos
-                 WHERE ativo = 1 AND (codigo LIKE ? OR nome LIKE ? OR gtin LIKE ?)
+                 WHERE (codigo LIKE ? OR nome LIKE ? OR gtin LIKE ?)
                  ORDER BY
                     CASE
                         WHEN codigo = ? THEN 1
@@ -1046,7 +1046,7 @@ module.exports = function createMiscRoutes(deps) {
             res.json({ id: result.insertId, success: true });
         } catch (error) {
             console.error('[NOTIFICATIONS] Erro ao criar:', error.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

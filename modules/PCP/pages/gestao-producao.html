@@ -1319,7 +1319,7 @@
                     }
                 } else {
                     const err = await response.json().catch(() => ({}));
-                    showToast(err.message || 'Erro ao salvar registro', 'error');
+                    showToast('Erro ao salvar registro', 'error');
                 }
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');

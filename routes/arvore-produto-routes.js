@@ -21,7 +21,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
             res.json({ success: true, parametros: rows });
         } catch (error) {
             console.error('[ARVORE-PRODUTO] Erro ao buscar parâmetros:', error.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -38,7 +38,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
             res.json({ success: true, message: 'Parâmetro atualizado' });
         } catch (error) {
             console.error('[ARVORE-PRODUTO] Erro ao atualizar parâmetro:', error.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -144,7 +144,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
             });
         } catch (error) {
             console.error('[ARVORE-PRODUTO] Erro ao recalcular:', error.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -211,7 +211,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
             res.json({ success: true, total: rows.length, produtos: rows });
         } catch (error) {
             console.error('[ARVORE-PRODUTO] Erro ao listar produtos:', error.message);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -226,7 +226,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
             const [paramRows] = await pool.query('SELECT * FROM arvore_produto_parametros WHERE ativo = 1');
             res.json({ success: true, produto: rows[0], parametros: paramRows });
         } catch (error) {
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -271,7 +271,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
 
             res.json({ success: true, stats: stats[0], por_tipo: porTipo });
         } catch (error) {
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -348,7 +348,7 @@ module.exports = function createArvoreProdutoRoutes({ pool, authenticateToken, a
                 }
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

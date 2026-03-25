@@ -63,7 +63,7 @@
             });
         } catch (error) {
             console.error('Erro ao buscar CDR:', error.message);
-            res.status(500).json({ error: error.message, chamadas: [], total: 0 });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.', chamadas: [], total: 0 });
         }
     });
 

@@ -61,6 +61,51 @@ router.get('/', async (req, res) => {
     }
 });
 
+// ============ LISTAR CATEGORIAS ============
+// IMPORTANTE: rotas estáticas /categorias/* DEVEM vir ANTES de /:id
+router.get('/categorias/list', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const [categorias] = await db.query(
+            'SELECT DISTINCT tipo as id, tipo as nome FROM materiais WHERE tipo IS NOT NULL ORDER BY tipo'
+        );
+        
+        res.json({ categorias });
+    } catch (error) {
+        console.error('Erro ao listar categorias:', error);
+        res.status(500).json({ error: 'Erro ao buscar categorias' });
+    }
+});
+
+// ============ CRIAR CATEGORIA ============
+router.post('/categorias', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { nome, descricao } = req.body;
+        
+        if (!nome) {
+            return res.status(400).json({ error: 'Nome é obrigatório' });
+        }
+        
+        const [result] = await db.query(
+            'SELECT DISTINCT tipo as nome FROM materiais WHERE tipo = ?',
+            [nome]
+        );
+        
+        if (result.length > 0) {
+            return res.status(400).json({ error: 'Categoria já existe' });
+        }
+        
+        res.status(201).json({
+            success: true,
+            message: 'Categoria registrada com sucesso'
+        });
+    } catch (error) {
+        console.error('Erro ao criar categoria:', error);
+        res.status(500).json({ error: 'Erro ao criar categoria' });
+    }
+});
+
 // ============ OBTER MATERIAL ============
 router.get('/:id', async (req, res) => {
     try {
@@ -232,50 +277,6 @@ router.delete('/:id', async (req, res) => {
     } catch (error) {
         console.error('Erro ao deletar material:', error);
         res.status(500).json({ error: 'Erro ao deletar material' });
-    }
-});
-
-// ============ LISTAR CATEGORIAS ============
-router.get('/categorias/list', async (req, res) => {
-    try {
-        const db = getDatabase();
-        const [categorias] = await db.query(
-            'SELECT DISTINCT tipo as id, tipo as nome FROM materiais WHERE tipo IS NOT NULL ORDER BY tipo'
-        );
-        
-        res.json({ categorias });
-    } catch (error) {
-        console.error('Erro ao listar categorias:', error);
-        res.status(500).json({ error: 'Erro ao buscar categorias' });
-    }
-});
-
-// ============ CRIAR CATEGORIA ============
-router.post('/categorias', async (req, res) => {
-    try {
-        const db = getDatabase();
-        const { nome, descricao } = req.body;
-        
-        if (!nome) {
-            return res.status(400).json({ error: 'Nome é obrigatório' });
-        }
-        
-        const [result] = await db.query(
-            'SELECT DISTINCT tipo as nome FROM materiais WHERE tipo = ?',
-            [nome]
-        );
-        
-        if (result.length > 0) {
-            return res.status(400).json({ error: 'Categoria já existe' });
-        }
-        
-        res.status(201).json({
-            success: true,
-            message: 'Categoria registrada com sucesso'
-        });
-    } catch (error) {
-        console.error('Erro ao criar categoria:', error);
-        res.status(500).json({ error: 'Erro ao criar categoria' });
     }
 });
 

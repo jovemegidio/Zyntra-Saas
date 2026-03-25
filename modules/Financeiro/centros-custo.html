@@ -8,9 +8,7 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Centros de Custo</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
@@ -67,7 +65,7 @@
 
 
 
-        /* ======================================== SISTEMA DE NOTIFICA��ES ======================================== */
+        /* ======================================== SISTEMA DE NOTIFICAÇÕES ======================================== */
 
 
 
@@ -203,7 +201,7 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADR�O PCP (HTML est�tico, RBAC via JS) -->
+        <!-- SIDEBAR - PADRÃO PCP (HTML estático, RBAC via JS) -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -228,13 +226,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Or�amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Concilia��o">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat�rios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -246,7 +244,7 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
-                <button class="sidebar-btn" title="Configura��es" id="btn-config" onclick="toggleConfiguracoes()">
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -254,7 +252,7 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADR�O PCP (HTML est�tico) -->
+            <!-- HEADER - PADRÃO PCP (HTML estático) -->
             <header class="header">
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
@@ -274,13 +272,13 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica��es" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge" id="notification-count" style="display: none;">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
                             <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notifica��es</h3>
+                                <h3><i class="fas fa-bell"></i> Notificações</h3>
                                 <div class="notification-actions">
                                     <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
                                         <i class="fas fa-check-double"></i>
@@ -293,22 +291,22 @@
                             <div class="notification-list" id="notification-list">
                                 <div class="notification-empty">
                                     <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notifica��o</p>
+                                    <p>Nenhuma notificação</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usu�rio" id="user-photo" style="display:none">
+                            <img alt="Foto do usuário" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
                 </div>
             </header>
 
-            <!-- Main Content - Padr�o PCP -->
+            <!-- Main Content - Padrão PCP -->
             <div class="main-content">
 
             <div class="page-content">
@@ -336,14 +334,14 @@
                     <div class="stat-card">
                         <div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div>
                         <div class="stat-info">
-                            <h3>Or�amento Total</h3>
-                            <div class="value blue" id="stat-or�amento">R$ 0,00</div>
+                            <h3>Orçamento Total</h3>
+                            <div class="value blue" id="stat-orçamento">R$ 0,00</div>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon orange"><i class="fas fa-chart-pie"></i></div>
                         <div class="stat-info">
-                            <h3>Utiliza��o M�dia</h3>
+                            <h3>Utilização Média</h3>
                             <div class="value" id="stat-utilizacao">0%</div>
                         </div>
                     </div>
@@ -362,14 +360,14 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>C�digo</th>
+                                    <th>Código</th>
                                     <th>Nome</th>
                                     <th>Departamento</th>
-                                    <th>Respons�vel</th>
-                                    <th>Or�amento</th>
-                                    <th>Utiliza��o</th>
+                                    <th>Responsável</th>
+                                    <th>Orçamento</th>
+                                    <th>Utilização</th>
                                     <th>Status</th>
-                                    <th>A��es</th>
+                                    <th>Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-centros">
@@ -388,7 +386,7 @@
         </main>
     </div>
 
-    <!-- Modal Novo/Editar - Padr�o SaaS Empresarial -->
+    <!-- Modal Novo/Editar - Padrão SaaS Empresarial -->
     <div class="modal-overlay-saas" id="modalCentro" onclick="if(event.target === this) fecharModal()">
         <div class="modal-saas modal-sm">
             <div class="modal-header-saas header-green">
@@ -397,7 +395,7 @@
                         <i class="fas fa-sitemap" id="modal-icon"></i>
                     </div>
                     <div class="modal-header-text-saas">
-                        <h2 id="modal-t�tulo">Novo Centro de Custo</h2>
+                        <h2 id="modal-título">Novo Centro de Custo</h2>
                         <p id="modal-subtitulo">Configure um novo centro de custo ou departamento</p>
                     </div>
                     <button class="modal-close-saas" onclick="fecharModal()" title="Fechar"><i class="fas fa-times"></i></button>
@@ -407,17 +405,17 @@
                 <form id="formCentro">
                     <input type="hidden" id="centro-id">
 
-                    <!-- Se��o: Identifica��o -->
+                    <!-- Seção: Identificação -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-tag"></i>
-                            <span>Identifica��o</span>
-                            <span class="section-badge-saas">Obrigat�rio</span>
+                            <span>Identificação</span>
+                            <span class="section-badge-saas">Obrigatório</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-hashtag"></i> C�digo <span class="required">*</span></label>
-                                <input type="text" id="centro-c�digo" placeholder="Ex: CC001" required>
+                                <label><i class="fas fa-hashtag"></i> Código <span class="required">*</span></label>
+                                <input type="text" id="centro-código" placeholder="Ex: CC001" required>
                             </div>
                             <div class="form-group-saas">
                                 <label><i class="fas fa-building"></i> Departamento</label>
@@ -426,10 +424,10 @@
                                     <option value="Administrativo">Administrativo</option>
                                     <option value="Comercial">Comercial</option>
                                     <option value="Financeiro">Financeiro</option>
-                                    <option value="Produ��o">Produ��o</option>
+                                    <option value="Produção">Produção</option>
                                     <option value="RH">Recursos Humanos</option>
                                     <option value="TI">Tecnologia</option>
-                                    <option value="Log�stica">Log�stica</option>
+                                    <option value="Logística">Logística</option>
                                 </select>
                             </div>
                             <div class="form-group-saas full">
@@ -439,22 +437,22 @@
                         </div>
                     </div>
 
-                    <!-- Se��o: Gest�o -->
+                    <!-- Seção: Gestão -->
                     <div class="form-section-saas">
                         <div class="form-section-title-saas">
                             <i class="fas fa-users-cog icon-blue"></i>
-                            <span>Gest�o e Or�amento</span>
+                            <span>Gestão e Orçamento</span>
                         </div>
                         <div class="form-grid-saas">
                             <div class="form-group-saas">
-                                <label><i class="fas fa-user-tie"></i> Respons�vel</label>
-                                <input type="text" id="centro-responsavel" placeholder="Nome do gestor respons�vel">
+                                <label><i class="fas fa-user-tie"></i> Responsável</label>
+                                <input type="text" id="centro-responsavel" placeholder="Nome do gestor responsável">
                             </div>
                             <div class="form-group-saas">
-                                <label><i class="fas fa-dollar-sign"></i> Or�amento Mensal</label>
+                                <label><i class="fas fa-dollar-sign"></i> Orçamento Mensal</label>
                                 <div class="valor-destaque-saas">
                                     <span class="currency-symbol">R$</span>
-                                    <input type="text" id="centro-or�amento" placeholder="0,00" oninput="formatarMoedaInput(this)">
+                                    <input type="text" id="centro-orçamento" placeholder="0,00" oninput="formatarMoedaInput(this)">
                                 </div>
                             </div>
                             <div class="form-group-saas">
@@ -472,7 +470,7 @@
                 <div class="modal-footer-left-saas">
                     <div class="footer-info">
                         <i class="fas fa-info-circle"></i>
-                        <span>Campos com <span class="required-asterisk">*</span> s�o obrigat�rios</span>
+                        <span>Campos com <span class="required-asterisk">*</span> são obrigatórios</span>
                     </div>
                 </div>
                 <div class="modal-footer-right-saas">
@@ -494,13 +492,13 @@
         let centrosCusto = [];
         let editandoId = null;
 
-        // Carregar usu�rio
+        // Carregar usuário
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu�rio');
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
 
                     const hour = new Date().getHours();
                     let greeting = 'Bom dia';
@@ -525,7 +523,7 @@
                         fotoEl.onerror = () => { fotoEl.style.display = 'none'; if (inicialEl) { inicialEl.textContent = primeiroNome.charAt(0).toUpperCase(); inicialEl.style.display = 'flex'; } };
                     }
                 }
-            } catch (e) { console.error('Erro ao carregar usu�rio:', e); }
+            } catch (e) { console.error('Erro ao carregar usuário:', e); }
         }
 
         // Carregar centros de custo
@@ -553,16 +551,16 @@
             }
 
             tbody.innerHTML = centrosCusto.map(c => {
-                const utilizacao = c.or�amento_mensal > 0 ? Math.min((c.utilizado / c.or�amento_mensal) * 100, 100) : 0;
+                const utilizacao = c.orçamento_mensal > 0 ? Math.min((c.utilizado / c.orçamento_mensal) * 100, 100) : 0;
                 const corBarra = utilizacao > 90 ? 'red' : utilizacao > 70 ? 'yellow' : 'green';
 
                 return `
                     <tr>
-                        <td><strong>${c.c�digo || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
-                        <td>${c.nome || c.descri��o || '-'}</td>
+                        <td><strong>${c.código || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
+                        <td>${c.nome || c.descrição || '-'}</td>
                         <td>${c.departamento || '-'}</td>
                         <td>${c.responsavel || c.responsavel_nome || '-'}</td>
-                        <td>${formatarMoeda(c.or�amento_mensal || c.or�amento || 0)}</td>
+                        <td>${formatarMoeda(c.orçamento_mensal || c.orçamento || 0)}</td>
                         <td style="min-width: 120px;">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div class="progress-bar" style="flex: 1;">
@@ -586,13 +584,13 @@
             const total = centrosCusto.length;
             const ativos = centrosCusto.filter(c => c.ativo == 1 || c.ativo === true || c.ativo === 'ativo').length;
             const inativos = total - ativos;
-            const or�amentoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.or�amento_mensal || c.or�amento || 0), 0);
+            const orçamentoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.orçamento_mensal || c.orçamento || 0), 0);
             const utilizadoTotal = centrosCusto.reduce((sum, c) => sum + parseFloat(c.utilizado || 0), 0);
-            const utilizacaoMedia = or�amentoTotal > 0 ? (utilizadoTotal / or�amentoTotal) * 100 : 0;
+            const utilizacaoMedia = orçamentoTotal > 0 ? (utilizadoTotal / orçamentoTotal) * 100 : 0;
 
             document.getElementById('stat-total').textContent = total;
             document.getElementById('stat-ativos').textContent = ativos;
-            document.getElementById('stat-or�amento').textContent = formatarMoeda(or�amentoTotal);
+            document.getElementById('stat-orçamento').textContent = formatarMoeda(orçamentoTotal);
             document.getElementById('stat-utilizacao').textContent = utilizacaoMedia.toFixed(1) + '%';
         }
 
@@ -607,7 +605,7 @@
 
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-t�tulo').textContent = 'Novo Centro de Custo';
+            document.getElementById('modal-título').textContent = 'Novo Centro de Custo';
             document.getElementById('formCentro').reset();
             document.getElementById('centro-id').value = '';
             document.getElementById('modalCentro').classList.add('active');
@@ -622,29 +620,29 @@
             if (!centro) return;
 
             editandoId = id;
-            document.getElementById('modal-t�tulo').textContent = 'Editar Centro de Custo';
+            document.getElementById('modal-título').textContent = 'Editar Centro de Custo';
             document.getElementById('centro-id').value = centro.id;
-            document.getElementById('centro-c�digo').value = centro.codigo || '';
-            document.getElementById('centro-nome').value = centro.nome || centro.descri��o || '';
+            document.getElementById('centro-código').value = centro.codigo || '';
+            document.getElementById('centro-nome').value = centro.nome || centro.descrição || '';
             document.getElementById('centro-departamento').value = centro.departamento || '';
             document.getElementById('centro-responsavel').value = centro.responsavel || centro.responsavel_nome || '';
-            document.getElementById('centro-or�amento').value = formatarMoeda(centro.or�amento_mensal || centro.or�amento || 0);
+            document.getElementById('centro-orçamento').value = formatarMoeda(centro.orçamento_mensal || centro.orçamento || 0);
             document.getElementById('centro-ativo').value = centro.ativo ? '1' : '0';
             document.getElementById('modalCentro').classList.add('active');
         }
 
         async function salvarCentro() {
             const dados = {
-                codigo: document.getElementById('centro-c�digo').value,
+                codigo: document.getElementById('centro-código').value,
                 nome: document.getElementById('centro-nome').value,
                 departamento: document.getElementById('centro-departamento').value,
                 responsavel: document.getElementById('centro-responsavel').value,
-                or�amento_mensal: parseMoeda(document.getElementById('centro-or�amento').value),
+                orçamento_mensal: parseMoeda(document.getElementById('centro-orçamento').value),
                 ativo: document.getElementById('centro-ativo').value === '1'
             };
 
             if (!dados.nome) {
-                alert('Nome � obrigat�rio');
+                alert('Nome é obrigatório');
                 return;
             }
 
@@ -666,7 +664,7 @@
                     alert(editandoId ? 'Centro atualizado com sucesso!' : 'Centro criado com sucesso!');
                 } else {
                     const error = await response.json();
-                    alert('Erro: ' + (error.message || 'Falha ao salvar'));
+                    alert('Falha ao salvar. Tente novamente.'));
                 }
             } catch (e) {
                 console.error('Erro ao salvar:', e);
@@ -685,7 +683,7 @@
 
                 if (response.ok) {
                     carregarCentros();
-                    alert('Centro exclu�do com sucesso!');
+                    alert('Centro excludo com sucesso!');
                 } else {
                     alert('Erro ao excluir centro de custo');
                 }
@@ -699,7 +697,7 @@
             const centro = centrosCusto.find(c => c.id === id);
             if (!centro) return;
 
-            const utilizacao = centro.or�amento_mensal > 0 ? ((centro.utilizado || 0) / centro.or�amento_mensal) * 100 : 0;
+            const utilizacao = centro.orçamento_mensal > 0 ? ((centro.utilizado || 0) / centro.orçamento_mensal) * 100 : 0;
             const utilizacaoCor = utilizacao >= 90 ? '#dc2626' : utilizacao >= 70 ? '#ea580c' : '#059669';
             const statusCor = centro.ativo ? '#059669' : '#dc2626';
             const statusTexto = centro.ativo ? 'Ativo' : 'Inativo';
@@ -707,23 +705,23 @@
             const mensagem = `
                 <div style="text-align:left; font-size:14px; line-height:1.8;">
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px 16px;">
-                        <div><span style="color:#9CA3AF; font-size:12px;">C�digo</span><br><strong>${centro.c�digo || '-'}</strong></div>
+                        <div><span style="color:#9CA3AF; font-size:12px;">Código</span><br><strong>${centro.código || '-'}</strong></div>
                         <div><span style="color:#9CA3AF; font-size:12px;">Departamento</span><br><strong>${centro.departamento || '-'}</strong></div>
-                        <div><span style="color:#9CA3AF; font-size:12px;">Respons�vel</span><br><strong>${centro.responsavel || '-'}</strong></div>
+                        <div><span style="color:#9CA3AF; font-size:12px;">Responsável</span><br><strong>${centro.responsavel || '-'}</strong></div>
                         <div><span style="color:#9CA3AF; font-size:12px;">Status</span><br><strong style="color:${statusCor}">${statusTexto}</strong></div>
                     </div>
                     <hr style="border:none; border-top:1px solid #E5E7EB; margin:12px 0;">
                     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
-                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">OR�AMENTO</div>
-                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(centro.or�amento_mensal || 0)}</div>
+                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">ORÇAMENTO</div>
+                            <div style="font-weight:700; color:#2563eb;">${formatarMoeda(centro.orçamento_mensal || 0)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
                             <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZADO</div>
                             <div style="font-weight:700; color:#ea580c;">${formatarMoeda(centro.utilizado || 0)}</div>
                         </div>
                         <div style="text-align:center; background:#f8fafc; border-radius:8px; padding:10px;">
-                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZA��O</div>
+                            <div style="color:#9CA3AF; font-size:11px; margin-bottom:4px;">UTILIZAÇÃO</div>
                             <div style="font-weight:700; color:${utilizacaoCor};">${utilizacao.toFixed(1)}%</div>
                         </div>
                     </div>
@@ -732,7 +730,7 @@
 
             if (typeof ConfirmDialog !== 'undefined') {
                 ConfirmDialog.show({
-                    title: `Centro de Custo: ${centro.nome || centro.descri��o}`,
+                    title: `Centro de Custo: ${centro.nome || centro.descrição}`,
                     message: mensagem,
                     type: 'info',
                     confirmText: 'OK',
@@ -741,7 +739,7 @@
                 });
             } else if (typeof showConfirmDialog === 'function') {
                 showConfirmDialog({
-                    title: `Centro de Custo: ${centro.nome || centro.descri��o}`,
+                    title: `Centro de Custo: ${centro.nome || centro.descrição}`,
                     message: mensagem,
                     type: 'info',
                     confirmText: 'OK',
@@ -749,19 +747,19 @@
                     showCancel: false
                 });
             } else {
-                alert(`Centro de Custo: ${centro.nome || centro.descri��o}\n\nC�digo: ${centro.c�digo || '-'}\nDepartamento: ${centro.departamento || '-'}\nRespons�vel: ${centro.responsavel || '-'}\nOr�amento: ${formatarMoeda(centro.or�amento_mensal || 0)}\nUtilizado: ${formatarMoeda(centro.utilizado || 0)}\nUtiliza��o: ${utilizacao.toFixed(1)}%\nStatus: ${statusTexto}`);
+                alert(`Centro de Custo: ${centro.nome || centro.descrição}\n\nCódigo: ${centro.código || '-'}\nDepartamento: ${centro.departamento || '-'}\nResponsável: ${centro.responsavel || '-'}\nOrçamento: ${formatarMoeda(centro.orçamento_mensal || 0)}\nUtilizado: ${formatarMoeda(centro.utilizado || 0)}\nUtilização: ${utilizacao.toFixed(1)}%\nStatus: ${statusTexto}`);
             }
         }
 
         function exportarCSV() {
             if (centrosCusto.length === 0) {
-                alert('N�o h� dados para exportar');
+                alert('Não há dados para exportar');
                 return;
             }
 
-            let csv = 'C�digo,Nome,Departamento,Respons�vel,Or�amento,Utilizado,Status\n';
+            let csv = 'Código,Nome,Departamento,Responsável,Orçamento,Utilizado,Status\n';
             centrosCusto.forEach(c => {
-                csv += `"${c.c�digo || ''}","${c.nome || c.descri��o || ''}","${c.departamento || ''}","${c.responsavel || ''}","${c.or�amento_mensal || 0}","${c.utilizado || 0}","${c.ativo ? 'Ativo' : 'Inativo'}"\n`;
+                csv += `"${c.código || ''}","${c.nome || c.descrição || ''}","${c.departamento || ''}","${c.responsavel || ''}","${c.orçamento_mensal || 0}","${c.utilizado || 0}","${c.ativo ? 'Ativo' : 'Inativo'}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -787,7 +785,7 @@
             input.value = formatarMoeda(valor);
         }
 
-        // Inicializa��o
+        // Inicialização
         document.addEventListener('DOMContentLoaded', function() {
             carregarUsuario();
             carregarCentros();

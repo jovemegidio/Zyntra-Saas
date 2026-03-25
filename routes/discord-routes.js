@@ -104,7 +104,7 @@ function createDiscordRoutes({ authenticateToken, authorizeAdmin }) {
             });
         } catch (error) {
             console.error('❌ [Discord API] Erro ao publicar:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -136,7 +136,7 @@ function createDiscordRoutes({ authenticateToken, authorizeAdmin }) {
             });
         } catch (error) {
             console.error('❌ [Discord API] Erro ao publicar deploy:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -167,7 +167,7 @@ function createDiscordRoutes({ authenticateToken, authorizeAdmin }) {
             });
         } catch (error) {
             console.error('❌ [Discord API] Erro ao publicar commits:', error);
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -196,7 +196,7 @@ function createDiscordRoutes({ authenticateToken, authorizeAdmin }) {
                 message: enviado ? 'Teste enviado com sucesso!' : 'Bot offline ou canal não configurado'
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: error.message });
+            res.status(500).json({ success: false, error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

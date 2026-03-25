@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Aluforce: Limpar Cache HSTS</title>    <!-- Mobile Enterprise Design System -->
@@ -132,12 +132,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>?? Correção do Erro SSL_PROTOCOL_ERROR</h1>
+        <h1>?? CorreÃ§Ã£o do Erro SSL_PROTOCOL_ERROR</h1>
         
         <div class="alert">
             <h2>?? Problema Detectado</h2>
-            <p>Seu navegador está tentando usar HTTPS mas o servidor está em HTTP (desenvolvimento).</p>
-            <p><strong>Causa:</strong> Cache HSTS (HTTP Strict Transport Security) forçando HTTPS.</p>
+            <p>Seu navegador estÃ¡ tentando usar HTTPS mas o servidor estÃ¡ em HTTP (desenvolvimento).</p>
+            <p><strong>Causa:</strong> Cache HSTS (HTTP Strict Transport Security) forÃ§ando HTTPS.</p>
         </div>
 
         <div class="steps">
@@ -152,7 +152,7 @@
                     </ul>
                     <div class="code">chrome://net-internals/#hsts</div>
                     <ul>
-                        <li>Na seção <strong>"Delete domain security policies"</strong>:</li>
+                        <li>Na seÃ§Ã£o <strong>"Delete domain security policies"</strong>:</li>
                         <li>Digite: <code>localhost</code> ? Clique em <strong>Delete</strong></li>
                         <li>Digite: <code>192.168.68.127</code> ? Clique em <strong>Delete</strong></li>
                     </ul>
@@ -167,7 +167,7 @@
                 <div class="step-content">
                     <ul>
                         <li>Pressione: <strong>Ctrl + Shift + Del</strong></li>
-                        <li>Selecione: <strong>"Todo o período"</strong></li>
+                        <li>Selecione: <strong>"Todo o perÃ­odo"</strong></li>
                         <li>Marque:</li>
                     </ul>
                     <ul style="margin-left: 20px;">
@@ -196,7 +196,7 @@
                     Acessar via HTTP
                 </div>
                 <div class="step-content">
-                    <p>Use <strong>HTTP</strong> (não HTTPS):</p>
+                    <p>Use <strong>HTTP</strong> (nÃ£o HTTPS):</p>
                     <div class="code">http://localhost:3000</div>
                     <p style="margin-top: 10px;">OU</p>
                     <div class="code">http://192.168.68.127:3000</div>
@@ -209,8 +209,8 @@
         </div>
 
         <div style="margin-top: 30px; padding: 20px; background: #e3f2fd; border-radius: 10px;">
-            <h3 style="color: #1976d2; margin-bottom: 10px;">?? Alternativa Rápida</h3>
-            <p>Se o problema persistir, use o navegador em <strong>modo anônimo</strong>:</p>
+            <h3 style="color: #1976d2; margin-bottom: 10px;">?? Alternativa RÃ¡pida</h3>
+            <p>Se o problema persistir, use o navegador em <strong>modo anÃ´nimo</strong>:</p>
             <ul>
                 <li>Chrome/Edge: <strong>Ctrl + Shift + N</strong></li>
                 <li>Firefox: <strong>Ctrl + Shift + P</strong></li>
@@ -219,7 +219,7 @@
         </div>
 
         <div style="margin-top: 20px; padding: 15px; background: #f1f8e9; border-radius: 10px; border-left: 4px solid #689f38;">
-            <strong>? Correções Aplicadas no Servidor:</strong>
+            <strong>? CorreÃ£es Aplicadas no Servidor:</strong>
             <ul style="margin-top: 10px;">
                 <li>HSTS desabilitado em desenvolvimento</li>
                 <li>CSP desabilitado em desenvolvimento</li>
@@ -230,10 +230,10 @@
     </div>
 
     <script>
-        // Auto-redirect após 30 segundos se estiver em localhost
+        // Auto-redirect apÃ³s 30 segundos se estiver em localhost
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             setTimeout(() => {
-                if (confirm('Você limpou o cache HSTS? Clique OK para acessar o sistema.')) {
+                if (confirm('VocÃª limpou o cache HSTS? Clique OK para acessar o sistema.')) {
                     window.location.href = 'http://localhost:3000';
                 }
             }, 30000);

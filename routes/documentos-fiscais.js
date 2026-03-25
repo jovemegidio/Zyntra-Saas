@@ -84,7 +84,7 @@ router.post('/nfce/emitir', authenticateToken, async (req, res) => {
         
     } catch (error) {
         console.error('Erro ao emitir NFC-e:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -112,7 +112,7 @@ router.post('/nfce/:chave/cancelar', authenticateToken, async (req, res) => {
         });
         
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -177,7 +177,7 @@ router.post('/cte/emitir', authenticateToken, async (req, res) => {
         
     } catch (error) {
         console.error('Erro ao emitir CT-e:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -204,7 +204,7 @@ router.post('/cte/:chave/cancelar', authenticateToken, async (req, res) => {
         });
         
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -275,7 +275,7 @@ router.post('/mdfe/emitir', authenticateToken, async (req, res) => {
         
     } catch (error) {
         console.error('Erro ao emitir MDF-e:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -298,7 +298,7 @@ router.post('/mdfe/:chave/encerrar', authenticateToken, async (req, res) => {
         });
         
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -325,7 +325,7 @@ router.post('/mdfe/:chave/cancelar', authenticateToken, async (req, res) => {
         });
         
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

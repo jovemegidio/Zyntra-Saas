@@ -122,7 +122,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao criar reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -223,7 +223,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao consumir reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -262,7 +262,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao cancelar reserva:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -427,7 +427,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao aprovar pedido:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -576,7 +576,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao receber pedido de compra:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -658,7 +658,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao consumir materiais:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -737,7 +737,7 @@ module.exports = function createIntegracaoRoutes(deps) {
         } catch (error) {
             await connection.rollback();
             logger.error('[INTEGRAÇÃO] Erro ao finalizar OP:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         } finally {
             connection.release();
         }
@@ -785,7 +785,7 @@ module.exports = function createIntegracaoRoutes(deps) {
     
         } catch (error) {
             logger.error('[INTEGRAÇÃO] Erro ao gerar relatório:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     
@@ -836,7 +836,7 @@ module.exports = function createIntegracaoRoutes(deps) {
     
         } catch (error) {
             logger.error('[INTEGRAÇÃO] Erro ao carregar dashboard:', error);
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     

@@ -4979,9 +4979,9 @@ apiVendasRouter.get('/produtos/autocomplete/:termo', async (req, res, next) => {
         const limit = parseInt(req.query.limit) || 15;
 
         const [rows] = await pool.query(
-            `SELECT id, codigo, descricao, unidade, preco_venda, estoque_atual, local_estoque
+            `SELECT id, codigo, descricao, unidade, preco_venda, COALESCE(estoque_atual, 0) as estoque_atual, local_estoque
              FROM produtos
-             WHERE situacao = 'ativo' AND (codigo LIKE ? OR descricao LIKE ? OR ean LIKE ?)
+             WHERE (codigo LIKE ? OR descricao LIKE ? OR ean LIKE ?)
              ORDER BY
                 CASE
                     WHEN codigo = ? THEN 1

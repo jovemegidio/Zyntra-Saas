@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -16,7 +14,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Fornecedores</title>
 
-    <!-- Sistema de Autentica��o Unificado -->
+    <!-- Sistema de Autenticação Unificado -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -29,7 +27,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- CSS Padr�o Global -->
+    <!-- CSS Padrão Global -->
     <link rel="stylesheet" href="/modules/Compras/css/compras-layout.css?v=20260301">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
@@ -73,14 +71,14 @@
             <nav class="sidebar-nav">
                 <button class="sidebar-btn" title="Dashboard" onclick="window.location.href='index.html'"><i class="fas fa-chart-line"></i></button>
                 <button class="sidebar-btn" title="Pedidos" onclick="window.location.href='pedidos.html'"><i class="fas fa-shopping-cart"></i></button>
-                <button class="sidebar-btn" title="Cota��es" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
+                <button class="sidebar-btn" title="Cotações" onclick="window.location.href='cotacoes.html'"><i class="fas fa-file-invoice-dollar"></i></button>
                 <button class="sidebar-btn active" title="Fornecedores" onclick="window.location.href='fornecedores.html'"><i class="fas fa-users"></i></button>
-                <button class="sidebar-btn" title="Requisi��es" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
+                <button class="sidebar-btn" title="Requisições" onclick="window.location.href='requisicoes.html'"><i class="fas fa-clipboard-list"></i></button>
                 <button class="sidebar-btn" title="Recebimento" onclick="window.location.href='recebimento.html'"><i class="fas fa-truck-loading"></i></button>
             </nav>
             <div class="sidebar-bottom">
                 <button class="sidebar-btn" title="Estoque MP" onclick="window.location.href='gestao-estoque.html'"><i class="fas fa-boxes"></i></button>
-                <button class="sidebar-btn" title="Relat�rios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
+                <button class="sidebar-btn" title="Relatórios" onclick="window.location.href='relatorios.html'"><i class="fas fa-chart-bar"></i></button>
             </div>
         </aside>
 
@@ -93,26 +91,26 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Fornecedores</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notifica��es" onclick="toggleNotificacoes()">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
                             <i class="fas fa-bell"></i>
                             <span class="notification-badge hidden" id="notification-count">0</span>
                         </button>
                         <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notifica��es</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
-                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">N�o lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
+                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notificações</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
+                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
                             <div class="notification-list" id="notification-list"></div>
-                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver hist�rico completo</a></div>
+                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a></div>
                         </div>
                     </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar"><img src="" alt="" id="user-photo" style="display:none;"><span id="user-initial">U</span></div>
                     </div>
                 </div>
@@ -143,12 +141,12 @@
                     <div class="stat-card cyan">
                         <div class="stat-header"><div class="stat-icon cyan"><i class="fas fa-user-plus"></i></div></div>
                         <div class="stat-value" id="fornecedoresNovos">0</div>
-                        <div class="stat-label">Novos (M�s)</div>
+                        <div class="stat-label">Novos (Mês)</div>
                     </div>
                     <div class="stat-card amber">
                         <div class="stat-header"><div class="stat-icon amber"><i class="fas fa-star"></i></div></div>
                         <div class="stat-value" id="avaliacaoMedia">0.0</div>
-                        <div class="stat-label">Avalia��o M�dia</div>
+                        <div class="stat-label">Avaliação Média</div>
                     </div>
                 </div>
 
@@ -174,13 +172,13 @@
                         <thead>
                             <tr>
                                 <th style="width:50px">#</th>
-                                <th>Raz�o Social</th>
+                                <th>Razão Social</th>
                                 <th>CNPJ</th>
                                 <th>Categoria</th>
                                 <th>Contato</th>
-                                <th>Avalia��o</th>
+                                <th>Avaliação</th>
                                 <th>Status</th>
-                                <th style="width:120px">A��es</th>
+                                <th style="width:120px">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="fornecedoresTableBody">
@@ -213,17 +211,17 @@
                     <!-- Tab: Dados -->
                     <div class="tab-content active" id="tab-dados">
                         <div class="form-grid cols-2">
-                            <div class="form-group"><label>Raz�o Social *</label><input type="text" id="razaoSocial" required></div>
+                            <div class="form-group"><label>Razão Social *</label><input type="text" id="razaoSocial" required></div>
                             <div class="form-group"><label>Nome Fantasia</label><input type="text" id="nomeFantasia"></div>
                             <div class="form-group"><label>CNPJ *</label><input type="text" id="cnpj" required maxlength="18" oninput="formatarCNPJInput(this)" placeholder="00.000.000/0000-00"></div>
-                            <div class="form-group"><label>Inscri��o Estadual</label><input type="text" id="inscricaoEstadual"></div>
+                            <div class="form-group"><label>Inscrião Estadual</label><input type="text" id="inscricaoEstadual"></div>
                             <div class="form-group">
                                 <label>Categoria</label>
                                 <select id="categoria">
                                     <option value="">Selecione</option>
-                                    <option value="materia-prima">Mat�ria-prima</option>
+                                    <option value="materia-prima">Matéria-prima</option>
                                     <option value="embalagem">Embalagem</option>
-                                    <option value="servico">Servi�o</option>
+                                    <option value="servico">Serviço</option>
                                     <option value="equipamento">Equipamento</option>
                                     <option value="outro">Outro</option>
                                 </select>
@@ -238,7 +236,7 @@
                             </div>
                         </div>
                         <div style="margin-top:var(--space-3); padding-top:var(--space-3); border-top:1px solid var(--gray-200);">
-                            <h4 style="font-size:0.8rem; font-weight:600; margin-bottom:var(--space-2); color:var(--gray-700);"><i class="fas fa-map-marker-alt"></i> Endere�o</h4>
+                            <h4 style="font-size:0.8rem; font-weight:600; margin-bottom:var(--space-2); color:var(--gray-700);"><i class="fas fa-map-marker-alt"></i> Endereço</h4>
                             <div class="form-grid cols-3">
                                 <div class="form-group">
                                     <label>CEP</label>
@@ -247,7 +245,7 @@
                                         <button type="button" onclick="buscarCEP(document.getElementById('cep').value)"><i class="fas fa-search"></i> Buscar</button>
                                     </div>
                                 </div>
-                                <div class="form-group"><label>Endere�o</label><input type="text" id="endereco"></div>
+                                <div class="form-group"><label>Endereço</label><input type="text" id="endereco"></div>
                                 <div class="form-group"><label>Bairro</label><input type="text" id="bairro"></div>
                                 <div class="form-group"><label>Cidade</label><input type="text" id="cidade"></div>
                                 <div class="form-group"><label>Estado</label><input type="text" id="estado" maxlength="2"></div>
@@ -271,30 +269,30 @@
                     <div class="tab-content" id="tab-financeiro">
                         <div class="form-grid cols-2">
                             <div class="form-group">
-                                <label>Condi��es de Pagamento</label>
-                                <select id="condi��esPagamento">
+                                <label>Condiães de Pagamento</label>
+                                <select id="condiãesPagamento">
                                     <option value="">Selecione</option>
-                                    <option value="avista">� Vista</option>
+                                    <option value="avista">À Vista</option>
                                     <option value="30">30 dias</option>
                                     <option value="30-60">30/60 dias</option>
                                     <option value="30-60-90">30/60/90 dias</option>
                                     <option value="outro">Outro</option>
                                 </select>
                             </div>
-                            <div class="form-group"><label>Prazo de Entrega</label><input type="text" id="prazoEntrega" placeholder="Ex: 15 dias �teis"></div>
+                            <div class="form-group"><label>Prazo de Entrega</label><input type="text" id="prazoEntrega" placeholder="Ex: 15 dias úteis"></div>
                             <div class="form-group"><label>Banco</label><input type="text" id="banco"></div>
-                            <div class="form-group"><label>Ag�ncia</label><input type="text" id="agencia"></div>
+                            <div class="form-group"><label>Agência</label><input type="text" id="agencia"></div>
                             <div class="form-group"><label>Conta</label><input type="text" id="conta"></div>
                             <div class="form-group"><label>Chave PIX</label><input type="text" id="chavePix"></div>
                             <div class="form-group" style="grid-column:span 2;">
-                                <label>Avalia��o (1-5)</label>
-                                <select id="avalia��o">
-                                    <option value="0">Sem avalia��o</option>
-                                    <option value="1">1 � Ruim</option>
-                                    <option value="2">2 � Regular</option>
-                                    <option value="3">3 � Bom</option>
-                                    <option value="4">4 � Muito Bom</option>
-                                    <option value="5">5 � Excelente</option>
+                                <label>Avaliação (1-5)</label>
+                                <select id="avaliação">
+                                    <option value="0">Sem avaliação</option>
+                                    <option value="1">1 é Ruim</option>
+                                    <option value="2">2 é Regular</option>
+                                    <option value="3">3 é Bom</option>
+                                    <option value="4">4 é Muito Bom</option>
+                                    <option value="5">5 é Excelente</option>
                                 </select>
                             </div>
                         </div>
@@ -310,8 +308,8 @@
                                 <input type="text" id="logoPath" placeholder="URL da logo">
                             </div>
                             <div class="form-group"><label>Produtos Fornecidos</label><textarea id="produtosFornecidos" rows="3" placeholder="Liste os principais produtos..."></textarea></div>
-                            <div class="form-group"><label>Certifica��es</label><textarea id="certificacoes" rows="2" placeholder="ISO 9001, etc..."></textarea></div>
-                            <div class="form-group"><label>Observa��es</label><textarea id="observacoes" rows="3"></textarea></div>
+                            <div class="form-group"><label>Certificações</label><textarea id="certificacoes" rows="2" placeholder="ISO 9001, etc..."></textarea></div>
+                            <div class="form-group"><label>Observações</label><textarea id="observacoes" rows="3"></textarea></div>
                         </div>
                     </div>
                 </div>
@@ -389,11 +387,11 @@
 
     async function buscarCEP(cep) {
         cep = (cep || '').replace(/\D/g, '');
-        if (cep.length !== 8) { alert('CEP inv�lido'); return; }
+        if (cep.length !== 8) { alert('CEP inválido'); return; }
         try {
             const r = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
             const d = await r.json();
-            if (d.erro) { alert('CEP n�o encontrado'); return; }
+            if (d.erro) { alert('CEP não encontrado'); return; }
             document.getElementById('endereco').value = d.logradouro || '';
             document.getElementById('bairro').value = d.bairro || '';
             document.getElementById('cidade').value = d.localidade || '';
@@ -426,19 +424,19 @@
             email_financeiro: document.getElementById('emailFinanceiro').value,
             whatsapp: document.getElementById('whatsapp').value,
             website: document.getElementById('website').value,
-            condi��es_pagamento: document.getElementById('condi��esPagamento').value,
+            condiães_pagamento: document.getElementById('condiãesPagamento').value,
             prazo_entrega: document.getElementById('prazoEntrega').value,
             banco: document.getElementById('banco').value,
             agencia: document.getElementById('agencia').value,
             conta: document.getElementById('conta').value,
             chave_pix: document.getElementById('chavePix').value,
-            avalia��o: parseInt(document.getElementById('avalia��o').value) || 0,
+            avaliação: parseInt(document.getElementById('avaliação').value) || 0,
             logo: document.getElementById('logoPath').value,
             produtos_fornecidos: document.getElementById('produtosFornecidos').value,
             certificacoes: document.getElementById('certificacoes').value,
             observacoes: document.getElementById('observacoes').value
         };
-        if (!dados.razao_social || !dados.cnpj) { alert('Preencha os campos obrigat�rios'); _salvandoFornecedor = false; return; }
+        if (!dados.razao_social || !dados.cnpj) { alert('Preencha os campos obrigatórios'); _salvandoFornecedor = false; return; }
         try {
             const url = id ? `/api/compras/fornecedores/${id}` : '/api/compras/fornecedores';
             const method = id ? 'PUT' : 'POST';
@@ -480,13 +478,13 @@
             document.getElementById('emailFinanceiro').value = f.email_financeiro || '';
             document.getElementById('whatsapp').value = f.whatsapp || '';
             document.getElementById('website').value = f.website || '';
-            document.getElementById('condi��esPagamento').value = f.condi��es_pagamento || '';
+            document.getElementById('condiãesPagamento').value = f.condiães_pagamento || '';
             document.getElementById('prazoEntrega').value = f.prazo_entrega || '';
             document.getElementById('banco').value = f.banco || '';
             document.getElementById('agencia').value = f.agencia || '';
             document.getElementById('conta').value = f.conta || '';
             document.getElementById('chavePix').value = f.chave_pix || '';
-            document.getElementById('avalia��o').value = f.avalia��o || '0';
+            document.getElementById('avaliação').value = f.avaliação || '0';
             document.getElementById('logoPath').value = f.logo || '';
             document.getElementById('produtosFornecidos').value = f.produtos_fornecidos || '';
             document.getElementById('certificacoes').value = f.certificacoes || '';
@@ -505,19 +503,19 @@
             const f = d.fornecedor || d;
             document.getElementById('viewFornNome').innerHTML = '<i class="fas fa-building"></i> ' + (f.razao_social || f.nome_fantasia || 'Fornecedor');
             let stars = '';
-            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avalia��o || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
+            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avaliação || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
             document.getElementById('viewFornBody').innerHTML =
                 '<div class="view-section"><h4><i class="fas fa-building"></i> Dados Gerais</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>Raz�o Social</label><p>' + (f.razao_social || '-') + '</p></div>' +
+                    '<div class="view-item"><label>Razão Social</label><p>' + (f.razao_social || '-') + '</p></div>' +
                     '<div class="view-item"><label>Nome Fantasia</label><p>' + (f.nome_fantasia || '-') + '</p></div>' +
                     '<div class="view-item"><label>CNPJ</label><p>' + formatarCNPJ(f.cnpj) + '</p></div>' +
                     '<div class="view-item"><label>IE</label><p>' + (f.inscricao_estadual || '-') + '</p></div>' +
                     '<div class="view-item"><label>Categoria</label><p>' + (f.categoria || '-') + '</p></div>' +
                     '<div class="view-item"><label>Status</label><p><span class="badge badge-' + (f.status === 'ativo' ? 'approved' : f.status === 'inativo' ? 'cancelled' : 'pending') + '">' + (f.status || '-') + '</span></p></div>' +
                 '</div></div>' +
-                '<div class="view-section"><h4><i class="fas fa-map-marker-alt"></i> Endere�o</h4><div class="view-grid">' +
+                '<div class="view-section"><h4><i class="fas fa-map-marker-alt"></i> Endereço</h4><div class="view-grid">' +
                     '<div class="view-item"><label>CEP</label><p>' + (f.cep || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Endere�o</label><p>' + (f.endereco || '-') + '</p></div>' +
+                    '<div class="view-item"><label>Endereço</label><p>' + (f.endereco || '-') + '</p></div>' +
                     '<div class="view-item"><label>Bairro</label><p>' + (f.bairro || '-') + '</p></div>' +
                     '<div class="view-item"><label>Cidade/UF</label><p>' + (f.cidade || '-') + '/' + (f.estado || '-') + '</p></div>' +
                 '</div></div>' +
@@ -530,17 +528,17 @@
                     '<div class="view-item"><label>Website</label><p>' + (f.website || '-') + '</p></div>' +
                 '</div></div>' +
                 '<div class="view-section"><h4><i class="fas fa-dollar-sign"></i> Financeiro</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>Pagamento</label><p>' + (f.condi��es_pagamento || '-') + '</p></div>' +
+                    '<div class="view-item"><label>Pagamento</label><p>' + (f.condiães_pagamento || '-') + '</p></div>' +
                     '<div class="view-item"><label>Prazo Entrega</label><p>' + (f.prazo_entrega || '-') + '</p></div>' +
                     '<div class="view-item"><label>Banco</label><p>' + (f.banco || '-') + ' Ag:' + (f.agencia || '-') + ' CC:' + (f.conta || '-') + '</p></div>' +
                     '<div class="view-item"><label>PIX</label><p>' + (f.chave_pix || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Avalia��o</label><p>' + stars + '</p></div>' +
+                    '<div class="view-item"><label>Avaliação</label><p>' + stars + '</p></div>' +
                 '</div></div>' +
                 (f.produtos_fornecidos || f.certificacoes || f.observacoes ?
-                    '<div class="view-section"><h4><i class="fas fa-file-alt"></i> Informa��es Adicionais</h4>' +
+                    '<div class="view-section"><h4><i class="fas fa-file-alt"></i> Informações Adicionais</h4>' +
                     (f.produtos_fornecidos ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Produtos</label><p>' + f.produtos_fornecidos + '</p></div>' : '') +
-                    (f.certificacoes ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certifica��es</label><p>' + f.certificacoes + '</p></div>' : '') +
-                    (f.observacoes ? '<div class="view-item"><label>Observa��es</label><p>' + f.observacoes + '</p></div>' : '') +
+                    (f.certificacoes ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certificações</label><p>' + f.certificacoes + '</p></div>' : '') +
+                    (f.observacoes ? '<div class="view-item"><label>Observações</label><p>' + f.observacoes + '</p></div>' : '') +
                     '</div>' : '');
             document.getElementById('modalVisualizarFornecedor').classList.add('active');
         } catch (e) { alert('Erro ao carregar detalhes'); }

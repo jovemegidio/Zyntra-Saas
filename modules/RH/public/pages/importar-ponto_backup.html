@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -383,23 +383,23 @@
         <!-- Tabs -->
         <div class="tabs">
             <button class="tab-btn active" onclick="showTab('config')">
-                <i class="fas fa-cog"></i> Configura��o
+                <i class="fas fa-cog"></i> Configuração
             </button>
             <button class="tab-btn" onclick="showTab('import')">
                 <i class="fas fa-download"></i> Importar
             </button>
             <button class="tab-btn" onclick="showTab('history')">
-                <i class="fas fa-history"></i> Hist�rico
+                <i class="fas fa-history"></i> Histórico
             </button>
         </div>
 
-        <!-- Tab: Configura��o -->
+        <!-- Tab: Configuração -->
         <div id="tab-config" class="tab-content active">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-server"></i>
-                        Conex�o com Control iD
+                        Conexão com Control iD
                     </h3>
                     <div class="connection-status offline" id="connection-status">
                         <i class="fas fa-circle"></i>
@@ -411,7 +411,7 @@
                         <i class="fas fa-info-circle"></i>
                         <div>
                             <strong>Como encontrar o IP do Control iD:</strong><br>
-                            No equipamento, acesse Menu → Comunica��o → Ethernet/Wi-Fi para ver o IP configurado.
+                            No equipamento, acesse Menu → Comunicação → Ethernet/Wi-Fi para ver o IP configurado.
                             O equipamento deve estar na mesma rede que este servidor.
                         </div>
                     </div>
@@ -425,12 +425,12 @@
                         <div class="form-group">
                             <label class="form-label">Porta</label>
                             <input type="number" class="form-input" id="device-port" value="80">
-                            <span class="help-text">Padr�o: 80 (HTTP) ou 443 (HTTPS)</span>
+                            <span class="help-text">Padrão: 80 (HTTP) ou 443 (HTTPS)</span>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Usu�rio</label>
+                            <label class="form-label">Usuário</label>
                             <input type="text" class="form-input" id="device-user" value="admin">
-                            <span class="help-text">Usu�rio de acesso ao equipamento</span>
+                            <span class="help-text">Usuário de acesso ao equipamento</span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Senha</label>
@@ -442,16 +442,16 @@
                     <div style="margin-top: 20px; display: flex; gap: 12px;">
                         <button class="btn btn-primary" onclick="testConnection()">
                             <i class="fas fa-plug"></i>
-                            Testar Conex�o
+                            Testar Conexão
                         </button>
                         <button class="btn btn-success" onclick="saveConfig()" id="btn-save-config" disabled>
                             <i class="fas fa-save"></i>
-                            Salvar Configura��o
+                            Salvar Configuração
                         </button>
                     </div>
 
                     <div class="device-info" id="device-info" style="display: none;">
-                        <h4>Informa��es do Equipamento</h4>
+                        <h4>Informações do Equipamento</h4>
                         <div class="device-info-grid">
                             <div class="device-info-item">
                                 <span class="device-info-label">Modelo</span>
@@ -466,7 +466,7 @@
                                 <span class="device-info-value" id="info-firmware">-</span>
                             </div>
                             <div class="device-info-item">
-                                <span class="device-info-label">Usu�rios</span>
+                                <span class="device-info-label">Usuários</span>
                                 <span class="device-info-value" id="info-users">-</span>
                             </div>
                             <div class="device-info-item">
@@ -474,7 +474,7 @@
                                 <span class="device-info-value" id="info-records">-</span>
                             </div>
                             <div class="device-info-item">
-                                <span class="device-info-label">�ltimo Registro</span>
+                                <span class="device-info-label">último Registro</span>
                                 <span class="device-info-value" id="info-last-record">-</span>
                             </div>
                         </div>
@@ -489,13 +489,13 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-file-import"></i>
-                        Importar Marca��es
+                        Importar Marcações
                     </h3>
                 </div>
                 <div class="card-body">
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Data In�cio *</label>
+                            <label class="form-label">Data Início *</label>
                             <input type="date" class="form-input" id="import-date-start">
                         </div>
                         <div class="form-group">
@@ -503,13 +503,13 @@
                             <input type="date" class="form-input" id="import-date-end">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Funcion�rio</label>
+                            <label class="form-label">Funcionário</label>
                             <select class="form-select" id="import-employee">
-                                <option value="">Todos os funcion�rios</option>
+                                <option value="">Todos os funcionários</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Tipo de Importa��o</label>
+                            <label class="form-label">Tipo de Importação</label>
                             <select class="form-select" id="import-type">
                                 <option value="api">Via API (Control iD)</option>
                                 <option value="afd">Arquivo AFD</option>
@@ -530,13 +530,13 @@
                     <div style="margin-top: 20px;">
                         <button class="btn btn-primary" onclick="startImport()">
                             <i class="fas fa-play"></i>
-                            Iniciar Importa��o
+                            Iniciar Importação
                         </button>
                     </div>
 
                     <!-- Progress -->
                     <div id="import-progress" style="display: none; margin-top: 24px;">
-                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da Importa��o</h4>
+                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Progresso da Importação</h4>
                         <div class="progress-bar">
                             <div class="progress-bar-fill" id="progress-fill" style="width: 0%"></div>
                         </div>
@@ -564,7 +564,7 @@
 
                     <!-- Log -->
                     <div id="import-log-section" style="display: none; margin-top: 24px;">
-                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de Importa��o</h4>
+                        <h4 style="font-size: 0.875rem; color: #64748b; margin-bottom: 8px;">Log de Importação</h4>
                         <div class="log-container" id="import-log"></div>
                     </div>
                 </div>
@@ -575,7 +575,7 @@
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-eye"></i>
-                        Pr�-visualiza��o
+                        Pré-visualização
                     </h3>
                 </div>
                 <div class="card-body">
@@ -585,7 +585,7 @@
                                 <tr>
                                     <th>Data</th>
                                     <th>Hora</th>
-                                    <th>Funcion�rio</th>
+                                    <th>Funcionário</th>
                                     <th>PIS</th>
                                     <th>Status</th>
                                 </tr>
@@ -597,13 +597,13 @@
             </div>
         </div>
 
-        <!-- Tab: Hist�rico -->
+        <!-- Tab: Histórico -->
         <div id="tab-history" class="tab-content">
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-history"></i>
-                        Hist�rico de Importa��es
+                        Histórico de Importações
                     </h3>
                 </div>
                 <div class="card-body">
@@ -612,18 +612,18 @@
                             <thead>
                                 <tr>
                                     <th>Data/Hora</th>
-                                    <th>Per�odo</th>
+                                    <th>Período</th>
                                     <th>Registros</th>
                                     <th>Sucesso</th>
                                     <th>Erros</th>
-                                    <th>Usu�rio</th>
+                                    <th>Usuário</th>
                                     <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody id="history-tbody">
                                 <tr>
                                     <td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">
-                                        Nenhuma importa��o realizada ainda
+                                        Nenhuma importação realizada ainda
                                     </td>
                                 </tr>
                             </tbody>
@@ -639,7 +639,7 @@
         let isConnected = false;
         let deviceInfo = null;
 
-        // Inicializa��o
+        // Inicialização
         document.addEventListener('DOMContentLoaded', () => {
             loadConfig();
             loadEmployees();
@@ -659,7 +659,7 @@
             if (tabId === 'history') loadImportHistory();
         }
 
-        // Configura��o - carrega do servidor (Bug #4 fix)
+        // Configuração - carrega do servidor (Bug #4 fix)
         async function loadConfig() {
             try {
                 const response = await fetch('/api/rh/controlid/config', {
@@ -704,7 +704,7 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    alert('Configura��o salva no servidor com sucesso!');
+                    alert('Configuração salva no servidor com sucesso!');
                 } else {
                     alert('Erro ao salvar: ' + (result.message || 'Tente novamente'));
                 }
@@ -712,11 +712,11 @@
                 console.error('Erro ao salvar config:', error);
                 // Fallback localStorage
                 localStorage.setItem('controlid_config', JSON.stringify({ ip, port: porta, user: usuario }));
-                alert('Configura��o salva localmente (servidor indispon�vel)');
+                alert('Configuração salva localmente (servidor indisponível)');
             }
         }
 
-        // Testar Conex�o
+        // Testar Conexão
         async function testConnection() {
             const ip = document.getElementById('device-ip').value;
             const port = document.getElementById('device-port').value;
@@ -728,7 +728,7 @@
                 return;
             }
 
-            updateConnectionStatus('testing', 'Testando conex�o...');
+            updateConnectionStatus('testing', 'Testando conexão...');
 
             try {
                 const response = await fetch('/api/rh/controlid/test-connection', {
@@ -749,13 +749,13 @@
                     showDeviceInfo(result.device);
                     document.getElementById('btn-save-config').disabled = false;
                 } else {
-                    updateConnectionStatus('offline', 'Falha na conex�o');
-                    alert('Erro: ' + (result.message || 'N�o foi poss�vel conectar ao equipamento'));
+                    updateConnectionStatus('offline', 'Falha na conexão');
+                    alert('Erro: ' + (result.message || 'Não foi possível conectar ao equipamento'));
                 }
             } catch (error) {
-                console.error('Erro ao testar conex�o:', error);
-                updateConnectionStatus('offline', 'Erro de conex�o');
-                alert('Erro ao conectar. Verifique se o servidor est� configurado para acessar o Control iD.');
+                console.error('Erro ao testar conexão:', error);
+                updateConnectionStatus('offline', 'Erro de conexão');
+                alert('Erro ao conectar. Verifique se o servidor está configurado para acessar o Control iD.');
             }
         }
 
@@ -775,7 +775,7 @@
             document.getElementById('info-last-record').textContent = device.lastRecord || '-';
         }
 
-        // Funcion�rios
+        // Funcionários
         async function loadEmployees() {
             try {
                 const response = await fetch('/api/rh/funcionarios', {
@@ -792,11 +792,11 @@
                     select.appendChild(option);
                 });
             } catch (error) {
-                console.error('Erro ao carregar funcion�rios:', error);
+                console.error('Erro ao carregar funcionários:', error);
             }
         }
 
-        // Datas padr�o
+        // Datas padrão
         function setDefaultDates() {
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -805,7 +805,7 @@
             document.getElementById('import-date-end').value = today.toISOString().split('T')[0];
         }
 
-        // Tipo de importa��o
+        // Tipo de importação
         function setupImportTypeChange() {
             document.getElementById('import-type').addEventListener('change', (e) => {
                 const fileSection = document.getElementById('file-upload-section');
@@ -813,7 +813,7 @@
             });
         }
 
-        // Importa��o
+        // Importação
         async function startImport() {
             const importType = document.getElementById('import-type').value;
             const dateStart = document.getElementById('import-date-start').value;
@@ -821,12 +821,12 @@
             const employeeId = document.getElementById('import-employee').value;
 
             if (!dateStart || !dateEnd) {
-                alert('Informe o per�odo de importa��o');
+                alert('Informe o período de importação');
                 return;
             }
 
             if (importType === 'api' && !isConnected) {
-                alert('Configure e teste a conex�o com o Control iD primeiro');
+                alert('Configure e teste a conexão com o Control iD primeiro');
                 showTab('config');
                 return;
             }
@@ -847,16 +847,16 @@
         async function importFromApi(dateStart, dateEnd, employeeId) {
             showProgress();
             clearLog();
-            addLog('Iniciando importa��o via API Control iD...', 'info');
+            addLog('Iniciando importação via API Control iD...', 'info');
 
-            // Pegar config dos campos (j� carregados do servidor)
+            // Pegar config dos campos (já carregados do servidor)
             const ip = document.getElementById('device-ip').value;
             const port = document.getElementById('device-port').value;
             const user = document.getElementById('device-user').value;
             const password = document.getElementById('device-password').value;
 
             if (!ip) {
-                addLog('Erro: IP do equipamento n�o configurado', 'error');
+                addLog('Erro: IP do equipamento não configurado', 'error');
                 return;
             }
 
@@ -883,16 +883,16 @@
                 if (result.success) {
                     updateProgress(100);
                     showSummary(result.summary);
-                    addLog(`Importa��o conclu�da! ${result.summary.success} registros importados.`, 'success');
+                    addLog(`Importação concluída! ${result.summary.success} registros importados.`, 'success');
                     
                     if (result.records && result.records.length > 0) {
                         showPreview(result.records);
                     }
                 } else {
-                    addLog('Erro na importa��o: ' + result.message, 'error');
+                    addLog('Erro na importação: ' + result.message, 'error');
                 }
             } catch (error) {
-                console.error('Erro na importa��o:', error);
+                console.error('Erro na importação:', error);
                 addLog('Erro: ' + error.message, 'error');
             }
         }
@@ -937,13 +937,13 @@
                     if (result.success) {
                         updateProgress(100);
                         showSummary(result.summary);
-                        addLog(`Importa��o conclu�da! ${result.summary.success} registros importados.`, 'success');
+                        addLog(`Importação concluída! ${result.summary.success} registros importados.`, 'success');
                         
                         if (result.records && result.records.length > 0) {
                             showPreview(result.records);
                         }
                     } else {
-                        addLog('Erro na importa��o: ' + result.message, 'error');
+                        addLog('Erro na importação: ' + result.message, 'error');
                     }
                 } catch (error) {
                     console.error('Erro ao processar arquivo:', error);
@@ -959,7 +959,7 @@
             const records = [];
 
             lines.forEach(line => {
-                // Tipo 3 = Marca��o de ponto
+                // Tipo 3 = Marcação de ponto
                 if (line.length >= 34 && line.charAt(9) === '3') {
                     const nsr = line.substring(0, 9);
                     const data = line.substring(10, 18); // DDMMAAAA
@@ -986,7 +986,7 @@
             const lines = content.split('\n');
             const records = [];
             
-            // Pular cabe�alho
+            // Pular cabeçalho
             for (let i = 1; i < lines.length; i++) {
                 const cols = lines[i].split(';');
                 if (cols.length >= 4) {
@@ -1011,7 +1011,7 @@
 
         function updateProgress(percent) {
             document.getElementById('progress-fill').style.width = percent + '%';
-            document.getElementById('progress-text').textContent = percent < 100 ? `Processando... ${percent}%` : 'Conclu�do!';
+            document.getElementById('progress-text').textContent = percent < 100 ? `Processando... ${percent}%` : 'Concluído!';
         }
 
         function showSummary(summary) {
@@ -1060,7 +1060,7 @@
             };
         }
 
-        // Bug #5 fix: Carregar hist�rico de importa��es do servidor
+        // Bug #5 fix: Carregar histórico de importações do servidor
         async function loadImportHistory() {
             try {
                 const response = await fetch('/api/rh/controlid/importacoes?limite=50', {
@@ -1070,7 +1070,7 @@
 
                 const tbody = document.getElementById('history-tbody');
                 if (!data.success || !data.importacoes || data.importacoes.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">Nenhuma importa��o realizada ainda</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #94a3b8; padding: 40px;">Nenhuma importação realizada ainda</td></tr>`;
                     return;
                 }
 
@@ -1080,7 +1080,7 @@
                         ? `${new Date(imp.periodo_inicio).toLocaleDateString('pt-BR')} a ${new Date(imp.periodo_fim).toLocaleDateString('pt-BR')}`
                         : '-';
                     const statusClass = imp.status === 'concluido' ? 'success' : (imp.status === 'erro' ? 'error' : 'pending');
-                    const statusText = imp.status === 'concluido' ? 'Conclu�do' : (imp.status === 'erro' ? 'Erro' : 'Pendente');
+                    const statusText = imp.status === 'concluido' ? 'Concluído' : (imp.status === 'erro' ? 'Erro' : 'Pendente');
                     const tipoLabel = imp.tipo === 'api_controlid' ? 'API' : (imp.tipo === 'arquivo' ? 'Arquivo' : imp.tipo);
 
                     return `<tr>
@@ -1094,7 +1094,7 @@
                     </tr>`;
                 }).join('');
             } catch (error) {
-                console.error('Erro ao carregar hist�rico:', error);
+                console.error('Erro ao carregar histórico:', error);
             }
         }
     </script>

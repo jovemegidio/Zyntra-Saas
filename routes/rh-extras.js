@@ -112,7 +112,7 @@ router.get('/notificacoes', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar notificações:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -133,7 +133,7 @@ const marcarNotificacaoLidaHandler = async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao marcar notificação como lida:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 };
 router.put('/notificacoes/:id/ler', authenticateToken, marcarNotificacaoLidaHandler);
@@ -156,7 +156,7 @@ router.put('/notificacoes/ler-todas', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao marcar todas notificações como lidas:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -178,7 +178,7 @@ router.post('/notificacoes', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao criar notificação:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -205,7 +205,7 @@ router.get('/funcionarios/aniversariantes', authenticateToken, async (req, res) 
 
     } catch (error) {
         console.error('Erro ao buscar aniversariantes:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -281,7 +281,7 @@ router.get('/feriados', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar feriados:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -322,7 +322,7 @@ router.get('/calendario', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar calendário:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -345,7 +345,7 @@ router.post('/calendario', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao criar evento:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -369,7 +369,7 @@ router.put('/calendario/:id', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao atualizar evento:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -387,7 +387,7 @@ router.delete('/calendario/:id', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao excluir evento:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -446,7 +446,7 @@ router.get('/ponto/marcacoes', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar marcações:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -588,7 +588,7 @@ router.put('/ponto/marcacoes/:id', authenticateToken, requireAdminOrRH, async (r
 
     } catch (error) {
         console.error('Erro ao editar marcação:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -617,7 +617,7 @@ router.post('/ponto/marcacoes', authenticateToken, requireAdminOrRH, async (req,
 
     } catch (error) {
         console.error('Erro ao adicionar marcação:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -698,7 +698,7 @@ router.delete('/ponto/marcacoes/:id', authenticateToken, requireAdminOrRH, async
 
     } catch (error) {
         console.error('Erro ao excluir marcação:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -748,7 +748,7 @@ router.get('/ponto/alteracoes', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar alterações:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -802,7 +802,7 @@ router.get('/ponto/resumo', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar resumo:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -838,7 +838,7 @@ router.get('/penalidades', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar penalidades:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -869,7 +869,7 @@ router.post('/penalidades', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao criar penalidade:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -887,7 +887,7 @@ router.delete('/penalidades/:id', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao excluir penalidade:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -927,7 +927,7 @@ router.get('/ponto/resumo', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('Erro ao buscar resumo:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -1172,7 +1172,7 @@ router.get('/espelho-ponto', authenticateToken, async (req, res) => {
 
     } catch (error) {
         console.error('[ESPELHO-PONTO] Erro:', error);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 

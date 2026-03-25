@@ -21,7 +21,7 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Favicon e Ícones PWA -->
-    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
 
 
     <!-- PWA Manifest -->
@@ -11797,7 +11797,6 @@
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
                     <title>Recibo - Pedido ${pedidoAtual.id}</title>
                     <style>
                         @page { margin: 10mm; size: A4; }
@@ -12098,7 +12097,6 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
 <title>${d.nomeArquivo}</title>
 <style>
 @page { margin: 10mm 12mm; size: A4; }
@@ -14843,8 +14841,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             dropdown.innerHTML = produtos.map((p, idx) => `
                 <div class="autocomplete-item" data-idx="${idx}" onclick="selecionarProdutoAutocomplete(${idx})">
-                    <span class="autocomplete-item-code">${escaparHTML(p.código || '')}</span>
-                    <span class="autocomplete-item-desc">${escaparHTML(p.descrição || p.nome || '')}</span>
+                    <span class="autocomplete-item-code">${escaparHTML(p.codigo || p.código || '')}</span>
+                    <span class="autocomplete-item-desc">${escaparHTML(p.descricao || p.descrição || p.nome || '')}</span>
                     <span class="autocomplete-item-info">
                         <span><i class="fas fa-box"></i> Estoque: ${formatarQuantidade(p.estoque_atual || 0)} ${escaparHTML(p.unidade || 'M')}</span>
                         <span><i class="fas fa-tag"></i> ${formatarMoeda(p.preco_venda || 0)}</span>
@@ -15127,9 +15125,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             try {
                 const headers = { 'Content-Type': 'application/json' };
-                // Usar endpoint correto de produtos (tabela produtos)
-                let url = '/api/produtos?limit=50';
-                if (termo) url += `&termo=${encodeURIComponent(termo)}`;
+                // Usar endpoint de autocomplete (retorna todos os produtos ativos)
+                let url;
+                if (termo) {
+                    url = `/api/vendas/produtos/autocomplete/${encodeURIComponent(termo)}?limit=50`;
+                } else {
+                    url = `/api/vendas/produtos/autocomplete/_?limit=50`;
+                }
 
                 const resp = await fetch(url, { credentials: 'include', headers });
 
@@ -15140,9 +15142,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 if (!resp.ok) throw new Error('HTTP ' + resp.status);
 
                 const data = await resp.json();
-                // /api/produtos retorna { rows, items, total }
-                let produtos = data.rows || data.items || data;
-                if (!Array.isArray(produtos)) produtos = [];
+                // autocomplete retorna array direto ou { rows, items }
+                let produtos = Array.isArray(data) ? data : (data.rows || data.items || []);
 
                 // Filtrar por categoria se selecionada
                 if (categoria && produtos.length > 0) {
@@ -21591,7 +21592,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 <!DOCTYPE html>
                 <html>
                 <head>
-    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
                     <title>Zyntra: Relatório de Vendas</title>
                     <style>
                         body { font-family: Arial, sans-serif; padding: 20px; }
@@ -21898,7 +21898,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 <html lang="pt-BR">
                 <head>
                     <meta charset="UTF-8">
-                    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
                     <title>Zyntra: ${título}</title>
                     <style>
                         @page { margin: 10mm; size: A4; }

@@ -2,9 +2,7 @@
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 
     <meta charset="UTF-8">
@@ -16,7 +14,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Eventos Faturamento</title>
 
-    <!-- Sistema de Autentica��o Unificado � DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticação Unificado é DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260324" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -31,16 +29,16 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 
-    <!-- Design System � Faturamento Layout -->
+    <!-- Design System é Faturamento Layout -->
     <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260301">
 
-    <!-- Global Header & Sidebar � Padr�o Institucional -->
+    <!-- Global Header & Sidebar é Padrão Institucional -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260301">
 
     <!-- Performance: Skeleton Loaders -->
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260301">
 
-    <!-- Popup Confirma��o -->
+    <!-- Popup Confirmação -->
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260301">
 
     <!-- Anti-Copy Protection -->
@@ -76,13 +74,13 @@
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relat�rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn active" title="Eventos"><i class="fas fa-history"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="Log�stica"><i class="fas fa-truck"></i></a>
-                <a href="inutilizacao.html" class="sidebar-btn" title="Inutiliza��o"><i class="fas fa-ban"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logística"><i class="fas fa-truck"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configura��es" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
         <main class="main-area">
@@ -93,15 +91,15 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Eventos Faturamento</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="Notifica��es" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
                             <img alt="Foto" id="user-photo" style="display:none">
                             <span id="user-initials">U</span>
@@ -120,21 +118,21 @@
                                 <div class="page-icon cyan"><i class="fas fa-history"></i></div>
                                 <div>
                                     <h2 class="page-title">Eventos da NFe</h2>
-                                    <p class="page-subtitle">Consulte, cancele e registre corre��es em notas fiscais</p>
+                                    <p class="page-subtitle">Consulte, cancele e registre correães em notas fiscais</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Card: Informa��es da NFe -->
+                    <!-- Card: Informações da NFe -->
                     <div class="card" style="margin-bottom:20px;">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-info-circle"></i> Informa��es da NFe</span>
+                            <span class="card-title"><i class="fas fa-info-circle"></i> Informações da NFe</span>
                         </div>
                         <div class="card-body">
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label>ID / N�mero da NFe</label>
+                                    <label>ID / Número da NFe</label>
                                     <input type="text" class="form-control" id="nfeId" placeholder="Ex: 12345">
                                 </div>
                                 <div class="form-group" style="align-self:end;">
@@ -142,10 +140,10 @@
                                 </div>
                             </div>
                             <div id="nfeInfoDisplay" class="nfe-info-display" style="display:none;">
-                                <div class="nfe-info-item"><div class="lbl">N�mero</div><div class="val" id="infoNumero">-</div></div>
-                                <div class="nfe-info-item"><div class="lbl">S�rie</div><div class="val" id="infoSerie">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Número</div><div class="val" id="infoNumero">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Série</div><div class="val" id="infoSerie">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Chave de Acesso</div><div class="val" id="infoChave" style="word-break:break-all;">-</div></div>
-                                <div class="nfe-info-item"><div class="lbl">Destinat�rio</div><div class="val" id="infoDestinatario">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Destinatério</div><div class="val" id="infoDestinatario">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Valor</div><div class="val" id="infoValor">-</div></div>
                                 <div class="nfe-info-item"><div class="lbl">Status</div><div class="val" id="infoStatus">-</div></div>
                             </div>
@@ -160,12 +158,12 @@
                         <div class="card-body">
                             <div class="danger-banner">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <span><strong>Aten��o:</strong> O cancelamento � irrevers�vel e deve ser feito em at� 24 horas ap�s a autoriza��o.</span>
+                                <span><strong>Atenão:</strong> O cancelamento é irreversível e deve ser feito em até 24 horas após a autorização.</span>
                             </div>
                             <div class="form-group">
                                 <label>Justificativa do Cancelamento <span style="color:#ef4444;">*</span></label>
-                                <textarea class="form-control" id="justificativaCancelamento" rows="3" placeholder="M�nimo 15 caracteres, m�ximo 255" minlength="15" maxlength="255" oninput="atualizarContadorCancel()"></textarea>
-                                <div class="char-count"><span id="charCountCancel">0</span>/255 caracteres (m�nimo 15)</div>
+                                <textarea class="form-control" id="justificativaCancelamento" rows="3" placeholder="Mínimo 15 caracteres, máximo 255" minlength="15" maxlength="255" oninput="atualizarContadorCancel()"></textarea>
+                                <div class="char-count"><span id="charCountCancel">0</span>/255 caracteres (mínimo 15)</div>
                             </div>
                             <div class="actions">
                                 <button class="btn btn-danger" onclick="cancelarNFe()"><i class="fas fa-times-circle"></i> Cancelar NFe</button>
@@ -173,20 +171,20 @@
                         </div>
                     </div>
 
-                    <!-- Card: Carta de Corre��o -->
+                    <!-- Card: Carta de Correção -->
                     <div class="card" id="cceCard" style="display:none;margin-bottom:20px;">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-edit"></i> Carta de Corre��o Eletr�nica (CC-e)</span>
+                            <span class="card-title"><i class="fas fa-edit"></i> Carta de Correção Eletrônica (CC-e)</span>
                         </div>
                         <div class="card-body">
                             <div class="warning-banner">
                                 <i class="fas fa-info-circle"></i>
-                                <span>A CC-e n�o permite alterar valores, impostos, dados do emitente/destinat�rio ou a descri��o da mercadoria.</span>
+                                <span>A CC-e não permite alterar valores, impostos, dados do emitente/destinatério ou a descrição da mercadoria.</span>
                             </div>
                             <div class="form-group">
-                                <label>Texto da Corre��o <span style="color:#ef4444;">*</span></label>
-                                <textarea class="form-control" id="textoCCe" rows="4" placeholder="M�nimo 15 caracteres, m�ximo 1000" minlength="15" maxlength="1000" oninput="atualizarContadorCCe()"></textarea>
-                                <div class="char-count"><span id="charCountCCe">0</span>/1000 caracteres (m�nimo 15)</div>
+                                <label>Texto da Correção <span style="color:#ef4444;">*</span></label>
+                                <textarea class="form-control" id="textoCCe" rows="4" placeholder="Mínimo 15 caracteres, máximo 1000" minlength="15" maxlength="1000" oninput="atualizarContadorCCe()"></textarea>
+                                <div class="char-count"><span id="charCountCCe">0</span>/1000 caracteres (mínimo 15)</div>
                             </div>
                             <div class="actions">
                                 <button class="btn btn-warning" onclick="registrarCCe()"><i class="fas fa-edit"></i> Registrar CC-e</button>
@@ -194,10 +192,10 @@
                         </div>
                     </div>
 
-                    <!-- Card: Hist�rico de Eventos -->
+                    <!-- Card: Histórico de Eventos -->
                     <div class="card" style="margin-bottom:20px;">
                         <div class="card-header">
-                            <span class="card-title"><i class="fas fa-list"></i> Hist�rico de Eventos</span>
+                            <span class="card-title"><i class="fas fa-list"></i> Histórico de Eventos</span>
                         </div>
                         <div class="card-body">
                             <div style="overflow-x:auto;">
@@ -207,7 +205,7 @@
                                             <th>Tipo</th>
                                             <th>Data/Hora</th>
                                             <th>Protocolo</th>
-                                            <th>Descri��o</th>
+                                            <th>Descrição</th>
                                             <th>Status</th>
                                         </tr>
                                     </thead>
@@ -250,7 +248,7 @@
             .then(r => r.json())
             .then(user => {
                 const d = user.dados || user;
-                const nome = (d.nome || d.name || 'Usu�rio').split(' ')[0];
+                const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
                 document.getElementById('user-name').textContent = nome;
                 const h = new Date().getHours();
                 document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
@@ -275,11 +273,11 @@
 
         function carregarNFe() {
             const id = document.getElementById('nfeId').value.trim();
-            if (!id) return showAlert('Informe o ID ou n�mero da NFe', 'warning');
+            if (!id) return showAlert('Informe o ID ou número da NFe', 'warning');
 
             fetch('/api/nfe/' + id, { credentials:'include' })
             .then(r => {
-                if (!r.ok) throw new Error('NFe n�o encontrada');
+                if (!r.ok) throw new Error('NFe não encontrada');
                 return r.json();
             })
             .then(data => {
@@ -304,8 +302,8 @@
         function cancelarNFe() {
             if (!nfeCarregada) return showAlert('Carregue uma NFe primeiro', 'warning');
             const just = document.getElementById('justificativaCancelamento').value.trim();
-            if (just.length < 15) return showAlert('Justificativa deve ter no m�nimo 15 caracteres', 'warning');
-            if (!confirm('ATEN��O: Esta a��o � IRREVERS�VEL. Deseja realmente cancelar esta NFe?')) return;
+            if (just.length < 15) return showAlert('Justificativa deve ter no mínimo 15 caracteres', 'warning');
+            if (!confirm('ATENº O: Esta ação é IRREVERSÍVEL. Deseja realmente cancelar esta NFe?')) return;
 
             const id = nfeCarregada.id || nfeCarregada.numero || document.getElementById('nfeId').value;
             fetch('/api/nfe/' + id + '/cancelar', {
@@ -329,7 +327,7 @@
         function registrarCCe() {
             if (!nfeCarregada) return showAlert('Carregue uma NFe primeiro', 'warning');
             const texto = document.getElementById('textoCCe').value.trim();
-            if (texto.length < 15) return showAlert('Texto da corre��o deve ter no m�nimo 15 caracteres', 'warning');
+            if (texto.length < 15) return showAlert('Texto da correção deve ter no mínimo 15 caracteres', 'warning');
 
             const id = nfeCarregada.id || nfeCarregada.numero || document.getElementById('nfeId').value;
             fetch('/api/nfe/' + id + '/cce', {
@@ -343,7 +341,7 @@
                 return r.json();
             })
             .then(data => {
-                showAlert('Carta de Corre��o registrada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
+                showAlert('Carta de Correção registrada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
                 document.getElementById('textoCCe').value = '';
                 atualizarContadorCCe();
                 carregarEventos(id);
@@ -371,7 +369,7 @@
                         <td><strong>${ev.tipo || '-'}</strong></td>
                         <td>${dt}</td>
                         <td class="code">${ev.protocolo || '-'}</td>
-                        <td>${ev.descri��o || ev.texto || '-'}</td>
+                        <td>${ev.descrição || ev.texto || '-'}</td>
                         <td><span class="badge ${statusClass}">${ev.status || '-'}</span></td>
                     </tr>`;
                 }).join('');
@@ -399,7 +397,7 @@
         }
 
         function abrirModalConfiguracoes() {
-            alert('Configura��es - Em desenvolvimento');
+            alert('Configurações - Em desenvolvimento');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -413,12 +411,12 @@
         });
     </script>
 
-    <!-- Sistema de Notifica��es Global -->
+    <!-- Sistema de Notificações Global -->
     <script src="/js/notification-manager.js?v=20260301"></script>
     <script src="/_shared/connection-monitor.js?v=20260301"></script>
     <script src="/js/popup-confirmacao.js?v=20260301"></script>
 
-    <!-- Utilit�rios Compartilhados -->
+    <!-- Utilitários Compartilhados -->
     <script src="/_shared/confirm-dialog.js?v=20260301"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260301" defer></script>
 

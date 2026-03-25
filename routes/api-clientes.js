@@ -140,7 +140,7 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
             
         } catch (error) {
             console.error('❌ Erro ao criar cliente:', error);
-            res.status(500).json({ error: 'Erro ao criar cliente', message: error.message });
+            res.status(500).json({ error: 'Erro ao criar cliente', message: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

@@ -229,7 +229,7 @@ router.get('/rhid/config', authenticateToken, async (req, res) => {
         res.json({ success: true, config: rows.length > 0 ? rows[0] : null });
     } catch (error) {
         console.error('[RHiD] Erro ao buscar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -273,7 +273,7 @@ router.post('/rhid/config', authenticateToken, async (req, res) => {
         res.json({ success: true, message: 'Configuração RHiD salva com sucesso' });
     } catch (error) {
         console.error('[RHiD] Erro ao salvar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -366,7 +366,7 @@ router.get('/rhid/devices', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('[RHiD] Erro ao listar devices:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -391,7 +391,7 @@ router.get('/rhid/employees', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('[RHiD] Erro ao listar employees:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -414,7 +414,7 @@ router.get('/rhid/ultimasmarcacoes', authenticateToken, async (req, res) => {
         });
     } catch (error) {
         console.error('[RHiD] Erro ao buscar últimas marcações:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -660,7 +660,7 @@ router.get('/config', authenticateToken, async (req, res) => {
         res.json({ success: true, config: rows.length > 0 ? rows[0] : null });
     } catch (error) {
         console.error('[Control iD] Erro ao buscar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -686,7 +686,7 @@ router.post('/config', authenticateToken, async (req, res) => {
         res.json({ success: true, message: 'Configuração salva com sucesso' });
     } catch (error) {
         console.error('[Control iD] Erro ao salvar config:', error.message);
-        res.status(500).json({ success: false, message: error.message });
+        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
     }
 });
 
@@ -870,7 +870,7 @@ router.get('/importacoes', authenticateToken, async (req, res) => {
             const [importacoes] = await pool.query('SELECT * FROM ponto_importacoes ORDER BY criado_em DESC LIMIT ?', [lim]);
             res.json({ success: true, importacoes: importacoes });
         } catch (e2) {
-            res.status(500).json({ success: false, message: error.message });
+            res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
         }
     }
 });

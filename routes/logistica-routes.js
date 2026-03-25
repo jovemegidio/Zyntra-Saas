@@ -169,7 +169,7 @@ module.exports = function createLogisticaRoutes(deps) {
             res.json(pedidos);
         } catch (error) {
             console.error('[LOGISTICA/PEDIDOS] Erro:', error);
-            res.status(500).json({ error: error.message, pedidos: [] });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.', pedidos: [] });
         }
     });
     
@@ -290,7 +290,7 @@ module.exports = function createLogisticaRoutes(deps) {
             if (error.code === 'ER_DUP_ENTRY') {
                 return res.status(400).json({ error: 'Transportadora com este CNPJ já existe' });
             }
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
     

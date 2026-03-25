@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -787,7 +785,7 @@
             document.getElementById('btn-stop-camera').style.display = 'flex';
             startScanning();
         } catch (err) {
-            showToast('Erro ao acessar câmera: ' + err.message, 'error');
+            showToast('Erro ao acessar câmera. Tente novamente.', 'error');
         }
     }
 
@@ -1039,7 +1037,7 @@
             document.getElementById('action-form').classList.remove('visible');
 
         } catch (err) {
-            showToast(err.message, 'error');
+            showToast('Erro ao processar. Tente novamente.', 'error');
         } finally {
             btn.disabled = false;
             if (currentAction === 'entrada') {

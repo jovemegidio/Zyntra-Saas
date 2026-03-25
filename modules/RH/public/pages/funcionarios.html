@@ -4851,7 +4851,7 @@
                     carregarFuncionários();
                 } else {
                     const err = await response.json();
-                    showToast('error', 'Erro', err.message || 'Erro ao atualizar funcionário', 4000);
+                    showToast('error', 'Erro', 'Erro ao atualizar funcionário', 4000);
                 }
             } catch (error) {
                 console.error('Erro ao salvar:', error);
@@ -4923,7 +4923,7 @@
                     mostrarCredenciais(dados.nome_completo);
                 } else {
                     const err = await response.json();
-                    showToast('error', 'Erro', err.message || 'Erro ao cadastrar funcionário', 5000);
+                    showToast('error', 'Erro', 'Erro ao cadastrar funcionário', 5000);
                 }
             } catch (error) {
                 console.error('Erro ao salvar:', error);
@@ -5024,7 +5024,7 @@
                     carregarFuncionarios();
                 } else {
                     const err = await response.json();
-                    showToast('error', 'Erro na Importao', err.message || 'Erro ao importar', 5000);
+                    showToast('error', 'Erro na Importao', 'Erro ao importar', 5000);
                 }
             } catch (error) {
                 console.error('Erro na importao:', error);

@@ -1735,7 +1735,7 @@ module.exports = function createRHRoutes(deps) {
             return res.json(resultado);
         } catch (error) {
             console.error('Erro ao gerar holerites em lote:', error);
-            return res.status(500).json({ message: 'Erro ao gerar holerites em lote', error: error.message });
+            return res.status(500).json({ message: 'Erro ao gerar holerites em lote', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

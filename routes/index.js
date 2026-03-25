@@ -471,7 +471,7 @@ module.exports = function registerAllRoutes(app, deps) {
             res.json(rows);
         } catch (error) {
             console.error('[USUARIOS] Erro:', error.message);
-            res.status(500).json({ message: 'Erro ao buscar usuários', error: error.message });
+            res.status(500).json({ message: 'Erro ao buscar usuários', error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 

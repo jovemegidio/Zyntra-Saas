@@ -160,7 +160,7 @@ function createContabilFiscalRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao gerar EFD ICMS/IPI:', error);
-            res.status(500).json({ error: 'Erro ao gerar SPED: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -200,7 +200,7 @@ function createContabilFiscalRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao gerar EFD Contribuições:', error);
-            res.status(500).json({ error: 'Erro ao gerar EFD Contribuições: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
@@ -239,7 +239,7 @@ function createContabilFiscalRouter(pool, authenticateToken) {
             });
         } catch (error) {
             console.error('❌ Erro ao gerar Sintegra:', error);
-            res.status(500).json({ error: 'Erro ao gerar Sintegra: ' + error.message });
+            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
 
