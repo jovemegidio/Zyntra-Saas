@@ -1303,8 +1303,19 @@ app.use('/modules/PCP', express.static(path.join(__dirname, 'modules', 'PCP'), {
     }
 }));
 
-app.use('/NFe', express.static(path.join(__dirname, 'modules', 'NFe'), { dotfiles: 'deny', index: false }));
-app.use('/e-Nf-e', express.static(path.join(__dirname, 'modules', 'NFe'), { dotfiles: 'deny', index: false }));
+const nfeStaticOptions = {
+    dotfiles: 'deny',
+    index: false,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+};
+app.use('/NFe', express.static(path.join(__dirname, 'modules', 'NFe'), nfeStaticOptions));
+app.use('/e-Nf-e', express.static(path.join(__dirname, 'modules', 'NFe'), nfeStaticOptions));
 
 // Servir templates de importação Zyntra (xlsx) para download direto
 // Rota explícita para subpastas (zyntra/) + arquivo direto
