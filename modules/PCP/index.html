@@ -9898,7 +9898,7 @@
             const matNames = { AL: 'Alumínio', PE: 'Polietileno (PE)', XLPE: 'XLPE', XLPE_AT: 'XLPE / Alta Tensão', HEPR: 'HEPR (Borracha)', PVC: 'PVC', MB_UV: 'Masterbatch UV' };
             const matIcons = { AL: '⬜', PE: '🔵', XLPE: '🟣', XLPE_AT: '🟡', HEPR: '🔴', PVC: '🟢', MB_UV: '🩷' };
             const icmsEstados = _cpParametros.icms_estados || {};
-            const freteOpcoes = _cpParametros.frete_opções || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
+            const freteOpcoes = _cpParametros.frete_opcoes || _cpParametros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
             const comNormal = _cpParametros.comissao_normal || 1.0;
             const comRepres = _cpParametros.comissao_representante || 4.0;
             const freteNames = { FOB: 'FOB 0%', CIF_SUDESTE: 'CIF Sudeste 6%', CIF_SUL: 'CIF Sul 6%', CIF_CENTRO_OESTE: 'CIF Centro-Oeste 7%', CIF_NE_NO: 'CIF NE/NO 9%' };
@@ -10059,7 +10059,8 @@
             if (stData) {
                 _cpParametros.despesas.icms = stData.icms || 12;
                 _cpParametros.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (stData.difal || 0) : 0;
-                _cpParametros.despesas.icms_st = stData.st || 0;
+                // Revenda: paga ST (sem DIFAL); Consumidor Final: paga DIFAL (sem ST)
+                _cpParametros.despesas.icms_st = _cpTipoCliente === 'revenda' ? (stData.st || 0) : 0;
             }
             cpRecalcularTodos();
             cpRenderParametros();
@@ -10073,7 +10074,8 @@
             if (stData) {
                 _cpParametros.despesas.icms = stData.icms || 12;
                 _cpParametros.despesas.difal = tipo === 'consumidor_final' ? (stData.difal || 0) : 0;
-                _cpParametros.despesas.icms_st = stData.st || 0;
+                // Revenda: paga ST (substituição tributária); Consumidor Final: paga DIFAL
+                _cpParametros.despesas.icms_st = tipo === 'revenda' ? (stData.st || 0) : 0;
             }
             cpRecalcularTodos();
             cpRenderParametros();
@@ -10092,7 +10094,7 @@
         function cpUpdateFreteOpcao(opção) {
             _cpFreteOpcao = opção;
             _cpParametros.frete_selecionado = opção;
-            const freteOpcoes = _cpParametros.frete_opções || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
+            const freteOpcoes = _cpParametros.frete_opcoes || _cpParametros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
             if (freteOpcoes[opção] !== undefined) {
                 _cpParametros.despesas.frete = freteOpcoes[opção];
             }
@@ -10326,7 +10328,7 @@
                         const stParams = JSON.parse(JSON.stringify(_cpParametros));
                         stParams.despesas.icms = icos[uf].icms || 12;
                         stParams.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0;
-                        stParams.despesas.icms_st = icos[uf].st || 0;
+                        stParams.despesas.icms_st = _cpTipoCliente === 'revenda' ? (icos[uf].st || 0) : 0;
                         const sr = cpCalcProduto(p, stParams);
                         const isCurrent = uf === _cpEstado;
                         const totalImp = (icos[uf].icms || 0) + (_cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0) + (icos[uf].st || 0);
@@ -10340,6 +10342,48 @@
                 })()}
                     </div>
                     <div style="margin-top:8px;font-size:10px;color:#9ca3af;text-align:center;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Clique em um estado para atualizar os impostos. O preço base (CMP + Markup) é o mesmo; as despesas fiscais variam.</div>
+                </div>
+                <!-- Comparativo de Canais de Venda -->
+                <div style="margin-top:16px;background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;">
+                    <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:4px;"><i class="fas fa-store" style="color:#059669;margin-right:6px;"></i>Comparativo de Canais de Venda</div>
+                    <div style="font-size:11px;color:#9ca3af;margin-bottom:12px;">Mesmo produto — como o preço e margem variam por tipo de cliente e canal de venda</div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                        ${(() => {
+                    const icos = _cpParametros.icms_estados || {};
+                    const uf = _cpEstado;
+                    const stData = icos[uf] || {};
+                    const canais = [
+                        { label: 'Revenda', sublabel: 'Vendedor Interno', tipo: 'revenda', repr: false, icon: 'fas fa-user-tie', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
+                        { label: 'Revenda', sublabel: 'Representante', tipo: 'revenda', repr: true, icon: 'fas fa-handshake', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
+                        { label: 'Consumidor Final', sublabel: 'Vendedor Interno', tipo: 'consumidor_final', repr: false, icon: 'fas fa-user', color: '#059669', bg: '#f0fdf4', border: '#bbf7d0' },
+                        { label: 'Consumidor Final', sublabel: 'Representante', tipo: 'consumidor_final', repr: true, icon: 'fas fa-users', color: '#d97706', bg: '#fffbeb', border: '#fde68a' }
+                    ];
+                    const isCurrent = (c) => c.tipo === _cpTipoCliente && c.repr === _cpIsRepresentante;
+                    return canais.map(canal => {
+                        const canalParams = JSON.parse(JSON.stringify(_cpParametros));
+                        canalParams.despesas.icms = stData.icms || 12;
+                        canalParams.despesas.difal = canal.tipo === 'consumidor_final' ? (stData.difal || 0) : 0;
+                        canalParams.despesas.icms_st = canal.tipo === 'revenda' ? (stData.st || 0) : 0;
+                        const comNormal = _cpParametros.comissao_normal || 1.0;
+                        const comRepr = _cpParametros.comissao_representante || 4.0;
+                        canalParams.despesas.comissao = canal.repr ? comRepr : comNormal;
+                        const sr = cpCalcProduto(p, canalParams);
+                        const highlight = isCurrent(canal);
+                        const totalDesp = Object.values(canalParams.despesas).reduce((a,b) => a+b, 0);
+                        return `<div onclick="cpUpdateTipoCliente('${canal.tipo}');cpUpdateRepresentante(${canal.repr});cpRenderSimulador()" style="cursor:pointer;border-radius:10px;padding:12px;background:${highlight ? canal.color : canal.bg};border:2px solid ${highlight ? canal.color : canal.border};box-shadow:${highlight ? '0 4px 12px rgba(0,0,0,0.15)' : 'none'};">
+                            <div style="font-size:10px;font-weight:700;color:${highlight ? 'rgba(255,255,255,0.85)' : '#6b7280'};text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;"><i class="${canal.icon}" style="margin-right:4px;"></i>${canal.sublabel}</div>
+                            <div style="font-size:11px;font-weight:700;color:${highlight ? 'white' : canal.color};margin-bottom:8px;">${canal.label}</div>
+                            <div style="font-size:16px;font-weight:800;font-family:monospace;color:${highlight ? 'white' : '#1e293b'};">R$ ${sr.preco.toFixed(2)}</div>
+                            <div style="font-size:10px;font-weight:600;margin-top:4px;color:${sr.ml_pct >= 15 ? (highlight ? '#a7f3d0' : '#059669') : (highlight ? '#fca5a5' : '#dc2626')};">ML ${sr.ml_pct.toFixed(1)}%</div>
+                            <div style="margin-top:8px;padding-top:8px;border-top:1px solid ${highlight ? 'rgba(255,255,255,0.2)' : '#e5e7eb'};font-size:9px;color:${highlight ? 'rgba(255,255,255,0.7)' : '#9ca3af'};">
+                                DIFAL: ${(canalParams.despesas.difal||0).toFixed(1)}% &nbsp;|&nbsp; ST: ${(canalParams.despesas.icms_st||0).toFixed(1)}%<br>
+                                Com: ${canalParams.despesas.comissao.toFixed(1)}% &nbsp;|&nbsp; Total desp: ${totalDesp.toFixed(1)}%
+                            </div>
+                        </div>`;
+                    }).join('');
+                })()}
+                    </div>
+                    <div style="margin-top:8px;font-size:10px;color:#9ca3af;text-align:center;"><i class="fas fa-mouse-pointer" style="margin-right:4px;"></i>Clique em um canal para ativá-lo e recalcular todos os parâmetros. Estado atual: <strong>${_cpEstado}</strong></div>
                 </div>`;
             }
 

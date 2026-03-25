@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body>
@@ -239,7 +240,7 @@
             <div style="display:flex;gap:8px;">
                 <button class="btn btn-outline btn-sm" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i>
                     PDF</button>
-                <button class="btn btn-outline btn-sm" onclick="exportarExcel()"><i class="fas fa-file-excel"></i>
+                <button class="btn btn-outline btn-sm" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> XLSX
                     Excel</button>
                 <button class="btn btn-primary btn-sm" onclick="imprimirRelatorioProfissional()"><i
                         class="fas fa-print"></i> Imprimir</button>
@@ -295,9 +296,10 @@
         <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:3px solid #1e40af;margin-bottom:20px;">
             <div style="display:flex;align-items:center;gap:12px;">
                 <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:28px;filter:invert(1) brightness(0);" onerror="this.style.display='none'">
-                <div>
+                <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;filter:invert(1) brightness(0);margin-left:6px;" onerror="this.style.display='none'">
+                <div style="border-left:2px solid #e2e8f0;padding-left:12px;">
                     <h2 style="margin:0;font-size:16px;color:#1e293b;font-weight:700;">ALUFORCE SISTEMAS</h2>
-                    <p style="margin:0;font-size:10px;color:#94a3b8;letter-spacing:1px;">GESTÃO EMPRESARIAL INTEGRADA</p>
+                    <p style="margin:0;font-size:10px;color:#94a3b8;letter-spacing:1px;">ZYNTRA ERP — GESTÃO EMPRESARIAL INTEGRADA</p>
                 </div>
             </div>
             <div style="text-align:right;">
@@ -486,43 +488,73 @@
         function fecharPreview() { document.getElementById('report-preview').classList.remove('active'); }
 
         function exportarExcel() {
+            if (typeof XLSX === 'undefined') {
+                alert('Biblioteca XLSX não carregada. Verifique sua conexão.');
+                return;
+            }
             const content = document.getElementById('preview-content');
             const tables = content.querySelectorAll('table');
             if (!tables.length) { alert('Nenhuma tabela para exportar'); return; }
-            let csv = '';
-            tables.forEach(table => {
-                table.querySelectorAll('tr').forEach(tr => {
-                    const cols = [];
-                    tr.querySelectorAll('th, td').forEach(td => cols.push('"' + td.textContent.trim().replace(/"/g, '""') + '"'));
-                    csv += cols.join(';') + '\n';
-                });
+            const titulo = (document.getElementById('preview-título') || document.getElementById('preview-t\u00EDtulo') || {}).textContent || 'Relatorio';
+            const wb = XLSX.utils.book_new();
+            tables.forEach((table, i) => {
+                const ws = XLSX.utils.table_to_sheet(table, { raw: false });
+                // Auto-column widths
+                const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+                const colWidths = [];
+                for (let C = range.s.c; C <= range.e.c; C++) {
+                    let maxW = 10;
+                    for (let R = range.s.r; R <= range.e.r; R++) {
+                        const cell = ws[XLSX.utils.encode_cell({ r: R, c: C })];
+                        if (cell && cell.v) maxW = Math.min(50, Math.max(maxW, String(cell.v).length + 2));
+                    }
+                    colWidths.push({ wch: maxW });
+                }
+                ws['!cols'] = colWidths;
+                XLSX.utils.book_append_sheet(wb, ws, 'Dados' + (tables.length > 1 ? '_' + (i + 1) : ''));
             });
-            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'relatorio_' + document.getElementById('preview-título').textContent.replace(/\s+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.csv';
-            a.click();
-            URL.revokeObjectURL(url);
+            // Summary sheet
+            const summaryData = [['Relatório', titulo], ['Emitido em', new Date().toLocaleString('pt-BR')], ['Sistema', 'Aluforce / Zyntra ERP']];
+            const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(wb, wsSummary, 'Info');
+            XLSX.writeFile(wb, 'relatorio_' + titulo.replace(/[^a-zA-Z0-9\u00C0-\u024F]/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
         }
 
         function exportarPDF() { imprimirRelatorioProfissional(); }
 
         function imprimirRelatorioProfissional() {
             const content = document.getElementById('preview-content').innerHTML;
-            const título = document.getElementById('preview-título').textContent;
+            const titulo = (document.getElementById('preview-t\u00EDtulo') || {}).textContent || 'Relat\u00F3rio';
             const w = window.open('', '_blank');
-            w.document.write(`<!DOCTYPE html><html><head><title>${título} — Aluforce</title><style>
+            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo} \u2014 Zyntra ERP</title><style>
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family:'Segoe UI',Inter,system-ui,sans-serif; padding:20mm 15mm; color:#1e293b; font-size:12px; line-height:1.5; }
-        table { width:100%; border-collapse:collapse; page-break-inside:auto; }
+        body { font-family:'Segoe UI',Inter,Arial,sans-serif; padding:15mm; color:#1e293b; font-size:11px; line-height:1.5; }
+        .print-header { display:flex; justify-content:space-between; align-items:center; padding-bottom:12px; border-bottom:3px solid #1e40af; margin-bottom:16px; }
+        .print-header .brand { display:flex; align-items:center; gap:10px; }
+        .print-header .brand-name { font-size:18px; font-weight:800; color:#1e40af; letter-spacing:1px; }
+        .print-header .brand-sub { font-size:9px; color:#94a3b8; letter-spacing:1px; }
+        .print-meta { text-align:right; font-size:10px; color:#64748b; }
+        .print-meta strong { font-size:13px; color:#1e40af; display:block; }
+        table { width:100%; border-collapse:collapse; font-size:11px; page-break-inside:auto; margin-bottom:12px; }
         tr { page-break-inside:avoid; }
-        th, td { padding:6px 8px; text-align:left; }
-        th { background:#f1f5f9 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        th { background:#1e40af !important; color:white !important; padding:7px 8px; text-align:left; font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        td { padding:6px 8px; border-bottom:1px solid #f1f5f9; color:#334155; }
+        tr:nth-child(even) td { background:#f8fafc; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        tfoot td { background:#f1f5f9 !important; font-weight:700; border-top:2px solid #cbd5e1; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+        .kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px; }
+        .kpi-box { background:#f0f9ff !important; padding:10px; border-radius:6px; text-align:center; border:1px solid #bae6fd; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
         strong { font-weight:600; }
-        @media print { body { padding:10mm; } .no-print { display:none !important; } }
-        @page { margin:10mm; size:A4 portrait; }
-    </style></head><body>${content}
+        @media print { body { padding:8mm; } }
+        @page { margin:8mm; size:A4 portrait; }
+    </style></head><body>
+    <div class="print-header">
+        <div class="brand">
+            <div style="background:#1e40af;color:white;padding:6px 14px;border-radius:4px;"><span class="brand-name">ALUFORCE</span></div>
+            <div style="border-left:2px solid #e2e8f0;padding-left:10px;"><div style="font-size:15px;font-weight:700;color:#1e40af;">Zyntra ERP</div><div class="brand-sub">GEST\u00C3O EMPRESARIAL INTEGRADA</div></div>
+        </div>
+        <div class="print-meta"><strong>${titulo}</strong><span>Emitido em: ${new Date().toLocaleString('pt-BR')}</span></div>
+    </div>
+    ${content}
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>

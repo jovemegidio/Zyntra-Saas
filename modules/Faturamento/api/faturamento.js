@@ -961,6 +961,219 @@ module.exports = (pool, authenticateToken) => {
     });
 
     // ============================================================
+    // ESPELHO DE NOTA — Pre-visualização HTML antes do certificado
+    // ============================================================
+
+    router.get('/nfes/:id/espelho', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const [nfes] = await pool.query(`
+                SELECT n.*,
+                       c.nome AS cli_nome, c.cpf_cnpj AS cli_cnpj, c.ie AS cli_ie,
+                       c.endereco AS cli_endereco, c.bairro AS cli_bairro,
+                       c.cidade AS cli_cidade, c.uf AS cli_uf, c.cep AS cli_cep,
+                       c.telefone AS cli_telefone, c.email AS cli_email
+                FROM nfe n
+                LEFT JOIN clientes c ON c.id = n.cliente_id
+                WHERE n.id = ?
+            `, [id]);
+
+            if (!nfes.length) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+
+            const nfe = nfes[0];
+            const [itens] = await pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ?', [id]);
+
+            // Dados do emitente
+            const [cfgRows] = await pool.query(`SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1`);
+            const cfg = cfgRows.length ? JSON.parse(cfgRows[0].valor || '{}') : {};
+            const emit = {
+                razaoSocial: cfg.razaoSocial || process.env.EMITENTE_RAZAO_SOCIAL || 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
+                nomeFantasia: cfg.nomeFantasia || process.env.EMITENTE_NOME_FANTASIA || 'ALUFORCE',
+                cnpj: cfg.cnpj || process.env.EMITENTE_CNPJ || '',
+                ie: cfg.ie || process.env.EMITENTE_IE || '',
+                logradouro: cfg.logradouro || '',
+                numero: cfg.numero || '',
+                bairro: cfg.bairro || '',
+                cidade: cfg.cidade || '',
+                uf: cfg.uf || process.env.EMITENTE_UF || 'MG',
+                cep: cfg.cep || '',
+                telefone: cfg.telefone || '',
+                email: cfg.email || ''
+            };
+
+            const fmt = (v) => v ? parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
+            const fmtDate = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '-';
+            const statusLabel = { pendente: 'Pendente', autorizada: 'Autorizada', cancelada: 'Cancelada', rejeitada: 'Rejeitada', denegada: 'Denegada' };
+
+            let itensRows = (itens || []).map((item, i) => `
+              <tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:5px 8px;font-size:11px;text-align:center;">${i + 1}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.codigo_produto || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.descricao || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.ncm || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:center;">${item.unidade || 'UN'}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">${fmt(item.quantidade)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_unitario)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_desconto || 0)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;font-weight:600;">R$ ${fmt(item.valor_total)}</td>
+              </tr>`).join('');
+
+            const totalItens = (itens || []).reduce((s, i) => s + parseFloat(i.valor_total || 0), 0);
+            const totalDesc  = (itens || []).reduce((s, i) => s + parseFloat(i.valor_desconto || 0), 0);
+
+            const html = `<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Espelho NF-e #${nfe.numero || nfe.numero_nfe || id}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:#f0f4f8; color:#1e293b; padding:24px; }
+    .danfe { background:white; max-width:960px; margin:0 auto; border:2px solid #1e40af; border-radius:4px; }
+    .danfe-header { background:#1e40af; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+    .danfe-header h1 { font-size:22px; font-weight:800; letter-spacing:2px; }
+    .danfe-header .espelho-badge { background:#fbbf24; color:#1e3a8a; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; }
+    .section { border:1px solid #d1d5db; margin:8px; border-radius:4px; overflow:hidden; }
+    .section-title { background:#f8fafc; border-bottom:1px solid #d1d5db; padding:6px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; }
+    .field { padding:8px 12px; border-right:1px solid #e5e7eb; }
+    .field:last-child { border-right:none; }
+    .field label { display:block; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#9ca3af; margin-bottom:2px; }
+    .field span { font-size:12px; color:#1e293b; font-weight:500; }
+    .watermark { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-35deg); font-size:100px; font-weight:900; color:rgba(30,64,175,0.06); pointer-events:none; white-space:nowrap; z-index:0; }
+    table.items { width:100%; border-collapse:collapse; font-size:11px; }
+    table.items thead th { background:#f1f5f9; padding:6px 8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; color:#64748b; border-bottom:2px solid #cbd5e1; }
+    .totais-row { display:flex; justify-content:flex-end; gap:24px; padding:10px 20px; background:#f8fafc; border-top:2px solid #1e40af; }
+    .totais-row .t-item { text-align:right; }
+    .totais-row .t-item label { font-size:9px; font-weight:700; text-transform:uppercase; color:#9ca3af; display:block; }
+    .totais-row .t-item span { font-size:14px; font-weight:700; color:#1e40af; }
+    .footer-bar { background:#1e40af; color:rgba(255,255,255,0.7); text-align:center; padding:8px; font-size:10px; }
+    .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; }
+    .status-pendente { background:#fef3c7; color:#d97706; }
+    .status-autorizada { background:#d1fae5; color:#059669; }
+    .status-cancelada { background:#fee2e2; color:#dc2626; }
+    @media print {
+      body { background:white; padding:0; }
+      .no-print { display:none !important; }
+      .danfe { border:1px solid #000; max-width:none; }
+    }
+  </style>
+</head>
+<body>
+<div class="watermark">ESPELHO SEM VALOR FISCAL</div>
+<!-- Print button -->
+<div class="no-print" style="max-width:960px;margin:0 auto 12px;display:flex;gap:8px;justify-content:flex-end;">
+  <button onclick="window.print()" style="background:#1e40af;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;"><i>🖨</i> Imprimir</button>
+  <button onclick="window.close()" style="background:#6b7280;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;">Fechar</button>
+</div>
+
+<div class="danfe">
+  <!-- HEADER -->
+  <div class="danfe-header">
+    <div>
+      <h1>ALUFORCE</h1>
+      <div style="font-size:11px;opacity:0.8;">${emit.razaoSocial}</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:16px;font-weight:700;letter-spacing:2px;">ESPELHO DE NF-e</div>
+      <div class="espelho-badge" style="margin-top:6px;">⚠ SEM VALOR FISCAL — PRÉ-AUTORIZAÇÃO</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:20px;font-weight:800;">Nº ${nfe.numero || nfe.numero_nfe || '—'}</div>
+      <div style="font-size:12px;opacity:0.8;">Série: ${nfe.serie || '1'}</div>
+      <span class="status-badge status-${(nfe.status || 'pendente').toLowerCase()}" style="margin-top:4px;display:inline-block;">${statusLabel[nfe.status] || nfe.status || 'Pendente'}</span>
+    </div>
+  </div>
+
+  <!-- EMITENTE -->
+  <div class="section">
+    <div class="section-title">📦 Emitente</div>
+    <div class="grid-2">
+      <div class="field"><label>Razão Social / Nome Fantasia</label><span>${emit.razaoSocial} / ${emit.nomeFantasia}</span></div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
+        <div><label>CNPJ</label><span>${emit.cnpj || '—'}</span></div>
+        <div><label>Inscrição Estadual</label><span>${emit.ie || '—'}</span></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Endereço</label><span>${emit.logradouro} ${emit.numero}, ${emit.bairro}</span></div>
+      <div class="field"><label>Município / UF</label><span>${emit.cidade} — ${emit.uf}</span></div>
+      <div class="field"><label>CEP / Telefone</label><span>${emit.cep} / ${emit.telefone}</span></div>
+    </div>
+  </div>
+
+  <!-- DESTINATÁRIO -->
+  <div class="section">
+    <div class="section-title">🏢 Destinatário</div>
+    <div class="grid-2">
+      <div class="field"><label>Nome / Razão Social</label><span>${nfe.destinatario || nfe.cli_nome || '—'}</span></div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
+        <div><label>CNPJ / CPF</label><span>${nfe.cli_cnpj || '—'}</span></div>
+        <div><label>Inscrição Estadual</label><span>${nfe.cli_ie || '—'}</span></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Endereço</label><span>${(nfe.cli_endereco || '—') + (nfe.cli_bairro ? ', ' + nfe.cli_bairro : '')}</span></div>
+      <div class="field"><label>Município / UF</label><span>${nfe.cli_cidade || '—'} — ${nfe.cli_uf || '—'}</span></div>
+      <div class="field"><label>CEP / E-mail</label><span>${nfe.cli_cep || '—'} / ${nfe.cli_email || '—'}</span></div>
+    </div>
+  </div>
+
+  <!-- DADOS DA NF-e -->
+  <div class="section">
+    <div class="section-title">📋 Dados da NF-e</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);">
+      <div class="field"><label>Data Emissão</label><span>${fmtDate(nfe.data_emissao)}</span></div>
+      <div class="field"><label>Natureza da Operação</label><span>${nfe.natureza_operacao || 'Venda de Produtos'}</span></div>
+      <div class="field"><label>Tipo da Operação</label><span>${nfe.tipo_operacao === '1' ? 'Saída' : 'Entrada'}</span></div>
+      <div class="field"><label>Modalidade Frete</label><span>${{ '0': 'CIF (Emitente)', '1': 'FOB (Destinatário)', '9': 'Sem Frete' }[nfe.modalidade_frete] || '—'}</span></div>
+      <div class="field"><label>Protocolo / Chave</label><span style="font-size:10px;">${nfe.numero_protocolo || nfe.chave_acesso || '—'}</span></div>
+    </div>
+  </div>
+
+  <!-- ITENS -->
+  <div class="section">
+    <div class="section-title">📦 Itens da NF-e (${itens.length} produto(s))</div>
+    <table class="items">
+      <thead>
+        <tr>
+          <th>#</th><th>Código</th><th>Descrição</th><th>NCM</th><th>UN</th>
+          <th style="text-align:right;">Qtd.</th><th style="text-align:right;">Vl. Unit.</th>
+          <th style="text-align:right;">Desconto</th><th style="text-align:right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>${itensRows || '<tr><td colspan="9" style="padding:16px;text-align:center;color:#9ca3af;">Nenhum item lançado</td></tr>'}</tbody>
+    </table>
+  </div>
+
+  <!-- TOTAIS -->
+  <div class="totais-row">
+    <div class="t-item"><label>Qtd. Itens</label><span>${itens.length}</span></div>
+    <div class="t-item"><label>Descontos</label><span style="color:#ef4444;">R$ ${fmt(totalDesc)}</span></div>
+    <div class="t-item"><label>Subtotal Itens</label><span>R$ ${fmt(totalItens)}</span></div>
+    <div class="t-item"><label>VALOR TOTAL NF-e</label><span style="font-size:18px;">R$ ${fmt(nfe.valor || nfe.valor_total || totalItens)}</span></div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-bar">
+    Documento sem valor fiscal • Gerado em ${new Date().toLocaleString('pt-BR')} • Sistema Zyntra / Aluforce
+    &nbsp;|&nbsp; NF-e Nº ${nfe.numero || nfe.numero_nfe || '—'} — Série ${nfe.serie || '1'}
+  </div>
+</div>
+</body></html>`;
+
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.send(html);
+
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao gerar espelho:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
     // GERAR E BAIXAR DANFE
     // ============================================================
 
