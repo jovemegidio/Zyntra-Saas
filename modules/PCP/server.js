@@ -969,6 +969,98 @@ app.post('/api/auth/change-password', async (req, res) => {
 
 // ================================
 
+// ============================================
+// ÁRVORE DE PRODUTO — CUSTOS & PRECIFICAÇÃO
+// ============================================
+app.get('/api/pcp/arvore-produto', authRequired, async (req, res) => {
+    try {
+        const dataPath = path.join(__dirname, '..', '..', 'api', 'arvore-produto-data.json');
+        if (!fs.existsSync(dataPath)) {
+            return res.status(404).json({ success: false, message: 'Dados da árvore de produto não encontrados.' });
+        }
+        const rawData = fs.readFileSync(dataPath, 'utf-8');
+        const data = JSON.parse(rawData);
+        const { categoria, search } = req.query;
+        let products = data.products;
+        if (categoria && categoria !== 'todos') {
+            products = products.filter(p => p.categoria === categoria);
+        }
+        if (search) {
+            const term = search.toLowerCase();
+            products = products.filter(p =>
+                p.codigo.toLowerCase().includes(term) ||
+                p.descricao.toLowerCase().includes(term) ||
+                (p.cores || '').toLowerCase().includes(term)
+            );
+        }
+        res.json({
+            success: true,
+            parametros: data.parametros,
+            total: data.products.length,
+            categorias: [...new Set(data.products.map(p => p.categoria))].sort(),
+            products
+        });
+    } catch (err) {
+        console.error('[PCP] Erro árvore de produto:', err.message);
+        res.status(500).json({ success: false, message: 'Erro ao carregar árvore de produto.' });
+    }
+});
+
+app.put('/api/pcp/arvore-produto/parametros', authRequired, async (req, res) => {
+    try {
+        const dataPath = path.join(__dirname, '..', '..', 'api', 'arvore-produto-data.json');
+        if (!fs.existsSync(dataPath)) {
+            return res.status(404).json({ success: false, message: 'Arquivo de dados não encontrado.' });
+        }
+        const rawData = fs.readFileSync(dataPath, 'utf-8');
+        const data = JSON.parse(rawData);
+        const { precos_kg, markup_pct, despesas } = req.body;
+        if (precos_kg) data.parametros.precos_kg = precos_kg;
+        if (markup_pct !== undefined) data.parametros.markup_pct = parseFloat(markup_pct);
+        if (despesas) data.parametros.despesas = despesas;
+        if (req.body.icms_estados) data.parametros.icms_estados = req.body.icms_estados;
+        if (req.body.frete_opcoes || req.body['frete_opções']) data.parametros.frete_opcoes = req.body.frete_opcoes || req.body['frete_opções'];
+        if (req.body.comissao_normal !== undefined) data.parametros.comissao_normal = parseFloat(req.body.comissao_normal);
+        if (req.body.comissao_representante !== undefined) data.parametros.comissao_representante = parseFloat(req.body.comissao_representante);
+        if (req.body.estado_selecionado !== undefined) data.parametros.estado_selecionado = req.body.estado_selecionado;
+        if (req.body.tipo_cliente !== undefined) data.parametros.tipo_cliente = req.body.tipo_cliente;
+        if (req.body.is_representante !== undefined) data.parametros.is_representante = req.body.is_representante;
+        if (req.body.frete_selecionado !== undefined) data.parametros.frete_selecionado = req.body.frete_selecionado;
+        fs.writeFileSync(dataPath, JSON.stringify(data, null, 2), 'utf-8');
+        res.json({ success: true, message: 'Parâmetros salvos com sucesso.', parametros: data.parametros });
+    } catch (err) {
+        console.error('[PCP] Erro ao salvar parâmetros:', err.message);
+        res.status(500).json({ success: false, message: 'Erro ao salvar parâmetros.' });
+    }
+});
+
+app.post('/api/pcp/arvore-produto/aplicar-precos', authRequired, async (req, res) => {
+    try {
+        const { precos } = req.body;
+        if (!Array.isArray(precos) || precos.length === 0) {
+            return res.status(400).json({ success: false, message: 'Nenhum preço informado.' });
+        }
+        try {
+            await db.query('ALTER TABLE produtos MODIFY COLUMN preco_venda DECIMAL(15,4) DEFAULT 0');
+        } catch (e) { /* já com precisão correta */ }
+        let atualizados = 0;
+        for (const item of precos) {
+            if (!item.codigo || item.preco_venda === undefined) continue;
+            const pv = parseFloat(item.preco_venda);
+            if (isNaN(pv) || pv < 0) continue;
+            const [result] = await db.query(
+                'UPDATE produtos SET preco_venda = ? WHERE codigo = ? OR TRIM(codigo) = ?',
+                [pv, item.codigo, item.codigo.trim()]
+            );
+            atualizados += result.affectedRows;
+        }
+        res.json({ success: true, atualizados, total: precos.length });
+    } catch (err) {
+        console.error('[PCP] Erro ao aplicar preços:', err.message);
+        res.status(500).json({ success: false, message: 'Erro ao aplicar preços.' });
+    }
+});
+
 // Protected sample endpoints for Dashboard / Prazos / Custos
 app.get('/api/pcp/dashboard', authRequired, async (req, res) => {
     try {
@@ -2554,7 +2646,7 @@ app.get('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
                 observacoes,
                 created_at,
                 'ordens' as origem,
-                pedido_vinculado_id,
+                numero_pedido as pedido_vinculado_id,
                 cliente_nome
             FROM ordens_producao
             WHERE status NOT IN ('cancelada')
