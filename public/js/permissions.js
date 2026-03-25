@@ -132,6 +132,13 @@ const userPermissions = {
     'qanfe': { areas: ['nfe', 'faturamento', 'rh'], rhType: 'areaadm', isAdmin: true },
     'qapainel': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'faturamento', 'ti'], rhType: 'areaadm', isAdmin: true },
 
+    // ============ LOGÍSTICA ============
+    'logistica': {
+        areas: ['nfe', 'vendas', 'rh'],
+        rhType: 'area',
+        isAdmin: false
+    },
+
     // ============ USUÁRIO DE TESTE ============
     'teste': {
         areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras'],

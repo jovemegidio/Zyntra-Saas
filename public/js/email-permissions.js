@@ -37,6 +37,7 @@ function applyModulePermissions(user) {
         'eldir@aluforce.ind.br': ['financeiro-receber', 'rh-funcionario'],
         'hellen@aluforce.ind.br': ['financeiro-pagar', 'rh-funcionario'],
         'thiago@aluforce.ind.br': ['nfe', 'rh-funcionario'],
+        'logistica@aluforce.ind.br': ['nfe', 'vendas', 'rh-funcionario'],
         'guilherme@aluforce.ind.br': ['compras', 'rh-funcionario'],
         'marcia@aluforce.ind.br': ['vendas', 'rh-funcionario'],
         'fabiano@aluforce.ind.br': ['vendas', 'rh-funcionario'],

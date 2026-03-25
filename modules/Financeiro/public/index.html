@@ -382,38 +382,42 @@
         <!-- Content -->
         <div class="content-area">
             <!-- KPIs -->
-            <div class="kpi-grid">
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #dbeafe; color: #1e40af;">
-                        <i class="fas fa-arrow-down"></i>
+            <div class="stats-grid">
+                <div class="stat-card amber">
+                    <div class="stat-header">
+                        <div class="stat-icon amber"><i class="fas fa-arrow-down"></i></div>
+                        <span class="stat-trend" id="trend-receber">&mdash;</span>
                     </div>
-                    <div class="kpi-value" id="kpi-total-receber">R$ 0,00</div>
-                    <div class="kpi-label">Total a Receber</div>
-                    <div class="kpi-sub" id="kpi-qtd-receber">0 lançamentos pendentes</div>
+                    <div class="stat-value" id="kpi-total-receber">R$ 0,00</div>
+                    <div class="stat-label">Total a Receber</div>
+                    <div class="stat-footer"><a href="contas_receber.html">Ver todos <i class="fas fa-arrow-right"></i></a></div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #fee2e2; color: #dc2626;">
-                        <i class="fas fa-arrow-up"></i>
+                <div class="stat-card indigo">
+                    <div class="stat-header">
+                        <div class="stat-icon indigo"><i class="fas fa-arrow-up"></i></div>
+                        <span class="stat-trend" id="trend-pagar">&mdash;</span>
                     </div>
-                    <div class="kpi-value" id="kpi-total-pagar">R$ 0,00</div>
-                    <div class="kpi-label">Total a Pagar</div>
-                    <div class="kpi-sub" id="kpi-qtd-pagar">0 lançamentos pendentes</div>
+                    <div class="stat-value" id="kpi-total-pagar">R$ 0,00</div>
+                    <div class="stat-label">Total a Pagar</div>
+                    <div class="stat-footer"><a href="contas_pagar.html">Ver todos <i class="fas fa-arrow-right"></i></a></div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #dcfce7; color: #16a34a;">
-                        <i class="fas fa-balance-scale"></i>
+                <div class="stat-card green">
+                    <div class="stat-header">
+                        <div class="stat-icon green"><i class="fas fa-balance-scale"></i></div>
+                        <span class="stat-trend" id="trend-saldo">&mdash;</span>
                     </div>
-                    <div class="kpi-value" id="kpi-saldo">R$ 0,00</div>
-                    <div class="kpi-label">Saldo Projetado</div>
-                    <div class="kpi-sub">Diferença entre entradas e saídas</div>
+                    <div class="stat-value" id="kpi-saldo">R$ 0,00</div>
+                    <div class="stat-label">Saldo Projetado</div>
+                    <div class="stat-footer"><a href="fluxo_caixa.html">Ver fluxo <i class="fas fa-arrow-right"></i></a></div>
                 </div>
-                <div class="kpi-card">
-                    <div class="kpi-icon" style="background: #fef3c7; color: #d97706;">
-                        <i class="fas fa-exclamation-triangle"></i>
+                <div class="stat-card purple">
+                    <div class="stat-header">
+                        <div class="stat-icon purple"><i class="fas fa-exclamation-triangle"></i></div>
+                        <span class="stat-trend" id="trend-vencidos">&mdash;</span>
                     </div>
-                    <div class="kpi-value" id="kpi-vencidos">0</div>
-                    <div class="kpi-label">Contas Vencidas</div>
-                    <div class="kpi-sub" id="kpi-vencidos-sub">Nenhum vencido</div>
+                    <div class="stat-value" id="kpi-vencidos">0</div>
+                    <div class="stat-label">Contas Vencidas</div>
+                    <div class="stat-footer"><a href="contas_pagar.html?status=vencido">Ver vencidos <i class="fas fa-arrow-right"></i></a></div>
                 </div>
             </div>
 

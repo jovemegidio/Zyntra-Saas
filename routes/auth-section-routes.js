@@ -447,15 +447,17 @@ module.exports = function createAuthSectionRoutes(deps) {
                             return Array.isArray(perm) ? perm : Object.values(perm);
                         }
                         if (typeof perm === 'string') {
-                            // Se contém vírgulas, dividir em array
-                            if (perm.includes(',')) {
-                                return perm.split(',').map(p => p.trim()).filter(p => p.length > 0);
-                            }
+                            // Tentar JSON.parse PRIMEIRO (antes de split por vírgula)
+                            // Evita que '["nfe","vendas"]' seja splitado errado
                             try {
                                 const parsed = JSON.parse(perm);
                                 return Array.isArray(parsed) ? parsed : [];
                             } catch (e) {
-                                // Se não é JSON, pode ser string simples como "rh" ou "vendas"
+                                // Se não é JSON válido, dividir por vírgula
+                                if (perm.includes(',')) {
+                                    return perm.split(',').map(p => p.trim()).filter(p => p.length > 0);
+                                }
+                                // String simples como "rh" ou "vendas"
                                 return perm.trim() ? [perm.trim()] : [];
                             }
                         }

@@ -449,6 +449,7 @@ const userPermissions = {
     'aluforce': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'compras': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
     'guilherme.bastos': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
+    'logistica': { areas: ['nfe', 'vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'funcionario' },
 
     // ============ CONTAS QA (Gerentes - Full Admin por Módulo) ============
     'qafinanceiro': { areas: ['financeiro', 'vendas', 'compras', 'nfe', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'financeiro_completo' },

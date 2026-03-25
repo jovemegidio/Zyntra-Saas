@@ -259,6 +259,12 @@ npm run lint
 
 ## 📊 Changelog Recente
 
+### v2.2.1 — 25/03/2026
+- ✅ **Permissões logistica@** — Usuário de logística agora visualiza cards "Faturamento & Logística" e "Vendas" no dashboard
+- ✅ **Bug parsePermissao** — Corrigido parsing JSON do campo `areas` no `/api/me` (valores como `["nfe","vendas"]` eram corrompidos por split de vírgula antes do JSON.parse)
+- ✅ **Novo Pedido de Venda** — Autocomplete de produtos exibe todos os itens (com e sem estoque); corrigido endpoint do modal "Pesquisar Produto"
+- ✅ **Deploy VPS** — PuTTY instalado via winget; pipeline de deploy funcional com pscp/plink
+
 ### v2.2.0 — Março 2026
 - ✅ **QR Code Estoque** — Sistema de entrada/saída de materiais via QR Code no celular
 - ✅ **Auto-Import Ponto** — Importação automática de marcações de ponto (Control iD)
