@@ -8340,6 +8340,32 @@ module.exports = function createPCPRoutes(deps) {
         }
     });
 
+    // Aplicar preços calculados aos produtos no MySQL
+    router.post('/arvore-produto/aplicar-precos', async (req, res) => {
+        try {
+            const { precos } = req.body;
+            if (!Array.isArray(precos) || precos.length === 0) {
+                return res.status(400).json({ success: false, message: 'Nenhum preço informado.' });
+            }
+            let atualizados = 0;
+            for (const item of precos) {
+                if (!item.codigo || item.preco_venda === undefined) continue;
+                const pv = parseFloat(item.preco_venda);
+                if (isNaN(pv) || pv < 0) continue;
+                const [result] = await pool.query(
+                    'UPDATE produtos SET preco_venda = ? WHERE codigo = ?',
+                    [pv, item.codigo]
+                );
+                atualizados += result.affectedRows;
+            }
+            console.log(`[PCP] Preços aplicados: ${atualizados} produtos atualizados`);
+            res.json({ success: true, atualizados, total: precos.length });
+        } catch (err) {
+            console.error('[PCP] Erro ao aplicar preços:', err.message);
+            res.status(500).json({ success: false, message: 'Erro ao aplicar preços.' });
+        }
+    });
+
     // =====================================================
     // ROTAS ADICIONADAS — Correção de botões quebrados
     // =====================================================

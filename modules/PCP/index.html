@@ -9783,7 +9783,7 @@
                         <div style="display:flex;gap:10px;">
                             <button onclick="cpExportarPDF()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF</button>
                             <button onclick="cpSalvarParametros()" style="padding:8px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
-                            <button onclick="cpRecalcularTodos()" style="padding:8px 18px;background:#059669;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-sync-alt" style="margin-right:6px;"></i>Recalcular Todos os Preços</button>
+                            <button onclick="cpAplicarPrecos()" style="padding:8px 18px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-tags" style="margin-right:6px;"></i>Aplicar Preços aos Produtos</button>
                         </div>
                     </div>
                 </div>`;
@@ -10314,6 +10314,32 @@
                         '</div>';
                 }).join('')}
                     </div>
+                </div>
+                <!-- State Price Comparison -->
+                <div style="margin-top:16px;background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;">
+                    <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-map-marked-alt" style="color:#2563eb;margin-right:6px;"></i>Preço por Estado — Comparativo de Impostos</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">
+                        ${(() => {
+                    const icos = _cpParametros.icms_estados || {};
+                    const estados = Object.keys(icos).sort();
+                    return estados.map(uf => {
+                        const stParams = JSON.parse(JSON.stringify(_cpParametros));
+                        stParams.despesas.icms = icos[uf].icms || 12;
+                        stParams.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0;
+                        stParams.despesas.icms_st = icos[uf].st || 0;
+                        const sr = cpCalcProduto(p, stParams);
+                        const isCurrent = uf === _cpEstado;
+                        const totalImp = (icos[uf].icms || 0) + (_cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0) + (icos[uf].st || 0);
+                        return '<div style="text-align:center;padding:8px 6px;border-radius:8px;' + (isCurrent ? 'background:#2563eb;color:white;box-shadow:0 2px 8px rgba(37,99,235,0.3);' : 'background:#f8fafc;border:1px solid #e5e7eb;') + 'cursor:pointer;" onclick="cpUpdateEstado(\'' + uf + '\');cpRenderSimulador()" title="ICMS: ' + (icos[uf].icms||0) + '% | DIFAL: ' + (icos[uf].difal||0) + '% | ST: ' + (icos[uf].st||0) + '%">' +
+                            '<div style="font-size:13px;font-weight:800;' + (isCurrent ? '' : 'color:#1e40af;') + '">' + uf + '</div>' +
+                            '<div style="font-size:11px;font-weight:700;font-family:monospace;margin-top:2px;">R$ ' + sr.preco.toFixed(2) + '</div>' +
+                            '<div style="font-size:9px;font-weight:600;margin-top:1px;' + (isCurrent ? 'color:rgba(255,255,255,0.8);' : 'color:#6b7280;') + '">Imp: ' + totalImp.toFixed(1) + '%</div>' +
+                            '<div style="font-size:9px;font-weight:600;' + (sr.ml_pct >= 15 ? (isCurrent ? 'color:#a7f3d0;' : 'color:#059669;') : (isCurrent ? 'color:#fca5a5;' : 'color:#dc2626;')) + '">ML ' + sr.ml_pct.toFixed(1) + '%</div>' +
+                            '</div>';
+                    }).join('');
+                })()}
+                    </div>
+                    <div style="margin-top:8px;font-size:10px;color:#9ca3af;text-align:center;"><i class="fas fa-info-circle" style="margin-right:4px;"></i>Clique em um estado para atualizar os impostos. O preço base (CMP + Markup) é o mesmo; as despesas fiscais variam.</div>
                 </div>`;
             }
 
@@ -10331,6 +10357,35 @@
             if (!codigo) { _cpSimProduto = null; }
             else { _cpSimProduto = _cpCache.find(p => p.codigo === codigo); }
             cpRenderSimulador();
+        }
+
+        // === APLICAR PRECOS AOS PRODUTOS (MySQL) ===
+        async function cpAplicarPrecos() {
+            if (!_cpCache || !_cpParametros) return;
+            const total = _cpCache.length;
+            const confirma = await ConfirmDialog.show({
+                message: `Aplicar preço sugerido (R$/metro) calculado a ${total} produtos no banco de dados?\n\nIsso irá atualizar o campo Preço de Venda de todos os produtos que possuem código correspondente no catálogo.`,
+                danger: 'Esta ação é irreversível.',
+                title: 'Aplicar Preços',
+                confirmText: 'Sim, Aplicar'
+            });
+            if (!confirma) return;
+            try {
+                const precos = _cpCache.map(p => ({ codigo: p.codigo, preco_venda: parseFloat(p._preco.toFixed(4)) }));
+                const resp = await fetch('/api/pcp/arvore-produto/aplicar-precos', {
+                    credentials: 'include', method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ precos })
+                });
+                if (!resp.ok) throw new Error('Erro ' + resp.status);
+                const data = await resp.json();
+                if (!data.success) throw new Error(data.message || 'Erro');
+                cpShowNotif(data.atualizados + ' produtos atualizados no banco!');
+                showNotification(data.atualizados + ' produtos tiveram o preço de venda atualizado com sucesso!', 'success');
+            } catch (err) {
+                console.error('Erro ao aplicar preços:', err);
+                showNotification('Erro ao aplicar preços: ' + err.message, 'error');
+            }
         }
 
         // === SAVE / EXPORT ===
