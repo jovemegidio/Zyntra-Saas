@@ -210,6 +210,47 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
         }
     });
 
+    // GET /api/nfe/listar — Lista NF-es para a página consultar.html
+    router.get('/listar', authenticateToken, async (req, res) => {
+        try {
+            const limite = Math.min(parseInt(req.query.limite) || 100, 500);
+            const offset = Math.max(parseInt(req.query.offset) || 0, 0);
+            let rows = [];
+
+            for (const table of ['nfe', 'nfes']) {
+                try {
+                    const [result] = await pool.query(
+                        `SELECT id, numero_nfe, numero, serie, cliente_nome, destinatario_nome,
+                                data_emissao, valor_total, valor, status, chave_acesso, numero_protocolo
+                         FROM \`${table}\`
+                         ORDER BY id DESC LIMIT ? OFFSET ?`,
+                        [limite, offset]
+                    );
+                    if (result && result.length > 0) { rows = result; break; }
+                } catch (_) {}
+            }
+
+            const notas = rows.map(row => ({
+                id:          row.id,
+                'número':    row.numero_nfe || row.numero || '',
+                numero:      row.numero_nfe || row.numero || '',
+                serie:       row.serie || '1',
+                cliente:     row.cliente_nome || row.destinatario_nome || '',
+                destinatario: row.destinatario_nome || row.cliente_nome || '',
+                dataEmissao: row.data_emissao || null,
+                valor:       parseFloat(row.valor_total || row.valor || 0),
+                status:      row.status || 'pendente',
+                chave:       row.chave_acesso || '',
+                protocolo:   row.numero_protocolo || ''
+            }));
+
+            res.json({ notas, total: notas.length });
+        } catch (err) {
+            console.error('[NFe Listar] Erro:', err);
+            res.status(500).json({ success: false, message: err.message });
+        }
+    });
+
     // GET /api/nfe/:id/espelho — Pré-visualização HTML sem valor fiscal
     router.get('/:id/espelho', authenticateToken, async (req, res) => {
         try {
