@@ -5913,7 +5913,18 @@ apiVendasRouter.get('/ligacoes/cdr', async (req, res, next) => {
         const di = data_inicio || hoje;
         const df = data_fim || hoje;
 
-        let chamadas = await cdrScraper.fetchCDRData(di, df);
+        let chamadas = [];
+        try {
+            chamadas = await cdrScraper.fetchCDRData(di, df);
+        } catch (scraperErr) {
+            console.warn('[CDR] Scraper indisponível:', scraperErr.message);
+            return res.json({
+                total: 0,
+                chamadas: [],
+                periodo: { inicio: di, fim: df },
+                aviso: 'Integração CDR temporariamente indisponível'
+            });
+        }
 
         // Filtrar por ramal se especificado
         if (ramal) {
@@ -5934,7 +5945,7 @@ apiVendasRouter.get('/ligacoes/cdr', async (req, res, next) => {
         });
     } catch (error) {
         console.error('Erro ao buscar CDR:', error.message);
-        res.status(500).json({ error: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno' });
+        res.json({ total: 0, chamadas: [], aviso: 'Erro ao buscar dados de ligações' });
     }
 });
 
@@ -5970,15 +5981,30 @@ apiVendasRouter.get('/ligacoes/resumo', async (req, res, next) => {
         const di = data_inicio || hoje;
         const df = data_fim || hoje;
 
-        const chamadas = await cdrScraper.fetchCDRData(di, df);
-        const resumo = cdrScraper.gerarResumo(chamadas);
+        let chamadas = [];
+        try {
+            chamadas = await cdrScraper.fetchCDRData(di, df);
+        } catch (scraperErr) {
+            console.warn('[CDR] Scraper indisponível para resumo:', scraperErr.message);
+            return res.json({
+                total: 0, realizadas: 0, atendidas: 0, nao_atendidas: 0,
+                duracao_total: 0, por_ramal: {},
+                periodo: { inicio: di, fim: df },
+                aviso: 'Integração CDR temporariamente indisponível'
+            });
+        }
 
+        const resumo = cdrScraper.gerarResumo(chamadas);
         resumo.periodo = { inicio: di, fim: df };
 
         res.json(resumo);
     } catch (error) {
         console.error('Erro ao gerar resumo de ligações:', error.message);
-        res.status(500).json({ error: process.env.NODE_ENV === 'development' ? error.message : 'Erro interno' });
+        res.json({
+            total: 0, realizadas: 0, atendidas: 0, nao_atendidas: 0,
+            duracao_total: 0, por_ramal: {},
+            aviso: 'Erro ao buscar resumo de ligações'
+        });
     }
 });
 

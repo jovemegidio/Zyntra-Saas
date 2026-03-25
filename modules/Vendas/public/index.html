@@ -6362,7 +6362,7 @@
                             <label>Condição de Pagamento <button type="button" onclick="abrirModalNovaCondicao()"
                                     class="btn-add-inline" title="Cadastrar condição"><i
                                         class="fas fa-plus"></i></button></label>
-                            <select id="edit-condicao-pagamento">
+                            <select id="edit-condicao-pagamento" onchange="recalcularParcelasAutomatico()">
                                 <option value="a vista">À Vista</option>
                                 <option value="28/35/42/49">28/35/42/49 dias</option>
                                 <option value="30/60">30/60 dias</option>
@@ -9917,40 +9917,45 @@
 
     <!-- Modal Cadastro Rápido - Condição de Pagamento -->
     <div class="modal-overlay" id="modal-nova-condicao">
-        <div class="modal-content" style="max-width: 450px; border-radius: 12px;">
-            <div class="modal-header">
-                <h2><i class="fas fa-credit-card"></i> Nova Condição de Pagamento</h2>
-                <button class="modal-close" onclick="fecharModalNovaCondicao()">
+        <div class="modal-content" style="max-width: 480px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+            <div class="modal-header-omie" style="padding: 16px 24px; min-height: auto;">
+                <h2 style="font-size: 16px;"><i class="fas fa-credit-card" style="color: #60a5fa;"></i> Nova Condição de Pagamento</h2>
+                <button class="close-btn" onclick="fecharModalNovaCondicao()" style="padding: 8px 16px; font-size: 12px;">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <div class="modal-body" style="padding: 24px;">
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label
-                        style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Nome
-                        da Condição *</label>
+            <div style="padding: 28px;">
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;">Nome da Condição <span style="color: #ef4444;">*</span></label>
                     <input type="text" id="nova-condicao-nome" placeholder="Ex: 30/60/90 dias"
-                        style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                        style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none; background: #f8fafc;"
+                        onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'; this.style.background='#fff'"
+                        onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'; this.style.background='#f8fafc'">
                 </div>
-                <div class="form-group" style="margin-bottom: 16px;">
-                    <label
-                        style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Dias
-                        para Vencimento (separados por /)</label>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;">Dias para Vencimento <span style="font-weight: 400; color: #94a3b8;">(separados por /)</span></label>
                     <input type="text" id="nova-condicao-dias" placeholder="Ex: 30/60/90"
-                        style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px;">
+                        style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; transition: all 0.2s; outline: none; background: #f8fafc;"
+                        onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'; this.style.background='#fff'"
+                        onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'; this.style.background='#f8fafc'">
                 </div>
                 <div class="form-group">
-                    <label
-                        style="font-size: 13px; font-weight: 500; color: #374151; display: block; margin-bottom: 6px;">Descrição</label>
-                    <textarea id="nova-condicao-descrição" placeholder="Descrição opcional..."
-                        style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 14px; min-height: 80px; resize: vertical;"></textarea>
+                    <label style="font-size: 13px; font-weight: 600; color: #1e293b; display: block; margin-bottom: 8px;">Descrição</label>
+                    <textarea id="nova-condicao-descricao" placeholder="Descrição opcional..."
+                        style="width: 100%; padding: 12px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; min-height: 80px; resize: vertical; transition: all 0.2s; outline: none; background: #f8fafc; font-family: inherit;"
+                        onfocus="this.style.borderColor='#3b82f6'; this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.1)'; this.style.background='#fff'"
+                        onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'; this.style.background='#f8fafc'"></textarea>
                 </div>
             </div>
-            <div class="modal-footer" style="padding: 16px 24px; background: #f9fafb; border-top: 1px solid #e5e7eb;">
-                <button type="button" class="btn-modal btn-modal-cancel"
-                    onclick="fecharModalNovaCondicao()">Cancelar</button>
-                <button type="button" class="btn-modal btn-modal-save" style="background: #8b5cf6;"
-                    onclick="salvarNovaCondicao()">
+            <div style="padding: 16px 28px 20px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; gap: 12px; justify-content: flex-end;">
+                <button type="button" onclick="fecharModalNovaCondicao()"
+                    style="padding: 10px 24px; border: 1.5px solid #e2e8f0; background: white; border-radius: 10px; font-size: 14px; font-weight: 500; color: #64748b; cursor: pointer; transition: all 0.2s;"
+                    onmouseover="this.style.background='#f1f5f9'; this.style.borderColor='#cbd5e1'"
+                    onmouseout="this.style.background='white'; this.style.borderColor='#e2e8f0'">Cancelar</button>
+                <button type="button" onclick="salvarNovaCondicao()"
+                    style="padding: 10px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 10px; font-size: 14px; font-weight: 600; color: white; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 14px rgba(59,130,246,0.3);"
+                    onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 6px 20px rgba(59,130,246,0.4)'"
+                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 14px rgba(59,130,246,0.3)'">
                     <i class="fas fa-save"></i> Salvar
                 </button>
             </div>
@@ -11073,6 +11078,9 @@
             // Carregar itens do pedido da API
             carregarItensPedido(pedido.id);
 
+            // Carregar condições de pagamento do banco
+            carregarCondicoesPagamentoDB(pedido.condicao_pagamento);
+
             // Carregar dados completos do cliente (para impressão com dados reais)
             carregarDadosCompletosCliente();
 
@@ -11941,16 +11949,6 @@
             showNotification(`Gerando PDF...`, 'info');
 
             try {
-                if (!token) {
-                    const cookies = document.cookie.split('; ');
-                    for (const cookie of cookies) {
-                        if (cookie.startsWith('authToken=') || cookie.startsWith('token=')) {
-                            token = decodeURIComponent(cookie.split('=')[1]);
-                            break;
-                        }
-                    }
-                }
-
                 const pdfUrl = `/api/vendas/pedidos/${pedidoAtual.id}/pdf`;
                 const headers = { 'Content-Type': 'application/json' };
                 // Tentar gerar via API com timeout de 15 segundos
@@ -12025,7 +12023,7 @@
 
             if (formato === 'arquivo') {
                 // Para nome de arquivo: ORCAMENTO - 00009Aluforce:
-                return `${tipoDoc.replace(/Ç/g, 'C').replace(/Ã/g, 'A')} - ${número} - ${empresa}`;
+                return `${tipoDoc.replace(/Ç/g, 'C').replace(/Ã/g, 'A')} - ${numero} - ${empresa}`;
             } else {
                 // Para título do documento
                 return tipoDoc;
@@ -14991,6 +14989,107 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Atualizar o valor (string vazia se for 0 e não tinha nada)
             input.value = valor === '' ? '' : numero.toString();
+        }
+
+        // Recalcular parcelas automaticamente baseado na condição de pagamento
+        function recalcularParcelasAutomatico() {
+            const condicaoSelect = document.getElementById('edit-condicao-pagamento');
+            const parcelasInput = document.getElementById('edit-parcelas');
+            const tbody = document.getElementById('parcelas-tbody');
+            if (!condicaoSelect) return;
+
+            const condicao = condicaoSelect.value;
+
+            // Parsear dias da condição
+            let dias = [];
+            if (condicao.toLowerCase() === 'a vista' || condicao === '0') {
+                dias = [0];
+            } else {
+                dias = condicao.split('/').map(d => parseInt(d.trim())).filter(d => !isNaN(d) && d >= 0);
+            }
+            if (dias.length === 0) dias = [0];
+
+            // Atualizar campo número de parcelas automaticamente
+            if (parcelasInput) {
+                parcelasInput.value = dias.length;
+            }
+
+            // Calcular valor total do pedido
+            let valorTotal = 0;
+            const valorTotalEl = document.getElementById('edit-valor-total');
+            if (valorTotalEl) {
+                valorTotal = parseFloat(valorTotalEl.value.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            }
+
+            // Gerar tabela de parcelas
+            if (tbody) {
+                if (dias.length === 1 && dias[0] === 0) {
+                    // À vista
+                    tbody.innerHTML = `
+                        <tr>
+                            <td>1/1</td>
+                            <td>${new Date().toLocaleDateString('pt-BR')}</td>
+                            <td>R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                            <td>Boleto</td>
+                        </tr>
+                    `;
+                } else {
+                    const valorParcela = valorTotal / dias.length;
+                    const resto = valorTotal - (Math.floor(valorParcela * 100) / 100) * dias.length;
+                    const hoje = new Date();
+
+                    tbody.innerHTML = dias.map((d, i) => {
+                        const vencimento = new Date(hoje);
+                        vencimento.setDate(vencimento.getDate() + d);
+                        let vl = Math.floor(valorParcela * 100) / 100;
+                        // Ajuste de centavos na última parcela
+                        if (i === dias.length - 1) {
+                            vl = Math.round((vl + resto) * 100) / 100;
+                        }
+                        return `
+                            <tr>
+                                <td>${i + 1}/${dias.length}</td>
+                                <td>${vencimento.toLocaleDateString('pt-BR')}</td>
+                                <td>R$ ${vl.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                                <td>Boleto</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
+        }
+
+        // Carregar condições de pagamento do banco de dados
+        async function carregarCondicoesPagamentoDB(condicaoSelecionada) {
+            try {
+                const resp = await fetch('/api/vendas/condicoes-pagamento', { credentials: 'include' });
+                if (resp.ok) {
+                    const condicoes = await resp.json();
+                    const select = document.getElementById('edit-condicao-pagamento');
+                    if (select && Array.isArray(condicoes) && condicoes.length > 0) {
+                        // Manter opções padrão e adicionar do banco
+                        const existentes = new Set();
+                        Array.from(select.options).forEach(o => existentes.add(o.value));
+                        condicoes.forEach(c => {
+                            const valor = c.dias || c.nome;
+                            if (!existentes.has(valor)) {
+                                const option = document.createElement('option');
+                                option.value = valor;
+                                option.textContent = c.nome;
+                                select.appendChild(option);
+                            }
+                        });
+                        // Selecionar a condição do pedido
+                        if (condicaoSelecionada) {
+                            select.value = condicaoSelecionada;
+                        }
+                    }
+                }
+            } catch (e) {
+                // Silencioso - usar opções padrão
+            }
+            // Recalcular parcelas com a condição atual
+            recalcularParcelasAutomatico();
         }
 
         // Atualizar valores calculados
@@ -21224,7 +21323,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             document.getElementById('modal-nova-condicao').classList.add('active');
             document.getElementById('nova-condicao-nome').value = '';
             document.getElementById('nova-condicao-dias').value = '';
-            document.getElementById('nova-condicao-descrição').value = '';
+            document.getElementById('nova-condicao-descricao').value = '';
         }
 
         function fecharModalNovaCondicao() {
@@ -21247,7 +21346,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     const response = await fetch('/api/vendas/condicoes-pagamento', {
                         credentials: 'include', method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ nome, dias, descrição: document.getElementById('nova-condicao-descrição').value })
+                        body: JSON.stringify({ nome, dias, descricao: document.getElementById('nova-condicao-descricao').value })
                     });
 
                     if (response.ok) {
@@ -21262,6 +21361,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             select.appendChild(option);
                             select.value = dias || nome;
                         }
+                        // Auto-recalcular parcelas com a nova condição
+                        recalcularParcelasAutomatico();
                     } else {
                         throw new Error('Erro ao salvar');
                     }

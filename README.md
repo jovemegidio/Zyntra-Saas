@@ -259,6 +259,14 @@ npm run lint
 
 ## 📊 Changelog Recente
 
+### v2.2.2 — 25/03/2026
+- ✅ **Condição de Pagamento** — Modal redesenhado com visual profissional (dark header, inputs focáveis), salva e carrega condições do banco de dados
+- ✅ **Parcelas Automáticas** — Número de parcelas e tabela de vencimentos calculados automaticamente ao selecionar condição de pagamento
+- ✅ **Fix PDF Vendas** — Corrigido `token is not defined` na geração de PDF e `número is not defined` no nome do documento
+- ✅ **Contadores Padronizados** — Módulo NFe atualizado com footer links e padrão visual Compras (stat-card + stat-footer)
+- ✅ **QR Code Estoque** — Integrado como funcionalidade no dashboard e sidebar do módulo Compras (ação rápida + botão lateral)
+- ✅ **Ligações CDR** — Endpoints /ligacoes/cdr e /ligacoes/resumo com fallback gracioso (retorna dados vazios ao invés de 500/504)
+
 ### v2.2.1 — 25/03/2026
 - ✅ **Permissões logistica@** — Usuário de logística agora visualiza cards "Faturamento & Logística" e "Vendas" no dashboard
 - ✅ **Bug parsePermissao** — Corrigido parsing JSON do campo `areas` no `/api/me` (valores como `["nfe","vendas"]` eram corrompidos por split de vírgula antes do JSON.parse)
