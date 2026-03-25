@@ -10118,7 +10118,7 @@
                 const mlColor = p._ml_pct >= 20 ? '#059669' : p._ml_pct >= 15 ? '#ca8a04' : '#dc2626';
                 tbody += `<tr style="background:${bgColor};" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bgColor}'">
                     <td style="padding:8px 12px;font-weight:600;color:#7c3aed;font-size:12px;">${p.codigo}</td>
-                    <td style="padding:8px 12px;font-size:12px;color:#374151;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.descrição}">${p.descrição}</td>
+                    <td style="padding:8px 12px;font-size:12px;color:#374151;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.descricao}">${p.descricao}</td>
                     <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
                     <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
                     <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${p._mb_pct.toFixed(2)}%</td>
@@ -10166,7 +10166,7 @@
             if (_cpFiltroCategoria !== 'todos') list = list.filter(p => p.categoria === _cpFiltroCategoria);
             if (_cpFiltroSearch) {
                 const s = _cpFiltroSearch.toLowerCase();
-                list = list.filter(p => p.codigo.toLowerCase().includes(s) || p.descrição.toLowerCase().includes(s));
+                list = list.filter(p => p.codigo.toLowerCase().includes(s) || (p.descricao || '').toLowerCase().includes(s));
             }
             return list;
         }
@@ -10185,7 +10185,7 @@
                 options += '<optgroup label="' + cat + '">';
                 cats[cat].forEach(p => {
                     const sel = _cpSimProduto && _cpSimProduto.codigo === p.codigo ? ' selected' : '';
-                    options += '<option value="' + p.codigo + '"' + sel + '>' + p.codigo + ' — ' + p.descrição.substring(0, 50) + '</option>';
+                    options += '<option value="' + p.codigo + '"' + sel + '>' + p.codigo + ' — ' + (p.descricao || '').substring(0, 50) + '</option>';
                 });
                 options += '</optgroup>';
             });
@@ -10322,7 +10322,7 @@
                 <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px;">
                     <select id="cp-sim-select" onchange="cpSelectSimProduto(this.value)" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;background:white;">${options}</select>
                 </div>
-                ${_cpSimProduto ? '<div style="margin-top:4px;padding:8px 14px;background:#faf5ff;border-radius:8px;border:1px solid #e9d5ff;font-size:12px;color:#6d28d9;"><i class="fas fa-info-circle" style="margin-right:6px;"></i><b>' + _cpSimProduto.codigo + '</b> — ' + _cpSimProduto.descrição + '  |  Cores: ' + (_cpSimProduto.cores || '—') + '</div>' : '<div style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-calculator" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.4;"></i><p>Selecione um produto para simular a formação de preço</p></div>'}
+                ${_cpSimProduto ? '<div style="margin-top:4px;padding:8px 14px;background:#faf5ff;border-radius:8px;border:1px solid #e9d5ff;font-size:12px;color:#6d28d9;"><i class="fas fa-info-circle" style="margin-right:6px;"></i><b>' + _cpSimProduto.codigo + '</b> — ' + (_cpSimProduto.descricao || '') + '  |  Cores: ' + (_cpSimProduto.cores || '—') + '</div>' : '<div style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-calculator" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.4;"></i><p>Selecione um produto para simular a formação de preço</p></div>'}
                 ${detail}
             </div>`;
         }
@@ -10378,7 +10378,7 @@
                 let rows = prods.map((p, i) => `
                     <tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'};">
                         <td style="padding:5px 8px;font-weight:600;color:#1e40af;">${p.codigo}</td>
-                        <td style="padding:5px 8px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.descrição}</td>
+                        <td style="padding:5px 8px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.descricao}</td>
                         <td style="padding:5px 8px;text-align:center;color:#6b7280;">${p.cores || '—'}</td>
                         <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
                         <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
