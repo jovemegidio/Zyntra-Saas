@@ -69,6 +69,9 @@ class NFeController {
         
         // Listar NFes
         router.get('/listar', this.listarNFes.bind(this));
+
+        // Espelho de NF-e (pré-visualização sem certificado)
+        router.get('/:id/espelho', this.gerarEspelho.bind(this));
         
         // Buscar NFe por ID
         router.get('/:id', this.buscarNFe.bind(this));
@@ -953,6 +956,226 @@ class NFeController {
                 mensagem: 'Erro ao sugerir faixa',
                 erro: error.message
             });
+        }
+    }
+
+    /**
+     * GET /api/nfe/:id/espelho
+     * Gera HTML de pré-visualização da NF-e (espelho) sem valor fiscal.
+     * Aceita: chave_acesso (44 dígitos), id numérico ou numero da NF-e.
+     */
+    async gerarEspelho(req, res) {
+        try {
+            const nfeId = req.params.id;
+            let row = null;
+
+            // Tenta por chave_acesso (44 dígitos)
+            if (/^\d{44}$/.test(nfeId)) {
+                const [rows] = await this.pool.query('SELECT * FROM nfes WHERE chave_acesso = ? LIMIT 1', [nfeId]).catch(() => [[]]);
+                row = rows && rows[0];
+                if (!row) {
+                    const [r2] = await this.pool.query('SELECT * FROM nfe WHERE chave_acesso = ? LIMIT 1', [nfeId]).catch(() => [[]]);
+                    row = r2 && r2[0];
+                }
+            } else {
+                // Tenta por id ou numero na tabela nfes
+                const [rows] = await this.pool.query('SELECT * FROM nfes WHERE id = ? LIMIT 1', [parseInt(nfeId) || 0]).catch(() => [[]]);
+                row = rows && rows[0];
+                if (!row) {
+                    const [r2] = await this.pool.query('SELECT * FROM nfes WHERE numero = ? LIMIT 1', [nfeId]).catch(() => [[]]);
+                    row = r2 && r2[0];
+                }
+                // Fallback para tabela nfe (faturamento)
+                if (!row) {
+                    const [r3] = await this.pool.query('SELECT * FROM nfe WHERE id = ? OR numero_nfe = ? LIMIT 1', [parseInt(nfeId) || 0, nfeId]).catch(() => [[]]);
+                    row = r3 && r3[0];
+                }
+            }
+
+            if (!row) return res.status(404).send('<h2 style="font-family:sans-serif;padding:40px;color:#ef4444;">NF-e não encontrada</h2>');
+
+            // Normaliza campos (nfes vs nfe tabela)
+            const nfe = {
+                id: row.id,
+                numero: row.numero || row.numero_nfe,
+                serie: row.serie,
+                chave_acesso: row.chave_acesso,
+                status: row.status,
+                data_emissao: row.data_emissao,
+                data_autorizacao: row.data_autorizacao,
+                protocolo: row.protocolo_nfe || row.numero_protocolo,
+                natureza_operacao: row.natureza_operacao,
+                tipo_operacao: row.tipo_operacao || row.tpNF,
+                modalidade_frete: row.modalidade_frete,
+                destinatario: row.destinatario_nome || row.destinatario,
+                dest_cnpj: row.destinatario_cnpj_cpf || row.dest_cnpj,
+                dest_ie: row.destinatario_ie,
+                dest_endereco: row.destinatario_endereco,
+                dest_bairro: row.destinatario_bairro,
+                dest_cidade: row.destinatario_municipio || row.destinatario_cidade,
+                dest_uf: row.destinatario_uf,
+                dest_cep: row.destinatario_cep,
+                dest_email: row.destinatario_email,
+                valor_total: parseFloat(row.valor_total || row.valor || 0)
+            };
+
+            // Itens da NF-e
+            const [itens] = await this.pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ? ORDER BY id', [row.id]).catch(() => [[]]);
+
+            // Emitente config
+            const [cfgRows] = await this.pool.query("SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1").catch(() => [[]]);
+            const cfg = cfgRows && cfgRows[0] ? JSON.parse(cfgRows[0].valor || '{}') : {};
+            const emit = {
+                razaoSocial: cfg.razaoSocial || row.emitente_nome || row.emitente_razao_social || (process.env.EMITENTE_RAZAO_SOCIAL || 'ALUFORCE'),
+                nomeFantasia: cfg.nomeFantasia || (process.env.EMITENTE_NOME_FANTASIA || 'ALUFORCE'),
+                cnpj: cfg.cnpj || row.emitente_cnpj || '',
+                ie: cfg.ie || row.emitente_ie || '',
+                cidade: cfg.cidade || row.emitente_municipio || '',
+                uf: cfg.uf || row.emitente_uf || (process.env.EMITENTE_UF || 'MG'),
+                logradouro: cfg.logradouro || '',
+                numero: cfg.numero || '',
+                bairro: cfg.bairro || '',
+                cep: cfg.cep || '',
+                telefone: cfg.telefone || ''
+            };
+
+            const fmt = v => v != null ? parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
+            const fmtDate = d => d ? new Date(d).toLocaleDateString('pt-BR') : '-';
+            const stLabel = { pendente: 'Pendente', autorizada: 'Autorizada', cancelada: 'Cancelada', rejeitada: 'Rejeitada', denegada: 'Denegada' };
+
+            const itensRows = (itens || []).map((item, i) => `
+              <tr style="border-bottom:1px solid #e5e7eb;">
+                <td style="padding:5px 8px;font-size:11px;text-align:center;">${i + 1}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.codigo_produto || item.codigo || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.descricao || item.descricao_produto || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;">${item.ncm || '-'}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:center;">${item.unidade || item.unidade_medida || 'UN'}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">${fmt(item.quantidade || item.qtd)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_unitario || item.preco_unitario)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_desconto || 0)}</td>
+                <td style="padding:5px 8px;font-size:11px;text-align:right;font-weight:600;">R$ ${fmt(item.valor_total || item.valor_produto)}</td>
+              </tr>`).join('');
+
+            const totalItens = (itens || []).reduce((s, i) => s + parseFloat(i.valor_total || i.valor_produto || 0), 0);
+            const totalDesc = (itens || []).reduce((s, i) => s + parseFloat(i.valor_desconto || 0), 0);
+
+            const html = `<!DOCTYPE html><html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Espelho NF-e #${nfe.numero || nfe.id}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:#f0f4f8; color:#1e293b; padding:24px; }
+    .danfe { background:white; max-width:960px; margin:0 auto; border:2px solid #1e40af; border-radius:4px; }
+    .danfe-header { background:#1e40af; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
+    .danfe-header h1 { font-size:22px; font-weight:800; letter-spacing:2px; }
+    .espelho-badge { background:#fbbf24; color:#1e3a8a; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; }
+    .section { border:1px solid #d1d5db; margin:8px; border-radius:4px; overflow:hidden; }
+    .section-title { background:#f8fafc; border-bottom:1px solid #d1d5db; padding:6px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; }
+    .grid-2 { display:grid; grid-template-columns:1fr 1fr; }
+    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; }
+    .field { padding:8px 12px; border-right:1px solid #e5e7eb; }
+    .field:last-child { border-right:none; }
+    .field label { display:block; font-size:9px; font-weight:700; text-transform:uppercase; color:#9ca3af; margin-bottom:2px; }
+    .field span { font-size:12px; color:#1e293b; font-weight:500; }
+    .watermark { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-35deg); font-size:90px; font-weight:900; color:rgba(30,64,175,0.06); pointer-events:none; white-space:nowrap; z-index:0; }
+    table.items { width:100%; border-collapse:collapse; }
+    table.items thead th { background:#f1f5f9; padding:6px 8px; font-size:10px; font-weight:700; text-transform:uppercase; color:#64748b; border-bottom:2px solid #cbd5e1; }
+    .totais-row { display:flex; justify-content:flex-end; gap:24px; padding:10px 20px; background:#f8fafc; border-top:2px solid #1e40af; }
+    .t-item { text-align:right; }
+    .t-item label { font-size:9px; font-weight:700; text-transform:uppercase; color:#9ca3af; display:block; }
+    .t-item span { font-size:14px; font-weight:700; color:#1e40af; }
+    .footer-bar { background:#1e40af; color:rgba(255,255,255,0.7); text-align:center; padding:8px; font-size:10px; }
+    .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; }
+    .status-pendente { background:#fef3c7; color:#d97706; }
+    .status-autorizada { background:#d1fae5; color:#059669; }
+    .status-cancelada { background:#fee2e2; color:#dc2626; }
+    @media print { body { background:white; padding:0; } .no-print { display:none !important; } .danfe { border:1px solid #000; } }
+  </style>
+</head>
+<body>
+<div class="watermark">ESPELHO SEM VALOR FISCAL</div>
+<div class="no-print" style="max-width:960px;margin:0 auto 12px;display:flex;gap:8px;justify-content:flex-end;">
+  <button onclick="window.print()" style="background:#1e40af;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨 Imprimir</button>
+  <button onclick="window.close()" style="background:#6b7280;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;">Fechar</button>
+</div>
+<div class="danfe">
+  <div class="danfe-header">
+    <div><h1>ALUFORCE</h1><div style="font-size:11px;opacity:0.8;">${emit.razaoSocial}</div></div>
+    <div style="text-align:center;">
+      <div style="font-size:16px;font-weight:700;letter-spacing:2px;">ESPELHO DE NF-e</div>
+      <div class="espelho-badge" style="margin-top:6px;">⚠ SEM VALOR FISCAL — PRÉ-AUTORIZAÇÃO</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:20px;font-weight:800;">Nº ${nfe.numero || '—'}</div>
+      <div style="font-size:12px;opacity:0.8;">Série: ${nfe.serie || '1'}</div>
+      <span class="status-badge status-${(nfe.status || 'pendente').toLowerCase()}" style="margin-top:4px;display:inline-block;">${stLabel[nfe.status] || nfe.status || 'Pendente'}</span>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📦 Emitente</div>
+    <div class="grid-2">
+      <div class="field"><label>Razão Social / Nome Fantasia</label><span>${emit.razaoSocial} / ${emit.nomeFantasia}</span></div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
+        <div><label>CNPJ</label><span>${emit.cnpj || '—'}</span></div>
+        <div><label>Insc. Estadual</label><span>${emit.ie || '—'}</span></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Endereço</label><span>${emit.logradouro} ${emit.numero}${emit.bairro ? ', ' + emit.bairro : ''}</span></div>
+      <div class="field"><label>Município / UF</label><span>${emit.cidade} — ${emit.uf}</span></div>
+      <div class="field"><label>CEP / Telefone</label><span>${emit.cep} / ${emit.telefone}</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">🏢 Destinatário</div>
+    <div class="grid-2">
+      <div class="field"><label>Nome / Razão Social</label><span>${nfe.destinatario || '—'}</span></div>
+      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
+        <div><label>CNPJ / CPF</label><span>${nfe.dest_cnpj || '—'}</span></div>
+        <div><label>Insc. Estadual</label><span>${nfe.dest_ie || '—'}</span></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="field"><label>Endereço</label><span>${(nfe.dest_endereco || '—') + (nfe.dest_bairro ? ', ' + nfe.dest_bairro : '')}</span></div>
+      <div class="field"><label>Município / UF</label><span>${nfe.dest_cidade || '—'} — ${nfe.dest_uf || '—'}</span></div>
+      <div class="field"><label>CEP / E-mail</label><span>${nfe.dest_cep || '—'} / ${nfe.dest_email || '—'}</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📋 Dados da NF-e</div>
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);">
+      <div class="field"><label>Data Emissão</label><span>${fmtDate(nfe.data_emissao)}</span></div>
+      <div class="field"><label>Natureza da Operação</label><span>${nfe.natureza_operacao || 'Venda de Produtos'}</span></div>
+      <div class="field"><label>Tipo da Operação</label><span>${nfe.tipo_operacao === '1' || nfe.tipo_operacao === 1 ? 'Saída' : 'Entrada'}</span></div>
+      <div class="field"><label>Protocolo</label><span style="font-size:10px;">${nfe.protocolo || nfe.chave_acesso ? (nfe.protocolo || (nfe.chave_acesso || '').substring(0,20) + '...') : '—'}</span></div>
+      <div class="field"><label>Status</label><span>${stLabel[nfe.status] || nfe.status || 'Pendente'}</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-title">📦 Itens da NF-e (${(itens || []).length} produto(s))</div>
+    <table class="items">
+      <thead><tr><th>#</th><th>Código</th><th>Descrição</th><th>NCM</th><th>UN</th><th style="text-align:right;">Qtd.</th><th style="text-align:right;">Vl. Unit.</th><th style="text-align:right;">Desconto</th><th style="text-align:right;">Total</th></tr></thead>
+      <tbody>${itensRows || '<tr><td colspan="9" style="padding:16px;text-align:center;color:#9ca3af;">Nenhum item lançado</td></tr>'}</tbody>
+    </table>
+  </div>
+  <div class="totais-row">
+    <div class="t-item"><label>Qtd. Itens</label><span>${(itens || []).length}</span></div>
+    <div class="t-item"><label>Descontos</label><span style="color:#ef4444;">R$ ${fmt(totalDesc)}</span></div>
+    <div class="t-item"><label>Subtotal</label><span>R$ ${fmt(totalItens)}</span></div>
+    <div class="t-item"><label>VALOR TOTAL NF-e</label><span style="font-size:18px;">R$ ${fmt(nfe.valor_total || totalItens)}</span></div>
+  </div>
+  <div class="footer-bar">Documento sem valor fiscal • Gerado em ${new Date().toLocaleString('pt-BR')} • Sistema Zyntra / Aluforce | NF-e Nº ${nfe.numero || '—'} — Série ${nfe.serie || '1'}</div>
+</div>
+</body></html>`;
+
+            res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.send(html);
+
+        } catch (error) {
+            console.error('[NFe] Erro ao gerar espelho:', error);
+            res.status(500).json({ sucesso: false, mensagem: error.message });
         }
     }
 
