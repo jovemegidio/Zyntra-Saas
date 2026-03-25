@@ -821,31 +821,12 @@ apiVendasRouter.get('/vendedores', authenticateToken, async (req, res) => {
             ORDER BY nome ASC
         `);
 
-        // Se não encontrou no banco, retornar lista fixa com IDs simulados
-        if (rows.length === 0) {
-            console.log('⚠️ Vendedores não encontrados no banco, retornando lista fixa');
-            return res.json([
-                { id: 1, nome: 'Márcia Scarcella', email: 'marcia@aluforce.com.br' },
-                { id: 2, nome: 'Augusto Ladeira', email: 'augusto@aluforce.com.br' },
-                { id: 3, nome: 'Renata Nascimento', email: 'renata@aluforce.com.br' },
-                { id: 4, nome: 'Fabiano Marques', email: 'fabiano@aluforce.com.br' },
-                { id: 5, nome: 'Fabíola Souza', email: 'fabiola@aluforce.com.br' }
-            ]);
-        }
-
         if (DEBUG) console.log(`👤 Vendedores comerciais ativos: ${rows.length} encontrados`);
         res.json(rows);
 
     } catch (err) {
-        console.error('Erro ao buscar vendedores:', err);
-        // Fallback para lista fixa em caso de erro
-        res.json([
-            { id: 62, nome: 'Márcia Scarcella', email: 'marcia@aluforce.com.br' },
-            { id: 63, nome: 'Augusto Ladeira', email: 'augusto@aluforce.com.br' },
-            { id: 2, nome: 'Renata Nascimento', email: 'renata@aluforce.com.br' },
-            { id: 65, nome: 'Fabiano Marques', email: 'fabiano@aluforce.com.br' },
-            { id: 72, nome: 'Fabíola Souza', email: 'fabiola@aluforce.com.br' }
-        ]);
+        console.error('Erro ao buscar vendedores:', err.message);
+        res.status(500).json({ message: 'Erro ao buscar vendedores.' });
     }
 });
 

@@ -1978,7 +1978,7 @@ app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh
         res.json(folhas);
     } catch (error) {
         logger.error('Erro ao buscar folha manual:', error);
-        res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     }
 });
 
@@ -2059,7 +2059,7 @@ app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async
     } catch (error) {
         await conn.rollback();
         logger.error('Erro ao salvar folha manual:', error);
-        res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
+        res.status(500).json({ error: 'Erro interno no servidor.' });
     } finally {
         conn.release();
     }

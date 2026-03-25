@@ -14537,11 +14537,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Carregar tarefas do pedido
             if (!tarefasPedido[pedidoAtual.id]) {
-                tarefasPedido[pedidoAtual.id] = [
-                    { id: 1, texto: 'Confirmar pagamento com cliente', concluida: true },
-                    { id: 2, texto: 'Aguardar aprovação de crédito', concluida: false },
-                    { id: 3, texto: 'Enviar documentação fiscal', concluida: false }
-                ];
+                tarefasPedido[pedidoAtual.id] = [];
             }
 
             renderizarTarefas(tarefasPedido[pedidoAtual.id]);
