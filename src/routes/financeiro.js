@@ -159,6 +159,9 @@ function authorizeFinanceiro(section) {
     };
 }
 
+// Alias usado pelas rotas de resumo/KPI
+const checkFinanceiroPermission = authorizeFinanceiro;
+
 // =====================================================
 // FUNÇÕES DE VALIDAÇÁO - Prioridade 2 QA
 // =====================================================
