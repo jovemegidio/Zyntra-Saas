@@ -1,6 +1,11 @@
-﻿const express = require('express');
+﻿const path = require('path');
+
+// Load environment variables FIRST (before any module that reads process.env)
+require('dotenv').config({ path: path.join(__dirname, '..', '..', '.env') });
+
+const express = require('express');
 const cors = require('cors');
-const path = require('path');
+const cookieParser = require('cookie-parser');
 const fs = require('fs');
 // mysql2/promise removido — pool centralizado em database/pool.js (Sprint 7)
 const http = require('http');
@@ -150,10 +155,7 @@ const {
     validateEmail,
     securityHeaders,
     cleanExpiredSessions
-} = require('./security-middleware');
-
-// Load environment variables
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+} = require('../../security-middleware');
 
 // Sistema de logs melhorado
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
@@ -273,6 +275,7 @@ app.use(generalLimiter);
 // 🔒 SECURITY: Sanitização de entrada
 app.use(sanitizeInput);
 
+app.use(cookieParser());
 app.use(express.json({ limit: '10mb' })); // SEGURANÇA: Reduzido de 50mb para 10mb
 app.use(express.urlencoded({ extended: true, limit: '10mb' })); // SEGURANÇA: Reduzido de 50mb (Sprint 7)
 
@@ -1009,9 +1012,9 @@ app.get('/api/pcp/dashboard', authRequired, async (req, res) => {
 
         // Pedidos recentes
         const [pedidos] = await db.query(`
-            SELECT id, cliente, produto_id, quantidade, status, data_pedido
+            SELECT id, cliente_nome, descricao, valor, status, created_at
             FROM pedidos
-            ORDER BY data_pedido DESC
+            ORDER BY created_at DESC
             LIMIT 10
         `);
 
@@ -1087,10 +1090,10 @@ app.get('/api/pcp/alertas', authRequired, async (req, res) => {
 
         // 3. Ordens de Produção em atraso
         const [ordensAtraso] = await db.query(`
-            SELECT id, codigo_produto, descricao_produto, data_previsao_entrega
+            SELECT id, codigo, produto_nome, data_prevista
             FROM ordens_producao
-            WHERE data_previsao_entrega < CURDATE()
-            AND status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada', 'entregue')
+            WHERE data_prevista < CURDATE()
+            AND status NOT IN ('concluida', 'cancelada')
             LIMIT 10
         `);
 
@@ -1108,9 +1111,9 @@ app.get('/api/pcp/alertas', authRequired, async (req, res) => {
 
         // 4. Ordens pendentes há mais de 7 dias
         const [ordensPendentes] = await db.query(`
-            SELECT id, codigo_produto, descricao_produto, created_at
+            SELECT id, codigo, produto_nome, created_at
             FROM ordens_producao
-            WHERE status IN ('pendente', 'a_produzir', 'A Fazer')
+            WHERE status IN ('pendente', 'ativa')
             AND created_at < DATE_SUB(CURDATE(), INTERVAL 7 DAY)
             LIMIT 10
         `);
@@ -1129,9 +1132,9 @@ app.get('/api/pcp/alertas', authRequired, async (req, res) => {
 
         // 5. Materiais com estoque baixo
         const [materiaisBaixo] = await db.query(`
-            SELECT codigo, nome, estoque_atual, estoque_minimo
+            SELECT codigo_material, descricao, quantidade_estoque, estoque_minimo
             FROM materiais
-            WHERE estoque_atual < estoque_minimo
+            WHERE quantidade_estoque < estoque_minimo
             AND estoque_minimo > 0
             LIMIT 20
         `);
@@ -1143,7 +1146,7 @@ app.get('/api/pcp/alertas', authRequired, async (req, res) => {
                 descricao: `${materiaisBaixo.length} material(is) abaixo do estoque mínimo`,
                 icone: 'fa-cubes',
                 cor: '#f59e0b',
-                detalhes: materiaisBaixo.slice(0, 3).map(m => m.nome || m.codigo).join(', '),
+                detalhes: materiaisBaixo.slice(0, 3).map(m => m.descricao || m.codigo_material).join(', '),
                 total: materiaisBaixo.length
             });
         }
@@ -2462,6 +2465,21 @@ app.get('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
                 }
             } catch (alterError) {
                 console.log('[API_ORDENS_KANBAN] Não foi possível alterar coluna status:', alterError.message);
+            }
+            // Garantir que colunas pedido_vinculado_id e cliente_nome existem
+            try {
+                const [cols] = await db.query(`SHOW COLUMNS FROM ordens_producao_kanban WHERE Field IN ('pedido_vinculado_id','cliente_nome')`);
+                const existingCols = cols.map(c => c.Field);
+                if (!existingCols.includes('pedido_vinculado_id')) {
+                    await db.query(`ALTER TABLE ordens_producao_kanban ADD COLUMN pedido_vinculado_id INT NULL`);
+                    console.log('[API_ORDENS_KANBAN] Coluna pedido_vinculado_id adicionada');
+                }
+                if (!existingCols.includes('cliente_nome')) {
+                    await db.query(`ALTER TABLE ordens_producao_kanban ADD COLUMN cliente_nome VARCHAR(200) NULL`);
+                    console.log('[API_ORDENS_KANBAN] Coluna cliente_nome adicionada');
+                }
+            } catch (e) {
+                console.log('[API_ORDENS_KANBAN] Erro ao verificar colunas:', e.message);
             }
         }
 
