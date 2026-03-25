@@ -1470,6 +1470,19 @@ app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
+// 📄 FATURAMENTO API — Módulo de Faturamento/NFe (SEFAZ, certificado)
+// =================================================================
+try {
+    const faturamentoRouter = require('./modules/Faturamento/api/faturamento');
+    const { idempotency } = require('./middleware/idempotency');
+    const { auditTrail } = require('./middleware/audit-trail');
+    app.use('/api/faturamento', idempotency(), auditTrail('faturamento'), faturamentoRouter(pool, authenticateToken));
+    console.log('✅ Rotas Faturamento API carregadas: /api/faturamento/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Faturamento:', err.message);
+}
+
+// =================================================================
 // é FINANCEIRO API — Módulo Financeiro (contas, fluxo de caixa, etc.)
 // =================================================================
 try {
@@ -2621,6 +2634,29 @@ const startServer = async () => {
                         }
                     });
                 }
+
+                // 🔐 Auto-carregar certificado digital NFe (se configurado)
+                setImmediate(async () => {
+                    const certPath = process.env.NFE_CERT_PATH;
+                    const certSenha = process.env.NFE_CERT_SENHA;
+                    if (!certPath || !certSenha) {
+                        console.log('⚠️  NFe: Certificado não configurado (NFE_CERT_PATH / NFE_CERT_SENHA)');
+                        return;
+                    }
+                    try {
+                        const certificadoService = require('./modules/Faturamento/services/certificado.service');
+                        const fullPath = require('path').resolve(certPath);
+                        await certificadoService.carregarCertificadoA1(fullPath, certSenha);
+                        const validade = certificadoService.verificarValidade();
+                        console.log('🔐 Certificado digital carregado com sucesso!');
+                        console.log(`   ✅ ${validade.diasRestantes} dia(s) restantes`);
+                        if (validade.diasRestantes <= 30) {
+                            console.log(`   ⚠️  ATENÇÃO: Certificado expira em ${validade.diasRestantes} dia(s)!`);
+                        }
+                    } catch (err) {
+                        console.error(`❌ Erro ao carregar certificado digital: ${err.message}`);
+                    }
+                });
 
                 serverStarted = true;
                 return serverInstance;

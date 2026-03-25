@@ -1,7 +1,7 @@
 ﻿// Servidor principal do sistema de faturamento
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '../../.env') });
+const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 
@@ -140,8 +140,31 @@ app.get('/api/faturamento/docs', (req, res) => {
   });
 });
 
+// Auto-carregar certificado digital (se configurado via env)
+async function autoCarregarCertificado() {
+  const certPath = process.env.NFE_CERT_PATH;
+  const certSenha = process.env.NFE_CERT_SENHA;
+  if (!certPath || !certSenha) {
+    console.log('⚠️  NFe: Certificado não configurado (NFE_CERT_PATH / NFE_CERT_SENHA)');
+    return;
+  }
+  try {
+    const certificadoService = require('./services/certificado.service');
+    const fullPath = require('path').resolve(certPath);
+    await certificadoService.carregarCertificadoA1(fullPath, certSenha);
+    const validade = certificadoService.verificarValidade();
+    console.log('🔐 Certificado digital carregado com sucesso!');
+    console.log(`   ✅ ${validade.diasRestantes} dia(s) restantes`);
+    if (validade.diasRestantes <= 30) {
+      console.log(`   ⚠️  ATENÇÃO: Certificado expira em ${validade.diasRestantes} dia(s)!`);
+    }
+  } catch (err) {
+    console.error(`❌ Erro ao carregar certificado digital: ${err.message}`);
+  }
+}
+
 // Iniciar servidor
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log('🚀 ========================================');
   console.log('🚀 Sistema de Faturamento NFe - ALUFORCE');
   console.log('🚀 ========================================');
@@ -154,6 +177,8 @@ app.listen(PORT, () => {
   console.log(`📦 Banco: ${process.env.DB_NAME}`);
   console.log(`🔐 NFe Ambiente: ${process.env.NFE_AMBIENTE == 1 ? 'PRODUÇÃO ⚠️' : 'HOMOLOGAÇÃO 🧪'}`);
   console.log('🚀 ========================================');
+  // Auto-carregar certificado
+  await autoCarregarCertificado();
 });
 
 module.exports = app;
