@@ -1614,7 +1614,7 @@ apiVendasRouter.get('/dashboard/admin', async (req, res, next) => {
                 SUM(p.valor) as valor_total
             FROM usuarios u
             LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
-            WHERE u.role = 'vendedor' OR u.is_admin = 0
+            WHERE u.role = 'comercial'
             GROUP BY u.id, u.nome, u.email
             ORDER BY valor_faturado DESC
             LIMIT 10
@@ -5778,7 +5778,8 @@ apiVendasRouter.get('/dashboard/top-vendedores', authenticateToken, async (req, 
                     COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) AS valor
                  FROM pedidos p
                  JOIN usuarios u ON p.vendedor_id = u.id
-                 WHERE p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)
+                 WHERE u.role = 'comercial'
+                   AND p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)
                  GROUP BY u.id, u.nome
                  ORDER BY valor DESC
                  LIMIT ?`,

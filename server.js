@@ -2584,6 +2584,13 @@ const startServer = async () => {
                 if (DB_AVAILABLE) {
                     setImmediate(() => {
                         initCronJobs();
+                        // Auto-importação de ponto (Control iD / RHiD)
+                        try {
+                            const { initAutoImportPonto } = require('./services/auto-import-ponto');
+                            initAutoImportPonto({ pool }, 30 * 60 * 1000); // A cada 30 minutos
+                        } catch (e) {
+                            console.warn('[AUTO-PONTO] ⚠️ Não foi possível inicializar:', e.message);
+                        }
                     });
                 }
 

@@ -2,6 +2,57 @@
 const router = express.Router();
 const { getDatabase } = require('../database');
 
+// ============ BUSCAR MATERIAL POR QR CODE ============
+router.get('/qrcode/lookup', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { code } = req.query;
+        if (!code) {
+            return res.status(400).json({ error: 'Código é obrigatório' });
+        }
+        // Try multiple tables with fallback
+        let material = null;
+        // Try estoque_materias_primas
+        try {
+            const [rows] = await db.query(
+                `SELECT id, codigo, descricao, unidade_medida as unidade,
+                        quantidade_minima as estoque_min, quantidade_minima as estoque_max,
+                        COALESCE(quantidade_atual, 0) as estoque_atual, localizacao, tipo
+                 FROM estoque_materias_primas
+                 WHERE codigo = ? OR id = ?
+                 LIMIT 1`,
+                [code, parseInt(code) || 0]
+            );
+            if (rows.length > 0) material = rows[0];
+        } catch (e) { /* table may not exist */ }
+        // Try materiais
+        if (!material) {
+            try {
+                const [rows] = await db.query(
+                    `SELECT m.id, m.codigo_material as codigo, m.descricao,
+                            m.unidade_medida as unidade, m.estoque_minimo as estoque_min,
+                            m.estoque_maximo as estoque_max,
+                            COALESCE(e.quantidade_atual, 0) as estoque_atual, m.tipo
+                     FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id
+                     WHERE m.codigo_material = ? OR m.id = ?
+                     LIMIT 1`,
+                    [code, parseInt(code) || 0]
+                );
+                if (rows.length > 0) material = rows[0];
+            } catch (e) { /* table may not exist */ }
+        }
+        if (!material) {
+            return res.status(404).json({ error: 'Material não encontrado' });
+        }
+        material.status = material.estoque_atual <= 0 ? 'critico'
+            : material.estoque_atual < (material.estoque_min || 0) ? 'baixo' : 'adequado';
+        res.json({ material });
+    } catch (error) {
+        console.error('Erro QR lookup:', error);
+        res.status(500).json({ error: 'Erro ao buscar material' });
+    }
+});
+
 // ============ CONSULTAR ESTOQUE ============
 router.get('/', async (req, res) => {
     try {

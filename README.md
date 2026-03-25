@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="public/images/zyntra-branco.png" alt="Zyntra ERP" width="200" />
+  <img src="public/images/zyntra-sem-fundo.png" alt="Zyntra ERP" width="200" />
 </p>
 
-<h1 align="center">🏭 ZYNTRA ERP — Sistema de Gestão Empresarial</h1>
+<h1 align="center">🏭 ZYNTRA ERP — Plataforma ERP Completa</h1>
 
 <p align="center">
-  <strong>Plataforma ERP completa para gestão industrial</strong><br>
-  Desenvolvido pela <a href="https://www.aluforce.com.br">Aluforce Indústria e Comércio</a>
+  <strong>Plataforma ERP completa para gestão industrial e empresarial sob medida</strong><br>
+  Desenvolvido pela <a href="https://www.aluforce.api.br">Agência do Japa</a>
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 ## 📋 Sobre
 
-O **Zyntra ERP** (anteriormente Aluforce ERP) é um sistema de gestão empresarial completo, desenvolvido para a indústria de alumínio. Oferece **10+ módulos integrados** cobrindo todas as operações da empresa — do pedido de venda à emissão de NF-e, do controle de produção à gestão financeira.
+O **Zyntra ERP** é uma plataforma ERP completa para gestão industrial e empresarial sob medida, desenvolvida com base nas necessidades reais da empresa. Oferece **10+ módulos integrados** cobrindo todas as operações — do pedido de venda à emissão de NF-e, do controle de produção à gestão financeira.
 
 ### ✨ Destaques
 
@@ -76,7 +76,6 @@ Chat empresarial integrado em **todas as 85+ páginas** do sistema:
 | 🏦 **Integração Bancária** | ✅ Produção (Boletos, CNAB, Pagamentos) |
 | 📧 **Email SMTP** | ✅ Produção |
 | 📱 **WhatsApp Business** | ✅ Produção |
-| 🔄 **Omie ERP** | ✅ Produção |
 | 🧾 **SEFAZ (NF-e/NFS-e)** | ✅ Produção |
 | 🤖 **OpenAI (BOB I.A.)** | ✅ Produção |
 | 📊 **Open Finance** | 🔄 Em desenvolvimento |
@@ -260,6 +259,13 @@ npm run lint
 
 ## 📊 Changelog Recente
 
+### v2.2.0 — Março 2026
+- ✅ **QR Code Estoque** — Sistema de entrada/saída de materiais via QR Code no celular
+- ✅ **Auto-Import Ponto** — Importação automática de marcações de ponto (Control iD)
+- ✅ **Auditoria RH** — Correções de segurança (access control, XSS, validação)
+- ✅ **Rebranding** — Nova identidade visual (Agência do Japa), remoção de referências concorrentes
+- ✅ **Login** — Nova logo e rodapé atualizado
+
 ### v2.1.7 — Março 2026
 - ✅ **Login Fix** — Correção no fluxo de autenticação (refresh tokens, CSRF, rate limiting)
 - ✅ **Top Vendedores** — Ranking filtrado apenas por usuários com role `comercial`
@@ -295,20 +301,20 @@ npm run lint
 |-------|----------|
 | 🤖 **BOB I.A.** | Assistente integrado 24/7 |
 | 💬 **Chat Teams** | Chat corporativo interno |
-| 📧 **Email** | suporte@aluforce.com.br |
-| 📱 **Telefone** | (11) 91793-9089 |
+| 📧 **Email** | ti@aluforce.com.br |
+| 📱 **Telefone** | (11) 96239-7527 |
 
 ---
 
 ## 📄 Licença
 
-Software proprietário da **Aluforce Indústria e Comércio de Condutores**.
+Software proprietário da **Agência do Japa**.
 
-© 2025-2026 Aluforce. Todos os direitos reservados.
+© 2025-2026 Agência do Japa. Todos os direitos reservados.
 
 ---
 
 <p align="center">
-  <sub>Desenvolvido com ❤️ pela equipe Aluforce Tecnologia</sub><br>
-  <sub>CNPJ: 68.192.475/0001-60 | www.aluforce.com.br</sub>
+  <sub>Desenvolvido com ❤️ pela Agência do Japa</sub><br>
+  <sub>CNPJ: 62.221.052/0001-45 | www.aluforce.api.br</sub>
 </p>

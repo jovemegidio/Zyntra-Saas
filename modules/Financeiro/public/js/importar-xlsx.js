@@ -175,7 +175,7 @@ const HEADER_MAP_FLUXO = {
 const IMPORT_CONFIG = {
     'contas-pagar': {
         endpoint: '/api/financeiro/importar/contas-pagar',
-        template: '/Financeiro/templates/template_contas_pagar.xlsx',
+        template: '/templates/Template - Contas a Pagar.xlsx',
         headerMap: HEADER_MAP_CONTAS_PAGAR
     },
     'contas-receber': {

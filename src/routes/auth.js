@@ -1315,6 +1315,9 @@ async function ensureRefreshTokensTable() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         `);
         // Migração: adicionar colunas se tabela já existia com schema antigo
+        // Migração: garantir que token aceita NULL (schema antigo era NOT NULL)
+        try { await safeQuery('ALTER TABLE refresh_tokens MODIFY COLUMN token VARCHAR(512) NULL'); } catch (e) { /* já está NULL */ }
+
         const columnsToAdd = [
             { name: 'token_id', sql: 'ALTER TABLE refresh_tokens ADD COLUMN token_id VARCHAR(64) NULL UNIQUE AFTER id' },
             { name: 'device_id', sql: 'ALTER TABLE refresh_tokens ADD COLUMN device_id VARCHAR(100) DEFAULT \'default\' AFTER token' },

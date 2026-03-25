@@ -81,7 +81,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                     SUM(p.valor) as valor_total
                 FROM usuarios u
                 LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
-                WHERE u.role = 'vendedor' OR u.is_admin = 0
+                WHERE u.role = 'comercial'
                 GROUP BY u.id, u.nome, u.email
                 ORDER BY valor_faturado DESC
                 LIMIT 10

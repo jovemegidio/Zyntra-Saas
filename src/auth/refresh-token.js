@@ -83,9 +83,9 @@ async function generateTokenPair(user, pool, deviceId = 'default') {
         // Inserir novo token
         await pool.query(`
             INSERT INTO refresh_tokens 
-            (token_id, user_id, device_id, expires_at, created_at)
-            VALUES (?, ?, ?, ?, NOW())
-        `, [refreshTokenId, id, deviceId, expiresAt]);
+            (token_id, user_id, token, device_id, expires_at, created_at)
+            VALUES (?, ?, ?, ?, ?, NOW())
+        `, [refreshTokenId, id, refreshToken, deviceId, expiresAt]);
     }
     
     return {

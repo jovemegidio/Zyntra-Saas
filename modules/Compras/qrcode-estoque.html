@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#0d1117">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <title>Zyntra: QR Code - Estoque</title>
+
+    <script src="/js/auth-unified.js?v=20260325" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+
+    <style>
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-card: #1c2333;
+            --border: rgba(255,255,255,0.08);
+            --text-primary: #e6edf3;
+            --text-secondary: #8b949e;
+            --accent: #6366f1;
+            --accent-glow: rgba(99,102,241,0.3);
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== MOBILE-FIRST LAYOUT ===== */
+        .qr-app {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-top: env(safe-area-inset-top, 16px);
+            padding-bottom: calc(env(safe-area-inset-bottom, 16px) + 80px);
+        }
+
+        /* ===== HEADER ===== */
+        .qr-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            margin-bottom: 16px;
+        }
+        .qr-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .qr-header-left .back-btn {
+            width: 40px; height: 40px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .qr-header-left .back-btn:hover { background: var(--accent); }
+        .qr-header h1 { font-size: 1.25rem; font-weight: 700; }
+        .qr-header .subtitle { font-size: 0.75rem; color: var(--text-secondary); }
+
+        /* ===== MODE TABS ===== */
+        .mode-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        .mode-tab {
+            flex: 1;
+            padding: 10px 8px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .mode-tab.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .mode-tab i { font-size: 0.9rem; }
+
+        /* ===== SCANNER AREA ===== */
+        .scanner-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .scanner-viewport {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scanner-viewport video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .scanner-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .scan-frame {
+            width: 220px; height: 220px;
+            border: 3px solid var(--accent);
+            border-radius: 16px;
+            position: relative;
+            box-shadow: 0 0 0 9999px rgba(0,0,0,0.5);
+        }
+        .scan-line {
+            position: absolute;
+            top: 0; left: 10%; right: 10%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            animation: scanMove 2s ease-in-out infinite;
+        }
+        @keyframes scanMove {
+            0%, 100% { top: 5%; }
+            50% { top: 95%; }
+        }
+        .scanner-hint {
+            text-align: center;
+            padding: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .scanner-controls {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            justify-content: center;
+        }
+        .scanner-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .scanner-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .scanner-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+        .scanner-btn.danger { border-color: var(--danger); color: var(--danger); }
+        .scanner-btn.danger:hover { background: var(--danger); color: white; }
+        .scanner-btn.success { border-color: var(--success); color: var(--success); }
+        .scanner-btn.success:hover { background: var(--success); color: white; }
+
+        /* ===== MANUAL INPUT ===== */
+        .manual-input-section {
+            display: flex;
+            gap: 8px;
+            padding: 0 12px 12px;
+        }
+        .manual-input-section input {
+            flex: 1;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+        }
+        .manual-input-section input:focus { border-color: var(--accent); }
+
+        /* ===== MATERIAL CARD ===== */
+        .material-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .material-card.visible { display: block; animation: slideUp 0.3s ease; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .material-info-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .material-name { font-size: 1.1rem; font-weight: 700; }
+        .material-code {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-family: monospace;
+        }
+        .material-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-box {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-box .stat-value { font-size: 1.4rem; font-weight: 800; }
+        .stat-box .stat-label { font-size: 0.65rem; color: var(--text-secondary); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-box.danger .stat-value { color: var(--danger); }
+        .stat-box.warning .stat-value { color: var(--warning); }
+        .stat-box.success .stat-value { color: var(--success); }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-badge.adequado { background: rgba(34,197,94,0.15); color: var(--success); }
+        .status-badge.baixo { background: rgba(245,158,11,0.15); color: var(--warning); }
+        .status-badge.critico { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+        /* ===== ACTION FORM ===== */
+        .action-form {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .action-form.visible { display: block; animation: slideUp 0.3s ease; }
+        .action-form h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-row {
+            margin-bottom: 14px;
+        }
+        .form-row label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+        .form-row input, .form-row select, .form-row textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            outline: none;
+        }
+        .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+            border-color: var(--accent);
+        }
+        .form-row textarea { resize: vertical; min-height: 60px; }
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .qty-btn {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .qty-btn:hover { background: var(--accent); border-color: var(--accent); }
+        .qty-input {
+            flex: 1;
+            text-align: center;
+            font-size: 1.3rem !important;
+            font-weight: 700 !important;
+        }
+        .action-submit {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            margin-top: 8px;
+        }
+        .action-submit.entrada {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            box-shadow: 0 4px 16px rgba(34,197,94,0.3);
+        }
+        .action-submit.saida {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            box-shadow: 0 4px 16px rgba(239,68,68,0.3);
+        }
+        .action-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== QR PRINT SECTION ===== */
+        .qr-print-section {
+            display: none;
+        }
+        .qr-print-section.visible { display: block; }
+        .qr-gen-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .qr-gen-card h3 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .qr-search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 12px;
+        }
+        .qr-material-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .qr-material-item:hover { border: 1px solid var(--accent); }
+        .qr-material-item .mat-name { font-weight: 600; font-size: 0.85rem; }
+        .qr-material-item .mat-code { font-size: 0.7rem; color: var(--text-secondary); font-family: monospace; }
+        .qr-preview {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            margin-top: 16px;
+        }
+        .qr-preview canvas { max-width: 200px !important; height: auto !important; }
+        .qr-label-info { color: #333; margin-top: 8px; }
+        .qr-label-info .label-name { font-weight: 700; font-size: 0.9rem; }
+        .qr-label-info .label-code { font-size: 0.75rem; color: #666; }
+
+        /* ===== HISTORY ===== */
+        .history-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .history-section h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .history-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+        .history-item:last-child { border-bottom: none; }
+        .history-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+        .history-icon.entrada { background: rgba(34,197,94,0.15); color: var(--success); }
+        .history-icon.saida { background: rgba(239,68,68,0.15); color: var(--danger); }
+        .history-details { flex: 1; }
+        .history-details .hist-title { font-size: 0.8rem; font-weight: 600; }
+        .history-details .hist-meta { font-size: 0.7rem; color: var(--text-secondary); }
+        .history-qty { font-weight: 700; font-size: 0.9rem; }
+        .history-qty.entrada { color: var(--success); }
+        .history-qty.saida { color: var(--danger); }
+
+        /* ===== TOAST ===== */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 90%; max-width: 400px; }
+        .toast {
+            padding: 14px 18px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-align: center;
+            animation: toastIn 0.3s ease;
+            margin-bottom: 8px;
+        }
+        .toast.success { background: var(--success); color: white; }
+        .toast.error { background: var(--danger); color: white; }
+        .toast.warning { background: var(--warning); color: #000; }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== BOTTOM NAV (mobile) ===== */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            display: flex;
+            padding: 8px 16px;
+            padding-bottom: calc(env(safe-area-inset-bottom, 8px) + 8px);
+            z-index: 100;
+        }
+        .bottom-nav a {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.65rem;
+            font-weight: 600;
+            padding: 6px;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .bottom-nav a.active { color: var(--accent); }
+        .bottom-nav a i { font-size: 1.1rem; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+        .empty-state p { font-size: 0.85rem; }
+
+        @media (min-width: 768px) {
+            .qr-app { padding: 24px; max-width: 700px; }
+            .scanner-viewport { aspect-ratio: 4/3; }
+        }
+
+        /* Print styles for QR labels */
+        @media print {
+            body { background: white !important; color: #000 !important; }
+            .qr-app, .bottom-nav, .qr-header, .mode-tabs, .scanner-section, .action-form, .history-section { display: none !important; }
+            .qr-print-section, .qr-preview { display: block !important; }
+            .qr-preview { border: 2px solid #000; page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toast-container"></div>
+
+    <div class="qr-app">
+        <!-- Header -->
+        <div class="qr-header">
+            <div class="qr-header-left">
+                <a href="/Compras/gestao-estoque.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1>QR Code - Estoque</h1>
+                    <div class="subtitle">Entrada, saída e baixa por leitura</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mode Tabs -->
+        <div class="mode-tabs">
+            <button class="mode-tab active" data-mode="scanner" onclick="switchMode('scanner')">
+                <i class="fas fa-qrcode"></i> Escanear
+            </button>
+            <button class="mode-tab" data-mode="generate" onclick="switchMode('generate')">
+                <i class="fas fa-print"></i> Gerar QR
+            </button>
+            <button class="mode-tab" data-mode="history" onclick="switchMode('history')">
+                <i class="fas fa-history"></i> Histórico
+            </button>
+        </div>
+
+        <!-- ===== SCANNER MODE ===== -->
+        <div id="mode-scanner">
+            <div class="scanner-section">
+                <div class="scanner-viewport" id="scanner-viewport">
+                    <video id="scanner-video" playsinline autoplay muted></video>
+                    <div class="scanner-overlay">
+                        <div class="scan-frame">
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="scanner-placeholder" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-secondary);">
+                        <i class="fas fa-camera"></i>
+                        <p>Toque em "Iniciar Câmera" para escanear</p>
+                    </div>
+                </div>
+                <div class="scanner-controls">
+                    <button class="scanner-btn" id="btn-start-camera" onclick="startCamera()">
+                        <i class="fas fa-camera"></i> Iniciar Câmera
+                    </button>
+                    <button class="scanner-btn danger" id="btn-stop-camera" onclick="stopCamera()" style="display:none;">
+                        <i class="fas fa-stop"></i> Parar
+                    </button>
+                </div>
+                <div class="manual-input-section">
+                    <input type="text" id="manual-code" placeholder="Ou digite o código do material..." autocomplete="off">
+                    <button class="scanner-btn success" onclick="searchManualCode()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                <div class="scanner-hint">
+                    <i class="fas fa-info-circle"></i> Aponte a câmera para o QR Code do material ou digite o código manualmente
+                </div>
+            </div>
+
+            <!-- Material Info Card (appears after scan) -->
+            <div class="material-card" id="material-card">
+                <div class="material-info-header">
+                    <div>
+                        <div class="material-name" id="mat-name">—</div>
+                        <span class="status-badge" id="mat-status">—</span>
+                    </div>
+                    <span class="material-code" id="mat-code">—</span>
+                </div>
+                <div class="material-stats">
+                    <div class="stat-box" id="stat-atual">
+                        <div class="stat-value" id="mat-atual">0</div>
+                        <div class="stat-label">Atual</div>
+                    </div>
+                    <div class="stat-box" id="stat-min">
+                        <div class="stat-value" id="mat-min">0</div>
+                        <div class="stat-label">Mínimo</div>
+                    </div>
+                    <div class="stat-box" id="stat-max">
+                        <div class="stat-value" id="mat-max">0</div>
+                        <div class="stat-label">Máximo</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button class="scanner-btn success" style="flex:1;" onclick="showActionForm('entrada')">
+                        <i class="fas fa-arrow-down"></i> Entrada
+                    </button>
+                    <button class="scanner-btn danger" style="flex:1;" onclick="showActionForm('saida')">
+                        <i class="fas fa-arrow-up"></i> Saída / Baixa
+                    </button>
+                </div>
+            </div>
+
+            <!-- Action Form (appears when user picks entrada/saida) -->
+            <div class="action-form" id="action-form">
+                <h3 id="action-title">
+                    <i class="fas fa-arrow-down"></i> Registrar Entrada
+                </h3>
+                <div class="form-row">
+                    <label>Quantidade</label>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="adjustQty(-1)">−</button>
+                        <input type="number" id="action-qty" class="qty-input" value="1" min="0.01" step="0.01">
+                        <button class="qty-btn" onclick="adjustQty(1)">+</button>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Motivo</label>
+                    <select id="action-motivo">
+                        <option value="">Selecione...</option>
+                        <option value="Compra">Compra / Recebimento</option>
+                        <option value="Devolução">Devolução</option>
+                        <option value="Produção">Consumo de produção</option>
+                        <option value="Transferência">Transferência</option>
+                        <option value="Ajuste">Ajuste de inventário</option>
+                        <option value="Venda">Venda / Expedição</option>
+                        <option value="Perda">Perda / Avaria</option>
+                        <option value="Amostra">Amostra / Teste</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>Documento / NF (opcional)</label>
+                    <input type="text" id="action-documento" placeholder="Ex: NF 12345">
+                </div>
+                <div class="form-row">
+                    <label>Observações (opcional)</label>
+                    <textarea id="action-obs" placeholder="Detalhes adicionais..."></textarea>
+                </div>
+                <button class="action-submit entrada" id="action-submit-btn" onclick="submitMovement()">
+                    <i class="fas fa-check"></i> Confirmar Entrada
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== GENERATE QR MODE ===== -->
+        <div id="mode-generate" style="display:none;">
+            <div class="qr-gen-card">
+                <h3><i class="fas fa-qrcode"></i> Gerar Etiquetas QR Code</h3>
+                <div class="form-row">
+                    <label>Buscar Material</label>
+                    <input type="text" id="qr-search-input" placeholder="Digite código ou descrição..." oninput="searchMaterials(this.value)">
+                </div>
+                <div class="qr-search-results" id="qr-search-results">
+                    <div class="empty-state">
+                        <i class="fas fa-search"></i>
+                        <p>Busque um material para gerar seu QR Code</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Preview -->
+            <div class="qr-gen-card qr-print-section" id="qr-print-section">
+                <h3><i class="fas fa-eye"></i> Pré-visualização da Etiqueta</h3>
+                <div class="qr-preview" id="qr-preview">
+                    <canvas id="qr-canvas"></canvas>
+                    <div class="qr-label-info">
+                        <div class="label-name" id="qr-label-name">—</div>
+                        <div class="label-code" id="qr-label-code">—</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:12px;">
+                    <button class="scanner-btn" style="flex:1;" onclick="downloadQR()">
+                        <i class="fas fa-download"></i> Baixar PNG
+                    </button>
+                    <button class="scanner-btn success" style="flex:1;" onclick="printQR()">
+                        <i class="fas fa-print"></i> Imprimir
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== HISTORY MODE ===== -->
+        <div id="mode-history" style="display:none;">
+            <div class="history-section">
+                <h3><i class="fas fa-history"></i> Últimas Movimentações via QR</h3>
+                <div id="history-list">
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>Nenhuma movimentação recente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="/Compras/gestao-estoque.html"><i class="fas fa-boxes"></i>Estoque</a>
+        <a href="/Compras/qrcode-estoque.html" class="active"><i class="fas fa-qrcode"></i>QR Code</a>
+        <a href="/Compras/gestao-estoque.html"><i class="fas fa-chart-bar"></i>Relatórios</a>
+        <a href="/dashboard"><i class="fas fa-home"></i>Início</a>
+    </div>
+
+    <!-- QR Code library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+
+    <script>
+    // ==================== STATE ====================
+    let currentMaterial = null;
+    let currentAction = null;
+    let cameraStream = null;
+    let scanInterval = null;
+    const recentMovements = [];
+    const API_BASE = '/api/compras/estoque';
+
+    // ==================== AUTH ====================
+    function getAuthHeaders() {
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        return {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        };
+    }
+
+    // ==================== MODE SWITCHING ====================
+    function switchMode(mode) {
+        document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.mode-tab[data-mode="${mode}"]`).classList.add('active');
+        document.getElementById('mode-scanner').style.display = mode === 'scanner' ? 'block' : 'none';
+        document.getElementById('mode-generate').style.display = mode === 'generate' ? 'block' : 'none';
+        document.getElementById('mode-history').style.display = mode === 'history' ? 'block' : 'none';
+        if (mode === 'history') loadHistory();
+        if (mode !== 'scanner') stopCamera();
+    }
+
+    // ==================== CAMERA / QR SCANNER ====================
+    async function startCamera() {
+        try {
+            const constraints = {
+                video: {
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 640 },
+                    height: { ideal: 640 }
+                }
+            };
+            cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+            const video = document.getElementById('scanner-video');
+            video.srcObject = cameraStream;
+            document.getElementById('scanner-placeholder').style.display = 'none';
+            document.getElementById('btn-start-camera').style.display = 'none';
+            document.getElementById('btn-stop-camera').style.display = 'flex';
+            startScanning();
+        } catch (err) {
+            showToast('Erro ao acessar câmera: ' + err.message, 'error');
+        }
+    }
+
+    function stopCamera() {
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(t => t.stop());
+            cameraStream = null;
+        }
+        if (scanInterval) {
+            clearInterval(scanInterval);
+            scanInterval = null;
+        }
+        const video = document.getElementById('scanner-video');
+        video.srcObject = null;
+        document.getElementById('scanner-placeholder').style.display = 'flex';
+        document.getElementById('btn-start-camera').style.display = 'flex';
+        document.getElementById('btn-stop-camera').style.display = 'none';
+    }
+
+    function startScanning() {
+        const video = document.getElementById('scanner-video');
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        
+        scanInterval = setInterval(() => {
+            if (video.readyState !== video.HAVE_ENOUGH_DATA) return;
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+            if (code && code.data) {
+                handleQRResult(code.data);
+            }
+        }, 300);
+    }
+
+    // jsQR library (lightweight QR decoder)
+    // Load dynamically
+    (function loadJsQR() {
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+        document.head.appendChild(s);
+    })();
+
+    let lastScannedCode = '';
+    let lastScannedTime = 0;
+
+    function handleQRResult(data) {
+        // Debounce: ignore same code within 3 seconds
+        const now = Date.now();
+        if (data === lastScannedCode && now - lastScannedTime < 3000) return;
+        lastScannedCode = data;
+        lastScannedTime = now;
+
+        // Parse QR data - format: ZYNTRA:MAT:<code> or just the code
+        let code = data;
+        if (data.startsWith('ZYNTRA:MAT:')) {
+            code = data.replace('ZYNTRA:MAT:', '');
+        }
+
+        // Vibrate feedback
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        showToast('QR Code lido: ' + code, 'success');
+        loadMaterial(code);
+    }
+
+    // ==================== MANUAL SEARCH ====================
+    function searchManualCode() {
+        const code = document.getElementById('manual-code').value.trim();
+        if (!code) return;
+        loadMaterial(code);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const input = document.getElementById('manual-code');
+        if (input) {
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') searchManualCode();
+            });
+        }
+    });
+
+    // ==================== LOAD MATERIAL ====================
+    async function loadMaterial(codeOrId) {
+        try {
+            // Try by code first — search in materiais-com-entrada
+            const res = await fetch(`${API_BASE}/materiais-com-entrada?search=${encodeURIComponent(codeOrId)}`, {
+                headers: getAuthHeaders()
+            });
+
+            if (!res.ok) throw new Error('Erro na busca');
+
+            const data = await res.json();
+            const materiais = data.materiais || [];
+
+            // Find exact match by code or id
+            let material = materiais.find(m =>
+                String(m.codigo) === String(codeOrId) ||
+                String(m.id) === String(codeOrId)
+            );
+
+            // If no exact match, try first partial match
+            if (!material && materiais.length > 0) {
+                material = materiais[0];
+            }
+
+            if (!material) {
+                showToast('Material não encontrado: ' + codeOrId, 'error');
+                return;
+            }
+
+            currentMaterial = material;
+            renderMaterialCard(material);
+        } catch (err) {
+            console.error('Erro ao carregar material:', err);
+            showToast('Erro ao buscar material', 'error');
+        }
+    }
+
+    function renderMaterialCard(mat) {
+        const card = document.getElementById('material-card');
+        card.classList.add('visible');
+        document.getElementById('mat-name').textContent = mat.descricao || mat.nome || '—';
+        document.getElementById('mat-code').textContent = mat.codigo || mat.codigo_material || mat.id;
+        document.getElementById('mat-atual').textContent = formatNum(mat.estoque_atual);
+        document.getElementById('mat-min').textContent = formatNum(mat.estoque_min);
+        document.getElementById('mat-max').textContent = formatNum(mat.estoque_max);
+
+        const status = mat.status || 'adequado';
+        const statusEl = document.getElementById('mat-status');
+        statusEl.className = 'status-badge ' + status;
+        statusEl.innerHTML = status === 'adequado' ? '<i class="fas fa-check-circle"></i> Adequado'
+            : status === 'baixo' ? '<i class="fas fa-exclamation-triangle"></i> Baixo'
+            : '<i class="fas fa-times-circle"></i> Crítico';
+
+        const statAtual = document.getElementById('stat-atual');
+        statAtual.className = 'stat-box ' + (status === 'adequado' ? 'success' : status === 'baixo' ? 'warning' : 'danger');
+
+        // Hide action form
+        document.getElementById('action-form').classList.remove('visible');
+
+        // Scroll into view
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function formatNum(n) {
+        if (n === null || n === undefined) return '0';
+        return parseFloat(n).toLocaleString('pt-BR', { maximumFractionDigits: 2 });
+    }
+
+    // ==================== ACTION FORM ====================
+    function showActionForm(type) {
+        currentAction = type;
+        const form = document.getElementById('action-form');
+        form.classList.add('visible');
+        const title = document.getElementById('action-title');
+        const submitBtn = document.getElementById('action-submit-btn');
+
+        if (type === 'entrada') {
+            title.innerHTML = '<i class="fas fa-arrow-down" style="color:var(--success)"></i> Registrar Entrada';
+            submitBtn.className = 'action-submit entrada';
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar Entrada';
+        } else {
+            title.innerHTML = '<i class="fas fa-arrow-up" style="color:var(--danger)"></i> Registrar Saída / Baixa';
+            submitBtn.className = 'action-submit saida';
+            submitBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar Saída';
+        }
+
+        document.getElementById('action-qty').value = 1;
+        document.getElementById('action-motivo').value = '';
+        document.getElementById('action-documento').value = '';
+        document.getElementById('action-obs').value = '';
+        form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function adjustQty(delta) {
+        const input = document.getElementById('action-qty');
+        let val = parseFloat(input.value) || 0;
+        val = Math.max(0.01, val + delta);
+        input.value = val;
+    }
+
+    // ==================== SUBMIT MOVEMENT ====================
+    async function submitMovement() {
+        if (!currentMaterial || !currentAction) return;
+
+        const qty = parseFloat(document.getElementById('action-qty').value);
+        const motivo = document.getElementById('action-motivo').value;
+        const documento = document.getElementById('action-documento').value.trim();
+        const obs = document.getElementById('action-obs').value.trim();
+
+        if (!qty || qty <= 0) {
+            showToast('Informe uma quantidade válida', 'warning');
+            return;
+        }
+        if (!motivo) {
+            showToast('Selecione um motivo', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('action-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+        try {
+            const res = await fetch(`${API_BASE}/movimentacao`, {
+                method: 'POST',
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    material_id: currentMaterial.id,
+                    tipo_movimentacao: currentAction,
+                    quantidade: qty,
+                    motivo: motivo + (obs ? ' | Via QR Code' : ' | Via QR Code'),
+                    documento: documento,
+                    observacoes: obs ? `[QR] ${obs}` : '[QR] Movimentação via leitura QR Code'
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Erro ao registrar');
+
+            // Vibrate success
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
+            showToast(
+                `${currentAction === 'entrada' ? '✅ Entrada' : '📤 Saída'} de ${qty} registrada! Saldo: ${data.saldo_atual}`,
+                'success'
+            );
+
+            // Update material card
+            currentMaterial.estoque_atual = data.saldo_atual;
+            renderMaterialCard(currentMaterial);
+
+            // Add to recent movements
+            recentMovements.unshift({
+                material: currentMaterial.descricao || currentMaterial.nome,
+                codigo: currentMaterial.codigo || currentMaterial.id,
+                tipo: currentAction,
+                quantidade: qty,
+                saldo: data.saldo_atual,
+                motivo,
+                timestamp: new Date()
+            });
+
+            // Hide form
+            document.getElementById('action-form').classList.remove('visible');
+
+        } catch (err) {
+            showToast(err.message, 'error');
+        } finally {
+            btn.disabled = false;
+            if (currentAction === 'entrada') {
+                btn.innerHTML = '<i class="fas fa-check"></i> Confirmar Entrada';
+            } else {
+                btn.innerHTML = '<i class="fas fa-check"></i> Confirmar Saída';
+            }
+        }
+    }
+
+    // ==================== QR CODE GENERATION ====================
+    let searchTimeout = null;
+
+    function searchMaterials(query) {
+        clearTimeout(searchTimeout);
+        if (!query || query.length < 2) {
+            document.getElementById('qr-search-results').innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>Digite ao menos 2 caracteres</p></div>';
+            return;
+        }
+        searchTimeout = setTimeout(async () => {
+            try {
+                const res = await fetch(`${API_BASE}/materiais-com-entrada?search=${encodeURIComponent(query)}`, {
+                    headers: getAuthHeaders()
+                });
+                const data = await res.json();
+                const materiais = data.materiais || [];
+                const container = document.getElementById('qr-search-results');
+
+                if (materiais.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-box-open"></i><p>Nenhum material encontrado</p></div>';
+                    return;
+                }
+
+                container.innerHTML = materiais.slice(0, 20).map(m => `
+                    <div class="qr-material-item" onclick="generateQR(${m.id}, '${(m.codigo || '').replace(/'/g, "\\'")}', '${(m.descricao || '').replace(/'/g, "\\'")}')">
+                        <div>
+                            <div class="mat-name">${escapeHtml(m.descricao || m.nome)}</div>
+                            <div class="mat-code">${escapeHtml(m.codigo || String(m.id))}</div>
+                        </div>
+                        <i class="fas fa-qrcode" style="color:var(--accent);font-size:1.2rem;"></i>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error('Erro na busca:', err);
+            }
+        }, 300);
+    }
+
+    function generateQR(id, codigo, descricao) {
+        const section = document.getElementById('qr-print-section');
+        section.classList.add('visible');
+
+        const qrData = 'ZYNTRA:MAT:' + (codigo || id);
+        const canvas = document.getElementById('qr-canvas');
+
+        QRCode.toCanvas(canvas, qrData, {
+            width: 200,
+            margin: 2,
+            color: { dark: '#000000', light: '#ffffff' }
+        });
+
+        document.getElementById('qr-label-name').textContent = descricao;
+        document.getElementById('qr-label-code').textContent = 'Código: ' + (codigo || id);
+
+        section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function downloadQR() {
+        const canvas = document.getElementById('qr-canvas');
+        const link = document.createElement('a');
+        link.download = `QR_${document.getElementById('qr-label-code').textContent.replace(/[^a-zA-Z0-9]/g, '_')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function printQR() {
+        window.print();
+    }
+
+    // ==================== HISTORY ====================
+    async function loadHistory() {
+        const container = document.getElementById('history-list');
+
+        // Show local recent movements + API data
+        try {
+            const res = await fetch(`${API_BASE}/movimentacoes?limit=20`, {
+                headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            const movs = data.movimentacoes || [];
+
+            if (movs.length === 0 && recentMovements.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-clipboard-list"></i><p>Nenhuma movimentação recente</p></div>';
+                return;
+            }
+
+            // Merge local + API
+            const allMovs = [
+                ...recentMovements.map(m => ({
+                    tipo: m.tipo,
+                    material_descricao: m.material,
+                    material_codigo: m.codigo,
+                    quantidade: m.quantidade,
+                    created_at: m.timestamp,
+                    isLocal: true
+                })),
+                ...movs
+            ];
+
+            container.innerHTML = allMovs.slice(0, 30).map(m => {
+                const tipo = (m.tipo || '').toLowerCase();
+                const isEntrada = tipo === 'entrada';
+                const date = m.created_at ? new Date(m.created_at).toLocaleString('pt-BR') : '—';
+                return `
+                    <div class="history-item">
+                        <div class="history-icon ${isEntrada ? 'entrada' : 'saida'}">
+                            <i class="fas fa-arrow-${isEntrada ? 'down' : 'up'}"></i>
+                        </div>
+                        <div class="history-details">
+                            <div class="hist-title">${escapeHtml(m.material_descricao || '—')}</div>
+                            <div class="hist-meta">${escapeHtml(m.material_codigo || '')} • ${date}${m.isLocal ? ' • <em>QR</em>' : ''}</div>
+                        </div>
+                        <div class="history-qty ${isEntrada ? 'entrada' : 'saida'}">
+                            ${isEntrada ? '+' : '−'}${parseFloat(m.quantidade || 0).toLocaleString('pt-BR')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error('Erro ao carregar histórico:', err);
+            container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Erro ao carregar histórico</p></div>';
+        }
+    }
+
+    // ==================== UTILS ====================
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            toast.style.transition = 'all 0.3s';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+    </script>
+</body>
+</html>

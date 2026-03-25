@@ -3629,7 +3629,8 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
                     COALESCE(SUM(p.valor), 0) as valor
                 FROM pedidos p
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
-                WHERE DATE(p.created_at) BETWEEN ? AND ?
+                WHERE u.role = 'comercial'
+                  AND DATE(p.created_at) BETWEEN ? AND ?
                 GROUP BY p.vendedor_id, u.nome, u.login
                 ORDER BY valor DESC
                 LIMIT 10

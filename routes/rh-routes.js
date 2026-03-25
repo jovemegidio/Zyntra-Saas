@@ -46,6 +46,11 @@ module.exports = function createRHRoutes(deps) {
     });
     const upload = multer({ storage: rhStorage, limits: { fileSize: 10 * 1024 * 1024 } });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+    // HTML escape helper to prevent XSS in server-rendered HTML
+    const escHtml = (str) => {
+        if (str == null) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    };
     const validate = (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ message: 'Dados inválidos', errors: errors.array() });
@@ -825,7 +830,12 @@ module.exports = function createRHRoutes(deps) {
         try {
             const funcionarioId = req.params.id;
 
-            // AUDIT-FIX ARCH-002: Removed duplicate CREATE TABLE atestados (kept in POST route with more columns)
+            // Access control: non-RH users can only see their own atestados
+            const isAdmin = req.user.role === 'admin' || req.user.role === 'Admin' || req.user.role === 'administrador';
+            const isRH = isAdmin || (req.user.areas && (req.user.areas.includes('rh') || req.user.areas.includes('RH')));
+            if (!isRH && String(funcionarioId) !== String(req.user.id)) {
+                return res.status(403).json({ message: 'Acesso negado' });
+            }
 
             // Verificar e adicionar colunas que podem faltar
             const colunasExtras = [
@@ -1339,7 +1349,7 @@ module.exports = function createRHRoutes(deps) {
             <style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;font-size:12px}th{background:#8b5cf6;color:white}tr:nth-child(even){background:#f5f3ff}.ok{color:green}.no{color:red}h1{color:#1e293b;font-size:18px}</style></head>
             <body><h1>Relatório de Visualizações - Holerites ${mes || ''}/${ano || ''}</h1>
             <table><thead><tr><th>Funcionário</th><th>Cargo</th><th>Depto</th><th>Mês/Ano</th><th>Visualizado</th><th>Visualizações</th><th>1ª Visualização</th><th>Confirmado</th></tr></thead><tbody>
-            ${rows.map(r => `<tr><td>${r.funcionario_nome}</td><td>${r.cargo || '-'}</td><td>${r.departamento || '-'}</td><td>${String(r.mes).padStart(2,'0')}/${r.ano}</td>
+            ${rows.map(r => `<tr><td>${escHtml(r.funcionario_nome)}</td><td>${escHtml(r.cargo) || '-'}</td><td>${escHtml(r.departamento) || '-'}</td><td>${String(r.mes).padStart(2,'0')}/${r.ano}</td>
             <td class="${r.visualizado ? 'ok' : 'no'}">${r.visualizado ? '✅ Sim' : '❌ Não'}</td>
             <td>${r.total_visualizacoes || 0}</td><td>${r.data_primeira_visualizacao ? new Date(r.data_primeira_visualizacao).toLocaleString('pt-BR') : '-'}</td>
             <td class="${r.confirmado_recebimento ? 'ok' : 'no'}">${r.confirmado_recebimento ? '✅' : '❌'}</td></tr>`).join('')}
