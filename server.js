@@ -653,8 +653,8 @@ const allowedOrigins = [
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://31.97.64.102:3000',
-    'http://31.97.64.102',
+    'http://31.97.64.102:3000',     // VPS IP (HTTP — only for internal/dev access)
+    'http://31.97.64.102',            // VPS IP (HTTP — only for internal/dev access)
     'http://tauri.localhost',        // App Desktop Tauri (ALUFORCE ERP Desktop)
     'https://tauri.localhost',       // App Desktop Tauri (HTTPS variant)
     'tauri://localhost',             // App Desktop Tauri (custom scheme)
@@ -1074,9 +1074,10 @@ app.use('/chat', (req, res, next) => {
     next();
 });
 
-// 📱 iOS: Servir .well-known para Universal Links / Deep Links (precisa dotfiles: 'allow')
+// 📱 iOS: Servir .well-known para Universal Links / Deep Links
+// SECURITY: dotfiles 'ignore' — apenas arquivos JSON legítimos do .well-known são servidos
 app.use('/.well-known', express.static(path.join(__dirname, 'public', '.well-known'), {
-    dotfiles: 'allow',
+    dotfiles: 'ignore',
     maxAge: '1d',
     setHeaders: (res) => {
         res.setHeader('Content-Type', 'application/json');
@@ -1445,7 +1446,7 @@ app.get('/api/proxy/cnpj/:cnpj', authenticateToken, async (req, res) => {
         res.json(data);
     } catch (err) {
         const status = err.response?.status || 502;
-        res.status(status).json({ error: 'Erro ao consultar CNPJ', message: err.response?.data?.message || err.message });
+        res.status(status).json({ error: 'Erro ao consultar CNPJ' });
     }
 });
 
@@ -1457,7 +1458,7 @@ app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
         res.json(data);
     } catch (err) {
         const status = err.response?.status || 502;
-        res.status(status).json({ error: 'Erro ao consultar CEP', message: err.message });
+        res.status(status).json({ error: 'Erro ao consultar CEP' });
     }
 });
 
@@ -1515,14 +1516,12 @@ try {
 
 // 📊 ENTERPRISE: Prometheus /metrics endpoint (protected at app level + nginx)
 app.get('/metrics', (req, res, next) => {
-    // In production, require metrics auth token or localhost
-    if (process.env.NODE_ENV === 'production') {
-        const metricsToken = process.env.METRICS_TOKEN;
-        const authHeader = req.headers['authorization'];
-        const isLocalhost = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip);
-        if (!isLocalhost && (!metricsToken || authHeader !== `Bearer ${metricsToken}`)) {
-            return res.status(403).json({ error: 'Acesso não autorizado' });
-        }
+    // SECURITY: Require auth in ALL environments (metrics expose internal data)
+    const metricsToken = process.env.METRICS_TOKEN;
+    const authHeader = req.headers['authorization'];
+    const isLocalhost = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(req.ip);
+    if (!isLocalhost && (!metricsToken || authHeader !== `Bearer ${metricsToken}`)) {
+        return res.status(403).json({ error: 'Acesso não autorizado' });
     }
     next();
 }, createMetricsEndpoint(pool, cacheService));
@@ -2099,11 +2098,11 @@ app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, as
             res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
         } catch (err) {
             logger.error('Erro ao integrar folha com Financeiro:', err?.response?.data || err.message);
-            res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+            res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro' });
         }
     } catch (error) {
         logger.error('Erro ao fechar folha manual:', error);
-        res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
+        res.status(500).json({ error: 'Erro ao fechar folha manual' });
     }
 });
 

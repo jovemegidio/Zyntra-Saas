@@ -75,40 +75,36 @@
             console.warn('[INIT] Erro ao ler sessionStorage:', e);
         }
 
-        // 2. Fallback: aguardar evento authSuccess do auth-unified (até 3s)
-        const waitForAuth = () => new Promise((resolve) => {
+        // 2. Aguardar evento authSuccess do auth-unified (até 4s)
+        // NÃO chamar AluforceAuth.getUserData() aqui pois o auth-unified já está 
+        // fazendo /api/me — evita chamadas duplicadas
+        const user = await new Promise((resolve) => {
             const handler = (e) => {
                 window.removeEventListener('authSuccess', handler);
                 resolve(e.detail && e.detail.user);
             };
             window.addEventListener('authSuccess', handler);
-            // Timeout de segurança
             setTimeout(() => {
                 window.removeEventListener('authSuccess', handler);
                 resolve(null);
-            }, 3000);
+            }, 4000);
         });
 
-        // Se AluforceAuth já está disponível, verificar diretamente
-        if (window.AluforceAuth && typeof window.AluforceAuth.getUserData === 'function') {
-            try {
-                const user = await window.AluforceAuth.getUserData();
-                if (user) {
-                    console.log('✅ Usuário autenticado (AluforceAuth):', user.nome);
-                    setCachedUser(user);
-                    return user;
-                }
-            } catch (e) {
-                console.warn('[INIT] AluforceAuth.getUserData falhou:', e);
-            }
-        }
-
-        // Aguardar evento authSuccess
-        const user = await waitForAuth();
         if (user) {
             console.log('✅ Usuário autenticado (authSuccess event):', user.nome);
             setCachedUser(user);
             return user;
+        }
+
+        // 3. Último recurso: ler dados do AluforceAuth (sem fetch duplicado — 
+        // getUserData retorna sessionStorage se disponível)
+        if (window.AluforceAuth) {
+            const tabUser = window.AluforceAuth.getLocalUserData?.();
+            if (tabUser && tabUser.id) {
+                console.log('✅ Usuário autenticado (AluforceAuth local):', tabUser.nome);
+                setCachedUser(tabUser);
+                return tabUser;
+            }
         }
 
         // Sem dados — o auth-unified.js já vai redirecionar se necessário

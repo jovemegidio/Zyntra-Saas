@@ -879,5 +879,176 @@ module.exports = function createMiscRoutes(deps) {
     });
     
     
+    // ========================================
+    // SISTEMA DE NOTIFICAÇÕES (tabela notificacoes)
+    // ========================================
+
+    // GET /api/notifications - Listar notificações do usuário
+    router.get('/notifications', authenticateToken, async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const filter = req.query.filter || 'all'; // 'all', 'unread', 'important'
+
+            let where = 'WHERE usuario_id = ?';
+            const params = [userId];
+
+            if (filter === 'unread') {
+                where += ' AND lida = 0';
+            } else if (filter === 'important') {
+                where += ' AND prioridade <= 2';
+            }
+
+            const [rows] = await pool.query(
+                `SELECT id, titulo as title, tipo as type, modulo as module, mensagem as message,
+                        lida as \`read\`, criado_em as createdAt, link, prioridade as priority,
+                        entidade_tipo, entidade_id,
+                        CASE WHEN prioridade <= 2 THEN 1 ELSE 0 END as important
+                 FROM notificacoes ${where}
+                 ORDER BY criado_em DESC LIMIT 50`,
+                params
+            );
+
+            const [countResult] = await pool.query(
+                'SELECT COUNT(*) as cnt FROM notificacoes WHERE usuario_id = ? AND lida = 0',
+                [userId]
+            );
+
+            const [totalResult] = await pool.query(
+                'SELECT COUNT(*) as cnt FROM notificacoes WHERE usuario_id = ?',
+                [userId]
+            );
+
+            res.json({
+                notifications: rows.map(r => ({
+                    ...r,
+                    read: !!r.read,
+                    important: !!r.important,
+                    data: { tipo: r.entidade_tipo, entidade_id: r.entidade_id }
+                })),
+                unreadCount: countResult[0]?.cnt || 0,
+                total: totalResult[0]?.cnt || 0
+            });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao listar:', error.message);
+            // Fallback: retornar vazio para não quebrar frontend
+            res.json({ notifications: [], unreadCount: 0, total: 0 });
+        }
+    });
+
+    // GET /api/notifications/history - Histórico com paginação
+    router.get('/notifications/history', authenticateToken, async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const page = parseInt(req.query.page) || 1;
+            const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+            const offset = (page - 1) * limit;
+            const startDate = req.query.startDate || null;
+            const endDate = req.query.endDate || null;
+            const type = req.query.type || null;
+
+            let where = 'WHERE usuario_id = ?';
+            const params = [userId];
+
+            if (startDate) { where += ' AND criado_em >= ?'; params.push(startDate); }
+            if (endDate) { where += ' AND criado_em <= ?'; params.push(endDate + ' 23:59:59'); }
+            if (type && type !== 'all') { where += ' AND tipo = ?'; params.push(type); }
+
+            const [rows] = await pool.query(
+                `SELECT id, titulo as title, tipo as type, modulo as module, mensagem as message,
+                        lida as \`read\`, criado_em as createdAt, link, prioridade as priority,
+                        entidade_tipo, entidade_id,
+                        CASE WHEN prioridade <= 2 THEN 1 ELSE 0 END as important
+                 FROM notificacoes ${where}
+                 ORDER BY criado_em DESC LIMIT ? OFFSET ?`,
+                [...params, limit, offset]
+            );
+
+            const [countResult] = await pool.query(
+                `SELECT COUNT(*) as cnt FROM notificacoes ${where}`,
+                params
+            );
+
+            res.json({
+                notifications: rows.map(r => ({
+                    ...r,
+                    read: !!r.read,
+                    important: !!r.important,
+                    data: { tipo: r.entidade_tipo, entidade_id: r.entidade_id }
+                })),
+                total: countResult[0]?.cnt || 0,
+                page,
+                limit,
+                totalPages: Math.ceil((countResult[0]?.cnt || 0) / limit)
+            });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao buscar histórico:', error.message);
+            res.json({ notifications: [], total: 0, page: 1, limit: 20, totalPages: 0 });
+        }
+    });
+
+    // POST /api/notifications/:id/read - Marcar como lida
+    router.post('/notifications/:id/read', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            await pool.query(
+                'UPDATE notificacoes SET lida = 1, lida_em = NOW() WHERE id = ? AND usuario_id = ?',
+                [id, userId]
+            );
+            res.json({ success: true });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao marcar lida:', error.message);
+            res.json({ success: false });
+        }
+    });
+
+    // POST /api/notifications/read-all - Marcar todas como lidas
+    router.post('/notifications/read-all', authenticateToken, async (req, res) => {
+        try {
+            const userId = req.user.id;
+            await pool.query(
+                'UPDATE notificacoes SET lida = 1, lida_em = NOW() WHERE usuario_id = ? AND lida = 0',
+                [userId]
+            );
+            res.json({ success: true });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao marcar todas lidas:', error.message);
+            res.json({ success: false });
+        }
+    });
+
+    // DELETE /api/notifications/:id - Excluir notificação
+    router.delete('/notifications/:id', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.user.id;
+            await pool.query(
+                'DELETE FROM notificacoes WHERE id = ? AND usuario_id = ?',
+                [id, userId]
+            );
+            res.json({ success: true });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao excluir:', error.message);
+            res.json({ success: false });
+        }
+    });
+
+    // POST /api/notifications - Criar notificação (uso interno/admin)
+    router.post('/notifications', authenticateToken, async (req, res) => {
+        try {
+            const { type, title, message, data, usuario_id } = req.body;
+            const targetUserId = usuario_id || req.user.id;
+            const [result] = await pool.query(
+                `INSERT INTO notificacoes (usuario_id, titulo, tipo, mensagem, modulo, prioridade, entidade_tipo, entidade_id)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [targetUserId, title, type || 'info', message, data?.modulo || 'sistema', data?.prioridade || 3, data?.tipo || null, data?.entidade_id || null]
+            );
+            res.json({ id: result.insertId, success: true });
+        } catch (error) {
+            console.error('[NOTIFICATIONS] Erro ao criar:', error.message);
+            res.status(500).json({ success: false, error: error.message });
+        }
+    });
+
     return router;
 };

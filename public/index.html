@@ -1,4 +1,6 @@
 ﻿<!DOCTYPE html>
+
+
 <html lang="pt-BR">
 
 <head>
@@ -2737,9 +2739,9 @@
                 try {
                     const headers = { 'Content-Type': 'application/json' };
                     await fetch('/api/me', {
-                        credentials: 'include', method: 'PUT',
-                        headers: headers,
+                        method: 'PUT',
                         credentials: 'include',
+                        headers: headers,
                         body: JSON.stringify({ apelido: apelido || null })
                     });
                 } catch (e) { console.error('[Perfil] Erro ao salvar apelido:', e); }

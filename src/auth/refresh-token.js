@@ -21,7 +21,13 @@ if (!process.env.JWT_SECRET) {
     process.exit(1);
 }
 const JWT_SECRET = process.env.JWT_SECRET;
-const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET + '_refresh';
+// SECURITY: REFRESH_SECRET MUST be independent from JWT_SECRET
+// If not set, derive using HMAC (not simple concatenation) as temporary fallback
+const REFRESH_SECRET = process.env.REFRESH_SECRET || 
+    crypto.createHmac('sha256', JWT_SECRET).update('refresh-token-secret').digest('hex');
+if (!process.env.REFRESH_SECRET) {
+    console.warn('⚠️ [SECURITY] REFRESH_SECRET não configurado. Usando derivação HMAC como fallback. Defina REFRESH_SECRET no .env para produção.');
+}
 
 /**
  * Gera par de tokens (access + refresh)

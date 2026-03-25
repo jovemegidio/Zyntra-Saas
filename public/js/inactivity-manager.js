@@ -38,11 +38,9 @@
       ACTIVITY_DEBOUNCE_MS: 5000,
 
       // Eventos que contam como atividade do usuário
+      // Reduzido para essenciais — 5s debounce para timer de 25min não precisa de mousemove
       ACTIVITY_EVENTS: [
-         'mousedown', 'mousemove', 'keydown', 'keypress',
-         'scroll', 'touchstart', 'touchmove', 'click',
-         'wheel', 'resize', 'focus', 'input', 'change',
-         'submit', 'pointerdown', 'pointermove'
+         'mousedown', 'keydown', 'scroll', 'touchstart', 'click', 'focus'
       ],
 
       // Debug mode (logs no console)
@@ -464,6 +462,8 @@
       _debug('Timers resetados. Aviso em ' + (CONFIG.WARNING_TIMEOUT_MS / 60000) + 'min, logout em ' + (CONFIG.LOGOUT_TIMEOUT_MS / 60000) + 'min');
    }
 
+   var _boundVisibilityChange = null;
+
    // ═══════════════════════════════════════════════════════════
    // Iniciar monitoramento de inatividade
    // ═══════════════════════════════════════════════════════════
@@ -483,9 +483,10 @@
 
       // Também detectar foco na aba (quando o usuário volta para a aba)
       window.addEventListener('focus', _boundHandleActivity);
-      document.addEventListener('visibilitychange', function () {
+
+      // Detectar aba ficando visível (para checar inatividade acumulada)
+      _boundVisibilityChange = function () {
          if (document.visibilityState === 'visible') {
-            // Aba ficou visível — verificar se o tempo de inatividade já expirou
             var elapsed = Date.now() - _lastActivity;
             if (elapsed >= CONFIG.LOGOUT_TIMEOUT_MS) {
                _performAutoLogout();
@@ -493,7 +494,8 @@
                _showWarningModal();
             }
          }
-      });
+      };
+      document.addEventListener('visibilitychange', _boundVisibilityChange);
 
       // Iniciar timers
       _resetTimers();
@@ -515,6 +517,10 @@
          });
          window.removeEventListener('focus', _boundHandleActivity);
          _boundHandleActivity = null;
+      }
+      if (_boundVisibilityChange) {
+         document.removeEventListener('visibilitychange', _boundVisibilityChange);
+         _boundVisibilityChange = null;
       }
 
       // Limpar timers

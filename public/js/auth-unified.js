@@ -1,5 +1,5 @@
 // auth-unified.js - Sistema de autenticação unificado para todos os módulos ALUFORCE
-// VERSÃO 7.4 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
+// VERSÃO 7.5 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
 // FIX v7.0: Resolve o problema de "espelhamento" onde o login de outro usuário em outra aba
 //      sobrescreve a sessão da aba atual via localStorage/cookie compartilhados.
 // FIX v7.1: NÃO copia mais token/userData de localStorage para sessionStorage em novas abas.
@@ -7,6 +7,8 @@
 //      Isso permite abrir módulos em novas abas sem forçar re-login, mantendo segurança.
 // FIX v7.4: Remove lsToken undefined, injeta credentials:'include', trata 503,
 //      exige 3 falhas consecutivas no check periódico antes de redirecionar.
+// FIX v7.5: AUTH_INACTIVE retorna Response sintética (evita 401 no caller), 503 retry
+//      sem signal abortado, proactive refresh usa config centralizada.
 
 // =============================================================================
 // 🔒 STORAGE ISOLATOR - Deve rodar ANTES de qualquer outro código
@@ -64,7 +66,7 @@
 (function () {
     'use strict';
 
-    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.3 (Tab-Isolated + Server Validation + Token Refresh)');
+    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
 
     // Configurações
     const AUTH_CONFIG = {
@@ -73,7 +75,8 @@
         refreshEndpoint: '/api/auth/refresh',
         dashboardUrl: '/index.html',
         timeout: 5000,
-        refreshBeforeExpiry: 2 * 60 * 1000, // Refresh 2 min antes de expirar
+        accessTokenLifetimeMs: 15 * 60 * 1000, // 15 min
+        refreshBeforeExpiryMs: 2 * 60 * 1000,  // Refresh 2 min antes de expirar
         debug: true
     };
 
@@ -137,7 +140,8 @@
     // Proactive refresh: renova antes do access token expirar
     function _scheduleProactiveRefresh() {
         if (_refreshTimer) clearTimeout(_refreshTimer);
-        // Access token dura 15 min — renovar aos 13 min (2 min antes)
+        // Access token dura 15 min — renovar 2 min antes
+        var refreshDelay = AUTH_CONFIG.accessTokenLifetimeMs - AUTH_CONFIG.refreshBeforeExpiryMs;
         _refreshTimer = setTimeout(async () => {
             if (isLoginPage() || isRedirecting) return;
             debugLog('🔄 Refresh proativo (antes de expirar)...');
@@ -145,7 +149,7 @@
             if (!ok) {
                 debugLog('⚠️ Refresh proativo falhou');
             }
-        }, 13 * 60 * 1000); // 13 minutos
+        }, refreshDelay);
     }
 
     // Fetch interceptor: adiciona timeout padrão + detecta 401 TOKEN_EXPIRED e tenta refresh
@@ -184,11 +188,19 @@
         }
         if (timeoutId) clearTimeout(timeoutId);
 
-        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático
+        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático com limite
         if (response.status === 503) {
-            debugLog('⚠️ Serviço temporariamente indisponível (503), retentando em 2s...');
-            await new Promise(r => setTimeout(r, 2000));
-            return _originalFetch(input, init);
+            const retryCount = (init._retryCount || 0);
+            if (retryCount < 2) {
+                const delay = 2000 * (retryCount + 1); // backoff: 2s, 4s
+                debugLog(`⚠️ 503 retry ${retryCount + 1}/2 em ${delay}ms...`);
+                await new Promise(r => setTimeout(r, delay));
+                var retryInit = Object.assign({}, init);
+                delete retryInit.signal;
+                retryInit._retryCount = retryCount + 1;
+                return window.fetch(input, retryInit);
+            }
+            debugLog('❌ 503 após 2 retries — retornando resposta original');
         }
 
         if (response.status === 401) {
@@ -210,7 +222,14 @@
                     debugLog('⏰ Sessão inativa detectada pelo servidor');
                     if (window.InactivityManager) {
                         window.dispatchEvent(new CustomEvent('sessionInactive'));
-                        // Retornar a response original (não redirecionar)
+                        // v7.5 FIX: Esperar que o usuário decida no modal.
+                        // Retornar Response sintética 'pending' para evitar que o caller
+                        // trate como erro. O modal vai renovar via refreshToken se o
+                        // usuário clicar "Continuar".
+                        return new Response(JSON.stringify({ code: 'AUTH_INACTIVE_PENDING', message: 'Aguardando decisão de inatividade' }), {
+                            status: 200,
+                            headers: { 'Content-Type': 'application/json' }
+                        });
                     } else {
                         // Fallback: tentar refresh automático
                         debugLog('🔄 Tentando refresh após inatividade...');
@@ -437,7 +456,7 @@
     });
 
     // Função para verificar autenticação via API
-    async function checkAuthentication() {
+    async function checkAuthentication(options = {}) {
         debugLog('🔍 Verificando autenticação no servidor...');
 
         try {
@@ -449,6 +468,13 @@
                 'Accept': 'application/json',
                 'Cache-Control': 'no-cache'
             };
+
+            // SECURITY FIX: Checks passivos (periódico, proactive refresh) NÃO devem
+            // resetar o timer de inatividade no servidor. Sem isso, o timeout de 30min
+            // nunca dispara porque o health-check periódico reseta o timer a cada 15min.
+            if (options.passive) {
+                headers['X-Activity-Check'] = 'passive';
+            }
 
             const response = await fetch(AUTH_CONFIG.apiMeEndpoint, {
                 method: 'GET',
@@ -592,7 +618,7 @@
 
     // Função para inicializar sistema de auth
     function initAuth() {
-        debugLog('🔧 Inicializando sistema de autenticação v7.2 (Tab-Isolated + Server Validation)...');
+        debugLog('🔧 Inicializando sistema de autenticação v7.5 (Tab-Isolated + Server Validation)...');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', verifyAuth);
@@ -606,8 +632,8 @@
         const MAX_PERIODIC_FAILURES = 3;
         setInterval(async () => {
             if (!shouldSkipAuth() && !isRedirecting) {
-                debugLog('🔄 Verificação periódica...');
-                const serverUser = await checkAuthentication();
+                debugLog('🔄 Verificação periódica (passive — não reseta inatividade)...');
+                const serverUser = await checkAuthentication({ passive: true });
                 if (!serverUser) {
                     _periodicFailCount++;
                     debugLog(`⚠️ Check periódico falhou (${_periodicFailCount}/${MAX_PERIODIC_FAILURES})`);
@@ -620,7 +646,7 @@
                     _periodicFailCount = 0;
                 }
             }
-        }, 5 * 60 * 1000);
+        }, 15 * 60 * 1000); // 15 min — proactive refresh já mantém a sessão ativa
     }
 
     // Expor funções para os módulos
@@ -655,6 +681,6 @@
     // Inicializar
     initAuth();
 
-    debugLog('✅ Sistema de autenticação v7.3 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
+    debugLog('✅ Sistema de autenticação v7.5 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
 
 })();

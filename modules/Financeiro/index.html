@@ -24,6 +24,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
 
+    <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260324">
+
     <!-- Financeiro Design System -->
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
@@ -2079,7 +2081,7 @@
                                 <i class="fas fa-${item.tipo === 'receber' ? 'arrow-down' : 'arrow-up'}"></i>
                             </div>
                             <div class="vencimento-info">
-                                <h4>${item.descricao || item.descrição || 'Sem descrição'}</h4>
+                                <h4>${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</h4>
                                 <span>${obterTextoPrazo(item.data_vencimento)} • ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
                             </div>
                         </div>
@@ -2111,7 +2113,7 @@
                     return `
                         <tr>
                             <td><span class="badge ${tipo === 'Receber' ? 'badge-success' : 'badge-danger'}">${tipo}</span></td>
-                            <td class="td-description">${item.descricao || item.descrição || 'Sem descrição'}</td>
+                            <td class="td-description">${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</td>
                             <td>${formatarData(item.data_vencimento)}</td>
                             <td class="td-valor ${tipo === 'Receber' ? 'td-valor--success' : 'td-valor--danger'}">${formatarMoeda(item.valor)}</td>
                             <td><span class="badge ${getStatusClass(item.status)}">${formatarStatus(item.status)}</span></td>
@@ -2151,6 +2153,14 @@
 
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(converterNumero(valor));
+        }
+
+        // SECURITY: Escape HTML para prevenir XSS em innerHTML
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/[&<>"']/g, function(c) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+            });
         }
 
         function novoLancamento(tipo) {
@@ -2833,7 +2843,7 @@
 
         function mostrarResultadosComDados(resultados) {
             const tbody = document.getElementById('resultadosTableBody');
-            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}" class="cursor-pointer"><td class="fw-500">${r.localidade}</td><td>${r.endereco}</td></tr>`).join('');
+            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}" class="cursor-pointer"><td class="fw-500">${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereco)}</td></tr>`).join('');
             document.getElementById('resultadosCount').textContent = `1-${resultados.length} de ${resultados.length} registros`;
             document.getElementById('modalResultados').classList.add('active');
         }
@@ -2841,7 +2851,7 @@
         function mostrarResultados(resultados) {
             fecharModalClienteFornecedor();
             const tbody = document.getElementById('resultadosTableBody');
-            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}"><td>${r.localidade}</td><td>${r.endereco}</td></tr>`).join('');
+            tbody.innerHTML = resultados.map((r, i) => `<tr onclick="selecionarLinha(this)" data-index="${i}"><td>${escapeHtml(r.localidade)}</td><td>${escapeHtml(r.endereco)}</td></tr>`).join('');
             document.getElementById('resultadosCount').textContent = `1-${resultados.length} de ${resultados.length} registros`;
             document.getElementById('modalResultados').classList.add('active');
         }

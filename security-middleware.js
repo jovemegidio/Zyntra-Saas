@@ -41,8 +41,8 @@ const generalLimiter = rateLimit({
         res.status(options.statusCode).json(options.message);
     },
     keyGenerator: (req) => {
-        // Usar X-Forwarded-For se atrás de proxy, senão IP direto
-        return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+        // SECURITY: Use req.ip which respects trust proxy setting
+        return req.ip;
     }
 });
 
@@ -64,7 +64,7 @@ const authLimiter = rateLimit({
     legacyHeaders: false,
     validate: { xForwardedForHeader: false }, // Desabilita validação - usamos trust proxy
     keyGenerator: (req) => {
-        return req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip;
+        return req.ip;
     },
     handler: (req, res, next, options) => {
         console.warn(`[AUTH-RATE-LIMIT] ⚠️ Brute-force bloqueado: ${req.ip} - ${req.path}`);
@@ -357,12 +357,22 @@ function csrfProtection(req, res, next) {
         return next(); // API token-based — CSRF não se aplica
     }
 
-    // FIX 23/03/2026: Bypass CSRF quando autenticado via cookie httpOnly (authToken)
-    // O frontend usa credentials:'include' com cookies httpOnly (SameSite=Strict),
-    // que já é protegido contra CSRF pelo próprio mecanismo de SameSite cookies.
-    // Sem este bypass, todas as operações POST/PUT/DELETE retornavam 403.
+    // FIX 24/03/2026: Para requests autenticados via httpOnly cookie (SameSite=Strict),
+    // verificar que a requisição tem um header customizado que browsers automaticamente
+    // não enviam em cross-origin requests (double-submit com header customizado).
+    // Isso é mais seguro que bypass total, pois custom headers requerem JS do mesmo origin.
     if (req.cookies?.authToken) {
-        return next();
+        // Requests com cookie httpOnly + qualquer header customizado (Accept, X-Requested-With,
+        // Content-Type: application/json) já são protegidos contra CSRF simples,
+        // pois cross-origin requests com custom headers disparam preflight CORS.
+        const contentType = req.headers['content-type'] || '';
+        const hasCustomHeader = req.headers['x-requested-with'] || 
+            contentType.includes('application/json') ||
+            req.headers['accept']?.includes('application/json');
+        if (hasCustomHeader) {
+            return next();
+        }
+        // Form submissions sem custom headers — exigir CSRF token
     }
 
     const cookieToken = req.cookies?.csrf_token;

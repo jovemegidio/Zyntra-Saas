@@ -1564,7 +1564,76 @@ module.exports = function createVendasRoutes(deps) {
             res.status(201).json({ message: 'Histórico não registrado (tabela não configurada)', warning: true });
         }
     });
-    
+
+    // BUSCA UNIFICADA: CLIENTES + EMPRESAS (para autocomplete de dropdowns)
+    router.get('/clientes-empresas/search', async (req, res, next) => {
+        try {
+            const q = (req.query.q || '').trim();
+            if (q.length < 1) return res.json([]);
+            const queryLike = `%${q}%`;
+            const qDigits = q.replace(/\D/g, '');
+            const queryDigits = qDigits.length >= 3 ? `%${qDigits}%` : null;
+
+            // Buscar empresas (nome_fantasia, razao_social, cnpj com/sem formatação)
+            let sqlEmpresas = `SELECT id, nome_fantasia, razao_social, cnpj, 'empresa' as tipo
+                 FROM empresas WHERE nome_fantasia LIKE ? OR razao_social LIKE ? OR cnpj LIKE ?`;
+            const paramsEmpresas = [queryLike, queryLike, queryLike];
+            if (queryDigits) {
+                sqlEmpresas += ` OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+                paramsEmpresas.push(queryDigits);
+            }
+            sqlEmpresas += ` ORDER BY nome_fantasia LIMIT 15`;
+            const [empresas] = await pool.query(sqlEmpresas, paramsEmpresas);
+
+            // Buscar clientes (nome, nome_fantasia, razao_social, cnpj, cnpj_cpf, cpf, email)
+            let sqlClientes = `SELECT c.id, c.nome, c.nome_fantasia, c.razao_social, c.email,
+                        c.telefone, c.cpf, c.cnpj, c.cnpj_cpf, c.empresa_id,
+                        e.nome_fantasia as empresa_nome, 'cliente' as tipo
+                 FROM clientes c LEFT JOIN empresas e ON c.empresa_id = e.id
+                 WHERE c.nome LIKE ? OR c.nome_fantasia LIKE ? OR c.razao_social LIKE ?
+                    OR c.email LIKE ? OR c.cpf LIKE ? OR c.cnpj LIKE ? OR c.cnpj_cpf LIKE ?`;
+            const paramsClientes = [queryLike, queryLike, queryLike, queryLike, queryLike, queryLike, queryLike];
+            if (queryDigits) {
+                sqlClientes += ` OR REPLACE(REPLACE(REPLACE(c.cnpj_cpf, '.', ''), '-', ''), '/', '') LIKE ?`;
+                sqlClientes += ` OR REPLACE(REPLACE(REPLACE(c.cnpj, '.', ''), '-', ''), '/', '') LIKE ?`;
+                paramsClientes.push(queryDigits, queryDigits);
+            }
+            sqlClientes += ` ORDER BY c.nome LIMIT 15`;
+            const [clientes] = await pool.query(sqlClientes, paramsClientes);
+
+            // Combinar: empresas primeiro, depois clientes
+            const resultados = [
+                ...empresas.map(e => ({
+                    id: e.id,
+                    nome: e.nome_fantasia || e.razao_social || `Empresa #${e.id}`,
+                    razao_social: e.razao_social || '',
+                    cnpj: e.cnpj || '',
+                    subtitulo: [e.razao_social, e.cnpj ? `CNPJ: ${e.cnpj}` : ''].filter(Boolean).join(' | '),
+                    tipo: 'empresa',
+                    empresa_id: e.id
+                })),
+                ...clientes.map(c => ({
+                    id: c.id,
+                    nome: c.nome_fantasia || c.nome || c.razao_social || `Cliente #${c.id}`,
+                    razao_social: c.razao_social || '',
+                    cnpj: c.cnpj || c.cnpj_cpf || '',
+                    cpf: c.cpf || '',
+                    email: c.email || '',
+                    subtitulo: [
+                        c.razao_social && c.razao_social !== (c.nome_fantasia || c.nome) ? c.razao_social : '',
+                        c.cnpj || c.cnpj_cpf ? `CNPJ/CPF: ${c.cnpj || c.cnpj_cpf}` : (c.cpf ? `CPF: ${c.cpf}` : ''),
+                        c.empresa_nome ? `(${c.empresa_nome})` : ''
+                    ].filter(Boolean).join(' | '),
+                    tipo: 'cliente',
+                    cliente_id: c.id,
+                    empresa_id: c.empresa_id
+                }))
+            ];
+
+            res.json(resultados);
+        } catch (error) { next(error); }
+    });
+
     // EMPRESAS
     router.get('/empresas', cacheMiddleware('vendas_empresas', 120000), async (req, res, next) => {
         try {

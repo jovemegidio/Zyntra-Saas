@@ -15,43 +15,90 @@ const router = express.Router();
 
 // ============================================================================
 // ACCOUNT LOCKOUT — bloqueia conta após tentativas falhas consecutivas
+// Persistido no banco (colunas login_attempts, locked_until na tabela usuarios)
+// com cache in-memory como fallback se o DB estiver indisponível
 // ============================================================================
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
-const loginAttempts = new Map(); // key: email, value: { count, lockedUntil }
+const loginAttemptsCache = new Map(); // fallback in-memory
 
-function getLoginAttempt(email) {
+async function getLoginAttempt(email) {
     const key = (email || '').toLowerCase().trim();
-    const record = loginAttempts.get(key);
-    if (!record) return { count: 0, lockedUntil: null };
-    // Limpar registros expirados
-    if (record.lockedUntil && Date.now() > record.lockedUntil) {
-        loginAttempts.delete(key);
-        return { count: 0, lockedUntil: null };
+    try {
+        const [rows] = await pool.query(
+            'SELECT login_attempts, locked_until FROM usuarios WHERE email = ?',
+            [key]
+        );
+        if (!rows.length) return { count: 0, lockedUntil: null };
+        const row = rows[0];
+        const lockedUntil = row.locked_until ? new Date(row.locked_until).getTime() : null;
+        if (lockedUntil && Date.now() > lockedUntil) {
+            await pool.query(
+                'UPDATE usuarios SET login_attempts = 0, locked_until = NULL WHERE email = ?',
+                [key]
+            );
+            return { count: 0, lockedUntil: null };
+        }
+        return { count: row.login_attempts || 0, lockedUntil };
+    } catch (err) {
+        // Fallback to in-memory cache
+        const record = loginAttemptsCache.get(key);
+        if (!record) return { count: 0, lockedUntil: null };
+        if (record.lockedUntil && Date.now() > record.lockedUntil) {
+            loginAttemptsCache.delete(key);
+            return { count: 0, lockedUntil: null };
+        }
+        return record;
     }
-    return record;
 }
 
-function recordFailedLogin(email) {
+async function recordFailedLogin(email) {
     const key = (email || '').toLowerCase().trim();
-    const record = getLoginAttempt(key);
+    const record = await getLoginAttempt(key);
     const newCount = record.count + 1;
     const lockedUntil = newCount >= MAX_LOGIN_ATTEMPTS ? Date.now() + LOCKOUT_DURATION_MS : null;
-    loginAttempts.set(key, { count: newCount, lockedUntil });
+    try {
+        await pool.query(
+            'UPDATE usuarios SET login_attempts = ?, locked_until = ? WHERE email = ?',
+            [newCount, lockedUntil ? new Date(lockedUntil) : null, key]
+        );
+    } catch (err) {
+        loginAttemptsCache.set(key, { count: newCount, lockedUntil });
+    }
     return { count: newCount, lockedUntil };
 }
 
-function resetLoginAttempts(email) {
-    loginAttempts.delete((email || '').toLowerCase().trim());
+async function resetLoginAttempts(email) {
+    const key = (email || '').toLowerCase().trim();
+    try {
+        await pool.query(
+            'UPDATE usuarios SET login_attempts = 0, locked_until = NULL WHERE email = ?',
+            [key]
+        );
+    } catch (err) {
+        loginAttemptsCache.delete(key);
+    }
 }
 
-// Limpar entradas expiradas a cada 10 minutos
-setInterval(() => {
-    const now = Date.now();
-    for (const [key, val] of loginAttempts) {
-        if (val.lockedUntil && now > val.lockedUntil) loginAttempts.delete(key);
+// Ensure DB columns exist (idempotent migration)
+async function ensureLockoutColumns() {
+    try {
+        const [cols] = await pool.query(
+            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'usuarios' AND COLUMN_NAME IN ('login_attempts','locked_until')"
+        );
+        const existing = cols.map(c => c.COLUMN_NAME);
+        if (!existing.includes('login_attempts')) {
+            await pool.query('ALTER TABLE usuarios ADD COLUMN login_attempts INT DEFAULT 0');
+        }
+        if (!existing.includes('locked_until')) {
+            await pool.query('ALTER TABLE usuarios ADD COLUMN locked_until DATETIME NULL');
+        }
+    } catch (err) {
+        console.warn('[AUTH/LOCKOUT] Could not add lockout columns (may already exist):', err.code);
     }
-}, 10 * 60 * 1000);
+}
+// Run migration after pool is set (deferred)
+setTimeout(() => { if (pool) ensureLockoutColumns(); }, 2000);
 
 // Configuração do Banco de Dados e modo de desenvolvimento
 const DEV_MOCK = (process.env.DEV_MOCK === '1' || process.env.DEV_MOCK === 'true');
@@ -199,7 +246,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                     [cpf]
                 );
                 if (!funcRows.length) {
-                    recordFailedLogin('cpf:' + cpf);
+                    await recordFailedLogin('cpf:' + cpf);
                     return res.status(401).json({ message: 'CPF ou senha incorretos.' });
                 }
                 email = funcRows[0].email;
@@ -237,7 +284,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         // ========================================
         // ACCOUNT LOCKOUT — verificar se conta está bloqueada
         // ========================================
-        const attemptRecord = getLoginAttempt(email);
+        const attemptRecord = await getLoginAttempt(email);
         if (attemptRecord.lockedUntil && Date.now() < attemptRecord.lockedUntil) {
             const minutesLeft = Math.ceil((attemptRecord.lockedUntil - Date.now()) / 60000);
             await auditLog('login_locked', null, `Tentativa em conta bloqueada: ${email}`, req);
@@ -380,7 +427,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         if (!rows.length) {
             // ACCOUNT LOCKOUT: registrar tentativa falha mesmo sem usuário encontrado
-            recordFailedLogin(email);
+            await recordFailedLogin(email);
             // AUDIT-FIX SEC-007: Generic message prevents user enumeration
             return res.status(401).json({ message: isCpfLogin ? 'CPF ou senha incorretos.' : 'Email ou senha incorretos.' });
         }
@@ -429,7 +476,10 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 valid = await bcrypt.compare(password, storedValue);
             } else {
                 // AUDIT-FIX: For legacy plaintext passwords, compare then auto-hash if valid
-                valid = password === user[hashField];
+                // SECURITY: Use timing-safe comparison to prevent timing attacks
+                const passwordBuf = Buffer.from(password);
+                const storedBuf = Buffer.from(user[hashField] || '');
+                valid = passwordBuf.length === storedBuf.length && crypto.timingSafeEqual(passwordBuf, storedBuf);
                 if (valid) {
                     // Auto-migrate: hash the plaintext password in the DB for future logins
                     try {
@@ -445,11 +495,11 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             }
         } catch (err) {
             console.error('Erro ao comparar senha:', err.message);
-            return res.status(500).json({ message: 'Erro ao verificar credenciais.', error: (err && err.message) ? err.message : String(err) });
+            return res.status(500).json({ message: 'Erro ao verificar credenciais.' });
         }
         if (!valid) {
             // ACCOUNT LOCKOUT: registrar tentativa falha
-            const lockResult = recordFailedLogin(email);
+            const lockResult = await recordFailedLogin(email);
             const remaining = MAX_LOGIN_ATTEMPTS - lockResult.count;
             await auditLog('login_failed', user.id, `Senha incorreta para ${email} (tentativa ${lockResult.count}/${MAX_LOGIN_ATTEMPTS})`, req);
             if (lockResult.lockedUntil) {
@@ -462,7 +512,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         }
 
         // ACCOUNT LOCKOUT: login bem-sucedido, resetar contador
-        resetLoginAttempts(email);
+        await resetLoginAttempts(email);
 
         // ════════════════════════════════════════════════════════════════
         // 🔐 2FA - AUTENTICAÇÃO DE DOIS FATORES VIA EMAIL
@@ -504,7 +554,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 await safeQuery('DELETE FROM auth_trusted_devices WHERE expira_em < NOW()');
 
                 const [trustedRows] = await safeQuery(
-                    'SELECT * FROM auth_trusted_devices WHERE device_token = ? AND usuario_id = ? AND expira_em > NOW()',
+                    'SELECT 1 FROM auth_trusted_devices WHERE device_token = ? AND usuario_id = ? AND expira_em > NOW()',
                     [trustedTokenToCheck, user.id]
                 );
 
@@ -611,7 +661,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                                 user: process.env.SMTP_USER,
                                 pass: process.env.SMTP_PASS
                             },
-                            tls: { rejectUnauthorized: false },
+                            tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
                             connectionTimeout: 10000,
                             greetingTimeout: 10000,
                             socketTimeout: 15000
@@ -724,8 +774,10 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 // Cai no fluxo normal de login abaixo
             } else {
                 console.error('[AUTH/2FA] ⚠️ Erro no sistema 2FA:', twoFAErr.message);
-                // Graceful degradation: se 2FA falhar, continua login normal
-                console.log('[AUTH/2FA] ⚠️ Permitindo login direto (2FA com erro)');
+                // SECURITY: Do NOT allow login without 2FA on failure (prevents 2FA bypass)
+                return res.status(503).json({
+                    message: 'Serviço de verificação temporariamente indisponível. Tente novamente em alguns instantes.'
+                });
             }
         }
         } // fim do if (requires2FA)
@@ -1059,8 +1111,8 @@ router.post('/auth/verify-email', async (req, res) => {
         const [rows] = await safeQuery('SELECT id, nome, email, setor FROM usuarios WHERE email = ? LIMIT 1', [email]);
 
         if (!rows.length) {
-            // AUDIT-FIX: Generic message to prevent user enumeration
-            return res.status(404).json({ message: 'Email não encontrado no sistema.' });
+            // SECURITY: Return 200 with generic message to prevent user enumeration
+            return res.json({ success: true, message: 'Verificação concluída.' });
         }
 
         const user = rows[0];
@@ -1069,13 +1121,12 @@ router.post('/auth/verify-email', async (req, res) => {
         // AUDIT-FIX: Do NOT return userId to client — prevents IDOR attack
         res.json({
             success: true,
-            message: 'Email verificado com sucesso.'
+            message: 'Verificação concluída.'
         });
     } catch (error) {
         console.error('[AUTH/VERIFY-EMAIL] Erro:', error.stack || error);
         res.status(500).json({
-            message: 'Erro ao verificar email.',
-            error: error.message
+            message: 'Erro ao verificar email.'
         });
     }
 });
@@ -1140,8 +1191,7 @@ router.post('/auth/verify-user-data', async (req, res) => {
     } catch (error) {
         console.error('[AUTH/VERIFY-DATA] Erro:', error.stack || error);
         res.status(500).json({
-            message: 'Erro ao verificar dados.',
-            error: error.message
+            message: 'Erro ao verificar dados.'
         });
     }
 });
@@ -1232,8 +1282,7 @@ router.post('/auth/change-password', async (req, res) => {
     } catch (error) {
         console.error('[AUTH/CHANGE-PASSWORD] Erro:', error.stack || error);
         res.status(500).json({
-            message: 'Erro ao alterar senha.',
-            error: error.message
+            message: 'Erro ao alterar senha.'
         });
     }
 });
@@ -1375,8 +1424,7 @@ router.post('/auth/create-remember-token', async (req, res) => {
     } catch (error) {
         console.error('[AUTH/REMEMBER-TOKEN] Erro:', error.stack || error);
         res.status(500).json({
-            message: 'Erro ao criar token de lembrar-me.',
-            error: error.message
+            message: 'Erro ao criar token de lembrar-me.'
         });
     }
 });
@@ -1510,8 +1558,7 @@ router.post('/auth/remove-remember-token', async (req, res) => {
     } catch (error) {
         console.error('[AUTH/REMOVE-REMEMBER] Erro:', error.stack || error);
         res.status(500).json({
-            message: 'Erro ao remover token de lembrar-me.',
-            error: error.message
+            message: 'Erro ao remover token de lembrar-me.'
         });
     }
 });
@@ -1529,7 +1576,7 @@ router.post('/verify-2fa', async (req, res) => {
     try {
         // Buscar o registro 2FA pendente
         const [rows] = await safeQuery(
-            'SELECT * FROM auth_2fa_codes WHERE pending_token = ? AND usado = 0',
+            'SELECT expira_em, tentativas, codigo, usuario_id, email FROM auth_2fa_codes WHERE pending_token = ? AND usado = 0',
             [pendingToken]
         );
 
@@ -1551,8 +1598,10 @@ router.post('/verify-2fa', async (req, res) => {
             return res.status(429).json({ message: 'Muitas tentativas incorretas. Faça login novamente.', expired: true });
         }
 
-        // Verificar código
-        if (registro.codigo !== code.trim()) {
+        // Verificar código (timing-safe comparison)
+        const codeA = Buffer.from(registro.codigo || '');
+        const codeB = Buffer.from((code || '').trim());
+        if (codeA.length !== codeB.length || !crypto.timingSafeEqual(codeA, codeB)) {
             await safeQuery('UPDATE auth_2fa_codes SET tentativas = tentativas + 1 WHERE pending_token = ?', [pendingToken]);
             const restantes = 4 - registro.tentativas;
             return res.status(401).json({
@@ -1565,7 +1614,7 @@ router.post('/verify-2fa', async (req, res) => {
         await safeQuery('DELETE FROM auth_2fa_codes WHERE pending_token = ?', [pendingToken]);
 
         // Buscar dados completos do usuário
-        const [userRows] = await safeQuery('SELECT * FROM usuarios WHERE id = ?', [registro.usuario_id]);
+        const [userRows] = await safeQuery('SELECT id, nome, email, role, setor, empresa_id, cargo, status, avatar_url, is_admin, apelido, foto, avatar, areas FROM usuarios WHERE id = ?', [registro.usuario_id]);
         if (!userRows.length) {
             return res.status(500).json({ message: 'Erro interno: usuário não encontrado.' });
         }
@@ -1729,7 +1778,7 @@ router.post('/resend-2fa', async (req, res) => {
     try {
         // Buscar registro existente
         const [rows] = await safeQuery(
-            'SELECT * FROM auth_2fa_codes WHERE pending_token = ? AND usado = 0',
+            'SELECT usuario_id, email FROM auth_2fa_codes WHERE pending_token = ? AND usado = 0',
             [pendingToken]
         );
 
@@ -1768,7 +1817,7 @@ router.post('/resend-2fa', async (req, res) => {
                         user: process.env.SMTP_USER,
                         pass: process.env.SMTP_PASS
                     },
-                    tls: { rejectUnauthorized: false },
+                    tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
                     connectionTimeout: 10000,
                     greetingTimeout: 10000,
                     socketTimeout: 15000
@@ -1990,7 +2039,7 @@ router.post('/auth/esqueci-senha', async (req, res) => {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            tls: { rejectUnauthorized: false },
+            tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
             connectionTimeout: 10000,
             greetingTimeout: 10000,
             socketTimeout: 15000
@@ -2078,7 +2127,7 @@ router.post('/auth/forgot-password', async (req, res) => {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
             },
-            tls: { rejectUnauthorized: false },
+            tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
             connectionTimeout: 10000,
             greetingTimeout: 10000,
             socketTimeout: 15000

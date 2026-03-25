@@ -5889,11 +5889,6 @@
                         <div class="kanban-column-content" id="col-orcamento">
                             <!-- Cards serão inseridos aqui -->
                         </div>
-                        <div class="kanban-column-footer">
-                            <button class="btn-new-card" onclick="novoOrcamento()">
-                                <i class="fas fa-plus"></i> Novo Orçamento
-                            </button>
-                        </div>
                     </div>
 
                     <!-- Coluna: Análise de Crédito -->
@@ -10476,7 +10471,7 @@
 
             let transportadora = '';
             if (item.transportadora) {
-                transportadora = `<div class="card-transport">Transportadora: ${item.transportadora}</div>`;
+                transportadora = `<div class="card-transport">Transportadora: ${escaparHTML(item.transportadora)}</div>`;
             }
 
             let mensagem = '';
@@ -10484,7 +10479,7 @@
                 mensagem = `
                     <div class="card-message">
                         <i class="fas fa-comment"></i>
-                        <span>${item.mensagem}</span>
+                        <span>${escaparHTML(item.mensagem)}</span>
                     </div>
                 `;
             }
@@ -13333,8 +13328,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 <div class="anexo-item">
                     <i class="fas ${getIconeArquivo(anexo.tipo)}"></i>
                     <div class="anexo-info">
-                        <div class="anexo-nome">${anexo.nome}</div>
-                        <div class="anexo-tamanho">${anexo.tamanho}</div>
+                        <div class="anexo-nome">${escaparHTML(anexo.nome)}</div>
+                        <div class="anexo-tamanho">${escaparHTML(anexo.tamanho)}</div>
                     </div>
                     <div class="anexo-actions">
                         <button onclick="downloadAnexo(${idx})" title="Baixar"><i class="fas fa-download"></i></button>
@@ -13857,13 +13852,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 </div>
                             `}
                         </div>
-                        ${isFirstColumn ? `
-                            <div class="kanban-column-footer">
-                                <button class="btn-new-card" onclick="novoOrcamento()">
-                                    <i class="fas fa-plus"></i> Novo Orçamento
-                                </button>
-                            </div>
-                        ` : ''}
+                        
                     </div>
                 `;
 
@@ -14360,10 +14349,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             container.innerHTML = emails.map(email => `
                 <div class="email-item">
                     <div class="email-header">
-                        <span class="email-destinatario"><i class="fas fa-user"></i> ${email.destinatario}</span>
-                        <span class="email-data">${email.data}</span>
+                        <span class="email-destinatario"><i class="fas fa-user"></i> ${escaparHTML(email.destinatario)}</span>
+                        <span class="email-data">${escaparHTML(email.data)}</span>
                     </div>
-                    <div class="email-assunto">${email.assunto}</div>
+                    <div class="email-assunto">${escaparHTML(email.assunto)}</div>
                     <span class="email-status ${email.status}">
                         <i class="fas ${email.status === 'lido' ? 'fa-check-double' : 'fa-check'}"></i>
                         ${email.status === 'lido' ? 'Lido' : 'Enviado'}
@@ -14457,10 +14446,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             ${badge}
                             <span class="historico-data-pro">${dataFormatada}</span>
                         </div>
-                        <div class="historico-descrição-pro">${item.descrição || item.action}</div>
+                        <div class="historico-descrição-pro">${escaparHTML(item.descrição || item.action)}</div>
                         <div class="historico-usuario-pro">
                             <i class="fas fa-user-circle"></i>
-                            ${item.user_name || 'Sistema'}
+                            ${escaparHTML(item.user_name || 'Sistema')}
                         </div>
                     </div>
                 `;
@@ -14574,7 +14563,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             container.innerHTML = tarefas.map((tarefa, idx) => `
                 <div class="tarefa-item ${tarefa.concluida ? 'concluida' : ''}">
                     <input type="checkbox" class="tarefa-checkbox" ${tarefa.concluida ? 'checked' : ''} onchange="toggleTarefa(${idx})">
-                    <span class="tarefa-texto">${tarefa.texto}</span>
+                    <span class="tarefa-texto">${escaparHTML(tarefa.texto)}</span>
                     <button class="tarefa-delete" onclick="excluirTarefa(${idx})"><i class="fas fa-trash"></i></button>
                 </div>
             `).join('');
@@ -15285,11 +15274,11 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             tbody.innerHTML = itensPedidoAtual.map((item, idx) => `
                 <tr data-index="${idx}" data-id="${item.id}" onclick="selecionarItemTabela(${idx})" ondblclick="editarItemPorIndice(${idx})">
-                    <td class="produto-code">${item.código || ''}</td>
-                    <td class="produto-desc">${item.descrição || ''}</td>
-                    <td>${formatarQuantidade(item.quantidade)} ${item.unidade || 'M'}</td>
-                    <td>${formatarQuantidade(item.quantidade_parcial)} ${item.unidade || 'M'}</td>
-                    <td>${item.local_estoque || 'PADRAO'}</td>
+                    <td class="produto-code">${escaparHTML(item.código || '')}</td>
+                    <td class="produto-desc">${escaparHTML(item.descrição || '')}</td>
+                    <td>${formatarQuantidade(item.quantidade)} ${escaparHTML(item.unidade || 'M')}</td>
+                    <td>${formatarQuantidade(item.quantidade_parcial)} ${escaparHTML(item.unidade || 'M')}</td>
+                    <td>${escaparHTML(item.local_estoque || 'PADRAO')}</td>
                     <td>${formatarMoeda(item.preco_unitario)}</td>
                 </tr>
             `).join('');
@@ -16297,8 +16286,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                                     <i class="fas ${tipoIcon}" style="color: ${tipoCor}; font-size: 14px; flex-shrink: 0;"></i>
                                     <div style="min-width: 0;">
-                                        <div style="font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.nome || 'Sem nome'}</div>
-                                        ${subtitulo ? `<div style="font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${subtitulo}</div>` : ''}
+                                        <div style="font-weight: 500; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escaparHTML(item.nome || 'Sem nome')}</div>
+                                        ${subtitulo ? `<div style="font-size: 11px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escaparHTML(subtitulo)}</div>` : ''}
                                     </div>
                                 </div>
                                 <span style="font-size: 10px; color: ${tipoCor}; background: ${item.tipo === 'empresa' ? '#fff7ed' : '#eff6ff'}; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-left: 8px; flex-shrink: 0;">${tipoLabel}</span>
@@ -16396,8 +16385,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                              style="padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; transition: all 0.2s;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <div style="font-weight: 500; color: #333;"><i class="fas fa-truck" style="color: #3b82f6; margin-right: 8px;"></i>${transp.nome || transp.razao_social || 'Sem nome'}</div>
-                                    ${transp.cidade ? `<div style="font-size: 11px; color: #888;">${transp.cidade}/${transp.estado || ''}</div>` : ''}
+                                    <div style="font-weight: 500; color: #333;"><i class="fas fa-truck" style="color: #3b82f6; margin-right: 8px;"></i>${escaparHTML(transp.nome || transp.razao_social || 'Sem nome')}</div>
+                                    ${transp.cidade ? `<div style="font-size: 11px; color: #888;">${escaparHTML(transp.cidade)}/${escaparHTML(transp.estado || '')}</div>` : ''}
                                 </div>
                                 <span style="font-size: 11px; color: #059669; background: #ecfdf5; padding: 3px 8px; border-radius: 4px;">${transp.cnpj || transp.telefone || ''}</span>
                             </div>
@@ -16650,8 +16639,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 <div style="display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0;">
                                     <i class="fas ${tipoIcon}" style="color: ${tipoCor}; font-size: 14px; flex-shrink: 0;"></i>
                                     <div style="min-width: 0;">
-                                        <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${nomeDisplay}</div>
-                                        ${subtitulo ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${subtitulo}</div>` : ''}
+                                        <div style="font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escaparHTML(nomeDisplay)}</div>
+                                        ${subtitulo ? `<div style="font-size: 11px; color: #64748b; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escaparHTML(subtitulo)}</div>` : ''}
                                     </div>
                                 </div>
                                 <span style="font-size: 10px; color: ${tipoCor}; background: ${item.tipo === 'empresa' ? '#fff7ed' : '#eff6ff'}; padding: 2px 8px; border-radius: 4px; white-space: nowrap; margin-left: 8px; flex-shrink: 0;">${tipoLabel}</span>
@@ -16881,7 +16870,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                      style="padding: 10px 12px; cursor: pointer; border-bottom: 1px solid #eee; ${v.id == vendedorAtualId ? 'background: #fff7ed;' : ''}"
                      onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='${v.id == vendedorAtualId ? '#fff7ed' : '#fff'}'">
                     <i class="fas fa-user" style="color: #f97316; margin-right: 8px;"></i>
-                    ${v.nome}
+                    ${escaparHTML(v.nome)}
                 </div>
             `).join('');
         }
@@ -17552,11 +17541,11 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                 tbody.innerHTML = itensOrcamento.map((item, idx) => `
                     <tr data-index="${idx}" onclick="selecionarItemOrcamento(${idx})">
-                        <td class="produto-code">${item.código}</td>
-                        <td class="produto-desc">${item.descrição}</td>
+                        <td class="produto-code">${escaparHTML(item.código)}</td>
+                        <td class="produto-desc">${escaparHTML(item.descrição)}</td>
                         <td>${item.quantidade}</td>
                         <td>${item.qtdPendente || item.quantidade}</td>
-                        <td>${item.localEstoque}</td>
+                        <td>${escaparHTML(item.localEstoque)}</td>
                         <td>R$ ${item.precoUnitario.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                         <td>R$ ${(item.quantidade * item.precoUnitario).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                     </tr>
@@ -19548,9 +19537,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                              style="padding: 14px 20px; border-bottom: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center;"
                              onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='white'">
                             <div>
-                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">${c.razao_social || c.nome || 'Sem nome'}</div>
+                                <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">${escaparHTML(c.razao_social || c.nome || 'Sem nome')}</div>
                                 <div style="font-size: 12px; color: #64748b;">
-                                    ${c.cnpj || c.cpf || c.cnpj_cpf || '-'} ${c.cidade ? '· ' + c.cidade : ''}${c.uf ? '/' + c.uf : ''}
+                                    ${escaparHTML(c.cnpj || c.cpf || c.cnpj_cpf || '-')} ${c.cidade ? '· ' + escaparHTML(c.cidade) : ''}${c.uf ? '/' + escaparHTML(c.uf) : ''}
                                     ${c._dadosBrasilAPI ? ' <span style="color: #0f766e; font-weight: 500;">· Receita Federal</span>' : ''}
                                 </div>
                             </div>
@@ -19747,7 +19736,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 const resultEl = document.getElementById('google-cnpj-resultado');
                 if (resultEl) {
                     resultEl.style.display = 'flex';
-                    resultEl.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${dados.razao_social} — dados importados!`;
+                    resultEl.innerHTML = `<i class="fas fa-check-circle" style="color: #22c55e;"></i> ${escaparHTML(dados.razao_social)} — dados importados!`;
                 }
 
                 // Fechar overlay e expandir formulário manual
@@ -20916,14 +20905,14 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 <div style="flex: 1; min-width: 0;">
                                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                                         <span style="font-weight: 700; color: #111827; font-size: 14px; line-height: 1.3;">
-                                            ${notif.título || notif.title || 'Notificação'}
+                                            ${escaparHTML(notif.título || notif.title || 'Notificação')}
                                         </span>
                                         <span style="font-size: 12px; color: #9ca3af; white-space: nowrap; margin-left: 16px; background: #f3f4f6; padding: 4px 10px; border-radius: 6px; font-weight: 500;">
                                             ${dataFormatada}
                                         </span>
                                     </div>
                                     <p style="margin: 0; font-size: 13px; color: #6b7280; line-height: 1.5;">
-                                        ${notif.mensagem || notif.message || ''}
+                                        ${escaparHTML(notif.mensagem || notif.message || '')}
                                     </p>
                                     ${notif.importante ? '<span style="display: inline-flex; align-items: center; gap: 4px; margin-top: 8px; padding: 4px 10px; background: linear-gradient(135deg, #fef2f2, #fee2e2); color: #dc2626; font-size: 11px; border-radius: 6px; font-weight: 600;"><i class="fas fa-star" style="font-size: 9px;"></i> Importante</span>' : ''}
                                 </div>

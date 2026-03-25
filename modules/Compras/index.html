@@ -425,7 +425,7 @@
                 return `<li class="activity-item">
                     <div class="activity-icon ${cfg.color}"><i class="fas ${cfg.icon}"></i></div>
                     <div class="activity-content">
-                        <div class="activity-title">Pedido ${p.número || '#' + p.id} — ${p.fornecedor_nome || 'Fornecedor'} (${p.status || 'pendente'})</div>
+                        <div class="activity-title">Pedido ${escapeHtml(p.número || '#' + p.id)} — ${escapeHtml(p.fornecedor_nome || 'Fornecedor')} (${escapeHtml(p.status || 'pendente')})</div>
                         <div class="activity-time">${tempo}</div>
                     </div>
                 </li>`;
@@ -472,9 +472,9 @@
             }
             tbody.innerHTML = requisicoes.slice(0, 5).map(req => `
                 <tr>
-                    <td class="code">${req.número || req.código || req.id}</td>
-                    <td>${req.descrição || req.material || '-'}</td>
-                    <td>${req.solicitante || req.usuário_nome || '-'}</td>
+                    <td class="code">${escapeHtml(req.número || req.código || req.id)}</td>
+                    <td>${escapeHtml(req.descrição || req.material || '-')}</td>
+                    <td>${escapeHtml(req.solicitante || req.usuário_nome || '-')}</td>
                     <td>${formatarData(req.data || req.created_at)}</td>
                     <td><span class="badge ${getStatusClass(req.status)}">${req.status || 'Pendente'}</span></td>
                 </tr>
@@ -493,6 +493,14 @@
         function formatarData(data) {
             if (!data) return '-';
             return new Date(data).toLocaleDateString('pt-BR');
+        }
+
+        // SECURITY: Escape HTML para prevenir XSS em innerHTML
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/[&<>"']/g, function(c) {
+                return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+            });
         }
 
         function formatarMoeda(valor) {

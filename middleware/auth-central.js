@@ -90,6 +90,9 @@ function authenticateToken(req, res, next) {
         // SPRINT-3: Inactivity timeout — 30 min sem atividade encerra a sessão
         if (_cacheService && user.id) {
             const sessionKey = `session_activity:${user.id}:${user.deviceId || 'default'}`;
+            // SECURITY FIX: Requests com X-Activity-Check NÃO resetam o timer de inatividade.
+            // Isso evita que health-checks periódicos do frontend anulem a proteção de inatividade.
+            const isPassiveCheck = req.headers['x-activity-check'] === 'passive';
             try {
                 const lastActivity = await _cacheService.cacheGet(sessionKey);
                 if (lastActivity && (Date.now() - lastActivity > SESSION_INACTIVITY_MS)) {
@@ -100,8 +103,10 @@ function authenticateToken(req, res, next) {
                         code: 'AUTH_INACTIVE'
                     });
                 }
-                // Renovar timestamp de atividade (TTL = inactivity timeout + margem)
-                await _cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
+                // Renovar timestamp de atividade APENAS se NÃO for check passivo
+                if (!isPassiveCheck) {
+                    await _cacheService.cacheSet(sessionKey, Date.now(), SESSION_INACTIVITY_MS + 60000);
+                }
             } catch (cacheErr) {
                 // CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar
                 console.warn('[AUTH] Cache indisponível para verificar inatividade:', cacheErr.message);

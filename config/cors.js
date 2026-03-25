@@ -35,11 +35,12 @@ const corsOptions = {
         if (!origin) return callback(null, true);
         if (allowedOrigins.includes(origin)) {
             callback(null, true);
-        } else if (process.env.NODE_ENV === 'development') {
-            // Em dev, permitir com warning ao invés de bloquear
-            console.warn(`⚠️ CORS DEV: Origem não listada aceita em dev: ${origin}`);
-            callback(null, true);
         } else {
+            // SECURITY: Bloquear origens não listadas em qualquer ambiente
+            // Em dev, logar para facilitar debug mas NÃO permitir
+            if (process.env.NODE_ENV === 'development') {
+                console.warn(`⚠️ CORS: Origem '${origin}' bloqueada. Adicione ao allowedOrigins se necessário.`);
+            }
             callback(new Error('Origem não permitida pelo CORS'));
         }
     },
