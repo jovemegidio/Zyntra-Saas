@@ -349,7 +349,7 @@
             const btn = event?.target?.closest?.('button');
             if (btn) btn.disabled = true;
             try {
-                const r = await fetch(`/api/nfe/${id}/enviar-sefaz`, { method: 'POST', credentials: 'include' });
+                const r = await fetch(`/api/faturamento/nfes/${id}/enviar-sefaz`, { method: 'POST', credentials: 'include' });
                 if (r.ok) { alert('Enviado à SEFAZ com sucesso!'); carregarNFes(); }
                 else { alert('Erro ao enviar à SEFAZ'); }
             } catch (e) { alert('Erro de conexão'); } finally {
@@ -359,7 +359,7 @@
         }
 
         async function baixarDANFE(id) {
-            window.open(`/api/nfe/${id}/danfe`, '_blank');
+            window.open(`/api/faturamento/nfes/${id}/danfe`, '_blank');
         }
 
         function carregarUsuarioLogado() {

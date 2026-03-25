@@ -619,6 +619,71 @@ module.exports = (pool, authenticateToken) => {
     });
 
     // ============================================================
+    // EVENTOS DA NF-e (histórico: emissão, autorização, cancelamento, CC-e)
+    // ============================================================
+
+    router.get('/nfes/:id/eventos', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const [[nfe]] = await pool.query(
+                'SELECT id, numero, status, data_emissao, data_autorizacao, protocolo, motivo_cancelamento, data_cancelamento FROM nfe WHERE id = ?',
+                [id]
+            );
+            if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+
+            const eventos = [];
+
+            // Evento de emissão
+            eventos.push({ tipo: 'Emissão', data: nfe.data_emissao, descricao: `NF-e ${nfe.numero} emitida`, protocolo: null });
+
+            // Evento de autorização SEFAZ
+            if (nfe.data_autorizacao) {
+                eventos.push({ tipo: 'Autorização SEFAZ', data: nfe.data_autorizacao, descricao: `NF-e autorizada`, protocolo: nfe.protocolo || null });
+            }
+
+            // Eventos registrados (CC-e, cancelamento eletrônico, etc.)
+            const [rows] = await pool.query(
+                `SELECT tipo_evento AS tipo, COALESCE(data_evento, created_at) AS data, descricao, protocolo
+                 FROM nfe_eventos WHERE nfe_id = ? ORDER BY data ASC`,
+                [id]
+            );
+            rows.forEach(r => eventos.push(r));
+
+            // Cancelamento
+            if (nfe.status === 'cancelada' && nfe.data_cancelamento) {
+                eventos.push({ tipo: 'Cancelamento', data: nfe.data_cancelamento, descricao: nfe.motivo_cancelamento || 'NF-e cancelada', protocolo: null });
+            }
+
+            eventos.sort((a, b) => new Date(a.data) - new Date(b.data));
+            res.json({ success: true, data: eventos });
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao buscar eventos:', error);
+            if (error.code === 'ER_NO_SUCH_TABLE') return res.json({ success: true, data: [] });
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
+    // DOWNLOAD XML DA NF-e
+    // ============================================================
+
+    router.get('/nfes/:id/xml', authenticateToken, async (req, res) => {
+        try {
+            const { id } = req.params;
+            const [[nfe]] = await pool.query('SELECT numero, xml_nfe FROM nfe WHERE id = ?', [id]);
+            if (!nfe) return res.status(404).json({ success: false, message: 'NF-e não encontrada' });
+            if (!nfe.xml_nfe) return res.status(404).json({ success: false, message: 'XML não disponível para esta NF-e' });
+
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="nfe_${nfe.numero || id}.xml"`);
+            res.send(nfe.xml_nfe);
+        } catch (error) {
+            console.error('[FATURAMENTO] Erro ao baixar XML:', error);
+            res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
     // CANCELAR NF-e
     // ============================================================
 

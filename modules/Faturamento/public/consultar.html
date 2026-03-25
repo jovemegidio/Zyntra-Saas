@@ -211,7 +211,7 @@
                 const tbody = document.getElementById('tbody-resultados');
                 tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Consultando...</p></div></td></tr>';
 
-                const r = await fetch('/api/nfe/listar?' + params.toString(), { credentials: 'include' });
+                const r = await fetch('/api/faturamento/nfes?' + params.toString(), { credentials: 'include' });
                 if (r.ok) {
                     const nfes = await r.json();
                     let lista = Array.isArray(nfes) ? nfes : nfes.data || [];
@@ -248,7 +248,7 @@
 
         function visualizarNFe(id) {
             if (!id) { alert('ID não disponível'); return; }
-            fetch(`/api/nfe/${id}`, { credentials: 'include' })
+            fetch(`/api/faturamento/nfes/${id}`, { credentials: 'include' })
                 .then(r => r.json())
                 .then(nfe => {
                     const info = [
@@ -269,13 +269,13 @@
         async function baixarXML(id) {
             if (!id) { alert('ID não disponível'); return; }
             try {
-                const r = await fetch(`/api/nfe/${id}/xml`, { credentials: 'include' });
+                const r = await fetch(`/api/faturamento/nfes/${id}/xml`, { credentials: 'include' });
                 if (r.ok) { const b = await r.blob(); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `nfe_${id}.xml`; a.click(); URL.revokeObjectURL(u); }
                 else { alert('XML não disponível para esta NF-e'); }
             } catch (e) { alert('Erro ao baixar XML'); }
         }
 
-        function gerarDANFE(id) { window.open(`/api/nfe/${id}/danfe`, '_blank'); }
+        function gerarDANFE(id) { window.open(`/api/faturamento/nfes/${id}/danfe`, '_blank'); }
 
         function carregarUsuarioLogado() {
             const h = new Date().getHours();

@@ -224,7 +224,7 @@
             const nfeId = document.getElementById('nfeId').value;
             if (!nfeId) { showAlert('Informe o ID da NF-e', 'warning'); return; }
             try {
-                const r = await fetch(`/api/nfe/${nfeId}`, { credentials: 'include' });
+                const r = await fetch(`/api/faturamento/nfes/${nfeId}`, { credentials: 'include' });
                 if (r.ok) {
                     const nfe = await r.json();
                     document.getElementById('infoNumero').textContent = nfe.numero || '-';
@@ -241,7 +241,7 @@
         async function carregarEventos(id) {
             id = id || document.getElementById('nfeId').value;
             try {
-                const r = await fetch(`/api/nfe/${id}/eventos`, { credentials: 'include' });
+                const r = await fetch(`/api/faturamento/nfes/${id}/eventos`, { credentials: 'include' });
                 if (r.ok) {
                     const eventos = await r.json();
                     const lista = Array.isArray(eventos) ? eventos : eventos.data || [];
@@ -268,7 +268,7 @@
             if (just.length < 15) { showAlert('Justificativa deve ter no mínimo 15 caracteres', 'warning'); return; }
             if (!confirm('ATENÇÃO: O cancelamento é IRREVERSÍVEL. Deseja continuar?')) return;
             try {
-                const r = await fetch(`/api/nfe/${id}/cancelar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ justificativa: just }) });
+                const r = await fetch(`/api/faturamento/nfes/${id}/cancelar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ justificativa: just }) });
                 if (r.ok) { showAlert('NF-e cancelada com sucesso!', 'success'); carregarNFe(); }
                 else { const e = await r.json(); showAlert(e.message || 'Erro ao cancelar', 'danger'); }
             } catch (e) { showAlert('Erro de conexão', 'danger'); }
@@ -280,7 +280,7 @@
             if (!id) { showAlert('Selecione uma NF-e primeiro', 'warning'); return; }
             if (correcao.length < 15) { showAlert('Texto da correção deve ter no mínimo 15 caracteres', 'warning'); return; }
             try {
-                const r = await fetch(`/api/nfe/${id}/cce`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ correcao }) });
+                const r = await fetch(`/api/faturamento/nfes/${id}/carta-correcao`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({ correcao }) });
                 if (r.ok) { showAlert('CC-e registrada com sucesso!', 'success'); carregarEventos(id); document.getElementById('correcaoCCe').value = ''; }
                 else { const e = await r.json(); showAlert(e.message || 'Erro ao registrar CC-e', 'danger'); }
             } catch (e) { showAlert('Erro de conexão', 'danger'); }

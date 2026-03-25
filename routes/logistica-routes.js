@@ -293,7 +293,58 @@ module.exports = function createLogisticaRoutes(deps) {
             res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
         }
     });
-    
+
+    // Atualizar transportadora
+    router.put('/transportadoras/:id', async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { razao_social, fantasia, cnpj, telefone, email, endereco, cidade, estado, cep, contato } = req.body;
+
+            if (!razao_social || razao_social.trim() === '') {
+                return res.status(400).json({ error: 'Razão Social é obrigatória' });
+            }
+
+            const [existing] = await pool.query('SELECT id FROM transportadoras WHERE id = ?', [id]);
+            if (!existing.length) return res.status(404).json({ error: 'Transportadora não encontrada' });
+
+            await pool.query(`
+                UPDATE transportadoras SET
+                    razao_social = ?, nome_fantasia = ?, cnpj_cpf = ?,
+                    telefone = ?, email = ?, endereco = ?,
+                    cidade = ?, estado = ?, cep = ?, contato = ?
+                WHERE id = ?
+            `, [
+                razao_social.trim(), (fantasia || '').trim(), (cnpj || '').trim(),
+                (telefone || '').trim(), (email || '').trim(), (endereco || '').trim(),
+                (cidade || '').trim(), (estado || '').trim(), (cep || '').trim(),
+                (contato || '').trim(), id
+            ]);
+
+            res.json({ success: true, message: 'Transportadora atualizada com sucesso' });
+        } catch (error) {
+            console.error('[LOGISTICA/TRANSPORTADORAS/PUT] Erro:', error);
+            next(error);
+        }
+    });
+
+    // Excluir transportadora
+    router.delete('/transportadoras/:id', async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const [existing] = await pool.query('SELECT id FROM transportadoras WHERE id = ?', [id]);
+            if (!existing.length) return res.status(404).json({ error: 'Transportadora não encontrada' });
+
+            // Desvincular pedidos antes de excluir
+            await pool.query('UPDATE pedidos SET transportadora_id = NULL WHERE transportadora_id = ?', [id]);
+            await pool.query('DELETE FROM transportadoras WHERE id = ?', [id]);
+
+            res.json({ success: true, message: 'Transportadora excluída com sucesso' });
+        } catch (error) {
+            console.error('[LOGISTICA/TRANSPORTADORAS/DELETE] Erro:', error);
+            next(error);
+        }
+    });
+
     // Criar nova expedição (manual)
     router.post('/expedicao', async (req, res, next) => {
         try {

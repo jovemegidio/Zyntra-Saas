@@ -323,7 +323,7 @@
                     else if (status) params.set('status', status);
                     params.set('limite', '500');
 
-                    const r = await fetch('/api/nfe/listar?' + params.toString(), { credentials: 'include' });
+                    const r = await fetch('/api/faturamento/nfes?' + params.toString(), { credentials: 'include' });
                     let lista = [];
                     if (r.ok) {
                         const data = await r.json();

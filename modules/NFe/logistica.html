@@ -1603,6 +1603,14 @@ function trocarTab(tab) {
     document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
 }
 
+function filtrarStatus(status) {
+    var el = document.getElementById('filtroStatus');
+    if (el) el.value = status;
+    trocarTab('pedidos');
+    paginaAtual = 1;
+    renderizarPedidos();
+}
+
 // --- Configurações placeholder ---
 function abrirModalConfiguracoes() { showAlert('Configurações é Em desenvolvimento', 'info'); }
 
