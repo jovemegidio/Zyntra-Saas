@@ -261,24 +261,31 @@ npm run lint
 ## 📊 Changelog Recente
 
 ### v2.1.7 — Março 2026
-- ✅ **Chat Teams** — Widget injetado automaticamente em todas as páginas
+- ✅ **Login Fix** — Correção no fluxo de autenticação (refresh tokens, CSRF, rate limiting)
+- ✅ **Top Vendedores** — Ranking filtrado apenas por usuários com role `comercial`
+- ✅ **Template Financeiro** — Novo template XLSX de importação de Contas a Pagar (62 colunas)
+- ✅ **Padronização CSS** — 88 arquivos padronizados com design system unificado (dark headers, botões, modais)
+- ✅ **Modais Profissionais** — Botão fechar redesenhado, consistência visual em todos os módulos
+- ✅ **Chat Teams** — Widget injetado automaticamente em todas as 85+ páginas
 - ✅ **Chat DM** — Lista de contatos inteligente (recentes + online + todos)
 - ✅ **Nomes** — Exibição de primeiro nome em todo o chat
 - ✅ **Integração Bancária** — API completa com boletos, CNAB e pagamentos
 - ✅ **Auto-inject CSS** — CSS do chat carregado automaticamente pelo JS
+- ✅ **Segurança** — Migração automática de schema, refresh tokens com rastreamento completo
+- ✅ **Auditoria de Produção** — 53/53 verificações passando, dados reais validados
 
 ### v2.1.6 — Fevereiro 2026
-- ✅ BOB I.A. — Assistente virtual integrado ao chat
-- ✅ Chat Teams — Canais, DMs, áudio, arquivos, emojis
-- ✅ PWA — Suporte offline completo com sync
-- ✅ Help Page — Central de ajuda
+- ✅ **BOB I.A.** — Assistente virtual integrado ao chat
+- ✅ **Chat Teams** — Canais, DMs, áudio, arquivos, emojis
+- ✅ **PWA** — Suporte offline completo com sync
+- ✅ **Help Page** — Central de ajuda
 
 ### v2.1.5 — Janeiro 2026
-- ✅ NF-e completa — Emissão, manifestação, importação
-- ✅ Módulo de Compras — Requisições, cotações, pedidos
-- ✅ PCP — Ordens de produção com Excel
-- ✅ Conciliação Bancária
-- ✅ eSocial
+- ✅ **NF-e completa** — Emissão, manifestação, importação XML
+- ✅ **Módulo de Compras** — Requisições, cotações, pedidos de compra
+- ✅ **PCP** — Ordens de produção com importação/exportação Excel
+- ✅ **Conciliação Bancária** — Importação OFX/CNAB e conciliação automática
+- ✅ **eSocial** — Integração com obrigações trabalhistas
 
 ---
 
