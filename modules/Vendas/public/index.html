@@ -11240,6 +11240,7 @@
                 return;
             }
             window._salvandoPedido = true;
+            try {
 
             // ====================================================
             // BLOQUEIO: Desconto ultrapassa margem bruta
@@ -11349,14 +11350,12 @@
 
             console.log('📝 Enviando atualização para API:', dadosAtualizacao);
 
-            try {
                 // Obter token de autenticação
 
                 // Salvar no backend via API
                 const response = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}`, {
                     credentials: 'include', method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
                     body: JSON.stringify(dadosAtualizacao)
                 });
 
