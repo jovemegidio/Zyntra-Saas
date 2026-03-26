@@ -1613,7 +1613,7 @@
                 </div>
                 <span class="filter-link" id="filterInfo" onclick="abrirModalFiltros()" style="cursor: pointer;">Exibindo Ordens de Produção de todos os períodos</span>
                 <div style="margin-left: auto; display: flex; gap: 12px;">
-                    <button class="btn-novo-apontamento" onclick="window.location.href='../pages/apontamentos.html'">
+                    <button class="btn-novo-apontamento" onclick="window.location.href='apontamentos.html'">
                         <i class="fas fa-stopwatch"></i> Novo Apontamento
                     </button>
                 </div>
@@ -2124,7 +2124,7 @@
         let _dadosEmpresaPCP = null;
         async function carregarDadosEmpresaPCP() {
             try {
-                const res = await fetch('/api/configuracoes/empresa', { credentials: 'include', headers });
+                const res = await fetch('/api/configuracoes/empresa', { credentials: 'include' });
                 if (res.ok) {
                     const d = await res.json();
                     const e = d.empresa || d;

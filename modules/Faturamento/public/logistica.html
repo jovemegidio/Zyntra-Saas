@@ -17,7 +17,7 @@
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 
 <body>
@@ -72,7 +72,7 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-title-wrapper">
-                            <div class="page-icon cyan"><i class="fas fa-truck"></i></div>
+                            <div class="page-icon blue"><i class="fas fa-truck"></i></div>
                             <div>
                                 <h1 class="page-title">Logística & Expedição</h1>
                                 <p class="page-subtitle">Gerenciamento de entregas, expedição e transportadoras</p>
@@ -88,56 +88,51 @@
                 </div>
 
                 <!-- KPIs -->
-                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);">
-                    <div class="stat-card yellow fade-in-delay-1" onclick="filtrarPorCard('pendente')"
+                <div class="metrics-grid">
+                    <div class="metric-card orange" onclick="filtrarPorCard('pendente')"
                         style="cursor:pointer;" title="Filtrar por Aguardando">
-                        <div class="stat-header">
-                            <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
-                            <span class="stat-trend" id="trend-aguardando">&mdash;</span>
+                        <div class="metric-header">
+                            <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                            <span class="metric-trend" id="trend-aguardando">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="count-aguardando">0</div>
-                        <div class="stat-label">Aguardando</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarPorCard('pendente');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="count-aguardando">0</div>
+                        <div class="metric-label">Aguardando</div>
                     </div>
-                    <div class="stat-card blue fade-in-delay-2" onclick="filtrarPorCard('em_separacao')"
+                    <div class="metric-card blue" onclick="filtrarPorCard('em_separacao')"
                         style="cursor:pointer;" title="Filtrar por Em Separação">
-                        <div class="stat-header">
-                            <div class="stat-icon blue"><i class="fas fa-box-open"></i></div>
-                            <span class="stat-trend" id="trend-separacao">&mdash;</span>
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-box-open"></i></div>
+                            <span class="metric-trend" id="trend-separacao">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="count-separacao">0</div>
-                        <div class="stat-label">Separação</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarPorCard('em_separacao');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="count-separacao">0</div>
+                        <div class="metric-label">Separação</div>
                     </div>
-                    <div class="stat-card cyan fade-in-delay-3" onclick="filtrarPorCard('em_expedicao')"
+                    <div class="metric-card blue" onclick="filtrarPorCard('em_expedicao')"
                         style="cursor:pointer;" title="Filtrar por Em Expedição">
-                        <div class="stat-header">
-                            <div class="stat-icon cyan"><i class="fas fa-dolly"></i></div>
-                            <span class="stat-trend" id="trend-expedicao">&mdash;</span>
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-dolly"></i></div>
+                            <span class="metric-trend" id="trend-expedicao">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="count-expedicao">0</div>
-                        <div class="stat-label">Expedição</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarPorCard('em_expedicao');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="count-expedicao">0</div>
+                        <div class="metric-label">Expedição</div>
                     </div>
-                    <div class="stat-card purple fade-in-delay-4" onclick="filtrarPorCard('em_transporte')"
+                    <div class="metric-card purple" onclick="filtrarPorCard('em_transporte')"
                         style="cursor:pointer;" title="Filtrar por Em Transporte">
-                        <div class="stat-header">
-                            <div class="stat-icon purple"><i class="fas fa-truck"></i></div>
-                            <span class="stat-trend" id="trend-transporte">&mdash;</span>
+                        <div class="metric-header">
+                            <div class="metric-icon purple"><i class="fas fa-truck"></i></div>
+                            <span class="metric-trend" id="trend-transporte">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="count-transporte">0</div>
-                        <div class="stat-label">Em Transporte</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarPorCard('em_transporte');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="count-transporte">0</div>
+                        <div class="metric-label">Em Transporte</div>
                     </div>
-                    <div class="stat-card green" onclick="filtrarPorCard('entregue')" style="cursor:pointer;"
+                    <div class="metric-card green" onclick="filtrarPorCard('entregue')" style="cursor:pointer;"
                         title="Filtrar por Entregues">
-                        <div class="stat-header">
-                            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                            <span class="stat-trend" id="trend-entregues">&mdash;</span>
+                        <div class="metric-header">
+                            <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                            <span class="metric-trend" id="trend-entregues">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="count-entregues">0</div>
-                        <div class="stat-label">Entregues</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarPorCard('entregue');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="count-entregues">0</div>
+                        <div class="metric-label">Entregues</div>
                     </div>
                 </div>
 

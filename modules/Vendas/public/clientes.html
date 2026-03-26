@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     
     <style>
         :root {
@@ -221,62 +221,6 @@
         }
         .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
 
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 20px; margin-bottom: 24px;
-        }
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
-
-        .stat-card {
-            background: white; border-radius: 16px;
-            padding: 24px 24px 20px 28px;
-            border: 1px solid #f0f0f5;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            position: relative;
-            overflow: hidden;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 28px rgba(0,0,0,0.08), 0 4px 10px rgba(0,0,0,0.03);
-            border-color: #e8e8f0;
-        }
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 12px; left: 0; bottom: 12px;
-            width: 4px;
-            border-radius: 0 4px 4px 0;
-        }
-        .stat-card.blue::before { background: linear-gradient(180deg, #3b82f6, #60a5fa); }
-        .stat-card.green::before { background: linear-gradient(180deg, #10b981, #34d399); }
-        .stat-card.red::before { background: linear-gradient(180deg, #ef4444, #f87171); }
-        .stat-card.indigo::before { background: linear-gradient(180deg, #6366f1, #818cf8); }
-
-        .stat-card.blue { background: linear-gradient(135deg, #eff6ff 0%, white 40%); }
-        .stat-card.green { background: linear-gradient(135deg, #ecfdf5 0%, white 40%); }
-        .stat-card.red { background: linear-gradient(135deg, #fef2f2 0%, white 40%); }
-        .stat-card.indigo { background: linear-gradient(135deg, #eef2ff 0%, white 40%); }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-        .stat-icon {
-            width: 48px; height: 48px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center; font-size: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-        .stat-icon.blue { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1d4ed8; }
-        .stat-icon.green { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #047857; }
-        .stat-icon.red { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #b91c1c; }
-        .stat-icon.indigo { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #4338ca; }
-
-        .stat-value { font-size: 30px; font-weight: 800; color: #111827; margin-bottom: 4px; letter-spacing: -0.03em; line-height: 1.1; }
-        .stat-label { color: #6b7280; font-size: 13px; font-weight: 500; line-height: 1.3; letter-spacing: 0.01em; }
 
         .filters-bar {
             background: white; border-radius: 12px;
@@ -865,26 +809,26 @@
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card blue">
-                        <div class="stat-header"><div class="stat-icon blue"><i class="fas fa-users"></i></div></div>
-                        <div class="stat-value" id="totalClientes">0</div>
-                        <div class="stat-label">Total de Clientes</div>
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-users"></i></div></div>
+                        <div class="metric-value" id="totalClientes">0</div>
+                        <div class="metric-label">Total de Clientes</div>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-header"><div class="stat-icon green"><i class="fas fa-user-check"></i></div></div>
-                        <div class="stat-value" id="clientesAtivos">0</div>
-                        <div class="stat-label">Clientes Ativos</div>
+                    <div class="metric-card green">
+                        <div class="metric-header"><div class="metric-icon green"><i class="fas fa-user-check"></i></div></div>
+                        <div class="metric-value" id="clientesAtivos">0</div>
+                        <div class="metric-label">Clientes Ativos</div>
                     </div>
-                    <div class="stat-card red">
-                        <div class="stat-header"><div class="stat-icon red"><i class="fas fa-user-times"></i></div></div>
-                        <div class="stat-value" id="clientesInativos">0</div>
-                        <div class="stat-label">Clientes Inativos</div>
+                    <div class="metric-card red">
+                        <div class="metric-header"><div class="metric-icon red"><i class="fas fa-user-times"></i></div></div>
+                        <div class="metric-value" id="clientesInativos">0</div>
+                        <div class="metric-label">Clientes Inativos</div>
                     </div>
-                    <div class="stat-card indigo">
-                        <div class="stat-header"><div class="stat-icon indigo"><i class="fas fa-building"></i></div></div>
-                        <div class="stat-value" id="clientesPJ">0</div>
-                        <div class="stat-label">Pessoa Jurídica</div>
+                    <div class="metric-card blue">
+                        <div class="metric-header"><div class="metric-icon blue"><i class="fas fa-building"></i></div></div>
+                        <div class="metric-value" id="clientesPJ">0</div>
+                        <div class="metric-label">Pessoa Jurídica</div>
                     </div>
                 </div>
 
@@ -2118,7 +2062,7 @@
                             <div class="card-label">Vencido</div>
                         </div>
                         <div class="resumo-card">
-                            <div class="card-icon teal"><i class="fas fa-file-invoice"></i></div>
+                            <div class="card-icon green"><i class="fas fa-file-invoice"></i></div>
                             <div class="card-valor">${f.total_títulos}</div>
                             <div class="card-label">Total de Títulos</div>
                         </div>
@@ -2278,7 +2222,7 @@
                             <div class="card-label">Ticket Médio</div>
                         </div>
                         <div class="resumo-card">
-                            <div class="card-icon teal"><i class="fas fa-trophy"></i></div>
+                            <div class="card-icon green"><i class="fas fa-trophy"></i></div>
                             <div class="card-valor">${formatarMoeda(stats.maior_pedido)}</div>
                             <div class="card-label">Maior Pedido</div>
                         </div>
@@ -2597,9 +2541,5 @@
     <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
 </body>
 </html>
-
-
-
-
 
 

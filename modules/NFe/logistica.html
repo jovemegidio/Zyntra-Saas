@@ -27,11 +27,6 @@
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260325">
     <style>
         /* -- Logistica Stat Card color overrides (Compras style) --- */
-        .stats-grid .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(245,158,11,0.35); }
-        .stats-grid .stat-icon.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(59,130,246,0.35); }
-        .stats-grid .stat-icon.cyan   { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(6,182,212,0.35); }
-        .stats-grid .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(139,92,246,0.35); }
-        .stats-grid .stat-icon.green  { background: linear-gradient(135deg, #10b981, #059669) !important; color: #fff !important; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
 
         /* -- Status Timeline ---------------------------------- */
         .status-timeline {
@@ -272,7 +267,7 @@
         }
     </style>
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260325">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 <body>
 <div class="app-container">
@@ -328,7 +323,7 @@
                 <div class="page-header fade-in">
                     <div class="page-header-top">
                         <div class="page-title-wrapper">
-                            <div class="page-icon cyan"><i class="fas fa-truck"></i></div>
+                            <div class="page-icon blue"><i class="fas fa-truck"></i></div>
                             <div>
                                 <h1 class="page-title">Logística & Expedião</h1>
                                 <p class="page-subtitle">Gerenciamento de entregas, expedião e transportadoras</p>
@@ -342,51 +337,46 @@
                 </div>
 
                 <!-- --- KPI Stats Grid --- -->
-                <div class="stats-grid" style="grid-template-columns:repeat(5,1fr);">
-                    <div class="stat-card yellow">
-                        <div class="stat-header">
-                            <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
-                            <span class="stat-trend" id="trend-aguardando">&mdash;</span>
+                <div class="metrics-grid">
+                    <div class="metric-card orange">
+                        <div class="metric-header">
+                            <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                            <span class="metric-trend" id="trend-aguardando">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="statAguardando">0</div>
-                        <div class="stat-label">Aguardando</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarStatus('aguardando');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="statAguardando">0</div>
+                        <div class="metric-label">Aguardando</div>
                     </div>
-                    <div class="stat-card blue">
-                        <div class="stat-header">
-                            <div class="stat-icon blue"><i class="fas fa-box-open"></i></div>
-                            <span class="stat-trend" id="trend-separacao">&mdash;</span>
+                    <div class="metric-card blue">
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-box-open"></i></div>
+                            <span class="metric-trend" id="trend-separacao">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="statSeparacao">0</div>
-                        <div class="stat-label">Em Separação</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarStatus('em_separacao');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="statSeparacao">0</div>
+                        <div class="metric-label">Em Separação</div>
                     </div>
-                    <div class="stat-card cyan">
-                        <div class="stat-header">
-                            <div class="stat-icon cyan"><i class="fas fa-dolly"></i></div>
-                            <span class="stat-trend" id="trend-expedicao">&mdash;</span>
+                    <div class="metric-card blue">
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-dolly"></i></div>
+                            <span class="metric-trend" id="trend-expedicao">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="statExpedicao">0</div>
-                        <div class="stat-label">Em Expedição</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarStatus('em_expedicao');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="statExpedicao">0</div>
+                        <div class="metric-label">Em Expedição</div>
                     </div>
-                    <div class="stat-card purple">
-                        <div class="stat-header">
-                            <div class="stat-icon purple"><i class="fas fa-truck"></i></div>
-                            <span class="stat-trend" id="trend-transporte">&mdash;</span>
+                    <div class="metric-card purple">
+                        <div class="metric-header">
+                            <div class="metric-icon purple"><i class="fas fa-truck"></i></div>
+                            <span class="metric-trend" id="trend-transporte">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="statTransporte">0</div>
-                        <div class="stat-label">Em Transporte</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarStatus('em_transporte');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="statTransporte">0</div>
+                        <div class="metric-label">Em Transporte</div>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-header">
-                            <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                            <span class="stat-trend" id="trend-entregues">&mdash;</span>
+                    <div class="metric-card green">
+                        <div class="metric-header">
+                            <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                            <span class="metric-trend" id="trend-entregues">&mdash;</span>
                         </div>
-                        <div class="stat-value" id="statEntregues">0</div>
-                        <div class="stat-label">Entregues</div>
-                        <div class="stat-footer"><a href="#" onclick="filtrarStatus('entregue');return false;">Ver todos <i class="fas fa-arrow-right"></i></a></div>
+                        <div class="metric-value" id="statEntregues">0</div>
+                        <div class="metric-label">Entregues</div>
                     </div>
                 </div>
 

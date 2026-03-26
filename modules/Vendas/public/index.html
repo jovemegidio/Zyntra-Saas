@@ -5615,10 +5615,6 @@
                 gap: 12px;
             }
 
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
-            }
 
             .main-grid {
                 grid-template-columns: 1fr;
@@ -5713,7 +5709,7 @@
     <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260319">
 
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 
 <body>
@@ -5952,7 +5948,7 @@
                             <!-- Cards -->
                         </div>
                         <div class="kanban-column-footer">
-                            <button class="btn-action-card teal" id="btn-comunicar-sefaz" onclick="comunicarSefaz()"
+                            <button class="btn-action-card green" id="btn-comunicar-sefaz" onclick="comunicarSefaz()"
                                 style="display: none;">
                                 <i class="fas fa-sync"></i> Comunicar com a SEFAZ
                             </button>
@@ -10158,6 +10154,70 @@
 
     <script>
         // ========================================
+        // INTERCEPTOR DE AUTENTICAÇÃO SILENCIOSA
+        // Renova o token automaticamente quando expira, evitando redirect
+        // inesperado para login durante uma sessão ativa de trabalho.
+        // ========================================
+        (function installAuthInterceptor() {
+            const _origFetch = window.fetch.bind(window);
+            window._origFetch = _origFetch;
+            let _isRefreshing = false;
+            let _pendingQueue = [];
+
+            async function doRefresh() {
+                try {
+                    const r = await _origFetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+                    return r.ok;
+                } catch { return false; }
+            }
+
+            window.fetch = async function patchedFetch(url, options) {
+                options = options || {};
+                options.credentials = options.credentials || 'include';
+                const response = await _origFetch(url, options);
+                if (response.status !== 401) return response;
+
+                // Não interceptar o próprio endpoint de refresh/login (evita loop)
+                const urlStr = (typeof url === 'string' ? url : (url && url.url)) || '';
+                if (urlStr.includes('/auth/refresh') || urlStr.includes('/vendas/login') ||
+                    urlStr === '/login.html' || urlStr === '/login') {
+                    return response;
+                }
+
+                // Só renovar silenciosamente para token expirado (AUTH_EXPIRED)
+                let body = {};
+                try { body = await response.clone().json(); } catch {}
+                if (body.code !== 'AUTH_EXPIRED') return response;
+
+                // Se já está renovando, enfileirar este request
+                if (_isRefreshing) {
+                    return new Promise((resolve) => {
+                        _pendingQueue.push(() => resolve(_origFetch(url, options)));
+                    });
+                }
+
+                _isRefreshing = true;
+                const refreshed = await doRefresh();
+                _isRefreshing = false;
+
+                if (refreshed) {
+                    // Drenar a fila e retentar o request original
+                    const queue = _pendingQueue.splice(0);
+                    queue.forEach(fn => fn());
+                    return _origFetch(url, options);
+                }
+
+                // Refresh falhou — redirecionar para login uma única vez
+                _pendingQueue = [];
+                if (!window._loginRedirectScheduled) {
+                    window._loginRedirectScheduled = true;
+                    setTimeout(() => { window.location.href = '/login.html'; }, 800);
+                }
+                return response;
+            };
+        })();
+
+        // ========================================
         // UTILITÁRIOS GLOBAIS
         // ========================================
         function escaparHTML(str) {
@@ -11445,14 +11505,14 @@
 
 
                 // Criar o pedido no banco de dados
-                const response = await fetch('/api/vendas/pedidos/novo', {
+                const response = await fetch('/api/vendas/pedidos', {
                     method: 'POST',
                     credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         status: 'orcamento',
                         valor: valorTotal,
-                        cliente: cliente,
+                        cliente_nome: cliente,
                         cliente_id: clienteId,
                         vendedor_nome: vendedor,
                         parcelas: parcelas,
@@ -11656,7 +11716,7 @@
         async function carregarDadosCompletosCliente() {
             if (!pedidoAtual) return;
 
-            const headers = { 'Authorization': `Bearer ${token}` };
+            const headers = getAuthHeaders(); // auth via httpOnly cookie (credentials: 'include')
 
             // Tentar buscar pelo cliente_id primeiro (tabela clientes)
             if (pedidoAtual.cliente_id) {
@@ -12550,7 +12610,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 </div>
             </div>
             <style>
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
                 @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
             </style>`;
 
@@ -20712,7 +20771,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     animation: fadeInHistórico 0.25s ease;
                 ">
                     <style>
-                        @keyframes fadeInHistórico { from { opacity: 0; } to { opacity: 1; } }
                         @keyframes slideUpHistórico { from { transform: translateY(30px) scale(0.96); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
                         .historico-notif-item { cursor: default; }
                         .historico-notif-item:hover { background: linear-gradient(90deg, #f8fafc, #ffffff) !important; }

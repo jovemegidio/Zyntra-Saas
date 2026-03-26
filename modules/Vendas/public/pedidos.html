@@ -24,7 +24,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     
     <style>
         :root {
@@ -248,43 +248,6 @@
         }
         .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
 
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px; margin-bottom: 20px;
-        }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
-
-        .stat-card {
-            background: white; border-radius: 16px;
-            padding: 24px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            display: flex; align-items: center; gap: 20px;
-            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-            border: 1px solid transparent;
-            animation: slideInUp 0.4s cubic-bezier(0.4,0,0.2,1) backwards;
-        }
-        .stat-card:nth-child(1) { animation-delay: 0.05s; }
-        .stat-card:nth-child(2) { animation-delay: 0.1s; }
-        .stat-card:nth-child(3) { animation-delay: 0.15s; }
-        .stat-card:nth-child(4) { animation-delay: 0.2s; }
-        .stat-card:nth-child(5) { animation-delay: 0.25s; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); border-color: rgba(99,102,241,0.2); }
-        @keyframes slideInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
-
-        .stat-icon {
-            width: 60px; height: 60px; border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; flex-shrink: 0; color: white;
-        }
-        .stat-icon.orange { background: linear-gradient(135deg, #f97316, #ea580c); }
-        .stat-icon.green { background: linear-gradient(135deg, #10b981, #059669); }
-        .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-        .stat-icon.yellow { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
-
-        .stat-content { flex: 1; }
-        .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
-        .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
-        .stat-trend { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 4px; margin-top: 4px; }
 
         .filters-bar {
             background: white; border-radius: 12px;
@@ -827,10 +790,6 @@
 
         .tab-content.active { display: block; }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
 
         /* Tabela de Itens */
         .items-table-container {
@@ -1518,41 +1477,41 @@
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon blue"><i class="fas fa-dollar-sign"></i></div>
-                        <div class="stat-content">
-                            <div class="stat-label">Valor Total (Mês)</div>
-                            <div class="stat-value" id="valorTotal">R$ 0</div>
-                            <div class="stat-trend"><i class="fas fa-calendar-alt"></i> Mês atual</div>
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Valor Total (Mês)</div>
+                            <div class="metric-value" id="valorTotal">R$ 0</div>
+                            <div class="metric-trend"><i class="fas fa-calendar-alt"></i> Mês atual</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon purple"><i class="fas fa-file-alt"></i></div>
-                        <div class="stat-content">
-                            <div class="stat-label">Total de Pedidos</div>
-                            <div class="stat-value" id="totalPedidos">0</div>
+                    <div class="metric-card purple">
+                        <div class="metric-icon purple"><i class="fas fa-file-alt"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Total de Pedidos</div>
+                            <div class="metric-value" id="totalPedidos">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon yellow"><i class="fas fa-clock"></i></div>
-                        <div class="stat-content">
-                            <div class="stat-label">Pendentes</div>
-                            <div class="stat-value" id="pedidosPendentes">0</div>
+                    <div class="metric-card orange">
+                        <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Pendentes</div>
+                            <div class="metric-value" id="pedidosPendentes">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
-                        <div class="stat-content">
-                            <div class="stat-label">Aprovados</div>
-                            <div class="stat-value" id="pedidosAprovados">0</div>
+                    <div class="metric-card green">
+                        <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Aprovados</div>
+                            <div class="metric-value" id="pedidosAprovados">0</div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon orange"><i class="fas fa-file-invoice"></i></div>
-                        <div class="stat-content">
-                            <div class="stat-label">Faturados</div>
-                            <div class="stat-value" id="pedidosFaturados">0</div>
+                    <div class="metric-card orange">
+                        <div class="metric-icon orange"><i class="fas fa-file-invoice"></i></div>
+                        <div class="metric-content">
+                            <div class="metric-label">Faturados</div>
+                            <div class="metric-value" id="pedidosFaturados">0</div>
                         </div>
                     </div>
                 </div>

@@ -400,7 +400,7 @@ app.post('/api/login', authLimiter, async (req, res, next) => {
 
         const userDataForToken = { id: user.id, nome: user.nome, email: user.email, role: user.role, is_admin: user.is_admin };
         // AUDIT-FIX ARCH-004: Added algorithm HS256 + audience claim
-        const token = jwt.sign(userDataForToken, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '15m' });
+        const token = jwt.sign(userDataForToken, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '8h' });
 
         // SPRINT-3: Inicializar session activity para inactivity timeout
         try {
@@ -416,7 +416,7 @@ app.post('/api/login', authLimiter, async (req, res, next) => {
             secure: isHttps,
             sameSite: isHttps ? 'strict' : 'lax',
             path: '/',
-            maxAge: 1000 * 60 * 15 // 15m — mesma duração do JWT
+            maxAge: 1000 * 60 * 60 * 8 // 8h — cobre um dia de trabalho completo
         });
         return res.json({ success: true, user: userDataForToken });
     } catch (error) {
@@ -2058,7 +2058,7 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
 
         // Suporte a JSON e multipart - TODOS OS CAMPOS DA TABELA
         const empresa_id = sanitize(req.body.empresa_id || req.body.empresaId) || null;
-        const cliente_nome = sanitize(req.body.cliente_nome || req.body.clienteNome) || null;
+        const cliente_nome = sanitize(req.body.cliente_nome || req.body.clienteNome || req.body.cliente) || null;
         const valor = 0; // F1-01/F2-03: Valor será recalculado server-side via atualizarTotalPedido() após inserir itens
         const descrição = sanitize(req.body.descrição || req.body.descricao) || null;
         const frete = sanitizeNum(req.body.frete) || 0.00;
@@ -4914,7 +4914,7 @@ async function ensureProdutosTable() {
                 peso_bruto DECIMAL(10,3) DEFAULT 0,
                 peso_liquido DECIMAL(10,3) DEFAULT 0,
                 preco_custo DECIMAL(15,2) DEFAULT 0,
-                preco_venda DECIMAL(15,2) DEFAULT 0,
+                preco_venda DECIMAL(15,4) DEFAULT 0,
                 estoque_atual INT DEFAULT 0,
                 estoque_minimo INT DEFAULT 0,
                 local_estoque VARCHAR(100) DEFAULT 'principal',
@@ -6422,7 +6422,7 @@ if (process.env.NODE_ENV === 'development' && process.env.ENABLE_DEV_TOKEN === '
                 const user = rows[0];
                 const tokenPayload = { id: user.id, nome: user.nome, email: user.email, role: user.role, is_admin: user.is_admin };
                 // AUDIT-FIX ARCH-004: Added algorithm HS256 + audience claim
-                const token = jwt.sign(tokenPayload, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '15m' });
+                const token = jwt.sign(tokenPayload, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '8h' });
                 return res.json({ token, user: tokenPayload });
             }
 
@@ -6435,7 +6435,7 @@ if (process.env.NODE_ENV === 'development' && process.env.ENABLE_DEV_TOKEN === '
                 is_admin: true
             };
             // AUDIT-FIX ARCH-004: Added algorithm HS256 + audience claim
-            const token = jwt.sign(fallbackUser, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '15m' });
+            const token = jwt.sign(fallbackUser, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '8h' });
             return res.json({ token, user: fallbackUser, note: 'DB indisponível — token de desenvolvimento gerado (apenas para dev).' });
         } catch (err) {
             next(err);

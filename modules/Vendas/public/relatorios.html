@@ -423,121 +423,7 @@
         }
 
         /* ==================== STATS GRID ==================== */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
-        }
 
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
-
-        .stat-card {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(0,0,0,0.08);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-        }
-
-        .stat-card.orange::before { background: linear-gradient(90deg, #f97316, #fb923c); }
-        .stat-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
-        .stat-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
-        .stat-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
-
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .stat-icon {
-            width: 52px;
-            height: 52px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-        }
-
-        .stat-icon.orange { background: linear-gradient(135deg, #fff7ed, #fed7aa); color: #ea580c; }
-        .stat-icon.blue { background: linear-gradient(135deg, #eff6ff, #bfdbfe); color: #2563eb; }
-        .stat-icon.green { background: linear-gradient(135deg, #ecfdf5, #a7f3d0); color: #059669; }
-        .stat-icon.purple { background: linear-gradient(135deg, #f5f3ff, #ddd6fe); color: #7c3aed; }
-
-        .stat-menu {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 6px;
-        }
-
-        .stat-menu:hover { background: #f1f5f9; color: #64748b; }
-
-        .stat-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: #0f172a;
-            line-height: 1;
-            margin-bottom: 16px;
-        }
-
-        .stat-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding-top: 16px;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .stat-change {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-
-        .stat-change.up { background: #ecfdf5; color: #059669; }
-        .stat-change.down { background: #fef2f2; color: #dc2626; }
-        .stat-change i { font-size: 10px; }
-
-        .stat-period {
-            font-size: 12px;
-            color: #94a3b8;
-        }
 
         /* ==================== SKELETON LOADING ==================== */
         .skeleton-loading {
@@ -905,7 +791,7 @@
     <!-- Chat Widget BOB AI - DESATIVADO -->
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 <body>
     <div class="app-container">
@@ -1025,48 +911,40 @@
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="stats-grid">
-                    <div class="stat-card blue">
-                        <div class="stat-header">
-                            <div class="stat-icon blue"><i class="fas fa-clipboard-list"></i></div>
+                <div class="metrics-grid">
+                    <div class="metric-card blue">
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-clipboard-list"></i></div>
                         </div>
-                        <div class="stat-label">Total de Pedidos</div>
-                        <div class="stat-value" id="totalPedidos"><span class="skeleton-loading">--</span></div>
-                        <div class="stat-footer">
-                            <div class="stat-change up" id="pedidosChange"><i class="fas fa-arrow-up"></i> 0%</div>
+                        <div class="metric-label">Total de Pedidos</div>
+                        <div class="metric-value" id="totalPedidos"><span class="skeleton-loading">--</span></div>
                             <div class="stat-period">vs período anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-header">
-                            <div class="stat-icon green"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="metric-card green">
+                        <div class="metric-header">
+                            <div class="metric-icon green"><i class="fas fa-dollar-sign"></i></div>
                         </div>
-                        <div class="stat-label">Faturamento Total</div>
-                        <div class="stat-value" id="faturamentoTotal"><span class="skeleton-loading">--</span></div>
-                        <div class="stat-footer">
-                            <div class="stat-change up" id="faturamentoChange"><i class="fas fa-arrow-up"></i> 0%</div>
+                        <div class="metric-label">Faturamento Total</div>
+                        <div class="metric-value" id="faturamentoTotal"><span class="skeleton-loading">--</span></div>
                             <div class="stat-period">vs período anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card purple">
-                        <div class="stat-header">
-                            <div class="stat-icon purple"><i class="fas fa-receipt"></i></div>
+                    <div class="metric-card purple">
+                        <div class="metric-header">
+                            <div class="metric-icon purple"><i class="fas fa-receipt"></i></div>
                         </div>
-                        <div class="stat-label">Ticket Médio</div>
-                        <div class="stat-value" id="ticketMedio"><span class="skeleton-loading">--</span></div>
-                        <div class="stat-footer">
-                            <div class="stat-change up" id="ticketChange"><i class="fas fa-arrow-up"></i> 0%</div>
+                        <div class="metric-label">Ticket Médio</div>
+                        <div class="metric-value" id="ticketMedio"><span class="skeleton-loading">--</span></div>
                             <div class="stat-period">vs período anterior</div>
                         </div>
                     </div>
-                    <div class="stat-card orange">
-                        <div class="stat-header">
-                            <div class="stat-icon orange"><i class="fas fa-users"></i></div>
+                    <div class="metric-card orange">
+                        <div class="metric-header">
+                            <div class="metric-icon orange"><i class="fas fa-users"></i></div>
                         </div>
-                        <div class="stat-label">Vendedores Ativos</div>
-                        <div class="stat-value" id="vendedoresAtivos"><span class="skeleton-loading">--</span></div>
-                        <div class="stat-footer">
-                            <div class="stat-change up" id="vendedoresChange"><i class="fas fa-arrow-up"></i> --</div>
+                        <div class="metric-label">Vendedores Ativos</div>
+                        <div class="metric-value" id="vendedoresAtivos"><span class="skeleton-loading">--</span></div>
                             <div class="stat-period">no período</div>
                         </div>
                     </div>
@@ -3016,7 +2894,7 @@
                     .page-content { position: absolute; left: 0; top: 0; width: 100%; }
                     .sidebar, .header, .page-header .page-actions, .filters-card .btn, .quick-reports, .stat-menu { display: none !important; }
                     .page-header { box-shadow: none !important; border: 1px solid #e2e8f0; }
-                    .stat-card, .chart-card, .table-card { box-shadow: none !important; border: 1px solid #e2e8f0; break-inside: avoid; }
+                    .metric-card, .chart-card, .table-card { box-shadow: none !important; border: 1px solid #e2e8f0; break-inside: avoid; }
                     .charts-grid { break-inside: avoid; }
                 }
             `;

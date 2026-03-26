@@ -139,28 +139,7 @@
         .request-status.processing { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 
         /* Stats */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 16px; margin-bottom: 24px;
-        }
 
-        @media (max-width: 900px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        }
-
-        .stat-card {
-            background: white; border-radius: 12px;
-            border: 1px solid #f1f5f9; padding: 16px;
-            text-align: center;
-        }
-
-        .stat-value { font-size: 1.75rem; font-weight: 700; color: #1e293b; }
-        .stat-label { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
-
-        .stat-card.pending .stat-value { color: #eab308; }
-        .stat-card.approved .stat-value { color: #10b981; }
-        .stat-card.rejected .stat-value { color: #ef4444; }
-        .stat-card.total .stat-value { color: var(--primary-pink); }
 
         /* Empty State */
         .empty-state {
@@ -169,6 +148,107 @@
 
         .empty-state i { font-size: 2.5rem; color: #e2e8f0; margin-bottom: 12px; }
         .empty-state h3 { font-size: 1rem; color: #1e293b; margin-bottom: 4px; }
+    
+        /* === Metric Card Standard (prospeccao.html) === */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+        .metric-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .metric-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .metric-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .metric-card.green::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .metric-card.red::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .metric-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .metric-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .metric-icon.orange { background: #fff7ed; color: #f59e0b; }
+        .metric-icon.purple { background: #faf5ff; color: #8b5cf6; }
+        .metric-icon.green { background: #f0fdf4; color: #22c55e; }
+        .metric-icon.red { background: #fef2f2; color: #ef4444; }
+        .metric-trend {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .metric-trend.up { background: #dcfce7; color: #16a34a; }
+        .metric-trend.down { background: #fee2e2; color: #dc2626; }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .metric-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        /* Pattern B/C compat: metric-content/metric-info wrappers */
+        .metric-content, .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .metric-content .metric-value,
+        .metric-info .value,
+        .metric-info h3 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+            margin: 0 0 4px;
+            order: 1;
+        }
+        .metric-content .metric-label,
+        .metric-info h3:first-child {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            margin: 0;
+        }
+        .metric-content .metric-trend {
+            order: 3;
+            margin-top: 4px;
+        }
+        @media (max-width: 1400px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1024px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .metrics-grid { grid-template-columns: 1fr; } }
+        /* === End Metric Card Standard === */
+
     </style>
     <script src="/js/anti-copy-protection.js" defer></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
@@ -252,22 +332,22 @@
                 </div>
 
                 <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card total">
-                        <div class="stat-value" id="stat-total">0</div>
-                        <div class="stat-label">Total de Solicitaes</div>
+                <div class="metrics-grid">
+                    <div class="metric-card total">
+                        <div class="metric-value" id="stat-total">0</div>
+                        <div class="metric-label">Total de Solicitaes</div>
                     </div>
-                    <div class="stat-card pending">
-                        <div class="stat-value" id="stat-pending">0</div>
-                        <div class="stat-label">Pendentes</div>
+                    <div class="metric-card pending">
+                        <div class="metric-value" id="stat-pending">0</div>
+                        <div class="metric-label">Pendentes</div>
                     </div>
-                    <div class="stat-card approved">
-                        <div class="stat-value" id="stat-approved">0</div>
-                        <div class="stat-label">Aprovadas</div>
+                    <div class="metric-card approved">
+                        <div class="metric-value" id="stat-approved">0</div>
+                        <div class="metric-label">Aprovadas</div>
                     </div>
-                    <div class="stat-card rejected">
-                        <div class="stat-value" id="stat-rejected">0</div>
-                        <div class="stat-label">Recusadas</div>
+                    <div class="metric-card rejected">
+                        <div class="metric-value" id="stat-rejected">0</div>
+                        <div class="metric-label">Recusadas</div>
                     </div>
                 </div>
 
@@ -643,7 +723,5 @@
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>
-
-
 
 

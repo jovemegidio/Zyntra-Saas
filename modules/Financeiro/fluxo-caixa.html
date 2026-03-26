@@ -51,27 +51,6 @@
 /* BUTTONS - .btn, .btn-primary, .btn-secondary definidos em fin-components.css */
 
         /* STATS */
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
-        @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } }
-        .stat-card { background: white; border-radius: 10px; padding: 20px 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border: 1px solid #eaeef3; border-left: 3.5px solid transparent; position: relative; transition: box-shadow 0.2s; }
-        .stat-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.07); }
-        .stat-card.entradas { border-left-color: #16a34a; }
-        .stat-card.saidas { border-left-color: #dc2626; }
-        .stat-card.saldo { border-left-color: #2563eb; }
-        .stat-card.projecao { border-left-color: #7c3aed; }
-        .stat-card h3 { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-weight: 600; }
-        .stat-card h3 i { width: 28px; height: 28px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; }
-        .stat-card h3 i.green { color: #16a34a; background: #f0fdf4; }
-        .stat-card h3 i.red { color: #dc2626; background: #fef2f2; }
-        .stat-card h3 i.blue { color: #2563eb; background: #eff6ff; }
-        .stat-card h3 i.purple { color: #7c3aed; background: #f5f3ff; }
-        .stat-card .value { font-size: 22px; font-weight: 700; letter-spacing: -0.3px; }
-        .stat-card .value.green { color: #15803d; }
-        .stat-card .value.red { color: #b91c1c; }
-        .stat-card .value.blue { color: #1d4ed8; }
-        .stat-card .value.purple { color: #6d28d9; }
-        .stat-card .change { font-size: 11px; color: #9ca3af; margin-top: 8px; display: flex; align-items: center; gap: 4px; }
 
         /* Period Selector */
         .period-selector { display: flex; gap: 8px; }
@@ -133,7 +112,7 @@
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
 </head>
 <body>
@@ -262,23 +241,23 @@
                 </div>
 
                 <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stat-card entradas">
+                <div class="metrics-grid">
+                    <div class="metric-card entradas">
                         <h3><i class="fas fa-arrow-down green"></i> Total de Entradas</h3>
                         <div class="value green" id="total-entradas">R$ 0,00</div>
                         <div class="change up" id="change-entradas"><i class="fas fa-arrow-up"></i> 0% vs período anterior</div>
                     </div>
-                    <div class="stat-card saidas">
+                    <div class="metric-card saidas">
                         <h3><i class="fas fa-arrow-up red"></i> Total de Saídas</h3>
                         <div class="value red" id="total-saidas">R$ 0,00</div>
                         <div class="change down" id="change-saidas"><i class="fas fa-arrow-up"></i> 0% vs período anterior</div>
                     </div>
-                    <div class="stat-card saldo">
+                    <div class="metric-card saldo">
                         <h3><i class="fas fa-wallet blue"></i> Saldo do Período</h3>
                         <div class="value blue" id="saldo-período">R$ 0,00</div>
                         <div class="change up" id="change-saldo"><i class="fas fa-arrow-up"></i> 0% vs período anterior</div>
                     </div>
-                    <div class="stat-card projecao">
+                    <div class="metric-card projecao">
                         <h3><i class="fas fa-chart-line purple"></i> Projeão 30 dias</h3>
                         <div class="value purple" id="projecao-30d">R$ 0,00</div>
                         <div class="change" id="change-projecao">Baseado nas previsões</div>

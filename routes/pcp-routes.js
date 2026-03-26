@@ -8322,7 +8322,7 @@ module.exports = function createPCPRoutes(deps) {
             if (despesas) data.parametros.despesas = despesas;
             // Novos campos de precificação por estado
             if (req.body.icms_estados) data.parametros.icms_estados = req.body.icms_estados;
-            if (req.body.frete_opcoes) data.parametros.frete_opcoes = req.body.frete_opcoes;
+            if (req.body.frete_opcoes || req.body['frete_opções']) data.parametros.frete_opcoes = req.body.frete_opcoes || req.body['frete_opções'];
             if (req.body.comissao_normal !== undefined) data.parametros.comissao_normal = parseFloat(req.body.comissao_normal);
             if (req.body.comissao_representante !== undefined) data.parametros.comissao_representante = parseFloat(req.body.comissao_representante);
             if (req.body.estado_selecionado !== undefined) data.parametros.estado_selecionado = req.body.estado_selecionado;
@@ -8347,14 +8347,19 @@ module.exports = function createPCPRoutes(deps) {
             if (!Array.isArray(precos) || precos.length === 0) {
                 return res.status(400).json({ success: false, message: 'Nenhum preço informado.' });
             }
+            // Primeiro garantir que a coluna preco_venda tenha precisão suficiente para preços por metro
+            try {
+                await pool.query('ALTER TABLE produtos MODIFY COLUMN preco_venda DECIMAL(15,4) DEFAULT 0');
+            } catch (e) { /* coluna já pode estar com a precisão correta */ }
+
             let atualizados = 0;
             for (const item of precos) {
                 if (!item.codigo || item.preco_venda === undefined) continue;
                 const pv = parseFloat(item.preco_venda);
                 if (isNaN(pv) || pv < 0) continue;
                 const [result] = await pool.query(
-                    'UPDATE produtos SET preco_venda = ? WHERE codigo = ?',
-                    [pv, item.codigo]
+                    'UPDATE produtos SET preco_venda = ? WHERE codigo = ? OR TRIM(codigo) = ?',
+                    [pv, item.codigo, item.codigo.trim()]
                 );
                 atualizados += result.affectedRows;
             }

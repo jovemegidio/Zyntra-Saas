@@ -8302,13 +8302,14 @@ app.put('/api/pcp/etapas/:id/status', authRequired, async (req, res) => {
 // 1. Cabos mais vendidos (ranking por quantidade e valor)
 app.get('/api/pcp/relatorios/cabos-mais-vendidos', authRequired, async (req, res) => {
     try {
-        const { data_inicio, data_fim, limit } = req.query;
-        const maxResults = parseInt(limit) || 20;
+        const data_inicio = req.query.data_inicio || req.query.dataInicio;
+        const data_fim = req.query.data_fim || req.query.dataFim;
+        const maxResults = parseInt(req.query.limit) || 20;
         let whereClause = '';
         let params = [];
 
         if (data_inicio && data_fim) {
-            whereClause = 'WHERE p.data_pedido BETWEEN ? AND ?';
+            whereClause = 'WHERE p.created_at BETWEEN ? AND ?';
             params = [data_inicio, data_fim];
         }
 
@@ -8371,14 +8372,14 @@ app.get('/api/pcp/relatorios/cabos-mais-vendidos', authRequired, async (req, res
         const [ordensProducao] = await db.query(`
             SELECT
                 produto_nome,
-                codigo_produto,
+                codigo,
                 SUM(quantidade) as total_quantidade,
                 SUM(metragem) as total_metragem,
                 COUNT(*) as total_ordens,
                 unidade
             FROM ordens_producao
             ${whereOP}
-            GROUP BY produto_nome, codigo_produto, unidade
+            GROUP BY produto_nome, codigo, unidade
             ORDER BY total_quantidade DESC
             LIMIT ?
         `, [...paramsOP, maxResults]);
@@ -8641,17 +8642,6 @@ app.get('/api/pcp/relatorios/faturamento-mensal', authRequired, async (req, res)
         console.error('[PCP_RELATORIOS] Erro faturamento mensal:', err.message);
         res.status(500).json({ success: false, message: 'Erro ao gerar relatório de faturamento mensal.' });
     }
-});
-
-// Serve static files (after API routes) so API endpoints are not shadowed by static fallback
-app.use(express.static(__dirname, { dotfiles: 'deny', index: false }));
-
-// API JSON 404 handler: make sure any unmatched /api routes return JSON (not HTML)
-app.use((req, res, next) => {
-    if (req.isApi) {
-        return res.status(404).json({ message: 'API endpoint not found' });
-    }
-    next();
 });
 
 // ============================================================
@@ -8929,6 +8919,17 @@ function formatarDuracaoServer(segundos) {
     const s = segundos % 60;
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
+
+// Serve static files (after ALL API routes) so API endpoints are not shadowed by static fallback
+app.use(express.static(__dirname, { dotfiles: 'deny', index: false }));
+
+// API JSON 404 handler: make sure any unmatched /api routes return JSON (not HTML)
+app.use((req, res, next) => {
+    if (req.isApi) {
+        return res.status(404).json({ message: 'API endpoint not found' });
+    }
+    next();
+});
 
 // Error handling centralizado (Sprint 7)
 app.use(errorHandler);

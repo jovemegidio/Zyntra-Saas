@@ -2065,8 +2065,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
     // GET /ligacoes/status
     router.get('/ligacoes/status', authorizeArea('vendas'), async (req, res) => {
-        const status = cdrScraper.getStatus();
-        res.json(status);
+        try {
+            const status = cdrScraper.getStatus();
+            res.json(status);
+        } catch (error) {
+            res.json({ configurado: false, erro: error.message });
+        }
     });
 
     // GET /ligacoes/dispositivos
@@ -2074,7 +2078,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
         try {
             const { data_inicio, data_fim } = req.query;
             const ramais = await cdrScraper.listarRamais(data_inicio, data_fim);
-            res.json(ramais);
+            return res.json(ramais);
         } catch (error) {
             console.error('Erro ao listar ramais CDR:', error.message);
             // Fallback: retornar lista estática de ramais quando scraper falha
@@ -2082,7 +2086,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const fallback = Object.entries(RAMAL_NOMES).map(([id, name]) => ({
                 username: id, name, callerid: `${name} (${id})`, id
             }));
-            res.json(fallback);
+            return res.json(fallback);
         }
     });
 
@@ -2113,7 +2117,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
             });
         } catch (error) {
             console.error('Erro ao buscar CDR:', error.message);
-            res.status(500).json({ error: 'Erro interno no servidor. Tente novamente.' });
+            const hoje = new Date().toISOString().split('T')[0];
+            res.json({
+                total: 0, chamadas: [],
+                periodo: { inicio: req.query.data_inicio || hoje, fim: req.query.data_fim || hoje },
+                erro: error.message
+            });
         }
     });
 
@@ -2139,10 +2148,15 @@ module.exports = function createVendasExtendedRoutes(deps) {
         } catch (error) {
             console.error('Erro ao gerar resumo de ligações:', error.message);
             // Fallback: retornar resumo vazio em vez de 500
+            // NOTE: di/df are scoped to try block — use req.query here
+            const hoje = new Date().toISOString().split('T')[0];
             res.json({
                 total: 0, realizadas: 0, atendidas: 0, nao_atendidas: 0,
                 duracao_total: '00:00:00', por_ramal: [],
-                periodo: { inicio: di, fim: df },
+                periodo: {
+                    inicio: req.query.data_inicio || hoje,
+                    fim: req.query.data_fim || hoje
+                },
                 erro: error.message
             });
         }

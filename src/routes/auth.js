@@ -230,6 +230,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         // CPF LOGIN MODE
         // ========================================
         let isCpfLogin = false;
+        let funcSenha = null; // senha do registro funcionarios, usada como fallback de comparação
         if (cpf && !email) {
             isCpfLogin = true;
             // Strip non-digits
@@ -239,10 +240,10 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             }
             if (isDevMode) console.log('[AUTH/LOGIN] Tentativa de login por CPF:', cpf.substring(0, 3) + '...');
 
-            // Look up email from funcionarios table by CPF
+            // Look up email AND senha from funcionarios table by CPF
             try {
                 const [funcRows] = await safeQuery(
-                    'SELECT email FROM funcionarios WHERE REPLACE(REPLACE(REPLACE(cpf, ".", ""), "-", ""), " ", "") = ? LIMIT 1',
+                    'SELECT email, senha FROM funcionarios WHERE REPLACE(REPLACE(REPLACE(cpf, ".", ""), "-", ""), " ", "") = ? LIMIT 1',
                     [cpf]
                 );
                 if (!funcRows.length) {
@@ -250,6 +251,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                     return res.status(401).json({ message: 'CPF ou senha incorretos.' });
                 }
                 email = funcRows[0].email;
+                funcSenha = funcRows[0].senha || null;
                 if (!email) {
                     return res.status(401).json({ message: 'CPF não possui email vinculado. Contate o RH.' });
                 }
@@ -497,6 +499,32 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             console.error('Erro ao comparar senha:', err.message);
             return res.status(500).json({ message: 'Erro ao verificar credenciais.' });
         }
+        // CPF fallback: se senha em `usuarios` não bater, comparar contra `funcionarios.senha`.
+        // Cobre o caso mais comum: senha trocada via módulo RH que só atualiza funcionarios.
+        if (!valid && isCpfLogin && funcSenha) {
+            const isFuncSenhaBcrypt = /^\$2[aby]\$/.test(String(funcSenha));
+            try {
+                if (isFuncSenhaBcrypt) {
+                    valid = await bcrypt.compare(password, funcSenha);
+                } else {
+                    const pwBuf = Buffer.from(password);
+                    const fbBuf = Buffer.from(funcSenha);
+                    valid = pwBuf.length === fbBuf.length && crypto.timingSafeEqual(pwBuf, fbBuf);
+                }
+                if (valid) {
+                    // Sincronizar: propagar hash do funcionarios → usuarios para próximos logins
+                    try {
+                        await safeQuery('UPDATE usuarios SET senha_hash = ? WHERE id = ?', [funcSenha, user.id]);
+                        console.log(`[AUTH/LOGIN] 🔄 CPF login: senha sincronizada de funcionarios → usuarios para ${email}`);
+                    } catch (syncErr) {
+                        console.error('[AUTH/LOGIN] ⚠️ CPF senha sync failed:', syncErr.message);
+                    }
+                }
+            } catch (fallbackErr) {
+                console.error('[AUTH/LOGIN] ⚠️ CPF senha fallback error:', fallbackErr.message);
+            }
+        }
+
         if (!valid) {
             // ACCOUNT LOCKOUT: registrar tentativa falha
             const lockResult = await recordFailedLogin(email);

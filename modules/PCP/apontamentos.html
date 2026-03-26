@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -66,33 +66,6 @@
         /* Botoes (.btn, .btn-primary, .btn-success, etc.) gerenciados por pcp-components.css */
 
         /* Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-        .stat-icon {
-            width: 56px; height: 56px;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px;
-        }
-        .stat-icon.blue { background: #dbeafe; color: #3b82f6; }
-        .stat-icon.green { background: #dcfce7; color: #22c55e; }
-        .stat-icon.yellow { background: #fef3c7; color: #f59e0b; }
-        .stat-icon.purple { background: #f3e8ff; color: #a855f7; }
-        .stat-value { font-size: 28px; font-weight: 700; }
-        .stat-label { font-size: 13px; color: var(--text-secondary); }
 
         /* Filtros */
         .filters-section {
@@ -352,7 +325,7 @@
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
 </head>
 <body>
     <div class="app-container">
@@ -953,10 +926,6 @@
             margin-bottom: 24px;
             animation: fadeIn 0.3s ease;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
         .contexto-card {
             background: white;
             border-radius: 16px;
@@ -1056,7 +1025,7 @@
             const opcoes = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             document.getElementById('dataHoje').innerHTML = `
                 <i class="fas fa-calendar"></i>
-                ${hoje.toLocaleDateString('pt-BR', opães)}
+                ${hoje.toLocaleDateString('pt-BR', opcoes)}
             `;
         }
 
@@ -1786,6 +1755,5 @@
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
 </body>
 </html>
-
 
 
