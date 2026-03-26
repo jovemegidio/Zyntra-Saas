@@ -4,6 +4,7 @@
  * Inclua este arquivo e a biblioteca xlsx.js nas páginas do financeiro
  * v2.1 - 2026-02-18 - Mapeamento completo de headers
  * v2.2 - 2026-03-26 - Aliases novos templates Zyntra (C. a Pagar, FATURAMENTO, Pagamentos)
+ * v2.3 - 2026-03-26 - Normalização template Pagamentos: data_pagamento→data_vencimento, status auto-pago
  */
 
 // ============================================================
@@ -521,6 +522,23 @@ async function processarArquivoXLSX(file, tipo) {
             }
             
             if (hasData) {
+                // Normalização para template de Pagamentos efetuados (DT. PAGTO como data_vencimento fallback)
+                if (obj.data_pagamento && !obj.data_vencimento) {
+                    obj.data_vencimento = obj.data_pagamento;
+                }
+                // Definir status 'pago' quando observação = PAGO ou quando há data_pagamento
+                if (!obj.status) {
+                    const obs = (obj.observacoes || '').trim().toUpperCase();
+                    if (obs === 'PAGO' || obs.startsWith('PAGO')) {
+                        obj.status = 'pago';
+                    } else if (obj.data_pagamento) {
+                        obj.status = 'pago';
+                    }
+                }
+                // Propagar valor → valor_pagamento quando pago
+                if (obj.data_pagamento && !obj.valor_pagamento && obj.valor) {
+                    obj.valor_pagamento = obj.valor;
+                }
                 dados.push(obj);
             }
         }

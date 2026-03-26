@@ -881,9 +881,10 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             for (let i = 0; i < dados.length; i++) {
                 const row = dados[i];
                 try {
-                    // Validar: precisa ter pelo menos valor E (data_vencimento OU fornecedor)
+                    // Validar: precisa ter pelo menos valor E (data_vencimento OU data_pagamento)
                     const valor = parseValor(row.valor);
-                    const dataVenc = parseDataBR(row.data_vencimento);
+                    // Aceitar data_pagamento como fallback para data_vencimento (template Pagamentos efetuados)
+                    const dataVenc = parseDataBR(row.data_vencimento) || parseDataBR(row.data_pagamento);
                     const descricao = row.descricao || row.fornecedor_nome || row.tipo_documento || 'Importado SGE';
 
                     if (!valor && valor !== 0) {
@@ -964,7 +965,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                         banco_id,
                         row.conta_corrente_nome || null,
                         row.forma_pagamento || null,
-                        row.status || 'pendente',
+                        row.status || (parseDataBR(row.data_pagamento) ? 'pago' : 'pendente'),
                         parseInt(row.parcela_numero) || 1,
                         parseInt(row.total_parcelas) || 1,
                         row.observacoes || null,
@@ -975,7 +976,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                         parseDataBR(row.data_registro),
                         parseDataBR(row.data_previsao),
                         parseDataBR(row.data_pagamento),
-                        parseValor(row.valor_pagamento) || null,
+                        parseValor(row.valor_pagamento) || (parseDataBR(row.data_pagamento) ? valor : null),
                         parseValor(row.juros),
                         parseValor(row.multa),
                         parseValor(row.desconto),
