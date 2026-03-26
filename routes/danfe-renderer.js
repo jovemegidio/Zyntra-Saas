@@ -760,9 +760,10 @@ function renderDanfe(ctx) {
  *
  * @param {object} pedido  - row from `pedidos` JOIN `clientes` JOIN `empresas`
  * @param {Array}  itens   - rows from `pedido_itens`
+ * @param {object} [opts]  - options: { preview: boolean }
  * @returns {object} template context
  */
-function buildDanfeCtx(pedido, itens) {
+function buildDanfeCtx(pedido, itens, opts = {}) {
     const fmtMoney = v =>
         (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtQty = v =>
@@ -778,7 +779,7 @@ function buildDanfeCtx(pedido, itens) {
         return isNaN(dt.getTime()) ? '' : dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     };
 
-    const nfNumero   = pedido.nf || pedido.numero_nf || '';
+    const nfNumero   = pedido.nf || pedido.numero_nf || (opts.preview ? 'PRÉVIA' : '');
     const valorTotal = parseFloat(pedido.valor_total || pedido.valor) || 0;
     const frete      = parseFloat(pedido.frete) || 0;
     const desconto   = parseFloat(pedido.desconto) || 0;
@@ -795,27 +796,47 @@ function buildDanfeCtx(pedido, itens) {
     const [empLgr, empNro] = splitEndereco(pedido.empresa_endereco);
     const [dstLgr, dstNro] = splitEndereco(pedido.cliente_endereco);
 
-    // Generate duplicatas from number of installments
+    // Generate duplicatas from installment condition string (e.g. "28/35/42/49" or plain count)
     const dups = [];
-    const nParcelas = parseInt(pedido.parcelas) || 0;
-    if (nParcelas > 1) {
-        const valorParcela = valorNF / nParcelas;
-        const base = pedido.data_vencimento ? new Date(pedido.data_vencimento) : new Date();
-        for (let i = 0; i < nParcelas; i++) {
-            const venc = new Date(base);
-            venc.setDate(venc.getDate() + i * 30);
+    const condicaoStr = String(pedido.condicao_pagamento || pedido.parcelas || '');
+    // Parse slash-separated days like "28/35/42/49"
+    const diasMatch = condicaoStr.match(/\d+/g);
+    if (diasMatch && diasMatch.length > 1) {
+        // Multiple days = multiple installments with specific due dates
+        const valorParcela = valorNF / diasMatch.length;
+        const base = new Date(pedido.data_faturamento || pedido.created_at || new Date());
+        const baseDay = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+        diasMatch.forEach((dias, i) => {
+            const venc = new Date(baseDay);
+            venc.setDate(venc.getDate() + parseInt(dias));
             dups.push({
                 nDup: String(i + 1).padStart(3, '0'),
                 dVenc: venc.toLocaleDateString('pt-BR'),
                 vDup: fmtMoney(valorParcela)
             });
+        });
+    } else {
+        const nParcelas = parseInt(condicaoStr) || 0;
+        if (nParcelas > 1) {
+            const valorParcela = valorNF / nParcelas;
+            const base = pedido.data_vencimento ? new Date(pedido.data_vencimento) : new Date();
+            for (let i = 0; i < nParcelas; i++) {
+                const venc = new Date(base);
+                venc.setDate(venc.getDate() + i * 30);
+                dups.push({
+                    nDup: String(i + 1).padStart(3, '0'),
+                    dVenc: venc.toLocaleDateString('pt-BR'),
+                    vDup: fmtMoney(valorParcela)
+                });
+            }
         }
     }
 
     return {
-        marcaAguaClasse: '',
-        marcaAguaTexto: '',
-        avisoTopo: '',
+        marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
+        marcaAguaTexto: opts.preview ? '<img src="' + (pedido.emitenteLogoUrl || '/api/empresa/' + (pedido.empresa_id || 1) + '/logo') + '" alt="ALUFORCE">' : '',
+        avisoTopo: opts.preview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
+        _isPreview: opts.preview || false,
         paginaAtual: '1',
         paginaTotal: '1',
         codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
@@ -891,26 +912,26 @@ function buildDanfeCtx(pedido, itens) {
                         vProd: fmtMoney(item.subtotal)
                     },
                     _danfeCstCsosn: item.cst || item.csosn || '',
-                    _danfeBcIcms: fmtMoney(item.bc_icms || 0),
-                    _danfeVIcms: fmtMoney(item.v_icms || 0),
-                    _danfePIcms: item.p_icms ? fmtMoney(item.p_icms) : '',
-                    _danfeVIpi: fmtMoney(item.v_ipi || 0),
-                    _danfePIpi: item.p_ipi ? fmtMoney(item.p_ipi) : ''
+                    _danfeBcIcms: fmtMoney(item.bc_icms || (parseFloat(item.subtotal) || 0)),
+                    _danfeVIcms: fmtMoney(item.icms_value || item.v_icms || 0),
+                    _danfePIcms: item.aliquota_icms ? fmtMoney(item.aliquota_icms) : '',
+                    _danfeVIpi: fmtMoney(item.valor_ipi || item.v_ipi || 0),
+                    _danfePIpi: item.aliquota_ipi ? fmtMoney(item.aliquota_ipi) : ''
                 })),
                 total: {
                     ICMSTot: {
-                        vBC: '0,00',
-                        vICMS: '0,00',
-                        vBCST: '0,00',
-                        vST: '0,00',
-                        vTotTrib: '0,00',
+                        vBC: fmtMoney(pedido.base_calculo_icms || 0),
+                        vICMS: fmtMoney(pedido.total_icms || 0),
+                        vBCST: fmtMoney(pedido.base_calculo_icms_st || 0),
+                        vST: fmtMoney(pedido.total_icms_st || 0),
+                        vTotTrib: fmtMoney(pedido.total_impostos || 0),
                         vProd: fmtMoney(valorTotal),
-                        vFCPSTRet: '0,00',
+                        vFCPSTRet: fmtMoney(pedido.total_fcp || 0),
                         vFrete: fmtMoney(frete),
                         vSeg: fmtMoney(seguro),
                         vDesc: fmtMoney(desconto),
                         vOutro: fmtMoney(outras),
-                        vIPI: '0,00',
+                        vIPI: fmtMoney(pedido.total_ipi || 0),
                         vNF: fmtMoney(valorNF),
                         vII: '0,00'
                     },

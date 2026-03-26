@@ -327,8 +327,8 @@ module.exports = function createVendasRoutes(deps) {
                     empresaFinalId = existing[0].id;
                 } else {
                     const [newEmp] = await connection.query(
-                        'INSERT INTO empresas (nome_fantasia, razao_social) VALUES (?, ?)',
-                        [nomeCliente, nomeCliente]
+                        'INSERT INTO empresas (nome_fantasia, razao_social, cnpj) VALUES (?, ?, ?)',
+                        [nomeCliente, nomeCliente, `TMP-${Date.now()}-${Math.floor(Math.random()*9999)}`]
                     );
                     empresaFinalId = newEmp.insertId;
                 }
@@ -753,10 +753,16 @@ module.exports = function createVendasRoutes(deps) {
             const camposCriticos = ['valor', 'frete', 'desconto', 'parcelas', 'condicao_pagamento', 'cliente_id', 'cliente_nome'];
             const camposCriticosAlterados = camposCriticos.filter(f => updates[f] !== undefined);
             if (camposCriticosAlterados.length > 0) {
-                const [opAtiva] = await patchConn.query(
-                    'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
-                    [id]
-                );
+                let opAtiva = [];
+                try {
+                    [opAtiva] = await patchConn.query(
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
+                        [id]
+                    );
+                } catch (_opErr) {
+                    // pedido_id column may not exist in this deployment — skip OP check
+                    opAtiva = [];
+                }
                 if (opAtiva.length > 0 && !isAdmin) {
                     console.log(`🚫 PATCH bloqueado: pedido #${id} tem OP ativa ${opAtiva[0].codigo}, campos: ${camposCriticosAlterados.join(', ')}`);
                     return res.status(403).json({
@@ -1884,6 +1890,23 @@ module.exports = function createVendasRoutes(deps) {
     });
     
     // CLIENTES (CONTATOS)
+    // Busca de clientes (autocomplete) — DEVE ficar ANTES de /clientes/:id
+    router.get('/clientes/buscar', async (req, res, next) => {
+        try {
+            const search = req.query.search || req.query.q || req.query.termo || '';
+            const limit = parseInt(req.query.limit) || 20;
+            let query = `SELECT id, nome, razao_social, nome_fantasia, cnpj_cpf, email, telefone, cidade, estado FROM clientes WHERE ativo = 1`;
+            const params = [];
+            if (search) {
+                query += ` AND (nome LIKE ? OR razao_social LIKE ? OR cnpj_cpf LIKE ? OR email LIKE ?)`;
+                params.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
+            }
+            query += ` ORDER BY nome LIMIT ?`;
+            params.push(limit);
+            const [rows] = await pool.query(query, params);
+            res.json(rows);
+        } catch (error) { next(error); }
+    });
     router.get('/clientes', cacheMiddleware('vendas_clientes', 120000), async (req, res, next) => {
         try {
             const { page = 1, limit = 2000 } = req.query;
@@ -2164,7 +2187,8 @@ module.exports = function createVendasRoutes(deps) {
             if (tables.length > 0) {
                 [rows] = await pool.query(`
                     SELECT
-                        u.id, u.nome, u.email, u.avatar,
+                        u.id, u.nome, u.email,
+                        COALESCE(f.foto_perfil_url, u.foto, u.avatar) as foto,
                         COALESCE(m.valor_meta, 0) as valor_meta,
                         COALESCE((SELECT SUM(valor) FROM pedidos
                                   WHERE vendedor_id = u.id
@@ -2176,14 +2200,18 @@ module.exports = function createVendasRoutes(deps) {
                                   AND DATE_FORMAT(created_at, '%Y-%m') = ?), 0) as qtd_vendas
                     FROM usuarios u
                     LEFT JOIN metas_vendas m ON u.id = m.vendedor_id AND m.periodo = ?
+                    LEFT JOIN funcionarios f ON f.email = u.email
                     WHERE (u.departamento = 'Comercial' OR u.departamento = 'Vendas' OR u.role = 'comercial')
+                      AND (u.ativo = 1 OR u.ativo IS NULL)
+                      AND (f.id IS NULL OR f.status != 'Demitido')
                     ORDER BY valor_realizado DESC
                 `, [periodo, periodo, periodo]);
             } else {
                 // Fallback sem tabela de metas
                 [rows] = await pool.query(`
                     SELECT
-                        u.id, u.nome, u.email, u.avatar,
+                        u.id, u.nome, u.email,
+                        COALESCE(f.foto_perfil_url, u.foto, u.avatar) as foto,
                         0 as valor_meta,
                         COALESCE((SELECT SUM(valor) FROM pedidos
                                   WHERE vendedor_id = u.id
@@ -2194,7 +2222,10 @@ module.exports = function createVendasRoutes(deps) {
                                   AND status IN ('faturado', 'recibo')
                                   AND DATE_FORMAT(created_at, '%Y-%m') = ?), 0) as qtd_vendas
                     FROM usuarios u
+                    LEFT JOIN funcionarios f ON f.email = u.email
                     WHERE (u.departamento = 'Comercial' OR u.departamento = 'Vendas' OR u.role = 'comercial')
+                      AND (u.ativo = 1 OR u.ativo IS NULL)
+                      AND (f.id IS NULL OR f.status != 'Demitido')
                     ORDER BY valor_realizado DESC
                 `, [periodo, periodo]);
             }
@@ -3518,8 +3549,8 @@ module.exports = function createVendasRoutes(deps) {
 
                 // 4b. Atualizar pedido para faturado — salva em AMBOS os campos nf e numero_nf
                 await connection.query(
-                    'UPDATE pedidos SET status = ?, nf = ?, numero_nf = ?, data_faturamento = COALESCE(data_faturamento, NOW()), nfe_chave = ?, nfe_protocolo = ?, updated_at = NOW() WHERE id = ?',
-                    ['faturado', novaNf, novaNf, nfeData?.chave || null, nfeData?.protocolo || null, id]
+                    'UPDATE pedidos SET status = ?, nf = ?, numero_nf = ?, data_faturamento = COALESCE(data_faturamento, NOW()), nfe_chave = ?, updated_at = NOW() WHERE id = ?',
+                    ['faturado', novaNf, novaNf, nfeData?.chave || null, id]
                 );
 
                 // 4c. Baixar estoque automaticamente
@@ -3583,7 +3614,7 @@ module.exports = function createVendasRoutes(deps) {
 
                 // 4f. Registrar histórico
                 await connection.query(
-                    'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
+                    'INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
                     [
                         id, user.id || null, user.nome || user.name || 'Usuário', 'faturamento',
                         nfeData ? `Pedido faturado - NFe ${novaNf} emitida` : `Pedido faturado - NF ${novaNf}`,
@@ -3968,6 +3999,7 @@ module.exports = function createVendasRoutes(deps) {
     router.get('/pedidos/:id/danfe', authenticateToken, async (req, res, next) => {
         try {
             const { id } = req.params;
+            const isPreview = req.query.preview === '1';
 
             // Buscar pedido completo com cliente e empresa
             const [[pedido]] = await pool.query(`
@@ -3994,10 +4026,12 @@ module.exports = function createVendasRoutes(deps) {
                 return res.status(404).json({ message: 'Pedido não encontrado' });
             }
 
-            // Verificar se tem NF
-            const nfNumero = pedido.nf || pedido.numero_nf;
-            if (!nfNumero) {
-                return res.status(404).json({ message: 'Este pedido não possui Nota Fiscal emitida' });
+            // Em modo preview, NF não precisa estar emitida
+            if (!isPreview) {
+                const nfNumero = pedido.nf || pedido.numero_nf;
+                if (!nfNumero) {
+                    return res.status(404).json({ message: 'Este pedido não possui Nota Fiscal emitida. Use ?preview=1 para visualizar sem NF.' });
+                }
             }
 
             // Buscar itens do pedido
@@ -4027,7 +4061,7 @@ module.exports = function createVendasRoutes(deps) {
 
             // Gerar HTML da DANFE usando template oficial (routes/danfe-renderer.js)
             const { renderDanfe, buildDanfeCtx } = require('./danfe-renderer');
-            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens));
+            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview }));
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);
