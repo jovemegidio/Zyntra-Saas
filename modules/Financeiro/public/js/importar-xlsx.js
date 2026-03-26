@@ -3,6 +3,7 @@
  * Sistema de importação de planilhas Excel para o módulo Financeiro
  * Inclua este arquivo e a biblioteca xlsx.js nas páginas do financeiro
  * v2.1 - 2026-02-18 - Mapeamento completo de headers
+ * v2.2 - 2026-03-26 - Aliases novos templates Zyntra (C. a Pagar, FATURAMENTO, Pagamentos)
  */
 
 // ============================================================
@@ -71,6 +72,18 @@ const HEADER_MAP_CONTAS_PAGAR = {
     'CST do COFINS': 'cst_cofins',
     'Base de cálculo - COFINS': 'base_calculo_cofins',
     'Alíquota do COFINS': 'aliquota_cofins',
+    // Headers novos: Template Zyntra "C. a Pagar" (Row 7)
+    'EMPRESA': 'empresa_nome',
+    'DT LANÇAMENTO': 'data_emissao',
+    'DT. VCTO': 'data_vencimento',
+    'CONTA FINANCEIRA': 'categoria_nome',
+    'FAVORECIDO': 'fornecedor_nome',
+    'DESCRIÇÃO': 'descricao',
+    // Headers novos: Template Zyntra "Pagamentos" (Row 5)
+    'DT. PAGTO': 'data_pagamento',
+    'HISTORICO': 'descricao',
+    'CONTA BANCÁRIA': 'conta_corrente_nome',
+    'OBSERVAÇÃO': 'observacoes',
     // Headers internos simples (fallback)
     'Descrição': 'descricao',
     'CNPJ/CPF': 'cnpj_cpf',
@@ -124,6 +137,24 @@ const HEADER_MAP_CONTAS_RECEBER = {
     'Valor INSS': 'valor_inss',
     'Reter INSS': 'reter_inss',
     'Departamento': 'departamento',
+    // Headers novos: Template ALUFORCE "FATURAMENTO" (Row 7)
+    'EMPRESA': 'empresa_nome',
+    'EMISSÃO': 'data_emissao',
+    'TIPO': 'tipo_documento',
+    'NFe': 'nota_fiscal',
+    'P': 'parcela_numero',
+    'CLIENTE': 'cliente_nome',
+    'CNPJ': 'cnpj_cpf',
+    'VALOR P': 'valor',
+    'VCTO': 'data_vencimento',
+    'SITUAÇÃO': 'situacao',
+    'PORTADOR': 'portador',
+    'STATUS': 'status',
+    'DIAS': 'dias_atraso',
+    'POSIÇÃO': 'posicao',
+    'RECOMPRADO': 'recomprado',
+    'CARTORIO': 'cartorio',
+    'OBSERVAÇÃO': 'observacoes',
     // Headers internos simples (fallback)
     'Descrição': 'descricao',
     'Valor': 'valor',
@@ -175,7 +206,7 @@ const HEADER_MAP_FLUXO = {
 const IMPORT_CONFIG = {
     'contas-pagar': {
         endpoint: '/api/financeiro/importar/contas-pagar',
-        template: '/templates/Template - Contas a Pagar.xlsx',
+        template: '/Financeiro/templates/template_contas_pagar.xlsx',
         headerMap: HEADER_MAP_CONTAS_PAGAR
     },
     'contas-receber': {
@@ -672,4 +703,4 @@ importStyles.textContent = `
 `;
 document.head.appendChild(importStyles);
 
-console.log('✅ Módulo de Importação XLSX v2.0 carregado (compatível SGE/Omie)');
+console.log('✅ Módulo de Importação XLSX v2.2 carregado (compatível SGE/Omie + Zyntra)');
