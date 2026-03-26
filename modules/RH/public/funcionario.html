@@ -517,7 +517,7 @@
                 <a href="pages/meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="pages/minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="pages/minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="pages/enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
                 <a href="pages/autoavaliacao.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -552,9 +552,9 @@
                         <i class="fas fa-bell"></i>
                     </button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -569,7 +569,7 @@
                     <div class="welcome-content">
                         <div class="welcome-info">
                             <span class="welcome-greeting">Boas-vindas</span>
-                            <h2><span id="welcome-name">Usurio</span></h2>
+                            <h2><span id="welcome-name">Usuário</span></h2>
                             <p>Portal do Funcionrio  Acesso ao seu espao de trabalho</p>
                         </div>
                         <div class="welcome-right">
@@ -625,8 +625,8 @@
                         <div class="action-icon blue">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <h3>Solicitaes</h3>
-                        <p>Fazer solicitaes</p>
+                        <h3>Solicitações</h3>
+                        <p>Fazer Solicitações</p>
                     </a>
                 </div>
 
@@ -734,7 +734,7 @@
                                     </li>
                                     <li class="info-item">
                                         <a href="pages/calendario-rh.html" style="color: var(--primary-pink); text-decoration: none;">
-                                            <i class="fas fa-calendar"></i> Calendrio RH
+                                            <i class="fas fa-calendar"></i> Calendário RH
                                         </a>
                                     </li>
                                 </ul>
@@ -748,7 +748,7 @@
 
     <script>
         // ========================================
-        // CARREGAR DADOS DO USURIO LOGADO
+        // CARREGAR DADOS DO Usuário LOGADO
         // ========================================
         const avatarNameMap = {
             'clemerson': '/avatars/Clemerson.webp',
@@ -783,7 +783,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de autenticao com o token
+        // Helper: Obtm headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -824,8 +824,8 @@
                     }
 
                     // Usar apelido se disponvel, seno primeiro nome
-                    const userName = user.apelido || user.nome || 'Usurio';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const userName = user.apelido || user.nome || 'Usuário';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     // Verificar mltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;
@@ -889,7 +889,7 @@
                     if (user.email) {
                         document.getElementById('info-email').textContent = user.email;
 
-                        // Mostrar boto admin apenas para usurios especficos
+                        // Mostrar boto admin apenas para Usuários ESPECÍFICOS
                         const adminEmails = [
                             'rh@aluforce.ind.br',
                             'ti@aluforce.ind.br',
@@ -916,7 +916,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 
@@ -938,7 +938,7 @@
         // ========================================
         // CARREGAR LTIMO HOLERITE DINMICO
         // ========================================
-        const mesesNome = ['', 'Janeiro', 'Fevereiro', 'Maro', 'Abril', 'Maio', 'Junho',
+        const mesesNome = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                            'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         function formatarMoeda(valor) {

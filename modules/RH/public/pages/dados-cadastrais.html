@@ -160,7 +160,7 @@
 
         .status-ativo { background: #dcfce7; color: #166534; }
         .status-inativo { background: #fee2e2; color: #991b1b; }
-        .status-férias, .status-frias { background: #fef3c7; color: #92400e; }
+        .status-férias, .status-Férias { background: #fef3c7; color: #92400e; }
         .status-afastado { background: #e0e7ff; color: #3730a3; }
 
         /* Bank Details Box */
@@ -553,7 +553,7 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn active" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
                 <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -585,9 +585,9 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -1247,8 +1247,8 @@
                 const user = await meResponse.json();
 
                 // Usar apelido se disponvel, seno primeiro nome
-                const userName = user.apelido || user.nome_completo || user.nome || 'Usurio';
-                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                const userName = user.apelido || user.nome_completo || user.nome || 'Usuário';
+                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                 const userNameEl = document.getElementById('user-name');
                 if (userNameEl) userNameEl.textContent = primeiroNome;
 
@@ -1359,7 +1359,7 @@
 
         function preencherDadosBasicos(user) {
             const nomeEl = document.getElementById('funcionário-nome-completo');
-            if (nomeEl) nomeEl.textContent = user.nome || user.apelido || 'Usurio';
+            if (nomeEl) nomeEl.textContent = user.nome || user.apelido || 'Usuário';
 
             setValor('dado-nome', user.nome || user.apelido);
             setValor('dado-email', user.email);

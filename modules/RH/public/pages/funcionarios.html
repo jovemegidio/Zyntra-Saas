@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="../css/rh-pages.css?v=1.0">
 
     <style>
-        /* ===== ESTILOS ESPECFICOS  FUNCIONRIOS ===== */
+        /* ===== ESTILOS ESPECÍFICOS  FUNCIONÁRIOS ===== */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #ffffff; }
@@ -915,7 +915,7 @@
         }
 
 
-        /* Lista de Solicitaes */
+        /* Lista de Solicitações */
         .solicitação-item {
             display: flex;
             align-items: center;
@@ -1398,13 +1398,13 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn active" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
-                <a href="calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -1429,9 +1429,9 @@
                 </div>
                 <div class="header-right">
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -1442,7 +1442,7 @@
                 <div class="page-header">
                     <div>
                         <h1 class="page-title"><i class="fas fa-users"></i> Funcionários</h1>
-                        <p class="page-subtitle">Gesto de colaboradores da empresa</p>
+                        <p class="page-subtitle">Gestão de colaboradores da empresa</p>
                     </div>
                 </div>
 
@@ -1468,7 +1468,7 @@
                                 <option value="todos">Todos (incluir inativos/demitidos)</option>
                                 <option value="ativo">Ativo</option>
                                 <option value="inativo">Inativo</option>
-                                <option value="férias">Frias</option>
+                                <option value="férias">Férias</option>
                                 <option value="afastado">Afastado</option>
                                 <option value="demitido">Demitido</option>
                             </select>
@@ -1561,7 +1561,7 @@
                         <i class="fas fa-user"></i> Dados
                     </button>
                     <button type="button" class="view-tab" data-tab="solicitações" onclick="abrirAbaVisualizacao('solicitações')">
-                        <i class="fas fa-paper-plane"></i> Solicitaes <span id="countSolicitacoes" class="tab-badge" style="display: none;">0</span>
+                        <i class="fas fa-paper-plane"></i> Solicitações <span id="countSolicitacoes" class="tab-badge" style="display: none;">0</span>
                     </button>
                     <button type="button" class="view-tab" data-tab="atestados" onclick="abrirAbaVisualizacao('atestados')">
                         <i class="fas fa-file-medical"></i> Atestados <span id="countAtestados" class="tab-badge" style="display: none;">0</span>
@@ -1684,12 +1684,12 @@
                         </div>
                     </div>
 
-                    <!-- Aba Solicitaes -->
+                    <!-- Aba Solicitações -->
                     <div id="tab-solicitacoes" class="view-tab-panel" style="display: none;">
                         <div id="solicitaçõesContainer">
                             <div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;">
                                 <i class="fas fa-spinner fa-spin fa-2x"></i>
-                                <p style="margin-top: 12px;">Carregando solicitaes...</p>
+                                <p style="margin-top: 12px;">Carregando Solicitações...</p>
                             </div>
                         </div>
                     </div>
@@ -1926,7 +1926,7 @@
                                 <select id="editStatus" class="form-input" onchange="toggleCamposDemissao()">
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo">Inativo</option>
-                                    <option value="Frias">Frias</option>
+                                    <option value="Férias">Férias</option>
                                     <option value="Afastado">Afastado</option>
                                     <option value="Demitido">Demitido</option>
                                 </select>
@@ -2774,7 +2774,7 @@
             });
         }
 
-        // ==== HELPER: OBTER TOKEN DE AUTENTICAO ====
+        // ==== HELPER: OBTER TOKEN DE Autenticação ====
         function getAuthToken() {
             // httpOnly cookie handles auth - token not needed in JS
             return null;
@@ -3023,7 +3023,7 @@
             showToast('success', 'Filtros Limpos', 'Exibindo apenas funcionários ativos', 2000);
         }
 
-        // ==== CARREGAR USURIO LOGADO ====
+        // ==== CARREGAR Usuário LOGADO ====
         async function carregarUsuarioLogado() {
             try {
                 const response = await fetch('/api/me', {
@@ -3044,8 +3044,8 @@
                     }
 
                     // Usar apelido se disponvel, seno primeiro nome
-                    const userName = user.apelido || user.nome || 'Usurio';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const userName = user.apelido || user.nome || 'Usuário';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : getAvatarFromEmail(user.email, userName);
                     const userNameEl = document.getElementById('user-name');
                     if (userNameEl) userNameEl.textContent = primeiroNome;
@@ -3054,10 +3054,10 @@
                     if (userAvatar && userPhotoEl) { userPhotoEl.src = userAvatar; userPhotoEl.classList.add('visible'); userPhotoEl.style.display = 'block'; if (userInitialEl) userInitialEl.style.display = 'none'; }
                     else if (userInitialEl) { userInitialEl.textContent = userName.charAt(0).toUpperCase(); userInitialEl.style.display = 'flex'; if (userPhotoEl) userPhotoEl.style.display = 'none'; }
                 }
-            } catch (error) { console.error('Erro ao carregar usurio:', error); }
+            } catch (error) { console.error('Erro ao carregar Usuário:', error); }
         }
 
-        // ==== CARREGAR E RENDERIZAR FUNCIONRIOS ====
+        // ==== CARREGAR E RENDERIZAR FUNCIONÁRIOS ====
         async function carregarFuncionarios() {
             try {
                 const response = await fetch('/api/rh/funcionarios', {
@@ -3095,7 +3095,7 @@
                             );
                         }
 
-                        // Filtrar por status: por padro mostrar apenas Ativos (ocultar Demitidos, Inativos, Afastados, Frias)
+                        // Filtrar por status: por padro mostrar apenas Ativos (ocultar Demitidos, Inativos, Afastados, Férias)
                         if (!filtroStatus || filtroStatus === '' || filtroStatus === 'apenas-ativos') {
                             funcionáriosExibir = funcionáriosExibir.filter(f => {
                                 const status = (f.status || 'ativo').toLowerCase();
@@ -3142,7 +3142,7 @@
                 switch(status) {
                     case 'ativo': statusLabel = 'Ativo'; statusClass = 'active'; break;
                     case 'inativo': statusLabel = 'Inativo'; statusClass = 'inactive'; break;
-                    case 'frias': case 'férias': statusLabel = 'Frias'; statusClass = 'pending'; break;
+                    case 'Férias': case 'férias': statusLabel = 'Férias'; statusClass = 'pending'; break;
                     case 'afastado': statusLabel = 'Afastado'; statusClass = 'pending'; break;
                     case 'demitido': statusLabel = 'Demitido'; statusClass = 'inactive'; break;
                     default: statusLabel = f.status || 'Ativo'; statusClass = 'active';
@@ -3333,7 +3333,7 @@
                 // Resetar para aba de dados
                 abrirAbaVisualizacao('dados');
 
-                // Carregar solicitaes e atestados
+                // Carregar Solicitações e atestados
                 carregarSolicitacoesFuncionário(id);
                 carregarAtestadosFuncionario(id);
 
@@ -3386,10 +3386,10 @@
             }
         }
 
-        // ==== SOLICITAES ====
+        // ==== Solicitações ====
         async function carregarSolicitacoesFuncionario(funcionarioId) {
             const container = document.getElementById('solicitaçõesContainer');
-            container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando solicitaes...</p></div>';
+            container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando Solicitações...</p></div>';
 
             try {
                 const response = await fetch(`/api/rh/funcionarios/${funcionarioId}/solicitacoes`, {
@@ -3429,7 +3429,7 @@
                     let iconeClass = 'outros';
                     let icone = 'fa-file-alt';
 
-                    if (tipo.includes('frias') || tipo.includes('férias')) {
+                    if (tipo.includes('Férias') || tipo.includes('férias')) {
                         iconeClass = 'férias'; icone = 'fa-umbrella-beach';
                     } else if (tipo.includes('hora') || tipo.includes('extra')) {
                         iconeClass = 'horas'; icone = 'fa-clock';
@@ -3473,7 +3473,7 @@
                 }).join('');
 
             } catch (error) {
-                console.error('Erro ao carregar solicitaes:', error);
+                console.error('Erro ao carregar Solicitações:', error);
                 container.innerHTML = `
                     <div class="empty-state">
                         <i class="fas fa-paper-plane"></i>
@@ -4250,7 +4250,7 @@
             } else {
                 camposDemissao.style.display = 'none';
                 // Limpar campos apenas quando muda DE demitido PARA outro status
-                // Mas manter os valores se o usurio quiser reverter
+                // Mas manter os valores se o Usuário quiser reverter
             }
         }
 
@@ -4695,7 +4695,7 @@
                                     userData.foto_perfil_url = fotoResult.foto_url;
                                     localStorage.setItem('userData', JSON.stringify(userData));
                                     window.dispatchEvent(new CustomEvent('avatar-updated', { detail: { avatarUrl: fotoResult.foto_url } }));
-                                    console.log('[Funcionários] ? Avatar do usurio logado atualizado:', fotoResult.foto_url);
+                                    console.log('[Funcionários] ? Avatar do Usuário logado atualizado:', fotoResult.foto_url);
                                 }
                             } catch(syncErr) { console.error('Erro ao sincronizar avatar:', syncErr); }
                         }
@@ -4824,7 +4824,7 @@
             }
         }
 
-        // ==== IMPORTAR FUNCIONRIOS ====
+        // ==== IMPORTAR FUNCIONÁRIOS ====
         let arquivoImportacao = null;
 
         function abrirModalImportar() {

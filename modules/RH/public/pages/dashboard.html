@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
-    <!-- DNS Prefetch e Preconnect para carregamento mais rpido -->
+    <!-- DNS Prefetch e Preconnect para carregamento mais rápido -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -170,13 +170,13 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn active" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
-                <a href="calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -202,7 +202,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <button class="header-btn" title="Notificaes"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span>Ol, <strong id="user-name">Usurio</strong></span>
+                        <span>Ol, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar"><span id="user-initials">U</span></div>
                     </div>
                 </div>
@@ -258,7 +258,7 @@
                                 <i class="fas fa-file-alt"></i>
                             </div>
                             <div class="activity-content">
-                                <p><strong>Relatrio gerado</strong> - Folha de Pagamento</p>
+                                <p><strong>Relatório gerado</strong> - Folha de Pagamento</p>
                                 <small>H 4 horas</small>
                             </div>
                         </div>
@@ -582,7 +582,7 @@
                         <div class="form-section">
                             <h3><i class="fas fa-cog"></i> Configuraes Gerais</h3>
                             <div class="form-group required">
-                                <label for="competencia">Competncia (Ms/Ano)</label>
+                                <label for="competencia">Competência (Ms/Ano)</label>
                                 <input type="month" id="competencia" name="competencia" required>
                             </div>
                             <div class="form-group required">
@@ -690,7 +690,7 @@
                                 <textarea id="mensagem_email" name="mensagem_email" rows="4">
 Prezado(a) colaborador(a),
 
-Segue em anexo seu holerite referente  competncia [COMPETENCIA].
+Segue em anexo seu holerite referente  Competência [COMPETENCIA].
 
 Atnciosamente,
 Equipe de Recursos Humanos
@@ -792,7 +792,7 @@ Equipe de Recursos Humanos
             }
         });
 
-        // Definir competncia atual (ms anterior)
+        // Definir Competência atual (ms anterior)
         function definirCompetenciaAtual() {
             const hoje = new Date();
             const mesAnterior = new Date(hoje.getFullYear(), hoje.getMonth() - 1, 1);
@@ -874,7 +874,7 @@ Equipe de Recursos Humanos
                 document.getElementById('preview_calculos').innerHTML = `
                     <p style="color: #6b7280; text-align: center; padding: 20px;">
                         <i class="fas fa-info-circle"></i>
-                        Preencha a competncia e dias trabalhados para ver o preview
+                        Preencha a Competência e dias trabalhados para ver o preview
                     </p>
                 `;
                 return;
@@ -1164,7 +1164,7 @@ Equipe de Recursos Humanos
                 return;
             }
 
-            // Validar filtros especficos
+            // Validar filtros ESPECÍFICOS
             if (tipoGeracao === 'departamento' && !document.getElementById('filtro_departamento').value) {
                 showToast('Por favor, selecione um departamento.', 'warning');
                 return;
@@ -1245,8 +1245,8 @@ Equipe de Recursos Humanos
     <!-- Script de correo dos nmeros -->
     <script src="../dashboard-numbers-script.js"></script>
 
-<!-- Sistema de Chat e Suporte (widgets condicionais por usurio) -->
-<!-- ti@aluforce.ind.br = Central de Suporte | Outros usurios = Chat normal -->
+<!-- Sistema de Chat e Suporte (widgets condicionais por Usuário) -->
+<!-- ti@aluforce.ind.br = Central de Suporte | Outros Usuários = Chat normal -->
     <!-- Sistema de Monitoramento de Conexo -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>

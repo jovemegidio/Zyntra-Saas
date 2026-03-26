@@ -430,6 +430,7 @@ function fecharModal(modalId) {
     if (modal) {
         modal.classList.remove('active');
         document.body.style.overflow = '';
+        modal.querySelector('form')?.reset();
     }
 }
 
@@ -530,8 +531,10 @@ function renderizarTabelaItens(itens) {
     `).join('');
 }
 
+let _salvandoPedido = false;
 async function salvarPedido() {
-    if (!pedidoAtual) return;
+    if (!pedidoAtual || _salvandoPedido) return;
+    _salvandoPedido = true;
 
     const form = document.querySelector('#modalEditarPedido');
     const dados = {
@@ -553,6 +556,8 @@ async function salvarPedido() {
     } catch (error) {
         console.error('Erro ao salvar pedido:', error);
         mostrarNotificacao('Erro ao salvar pedido', 'error');
+    } finally {
+        _salvandoPedido = false;
     }
 }
 

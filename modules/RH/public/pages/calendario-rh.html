@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Calendrio RH</title>
+    <title>Aluforce: Calendário RH</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
     
     <style>
-        /* === CALENDRIO RH - CSS ESPECFICO === */
+        /* === Calendário RH - CSS ESPECFICO === */
 
         /* CONTENT AREA */
         .content-area {
@@ -569,13 +569,13 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
-                <a href="calendario-rh.html" class="sidebar-btn active" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn active" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -597,15 +597,15 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Calendrio RH</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Calendário RH</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -618,7 +618,7 @@
                     <div>
                         <h1 class="page-title">
                             <i class="fas fa-calendar-alt"></i>
-                            Calendrio RH
+                            Calendário RH
                         </h1>
                     </div>
                     <div style="display: flex; gap: 12px;">
@@ -634,7 +634,7 @@
                 </div>
 
                 <div class="calendar-container">
-                    <!-- Calendrio Principal -->
+                    <!-- Calendário Principal -->
                     <div class="calendar-card">
                         <div class="calendar-header">
                             <div class="calendar-nav">
@@ -649,7 +649,7 @@
                             <div class="calendar-filters">
                                 <button class="filter-btn active" data-filter="todos">Todos</button>
                                 <button class="filter-btn" data-filter="feriado">Feriados</button>
-                                <button class="filter-btn" data-filter="férias">Frias</button>
+                                <button class="filter-btn" data-filter="férias">Férias</button>
                                 <button class="filter-btn" data-filter="evento">Eventos</button>
                             </div>
                         </div>
@@ -707,7 +707,7 @@
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-color" style="background: #3b82f6;"></div>
-                                    <span>Frias</span>
+                                    <span>Férias</span>
                                 </div>
                                 <div class="legend-item">
                                     <div class="legend-color" style="background: #6366f1;"></div>
@@ -786,7 +786,7 @@
                         <select class="form-select" id="evento-tipo" required>
                             <option value="evento">Evento</option>
                             <option value="feriado">Feriado</option>
-                            <option value="férias">Frias</option>
+                            <option value="férias">Férias</option>
                             <option value="treinamento">Treinamento</option>
                             <option value="reuniao">Reunio</option>
                             <option value="aniversario">Aniversrio</option>
@@ -833,7 +833,7 @@
         let isAdmin = false;
         let _navVersion = 0; // controle de race condition na navegao
 
-        const meses = ['Janeiro', 'Fevereiro', 'Maro', 'Abril', 'Maio', 'Junho', 
+        const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         // Mapa de avatares
@@ -870,7 +870,7 @@
             return null;
         }
 
-        // Carregamento do usurio
+        // Carregamento do Usuário
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', {
@@ -886,7 +886,7 @@
                     else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
                     document.getElementById('greeting-text').textContent = greeting;
                     
-                    const nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     document.getElementById('user-name').textContent = nome;
                     
                     // Buscar avatar corretamente
@@ -917,7 +917,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 
@@ -934,7 +934,7 @@
                 
                 // Fazer todas as requisições em paralelo para performance
                 const [respCalendario, respAniv, respFer] = await Promise.allSettled([
-                    // 1. Eventos do calendrio (tabela rh_calendário)
+                    // 1. Eventos do Calendário (tabela rh_calendário)
                     fetch(`/api/rh/calendario?mes=${mesBusca + 1}&ano=${anoBusca}`, {
                         credentials: 'include'
                     }),
@@ -948,10 +948,10 @@
                     })
                 ]);
                 
-                // Se o usurio j navegou para outro ms, descartar resultado
+                // Se o Usuário j navegou para outro ms, descartar resultado
                 if (myVersion !== _navVersion) return;
                 
-                // Processar eventos do calendrio
+                // Processar eventos do Calendário
                 if (respCalendario.status === 'fulfilled' && respCalendario.value.ok) {
                     try {
                         const data = await respCalendario.value.json();
@@ -960,7 +960,7 @@
                             data: e.data_inicio ? e.data_inicio.split('T')[0] : null
                         }));
                         todosEventos = [...todosEventos, ...eventosCalendario];
-                    } catch (e) { console.log('?? Erro parsing eventos calendrio:', e.message); }
+                    } catch (e) { console.log('?? Erro parsing eventos Calendário:', e.message); }
                 }
                 
                 // Processar aniversariantes
@@ -1024,7 +1024,7 @@
             }
         }
 
-        // Renderizar calendrio principal
+        // Renderizar Calendário principal
         function renderizarCalendario() {
             const container = document.getElementById('calendar-days');
             container.innerHTML = '';
@@ -1111,7 +1111,7 @@
             return div;
         }
 
-        // Mini calendrio
+        // Mini Calendário
         function renderizarMiniCalendario() {
             const container = document.getElementById('mini-calendar');
             container.innerHTML = '';
@@ -1210,7 +1210,7 @@
         function formatarTipo(tipo) {
             const tipos = {
                 feriado: 'Feriado',
-                férias: 'Frias',
+                férias: 'Férias',
                 treinamento: 'Treinamento',
                 reuniao: 'Reunio',
                 evento: 'Evento',
@@ -1235,7 +1235,7 @@
             eventos = [];
             renderizarCalendario();
             renderizarProximosEventos();
-            // Sincronizar mini calendrio
+            // Sincronizar mini Calendário
             miniMonth = currentMonth;
             miniYear = currentYear;
             renderizarMiniCalendario();

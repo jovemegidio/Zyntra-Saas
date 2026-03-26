@@ -10,7 +10,7 @@
     <meta http-equiv="Expires" content="0">
     <title>Zyntra: Meus Dados Pessoais</title>
     
-    <!-- Sistema de Autenticao Unificado - DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     
     <!-- Favicon -->
     
@@ -19,7 +19,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     
-    <!-- Estilos especficos -->
+    <!-- Estilos ESPECÍFICOS -->
     <style>
         /* Variables CSS personalizadas para RH */
         :root {
@@ -392,14 +392,14 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionrios"><i class="fas fa-users"></i></a>
-                <a href="gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/ferias.html" class="sidebar-btn" title="Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="pages/ferias.html" class="sidebar-btn" title="Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
@@ -424,9 +424,9 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -508,11 +508,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Carregar dados do usurio
+            // Carregar dados do Usuário
             carregarDadosUsuario();
         });
 
-        // Helper: Obtm headers de autenticao com o token
+        // Helper: Obtm headers de Autenticação com o token
         function getAuthHeaders() {
             return { 'Content-Type': 'application/json' }; /* Auth via httpOnly cookie */
         }
@@ -524,7 +524,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log('Dados do usurio:', data);
+                console.log('Dados do Usuário:', data);
                 const greetingEl = document.getElementById('greeting-text');
                 const userNameEl = document.getElementById('user-name');
                 const userInitialEl = document.getElementById('user-initial');
@@ -547,7 +547,7 @@
             .catch(error => {
                 console.error('Erro ao carregar dados:', error);
                 const userNameEl = document.getElementById('user-name');
-                if (userNameEl) userNameEl.textContent = 'Usurio';
+                if (userNameEl) userNameEl.textContent = 'Usuário';
             });
         }
 
@@ -557,13 +557,13 @@
         }
 
         function toggleUserMenu() {
-            // Implementar menu do usurio se necessrio
-            console.log('Menu do usurio clicado');
+            // Implementar menu do Usuário se necessrio
+            console.log('Menu do Usuário clicado');
         }
     </script>
 
-<!-- Sistema de Chat e Suporte (widgets condicionais por usurio) -->
-<!-- ti@aluforce.ind.br = Central de Suporte | Outros usurios = Chat normal -->
+<!-- Sistema de Chat e Suporte (widgets condicionais por Usuário) -->
+<!-- ti@aluforce.ind.br = Central de Suporte | Outros Usuários = Chat normal -->
     <!-- Sistema de Monitoramento de Conexo -->
     <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
     <script src="/js/popup-confirmacao.js" defer></script>

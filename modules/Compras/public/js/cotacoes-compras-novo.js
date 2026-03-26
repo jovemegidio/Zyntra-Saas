@@ -6,6 +6,14 @@
 (function() {
     'use strict';
 
+    // Sanitização XSS
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(value);
+        return div.innerHTML;
+    }
+
     let container;
     let cotacoes = [];
     let filtroStatus = 'todos';
@@ -109,8 +117,8 @@
                     <tbody>
                         ${cotacoesFiltradas.map(c => `
                             <tr>
-                                <td><strong>${c.numero}</strong></td>
-                                <td>${c.material}</td>
+                                <td><strong>${escapeHtml(c.numero)}</strong></td>
+                                <td>${escapeHtml(c.material)}</td>
                                 <td>${c.quantidade} ${c.unidade}</td>
                                 <td><span class="badge badge-info">${c.fornecedores} fornecedores</span></td>
                                 <td><strong class="text-success">${formatCurrency(c.melhorOferta)}/${c.unidade}</strong></td>

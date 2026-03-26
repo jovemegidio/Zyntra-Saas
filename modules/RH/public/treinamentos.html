@@ -8,9 +8,9 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Gesto de Treinamentos</title>
+    <title>Zyntra: Gestão de Treinamentos</title>
     
-    <!-- Sistema de Autenticao Unificado - DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <!-- Mobile Enterprise Design System -->
@@ -262,13 +262,13 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionrios"><i class="fas fa-users"></i></a>
-                <a href="gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/ferias.html" class="sidebar-btn" title="Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="pages/ferias.html" class="sidebar-btn" title="Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
@@ -292,9 +292,9 @@
                 </div>
                 <div class="header-right">
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -303,7 +303,7 @@
             
             <div class="page-content">
                 <div class="page-header">
-                    <h1 class="page-title"><i class="fas fa-graduation-cap"></i> Gesto de Treinamentos</h1>
+                    <h1 class="page-title"><i class="fas fa-graduation-cap"></i> Gestão de Treinamentos</h1>
                     <div class="page-actions">
                         <button class="btn btn-secondary" onclick="carregarDados()"><i class="fas fa-sync-alt"></i> Atualizar</button>
                         <button class="btn btn-primary" onclick="abrirModalNovo()"><i class="fas fa-plus"></i> Novo Treinamento</button>
@@ -313,31 +313,23 @@
                 <!-- Stats -->
                 <div class="stats-row">
                     <div class="metric-card purple">
-                        <div class="metric-icon purple"><i class="fas fa-calendar-alt"></i></div>
-                        <div class="metric-content">
-                            <h3>Total Treinamentos</h3>
-                            <div class="metric-value" id="statTotal">0</div>
+                        <div class="metric-header">
+                            <div class="metric-icon purple"><i class="fas fa-calendar-alt"></i></div>
                         </div>
                     </div>
                     <div class="metric-card blue">
-                        <div class="metric-icon blue"><i class="fas fa-clock"></i></div>
-                        <div class="metric-content">
-                            <h3>Agendados</h3>
-                            <div class="metric-value" id="statAgendados">0</div>
+                        <div class="metric-header">
+                            <div class="metric-icon blue"><i class="fas fa-clock"></i></div>
                         </div>
                     </div>
                     <div class="metric-card green">
-                        <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
-                        <div class="metric-content">
-                            <h3>Concludos</h3>
-                            <div class="metric-value" id="statConcluidos">0</div>
+                        <div class="metric-header">
+                            <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
                         </div>
                     </div>
                     <div class="metric-card orange">
-                        <div class="metric-icon orange"><i class="fas fa-users"></i></div>
-                        <div class="metric-content">
-                            <h3>Total Inscries</h3>
-                            <div class="metric-value" id="statInscricoes">0</div>
+                        <div class="metric-header">
+                            <div class="metric-icon orange"><i class="fas fa-users"></i></div>
                         </div>
                     </div>
                 </div>
@@ -508,7 +500,7 @@
             carregarUsuarioLogado();
         });
         
-        // Funo para carregar dados do usurio logado e exibir foto
+        // Funo para carregar dados do Usuário logado e exibir foto
         async function carregarUsuarioLogado() {
             try {
                 const response = await fetch('/api/me', { credentials: 'include' });
@@ -547,7 +539,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
         

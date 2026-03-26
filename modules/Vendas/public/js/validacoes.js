@@ -164,6 +164,32 @@ const AluforceValidacoes = (function() {
         return numeros.length >= 8 && numeros.length <= 14;
     }
 
+    /**
+     * Valida valor de desconto
+     * @param {number|string} desconto - Valor do desconto
+     * @param {number|string} subtotal - Subtotal do pedido
+     * @returns {{valido: boolean, mensagem: string}} Resultado da validação
+     */
+    function validarDesconto(desconto, subtotal) {
+        const desc = parseFloat(desconto);
+        const sub = parseFloat(subtotal);
+        if (isNaN(desc) || desc < 0) return { valido: false, mensagem: 'Desconto não pode ser negativo' };
+        if (!isNaN(sub) && desc > sub) return { valido: false, mensagem: 'Desconto não pode ser maior que o subtotal' };
+        return { valido: true, mensagem: '' };
+    }
+
+    /**
+     * Valida valor monetário
+     * @param {number|string} valor - Valor a validar
+     * @returns {{valido: boolean, mensagem: string}} Resultado da validação
+     */
+    function validarValorMonetario(valor) {
+        const v = parseFloat(valor);
+        if (isNaN(v)) return { valido: false, mensagem: 'Valor inválido' };
+        if (v < 0) return { valido: false, mensagem: 'Valor não pode ser negativo' };
+        return { valido: true, mensagem: '' };
+    }
+
     // Expor funções públicas
     return {
         validarCNPJ,
@@ -173,6 +199,8 @@ const AluforceValidacoes = (function() {
         validarCEP,
         validarTelefone,
         validarIE,
+        validarDesconto,
+        validarValorMonetario,
         // Aliases
         cnpj: validarCNPJ,
         cpf: validarCPF,

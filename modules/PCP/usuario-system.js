@@ -34,7 +34,7 @@
         
         console.log('🔄 Atualizando interface do usuário:', user.nome);
         
-        // Atualizar saudAção dinâmica baseada na hora
+        // Atualizar saudação dinâmica baseada na hora
         const greetingTextEl = document.getElementById('greeting-text');
         if (greetingTextEl) {
             const hour = new Date().getHours();
@@ -47,7 +47,7 @@
         // Usar apelido se disponível, senão primeiro nome
         const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
         
-        // Atualizar nome na saudAção principal (header)
+        // Atualizar nome na saudação principal (header)
         const userNameEl = document.getElementById('user-name');
         if (userNameEl) {
             userNameEl.textContent = primeiroNome;

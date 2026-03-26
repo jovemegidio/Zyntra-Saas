@@ -64,7 +64,13 @@ async function carregarPedidosDaAPI() {
                 'Content-Type': 'application/json'
             }
         });
-        if (!resp.ok) throw new Error(`Erro ${resp.status}`);
+        if (!resp.ok) {
+            if (resp.status === 401) {
+                window.location.href = '/login.html';
+                return;
+            }
+            throw new Error(`Erro ${resp.status}`);
+        }
         const data = await resp.json();
         let todosPedidos = (Array.isArray(data) && data.length ? data : []).map(p => ({
             ...p,
@@ -154,7 +160,7 @@ function criarCardHTML(pedido) {
         <div class="kanban-card" draggable="true" data-id="${pedido.id}" data-status="${pedido.status}">
             <div class="card-top">
                 <div class="card-meta">
-                    <span class="card-numero">${pedido.numero}</span>
+                    <span class="card-numero">${escapeHtml(pedido.numero)}</span>
                 </div>
                 <button class="card-menu-btn" title="Mais ações">
                     <i class="fas fa-ellipsis-v"></i>
@@ -210,7 +216,7 @@ function renderizarKanban() {
         if (!htmlPorColuna[colunaId]) htmlPorColuna[colunaId] = '';
         htmlPorColuna[colunaId] += cardHTML;
         contadores[pedido.status].qnt++;
-        contadores[pedido.status].total += Number(pedido.valor || 0);
+        contadores[pedido.status].total += parseFloat(pedido.valor) || 0;
     });
 
     // Inserir HTML de uma vez por coluna (único reflow por coluna)

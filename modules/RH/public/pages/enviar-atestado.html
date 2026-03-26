@@ -217,7 +217,7 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn active" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
                 <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -249,9 +249,9 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -414,7 +414,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de autenticao com o token
+        // Helper: Obtm headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -441,8 +441,8 @@
                     }
                     
                     // Usar apelido se disponvel, seno primeiro nome
-                    const userName = user.apelido || user.nome || 'Usurio';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const userName = user.apelido || user.nome || 'Usuário';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
                     if (!userAvatar) userAvatar = getAvatarFromEmail(user.email, userName);
                     
@@ -463,7 +463,7 @@
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
                     }
                     
-                    // Mostrar boto admin apenas para usurios especficos
+                    // Mostrar boto admin apenas para Usuários ESPECÍFICOS
                     const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
                     const btnAdmin = document.getElementById('btn-admin');
                     if (btnAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
@@ -471,7 +471,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 

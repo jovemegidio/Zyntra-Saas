@@ -132,7 +132,7 @@
         <div id="log" class="log" style="display: none;"></div>
 
         <!-- Formulário oculto para submissão -->
-        <form id="ordem-form" action="http://localhost:3001/api/pcp/ordens-producao" method="POST" style="display: none;" target="_blank">
+        <form id="ordem-form" action="/api/pcp/ordens-producao" method="POST" style="display: none;" target="_blank">
             <!-- Dados do cliente -->
             <input name="cliente" value="ENERGIZE MATERIAIS ELETRICOS — 50.160.305/0001-39 (Evandro)">
             <input name="cliente_id" value="73">
@@ -175,7 +175,7 @@
     <div class="container">
         <h2>ð¥ï¸ Interface para Teste Manual</h2>
         <div class="interface-frame">
-            <iframe id="interface" src="http://localhost:3001" width="100%" height="700"></iframe>
+            <iframe id="interface" src="/" width="100%" height="700"></iframe>
         </div>
     </div>
 
@@ -198,7 +198,7 @@
         function verificarServidor() {
             log('ð Verificando servidor...', 'info');
 
-            fetch('http://localhost:3001/api/pcp/clientes?q=test')
+            fetch('/api/pcp/clientes?q=test')
                 .then(response => {
                     if (response.ok) {
                         log('â Servidor está funcionando!', 'success');

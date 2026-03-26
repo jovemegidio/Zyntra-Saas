@@ -8,13 +8,13 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Aluforce: Gesto do Ponto</title>
+    <title>Aluforce: Gestão do Ponto</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/modern-saas.css?v=20260210">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260210">
     <style>
-        /* === GESTO DO PONTO - DESIGN INSTITUCIONAL === */
+        /* === Gestão do PONTO - DESIGN INSTITUCIONAL === */
 
         /* Layout */
         .content-area { flex: 1; padding: 28px 32px; overflow-y: auto; background: #f4f6f9; }
@@ -188,13 +188,13 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn active" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestao-ponto.html" class="sidebar-btn active" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="ferias.html" class="sidebar-btn" title="Gesto de Frias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gesto de Solicitaes"><i class="fas fa-tasks"></i></a>
-                <a href="calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
@@ -215,14 +215,14 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gesto de Ponto</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gestão de Ponto</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -663,7 +663,7 @@
                 var hour = new Date().getHours();
                 var greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
                 document.getElementById('greeting-text').textContent = greeting;
-                var nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                var nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                 document.getElementById('user-name').textContent = nome;
                 var av = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
                 if (!av) av = getAvatarFromEmail(user.email, user.nome);
@@ -1107,7 +1107,7 @@
             link.href = URL.createObjectURL(blob);
             link.download = 'ponto_' + document.getElementById('filter-data').value + '.csv';
             link.click();
-            showToast('Relatrio exportado!', 'success');
+            showToast('Relatório exportado!', 'success');
         }
 
         // ============= SYNC STATUS =============
@@ -1141,7 +1141,7 @@
         function fecharModal(id) {
             document.getElementById(id).classList.remove('show');
             document.body.classList.remove('modal-open');
-            document.title = 'Aluforce: Gesto do Ponto';
+            document.title = 'Aluforce: Gestão do Ponto';
         }
 
         function showToast(msg, type) {
@@ -1279,7 +1279,7 @@
                     }
 
                     var motivoHtml = item.motivo ? '<div class="audit-motivo"><i class="fas fa-quote-left" style="margin-right:6px;font-size:10px"></i>' + item.motivo + '</div>' : '';
-                    var userHtml = '<div class="audit-user"><i class="fas fa-user-shield" style="margin-right:4px"></i>Usurio #' + (item.usuário_id || '?') + (item.ip_address ? '  IP: ' + item.ip_address : '') + '</div>';
+                    var userHtml = '<div class="audit-user"><i class="fas fa-user-shield" style="margin-right:4px"></i>Usuário #' + (item.usuário_id || '?') + (item.ip_address ? '  IP: ' + item.ip_address : '') + '</div>';
 
                     return '<div class="audit-item">' +
                         '<div class="audit-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
@@ -1312,7 +1312,7 @@
             document.getElementById('filter-alteracoes-fim').value = today;
             document.getElementById('filter-ano-resumo').value = new Date().getFullYear();
 
-            var meses = ['Janeiro','Fevereiro','Maro','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+            var meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
             var mesSelect = document.getElementById('filter-mes-resumo');
             meses.forEach(function(m, i) {
                 var opt = document.createElement('option');

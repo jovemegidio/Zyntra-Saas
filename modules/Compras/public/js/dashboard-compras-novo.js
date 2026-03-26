@@ -6,6 +6,14 @@
 (function() {
     'use strict';
 
+    // Sanitização XSS
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(value);
+        return div.innerHTML;
+    }
+
     let container;
 
     function init() {
@@ -155,8 +163,8 @@
                                 <tbody>
                                     ${pedidosRecentes.map(p => `
                                         <tr>
-                                            <td><strong>${p.numero}</strong></td>
-                                            <td>${p.fornecedor}</td>
+                                            <td><strong>${escapeHtml(p.numero)}</strong></td>
+                                            <td>${escapeHtml(p.fornecedor)}</td>
                                             <td><strong>${formatCurrency(p.valor)}</strong></td>
                                             <td>${formatDate(p.data)}</td>
                                             <td>
@@ -186,7 +194,7 @@
                                         ${a.tipo === 'aviso' ? '<i class="fas fa-exclamation"></i>' : ''}
                                         ${a.tipo === 'info' ? '<i class="fas fa-info-circle"></i>' : ''}
                                     </div>
-                                    <div class="alerta-texto">${a.mensagem}</div>
+                                    <div class="alerta-texto">${escapeHtml(a.mensagem)}</div>
                                 </div>
                             `).join('')}
                         </div>

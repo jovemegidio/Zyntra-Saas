@@ -1,5 +1,5 @@
 // =====================================================
-// ROTAS DO M??DULO DE COMPRAS
+// ROTAS DO MÓDULO DE COMPRAS
 // Sistema Aluforce v2.0
 // =====================================================
 
@@ -7,12 +7,12 @@ const express = require('express');
 const router = express.Router();
 const { body, param, query, validationResult } = require('express-validator');
 
-// Valida????o de CNPJ
+// Validação de CNPJ
 function validarCNPJ(cnpj) {
     cnpj = cnpj.replace(/[^\d]+/g, '');
     if (cnpj.length !== 14) return false;
 
-    // Valida????o dos d??gitos verificadores
+    // Validação dos dígitos verificadores
     let tamanho = cnpj.length - 2;
     let numeros = cnpj.substring(0, tamanho);
     let digitos = cnpj.substring(tamanho);
@@ -66,7 +66,7 @@ async function logAcao(pool, usuarioId, acao, entidadeTipo, entidadeId, dadosAnt
     }
 }
 
-// Fun????o para criar notifica????o
+// Função para criar notificação
 async function criarNotificacao(pool, usuarioId, tipo, titulo, mensagem, entidadeTipo = null, entidadeId = null, enviarEmail = false) {
     try {
         await pool.execute(
@@ -76,22 +76,22 @@ async function criarNotificacao(pool, usuarioId, tipo, titulo, mensagem, entidad
             [usuarioId, tipo, titulo, mensagem, entidadeTipo, entidadeId, enviarEmail]
         );
     } catch (error) {
-        console.error('Erro ao criar notifica????o:', error);
+        console.error('Erro ao criar notificação:', error);
     }
 }
 
 // =====================================================
-// FUN????ES DE VALIDA????O E EXTRA????O DE CHAVE NF-e
+// FUNÇÕES DE VALIDAÇÃO E EXTRAÇÃO DE CHAVE NF-e
 // =====================================================
 
-// Validar chave de acesso NF-e (44 d??gitos + DV)
+// Validar chave de acesso NF-e (44 dígitos + DV)
 function validarChaveAcesso(chave) {
     if (!chave || chave.length !== 44) return false;
 
     const chaveSemDV = chave.substr(0, 43);
     const dvInformado = chave.substr(43, 1);
 
-    // Calcular d??gito verificador usando m??dulo 11
+    // Calcular dígito verificador usando módulo 11
     let peso = 2;
     let soma = 0;
 
@@ -136,7 +136,7 @@ function extrairDadosChave(chave) {
 function extrairDadosNFeXML(xml) {
     const dados = {};
 
-    // Fun????o helper para extrair valor
+    // Função helper para extrair valor
     const extrair = (tag) => {
         const match = xml.match(new RegExp(`<${tag}>(.*?)</${tag}>`, 's'));
         return match ? match[1].trim() : null;
@@ -162,7 +162,7 @@ function extrairDadosNFeXML(xml) {
         dados.emitenteCidade = emitente.match(/<xMun>(.*?)<\/xMun>/)?.[1];
     }
 
-    // Dados do destinat??rio
+    // Dados do destinatário
     const destMatch = xml.match(/<dest>(.*?)<\/dest>/s);
     if (destMatch) {
         const dest = destMatch[1];
@@ -197,7 +197,7 @@ module.exports = (pool, authenticateToken, logger) => {
         try {
             const [stats] = await pool.execute(`SELECT * FROM vw_dashboard_compras LIMIT 1`);
 
-            // Pedidos por status (??ltimos 30 dias)
+            // Pedidos por status (últimos 30 dias)
             const [pedidosPorStatus] = await pool.execute(`
                 SELECT status, COUNT(*) as total, SUM(valor_total) as valor
                 FROM pedidos_compra
@@ -308,7 +308,7 @@ module.exports = (pool, authenticateToken, logger) => {
             );
 
             if (fornecedor.length === 0) {
-                return res.status(404).json({ error: 'Fornecedor n??o encontrado' });
+                return res.status(404).json({ error: 'Fornecedor não encontrado' });
             }
 
             // Buscar contatos
@@ -317,7 +317,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 [req.params.id]
             );
 
-            // Buscar ??ltimas avalia????es
+            // Buscar últimas avaliações
             const [avaliacoes] = await pool.execute(
                 `SELECT fa.*, u.nome as avaliador_nome
                 FROM fornecedor_avaliacoes fa
@@ -328,7 +328,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 [req.params.id]
             );
 
-            // Buscar ??ltimos pedidos
+            // Buscar últimos pedidos
             const [pedidos] = await pool.execute(
                 `SELECT id, numero_pedido, data_pedido, valor_total, status
                 FROM pedidos_compra
@@ -357,11 +357,11 @@ module.exports = (pool, authenticateToken, logger) => {
     router.post('/fornecedores',
         authenticateToken,
         [
-            body('razao_social').notEmpty().withMessage('Raz??o social ?? obrigat??ria'),
-            body('cnpj').notEmpty().withMessage('CNPJ ?? obrigat??rio')
-                .custom((value) => validarCNPJ(value)).withMessage('CNPJ inv??lido'),
-            body('telefone').notEmpty().withMessage('Telefone ?? obrigat??rio'),
-            body('email').optional().isEmail().withMessage('Email inv??lido')
+            body('razao_social').notEmpty().withMessage('Razão social é obrigatória'),
+            body('cnpj').notEmpty().withMessage('CNPJ é obrigatório')
+                .custom((value) => validarCNPJ(value)).withMessage('CNPJ inválido'),
+            body('telefone').notEmpty().withMessage('Telefone é obrigatório'),
+            body('email').optional().isEmail().withMessage('Email inválido')
         ],
         async (req, res) => {
             const errors = validationResult(req);
@@ -382,7 +382,7 @@ module.exports = (pool, authenticateToken, logger) => {
                     valor_minimo_pedido, categoria, tipo_fornecedor, observacoes
                 } = req.body;
 
-                // Verificar se CNPJ j?? existe
+                // Verificar se CNPJ já existe
                 const [existente] = await connection.execute(
                     'SELECT id FROM fornecedores WHERE cnpj = ?',
                     [cnpj.replace(/[^\d]+/g, '')]
@@ -390,10 +390,10 @@ module.exports = (pool, authenticateToken, logger) => {
 
                 if (existente.length > 0) {
                     await connection.rollback();
-                    return res.status(400).json({ error: 'CNPJ j?? cadastrado' });
+                    return res.status(400).json({ error: 'CNPJ já cadastrado' });
                 }
 
-                // Gerar c??digo do fornecedor
+                // Gerar código do fornecedor
                 const [ultimo] = await connection.execute(
                     "SELECT MAX(CAST(SUBSTRING(codigo, 5) AS UNSIGNED)) as ultimo FROM fornecedores WHERE codigo LIKE 'FOR-%'"
                 );
@@ -468,7 +468,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const [anterior] = await connection.execute('SELECT * FROM fornecedores WHERE id = ?', [fornecedorId]);
             if (anterior.length === 0) {
                 await connection.rollback();
-                return res.status(404).json({ error: 'Fornecedor n??o encontrado' });
+                return res.status(404).json({ error: 'Fornecedor não encontrado' });
             }
 
             const campos = [];
@@ -529,7 +529,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 [req.params.id, pedido_id, req.user.userId, nota_qualidade, nota_prazo, nota_preco, nota_atendimento, nota_entrega, comentarios, pontos_positivos, pontos_negativos, recomenda_fornecedor]
             );
 
-            // Recalcular m??dias do fornecedor
+            // Recalcular médias do fornecedor
             await pool.execute(`
                 UPDATE fornecedores f
                 SET
@@ -621,7 +621,7 @@ module.exports = (pool, authenticateToken, logger) => {
             );
 
             if (pedido.length === 0) {
-                return res.status(404).json({ error: 'Pedido n??o encontrado' });
+                return res.status(404).json({ error: 'Pedido não encontrado' });
             }
 
             // Buscar itens do pedido
@@ -630,7 +630,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 [req.params.id]
             );
 
-            // Buscar workflow de aprova????es
+            // Buscar workflow de aprovações
             const [aprovacoes] = await pool.execute(
                 `SELECT wa.*, u.nome as aprovador_nome
                 FROM workflow_aprovacoes wa
@@ -679,10 +679,10 @@ module.exports = (pool, authenticateToken, logger) => {
 
             if (!fornecedor_id || !itens || !Array.isArray(itens) || itens.length === 0) {
                 await connection.rollback();
-                return res.status(400).json({ error: 'Fornecedor e itens s??o obrigat??rios' });
+                return res.status(400).json({ error: 'Fornecedor e itens são obrigatórios' });
             }
 
-            // Gerar n??mero do pedido
+            // Gerar número do pedido
             const ano = new Date().getFullYear();
             const [ultimos] = await connection.execute(
                 "SELECT MAX(CAST(SUBSTRING(numero_pedido, 8) AS UNSIGNED)) as ultimo FROM pedidos_compra WHERE numero_pedido LIKE ?",
@@ -731,7 +731,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 );
             }
 
-            // Verificar se precisa de aprova????o
+            // Verificar se precisa de aprovação
             const [config] = await connection.execute(
                 "SELECT valor FROM compras_configuracoes WHERE chave = 'pedido_aprovacao_valor_minimo'"
             );
@@ -740,7 +740,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const valorTotal = valor_produtos - (desconto || 0) + (frete || 0) + (seguro || 0) + (outras_despesas || 0);
 
             if (valorTotal >= valorMinimoAprovacao) {
-                // Buscar aprovadores necess??rios
+                // Buscar aprovadores necessários
                 const [regras] = await connection.execute(
                     `SELECT * FROM workflow_regras_aprovacao
                     WHERE entidade_tipo = 'pedido_compra'
@@ -751,7 +751,7 @@ module.exports = (pool, authenticateToken, logger) => {
                     [valorTotal, valorTotal]
                 );
 
-                // Criar workflow de aprova????o
+                // Criar workflow de aprovação
                 for (const regra of regras) {
                     await connection.execute(
                         `INSERT INTO workflow_aprovacoes
@@ -760,13 +760,13 @@ module.exports = (pool, authenticateToken, logger) => {
                         [pedidoId, regra.nivel, regra.aprovador_id]
                     );
 
-                    // Criar notifica????o para aprovador
+                    // Criar notificação para aprovador
                     await criarNotificacao(
                         connection,
                         regra.aprovador_id,
                         'pedido_aprovacao',
-                        'Pedido aguardando aprova????o',
-                        `O pedido ${numero_pedido} no valor de R$ ${valorTotal.toFixed(2)} aguarda sua aprova????o.`,
+                        'Pedido aguardando aprovação',
+                        `O pedido ${numero_pedido} no valor de R$ ${valorTotal.toFixed(2)} aguarda sua aprovação.`,
                         'pedido_compra',
                         pedidoId,
                         true
@@ -805,7 +805,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const pedidoId = req.params.id;
             const { aprovar, comentario } = req.body;
 
-            // Buscar workflow pendente do usu??rio
+            // Buscar workflow pendente do usuário
             const [workflow] = await connection.execute(
                 `SELECT * FROM workflow_aprovacoes
                 WHERE entidade_tipo = 'pedido_compra'
@@ -819,7 +819,7 @@ module.exports = (pool, authenticateToken, logger) => {
 
             if (workflow.length === 0) {
                 await connection.rollback();
-                return res.status(403).json({ error: 'Voc?? n??o tem permiss??o para aprovar este pedido' });
+                return res.status(403).json({ error: 'Você não tem permissão para aprovar este pedido' });
             }
 
             const novoStatus = aprovar ? 'aprovado' : 'rejeitado';
@@ -833,7 +833,7 @@ module.exports = (pool, authenticateToken, logger) => {
             );
 
             if (aprovar) {
-                // Verificar se h?? mais aprova????es pendentes
+                // Verificar se há mais aprovações pendentes
                 const [pendentes] = await connection.execute(
                     `SELECT COUNT(*) as total FROM workflow_aprovacoes
                     WHERE entidade_tipo = 'pedido_compra'
@@ -843,7 +843,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 );
 
                 if (pendentes[0].total === 0) {
-                    // Todas as aprova????es conclu??das
+                    // Todas as aprovações concluídas
                     await connection.execute(
                         `UPDATE pedidos_compra
                         SET status = 'aprovado', usuario_aprovador = ?, data_aprovacao = NOW()
@@ -903,7 +903,7 @@ module.exports = (pool, authenticateToken, logger) => {
         } catch (error) {
             await connection.rollback();
             logger.error('Erro ao aprovar/rejeitar pedido:', error);
-            res.status(500).json({ error: 'Erro ao processar aprova????o' });
+            res.status(500).json({ error: 'Erro ao processar aprovação' });
         } finally {
             connection.release();
         }
@@ -938,9 +938,9 @@ module.exports = (pool, authenticateToken, logger) => {
         }
     });
 
-    // ==================== COTA????ES ====================
+    // ==================== COTAÇÕES ====================
 
-    // Listar cota????es
+    // Listar cotações
     router.get('/cotacoes', authenticateToken, async (req, res) => {
         try {
             const { status, limit = 50, offset = 0 } = req.query;
@@ -968,12 +968,12 @@ module.exports = (pool, authenticateToken, logger) => {
             const [cotacoes] = await pool.execute(query, params);
             res.json({ success: true, data: cotacoes });
         } catch (error) {
-            logger.error('Erro ao listar cota????es:', error);
-            res.status(500).json({ error: 'Erro ao buscar cota????es' });
+            logger.error('Erro ao listar cotações:', error);
+            res.status(500).json({ error: 'Erro ao buscar cotações' });
         }
     });
 
-    // Criar cota????o
+    // Criar cotação
     router.post('/cotacoes', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
@@ -981,7 +981,7 @@ module.exports = (pool, authenticateToken, logger) => {
 
             const { titulo, descricao, data_encerramento, tipo, itens, fornecedores } = req.body;
 
-            // Gerar n??mero da cota????o
+            // Gerar número da cotação
             const ano = new Date().getFullYear();
             const [ultimos] = await connection.execute(
                 "SELECT MAX(CAST(SUBSTRING(numero_cotacao, 8) AS UNSIGNED)) as ultimo FROM cotacoes WHERE numero_cotacao LIKE ?",
@@ -990,7 +990,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const proximo = (ultimos[0].ultimo || 0) + 1;
             const numero_cotacao = `COT-${ano}-${String(proximo).padStart(6, '0')}`;
 
-            // Inserir cota????o
+            // Inserir cotação
             const [cotacao] = await connection.execute(
                 `INSERT INTO cotacoes (
                     numero_cotacao, titulo, descricao, data_abertura, data_encerramento,
@@ -1018,7 +1018,7 @@ module.exports = (pool, authenticateToken, logger) => {
             // Notificar fornecedores (se fornecidos)
             if (fornecedores && Array.isArray(fornecedores)) {
                 for (const fornecedorId of fornecedores) {
-                    // Aqui voc?? pode implementar envio de email para fornecedor
+                    // Aqui você pode implementar envio de email para fornecedor
                     // await enviarEmailCotacao(fornecedorId, cotacaoId);
                 }
             }
@@ -1027,20 +1027,20 @@ module.exports = (pool, authenticateToken, logger) => {
 
             await connection.commit();
 
-            logger.info(`Cota????o criada: ${numero_cotacao}`);
+            logger.info(`Cotação criada: ${numero_cotacao}`);
             res.json({ success: true, id: cotacaoId, numero_cotacao });
 
         } catch (error) {
             await connection.rollback();
-            logger.error('Erro ao criar cota????o:', error);
-            res.status(500).json({ error: 'Erro ao criar cota????o' });
+            logger.error('Erro ao criar cotação:', error);
+            res.status(500).json({ error: 'Erro ao criar cotação' });
         } finally {
             connection.release();
         }
     });
 
     // Aprovar proposta e gerar pedido de compra automaticamente
-    // FLUXO: Cota????o ??? Fornecedor ??? Pedido de Compra
+    // FLUXO: Cotação → Fornecedor → Pedido de Compra
     router.post('/cotacoes/:id/aprovar-proposta', authenticateToken, async (req, res) => {
         const connection = await pool.getConnection();
         try {
@@ -1049,7 +1049,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const cotacaoId = req.params.id;
             const { proposta_id, fornecedor_id, observacoes } = req.body;
 
-            // 1. Buscar a cota????o
+            // 1. Buscar a cotação
             const [cotacaoResult] = await connection.execute(
                 `SELECT c.*, u.nome as responsavel_nome
                  FROM cotacoes c
@@ -1060,12 +1060,12 @@ module.exports = (pool, authenticateToken, logger) => {
 
             if (cotacaoResult.length === 0) {
                 await connection.rollback();
-                return res.status(404).json({ error: 'Cota????o n??o encontrada' });
+                return res.status(404).json({ error: 'Cotação não encontrada' });
             }
 
             const cotacao = cotacaoResult[0];
 
-            // 2. Buscar itens da cota????o (tabela pode n??o existir ainda)
+            // 2. Buscar itens da cotação (tabela pode não existir ainda)
             let itensCotacao = [];
             try {
                 const [itens] = await connection.execute(
@@ -1074,8 +1074,8 @@ module.exports = (pool, authenticateToken, logger) => {
                 );
                 itensCotacao = itens;
             } catch (e) {
-                // Tabela cotacoes_itens pode n??o existir - continuar sem itens
-                console.warn('[COMPRAS] Tabela cotacoes_itens n??o encontrada, continuando sem itens');
+                // Tabela cotacoes_itens pode não existir - continuar sem itens
+                console.warn('[COMPRAS] Tabela cotacoes_itens não encontrada, continuando sem itens');
             }
 
             // 3. Buscar proposta selecionada (se houver)
@@ -1099,7 +1099,7 @@ module.exports = (pool, authenticateToken, logger) => {
             // 4. Validar fornecedor
             if (!fornecedorIdFinal) {
                 await connection.rollback();
-                return res.status(400).json({ error: 'Fornecedor ?? obrigat??rio' });
+                return res.status(400).json({ error: 'Fornecedor é obrigatório' });
             }
 
             // 5. Buscar dados do fornecedor
@@ -1110,12 +1110,12 @@ module.exports = (pool, authenticateToken, logger) => {
 
             if (fornecedorResult.length === 0) {
                 await connection.rollback();
-                return res.status(404).json({ error: 'Fornecedor n??o encontrado' });
+                return res.status(404).json({ error: 'Fornecedor não encontrado' });
             }
 
             const fornecedor = fornecedorResult[0];
 
-            // 6. Gerar n??mero do pedido de compra
+            // 6. Gerar número do pedido de compra
             const ano = new Date().getFullYear();
             const [ultimos] = await connection.execute(
                 "SELECT MAX(CAST(SUBSTRING(numero_pedido, 8) AS UNSIGNED)) as ultimo FROM pedidos_compra WHERE numero_pedido LIKE ?",
@@ -1129,7 +1129,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const itensPedido = [];
 
             for (const itemCot of itensCotacao) {
-                // Buscar pre??o da proposta (se houver) ou usar pre??o de refer??ncia
+                // Buscar preço da proposta (se houver) ou usar preço de referência
                 let precoUnitario = itemCot.preco_referencia || itemCot.preco_unitario || 0;
 
                 if (proposta_id) {
@@ -1143,7 +1143,7 @@ module.exports = (pool, authenticateToken, logger) => {
                             precoUnitario = itemProposta[0].preco_unitario;
                         }
                     } catch (e) {
-                        // Tabela pode n??o existir
+                        // Tabela pode não existir
                     }
                 }
 
@@ -1177,7 +1177,7 @@ module.exports = (pool, authenticateToken, logger) => {
                     dataEntregaPrevista.toISOString().split('T')[0],
                     valorTotalProdutos,
                     valorTotalProdutos,
-                    observacoes || `Pedido gerado a partir da cota????o ${cotacao.numero_cotacao}`,
+                    observacoes || `Pedido gerado a partir da cotação ${cotacao.numero_cotacao}`,
                     req.user.userId || req.user.id
                 ]
             );
@@ -1202,7 +1202,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 );
             }
 
-            // 10. Atualizar status da cota????o para aprovada
+            // 10. Atualizar status da cotação para aprovada
             await connection.execute(
                 `UPDATE cotacoes
                  SET status = 'concluida',
@@ -1235,7 +1235,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 }
             }
 
-            // 12. Log da a????o
+            // 12. Log da ação
             await logAcao(connection, req.user.userId, 'aprovar_cotacao_gerar_pedido', 'cotacao', cotacaoId, null, {
                 cotacao_numero: cotacao.numero_cotacao,
                 pedido_numero: numero_pedido,
@@ -1245,7 +1245,7 @@ module.exports = (pool, authenticateToken, logger) => {
 
             await connection.commit();
 
-            logger.info(`Cota????o ${cotacao.numero_cotacao} aprovada ??? Pedido ${numero_pedido} gerado`);
+            logger.info(`Cotação ${cotacao.numero_cotacao} aprovada → Pedido ${numero_pedido} gerado`);
 
             res.json({
                 success: true,
@@ -1265,19 +1265,19 @@ module.exports = (pool, authenticateToken, logger) => {
 
         } catch (error) {
             await connection.rollback();
-            logger.error('Erro ao aprovar cota????o e gerar pedido:', error);
-            res.status(500).json({ error: 'Erro ao processar aprova????o: ' + error.message });
+            logger.error('Erro ao aprovar cotação e gerar pedido:', error);
+            res.status(500).json({ error: 'Erro ao processar aprovação: ' + error.message });
         } finally {
             connection.release();
         }
     });
 
-    // Buscar detalhes de uma cota????o espec??fica
+    // Buscar detalhes de uma cotação específica
     router.get('/cotacoes/:id', authenticateToken, async (req, res) => {
         try {
             const cotacaoId = req.params.id;
 
-            // Buscar cota????o
+            // Buscar cotação
             const [cotacao] = await pool.execute(
                 `SELECT c.*, u.nome as responsavel_nome,
                         ua.nome as aprovador_nome,
@@ -1293,7 +1293,7 @@ module.exports = (pool, authenticateToken, logger) => {
             );
 
             if (cotacao.length === 0) {
-                return res.status(404).json({ error: 'Cota????o n??o encontrada' });
+                return res.status(404).json({ error: 'Cotação não encontrada' });
             }
 
             // Buscar itens
@@ -1334,8 +1334,8 @@ module.exports = (pool, authenticateToken, logger) => {
             });
 
         } catch (error) {
-            logger.error('Erro ao buscar cota????o:', error);
-            res.status(500).json({ error: 'Erro ao buscar cota????o' });
+            logger.error('Erro ao buscar cotação:', error);
+            res.status(500).json({ error: 'Erro ao buscar cotação' });
         }
     });
 
@@ -1352,7 +1352,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 conferente, observacoes, itens
             } = req.body;
 
-            // Gerar n??mero do recebimento
+            // Gerar número do recebimento
             const ano = new Date().getFullYear();
             const [ultimos] = await connection.execute(
                 "SELECT MAX(CAST(SUBSTRING(numero_recebimento, 8) AS UNSIGNED)) as ultimo FROM recebimentos WHERE numero_recebimento LIKE ?",
@@ -1406,7 +1406,7 @@ module.exports = (pool, authenticateToken, logger) => {
                 }
             }
 
-            // Atualizar status do recebimento se houver diverg??ncia
+            // Atualizar status do recebimento se houver divergência
             if (temDivergencia) {
                 await connection.execute(
                     'UPDATE recebimentos SET status = "com_divergencia" WHERE id = ?',
@@ -1451,9 +1451,9 @@ module.exports = (pool, authenticateToken, logger) => {
         }
     });
 
-    // ==================== NOTIFICA????ES ====================
+    // ==================== NOTIFICAÇÕES ====================
 
-    // Listar notifica????es do usu??rio
+    // Listar notificações do usuário
     router.get('/notificacoes', authenticateToken, async (req, res) => {
         try {
             const { limit = 20 } = req.query;
@@ -1477,12 +1477,12 @@ module.exports = (pool, authenticateToken, logger) => {
                 nao_lidas: naoLidas[0].total
             });
         } catch (error) {
-            logger.error('Erro ao listar notifica????es:', error);
-            res.status(500).json({ error: 'Erro ao buscar notifica????es' });
+            logger.error('Erro ao listar notificações:', error);
+            res.status(500).json({ error: 'Erro ao buscar notificações' });
         }
     });
 
-    // Marcar notifica????o como lida
+    // Marcar notificação como lida
     router.put('/notificacoes/:id/ler', authenticateToken, async (req, res) => {
         try {
             await pool.execute(
@@ -1494,8 +1494,8 @@ module.exports = (pool, authenticateToken, logger) => {
 
             res.json({ success: true });
         } catch (error) {
-            logger.error('Erro ao marcar notifica????o:', error);
-            res.status(500).json({ error: 'Erro ao marcar notifica????o' });
+            logger.error('Erro ao marcar notificação:', error);
+            res.status(500).json({ error: 'Erro ao marcar notificação' });
         }
     });
 
@@ -1506,24 +1506,24 @@ module.exports = (pool, authenticateToken, logger) => {
         try {
             const { chaveAcesso } = req.params;
 
-            // Validar formato da chave (44 d??gitos)
+            // Validar formato da chave (44 dígitos)
             const chaveNormalizada = chaveAcesso.replace(/\D/g, '');
             if (chaveNormalizada.length !== 44) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Chave de acesso inv??lida. Deve conter 44 d??gitos.'
+                    error: 'Chave de acesso inválida. Deve conter 44 dígitos.'
                 });
             }
 
-            // Validar d??gito verificador
+            // Validar dígito verificador
             if (!validarChaveAcesso(chaveNormalizada)) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Chave de acesso inv??lida. D??gito verificador incorreto.'
+                    error: 'Chave de acesso inválida. Dígito verificador incorreto.'
                 });
             }
 
-            // Extrair informa????es da chave de acesso
+            // Extrair informações da chave de acesso
             const dadosChave = extrairDadosChave(chaveNormalizada);
 
             try {
@@ -1561,18 +1561,18 @@ module.exports = (pool, authenticateToken, logger) => {
                 } else {
                     res.status(404).json({
                         success: false,
-                        error: 'NF-e n??o encontrada ou n??o autorizada',
+                        error: 'NF-e não encontrada ou não autorizada',
                         codigo: resultado.codigoStatus
                     });
                 }
             } catch (sefazError) {
-                // Se falhou a consulta ao SEFAZ, retornar dados extra??dos da chave
+                // Se falhou a consulta ao SEFAZ, retornar dados extraídos da chave
                 logger.warn('Erro ao consultar SEFAZ:', sefazError.message);
 
                 res.json({
                     success: true,
                     fonte: 'chave',
-                    aviso: 'N??o foi poss??vel consultar o SEFAZ. Dados extra??dos da chave de acesso.',
+                    aviso: 'Não foi possível consultar o SEFAZ. Dados extraídos da chave de acesso.',
                     dados: {
                         chave_acesso: chaveNormalizada,
                         numero: dadosChave.numero,
@@ -1600,7 +1600,7 @@ module.exports = (pool, authenticateToken, logger) => {
             const { chave_acesso } = req.body;
 
             if (!chave_acesso) {
-                return res.status(400).json({ success: false, error: 'Chave de acesso n??o informada' });
+                return res.status(400).json({ success: false, error: 'Chave de acesso não informada' });
             }
 
             const chaveNormalizada = chave_acesso.replace(/\D/g, '');
@@ -1608,7 +1608,7 @@ module.exports = (pool, authenticateToken, logger) => {
             if (chaveNormalizada.length !== 44) {
                 return res.status(400).json({
                     success: false,
-                    error: 'Chave de acesso inv??lida. Deve conter 44 d??gitos.',
+                    error: 'Chave de acesso inválida. Deve conter 44 dígitos.',
                     digitos_informados: chaveNormalizada.length
                 });
             }
@@ -1616,7 +1616,7 @@ module.exports = (pool, authenticateToken, logger) => {
             if (!validarChaveAcesso(chaveNormalizada)) {
                 return res.status(400).json({
                     success: false,
-                    error: 'D??gito verificador da chave ?? inv??lido'
+                    error: 'Dígito verificador da chave é inválido'
                 });
             }
 
@@ -1644,9 +1644,9 @@ module.exports = (pool, authenticateToken, logger) => {
         }
     });
 
-    // ==================== RELAT??RIOS ====================
+    // ==================== RELATÓRIOS ====================
 
-    // Relat??rio de compras por per??odo
+    // Relatório de compras por período
     router.get('/relatorios/compras-periodo', authenticateToken, async (req, res) => {
         try {
             const { data_inicio, data_fim } = req.query;
@@ -1667,12 +1667,12 @@ module.exports = (pool, authenticateToken, logger) => {
 
             res.json({ success: true, data: resultado });
         } catch (error) {
-            logger.error('Erro ao gerar relat??rio:', error);
-            res.status(500).json({ error: 'Erro ao gerar relat??rio' });
+            logger.error('Erro ao gerar relatório:', error);
+            res.status(500).json({ error: 'Erro ao gerar relatório' });
         }
     });
 
-    // Relat??rio de top fornecedores
+    // Relatório de top fornecedores
     router.get('/relatorios/top-fornecedores', authenticateToken, async (req, res) => {
         try {
             const { data_inicio, data_fim, limit = 10 } = req.query;
@@ -1695,8 +1695,8 @@ module.exports = (pool, authenticateToken, logger) => {
 
             res.json({ success: true, data: resultado });
         } catch (error) {
-            logger.error('Erro ao gerar relat??rio:', error);
-            res.status(500).json({ error: 'Erro ao gerar relat??rio' });
+            logger.error('Erro ao gerar relatório:', error);
+            res.status(500).json({ error: 'Erro ao gerar relatório' });
         }
     });
 

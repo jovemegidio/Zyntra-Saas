@@ -399,6 +399,12 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
             const pedido = pedidos[0];
 
+            // Verificar ownership: vendedor só pode gerar PDF dos seus pedidos
+            const isAdmin = req.user && (req.user.role === 'admin' || req.user.cargo === 'admin');
+            if (!isAdmin && pedido.vendedor_id && req.user && pedido.vendedor_id !== req.user.id) {
+                return res.status(403).json({ error: 'Acesso negado: este pedido pertence a outro vendedor' });
+            }
+
             let [itens] = await vendasPool.query(`SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC`, [id]);
 
             if (itens.length === 0 && pedido.produtos_preview) {

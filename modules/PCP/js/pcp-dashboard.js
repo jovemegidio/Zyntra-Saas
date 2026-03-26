@@ -7,6 +7,9 @@ let dashboardStats = {};
 let ordensRecentes = [];
 let estoqueCritico = [];
 
+// Token de autenticação (pode vir de auth-unified ou cookie)
+const token = typeof getAuthToken === 'function' ? getAuthToken() : (localStorage.getItem('token') || sessionStorage.getItem('token') || document.cookie.match(/token=([^;]+)/)?.[1] || '');
+
 // Carregar estatísticas do dashboard
 async function carregarEstatisticas() {
     try {
@@ -85,7 +88,6 @@ async function carregarOrdensRecentes() {
         }
         
         const response = await fetch(`${API_BASE}/api/pcp/ordens?limit=5&orderBy=created_at&order=DESC`, {
-            credentials: 'include',
             credentials: 'include'
         });
         

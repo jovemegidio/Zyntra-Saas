@@ -67,7 +67,7 @@
             const badges = {
                 'pendente': '<span class="badge badge-warning">Pendente</span>',
                 'aprovado': '<span class="badge badge-success">Aprovado</span>',
-                'em_transito': '<span class="badge badge-info">Em Trnsito</span>',
+                'em_transito': '<span class=\"badge badge-info\">Em Trânsito</span>',
                 'recebido': '<span class="badge badge-success">Recebido</span>',
                 'cancelado': '<span class="badge badge-danger">Cancelado</span>',
                 'ativo': '<span class="badge badge-success">Ativo</span>',

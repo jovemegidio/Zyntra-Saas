@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Zyntra: Solicitaes</title>
+    <title>Zyntra: Solicitações</title>
 
-    <!-- Sistema de Autenticao Unificado - DEVE ser carregado primeiro -->
+    <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/css/modern-saas.css?v=20260210">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260210">
     <style>
-        /* === SOLICITAES - CSS ESPECFICO === */
+        /* === Solicitações - CSS ESPECFICO === */
 
         /* CONTENT AREA */
         .content-area { flex: 1; overflow-y: auto; padding: 24px; background: #ffffff; }
@@ -271,14 +271,14 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionrios"><i class="fas fa-users"></i></a>
-                <a href="gestao-holerites.html" class="sidebar-btn" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="FUNCIONÁRIOS"><i class="fas fa-users"></i></a>
+                <a href="gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
-                <a href="pages/ferias.html" class="sidebar-btn" title="Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="pages/ferias.html" class="sidebar-btn" title="Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/beneficios.html" class="sidebar-btn" title="Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
+                <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
@@ -299,15 +299,15 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Solicitaes</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Solicitações</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -319,9 +319,9 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-envelope"></i>
-                        Solicitaes
+                        Solicitações
                     </h1>
-                    <p class="page-subtitle">Faa solicitaes e acompanhe o status</p>
+                    <p class="page-subtitle">Faa Solicitações e acompanhe o status</p>
                 </div>
 
                 <div class="controls-bar">
@@ -335,7 +335,7 @@
                 <div class="metrics-grid">
                     <div class="metric-card total">
                         <div class="metric-value" id="stat-total">0</div>
-                        <div class="metric-label">Total de Solicitaes</div>
+                        <div class="metric-label">Total de Solicitações</div>
                     </div>
                     <div class="metric-card pending">
                         <div class="metric-value" id="stat-pending">0</div>
@@ -367,7 +367,7 @@
                                     <label class="form-label">Tipo de Solicitao</label>
                                     <select class="form-select" id="tipo-solicitação" required>
                                         <option value="">Selecione o tipo</option>
-                                        <option value="férias">Frias</option>
+                                        <option value="férias">Férias</option>
                                         <option value="folga">Folga / Abono</option>
                                         <option value="holerite">2 Via de Holerite</option>
                                         <option value="declaracao">Declarao</option>
@@ -416,7 +416,7 @@
                         <div class="card-header">
                             <h3 class="card-title">
                                 <i class="fas fa-history"></i>
-                                Minhas Solicitaes
+                                Minhas Solicitações
                             </h3>
                         </div>
                         <div class="card-body" id="requests-list">
@@ -500,7 +500,7 @@
             return status || 'Pendente';
         }
 
-        // Helper: Obtm headers de autenticao com o token
+        // Helper: Obtm headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 ...additionalHeaders
@@ -527,8 +527,8 @@
                     }
 
                     // Usar apelido se disponvel, seno primeiro nome
-                    const userName = user.apelido || user.nome || 'Usurio';
-                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const userName = user.apelido || user.nome || 'Usuário';
+                    const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     // Verificar mltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;
@@ -551,7 +551,7 @@
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
                     }
 
-                    // Mostrar boto admin apenas para usurios especficos
+                    // Mostrar boto admin apenas para Usuários ESPECÍFICOS
                     const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
                     const btnAdmin = document.getElementById('btn-admin');
                     if (btnAdmin && user.email && adminEmails.includes(user.email.toLowerCase())) {
@@ -559,14 +559,14 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 
         async function carregarSolicitacoes() {
             try {
                 const response = await fetch('/api/rh/solicitacoes', { credentials: 'include' });
-                if (!response.ok) throw new Error('Erro ao carregar solicitaes');
+                if (!response.ok) throw new Error('Erro ao carregar Solicitações');
 
                 const data = await response.json();
                 const solicitações = data.solicitações || [];
@@ -578,11 +578,11 @@
                 document.getElementById('stat-approved').textContent = stats.aprovadas || 0;
                 document.getElementById('stat-rejected').textContent = stats.recusadas || 0;
 
-                // Renderizar lista de solicitaes
+                // Renderizar lista de Solicitações
                 renderizarSolicitacoes(solicitações);
 
             } catch (error) {
-                console.error('Erro ao carregar solicitaes:', error);
+                console.error('Erro ao carregar Solicitações:', error);
             }
         }
 
@@ -594,7 +594,7 @@
                     <div class="empty-state">
                         <i class="fas fa-inbox"></i>
                         <h3>Nenhuma solicitao encontrada</h3>
-                        <p>Suas solicitaes aparecero aqui</p>
+                        <p>Suas Solicitações aparecero aqui</p>
                     </div>
                 `;
                 return;
@@ -687,7 +687,7 @@
                 showToast('Solicitao enviada com sucesso!', 'success');
                 limparFormulario();
 
-                // Recarregar lista de solicitaes
+                // Recarregar lista de Solicitações
                 await carregarSolicitacoes();
 
             } catch (error) {

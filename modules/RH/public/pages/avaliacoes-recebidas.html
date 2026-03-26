@@ -41,7 +41,7 @@
       <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
       <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
       <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-      <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+      <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
       <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
       <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
       <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -91,7 +91,7 @@ async function abrirDetalhes(id){
   const drawer=document.getElementById('drawer-detalhes'); const body=document.getElementById('drawer-body'); body.textContent='Carregando detalhes...'; drawer.classList.add('open');
   const resp = await fetch(`/api/rh/avaliacoes/${id}`, {headers: rhUiCommon.getAuthHeaders(), credentials:'include'});
   const data = await resp.json().catch(()=>null);
-  if(!resp.ok || !data){body.textContent='Nao foi possivel carregar os detalhes.'; return;}
+  if(!resp.ok || !data){body.textContent='Não foi possível carregar os detalhes.'; return;}
   const av = data.avaliação || {}; const itens = Array.isArray(data.itens) ? data.itens : [];
   body.innerHTML = `<div style='display:grid;gap:8px;margin-bottom:16px;'><div><strong>Período:</strong> ${rhUiCommon.escapeHtml(av.período_nome || av['per\u00edodo_nome'] || '--')}</div><div><strong>Avaliador:</strong> ${rhUiCommon.escapeHtml(av.avaliador_nome || '--')}</div><div><strong>Status:</strong> ${statusHtml(av.status)}</div><div><strong>Pontos fortes:</strong> ${rhUiCommon.escapeHtml(av.pontos_fortes || '--')}</div><div><strong>Pontos de melhoria:</strong> ${rhUiCommon.escapeHtml(av.pontos_melhoria || '--')}</div><div><strong>Comentarios:</strong> ${rhUiCommon.escapeHtml(av.comentarios_avaliador || '--')}</div></div><h3 style='margin:0 0 8px 0;'>Competencias</h3><div style='display:grid;gap:8px;'>${itens.map(i=>`<div class='saas-card' style='padding:10px;'><strong>${rhUiCommon.escapeHtml(i.competencia_nome || '-')}</strong><br><small>Nota: ${rhUiCommon.escapeHtml(String(i.nota || 0))}</small><br><small>${rhUiCommon.escapeHtml(i.comentario || '')}</small></div>`).join('') || '<small>Nenhuma competencia registrada.</small>'}</div>`;
 }
@@ -108,7 +108,7 @@ async function carregarAvaliacoes(){
 
 document.addEventListener('DOMContentLoaded', async function(){
   try{usuário = await rhUiCommon.getCurrentUser(); rhUiCommon.updateHeaderUser(usuário); await carregarAvaliacoes();}
-  catch(e){rhUiCommon.showToast('Nao foi possivel carregar as avaliações recebidas.', 'danger');}
+  catch(e){rhUiCommon.showToast('Não foi possível carregar as avaliações recebidas.', 'danger');}
 });
 </script>
 <script src="/js/tooltips-professional.js?v=20260209" defer></script>

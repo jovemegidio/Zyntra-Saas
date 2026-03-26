@@ -793,7 +793,7 @@
                 <a href="meus-holerites.html" class="sidebar-btn active" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
                 <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -825,9 +825,9 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -866,7 +866,7 @@
                             <option value="06">Junho</option>
                             <option value="05">Maio</option>
                             <option value="04">Abril</option>
-                            <option value="03">Maro</option>
+                            <option value="03">Março</option>
                             <option value="02">Fevereiro</option>
                             <option value="01">Janeiro</option>
                         </select>
@@ -1007,7 +1007,7 @@
             return null;
         }
 
-        // Helper: Obtm headers de autenticao com o token
+        // Helper: Obtm headers de Autenticação com o token
         function getAuthHeaders(additionalHeaders = {}) {
             return {
                 'Content-Type': 'application/json',
@@ -1019,7 +1019,7 @@
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
         }
 
-        const meses = ['', 'Janeiro', 'Fevereiro', 'Maro', 'Abril', 'Maio', 'Junho', 
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 
         let holeritesData = [];
@@ -1045,8 +1045,8 @@
                     }
                     
                     // Usar apelido se disponvel, seno primeiro nome
-                    const userName = currentUser.apelido || currentUser.nome || 'Usurio';
-                    const primeiroNome = currentUser.apelido || (currentUser.nome ? currentUser.nome.split(' ')[0] : 'Usurio');
+                    const userName = currentUser.apelido || currentUser.nome || 'Usuário';
+                    const primeiroNome = currentUser.apelido || (currentUser.nome ? currentUser.nome.split(' ')[0] : 'Usuário');
                     let userAvatar = currentUser.avatar && currentUser.avatar !== '/avatars/default.webp' ? currentUser.avatar : null;
                     if (!userAvatar) userAvatar = getAvatarFromEmail(currentUser.email, userName);
                     
@@ -1067,7 +1067,7 @@
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
                     }
                     
-                    // Mostrar boto admin apenas para usurios especficos
+                    // Mostrar boto admin apenas para Usuários ESPECÍFICOS
                     const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
                     const btnAdmin = document.getElementById('btn-admin');
                     if (btnAdmin && currentUser.email && adminEmails.includes(currentUser.email.toLowerCase())) {
@@ -1083,7 +1083,7 @@
                     await verificarConsentimentoECarregar();
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 

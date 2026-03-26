@@ -42,7 +42,7 @@
                 <div class="step-number">3</div>
                 <div class="step-content">
                     <div class="step-title">Acesse o sistema novamente</div>
-                    <div class="step-desc">Abra o navegador e vá para http://localhost:3002</div>
+                    <div class="step-desc">Abra o navegador e vá para a página do sistema</div>
                 </div>
             </div>
             
@@ -101,7 +101,7 @@
         </div>
         
         <div class="btn-group">
-            <a href="http://localhost:3002" class="btn btn-primary">
+            <a href="/" class="btn btn-primary">
                 ð Ir para o Sistema
             </a>
             <button onclick="location.reload()" class="btn btn-secondary">
@@ -125,7 +125,7 @@
         document.querySelector('.btn-primary').addEventListener('click', (e) => {
             e.preventDefault();
             const timestamp = Date.now();
-            window.open(`http://localhost:3002?v=${timestamp}`, '_blank');
+            window.open(`/?v=${timestamp}`, '_blank');
         });
     </script>
     <script src="/js/mobile-menu.js"></script>

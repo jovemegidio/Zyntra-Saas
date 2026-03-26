@@ -351,7 +351,7 @@
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
                 <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
-                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Frias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
                 <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
@@ -383,9 +383,9 @@
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
                             <span id="user-initials">U</span>
                         </div>
                     </div>
@@ -450,7 +450,7 @@
                             <li class="manual-nav-item">
                                 <a href="#ferias" class="manual-nav-link">
                                     <i class="fas fa-umbrella-beach"></i>
-                                    Frias e Licenas
+                                    Férias e Licenas
                                 </a>
                             </li>
                             <li class="manual-nav-item">
@@ -601,17 +601,17 @@
                             </div>
                         </section>
 
-                        <!-- Frias e Licenas -->
+                        <!-- Férias e Licenas -->
                         <section id="ferias" class="manual-section">
                             <div class="section-header">
                                 <div class="section-icon cyan">
                                     <i class="fas fa-umbrella-beach"></i>
                                 </div>
-                                <h2 class="section-title">Frias e Licenas</h2>
+                                <h2 class="section-title">Férias e Licenas</h2>
                             </div>
                             <div class="section-content">
-                                <h4>Frias</h4>
-                                <p>Aps 12 meses de trabalho, voc tem direito a 30 dias de frias remuneradas. As frias devem ser programadas com antecedncia junto ao seu gestor.</p>
+                                <h4>Férias</h4>
+                                <p>Aps 12 meses de trabalho, voc tem direito a 30 dias de Férias remuneradas. As Férias devem ser programadas com antecedncia junto ao seu gestor.</p>
                                 <ul>
                                     <li>Possibilidade de fracionamento em at 3 perodos</li>
                                     <li>Um perodo deve ter no mnimo 14 dias</li>
@@ -795,7 +795,7 @@
             return null;
         }
 
-        // Carregamento do usurio
+        // Carregamento do Usuário
         async function carregarUsuario() {
             try {
                 const response = await fetch('/api/me', {
@@ -813,7 +813,7 @@
                     document.getElementById('greeting-text').textContent = greeting;
 
                     // Nome
-                    const nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usurio');
+                    const nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                     document.getElementById('user-name').textContent = nome;
 
                     // Buscar avatar corretamente
@@ -844,7 +844,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Erro ao carregar usurio:', error);
+                console.error('Erro ao carregar Usuário:', error);
             }
         }
 

@@ -5,6 +5,14 @@
 (function() {
     'use strict';
 
+    // Sanitização XSS
+    function escapeHtml(value) {
+        if (value === null || value === undefined) return '';
+        const div = document.createElement('div');
+        div.textContent = String(value);
+        return div.innerHTML;
+    }
+
     let container;
     let pedidos = [];
 
@@ -79,8 +87,8 @@
                     <tbody>
                         ${pedidos.map(p => `
                             <tr>
-                                <td><strong>${p.numero}</strong></td>
-                                <td>${p.fornecedor}</td>
+                                <td><strong>${escapeHtml(p.numero)}</strong></td>
+                                <td>${escapeHtml(p.fornecedor)}</td>
                                 <td>${p.itens}</td>
                                 <td>${formatCurrency(p.valor)}</td>
                                 <td>${formatDate(p.data)}</td>
