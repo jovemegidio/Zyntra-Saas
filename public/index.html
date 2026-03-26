@@ -12,6 +12,9 @@
     <meta name="apple-mobile-web-app-title" content="ALUFORCE">
     <title>Aluforce: Painel de Controle</title>
 
+    <!-- Suprimir console.log em produção -->
+    <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
+
     <!-- Autenticação Unificada (isolamento por aba + refresh + inatividade) -->
     <script src="/js/auth-unified.js?v=20260324"></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>

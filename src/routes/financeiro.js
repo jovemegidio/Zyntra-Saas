@@ -1,64 +1,16 @@
 /**
  * Rotas de API - Módulo Financeiro
  * Controle de Contas a Pagar e Contas a Receber com permissões por usuário
+ * 
+ * Usa pool centralizado (database/pool.js) e auth centralizado (middleware/auth-central.js)
  */
 
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2/promise');
-const jwt = require('jsonwebtoken');
 
-// JWT_SECRET deve vir OBRIGATORIAMENTE do .env
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-    console.error('❌ [FINANCEIRO] ERRO FATAL: JWT_SECRET não definido no .env');
-    process.exit(1);
-}
-
-// Log das variáveis de ambiente para debug
-console.log('[Financeiro] Configuração DB:', {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    database: process.env.DB_NAME
-});
-
-// Configuração do pool de conexões MySQL
-const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'localhost',
-    user: process.env.DB_USER || 'aluforce',
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'aluforce_vendas',
-    port: parseInt(process.env.DB_PORT) || 3306,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-});
-
-// =====================================================
-// MIDDLEWARES DE AUTENTICAÇÍO E AUTORIZAÇÍO
-// =====================================================
-
-/**
- * Middleware para verificar autenticação via JWT
- */
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = (authHeader && authHeader.split(' ')[1]) || 
-                 req.cookies?.authToken || 
-                 req.cookies?.token;
-    
-    if (!token) {
-        return res.status(401).json({ error: 'Token não fornecido' });
-    }
-
-    jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }, (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: 'Token inválido' });
-        }
-        req.user = user;
-        next();
-    });
-}
+// Pool e Auth centralizados — sem duplicações
+const pool = require('../../database/pool');
+const { authenticateToken } = require('../../middleware/auth-central');
 
 /**
  * Middleware para controle de acesso ao módulo financeiro
@@ -70,8 +22,6 @@ function authorizeFinanceiro(section) {
         try {
             const userEmail = req.user?.email?.toLowerCase();
             const userRole = req.user?.role;
-            
-            console.log(`[FINANCEIRO-AUTH] Verificando: email="${userEmail}", section="${section}"`);
             
             if (!userEmail) {
                 return res.status(401).json({ error: 'Usuário não identificado' });
@@ -100,14 +50,12 @@ function authorizeFinanceiro(section) {
             const hasFinanceiroAccess = financeiroEmails.includes(userEmail);
 
             if (isAdmin || hasFinanceiroAccess) {
-                console.log(`[FINANCEIRO-AUTH] ✅ Acesso concedido para ${userEmail}`);
                 req.userAccess = 'admin';
                 return next();
             }
 
             // Consultoria tem acesso de visualização a todos os módulos
             if (userRole === 'consultoria') {
-                console.log(`[FINANCEIRO-AUTH] ✅ Acesso consultoria para ${userEmail}`);
                 req.userAccess = 'consultoria';
                 req.canEdit = false;
                 req.canCreate = false;
@@ -127,7 +75,6 @@ function authorizeFinanceiro(section) {
                         try { areas = JSON.parse(areas); } catch(e) { areas = []; }
                     }
                     if (Array.isArray(areas) && areas.includes('financeiro')) {
-                        console.log(`[FINANCEIRO-AUTH] ✅ Acesso via areas[] para ${userEmail}`);
                         req.userAccess = 'admin';
                         return next();
                     }
@@ -137,8 +84,6 @@ function authorizeFinanceiro(section) {
             }
 
             // Outros usuários não autorizados
-            console.log(`[FINANCEIRO-AUTH] ❌ Acesso negado para ${userEmail}`);
-            
             // Mensagens específicas por seção
             const sectionMessages = {
                 'pagar': 'Contas a Pagar',

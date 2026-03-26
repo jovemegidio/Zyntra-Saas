@@ -123,6 +123,14 @@ const userPermissions = {
         isAdmin: false
     },
 
+    // ============ PRODUÇÃO / PCP ============
+    // Ana Paula Ferreira do Nascimento (PCP, excluding relatorios)
+    'ana': {
+        areas: ['pcp', 'rh'],
+        rhType: 'area',
+        isAdmin: false
+    },
+
     // ============ CONTAS QA (Gerentes - Full Admin por Módulo) ============
     'qafinanceiro': { areas: ['financeiro', 'vendas', 'compras', 'nfe', 'rh'], rhType: 'areaadm', isAdmin: true },
     'qavendas': { areas: ['vendas', 'rh'], rhType: 'areaadm', isAdmin: true },

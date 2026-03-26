@@ -464,7 +464,37 @@ const userPermissions = {
     'hellen': { areas: ['financeiro', 'rh'], rhType: 'area', profile: 'funcionario' },
     'tatiane': { areas: ['financeiro', 'rh'], rhType: 'area', profile: 'funcionario' },
 
-    // ============ PRODUÇÃO / VENDAS RESTRITO ============
+    // ============ PRODUÇÃO / PCP ============
+    'ana': {
+        areas: ['pcp', 'rh'],
+        rhType: 'area',
+        isAdmin: false,
+        profile: null,
+        customPermissions: {
+            pcp: [
+                'page.dashboard',
+                'page.ordens',
+                'page.apontamentos',
+                'page.maquinas',
+                'page.produtos',
+                'page.estoque',
+                'page.qualidade',
+                'page.planejamento',
+                'page.configuracoes',
+                // 'page.relatorios' — EXCLUDED
+                'ordem.criar', 'ordem.editar', 'ordem.excluir',
+                'ordem.iniciar', 'ordem.finalizar',
+                'apontamento.criar', 'apontamento.editar',
+                'estoque.ajustar', 'estoque.transferir',
+                'produto.criar', 'produto.editar',
+                'maquina.criar', 'maquina.editar',
+                'exportar.excel'
+            ],
+            rh: ['funcionario.visualizar', 'ferias.solicitar']
+        }
+    },
+
+    // ============ VENDAS RESTRITO ============
     'jamesson': {
         areas: ['pcp'],
         rhType: null,
