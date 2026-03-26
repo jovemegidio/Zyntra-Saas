@@ -287,88 +287,241 @@ module.exports = function createVendasRoutes(deps) {
             res.json(pedido);
         } catch (error) { next(error); }
     });
-    router.post('/pedidos', [
-        body('empresa_id').isInt({ min: 1 }).withMessage('ID da empresa deve ser um número inteiro positivo'),
-        body('valor').isFloat({ min: 0.01 }).withMessage('Valor deve ser um número positivo'),
-        body('descricao').optional().trim().isLength({ max: 1000 }).withMessage('Descrição muito longa (máx 1000 caracteres)'),
-        validate
-    ], async (req, res, next) => {
+    const cacheService = (() => { try { return require('../services/cache'); } catch(_) { return null; } })();
+
+    router.post('/pedidos', async (req, res, next) => {
+        const connection = await pool.getConnection();
         try {
-            const { empresa_id, valor, descricao } = req.body;
+            await connection.beginTransaction();
+
+            const sanitize = (v) => (v === 'null' || v === 'undefined' || v === '' || v === undefined ? null : v);
+            const sanitizeNum = (v) => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+
+            const {
+                empresa_id, cliente_id, cliente_nome, cliente,
+                valor, descricao, observacao, observacoes,
+                status = 'orcamento',
+                condicao_pagamento, cenario_fiscal,
+                transportadora, transportadora_nome,
+                tipo_frete, frete = 0,
+                placa_veiculo, veiculo_uf, rntrc,
+                qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                peso_liquido, peso_bruto, valor_seguro, outras_despesas,
+                tipo_entrega, endereco_entrega, municipio_entrega, prazo_entrega,
+                desconto_pct = 0, origem,
+                itens, produtos, parcelas
+            } = req.body;
+
             const vendedor_id = req.user.id;
-    
-            const [result] = await pool.query(
-                'INSERT INTO pedidos (empresa_id, vendedor_id, valor, descricao, status) VALUES (?, ?, ?, ?, ?)',
-                [empresa_id, vendedor_id, valor, descricao || null, 'orcamento']
-            );
+            const nomeCliente = sanitize(cliente_nome) || sanitize(cliente) || null;
+            const obs = sanitize(observacao) || sanitize(observacoes) || sanitize(descricao) || null;
+
+            // empresa_id: aceitar do body OU buscar/criar pelo nome do cliente
+            let empresaFinalId = sanitize(empresa_id) ? parseInt(empresa_id) : null;
+            if (!empresaFinalId && nomeCliente) {
+                const [existing] = await connection.query(
+                    'SELECT id FROM empresas WHERE nome_fantasia = ? OR razao_social = ? LIMIT 1',
+                    [nomeCliente, nomeCliente]
+                );
+                if (existing.length > 0) {
+                    empresaFinalId = existing[0].id;
+                } else {
+                    const [newEmp] = await connection.query(
+                        'INSERT INTO empresas (nome_fantasia, razao_social) VALUES (?, ?)',
+                        [nomeCliente, nomeCliente]
+                    );
+                    empresaFinalId = newEmp.insertId;
+                }
+            }
+
+            if (!empresaFinalId && !nomeCliente) {
+                await connection.rollback();
+                connection.release();
+                return res.status(400).json({ message: 'Informe o cliente ou empresa.' });
+            }
+
+            // Calcular valor total dos itens (server-side)
+            const itensArray = itens || produtos || [];
+            let valorTotal = 0;
+            if (Array.isArray(itensArray) && itensArray.length > 0) {
+                for (const item of itensArray) {
+                    const qty = parseFloat(item.quantidade) || 1;
+                    const preco = parseFloat(item.preco_unitario || item.preco || 0);
+                    const desc = parseFloat(item.desconto) || 0;
+                    valorTotal += (qty * preco) - desc;
+                }
+                const descontoVal = valorTotal * ((sanitizeNum(desconto_pct) || 0) / 100);
+                valorTotal = valorTotal - descontoVal + (sanitizeNum(frete) || 0);
+            } else {
+                // Sem itens: aceitar valor do body como fallback (para compatibilidade)
+                valorTotal = sanitizeNum(valor) || 0;
+            }
+
+            const [result] = await connection.query(`
+                INSERT INTO pedidos (
+                    empresa_id, cliente_id, vendedor_id, valor, descricao, status,
+                    condicao_pagamento, cenario_fiscal,
+                    transportadora_nome, tipo_frete, frete,
+                    placa_veiculo, veiculo_uf, rntrc,
+                    qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                    peso_liquido, peso_bruto, valor_seguro, outras_despesas,
+                    desconto_pct, origem, observacao, parcelas
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                empresaFinalId,
+                sanitize(cliente_id) ? parseInt(cliente_id) : null,
+                vendedor_id,
+                valorTotal,
+                obs,
+                'orcamento',
+                sanitize(condicao_pagamento),
+                sanitize(cenario_fiscal),
+                sanitize(transportadora_nome) || sanitize(transportadora),
+                sanitize(tipo_frete),
+                sanitizeNum(frete) || 0,
+                sanitize(placa_veiculo),
+                sanitize(veiculo_uf),
+                sanitize(rntrc),
+                sanitizeNum(qtd_volumes),
+                sanitize(especie_volumes),
+                sanitize(marca_volumes),
+                sanitize(numeracao_volumes),
+                sanitizeNum(peso_liquido),
+                sanitizeNum(peso_bruto),
+                sanitizeNum(valor_seguro),
+                sanitizeNum(outras_despesas),
+                sanitizeNum(desconto_pct) || 0,
+                sanitize(origem) || 'Sistema',
+                obs,
+                parcelas ? (typeof parcelas === 'string' ? parcelas : JSON.stringify(parcelas)) : null
+            ]);
 
             const pedidoId = result.insertId;
 
-            // ========================================
-            // CRIAR NOTIFICAÇÃO DO NOVO PEDIDO
-            // ========================================
-            try {
-                // Buscar nome da empresa
-                const [empresa] = await pool.query('SELECT razao_social, nome_fantasia FROM empresas WHERE id = ?', [empresa_id]);
-                const nomeEmpresa = empresa[0]?.nome_fantasia || empresa[0]?.razao_social || 'Cliente';
-                const nomeVendedor = req.user.nome || req.user.apelido || 'Vendedor';
-                const valorFormatado = parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-                // Notificar todos os admins e supervisores sobre novo pedido
-                const [admins] = await pool.query(`
-                    SELECT id FROM usuarios WHERE 
-                        (role = 'admin' OR is_admin = 1 OR 
-                         departamento IN ('diretoria', 'gerencia', 'supervisao', 'coordenacao', 'ti'))
-                        AND id != ?
-                `, [vendedor_id]);
-
-                const notificacoes = admins.map(admin => [
-                    admin.id,
-                    `📋 Novo Pedido #${pedidoId}`,
-                    `${nomeVendedor} criou um novo pedido para ${nomeEmpresa} no valor de ${valorFormatado}`,
-                    'pedido',
-                    `/modules/Vendas/public/index.html`,
-                    JSON.stringify({ pedido_id: pedidoId, empresa: nomeEmpresa, vendedor: nomeVendedor, valor })
-                ]);
-
-                // Também notificar o próprio vendedor (confirmação)
-                notificacoes.push([
-                    vendedor_id,
-                    `✅ Pedido #${pedidoId} criado`,
-                    `Seu pedido para ${nomeEmpresa} (${valorFormatado}) foi criado e está em Orçamento`,
-                    'pedido',
-                    `/modules/Vendas/public/index.html`,
-                    JSON.stringify({ pedido_id: pedidoId, empresa: nomeEmpresa, valor })
-                ]);
-
-                if (notificacoes.length > 0) {
-                    await pool.query(
-                        'INSERT INTO notificacoes (usuario_id, titulo, mensagem, tipo, link, dados_extras) VALUES ?',
-                        [notificacoes]
+            // Salvar itens
+            if (Array.isArray(itensArray) && itensArray.length > 0) {
+                for (const item of itensArray) {
+                    const qty = parseFloat(item.quantidade) || 1;
+                    const preco = parseFloat(item.preco_unitario || item.preco || 0);
+                    const desc = parseFloat(item.desconto) || 0;
+                    const subtotal = (qty * preco) - desc;
+                    await connection.query(
+                        `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, unidade, local_estoque, preco_unitario, desconto, subtotal)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [pedidoId, item.codigo || '', item.descricao || item.nome || '', qty,
+                         item.unidade || 'UN', item.local_estoque || 'PADRAO', preco, desc, subtotal]
                     );
-                    console.log(`[Vendas] 🔔 ${notificacoes.length} notificações criadas para pedido #${pedidoId}`);
                 }
-            } catch (notifErr) {
-                console.error('[Vendas] Erro ao criar notificações (não-bloqueante):', notifErr.message);
             }
 
-            res.status(201).json({ message: 'Pedido criado com sucesso!', id: pedidoId });
-        } catch (error) { next(error); }
+            await connection.commit();
+
+            // Invalidar cache do GET /pedidos para que o kanban veja o novo pedido imediatamente
+            if (cacheService && cacheService.cacheClear) {
+                cacheService.cacheClear('vendas_pedidos').catch(() => {});
+            }
+
+            // Notificação (não-bloqueante)
+            try {
+                const nomeVendedor = req.user.nome || 'Vendedor';
+                const nomeEmpresa = nomeCliente || 'Cliente';
+                const valorFormatado = valorTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const [admins] = await pool.query(
+                    `SELECT id FROM usuarios WHERE (role = 'admin' OR is_admin = 1) AND id != ?`,
+                    [vendedor_id]
+                );
+                const notifs = admins.map(a => [
+                    a.id, `📋 Novo Pedido #${pedidoId}`,
+                    `${nomeVendedor} criou pedido para ${nomeEmpresa} - ${valorFormatado}`,
+                    'pedido', '/modules/Vendas/public/index.html',
+                    JSON.stringify({ pedido_id: pedidoId })
+                ]);
+                notifs.push([
+                    vendedor_id, `✅ Pedido #${pedidoId} criado`,
+                    `Pedido para ${nomeEmpresa} (${valorFormatado}) registrado com sucesso`,
+                    'pedido', '/modules/Vendas/public/index.html',
+                    JSON.stringify({ pedido_id: pedidoId })
+                ]);
+                if (notifs.length > 0) {
+                    await pool.query(
+                        'INSERT INTO notificacoes (usuario_id, titulo, mensagem, tipo, link, dados_extras) VALUES ?',
+                        [notifs]
+                    );
+                }
+            } catch (_) {}
+
+            res.status(201).json({ message: 'Pedido criado com sucesso!', id: pedidoId, insertId: pedidoId });
+        } catch (error) {
+            try { await connection.rollback(); } catch (_) {}
+            next(error);
+        } finally {
+            connection.release();
+        }
     });
-    router.put('/pedidos/:id', pedidoOwnership, [
-        param('id').isInt({ min: 1 }).withMessage('ID do pedido inválido'),
-        body('empresa_id').isInt({ min: 1 }).withMessage('ID da empresa deve ser um número inteiro positivo'),
-        body('valor').isFloat({ min: 0.01 }).withMessage('Valor deve ser um número positivo'),
-        body('descricao').optional().trim().isLength({ max: 1000 }).withMessage('Descrição muito longa (máx 1000 caracteres)'),
-        validate
-    ], async (req, res, next) => {
+    router.put('/pedidos/:id', pedidoOwnership, async (req, res, next) => {
         try {
             const { id } = req.params;
-            const { empresa_id, valor, descricao } = req.body;
-    
+            const sanitize = (v) => (v === 'null' || v === 'undefined' || v === '' || v === undefined ? null : v);
+            const sanitizeNum = (v) => { const n = parseFloat(v); return isNaN(n) ? null : n; };
+
+            const {
+                empresa_id, cliente_id, cliente_nome, cliente,
+                valor, descricao, observacao, observacoes,
+                status,
+                condicao_pagamento, cenario_fiscal,
+                transportadora, transportadora_nome,
+                tipo_frete, frete,
+                placa_veiculo, veiculo_uf, rntrc,
+                qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                peso_liquido, peso_bruto, valor_seguro, outras_despesas,
+                desconto_pct, origem, parcelas
+            } = req.body;
+
+            const obs = sanitize(observacao) || sanitize(observacoes) || sanitize(descricao) || null;
+
+            // Build dynamic SET clause — only update fields that were sent
+            const sets = [];
+            const params = [];
+
+            if (empresa_id !== undefined && sanitize(empresa_id)) { sets.push('empresa_id = ?'); params.push(parseInt(empresa_id)); }
+            if (cliente_id !== undefined) { sets.push('cliente_id = ?'); params.push(sanitize(cliente_id) ? parseInt(cliente_id) : null); }
+            if (cliente_nome !== undefined || cliente !== undefined) {
+                const nome = sanitize(cliente_nome) || sanitize(cliente);
+                if (nome) { sets.push('cliente_nome = ?'); params.push(nome); }
+            }
+            if (valor !== undefined && sanitizeNum(valor) !== null) { sets.push('valor = ?'); params.push(sanitizeNum(valor)); }
+            if (obs !== null) { sets.push('descricao = ?'); params.push(obs); sets.push('observacao = ?'); params.push(obs); }
+            if (status !== undefined && sanitize(status)) { sets.push('status = ?'); params.push(sanitize(status)); }
+            if (condicao_pagamento !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicao_pagamento)); }
+            if (cenario_fiscal !== undefined) { sets.push('cenario_fiscal = ?'); params.push(sanitize(cenario_fiscal)); }
+            if (transportadora_nome !== undefined || transportadora !== undefined) {
+                sets.push('transportadora_nome = ?'); params.push(sanitize(transportadora_nome) || sanitize(transportadora));
+            }
+            if (tipo_frete !== undefined) { sets.push('tipo_frete = ?'); params.push(sanitize(tipo_frete)); }
+            if (frete !== undefined) { sets.push('frete = ?'); params.push(sanitizeNum(frete) || 0); }
+            if (placa_veiculo !== undefined) { sets.push('placa_veiculo = ?'); params.push(sanitize(placa_veiculo)); }
+            if (veiculo_uf !== undefined) { sets.push('veiculo_uf = ?'); params.push(sanitize(veiculo_uf)); }
+            if (rntrc !== undefined) { sets.push('rntrc = ?'); params.push(sanitize(rntrc)); }
+            if (qtd_volumes !== undefined) { sets.push('qtd_volumes = ?'); params.push(sanitizeNum(qtd_volumes)); }
+            if (especie_volumes !== undefined) { sets.push('especie_volumes = ?'); params.push(sanitize(especie_volumes)); }
+            if (marca_volumes !== undefined) { sets.push('marca_volumes = ?'); params.push(sanitize(marca_volumes)); }
+            if (numeracao_volumes !== undefined) { sets.push('numeracao_volumes = ?'); params.push(sanitize(numeracao_volumes)); }
+            if (peso_liquido !== undefined) { sets.push('peso_liquido = ?'); params.push(sanitizeNum(peso_liquido)); }
+            if (peso_bruto !== undefined) { sets.push('peso_bruto = ?'); params.push(sanitizeNum(peso_bruto)); }
+            if (valor_seguro !== undefined) { sets.push('valor_seguro = ?'); params.push(sanitizeNum(valor_seguro)); }
+            if (outras_despesas !== undefined) { sets.push('outras_despesas = ?'); params.push(sanitizeNum(outras_despesas)); }
+            if (desconto_pct !== undefined) { sets.push('desconto_pct = ?'); params.push(sanitizeNum(desconto_pct) || 0); }
+            if (origem !== undefined) { sets.push('origem = ?'); params.push(sanitize(origem)); }
+            if (parcelas !== undefined) { sets.push('parcelas = ?'); params.push(parcelas ? (typeof parcelas === 'string' ? parcelas : JSON.stringify(parcelas)) : null); }
+
+            if (sets.length === 0) {
+                return res.status(400).json({ message: 'Nenhum campo para atualizar.' });
+            }
+
+            params.push(parseInt(id));
             const [result] = await pool.query(
-                `UPDATE pedidos SET empresa_id = ?, valor = ?, descricao = ? WHERE id = ?`,
-                [empresa_id, valor, descricao || null, id]
+                `UPDATE pedidos SET ${sets.join(', ')} WHERE id = ?`,
+                params
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
             res.json({ message: 'Pedido atualizado com sucesso.' });
