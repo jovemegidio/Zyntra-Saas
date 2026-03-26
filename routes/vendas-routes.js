@@ -1961,18 +1961,26 @@ module.exports = function createVendasRoutes(deps) {
             });
         } catch (error) { next(error); }
     });
-    router.post('/clientes', [
-        body('nome').trim().notEmpty().withMessage('Nome é obrigatório')
-            .isLength({ max: 255 }).withMessage('Nome muito longo'),
-        body('email').optional({ checkFalsy: true }).trim().isEmail().withMessage('Email inválido'),
-        validate
-    ], async (req, res, next) => {
+    router.post('/clientes', authenticateToken, async (req, res, next) => {
         try {
-            const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
-                    endereco, numero, complemento, bairro, cidade, uf, cep,
-                    inscricao_estadual, inscricao_municipal, limite_credito, ativo, empresa_id } = req.body;
+            // Field aliasing — frontend may send razao_social/cnpj_cpf/ie/logradouro/número
+            const b = req.body;
+            const nome = (b.nome || b.razao_social || '').trim();
+            const cnpj = b.cnpj || b.cnpj_cpf || null;
+            const endereco = b.endereco || b.logradouro || null;
+            const numero = b.numero || b.número || null;
+            const inscricao_estadual = b.inscricao_estadual || b.ie || null;
+            const { nome_fantasia, contato, telefone, celular, email, website,
+                    complemento, bairro, cidade, uf, cep,
+                    inscricao_municipal, limite_credito, ativo, empresa_id } = b;
             if (!nome) {
-                return res.status(400).json({ message: 'Nome é obrigatório.' });
+                return res.status(400).json({ message: 'Nome / Razão Social é obrigatório.' });
+            }
+            if (nome.length > 255) {
+                return res.status(400).json({ message: 'Nome muito longo (máx 255 caracteres).' });
+            }
+            if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                return res.status(400).json({ message: 'Email inválido.' });
             }
 
             const [result] = await pool.query(
@@ -1991,7 +1999,7 @@ module.exports = function createVendasRoutes(deps) {
             res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
         } catch (error) { next(error); }
     });
-    router.put('/clientes/:id', async (req, res, next) => {
+    router.put('/clientes/:id', authenticateToken, async (req, res, next) => {
         try {
             const { id } = req.params;
             const body = req.body;
@@ -2006,9 +2014,15 @@ module.exports = function createVendasRoutes(deps) {
                 return res.json({ message: `Cliente ${body.ativo ? 'ativado' : 'inativado'} com sucesso.` });
             }
 
-            const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
-                    endereco, numero, complemento, bairro, cidade, uf, cep,
-                    inscricao_estadual, inscricao_municipal, limite_credito, empresa_id } = body;
+            // Field aliasing — frontend may send razao_social/cnpj_cpf/ie/logradouro/número
+            const nome = (body.nome || body.razao_social || '').trim();
+            const cnpj = body.cnpj || body.cnpj_cpf || null;
+            const endereco = body.endereco || body.logradouro || null;
+            const numero = body.numero || body.número || null;
+            const inscricao_estadual = body.inscricao_estadual || body.ie || null;
+            const { nome_fantasia, contato, telefone, celular, email, website,
+                    complemento, bairro, cidade, uf, cep,
+                    inscricao_municipal, limite_credito, empresa_id } = body;
             
             if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 

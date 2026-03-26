@@ -1848,7 +1848,7 @@
             if (nome) atualizarAvatarModal(nome);
         }
 
-        // Buscar dados do CNPJ na ReceitaWS
+        // Buscar dados do CNPJ via proxy server (BrasilAPI)
         async function buscarCnpj() {
             const cnpj = document.getElementById('clienteCnpj').value.replace(/\D/g, '');
             if (cnpj.length !== 14) {
@@ -1859,20 +1859,20 @@
             mostrarToast('Consultando CNPJ na Receita Federal...', 'info');
             
             try {
-                const response = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj}`);
-                const data = await response.json();
-                
-                if (data.status === 'ERROR') {
-                    mostrarToast(data.message || 'CNPJ não encontrado', 'error');
+                const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { credentials: 'include' });
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    mostrarToast(err.error || 'CNPJ não encontrado', 'error');
                     return;
                 }
+                const data = await response.json();
                 
-                // Preencher campos com dados da Receita
-                document.getElementById('clienteNome').value = data.nome || '';
-                document.getElementById('clienteFantasia').value = data.fantasia || '';
+                // Preencher campos com dados da BrasilAPI
+                document.getElementById('clienteNome').value = data.razao_social || '';
+                document.getElementById('clienteFantasia').value = data.nome_fantasia || '';
                 
-                // Separar DDD do telefone
-                const telefone = (data.telefone || '').replace(/\D/g, '');
+                // Separar DDD do telefone (BrasilAPI: ddd_telefone_1 = "1138831234")
+                const telefone = (data.ddd_telefone_1 || '').replace(/\D/g, '');
                 if (telefone.length >= 10) {
                     document.getElementById('clienteDDD').value = telefone.substring(0, 2);
                     document.getElementById('clienteTelefone').value = telefone.substring(2);
@@ -1881,7 +1881,7 @@
                 document.getElementById('clienteEmail').value = data.email || '';
                 
                 // Endereço
-                const cep = (data.cep || '').replace(/[.\-]/g, '');
+                const cep = (data.cep || '').toString().replace(/[.\-]/g, '');
                 document.getElementById('clienteCep').value = cep;
                 document.getElementById('clienteEndereco').value = data.logradouro || '';
                 document.getElementById('clienteNumero').value = data.numero || '';
@@ -1890,14 +1890,13 @@
                 document.getElementById('clienteCidade').value = data.municipio || '';
                 document.getElementById('clienteUF').value = data.uf || '';
                 
-                // CNAE
-                if (data.atividade_principal && data.atividade_principal.length > 0) {
-                    const cnae = data.atividade_principal[0];
-                    document.getElementById('clienteCnae').value = `${cnae.code} ${cnae.text}`;
+                // CNAE (BrasilAPI: cnae_fiscal + cnae_fiscal_descricao)
+                if (data.cnae_fiscal) {
+                    document.getElementById('clienteCnae').value = `${data.cnae_fiscal} ${data.cnae_fiscal_descricao || ''}`;
                 }
                 
                 // Atualizar avatar
-                atualizarAvatarModal(data.nome || data.fantasia);
+                atualizarAvatarModal(data.razao_social || data.nome_fantasia);
                 
                 mostrarToast('Dados do CNPJ carregados com sucesso!', 'success');
             } catch (error) {
