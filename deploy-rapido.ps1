@@ -12,7 +12,7 @@ param(
 
 $servidor = "31.97.64.102"
 $usuario = "root"
-$senha = "Aluforce@2026#Vps"
+$senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = $PSScriptRoot
 if (-not $caminhoLocal) {

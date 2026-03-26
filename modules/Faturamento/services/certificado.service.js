@@ -102,8 +102,8 @@ class CertificadoService {
             const tagContent = this.extrairConteudoTag(xmlString, tagAssinatura, id);
             const c14nContent = this.canonicalizarXML(tagContent);
             
-            // Calcular digest SHA-1
-            const md = forge.md.sha1.create();
+            // Calcular digest SHA-256
+            const md = forge.md.sha256.create();
             md.update(c14nContent, 'utf8');
             const digestValue = forge.util.encode64(md.digest().bytes());
             
@@ -111,8 +111,8 @@ class CertificadoService {
             const signedInfo = this.criarSignedInfo(id, digestValue);
             const c14nSignedInfo = this.canonicalizarXML(signedInfo);
             
-            // Assinar SignedInfo com chave privada
-            const mdSignature = forge.md.sha1.create();
+            // Assinar SignedInfo com chave privada (SHA-256)
+            const mdSignature = forge.md.sha256.create();
             mdSignature.update(c14nSignedInfo, 'utf8');
             const signature = this.chavePriva.sign(mdSignature);
             const signatureValue = forge.util.encode64(signature);
@@ -136,10 +136,13 @@ ${signedInfo}
 </KeyInfo>
 </Signature>`;
             
-            // Inserir assinatura no XML
+            // Inserir assinatura no XML (Signature é filha de NFe/CTe, DEPOIS de infNFe/infCte)
             const xmlAssinado = xmlString.replace(
+                new RegExp(`(</${tagAssinatura}>)(\\s*</(?:NFe|CTe)>)`),
+                `$1${assinatura}$2`
+            ) || xmlString.replace(
                 `</${tagAssinatura}>`,
-                `${assinatura}</${tagAssinatura}>`
+                `</${tagAssinatura}>${assinatura}`
             );
             
             return xmlAssinado;
@@ -154,13 +157,13 @@ ${signedInfo}
     criarSignedInfo(referenceId, digestValue) {
         return `<SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
 <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
-<SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+<SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
 <Reference URI="#${referenceId}">
 <Transforms>
 <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
 <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
 </Transforms>
-<DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+<DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
 <DigestValue>${digestValue}</DigestValue>
 </Reference>
 </SignedInfo>`;
@@ -184,10 +187,13 @@ ${signedInfo}
      * Canonicalizar XML (C14N)
      */
     canonicalizarXML(xml) {
-        // Implementação simplificada - em produção usar biblioteca específica
+        // C14N simplificada compatível com SEFAZ NF-e 4.00
         return xml
-            .replace(/>\s+</g, '><')  // Remove espaços entre tags
-            .replace(/\r/g, '')   // Normaliza quebras de linha
+            .replace(/\r\n/g, '\n')      // Normaliza line endings
+            .replace(/\r/g, '\n')         // CR → LF  
+            .replace(/>\s+</g, '><')       // Remove espaços entre tags
+            .replace(/\s+\/>/g, '/>')      // Remove espaços antes de />
+            .replace(/\n/g, '')            // Remove newlines
             .trim();
     }
     

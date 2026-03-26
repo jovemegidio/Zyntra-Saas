@@ -7,7 +7,7 @@
 
 $servidor = "31.97.64.102"
 $usuario = "root"
-$senha = "Aluforce@2026#Vps"
+$senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = "G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Sistema - ALUFORCE - V.2"
 
@@ -185,7 +185,7 @@ foreach ($pasta in $pastasMonitorar) {
          $caminhoLocal = "G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Sistema - ALUFORCE - V.2"
          $servidor = "31.97.64.102"
          $usuario = "root"
-         $senha = "Aluforce@2026#Vps"
+         $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { "" }
          $caminhoRemoto = "/var/www/aluforce"
 
          # Ignorar arquivos temporários
@@ -267,7 +267,7 @@ $actionRaiz = {
    $nome = Split-Path $path -Leaf
    $servidor = "31.97.64.102"
    $usuario = "root"
-   $senha = "Aluforce@2026#Vps"
+   $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { "" }
    $caminhoRemoto = "/var/www/aluforce"
 
    $arquivosMonitorar = @("server.js", "index.html", "security-middleware.js", "ecosystem.config.js", "package.json")

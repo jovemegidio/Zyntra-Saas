@@ -164,27 +164,27 @@ class DanfeService {
         // Natureza da operação
         doc.rect(10, 155, 280, 20).stroke();
         doc.fontSize(7).font('Helvetica');
-        doc.text('NATUREZA DA OPERAÇÍO', 15, 160);
+        doc.text('NATUREZA DA OPERAÇÃO', 15, 160);
         doc.fontSize(9).font('Helvetica-Bold');
         doc.text(dados.naturezaOperacao, 15, 168);
         
         // Protocolo de autorização
         doc.rect(295, 155, 290, 20).stroke();
         doc.fontSize(7).font('Helvetica');
-        doc.text('PROTOCOLO DE AUTORIZAÇÍO DE USO', 300, 160);
+        doc.text('PROTOCOLO DE AUTORIZAÇÃO DE USO', 300, 160);
         doc.fontSize(9).font('Helvetica-Bold');
         doc.text(dados.numeroProtocolo || 'PENDENTE', 300, 168);
         
         // Inscrições
         doc.rect(10, 180, 190, 20).stroke();
         doc.fontSize(7).font('Helvetica');
-        doc.text('INSCRIÇÍO ESTADUAL', 15, 185);
+        doc.text('INSCRIÇÃO ESTADUAL', 15, 185);
         doc.fontSize(9);
         doc.text(emitente.ie, 15, 193);
         
         doc.rect(205, 180, 190, 20).stroke();
         doc.fontSize(7);
-        doc.text('INSCRIÇÍO ESTADUAL DO SUBST. TRIBUTÁRIO', 210, 185);
+        doc.text('INSCRIÇÃO ESTADUAL DO SUBST. TRIBUTÁRIO', 210, 185);
         
         doc.rect(400, 180, 185, 20).stroke();
         doc.fontSize(7);
@@ -279,7 +279,7 @@ class DanfeService {
         // IE
         doc.rect(425, y, 160, 18).stroke();
         doc.fontSize(7);
-        doc.text('INSCRIÇÍO ESTADUAL', 430, y + 2);
+        doc.text('INSCRIÇÃO ESTADUAL', 430, y + 2);
         doc.fontSize(9);
         doc.text(destinatario.ie || 'ISENTO', 430, y + 10);
     }

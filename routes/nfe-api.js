@@ -210,38 +210,44 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
         }
     });
 
-    // GET /api/nfe/listar — Lista NF-es para a página consultar.html
+    // GET /api/nfe/listar — Lista NF-es para espelho/consulta
     router.get('/listar', authenticateToken, async (req, res) => {
         try {
             const limite = Math.min(parseInt(req.query.limite) || 100, 500);
             const offset = Math.max(parseInt(req.query.offset) || 0, 0);
             let rows = [];
 
-            for (const table of ['nfe', 'nfes']) {
+            // Tabelas com schema de NF-e produto (DANFE)
+            const queries = [
+                { table: 'notas_fiscais', sql: `SELECT id, numero, serie, chave_acesso, cliente_nome AS destinatario_nome, cliente_cnpj AS destinatario_cnpj, data_emissao, valor_total, status, protocolo_autorizacao AS numero_protocolo, pedido_numero FROM notas_fiscais ORDER BY id DESC LIMIT ? OFFSET ?` },
+                { table: 'nfes', sql: `SELECT id, numero, serie, chave_acesso, destinatario_nome, destinatario_cnpj_cpf AS destinatario_cnpj, data_emissao, valor_total, status, protocolo_autorizacao AS numero_protocolo, NULL AS pedido_numero FROM nfes ORDER BY id DESC LIMIT ? OFFSET ?` }
+            ];
+
+            for (const q of queries) {
                 try {
-                    const [result] = await pool.query(
-                        `SELECT id, numero_nfe, numero, serie, cliente_nome, destinatario_nome,
-                                data_emissao, valor_total, valor, status, chave_acesso, numero_protocolo
-                         FROM \`${table}\`
-                         ORDER BY id DESC LIMIT ? OFFSET ?`,
-                        [limite, offset]
-                    );
-                    if (result && result.length > 0) { rows = result; break; }
+                    const [result] = await pool.query(q.sql, [limite, offset]);
+                    if (result && result.length > 0) {
+                        rows = rows.concat(result);
+                    }
                 } catch (_) {}
             }
 
+            // Ordenar por id desc (merge das tabelas)
+            rows.sort((a, b) => (b.id || 0) - (a.id || 0));
+            rows = rows.slice(0, limite);
+
             const notas = rows.map(row => ({
-                id:          row.id,
-                'número':    row.numero_nfe || row.numero || '',
-                numero:      row.numero_nfe || row.numero || '',
-                serie:       row.serie || '1',
-                cliente:     row.cliente_nome || row.destinatario_nome || '',
-                destinatario: row.destinatario_nome || row.cliente_nome || '',
-                dataEmissao: row.data_emissao || null,
-                valor:       parseFloat(row.valor_total || row.valor || 0),
-                status:      row.status || 'pendente',
-                chave:       row.chave_acesso || '',
-                protocolo:   row.numero_protocolo || ''
+                id:           row.id,
+                numero:       row.numero || '',
+                serie:        row.serie || '1',
+                destinatario: row.destinatario_nome || '',
+                cnpj:         row.destinatario_cnpj || '',
+                dataEmissao:  row.data_emissao || null,
+                valor:        parseFloat(row.valor_total || 0),
+                status:       row.status || 'rascunho',
+                chave:        row.chave_acesso || '',
+                protocolo:    row.numero_protocolo || '',
+                pedido:       row.pedido_numero || ''
             }));
 
             res.json({ notas, total: notas.length });

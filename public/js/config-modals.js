@@ -55,7 +55,8 @@ async function abrirConfiguracao(tipo) {
         'contratos': 'modal-contratos',
         'sla': 'modal-sla',
         'nfse': 'modal-nfse',
-        'custos-precificacao': 'modal-custos-precificacao'
+        'custos-precificacao': 'modal-custos-precificacao',
+        'espelho-nf': 'modal-espelho-nf'
     };
 
     const modalId = modalMap[tipo];
@@ -141,7 +142,8 @@ async function abrirConfiguracao(tipo) {
         'tipos-servico': 'Tipos de Serviço',
         'contratos': 'Modelos de Contrato',
         'sla': 'SLA de Atendimento',
-        'nfse': 'NFS-e'
+        'nfse': 'NFS-e',
+        'espelho-nf': 'Espelho de Nota Fiscal'
     };
     if (titleMap[tipo]) {
         document.title = 'Zyntra: Configurações — ' + titleMap[tipo];
@@ -259,6 +261,9 @@ async function abrirConfiguracao(tipo) {
             break;
         case 'custos-precificacao':
             loadCustosPrecificacaoData();
+            break;
+        case 'espelho-nf':
+            if (typeof carregarListaNFesEspelho === 'function') carregarListaNFesEspelho();
             break;
     }
 }

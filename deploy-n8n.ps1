@@ -20,7 +20,8 @@ param(
 # ── Configuração ──────────────────────────────
 $servidor = "31.97.64.102"
 $usuario = "root"
-$senha = "Aluforce@2026#Vps"
+$senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
+$n8nPassword = if ($env:N8N_PASSWORD) { $env:N8N_PASSWORD } else { Read-Host "Senha n8n" }
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = $PSScriptRoot
 if (-not $caminhoLocal) {
@@ -260,7 +261,7 @@ N8N_HOST=n8n.aluforce.api.br
 N8N_PROTOCOL=https
 N8N_WEBHOOK_URL=https://n8n.aluforce.api.br/
 N8N_AUTH_USER=admin
-N8N_AUTH_PASSWORD=Aluforce_n8n_2026!
+N8N_AUTH_PASSWORD=$n8nPassword
 N8N_ENCRYPTION_KEY=$encryptionKey
 N8N_API_KEY=$apiKey
 N8N_DB_NAME=n8n
@@ -279,7 +280,7 @@ N8N_DB_NAME=n8n
     Write-Host "  📋 Credenciais do n8n:" -ForegroundColor White
     Write-Host "     URL:    https://n8n.aluforce.api.br" -ForegroundColor Cyan
     Write-Host "     Login:  admin" -ForegroundColor Cyan
-    Write-Host "     Senha:  Aluforce_n8n_2026!" -ForegroundColor Cyan
+    Write-Host "     Senha:  (definida via \$env:N8N_PASSWORD)" -ForegroundColor Cyan
     Write-Host "     API Key: $apiKey" -ForegroundColor DarkGray
 }
 Write-Host ""
@@ -558,7 +559,7 @@ Environment=DB_MYSQLDB_USER=root
 Environment=DB_MYSQLDB_PASSWORD=
 Environment=N8N_BASIC_AUTH_ACTIVE=true
 Environment=N8N_BASIC_AUTH_USER=admin
-Environment=N8N_BASIC_AUTH_PASSWORD=Aluforce_n8n_2026!
+Environment=N8N_BASIC_AUTH_PASSWORD=$n8nPassword
 Environment=N8N_ENCRYPTION_KEY=$encryptionKey
 ExecStart=/usr/bin/n8n start
 Restart=always
@@ -626,7 +627,7 @@ Write-Host "╚═════════════════════�
 Write-Host ""
 Write-Host "  🌐 Painel n8n: " -NoNewline; Write-Host "https://n8n.aluforce.api.br" -ForegroundColor Cyan
 Write-Host "  👤 Login:      " -NoNewline; Write-Host "admin" -ForegroundColor White
-Write-Host "  🔑 Senha:      " -NoNewline; Write-Host "Aluforce_n8n_2026!" -ForegroundColor White
+Write-Host "  🔑 Senha:      " -NoNewline; Write-Host "(definida via `$env:N8N_PASSWORD)" -ForegroundColor White
 Write-Host ""
 Write-Host "  📋 Próximos passos:" -ForegroundColor Yellow
 Write-Host "     1. Acesse https://n8n.aluforce.api.br" -ForegroundColor White

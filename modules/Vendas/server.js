@@ -3903,20 +3903,23 @@ apiVendasRouter.post('/pedidos/:id/duplicar', authenticateToken, async (req, res
         for (const item of itensRows) {
             await pool.query(`
                 INSERT INTO pedido_itens (
-                    pedido_id, codigo_produto, produto, descricao,
-                    quantidade, valor_unitario, valor_total,
-                    ncm, unidade, ipi, icms, pis, cofins
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    pedido_id, codigo, descricao,
+                    quantidade, quantidade_parcial, unidade, local_estoque,
+                    preco_unitario, desconto, subtotal,
+                    ncm, ipi, icms, pis, cofins
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 novoPedidoId,
-                item.codigo_produto,
-                item.produto,
+                item.codigo,
                 item.descricao,
                 item.quantidade,
-                item.valor_unitario,
-                item.valor_total,
-                item.ncm,
+                item.quantidade_parcial || 0,
                 item.unidade,
+                item.local_estoque || 'PADRAO',
+                item.preco_unitario,
+                item.desconto || 0,
+                item.subtotal,
+                item.ncm,
                 item.ipi || 0,
                 item.icms || 0,
                 item.pis || 0,
@@ -4050,19 +4053,19 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
         } = req.body;
         const user = req.user || {};
 
-        const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ?', [id]);
-        if (pedidoRows.length === 0) { connection.release(); return res.status(404).json({ success: false, message: 'Pedido não encontrado.' }); }
-        const pedido = pedidoRows[0];
-        if (pedido.status === 'cancelado') { connection.release(); return res.status(400).json({ success: false, message: 'Não é possível faturar pedido cancelado.' }); }
-        if (pedido.percentual_faturado >= 100) { connection.release(); return res.status(400).json({ success: false, message: 'Pedido já está 100% faturado.' }); }
-
-        const valorTotal = parseFloat(pedido.valor) || 0;
-        const percentualFaturar = Math.min(parseFloat(percentual), 100 - (parseFloat(pedido.percentual_faturado) || 0));
-        const valorFaturar = (valorTotal * percentualFaturar) / 100;
-
         // === TRANSAÇÃO ATÔMICA ===
         await connection.beginTransaction();
         try {
+            // Ler pedido DENTRO da transação com FOR UPDATE para evitar race condition
+            const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+            if (pedidoRows.length === 0) { await connection.rollback(); connection.release(); return res.status(404).json({ success: false, message: 'Pedido não encontrado.' }); }
+            const pedido = pedidoRows[0];
+            if (pedido.status === 'cancelado') { await connection.rollback(); connection.release(); return res.status(400).json({ success: false, message: 'Não é possível faturar pedido cancelado.' }); }
+            if (pedido.percentual_faturado >= 100) { await connection.rollback(); connection.release(); return res.status(400).json({ success: false, message: 'Pedido já está 100% faturado.' }); }
+
+            const valorTotal = parseFloat(pedido.valor) || 0;
+            const percentualFaturar = Math.min(parseFloat(percentual), 100 - (parseFloat(pedido.percentual_faturado) || 0));
+            const valorFaturar = (valorTotal * percentualFaturar) / 100;
             // NF atômica com FOR UPDATE
             const [nfRows] = await connection.query('SELECT MAX(CAST(nfe_faturamento_numero AS UNSIGNED)) as ultima_nf FROM pedidos WHERE nfe_faturamento_numero IS NOT NULL FOR UPDATE');
             const ultimaNf = nfRows[0]?.ultima_nf || 0;
@@ -4144,20 +4147,21 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
         } = req.body;
         const user = req.user || {};
 
-        const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ?', [id]);
-        if (pedidoRows.length === 0) { connection.release(); return res.status(404).json({ success: false, message: 'Pedido não encontrado.' }); }
-        const pedido = pedidoRows[0];
-        if (pedido.estoque_baixado === 1) { connection.release(); return res.status(400).json({ success: false, message: 'Estoque já foi baixado para este pedido.' }); }
-        if (pedido.tipo_faturamento === 'normal') { connection.release(); return res.status(400).json({ success: false, message: 'Este pedido não é de faturamento parcial.' }); }
-
-        const valorTotal = parseFloat(pedido.valor) || 0;
-        const valorFaturado = parseFloat(pedido.valor_faturado) || 0;
-        const valorRestante = valorTotal - valorFaturado;
-        const percentualRestante = 100 - (parseFloat(pedido.percentual_faturado) || 0);
-
         // === TRANSAÇÃO ATÔMICA: NF + pedido + estoque + financeiro ===
         await connection.beginTransaction();
         try {
+            // Ler pedido DENTRO da transação com FOR UPDATE para evitar race condition
+            const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+            if (pedidoRows.length === 0) { await connection.rollback(); connection.release(); return res.status(404).json({ success: false, message: 'Pedido não encontrado.' }); }
+            const pedido = pedidoRows[0];
+            if (pedido.estoque_baixado === 1) { await connection.rollback(); connection.release(); return res.status(400).json({ success: false, message: 'Estoque já foi baixado para este pedido.' }); }
+            if (pedido.tipo_faturamento === 'normal') { await connection.rollback(); connection.release(); return res.status(400).json({ success: false, message: 'Este pedido não é de faturamento parcial.' }); }
+
+            const valorTotal = parseFloat(pedido.valor) || 0;
+            const valorFaturado = parseFloat(pedido.valor_faturado) || 0;
+            const valorRestante = valorTotal - valorFaturado;
+            const percentualRestante = 100 - (parseFloat(pedido.percentual_faturado) || 0);
+
             // NF de remessa atômica
             const [nfRows] = await connection.query('SELECT MAX(CAST(nfe_remessa_numero AS UNSIGNED)) as ultima_nf FROM pedidos WHERE nfe_remessa_numero IS NOT NULL FOR UPDATE');
             const ultimaNf = nfRows[0]?.ultima_nf || 0;

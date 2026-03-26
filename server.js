@@ -1491,6 +1491,17 @@ app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
+// 🚚 LOGÍSTICA API — Extracted to routes/logistica-routes.js
+// =================================================================
+try {
+    const logisticaRouter = require('./routes/logistica-routes')({ pool, authenticateToken, authorizeArea });
+    app.use('/api/logistica', logisticaRouter);
+    console.log('✅ Rotas Logística API carregadas: /api/logistica/*');
+} catch (err) {
+    console.error('❌ Erro ao carregar rotas Logística:', err.message);
+}
+
+// =================================================================
 // 📄 FATURAMENTO API — Módulo de Faturamento/NFe (SEFAZ, certificado)
 // =================================================================
 try {

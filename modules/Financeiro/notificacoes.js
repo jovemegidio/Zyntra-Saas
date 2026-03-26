@@ -91,10 +91,9 @@ class SistemaNotificacoes {
         try {
             // TODO: Salvar na API
             // await fetch('/api/financeiro/notificacoes', {
-                    credentials: 'include',
-                    //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json'
-                }),
+            //     credentials: 'include',
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify(notificação)
             // });
 
@@ -112,10 +111,9 @@ class SistemaNotificacoes {
         try {
             // TODO: Atualizar na API
             // await fetch(`/api/financeiro/notificacoes/${id}`, {
-                    credentials: 'include',
-                    //     method: 'PATCH',
-            //     headers: { 'Content-Type': 'application/json'
-                }),
+            //     credentials: 'include',
+            //     method: 'PATCH',
+            //     headers: { 'Content-Type': 'application/json' },
             //     body: JSON.stringify({ lida: true })
             // });
 

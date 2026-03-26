@@ -24,11 +24,11 @@ console.log('[Financeiro] Configuração DB:', {
 
 // Configuração do pool de conexões MySQL
 const pool = mysql.createPool({
-    host: process.env.DB_HOST || 'interchange.proxy.rlwy.net',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD, // SEGURANÇA: sem fallback hardcoded
+    host: process.env.DB_HOST || 'localhost',
+    user: process.env.DB_USER || 'aluforce',
+    password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME || 'aluforce_vendas',
-    port: parseInt(process.env.DB_PORT) || 19396,
+    port: parseInt(process.env.DB_PORT) || 3306,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -2850,3 +2850,238 @@ router.post('/importar/fluxo-caixa', authenticateToken, async (req, res) => {
 });
 
 module.exports = router;
+
+// =============================================
+// CONCILIAÇÃO BANCÁRIA - ROTAS CRUD
+// =============================================
+
+// Helper: garantir que tabelas de conciliação existem
+async function ensureConciliacaoTables() {
+    try {
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS extrato_bancario (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                conta_id INT NULL,
+                data DATE NULL,
+                descricao VARCHAR(500) NULL,
+                valor DECIMAL(15,2) NOT NULL DEFAULT 0,
+                conciliado TINYINT(1) DEFAULT 0,
+                hash_linha VARCHAR(64) NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_conta (conta_id),
+                INDEX idx_data (data),
+                INDEX idx_hash (hash_linha)
+            )
+        `);
+        await pool.execute(`
+            CREATE TABLE IF NOT EXISTS conciliacoes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                conta_id INT NULL,
+                movimentacao_sistema_id INT NULL,
+                movimentacao_tabela VARCHAR(50) NULL,
+                extrato_id INT NULL,
+                valor DECIMAL(15,2) NOT NULL DEFAULT 0,
+                tipo_match ENUM('manual','automatico') DEFAULT 'manual',
+                usuario_id INT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                INDEX idx_extrato (extrato_id),
+                INDEX idx_sistema (movimentacao_sistema_id)
+            )
+        `);
+    } catch (e) {
+        if (!String(e.message).includes('already exists')) {
+            console.warn('[Conciliação] Erro ao criar tabelas:', e.message);
+        }
+    }
+}
+
+/**
+ * GET /api/financeiro/conciliacao
+ * tipo=extrato → lançamentos do extrato bancário
+ * tipo=conciliacoes → histórico de conciliações
+ */
+router.get('/conciliacao', authenticateToken, async (req, res) => {
+    try {
+        await ensureConciliacaoTables();
+        const { tipo, conta_id } = req.query;
+        if (tipo === 'extrato') {
+            let sql = 'SELECT id, conta_id, data, descricao, valor, conciliado FROM extrato_bancario';
+            const params = [];
+            if (conta_id) { sql += ' WHERE conta_id = ?'; params.push(conta_id); }
+            sql += ' ORDER BY data DESC LIMIT 200';
+            const [rows] = await pool.execute(sql, params);
+            return res.json({ success: true, data: rows });
+        }
+        if (tipo === 'conciliacoes') {
+            let sql = 'SELECT id, conta_id, movimentacao_sistema_id, movimentacao_tabela, extrato_id, valor, tipo_match, created_at FROM conciliacoes';
+            const params = [];
+            if (conta_id) { sql += ' WHERE conta_id = ?'; params.push(conta_id); }
+            sql += ' ORDER BY created_at DESC LIMIT 200';
+            const [rows] = await pool.execute(sql, params);
+            return res.json({ success: true, data: rows });
+        }
+        res.json({ success: true, data: [] });
+    } catch (error) {
+        console.error('[Conciliação] Erro GET:', error);
+        res.status(500).json({ success: false, message: 'Erro ao buscar dados de conciliação' });
+    }
+});
+
+/**
+ * POST /api/financeiro/conciliacao
+ * Conciliação manual: vincula lançamento do sistema com extrato
+ */
+router.post('/conciliacao', authenticateToken, async (req, res) => {
+    try {
+        await ensureConciliacaoTables();
+        const { conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match = 'manual' } = req.body;
+        if (!movimentacao_sistema_id || !extrato_id) {
+            return res.status(400).json({ success: false, message: 'IDs do sistema e extrato são obrigatórios' });
+        }
+        const [result] = await pool.execute(
+            'INSERT INTO conciliacoes (conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
+            [conta_id || null, movimentacao_sistema_id, extrato_id, valor || 0, tipo_match, req.user?.id || null]
+        );
+        await pool.execute('UPDATE extrato_bancario SET conciliado = 1 WHERE id = ?', [extrato_id]);
+        res.json({ success: true, id: result.insertId, message: 'Conciliação realizada' });
+    } catch (error) {
+        console.error('[Conciliação] Erro POST:', error);
+        res.status(500).json({ success: false, message: 'Erro ao conciliar' });
+    }
+});
+
+/**
+ * POST /api/financeiro/conciliacao/automatica
+ * Concilia automaticamente por valor e data aproximada
+ */
+router.post('/conciliacao/automatica', authenticateToken, async (req, res) => {
+    try {
+        await ensureConciliacaoTables();
+        const { conta_id } = req.body;
+        let whereConta = '';
+        const params = [];
+        if (conta_id) { whereConta = ' AND e.conta_id = ?'; params.push(conta_id); }
+
+        // Buscar extratos não conciliados
+        const [extratos] = await pool.execute(
+            `SELECT id, valor, data FROM extrato_bancario WHERE conciliado = 0${conta_id ? ' AND conta_id = ?' : ''} ORDER BY data`,
+            conta_id ? [conta_id] : []
+        );
+
+        // Buscar movimentações do sistema pendentes
+        const [receber] = await pool.execute(
+            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_receber' as tabela FROM contas_receber WHERE status IN ('pendente','parcial')"
+        );
+        const [pagar] = await pool.execute(
+            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_pagar' as tabela FROM contas_pagar WHERE status IN ('pendente','parcial')"
+        );
+        const sistema = [...receber, ...pagar];
+
+        let conciliados = 0;
+        const usados = new Set();
+        for (const ext of extratos) {
+            const extVal = Math.abs(parseFloat(ext.valor));
+            const match = sistema.find(s => !usados.has(s.tabela + '_' + s.id) && Math.abs(Math.abs(parseFloat(s.valor)) - extVal) < 0.01);
+            if (match) {
+                await pool.execute(
+                    'INSERT INTO conciliacoes (conta_id, movimentacao_sistema_id, movimentacao_tabela, extrato_id, valor, tipo_match, usuario_id) VALUES (?, ?, ?, ?, ?, "automatico", ?)',
+                    [conta_id || null, match.id, match.tabela, ext.id, extVal, req.user?.id || null]
+                );
+                await pool.execute('UPDATE extrato_bancario SET conciliado = 1 WHERE id = ?', [ext.id]);
+                usados.add(match.tabela + '_' + match.id);
+                conciliados++;
+            }
+        }
+        res.json({ success: true, conciliados, message: `${conciliados} item(ns) conciliado(s)` });
+    } catch (error) {
+        console.error('[Conciliação Auto] Erro:', error);
+        res.status(500).json({ success: false, message: 'Erro na conciliação automática' });
+    }
+});
+
+/**
+ * DELETE /api/financeiro/conciliacao/:id
+ * Desfazer conciliação
+ */
+router.delete('/conciliacao/:id', authenticateToken, async (req, res) => {
+    try {
+        await ensureConciliacaoTables();
+        const { id } = req.params;
+        const [conc] = await pool.execute('SELECT extrato_id FROM conciliacoes WHERE id = ?', [id]);
+        if (conc.length === 0) return res.status(404).json({ success: false, message: 'Conciliação não encontrada' });
+        const extratoId = conc[0].extrato_id;
+        await pool.execute('DELETE FROM conciliacoes WHERE id = ?', [id]);
+        if (extratoId) {
+            await pool.execute('UPDATE extrato_bancario SET conciliado = 0 WHERE id = ?', [extratoId]);
+        }
+        res.json({ success: true, message: 'Conciliação desfeita' });
+    } catch (error) {
+        console.error('[Conciliação] Erro DELETE:', error);
+        res.status(500).json({ success: false, message: 'Erro ao desfazer conciliação' });
+    }
+});
+
+/**
+ * POST /api/financeiro/conciliacao/importar-ofx
+ * Importar extrato bancário (OFX ou CSV em texto)
+ */
+router.post('/conciliacao/importar-ofx', authenticateToken, async (req, res) => {
+    try {
+        await ensureConciliacaoTables();
+        const { conta_id, conteudo, nome_arquivo } = req.body;
+        if (!conteudo) return res.status(400).json({ success: false, message: 'Conteúdo do arquivo é obrigatório' });
+
+        const linhas = conteudo.split('\n').filter(l => l.trim());
+        let importados = 0;
+        let duplicados = 0;
+        const isOFX = conteudo.includes('<OFX>') || conteudo.includes('<STMTTRN>');
+
+        if (isOFX) {
+            // Parse OFX simplificado
+            const transacoes = conteudo.split('<STMTTRN>').slice(1);
+            for (const tx of transacoes) {
+                const getTag = (tag) => { const m = tx.match(new RegExp('<' + tag + '>([^<\\n]+)')); return m ? m[1].trim() : ''; };
+                const dtPosted = getTag('DTPOSTED');
+                const valor = parseFloat(getTag('TRNAMT').replace(',', '.')) || 0;
+                const memo = getTag('MEMO') || getTag('NAME') || '';
+                const fitid = getTag('FITID');
+                const data = dtPosted.length >= 8 ? `${dtPosted.slice(0,4)}-${dtPosted.slice(4,6)}-${dtPosted.slice(6,8)}` : null;
+
+                const hash = require('crypto').createHash('sha256').update(`${conta_id || ''}_${data}_${valor}_${fitid}`).digest('hex');
+                const [dup] = await pool.execute('SELECT id FROM extrato_bancario WHERE hash_linha = ?', [hash]);
+                if (dup.length > 0) { duplicados++; continue; }
+
+                await pool.execute(
+                    'INSERT INTO extrato_bancario (conta_id, data, descricao, valor, hash_linha) VALUES (?, ?, ?, ?, ?)',
+                    [conta_id || null, data, memo.substring(0, 500), valor, hash]
+                );
+                importados++;
+            }
+        } else {
+            // Parse CSV (data;descricao;valor ou data,descricao,valor)
+            const sep = linhas[0].includes(';') ? ';' : ',';
+            const startIdx = linhas[0].toLowerCase().includes('data') ? 1 : 0;
+            for (let i = startIdx; i < linhas.length; i++) {
+                const cols = linhas[i].split(sep).map(c => c.trim().replace(/^"|"$/g, ''));
+                if (cols.length < 3) continue;
+                const data = cols[0].includes('/') ? cols[0].split('/').reverse().join('-') : cols[0];
+                const descricao = cols[1] || '';
+                const valor = parseFloat((cols[2] || '0').replace(/\./g, '').replace(',', '.')) || 0;
+
+                const hash = require('crypto').createHash('sha256').update(`${conta_id || ''}_${data}_${valor}_${descricao}`).digest('hex');
+                const [dup] = await pool.execute('SELECT id FROM extrato_bancario WHERE hash_linha = ?', [hash]);
+                if (dup.length > 0) { duplicados++; continue; }
+
+                await pool.execute(
+                    'INSERT INTO extrato_bancario (conta_id, data, descricao, valor, hash_linha) VALUES (?, ?, ?, ?, ?)',
+                    [conta_id || null, data, descricao.substring(0, 500), valor, hash]
+                );
+                importados++;
+            }
+        }
+        res.json({ success: true, importados, duplicados, total: importados + duplicados, arquivo: nome_arquivo });
+    } catch (error) {
+        console.error('[Conciliação] Erro importação:', error);
+        res.status(500).json({ success: false, message: 'Erro ao importar extrato' });
+    }
+});
