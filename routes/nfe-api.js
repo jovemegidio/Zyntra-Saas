@@ -318,27 +318,54 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 const nfeIdNum = parseInt(row.id);
                 for (const table of ['nfe_itens', 'nfes_itens']) {
                     try {
-                        const fk = table === 'nfe_itens' ? 'nfe_id' : 'nfe_id';
-                        const [rows] = await pool.query(`SELECT * FROM \`${table}\` WHERE ${fk} = ?`, [nfeIdNum]);
+                        const [rows] = await pool.query(`SELECT * FROM \`${table}\` WHERE nfe_id = ?`, [nfeIdNum]);
                         if (rows && rows.length) { itens = rows; break; }
                     } catch (_) {}
                 }
             } catch (_) {}
+            // Fallback: busca itens via pedido_itens se NF-e não tem itens próprios
+            if (!itens.length && (row.pedido_id || row.venda_id)) {
+                try {
+                    const pedidoId = row.pedido_id || row.venda_id;
+                    const [rows] = await pool.query(
+                        'SELECT codigo AS codigo_produto, descricao, ncm, unidade, quantidade, preco_unitario AS valor_unitario, desconto AS valor_desconto, subtotal AS valor_total FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC',
+                        [pedidoId]
+                    );
+                    if (rows && rows.length) itens = rows;
+                } catch (_) {}
+            }
 
-            // Emitente
+            // Emitente (cascata: configuracoes → configuracoes_nfe → empresas)
             let emit = { razaoSocial: 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA', nomeFantasia: 'ALUFORCE', cnpj: '', ie: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: 'MG', cep: '', telefone: '' };
+            let emitFilled = false;
             try {
                 const [cfgRows] = await pool.query("SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1");
                 if (cfgRows && cfgRows[0]) {
                     const c = JSON.parse(cfgRows[0].valor || '{}');
-                    emit = { ...emit, ...c, cidade: c.cidade || c.municipio || '', logradouro: c.logradouro || c.endereco || '' };
+                    if (c.cnpj) {
+                        emit = { ...emit, ...c, cidade: c.cidade || c.municipio || '', logradouro: c.logradouro || c.endereco || '' };
+                        emitFilled = true;
+                    }
                 }
-            } catch (_) {
+            } catch (_) {}
+            if (!emitFilled) {
                 try {
                     const [cfgRows] = await pool.query("SELECT * FROM configuracoes_nfe WHERE ativo = 1 LIMIT 1");
                     if (cfgRows && cfgRows[0]) {
                         const c = cfgRows[0];
-                        emit = { razaoSocial: c.razao_social || emit.razaoSocial, nomeFantasia: c.nome_fantasia || emit.nomeFantasia, cnpj: c.cnpj || '', ie: c.inscricao_estadual || '', logradouro: c.endereco || '', numero: c.numero || '', bairro: c.bairro || '', cidade: c.municipio || '', uf: c.uf || 'MG', cep: c.cep || '', telefone: '' };
+                        if (c.cnpj) {
+                            emit = { razaoSocial: c.razao_social || emit.razaoSocial, nomeFantasia: c.nome_fantasia || emit.nomeFantasia, cnpj: c.cnpj || '', ie: c.inscricao_estadual || '', logradouro: c.endereco || '', numero: c.numero || '', bairro: c.bairro || '', cidade: c.municipio || '', uf: c.uf || 'MG', cep: c.cep || '', telefone: '' };
+                            emitFilled = true;
+                        }
+                    }
+                } catch (_) {}
+            }
+            if (!emitFilled) {
+                try {
+                    const [empresaRows] = await pool.query("SELECT * FROM empresas LIMIT 1");
+                    if (empresaRows && empresaRows[0]) {
+                        const e = empresaRows[0];
+                        emit = { razaoSocial: e.razao_social || e.nome || emit.razaoSocial, nomeFantasia: e.nome_fantasia || e.nome_comercial || emit.nomeFantasia, cnpj: e.cnpj || '', ie: e.inscricao_estadual || '', logradouro: e.endereco || e.logradouro || '', numero: e.numero || '', bairro: e.bairro || '', cidade: e.municipio || e.cidade || '', uf: e.uf || 'MG', cep: e.cep || '', telefone: e.telefone || '' };
                     }
                 } catch (_) {}
             }
