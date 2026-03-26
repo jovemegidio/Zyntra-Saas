@@ -1374,7 +1374,17 @@ app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), {
 app.use('/_shared', express.static(path.join(__dirname, 'modules', '_shared'), { dotfiles: 'deny', index: false }));
 
 // Servir módulos diretamente com rotas específicas
-app.use('/modules', express.static(path.join(__dirname, 'modules'), { dotfiles: 'deny', index: false }));
+app.use('/modules', express.static(path.join(__dirname, 'modules'), {
+    dotfiles: 'deny',
+    index: false,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
 
 // =================================================================
 // ENDPOINT DE HEALTH CHECK — Enterprise Monitoring

@@ -386,6 +386,7 @@
                 const st = escapeHtml((nfe.status||'pendente').toLowerCase());
                 const stLabel = st.charAt(0).toUpperCase() + st.slice(1);
                 const chaveEsc = escapeHtml(nfe.chave||'');
+                const nfeIdentificador = chaveEsc || String(nfe.id || '');
                 return `<tr>
                     <td><strong>${escapeHtml(nfe.número||'-')}</strong></td>
                     <td>${escapeHtml(nfe.serie||'1')}</td>
@@ -398,7 +399,7 @@
                         <button class="action-btn" title="Download XML" onclick="baixarXML('${chaveEsc}')"><i class="fas fa-download"></i></button>
                         <button class="action-btn" title="DANFE" onclick="window.location.href='danfe.html?chave=${chaveEsc}'"><i class="fas fa-print"></i></button>
                         <button class="action-btn" title="Enviar Email" onclick="enviarEmail('${chaveEsc}')"><i class="fas fa-envelope"></i></button>
-                        <button class="action-btn" title="Espelho NF-e (pr\u00e9-visualiza\u00e7\u00e3o)" onclick="verEspelho('${chaveEsc}')" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;"><i class="fas fa-file-alt"></i></button>
+                        <button class="action-btn" title="Espelho NF-e (pr\u00e9-visualiza\u00e7\u00e3o)" onclick="verEspelho('${nfeIdentificador}')" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;"><i class="fas fa-file-alt"></i></button>
                     </td>
                 </tr>`;
             }).join('');
