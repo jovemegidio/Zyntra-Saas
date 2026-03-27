@@ -785,7 +785,8 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const desconto   = parseFloat(pedido.desconto) || 0;
     const seguro     = parseFloat(pedido.valor_seguro) || 0;
     const outras     = parseFloat(pedido.outras_despesas) || 0;
-    const valorNF    = valorTotal + frete + seguro + outras - desconto;
+    const valorBruto = valorTotal + frete + seguro + outras;
+    const valorNF    = valorBruto - desconto;
     const chave      = pedido.nfe_chave || pedido.chave_acesso || '';
 
     // Split "Rua Tal, 123" into street + number
@@ -879,8 +880,8 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                     xNome: pedido.cliente_razao_social || pedido.cliente_nome || '',
                     CNPJ: pedido.cliente_cnpj || '',
                     CPF: pedido.cliente_cpf || '',
-                    IE: '',
-                    indIEDest: '',
+                    IE: pedido.cliente_ie || '',
+                    indIEDest: pedido.cliente_ie ? '1' : '9',
                     enderDest: {
                         xLgr: dstLgr,
                         nro: dstNro,
@@ -895,8 +896,8 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                 cobr: {
                     fat: {
                         nFat: nfNumero,
-                        vOrig: fmtMoney(valorNF),
-                        vLiq: fmtMoney(valorNF - desconto)
+                        vOrig: fmtMoney(valorBruto),
+                        vLiq: fmtMoney(valorNF)
                     },
                     dup: dups
                 },

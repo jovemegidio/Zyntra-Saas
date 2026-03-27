@@ -4137,6 +4137,7 @@ module.exports = function createVendasRoutes(deps) {
                        COALESCE(c.nome_fantasia, c.razao_social, c.nome) AS cliente_nome,
                        c.razao_social AS cliente_razao_social,
                        c.cnpj AS cliente_cnpj, c.cpf AS cliente_cpf,
+                       c.inscricao_estadual AS cliente_ie,
                        c.email AS cliente_email, c.telefone AS cliente_telefone,
                        c.endereco AS cliente_endereco, c.bairro AS cliente_bairro,
                        c.cidade AS cliente_cidade, c.estado AS cliente_estado,
