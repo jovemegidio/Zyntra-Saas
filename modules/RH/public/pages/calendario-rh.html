@@ -790,7 +790,7 @@
                             <option value="treinamento">Treinamento</option>
                             <option value="reuniao">Reunio</option>
                             <option value="aniversario">Aniversrio</option>
-                            <option value="admissão">Admisso</option>
+                            <option value="admissão">Admissão</option>
                             <option value="outro">Outro</option>
                         </select>
                     </div>
@@ -831,7 +831,7 @@
         let eventos = [];
         let filtroAtivo = 'todos';
         let isAdmin = false;
-        let _navVersion = 0; // controle de race condition na navegao
+        let _navVersion = 0; // controle de race condition na navegação
 
         const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
                        'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
@@ -1215,7 +1215,7 @@
                 reuniao: 'Reunio',
                 evento: 'Evento',
                 aniversario: 'Aniversrio',
-                admissão: 'Admisso',
+                admissão: 'Admissão',
                 outro: 'Outro'
             };
             return tipos[tipo] || tipo;
@@ -1291,7 +1291,7 @@
             };
 
             if (!evento.titulo || !evento.data_inicio) {
-                showToast('Preencha os campos obrigatrios', 'warning');
+                showToast('Preencha os campos obrigatórios', 'warning');
                 return;
             }
 

@@ -523,107 +523,20 @@
                         </div>
                     </div>
 
-                    <!-- SECTION: PREVIEW DO DANFE -->
+                    <!-- SECTION: PREVIEW DO DANFE (Espelho oficial A4) -->
                     <div class="card hidden-section" id="previewSection">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-eye"></i> Preview do DANFE</h3>
+                            <h3 class="card-title"><i class="fas fa-eye"></i> Espelho da Nota Fiscal (DANFE)</h3>
                         </div>
                         <div class="card-body">
-                            <div class="danfe-preview" id="danfe-preview">
-                                <!-- DANFE HEADER -->
-                                <div class="danfe-header">
-                                    <div class="danfe-header-left">
-                                        <div class="empresa-nome" id="danfeEmpresa">-</div>
-                                        <div class="empresa-cnpj" id="danfeCNPJ">CNPJ: -</div>
-                                        <div class="empresa-endereco" id="danfeEndereco">-</div>
-                                    </div>
-                                    <div class="danfe-header-center">
-                                        <div class="danfe-title">DANFE</div>
-                                        <div class="danfe-subtitle">Documento Auxiliar da Nota Fiscal Eletrônica</div>
-                                        <div class="danfe-tipo">0 - ENTRADA &nbsp;/&nbsp; 1 - SAÍDA</div>
-                                    </div>
-                                    <div class="danfe-header-right">
-                                        <div class="nfe-número" id="danfeNumero">Nº </div>
-                                        <div class="nfe-serie" id="danfeSerie">Série -</div>
-                                    </div>
-                                </div>
-
-                                <!-- CHAVE DE ACESSO -->
-                                <div class="danfe-chave-section">
-                                    <div class="danfe-chave-label">Chave de Acesso</div>
-                                    <div class="danfe-chave-value" id="danfeChave"> é é é é é é é é é </div>
-                                </div>
-
-                                <!-- NATUREZA / PROTOCOLO -->
-                                <div class="danfe-section-grid cols-2">
-                                    <div class="danfe-field">
-                                        <div class="danfe-label">Natureza da Operação</div>
-                                        <div class="danfe-value" id="danfeNatureza">-</div>
-                                    </div>
-                                    <div class="danfe-field">
-                                        <div class="danfe-label">Protocolo de Autorização</div>
-                                        <div class="danfe-value" id="danfeProtocolo">-</div>
-                                    </div>
-                                </div>
-
-                                <!-- DESTINATÁRIO -->
-                                <div class="danfe-section" style="margin-top:-1px;">
-                                    <div class="danfe-label" style="margin-bottom:4px;font-weight:600;font-size:10px;color:#000;">DESTINATÁRIO / REMETENTE</div>
-                                </div>
-                                <div class="danfe-section-grid cols-3">
-                                    <div class="danfe-field" style="grid-column: 1 / 3;">
-                                        <div class="danfe-label">Nome / Razão Social</div>
-                                        <div class="danfe-value" id="danfeDestinatario">-</div>
-                                    </div>
-                                    <div class="danfe-field">
-                                        <div class="danfe-label">CNPJ/CPF</div>
-                                        <div class="danfe-value" id="danfeDocDest">-</div>
-                                    </div>
-                                </div>
-                                <div class="danfe-section-grid cols-2" style="margin-top:-1px;">
-                                    <div class="danfe-field" style="grid-column: 1 / -1;">
-                                        <div class="danfe-label">Endereço</div>
-                                        <div class="danfe-value" id="danfeEnderecoDest">-</div>
-                                    </div>
-                                </div>
-
-                                <!-- ITENS -->
-                                <div class="danfe-section" style="margin-top:8px;">
-                                    <div class="danfe-label" style="font-weight:600;font-size:10px;color:#000;">DADOS DOS PRODUTOS / SERVIÇOS</div>
-                                </div>
-                                <table class="danfe-table">
-                                    <thead>
-                                        <tr>
-                                            <th style="width:50%;">Descrição</th>
-                                            <th style="width:12%;" class="text-right">Qtd</th>
-                                            <th style="width:19%;" class="text-right">Valor Unit.</th>
-                                            <th style="width:19%;" class="text-right">Valor Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="danfeItensBody">
-                                        <tr>
-                                            <td colspan="4" style="text-align:center;color:#999;padding:20px;">Nenhum item carregado</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-
-                                <!-- TOTAIS -->
-                                <div class="danfe-totais">
-                                    <div class="danfe-total-item">
-                                        <div class="danfe-label">Total dos Produtos</div>
-                                        <div class="danfe-value" id="danfeTotalProdutos">R$ 0,00</div>
-                                    </div>
-                                    <div class="danfe-total-item">
-                                        <div class="danfe-label">Valor Total da NFe</div>
-                                        <div class="danfe-value" id="danfeTotalNFe">R$ 0,00</div>
-                                    </div>
-                                </div>
+                            <div id="danfe-iframe-container" style="background:#e9e9e9;border-radius:8px;overflow:hidden;">
+                                <iframe id="danfe-iframe" style="width:100%;min-height:1100px;border:none;background:#fff;" sandbox="allow-same-origin allow-scripts allow-popups"></iframe>
                             </div>
 
                             <!-- PREVIEW ACTIONS -->
                             <div class="preview-actions">
-                                <button class="btn btn-primary" onclick="gerarPDF()"><i class="fas fa-file-pdf"></i> Gerar PDF</button>
-                                <button class="btn btn-primary" onclick="imprimir()"><i class="fas fa-print"></i> Imprimir</button>
+                                <button class="btn btn-primary" onclick="imprimirEspelho()"><i class="fas fa-print"></i> Imprimir</button>
+                                <button class="btn btn-primary" onclick="abrirEspelhoNovaAba()"><i class="fas fa-external-link-alt"></i> Abrir em Nova Aba</button>
                                 <button class="btn btn-secondary" onclick="enviarEmail()"><i class="fas fa-envelope"></i> Enviar por Email</button>
                                 <button class="btn btn-whatsapp" onclick="enviarWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar WhatsApp</button>
                             </div>
@@ -783,9 +696,16 @@
                 }
 
                 nfeData = await response.json();
-                preencherPreview();
 
-                // Mostrar seães
+                // Obter identificador para o espelho (chave, número ou id)
+                const nfeIdentificador = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || nfeData.id || nfeData.numero || nfeData.nNF;
+                if (nfeIdentificador) {
+                    // Carregar o espelho oficial (DANFE A4) no iframe
+                    const iframe = document.getElementById('danfe-iframe');
+                    iframe.src = '/api/nfe/' + encodeURIComponent(nfeIdentificador) + '/espelho';
+                }
+
+                // Mostrar seções
                 document.getElementById('formatoSection').classList.remove('hidden-section');
                 document.getElementById('previewSection').classList.remove('hidden-section');
 
@@ -803,102 +723,31 @@
             }
         }
 
-        // ===== PREENCHER PREVIEW =====
-        function preencherPreview() {
-            if (!nfeData) return;
+        // ===== PREENCHER PREVIEW (espelho carregado via iframe) =====
+        // O espelho oficial é carregado diretamente do endpoint /api/nfe/:id/espelho
 
-            // Emitente
-            const emit = nfeData.emitente || nfeData.emit || {};
-            document.getElementById('danfeEmpresa').textContent = emit.razaoSocial || emit.xNome || emit.nome || '-';
-            document.getElementById('danfeCNPJ').textContent = 'CNPJ: ' + (emit.cnpj || emit.CNPJ || '-');
-            const endEmit = emit.endereco || emit.enderEmit || {};
-            document.getElementById('danfeEndereco').textContent = [
-                endEmit.logradouro || endEmit.xLgr || '',
-                endEmit.numero || endEmit.nro || '',
-                endEmit.bairro || endEmit.xBairro || '',
-                endEmit.cidade || endEmit.xMun || '',
-                endEmit.uf || endEmit.UF || ''
-            ].filter(Boolean).join(', ') || '-';
-
-            // Número e série
-            document.getElementById('danfeNumero').textContent = 'Nº ' + (nfeData.numero || nfeData.nNF || '-');
-            document.getElementById('danfeSerie').textContent = 'Série ' + (nfeData.serie || '-');
-
-            // Chave de acesso
-            const chave = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || '-';
-            document.getElementById('danfeChave').textContent = chave.replace(/(\d{4})/g, '$1 ').trim();
-
-            // Natureza e protocolo
-            document.getElementById('danfeNatureza').textContent = nfeData.naturezaOperacao || nfeData.natOp || '-';
-            document.getElementById('danfeProtocolo').textContent = nfeData.protocolo || nfeData.nProt || '-';
-
-            // Destinatério
-            const dest = nfeData.destinatario || nfeData.dest || {};
-            document.getElementById('danfeDestinatario').textContent = dest.razaoSocial || dest.xNome || dest.nome || '-';
-            document.getElementById('danfeDocDest').textContent = dest.cnpj || dest.cpf || dest.CNPJ || dest.CPF || '-';
-            const endDest = dest.endereco || dest.enderDest || {};
-            document.getElementById('danfeEnderecoDest').textContent = [
-                endDest.logradouro || endDest.xLgr || '',
-                endDest.numero || endDest.nro || '',
-                endDest.bairro || endDest.xBairro || '',
-                endDest.cidade || endDest.xMun || '',
-                endDest.uf || endDest.UF || ''
-            ].filter(Boolean).join(', ') || '-';
-
-            // Itens
-            const itens = nfeData.itens || nfeData.det || nfeData.produtos || [];
-            const tbody = document.getElementById('danfeItensBody');
-            tbody.innerHTML = '';
-
-            if (itens.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#999;padding:20px;">Nenhum item</td></tr>';
-            } else {
-                itens.forEach(item => {
-                    const prod = item.prod || item;
-                    const desc = prod.descricao || prod.xProd || prod.nome || '-';
-                    const qtd = prod.quantidade || prod.qCom || prod.qtd || 0;
-                    const vUnit = prod.valorUnitario || prod.vUnCom || prod.vlrUnit || 0;
-                    const vTotal = prod.valorTotal || prod.vProd || (parseFloat(qtd) * parseFloat(vUnit)) || 0;
-
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${escapeHtml(desc)}</td>
-                        <td class="text-right">${formatNumber(qtd)}</td>
-                        <td class="text-right">${formatCurrency(vUnit)}</td>
-                        <td class="text-right">${formatCurrency(vTotal)}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
-
-            // Totais
-            const totalProd = nfeData.totalProdutos || nfeData.vProd ||
-                itens.reduce((sum, item) => {
-                    const prod = item.prod || item;
-                    return sum + parseFloat(prod.valorTotal || prod.vProd || 0);
-                }, 0);
-            const totalNFe = nfeData.totalNFe || nfeData.vNF || totalProd;
-
-            document.getElementById('danfeTotalProdutos').textContent = formatCurrency(totalProd);
-            document.getElementById('danfeTotalNFe').textContent = formatCurrency(totalNFe);
-        }
-
-        // ===== GERAR PDF =====
-        function gerarPDF() {
+        // ===== IMPRIMIR ESPELHO =====
+        function imprimirEspelho() {
             if (!nfeData) {
                 showAlert('Nenhuma nota fiscal carregada.', 'warning');
                 return;
             }
-            window.print();
+            const iframe = document.getElementById('danfe-iframe');
+            if (iframe && iframe.contentWindow) {
+                iframe.contentWindow.print();
+            }
         }
 
-        // ===== IMPRIMIR =====
-        function imprimir() {
+        // ===== ABRIR EM NOVA ABA =====
+        function abrirEspelhoNovaAba() {
             if (!nfeData) {
                 showAlert('Nenhuma nota fiscal carregada.', 'warning');
                 return;
             }
-            window.print();
+            const nfeIdentificador = nfeData.chaveAcesso || nfeData.chave || nfeData.chNFe || nfeData.id || nfeData.numero || nfeData.nNF;
+            if (nfeIdentificador) {
+                window.open('/api/nfe/' + encodeURIComponent(nfeIdentificador) + '/espelho', '_blank');
+            }
         }
 
         // ===== ENVIAR EMAIL =====

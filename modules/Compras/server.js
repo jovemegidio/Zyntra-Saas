@@ -165,6 +165,7 @@ const cotacoesRoutes = require('./api/cotacoes');
 const requisicoesRoutes = require('./api/requisicoes');
 const recebimentoRoutes = require('./api/recebimento');
 const relatoriosRoutes = require('./api/relatorios');
+const centrosCustoRoutes = require('./api/centros-custo');
 
 // Disponibilizar pool para audit trail middleware
 app.locals.pool = mysqlPool;
@@ -188,6 +189,7 @@ app.use('/api/compras/cotacoes', authenticateToken, authorizeCompras, idempotenc
 app.use('/api/compras/requisicoes', authenticateToken, authorizeCompras, auditTrail('compras'), requisicoesRoutes);
 app.use('/api/compras/recebimento', authenticateToken, authorizeCompras, idempotency(), auditTrail('compras'), recebimentoRoutes);
 app.use('/api/compras/relatorios', authenticateToken, authorizeCompras, relatoriosRoutes);
+app.use('/api/compras/centros-custo', authenticateToken, authorizeCompras, centrosCustoRoutes);
 
 // ============ NF-e ENTRADA & RECEBIMENTO ROUTES ============
 // Rota de recebimento via pedido (match frontend: POST /api/compras/pedidos/:id/receber)

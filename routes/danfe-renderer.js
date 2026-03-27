@@ -787,7 +787,33 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const outras     = parseFloat(pedido.outras_despesas) || 0;
     const valorBruto = valorTotal + frete + seguro + outras;
     const valorNF    = valorBruto - desconto;
-    const chave      = pedido.nfe_chave || pedido.chave_acesso || '';
+    let chave        = pedido.nfe_chave || pedido.chave_acesso || '';
+
+    // Configuração fiscal padrão da empresa
+    const cfgFiscal = opts.cfgFiscal || {};
+    const cfopPadrao = cfgFiscal.cfop_venda_estado || '5102';
+
+    // Em modo preview sem chave real, gerar chave de acesso ilustrativa
+    if (!chave && opts.preview) {
+        const cnpjClean = (pedido.empresa_cnpj || '').replace(/\D/g, '').padEnd(14, '0').slice(0, 14);
+        const uf = '35'; // SP
+        const now = new Date();
+        const aamm = String(now.getFullYear()).slice(2) + String(now.getMonth() + 1).padStart(2, '0');
+        const modelo = '55';
+        const serie = String(pedido.serie_nf || '1').padStart(3, '0');
+        const nnf = String(pedido.id || 0).padStart(9, '0');
+        const tpEmis = '1';
+        const codNum = String(Math.floor(Math.random() * 99999999)).padStart(8, '0');
+        const base43 = uf + aamm + cnpjClean + modelo + serie + nnf + tpEmis + codNum;
+        // DV mod11 simplificado
+        let soma = 0, peso = 2;
+        for (let i = base43.length - 1; i >= 0; i--) {
+            soma += parseInt(base43[i]) * peso;
+            peso = peso >= 9 ? 2 : peso + 1;
+        }
+        const dv = 11 - (soma % 11);
+        chave = base43 + (dv >= 10 ? '0' : String(dv));
+    }
 
     // Split "Rua Tal, 123" into street + number
     const splitEndereco = str => {
@@ -831,6 +857,16 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                 });
             }
         }
+    }
+
+    // Se nenhuma duplicata foi gerada (ex: A Vista), criar fatura única
+    if (dups.length === 0) {
+        const dataFat = new Date(pedido.data_faturamento || pedido.data_emissao || pedido.created_at || new Date());
+        dups.push({
+            nDup: nfNumero || '001',
+            dVenc: fmtDate(dataFat),
+            vDup: fmtMoney(valorNF)
+        });
     }
 
     return {
@@ -906,18 +942,18 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                         cProd: item.codigo || String(i + 1).padStart(3, '0'),
                         xProd: item.descricao || '',
                         NCM: item.ncm || '',
-                        CFOP: item.cfop || '',
+                        CFOP: item.cfop || cfopPadrao,
                         uCom: item.unidade || 'UN',
                         qCom: fmtQty(item.quantidade),
                         vUnCom: fmtMoney(item.preco_unitario),
                         vProd: fmtMoney(item.subtotal)
                     },
-                    _danfeCstCsosn: item.cst || item.csosn || '',
-                    _danfeBcIcms: fmtMoney(item.bc_icms || (parseFloat(item.subtotal) || 0)),
+                    _danfeCstCsosn: item.cst || item.csosn || '000',
+                    _danfeBcIcms: fmtMoney(item.bc_icms || item.icms_value ? (parseFloat(item.icms_value) / (parseFloat(item.aliquota_icms || item.icms_percent) / 100 || 1)) : (parseFloat(item.subtotal) || 0)),
                     _danfeVIcms: fmtMoney(item.icms_value || item.v_icms || 0),
-                    _danfePIcms: item.aliquota_icms ? fmtMoney(item.aliquota_icms) : '',
+                    _danfePIcms: fmtMoney(item.aliquota_icms || item.icms_percent || 0),
                     _danfeVIpi: fmtMoney(item.valor_ipi || item.v_ipi || 0),
-                    _danfePIpi: item.aliquota_ipi ? fmtMoney(item.aliquota_ipi) : ''
+                    _danfePIpi: fmtMoney(item.aliquota_ipi || 0)
                 })),
                 total: {
                     ICMSTot: {
@@ -933,6 +969,8 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                         vDesc: fmtMoney(desconto),
                         vOutro: fmtMoney(outras),
                         vIPI: fmtMoney(pedido.total_ipi || 0),
+                        vPIS: fmtMoney(pedido.total_pis || 0),
+                        vCOFINS: fmtMoney(pedido.total_cofins || 0),
                         vNF: fmtMoney(valorNF),
                         vII: '0,00'
                     },

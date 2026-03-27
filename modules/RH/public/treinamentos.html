@@ -271,7 +271,7 @@
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
+                <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
                 <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
@@ -389,7 +389,7 @@
                     
                     <div class="form-group">
                         <label for="descrição">Descrição</label>
-                        <textarea id="descricao" rows="3" placeholder="Descreva o objetivo e contedo do treinamento..."></textarea>
+                        <textarea id="descricao" rows="3" placeholder="Descreva o objetivo e conteúdo do treinamento..."></textarea>
                     </div>
                     
                     <div class="form-row three">
@@ -452,7 +452,7 @@
                         </div>
                         <div class="form-group">
                             <label for="obrigatório">
-                                <input type="checkbox" id="obrigatorio" style="width: auto; margin-right: 8px;">
+                                <input type="checkbox" id="obrigatório" style="width: auto; margin-right: 8px;">
                                 Treinamento Obrigatório
                             </label>
                         </div>
@@ -745,7 +745,7 @@
                     document.getElementById('horarioInicio').value = t.horario_inicio || '';
                     document.getElementById('horarioFim').value = t.horario_fim || '';
                     document.getElementById('vagas').value = t.vagas_totais || 0;
-                    document.getElementById('obrigatorio').checked = t.obrigatorio;
+                    document.getElementById('obrigatório').checked = t.obrigatório;
                     
                     document.getElementById('modalTitle').textContent = 'Editar Treinamento';
                     document.getElementById('modalTreinamento').classList.add('active');
@@ -775,7 +775,7 @@
                 horario_inicio: document.getElementById('horarioInicio').value,
                 horario_fim: document.getElementById('horarioFim').value,
                 vagas_totais: parseInt(document.getElementById('vagas').value) || 0,
-                obrigatorio: document.getElementById('obrigatorio').checked
+                obrigatório: document.getElementById('obrigatório').checked
             };
             
             if (!dados.titulo || !dados.data_inicio) {

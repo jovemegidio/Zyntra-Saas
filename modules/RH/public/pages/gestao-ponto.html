@@ -278,8 +278,8 @@
                 <!-- Tabs -->
                 <div class="tabs">
                     <button class="tab-btn active" data-tab="registros">Registros do Dia</button>
-                    <button class="tab-btn" data-tab="histórico">Histrico</button>
-                    <button class="tab-btn" data-tab="alteracoes">Histrico de Alteraes</button>
+                    <button class="tab-btn" data-tab="histórico">Histórico</button>
+                    <button class="tab-btn" data-tab="alteracoes">Histórico de Alterações</button>
                     <button class="tab-btn" data-tab="resumo">Resumo Mensal</button>
                 </div>
 
@@ -302,7 +302,7 @@
 
                     <div class="card" style="position:relative">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-list"></i> Marcaes  <span id="data-atual"></span></h3>
+                            <h3 class="card-title"><i class="fas fa-list"></i> Marcações  <span id="data-atual"></span></h3>
                             <div style="display:flex;align-items:center;gap:12px;">
                                 <div id="sync-status" class="sync-status online">
                                     <span id="sync-dot" class="sync-dot online"></span>
@@ -337,7 +337,7 @@
                     </div>
                 </div>
 
-                <!-- Tab: Histrico -->
+                <!-- Tab: Histórico -->
                 <div class="tab-content" id="tab-historico">
                     <div class="filters-bar">
                         <div class="form-group">
@@ -358,7 +358,7 @@
                     </div>
                     <div class="card" style="position:relative">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-history"></i> Histrico de Marcaes</h3>
+                            <h3 class="card-title"><i class="fas fa-history"></i> Histórico de Marcações</h3>
                             <span class="status-badge normal" id="total-historico">0 registros</span>
                         </div>
                         <div class="card-body">
@@ -386,7 +386,7 @@
                     </div>
                 </div>
 
-                <!-- Tab: Histrico de Alteraes -->
+                <!-- Tab: Histórico de Alterações -->
                 <div class="tab-content" id="tab-alteracoes">
                     <div class="filters-bar">
                         <div class="form-group">
@@ -399,9 +399,9 @@
                             <label class="form-label">Tipo de Ao</label>
                             <select class="form-select" id="filter-ação-alteracoes">
                                 <option value="">Todas</option>
-                                <option value="criacao">Criao</option>
-                                <option value="edição">Edio</option>
-                                <option value="exclusão">Excluso</option>
+                                <option value="criacao">Criação</option>
+                                <option value="edição">Edição</option>
+                                <option value="exclusão">Exclusão</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -416,7 +416,7 @@
                     </div>
                     <div class="card" style="position:relative">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Auditoria de Alteraes</h3>
+                            <h3 class="card-title"><i class="fas fa-clipboard-list"></i> Auditoria de Alterações</h3>
                             <span class="status-badge normal" id="total-alteracoes">0 registros</span>
                         </div>
                         <div class="card-body">
@@ -424,7 +424,7 @@
                             <div class="empty-state" id="empty-alteracoes">
                                 <i class="fas fa-clipboard-check"></i>
                                 <h3>Nenhuma alterao registrada</h3>
-                                <p>As edies e excluses de marcaes aparecero aqui com detalhes completos.</p>
+                                <p>As edições e excluses de marcações aparecero aqui com detalhes completos.</p>
                             </div>
                         </div>
                     </div>
@@ -524,9 +524,9 @@
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
                         <i class="fas fa-gavel" style="color: #6366f1;"></i> Motivo da Alterao <span class="required-indicator">*</span>
                     </label>
-                    <textarea id="ajuste-motivo" placeholder="Descreva o motivo da edio (obrigatrio para edies)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 60px; resize: vertical; background: #faf5ff; box-sizing: border-box; font-family: inherit;"></textarea>
+                    <textarea id="ajuste-motivo" placeholder="Descreva o motivo da edição (obrigatório para edições)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 60px; resize: vertical; background: #faf5ff; box-sizing: border-box; font-family: inherit;"></textarea>
                     <div class="motivo-warning" id="motivo-warning">
-                        <i class="fas fa-exclamation-triangle"></i> O motivo  obrigatrio para edies de marcaes existentes.
+                        <i class="fas fa-exclamation-triangle"></i> O motivo  obrigatório para edições de marcações existentes.
                     </div>
                 </div>
             </div>
@@ -541,7 +541,7 @@
         </div>
     </div>
 
-    <!-- Modal Confirmar Excluso -->
+    <!-- Modal Confirmar Exclusão -->
     <div class="modal" id="modal-excluir">
         <div class="modal-overlay" onclick="fecharModal('modal-excluir')"></div>
         <div class="modal-content" style="max-width: 520px;">
@@ -553,15 +553,15 @@
                 <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
                     <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 18px; margin-top: 2px;"></i>
                     <div>
-                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #991b1b;">Confirmao de excluso</p>
+                        <p style="margin: 0; font-size: 14px; font-weight: 600; color: #991b1b;">Confirmao de exclusão</p>
                         <p style="margin: 6px 0 0 0; font-size: 14px; color: #b91c1c;" id="excluir-info"></p>
                     </div>
                 </div>
                 <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
-                        <i class="fas fa-gavel" style="color: #ef4444;"></i> Motivo da Excluso <span style="color: #ef4444;">*</span>
+                        <i class="fas fa-gavel" style="color: #ef4444;"></i> Motivo da Exclusão <span style="color: #ef4444;">*</span>
                     </label>
-                    <textarea id="excluir-motivo" placeholder="Descreva o motivo da excluso (obrigatrio para auditoria)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #fef2f2; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"></textarea>
+                    <textarea id="excluir-motivo" placeholder="Descreva o motivo da exclusão (obrigatório para auditoria)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #fef2f2; box-sizing: border-box; font-family: inherit; transition: border-color 0.2s;"></textarea>
                     <p style="margin: 8px 0 0 0; font-size: 12px; color: #9ca3af; display: flex; align-items: center; gap: 6px;">
                         <i class="fas fa-shield-alt"></i> O motivo ser registrado na auditoria do sistema
                     </p>
@@ -593,7 +593,7 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
-        // Obter token CSRF fresco do servidor (necessrio para operaes de escrita)
+        // Obter token CSRF fresco do servidor (necessrio para operações de escrita)
         async function getCsrfToken() {
             try {
                 var resp = await fetch('/api/csrf-token', { credentials: 'include' });
@@ -610,7 +610,7 @@
             if (csrf) h['X-CSRF-Token'] = csrf;
             return h;
         }
-        // Fetch com CSRF automtico para operaes de escrita (POST/PUT/DELETE)
+        // Fetch com CSRF automtico para operações de escrita (POST/PUT/DELETE)
         async function fetchWithCsrf(url, options) {
             options = options || {};
             options.credentials = 'include';
@@ -794,9 +794,9 @@
                 document.getElementById('stat-marcacoes').textContent = marcacoesCache.length;
 
             } catch (e) {
-                console.error('Erro marcaes:', e);
+                console.error('Erro marcações:', e);
                 updateSyncStatus(false);
-                showToast('Erro ao carregar marcaes: ' + e.message, 'error');
+                showToast('Erro ao carregar marcações: ' + e.message, 'error');
             }
         }
 
@@ -875,8 +875,8 @@
                 showToast(marcacoes.length + ' registros encontrados', 'success');
 
             } catch (e) {
-                console.error('Erro histrico:', e);
-                showToast('Erro ao carregar histrico: ' + e.message, 'error');
+                console.error('Erro histórico:', e);
+                showToast('Erro ao carregar histórico: ' + e.message, 'error');
             }
         }
 
@@ -914,7 +914,7 @@
                             '<div style="font-size:1.5rem;font-weight:700;color:#1e293b">' + (r.dias_trabalhados || 0) + '</div>' +
                         '</div>' +
                         '<div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">' +
-                            '<div style="font-size:0.8rem;color:#64748b">Total Marcaes</div>' +
+                            '<div style="font-size:0.8rem;color:#64748b">Total Marcações</div>' +
                             '<div style="font-size:1.5rem;font-weight:700;color:#1e293b">' + (r.total_marcacoes || 0) + '</div>' +
                         '</div>' +
                         '<div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">' +
@@ -1012,7 +1012,7 @@
                 return;
             }
 
-            // Motivo obrigatrio para edies
+            // Motivo obrigatório para edições
             if (id && !motivo) {
                 document.getElementById('motivo-warning').classList.add('show');
                 document.getElementById('ajuste-motivo').focus();
@@ -1069,7 +1069,7 @@
         async function confirmarExclusao() {
             var motivo = document.getElementById('excluir-motivo').value.trim();
             if (!motivo) {
-                showToast('Informe o motivo da excluso', 'error');
+                showToast('Informe o motivo da exclusão', 'error');
                 document.getElementById('excluir-motivo').focus();
                 document.getElementById('excluir-motivo').style.borderColor = '#ef4444';
                 return;
@@ -1119,7 +1119,7 @@
             if (online) {
                 statusEl.className = 'sync-status online';
                 dotEl.className = 'sync-dot online';
-                textEl.textContent = count !== undefined ? (count + ' marcaes') : 'Conectado';
+                textEl.textContent = count !== undefined ? (count + ' marcações') : 'Conectado';
             } else {
                 statusEl.className = 'sync-status offline';
                 dotEl.className = 'sync-dot offline';
@@ -1260,7 +1260,7 @@
                 timeline.innerHTML = items.map(function(item) {
                     var iconClass = item.ação || 'edição';
                     var iconMap = { criacao: 'fa-plus-circle', edicao: 'fa-edit', exclusão: 'fa-trash-alt' };
-                    var acaoMap = { criacao: 'Criao', edicao: 'Edio', exclusão: 'Excluso' };
+                    var acaoMap = { criacao: 'Criação', edicao: 'Edição', exclusão: 'Exclusão' };
                     var icon = iconMap[iconClass] || 'fa-edit';
                     var funcName = getFuncName(item.funcionário_id);
                     var dtStr = item.criado_em ? new Date(item.criado_em).toLocaleString('pt-BR') : '-';
@@ -1295,10 +1295,10 @@
                     '</div>';
                 }).join('');
 
-                showToast(items.length + ' alteraes encontradas', 'success');
+                showToast(items.length + ' alterações encontradas', 'success');
             } catch (e) {
-                console.error('Erro alteraes:', e);
-                showToast('Erro ao carregar alteraes: ' + e.message, 'error');
+                console.error('Erro alterações:', e);
+                showToast('Erro ao carregar alterações: ' + e.message, 'error');
             }
         }
 

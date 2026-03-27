@@ -9411,8 +9411,8 @@
         // CUSTOS & PRECIFICAÇÃO — ÁRVORE DE PRODUTO (3 TABS)
         // ============================================
         let _cpCache = null;          // produtos carregados
-        let _cpParametros = null;     // parametros atuais
-        let _cpActiveTab = 'parametros';
+        let _cpParâmetros = null;     // parâmetros atuais
+        let _cpActiveTab = 'parâmetros';
         let _cpFiltroCategoria = 'todos';
         let _cpFiltroSearch = '';
         let _cpSimProduto = null;
@@ -9455,7 +9455,7 @@
                     </div>
                     <!-- TABS -->
                     <div style="display:flex;border-bottom:2px solid #e5e7eb;background:white;">
-                        <button id="cp-tab-parametros" onclick="cpSwitchTab('parametros')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                        <button id="cp-tab-parâmetros" onclick="cpSwitchTab('parâmetros')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
                             <i class="fas fa-sliders-h" style="margin-right:6px;"></i>Parâmetros
                         </button>
                         <button id="cp-tab-previa" onclick="cpSwitchTab('previa')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
@@ -9474,7 +9474,7 @@
                         <span id="cp-footer-info" style="font-size:12px;color:#9ca3af;"></span>
                         <div style="display:flex;gap:10px;">
                             <button onclick="cpExportarPDF()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF</button>
-                            <button onclick="cpSalvarParametros()" style="padding:8px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
+                            <button onclick="cpSalvarParâmetros()" style="padding:8px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
                             <button onclick="cpAplicarPrecos()" style="padding:8px 18px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-tags" style="margin-right:6px;"></i>Aplicar Preços aos Produtos</button>
                         </div>
                     </div>
@@ -9503,12 +9503,12 @@
                 if (!resp.ok) throw new Error('Erro ' + resp.status);
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.message || 'Erro ao carregar');
-                _cpParametros = data.parametros || data.config;
+                _cpParâmetros = data.parâmetros || data.config;
                 // Restaurar estado salvo
-                if (_cpParametros.estado_selecionado) _cpEstado = _cpParametros.estado_selecionado;
-                if (_cpParametros.tipo_cliente) _cpTipoCliente = _cpParametros.tipo_cliente;
-                if (_cpParametros.is_representante !== undefined) _cpIsRepresentante = _cpParametros.is_representante;
-                if (_cpParametros.frete_selecionado) _cpFreteOpcao = _cpParametros.frete_selecionado;
+                if (_cpParâmetros.estado_selecionado) _cpEstado = _cpParâmetros.estado_selecionado;
+                if (_cpParâmetros.tipo_cliente) _cpTipoCliente = _cpParâmetros.tipo_cliente;
+                if (_cpParâmetros.is_representante !== undefined) _cpIsRepresentante = _cpParâmetros.is_representante;
+                if (_cpParâmetros.frete_selecionado) _cpFreteOpcao = _cpParâmetros.frete_selecionado;
                 _cpCache = data.products;
                 // Recalculate all products with current params
                 cpRecalcularTodos();
@@ -9551,9 +9551,9 @@
         }
 
         function cpRecalcularTodos() {
-            if (!_cpCache || !_cpParametros) return;
+            if (!_cpCache || !_cpParâmetros) return;
             _cpCache.forEach(p => {
-                const r = cpCalcProduto(p, _cpParametros);
+                const r = cpCalcProduto(p, _cpParâmetros);
                 p._cmp = r.cmp; p._preco = r.preco; p._mb = r.mb; p._mb_pct = r.mb_pct;
                 p._ml = r.ml; p._ml_pct = r.ml_pct; p._matCosts = r.matCosts; p._despTotal = r.despTotal;
             });
@@ -9565,7 +9565,7 @@
         // === TAB SWITCHING ===
         function cpSwitchTab(tab) {
             _cpActiveTab = tab;
-            ['parametros', 'previa', 'simulador'].forEach(t => {
+            ['parâmetros', 'previa', 'simulador'].forEach(t => {
                 const btn = document.getElementById('cp-tab-' + t);
                 if (btn) {
                     btn.style.color = t === tab ? '#7c3aed' : '#6b7280';
@@ -9573,26 +9573,26 @@
                     btn.style.background = t === tab ? '#faf5ff' : 'transparent';
                 }
             });
-            if (tab === 'parametros') cpRenderParametros();
+            if (tab === 'parâmetros') cpRenderParâmetros();
             else if (tab === 'previa') cpRenderPrevia();
             else if (tab === 'simulador') cpRenderSimulador();
         }
 
         // === TAB 1: PARÂMETROS ===
-        function cpRenderParametros() {
-            if (!_cpParametros) return;
-            const pr = _cpParametros.precos_kg;
-            const mk = _cpParametros.markup_pct;
-            const desp = _cpParametros.despesas;
+        function cpRenderParâmetros() {
+            if (!_cpParâmetros) return;
+            const pr = _cpParâmetros.precos_kg;
+            const mk = _cpParâmetros.markup_pct;
+            const desp = _cpParâmetros.despesas;
             const totDesp = Object.values(desp).reduce((a, b) => a + b, 0);
             const mb_pct_calc = (1 - 1 / (1 + mk / 100)) * 100;
             const ml_pct_calc = mb_pct_calc - totDesp;
             const matNames = { AL: 'Alumínio', PE: 'Polietileno (PE)', XLPE: 'XLPE', XLPE_AT: 'XLPE / Alta Tensão', HEPR: 'HEPR (Borracha)', PVC: 'PVC', MB_UV: 'Masterbatch UV' };
             const matIcons = { AL: '⬜', PE: '🔵', XLPE: '🟣', XLPE_AT: '🟡', HEPR: '🔴', PVC: '🟢', MB_UV: '🩷' };
-            const icmsEstados = _cpParametros.icms_estados || {};
-            const freteOpcoes = _cpParametros.frete_opcoes || _cpParametros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
-            const comNormal = _cpParametros.comissao_normal || 1.0;
-            const comRepres = _cpParametros.comissao_representante || 4.0;
+            const icmsEstados = _cpParâmetros.icms_estados || {};
+            const freteOpcoes = _cpParâmetros.frete_opcoes || _cpParâmetros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
+            const comNormal = _cpParâmetros.comissao_normal || 1.0;
+            const comRepres = _cpParâmetros.comissao_representante || 4.0;
             const freteNames = { FOB: 'FOB 0%', CIF_SUDESTE: 'CIF Sudeste 6%', CIF_SUL: 'CIF Sul 6%', CIF_CENTRO_OESTE: 'CIF Centro-Oeste 7%', CIF_NE_NO: 'CIF NE/NO 9%' };
             let estadoOpts = Object.keys(icmsEstados).sort().map(uf => { const d = icmsEstados[uf] || {}; return '<option value="' + uf + '" ' + (uf === _cpEstado ? 'selected' : '') + '>' + uf + ' — ICMS ' + (d.icms || 12) + '% | DIFAL ' + (d.difal || 0) + '%</option>'; }).join('');
 
@@ -9718,80 +9718,80 @@
         function cpUpdatePrecoKg(input) {
             const mat = input.dataset.mat;
             const val = parseFloat(input.value);
-            if (!isNaN(val) && val >= 0 && _cpParametros) {
-                _cpParametros.precos_kg[mat] = val;
+            if (!isNaN(val) && val >= 0 && _cpParâmetros) {
+                _cpParâmetros.precos_kg[mat] = val;
                 cpRecalcularTodos();
-                cpRenderParametros();
+                cpRenderParâmetros();
             }
         }
         function cpUpdateMarkup(input) {
             const val = parseFloat(input.value);
-            if (!isNaN(val) && val >= 0 && _cpParametros) {
-                _cpParametros.markup_pct = val;
+            if (!isNaN(val) && val >= 0 && _cpParâmetros) {
+                _cpParâmetros.markup_pct = val;
                 cpRecalcularTodos();
-                cpRenderParametros();
+                cpRenderParâmetros();
             }
         }
         function cpUpdateDespesa(input) {
             const d = input.dataset.desp;
             const val = parseFloat(input.value);
-            if (!isNaN(val) && val >= 0 && _cpParametros) {
-                _cpParametros.despesas[d] = val;
+            if (!isNaN(val) && val >= 0 && _cpParâmetros) {
+                _cpParâmetros.despesas[d] = val;
                 cpRecalcularTodos();
-                cpRenderParametros();
+                cpRenderParâmetros();
             }
         }
 
         // === ESTADO / TIPO CLIENTE / REPRESENTANTE / FRETE ===
         function cpUpdateEstado(uf) {
             _cpEstado = uf;
-            _cpParametros.estado_selecionado = uf;
-            const icmsEstados = _cpParametros.icms_estados || {};
+            _cpParâmetros.estado_selecionado = uf;
+            const icmsEstados = _cpParâmetros.icms_estados || {};
             const stData = icmsEstados[uf];
             if (stData) {
-                _cpParametros.despesas.icms = stData.icms || 12;
-                _cpParametros.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (stData.difal || 0) : 0;
+                _cpParâmetros.despesas.icms = stData.icms || 12;
+                _cpParâmetros.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (stData.difal || 0) : 0;
                 // Revenda: paga ST (sem DIFAL); Consumidor Final: paga DIFAL (sem ST)
-                _cpParametros.despesas.icms_st = _cpTipoCliente === 'revenda' ? (stData.st || 0) : 0;
+                _cpParâmetros.despesas.icms_st = _cpTipoCliente === 'revenda' ? (stData.st || 0) : 0;
             }
             cpRecalcularTodos();
-            cpRenderParametros();
+            cpRenderParâmetros();
         }
 
         function cpUpdateTipoCliente(tipo) {
             _cpTipoCliente = tipo;
-            _cpParametros.tipo_cliente = tipo;
-            const icmsEstados = _cpParametros.icms_estados || {};
+            _cpParâmetros.tipo_cliente = tipo;
+            const icmsEstados = _cpParâmetros.icms_estados || {};
             const stData = icmsEstados[_cpEstado];
             if (stData) {
-                _cpParametros.despesas.icms = stData.icms || 12;
-                _cpParametros.despesas.difal = tipo === 'consumidor_final' ? (stData.difal || 0) : 0;
+                _cpParâmetros.despesas.icms = stData.icms || 12;
+                _cpParâmetros.despesas.difal = tipo === 'consumidor_final' ? (stData.difal || 0) : 0;
                 // Revenda: paga ST (substituição tributária); Consumidor Final: paga DIFAL
-                _cpParametros.despesas.icms_st = tipo === 'revenda' ? (stData.st || 0) : 0;
+                _cpParâmetros.despesas.icms_st = tipo === 'revenda' ? (stData.st || 0) : 0;
             }
             cpRecalcularTodos();
-            cpRenderParametros();
+            cpRenderParâmetros();
         }
 
         function cpUpdateRepresentante(isRepr) {
             _cpIsRepresentante = isRepr;
-            _cpParametros.is_representante = isRepr;
-            const comNormal = _cpParametros.comissao_normal || 1.0;
-            const comRepr = _cpParametros.comissao_representante || 4.0;
-            _cpParametros.despesas.comissao = isRepr ? comRepr : comNormal;
+            _cpParâmetros.is_representante = isRepr;
+            const comNormal = _cpParâmetros.comissao_normal || 1.0;
+            const comRepr = _cpParâmetros.comissao_representante || 4.0;
+            _cpParâmetros.despesas.comissao = isRepr ? comRepr : comNormal;
             cpRecalcularTodos();
-            cpRenderParametros();
+            cpRenderParâmetros();
         }
 
         function cpUpdateFreteOpcao(opção) {
             _cpFreteOpcao = opção;
-            _cpParametros.frete_selecionado = opção;
-            const freteOpcoes = _cpParametros.frete_opcoes || _cpParametros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
+            _cpParâmetros.frete_selecionado = opção;
+            const freteOpcoes = _cpParâmetros.frete_opcoes || _cpParâmetros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
             if (freteOpcoes[opção] !== undefined) {
-                _cpParametros.despesas.frete = freteOpcoes[opção];
+                _cpParâmetros.despesas.frete = freteOpcoes[opção];
             }
             cpRecalcularTodos();
-            cpRenderParametros();
+            cpRenderParâmetros();
         }
 
         // === TAB 2: PRÉVIA DE PREÇOS ===
@@ -9867,7 +9867,7 @@
 
         // === TAB 3: SIMULADOR ===
         function cpRenderSimulador() {
-            if (!_cpCache || !_cpParametros) return;
+            if (!_cpCache || !_cpParâmetros) return;
             // Product selector
             let options = '<option value="">— Selecione um produto —</option>';
             const cats = {};
@@ -9887,7 +9887,7 @@
             let detail = '';
             if (_cpSimProduto) {
                 const p = _cpSimProduto;
-                const r = cpCalcProduto(p, _cpParametros);
+                const r = cpCalcProduto(p, _cpParâmetros);
                 const matNames = { AL: 'Alumínio', PE: 'PE', XLPE: 'XLPE', XLPE_AT: 'XLPE/AT', HEPR: 'HEPR', PVC: 'PVC', MB_UV: 'Masterbatch UV' };
                 const matColors = { AL: '#9ca3af', PE: '#3b82f6', XLPE: '#8b5cf6', XLPE_AT: '#f59e0b', HEPR: '#ef4444', PVC: '#22c55e', MB_UV: '#ec4899' };
 
@@ -9896,7 +9896,7 @@
                 Object.keys(r.matCosts).forEach(mat => {
                     if (r.matCosts[mat] > 0) {
                         const kgm = p.kg_m[mat] || 0;
-                        const prkg = _cpParametros.precos_kg[mat];
+                        const prkg = _cpParâmetros.precos_kg[mat];
                         const pct = r.cmp > 0 ? (r.matCosts[mat] / r.cmp * 100) : 0;
                         matRows += `<tr>
                             <td style="padding:6px 10px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${matColors[mat] || '#6b7280'};margin-right:6px;"></span>${matNames[mat] || mat}</td>
@@ -9915,7 +9915,7 @@
                 const despIcons = { bobina: 'fa-circle-notch', comissao: 'fa-handshake', custo_fixo: 'fa-building', financeira: 'fa-credit-card', icms: 'fa-landmark', difal: 'fa-balance-scale', pis_cofins: 'fa-file-invoice-dollar', icms_st: 'fa-file-contract', redespacho: 'fa-shipping-fast', frete: 'fa-truck' };
                 let despRows = '';
                 Object.keys(r.despTotal).forEach(d => {
-                    const pct = _cpParametros.despesas[d];
+                    const pct = _cpParâmetros.despesas[d];
                     despRows += `<tr>
                         <td style="padding:5px 10px;font-size:12px;"><i class="fas ${despIcons[d] || 'fa-minus'}" style="color:#7c3aed;margin-right:6px;font-size:10px;"></i>${despNames[d] || d}</td>
                         <td style="padding:5px 10px;text-align:right;font-size:12px;color:#6b7280;">${pct.toFixed(2)}%</td>
@@ -9961,7 +9961,7 @@
                             </div>
                             <!-- Markup -->
                             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;">
-                                <span style="font-size:12px;color:#374151;"><i class="fas fa-plus-circle" style="color:#3b82f6;margin-right:6px;"></i>Markup (${_cpParametros.markup_pct}%)</span>
+                                <span style="font-size:12px;color:#374151;"><i class="fas fa-plus-circle" style="color:#3b82f6;margin-right:6px;"></i>Markup (${_cpParâmetros.markup_pct}%)</span>
                                 <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${r.mb.toFixed(4)}</span>
                             </div>
                             <!-- Preço -->
@@ -9974,7 +9974,7 @@
                             <table style="width:100%;border-collapse:collapse;">${despRows}
                                 <tr style="border-top:1px solid #e5e7eb;">
                                     <td style="padding:6px 10px;font-size:12px;font-weight:600;">Total Despesas</td>
-                                    <td style="padding:6px 10px;text-align:right;font-size:12px;font-weight:600;">${Object.values(_cpParametros.despesas).reduce((a, b) => a + b, 0).toFixed(2)}%</td>
+                                    <td style="padding:6px 10px;text-align:right;font-size:12px;font-weight:600;">${Object.values(_cpParâmetros.despesas).reduce((a, b) => a + b, 0).toFixed(2)}%</td>
                                     <td style="padding:6px 10px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#dc2626;">R$ ${r.sumDesp.toFixed(4)}</td>
                                 </tr>
                             </table>
@@ -9997,10 +9997,10 @@
                     <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-sliders-h" style="color:#7c3aed;margin-right:6px;"></i>Simulação Rápida — Variar Markup</div>
                     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
                         ${[60, 70, 80, 85, 90, 95, 100, 110, 120, 130].map(m => {
-                    const simParams = JSON.parse(JSON.stringify(_cpParametros));
+                    const simParams = JSON.parse(JSON.stringify(_cpParâmetros));
                     simParams.markup_pct = m;
                     const sr = cpCalcProduto(p, simParams);
-                    const isCurrent = m === _cpParametros.markup_pct;
+                    const isCurrent = m === _cpParâmetros.markup_pct;
                     return '<div style="text-align:center;padding:8px;border-radius:8px;' + (isCurrent ? 'background:#7c3aed;color:white;' : 'background:#f8fafc;border:1px solid #e5e7eb;') + '">' +
                         '<div style="font-size:10px;font-weight:600;' + (isCurrent ? 'color:rgba(255,255,255,0.8);' : 'color:#9ca3af;') + '">MK ' + m + '%</div>' +
                         '<div style="font-size:12px;font-weight:700;font-family:monospace;margin-top:2px;">R$ ' + sr.preco.toFixed(2) + '</div>' +
@@ -10014,10 +10014,10 @@
                     <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-map-marked-alt" style="color:#2563eb;margin-right:6px;"></i>Preço por Estado — Comparativo de Impostos</div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;">
                         ${(() => {
-                    const icos = _cpParametros.icms_estados || {};
+                    const icos = _cpParâmetros.icms_estados || {};
                     const estados = Object.keys(icos).sort();
                     return estados.map(uf => {
-                        const stParams = JSON.parse(JSON.stringify(_cpParametros));
+                        const stParams = JSON.parse(JSON.stringify(_cpParâmetros));
                         stParams.despesas.icms = icos[uf].icms || 12;
                         stParams.despesas.difal = _cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0;
                         stParams.despesas.icms_st = _cpTipoCliente === 'revenda' ? (icos[uf].st || 0) : 0;
@@ -10041,7 +10041,7 @@
                     <div style="font-size:11px;color:#9ca3af;margin-bottom:12px;">Mesmo produto — como o preço e margem variam por tipo de cliente e canal de venda</div>
                     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
                         ${(() => {
-                    const icos = _cpParametros.icms_estados || {};
+                    const icos = _cpParâmetros.icms_estados || {};
                     const uf = _cpEstado;
                     const stData = icos[uf] || {};
                     const canais = [
@@ -10052,12 +10052,12 @@
                     ];
                     const isCurrent = (c) => c.tipo === _cpTipoCliente && c.repr === _cpIsRepresentante;
                     return canais.map(canal => {
-                        const canalParams = JSON.parse(JSON.stringify(_cpParametros));
+                        const canalParams = JSON.parse(JSON.stringify(_cpParâmetros));
                         canalParams.despesas.icms = stData.icms || 12;
                         canalParams.despesas.difal = canal.tipo === 'consumidor_final' ? (stData.difal || 0) : 0;
                         canalParams.despesas.icms_st = canal.tipo === 'revenda' ? (stData.st || 0) : 0;
-                        const comNormal = _cpParametros.comissao_normal || 1.0;
-                        const comRepr = _cpParametros.comissao_representante || 4.0;
+                        const comNormal = _cpParâmetros.comissao_normal || 1.0;
+                        const comRepr = _cpParâmetros.comissao_representante || 4.0;
                         canalParams.despesas.comissao = canal.repr ? comRepr : comNormal;
                         const sr = cpCalcProduto(p, canalParams);
                         const highlight = isCurrent(canal);
@@ -10097,7 +10097,7 @@
 
         // === APLICAR PRECOS AOS PRODUTOS (MySQL) ===
         async function cpAplicarPrecos() {
-            if (!_cpCache || !_cpParametros) return;
+            if (!_cpCache || !_cpParâmetros) return;
             const total = _cpCache.length;
             const confirma = await ConfirmDialog.show({
                 message: `Aplicar preço sugerido (R$/metro) calculado a ${total} produtos no banco de dados?\n\nIsso irá atualizar o campo Preço de Venda de todos os produtos que possuem código correspondente no catálogo.`,
@@ -10125,13 +10125,13 @@
         }
 
         // === SAVE / EXPORT ===
-        async function cpSalvarParametros() {
-            if (!_cpParametros) return;
+        async function cpSalvarParâmetros() {
+            if (!_cpParâmetros) return;
             try {
-                const resp = await fetch('/api/pcp/arvore-produto/parametros', {
+                const resp = await fetch('/api/pcp/arvore-produto/parâmetros', {
                     credentials: 'include', method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(_cpParametros)
+                    body: JSON.stringify(_cpParâmetros)
                 });
                 if (!resp.ok) throw new Error('Erro ' + resp.status);
                 const data = await resp.json();
@@ -10145,10 +10145,10 @@
         }
 
         function cpExportarPDF() {
-            if (!_cpCache || !_cpParametros) return;
+            if (!_cpCache || !_cpParâmetros) return;
             const products = cpGetFilteredProducts();
-            const mk = _cpParametros.markup_pct;
-            const desp = _cpParametros.despesas;
+            const mk = _cpParâmetros.markup_pct;
+            const desp = _cpParâmetros.despesas;
             const totDesp = Object.values(desp).reduce((a, b) => a + b, 0);
             const mb_pct = (1 - 1 / (1 + mk / 100)) * 100;
             const ml_pct = mb_pct - totDesp;
@@ -21830,7 +21830,7 @@
                     .replace(/['"]\s*\+\s*(dateValue|timeValue)\s*\+\s*['"]/gi, '')
                     .trim()
                 : '';
-            const obrigatorio = campo.obrigatório ? '<span style="color: #dc2626;">*</span>' : '';
+            const obrigatório = campo.obrigatório ? '<span style="color: #dc2626;">*</span>' : '';
             const required = campo.obrigatório ? 'required' : '';
 
             let inputHTML = '';
@@ -21891,7 +21891,7 @@
                     inputHTML = '<input type="text" id="' + campo.id + '" value="' + (valor || '') + '" placeholder="' + (campo.placeholder || '') + '" class="modal-diario-input">';
             }
 
-            return '<div class="campo-grupo"><label class="modal-diario-label"><i class="fas ' + campo.icone + '"></i> ' + campo.label + ' ' + obrigatorio + '</label>' + inputHTML + '</div>';
+            return '<div class="campo-grupo"><label class="modal-diario-label"><i class="fas ' + campo.icone + '"></i> ' + campo.label + ' ' + obrigatório + '</label>' + inputHTML + '</div>';
         }
 
         function preencherCamposTarefa(tarefa) {

@@ -204,7 +204,7 @@
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliao"><i class="fas fa-user-check"></i></a>
+                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
                 <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
@@ -568,7 +568,7 @@
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: #94a3b8;">
                         <i class="fas fa-gift" style="font-size: 64px; margin-bottom: 20px; display: block;"></i>
                         <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">Nenhum benefcio cadastrado</p>
-                        <p style="font-size: 0.9rem;">Entre em contato com o RH para mais informaes.</p>
+                        <p style="font-size: 0.9rem;">Entre em contato com o RH para mais informações.</p>
                     </div>
                 `;
                 atualizarContadores();
@@ -787,7 +787,7 @@
             };
 
             if (!dados.nome || !dados.tipo) {
-                showToast('Preencha os campos obrigatrios', 'error');
+                showToast('Preencha os campos obrigatórios', 'error');
                 return;
             }
 
@@ -1065,7 +1065,7 @@
                 if (!meResp.ok) return;
                 const me = await meResp.json();
 
-                // Buscar marcaes do ms atual para o funcionário
+                // Buscar marcações do ms atual para o funcionário
                 const hoje = new Date();
                 const inicioMes = hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0') + '-01';
                 const fimMes = hoje.toISOString().split('T')[0];
@@ -1078,7 +1078,7 @@
                 const pontoData = await pontoResp.json();
                 const marcacoes = pontoData.marcacoes || [];
 
-                // Filtrar marcaes do funcionário logado
+                // Filtrar marcações do funcionário logado
                 const minhasMarcacoes = marcacoes.filter(m => {
                     if (me.funcionário_id && m.funcionário_id == me.funcionário_id) return true;
                     const obs = (m.observacao || '').toUpperCase();

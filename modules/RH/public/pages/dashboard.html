@@ -200,7 +200,7 @@
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="header-btn" title="Notificaes"><i class="fas fa-bell"></i></button>
+                    <button class="header-btn" title="Notificações"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
                         <span>Ol, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar"><span id="user-initials">U</span></div>
@@ -501,12 +501,12 @@
                                     <option value="financeiro">Financeiro</option>
                                     <option value="vendas">Vendas</option>
                                     <option value="marketing">Marketing</option>
-                                    <option value="produo">Produo</option>
+                                    <option value="produção">Produção</option>
                                     <option value="administrativo">Administrativo</option>
                                 </select>
                             </div>
                             <div class="form-group required">
-                                <label for="data_admissao">Data de Admisso</label>
+                                <label for="data_admissao">Data de Admissão</label>
                                 <input type="date" id="data_admissao" name="data_admissao" required>
                             </div>
                             <div class="form-group required">
@@ -524,7 +524,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label for="observacoes">Observaes</label>
+                                <label for="observacoes">Observações</label>
                                 <textarea id="observacoes" name="observacoes" placeholder="Informações adicionais..."></textarea>
                             </div>
                         </div>
@@ -603,7 +603,7 @@
                                     <option value="financeiro">Financeiro</option>
                                     <option value="vendas">Vendas</option>
                                     <option value="marketing">Marketing</option>
-                                    <option value="produo">Produo</option>
+                                    <option value="produção">Produção</option>
                                     <option value="administrativo">Administrativo</option>
                                 </select>
                             </div>
@@ -664,8 +664,8 @@
                                 <input type="number" id="outros_descontos" name="outros_descontos" step="0.01" value="0">
                             </div>
                             <div class="form-group">
-                                <label for="descrio_outros_descontos">Descrição dos Outros Descontos</label>
-                                <input type="text" id="descrio_outros_descontos" name="descrio_outros_descontos" placeholder="Ex: Emprstimo consignado, etc.">
+                                <label for="descrição_outros_descontos">Descrição dos Outros Descontos</label>
+                                <input type="text" id="descrição_outros_descontos" name="descrição_outros_descontos" placeholder="Ex: Emprstimo consignado, etc.">
                             </div>
                         </div>
 
@@ -703,8 +703,8 @@ Equipe de Recursos Humanos
                                 </label>
                             </div>
                             <div class="form-group">
-                                <label for="observacoes_holerite">Observaes no Holerite</label>
-                                <textarea id="observacoes_holerite" name="observacoes_holerite" rows="3" placeholder="Observaes que aparecerão no holerite..."></textarea>
+                                <label for="observacoes_holerite">Observações no Holerite</label>
+                                <textarea id="observacoes_holerite" name="observacoes_holerite" rows="3" placeholder="Observações que aparecerão no holerite..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -969,7 +969,7 @@ Equipe de Recursos Humanos
             const form = document.getElementById('novoFuncionarioForm');
             const formData = new FormData(form);
             
-            // Validar campos obrigatrios
+            // Validar campos obrigatórios
             const requiredFields = form.querySelectorAll('[required]');
             let isValid = true;
             
@@ -983,7 +983,7 @@ Equipe de Recursos Humanos
             });
             
             if (!isValid) {
-                showToast('Por favor, preencha todos os campos obrigatrios.', 'warning');
+                showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
                 return;
             }
 
@@ -1154,13 +1154,13 @@ Equipe de Recursos Humanos
             const form = document.getElementById('gerarHoleritesForm');
             const formData = new FormData(form);
             
-            // Validar campos obrigatrios
+            // Validar campos obrigatórios
             const competencia = document.getElementById('competencia').value;
             const tipoGeracao = document.getElementById('tipo_geracao').value;
             const formatoSaida = document.getElementById('formato_saida').value;
             
             if (!competencia || !tipoGeracao || !formatoSaida) {
-                showToast('Por favor, preencha todos os campos obrigatrios.', 'warning');
+                showToast('Por favor, preencha todos os campos obrigatórios.', 'warning');
                 return;
             }
 

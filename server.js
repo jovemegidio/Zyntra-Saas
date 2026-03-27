@@ -1544,6 +1544,7 @@ try {
     const comprasRequisicoesRoutes = require('./modules/Compras/api/requisicoes');
     const comprasRecebimentoRoutes = require('./modules/Compras/api/recebimento');
     const comprasRelatoriosRoutes = require('./modules/Compras/api/relatorios');
+    const comprasCentrosCustoRoutes = require('./modules/Compras/api/centros-custo');
 
     app.use('/api/compras/fornecedores', authenticateToken, authorizeArea('compras'), comprasFornecedoresRoutes);
     app.use('/api/compras/pedidos', authenticateToken, authorizeArea('compras'), comprasPedidosRoutes);
@@ -1553,6 +1554,7 @@ try {
     app.use('/api/compras/requisicoes', authenticateToken, authorizeArea('compras'), comprasRequisicoesRoutes);
     app.use('/api/compras/recebimento', authenticateToken, authorizeArea('compras'), comprasRecebimentoRoutes);
     app.use('/api/compras/relatorios', authenticateToken, authorizeArea('compras'), comprasRelatoriosRoutes);
+    app.use('/api/compras/centros-custo', authenticateToken, authorizeArea('compras'), comprasCentrosCustoRoutes);
 
     console.log('✅ Rotas Compras API carregadas: /api/compras/*');
 } catch (err) {
