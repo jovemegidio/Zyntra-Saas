@@ -2630,8 +2630,9 @@ module.exports = function createVendasRoutes(deps) {
             const { clienteId } = req.params;
             const nomeCliente = req.query.nome || '';
 
-            let query = `SELECT p.id, p.cliente, p.status, p.valor, p.vendedor, p.nf, p.parcelas,
-                         p.data_criacao, p.data_atualizacao, p.desconto_pct,
+            let query = `SELECT p.id, p.cliente, p.cliente_nome, p.status, p.valor,
+                         COALESCE(p.vendedor_nome, '') as vendedor, p.nf, p.parcelas,
+                         p.created_at as data_criacao, p.updated_at as data_atualizacao, p.desconto_pct,
                          (SELECT COUNT(*) FROM pedido_itens pi WHERE pi.pedido_id = p.id) as total_itens
                          FROM pedidos p WHERE `;
             let params = [];
@@ -2646,7 +2647,7 @@ module.exports = function createVendasRoutes(deps) {
                 return res.json({ pedidos: [], total: 0, totalValor: 0 });
             }
 
-            query += `ORDER BY p.data_criacao DESC LIMIT 100`;
+            query += `ORDER BY p.created_at DESC LIMIT 100`;
 
             const [pedidos] = await pool.query(query, params);
 
@@ -2658,7 +2659,16 @@ module.exports = function createVendasRoutes(deps) {
                 statusCount[st] = (statusCount[st] || 0) + 1;
             });
 
+            // Map pedidos to historico format expected by frontend
+            const historico = pedidos.map(p => ({
+                data_alteracao: p.data_criacao,
+                descricao: `Pedido #${p.id} — ${p.status || 'orçamento'} — R$ ${(parseFloat(p.valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
+                usuario: p.vendedor || 'Sistema',
+                tipo: 'pedido'
+            }));
+
             res.json({
+                historico,
                 pedidos,
                 total: pedidos.length,
                 totalValor,
