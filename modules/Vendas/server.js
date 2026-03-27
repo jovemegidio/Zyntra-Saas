@@ -452,6 +452,16 @@ function verificarSeAdmin(user) {
     return false;
 }
 
+/**
+ * Verifica se o usuário é supervisor de vendas (acesso total ao kanban sem ser admin global)
+ * Roles: supervisor, gerente, gerente_comercial
+ */
+function isKanbanSupervisor(user) {
+    if (!user) return false;
+    const role = user.role ? user.role.toString().toLowerCase() : '';
+    return ['supervisor', 'gerente', 'gerente_comercial'].includes(role);
+}
+
 // Rota para Kanban - COM FILTROS e controle de visibilidade por usuário
 // SECURITY: Agora requer autenticação obrigatória
 apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
@@ -495,11 +505,12 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
         let whereConditions = [];
         let queryParams = [];
 
-        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos
-        if (currentUser && !isAdmin) {
+        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos (supervisores veem todos)
+        const isSupervisor = isKanbanSupervisor(currentUser);
+        if (currentUser && !isAdmin && !isSupervisor) {
             whereConditions.push('p.vendedor_id = ?');
             queryParams.push(currentUser.id);
-            if (DEBUG) console.log(`👤 Filtrando pedidos do vendedor: ${currentUser.nome} (ID: ${currentUser.id})`);
+            if (DEBUG) console.log(`👤 Filtrando pedidos do vendedor: ${currentUser.nome} (ID: ${currentUser.id})`);    
         }
 
         // Filtro de status base (cancelados, denegados, encerrados)
@@ -2795,10 +2806,11 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
         const existing = existingRows[0];
         const user = req.user || {};
         const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+        const isSupervisor = isKanbanSupervisor(user);
 
-        // Verificar permissão
-        if (!isAdmin && existing.vendedor_id && Number(existing.vendedor_id) !== Number(user.id)) {
-            return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável ou admin podem editar este pedido.' });
+        // Verificar permissão (supervisores também podem editar qualquer pedido)
+        if (!isAdmin && !isSupervisor && existing.vendedor_id && Number(existing.vendedor_id) !== Number(user.id)) {
+            return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável, supervisor ou admin podem editar este pedido.' });
         }
 
         // Construir query de atualização dinâmica
@@ -2864,8 +2876,8 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
                 return res.status(403).json({ message: 'Apenas administradores podem reabrir pedidos cancelados.' });
             }
 
-            // Vendedores só movem até analise
-            if (!isAdmin) {
+            // Vendedores só movem até analise (supervisores podem mover qualquer etapa)
+            if (!isAdmin && !isSupervisor) {
                 const allowedForVendedor = ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'];
                 if (!allowedForVendedor.includes(updates.status)) {
                     return res.status(403).json({ message: 'Apenas administradores podem mover pedidos após "Análise de Crédito".' });
