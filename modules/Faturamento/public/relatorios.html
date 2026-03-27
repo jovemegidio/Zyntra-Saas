@@ -107,7 +107,7 @@
                     </div>
                 </div>
 
-                <!-- Categorias de Relatórios -->
+                <!-- Seção 1: Ordens de Serviço (5 templates) -->
                 <div class="card fade-in-delay-2">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-tools"></i> Ordens de Serviço</h3>
@@ -117,7 +117,7 @@
                             <div class="option-card" onclick="gerarRelatorio('os_abertas')">
                                 <div class="option-card-icon"><i class="fas fa-folder-open"></i></div>
                                 <div class="option-card-title">OS Abertas</div>
-                                <div class="option-card-desc">Listagem de ordens em andamento</div>
+                                <div class="option-card-desc">Ordens abertas com foco em faturamento potencial</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('os_concluidas')">
                                 <div class="option-card-icon green"><i class="fas fa-check-circle"></i></div>
@@ -132,17 +132,18 @@
                             <div class="option-card" onclick="gerarRelatorio('os_por_tecnico')">
                                 <div class="option-card-icon cyan"><i class="fas fa-user-cog"></i></div>
                                 <div class="option-card-title">OS por Técnico</div>
-                                <div class="option-card-desc">Distribuição por responsável</div>
+                                <div class="option-card-desc">Desempenho de faturamento por técnico</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatorio('os_faturamento')">
+                            <div class="option-card" onclick="gerarRelatorio('faturamento_os')">
                                 <div class="option-card-icon purple"><i class="fas fa-dollar-sign"></i></div>
-                                <div class="option-card-title">Faturamento OS</div>
-                                <div class="option-card-desc">Receita gerada pelas OS</div>
+                                <div class="option-card-title">Faturamento de OS</div>
+                                <div class="option-card-desc">Receita gerada pelas ordens de serviço</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Seção 2: Contratos (5 templates) -->
                 <div class="card fade-in-delay-3">
                     <div class="card-header">
                         <h3 class="card-title"><i class="fas fa-file-signature"></i> Contratos</h3>
@@ -152,75 +153,73 @@
                             <div class="option-card" onclick="gerarRelatorio('contratos_ativos')">
                                 <div class="option-card-icon green"><i class="fas fa-file-alt"></i></div>
                                 <div class="option-card-title">Contratos Ativos</div>
-                                <div class="option-card-desc">Contratos em vigência</div>
+                                <div class="option-card-desc">Contratos ativos acompanhados pelo faturamento</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('contratos_vencer')">
-                                <div class="option-card-icon yellow"><i class="fas fa-calendar-exclamation"></i></div>
-                                <div class="option-card-title">A Vencer</div>
-                                <div class="option-card-desc">Próximos vencimentos</div>
+                                <div class="option-card-icon yellow"><i class="fas fa-calendar-check"></i></div>
+                                <div class="option-card-title">Contratos a Vencer</div>
+                                <div class="option-card-desc">Próximos vencimentos de contratos</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('contratos_vencidos')">
-                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i
-                                        class="fas fa-calendar-times"></i></div>
-                                <div class="option-card-title">Vencidos</div>
-                                <div class="option-card-desc">Contratos já vencidos</div>
-                            </div>
-                            <div class="option-card" onclick="gerarRelatorio('contratos_receita')">
-                                <div class="option-card-icon"><i class="fas fa-chart-line"></i></div>
-                                <div class="option-card-title">Receita Contratos</div>
-                                <div class="option-card-desc">Receita mensal recorrente</div>
+                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-calendar-times"></i></div>
+                                <div class="option-card-title">Contratos Vencidos</div>
+                                <div class="option-card-desc">Contratos já vencidos sem renovação</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('contratos_clientes')">
                                 <div class="option-card-icon cyan"><i class="fas fa-users"></i></div>
                                 <div class="option-card-title">Contratos por Cliente</div>
-                                <div class="option-card-desc">Agrupamento por cliente</div>
+                                <div class="option-card-desc">Visão contratual consolidada por cliente</div>
+                            </div>
+                            <div class="option-card" onclick="gerarRelatorio('receita_contratos')">
+                                <div class="option-card-icon"><i class="fas fa-chart-line"></i></div>
+                                <div class="option-card-title">Receita de Contratos</div>
+                                <div class="option-card-desc">Receita contratual, recorrência e expansão</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Seção 3: Faturamento & NF-e (7 templates) -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Faturamento & NF-e</h3>
+                        <h3 class="card-title"><i class="fas fa-file-invoice-dollar"></i> Faturamento &amp; NF-e</h3>
                     </div>
                     <div class="card-body">
                         <div class="report-grid">
                             <div class="option-card" onclick="gerarRelatorio('nfe_emitidas')">
                                 <div class="option-card-icon"><i class="fas fa-file-invoice"></i></div>
                                 <div class="option-card-title">NF-e Emitidas</div>
-                                <div class="option-card-desc">Todas notas emitidas no período</div>
+                                <div class="option-card-desc">Notas fiscais emitidas — conferência e volume</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('nfe_canceladas')">
-                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i
-                                        class="fas fa-ban"></i></div>
+                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-ban"></i></div>
                                 <div class="option-card-title">NF-e Canceladas</div>
-                                <div class="option-card-desc">Notas canceladas</div>
+                                <div class="option-card-desc">Notas fiscais canceladas no período</div>
+                            </div>
+                            <div class="option-card" onclick="gerarRelatorio('nfe_por_cliente')">
+                                <div class="option-card-icon cyan"><i class="fas fa-user-tag"></i></div>
+                                <div class="option-card-title">NF-e por Cliente</div>
+                                <div class="option-card-desc">Notas agrupadas por cliente</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('faturamento_mensal')">
                                 <div class="option-card-icon green"><i class="fas fa-chart-bar"></i></div>
                                 <div class="option-card-title">Faturamento Mensal</div>
-                                <div class="option-card-desc">Evolução do faturamento</div>
+                                <div class="option-card-desc">Evolução mensal da receita faturada</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('impostos')">
                                 <div class="option-card-icon purple"><i class="fas fa-percentage"></i></div>
-                                <div class="option-card-title">Impostos</div>
-                                <div class="option-card-desc">Resumo de impostos retidos</div>
+                                <div class="option-card-title">Impostos de Faturamento</div>
+                                <div class="option-card-desc">ICMS, IPI, PIS, COFINS recolhidos</div>
                             </div>
-                            <div class="option-card" onclick="gerarRelatorio('faturamento_cliente')">
-                                <div class="option-card-icon cyan"><i class="fas fa-user-tag"></i></div>
-                                <div class="option-card-title">Por Cliente</div>
-                                <div class="option-card-desc">Faturamento por cliente</div>
-                            </div>
-                            <div class="option-card" onclick="gerarRelatorio('logistica')">
-                                <div class="option-card-icon yellow"><i class="fas fa-truck"></i></div>
-                                <div class="option-card-title">Logística</div>
-                                <div class="option-card-desc">Entregas e expedição</div>
+                            <div class="option-card" onclick="gerarRelatorio('logistica_nfe')">
+                                <div class="option-card-icon" style="background:#fff7ed;color:#ea580c;"><i class="fas fa-truck"></i></div>
+                                <div class="option-card-title">Logística de NF-e</div>
+                                <div class="option-card-desc">Entregas, expedição e rastreamento</div>
                             </div>
                             <div class="option-card" onclick="gerarRelatorio('inadimplencia')">
-                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i
-                                        class="fas fa-exclamation-triangle"></i></div>
+                                <div class="option-card-icon" style="background:#fef2f2;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i></div>
                                 <div class="option-card-title">Inadimplência</div>
-                                <div class="option-card-desc">Títulos em atraso</div>
+                                <div class="option-card-desc">Títulos em atraso e devedores</div>
                             </div>
                         </div>
                     </div>
@@ -257,13 +256,13 @@
         function formatarMoeda(v) { return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
 
         const relatorioNomes = {
-            os_abertas: 'Ordens de Serviço Abertas', os_concluídas: 'OS Concluídas', os_pendentes: 'OS Pendentes',
-            os_por_tecnico: 'OS por Técnico', os_faturamento: 'Faturamento OS',
-            contratos_ativos: 'Contratos Ativos', contratos_vencer: 'Contratos a Vencer', contratos_vencidos: 'Contratos Vencidos',
-            contratos_receita: 'Receita de Contratos', contratos_clientes: 'Contratos por Cliente',
-            nfe_emitidas: 'NF-e Emitidas', nfe_canceladas: 'NF-e Canceladas', faturamento_mensal: 'Faturamento Mensal',
-            impostos: 'Resumo de Impostos', faturamento_cliente: 'Faturamento por Cliente',
-            logistica: 'Relatório de Logística', inadimplencia: 'Inadimplência'
+            os_abertas: 'OS Abertas Faturamento', os_concluidas: 'OS Concluídas', os_pendentes: 'OS Pendentes',
+            os_por_tecnico: 'OS por Técnico Faturamento', faturamento_os: 'Faturamento de OS',
+            contratos_ativos: 'Contratos Ativos Faturamento', contratos_vencer: 'Contratos a Vencer', contratos_vencidos: 'Contratos Vencidos',
+            contratos_clientes: 'Contratos por Cliente Faturamento', receita_contratos: 'Receita de Contratos',
+            nfe_emitidas: 'NF-e Emitidas', nfe_canceladas: 'NF-e Canceladas', nfe_por_cliente: 'NF-e por Cliente',
+            faturamento_mensal: 'Faturamento Mensal', impostos: 'Impostos de Faturamento',
+            logistica_nfe: 'Logística de NF-e', inadimplencia: 'Inadimplência'
         };
 
         function gerarRelatorio(tipo) {
