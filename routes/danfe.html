@@ -331,6 +331,42 @@
       color:#333;
       text-align:right;
     }
+    .canhoto{
+      display:grid;
+      grid-template-columns:1fr 22mm;
+      border:var(--thin);
+      margin-bottom:0;
+      font-size:5.5pt;
+      line-height:1.25;
+    }
+    .canhoto-body{padding:1mm 1.5mm;}
+    .canhoto-text{margin-bottom:1mm;}
+    .canhoto-fields{
+      display:grid;
+      grid-template-columns:30% 1fr;
+      border-top:var(--thin);
+      min-height:7mm;
+    }
+    .canhoto-fields > div{
+      padding:0.8mm 1.2mm;
+    }
+    .canhoto-fields > div:first-child{border-right:var(--thin);}
+    .canhoto-nfe{
+      border-left:var(--thin);
+      padding:2mm 2mm;
+      text-align:center;
+      font-size:8pt;
+      font-weight:700;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      line-height:1.5;
+    }
+    .canhoto-nfe .nfe-label{font-size:10pt;}
+    .canhoto-separator{
+      border-bottom:0.5mm dashed #555;
+      margin:1.5mm 0 2mm;
+    }
     .mapping-note{
       display:none;
     }
@@ -360,7 +396,22 @@
     <div class="watermark {{marcaAguaClasse}}"><img src="{{emitenteLogoUrl}}" alt="" onerror="this.parentElement.style.display='none'"></div>
 
     <p class="top-note">{{avisoTopo}}</p>
-    <h1 class="doc-title">DANFE - Documento Auxiliar da Nota Fiscal Eletrônica</h1>
+
+    <section class="canhoto">
+      <div class="canhoto-body">
+        <div class="canhoto-text">RECEBEMOS DE <strong>{{NFe.infNFe.emit.xNome}}</strong> OS PRODUTOS E/OU SERVIÇOS CONSTANTES DA NOTA FISCAL ELETRÔNICA INDICADA ABAIXO. EMISSÃO: {{NFe.infNFe.ide.dhEmi}} VALOR TOTAL: R$ {{NFe.infNFe.total.ICMSTot.vNF}} DESTINATÁRIO: {{NFe.infNFe.dest.xNome}}</div>
+        <div class="canhoto-fields">
+          <div><span class="label">Data de recebimento</span></div>
+          <div><span class="label">Identificação e assinatura do recebedor</span></div>
+        </div>
+      </div>
+      <div class="canhoto-nfe">
+        <div class="nfe-label">NF-e</div>
+        <div>Nº {{NFe.infNFe.ide.nNF}}</div>
+        <div style="font-size:7pt;">Série {{NFe.infNFe.ide.serie}}</div>
+      </div>
+    </section>
+    <div class="canhoto-separator"></div>
 
     <section class="box">
       <div class="header-main">
@@ -552,18 +603,18 @@
         <div class="cell"><span class="label">Valor do ICMS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vICMS}}</span></div>
         <div class="cell"><span class="label">Base de cálculo ICMS ST</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vBCST}}</span></div>
         <div class="cell"><span class="label">Valor do ICMS ST</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vST}}</span></div>
-        <div class="cell"><span class="label">Valor aprox. tributos</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vTotTrib}}</span></div>
+        <div class="cell"><span class="label">Valor imp. importação</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vII}}</span></div>
+        <div class="cell"><span class="label">Valor do PIS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vPIS}}</span></div>
         <div class="cell"><span class="label">Valor total dos produtos</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vProd}}</span></div>
-        <div class="cell"><span class="label">Valor do FCP ST retido</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vFCPSTRet}}</span></div>
       </div>
       <div class="row" style="grid-template-columns: 14% 14% 14% 14% 14% 15% 15%;">
         <div class="cell"><span class="label">Valor do frete</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vFrete}}</span></div>
         <div class="cell"><span class="label">Valor do seguro</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vSeg}}</span></div>
         <div class="cell"><span class="label">Desconto</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vDesc}}</span></div>
         <div class="cell"><span class="label">Outras despesas acessórias</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vOutro}}</span></div>
-        <div class="cell"><span class="label">Valor do IPI</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vIPI}}</span></div>
+        <div class="cell"><span class="label">Valor total do IPI</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vIPI}}</span></div>
+        <div class="cell"><span class="label">Valor da COFINS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vCOFINS}}</span></div>
         <div class="cell"><span class="label">Valor total da nota</span><span class="value right strong">{{NFe.infNFe.total.ICMSTot.vNF}}</span></div>
-        <div class="cell"><span class="label">Valor total do II</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vII}}</span></div>
       </div>
     </section>
 
@@ -579,20 +630,20 @@
         <div class="cell"><span class="label">CNPJ / CPF</span><span class="value">{{NFe.infNFe.transp.transporta.CNPJ}}{{NFe.infNFe.transp.transporta.CPF}}</span></div>
       </div>
 
-      <div class="row" style="grid-template-columns: 46% 12% 12% 12% 18%;">
+      <div class="row" style="grid-template-columns: 52% 18% 12% 18%;">
         <div class="cell"><span class="label">Endereço</span><span class="value">{{NFe.infNFe.transp.transporta.xEnder}}</span></div>
         <div class="cell"><span class="label">Município</span><span class="value">{{NFe.infNFe.transp.transporta.xMun}}</span></div>
         <div class="cell"><span class="label">UF</span><span class="value">{{NFe.infNFe.transp.transporta.UF}}</span></div>
         <div class="cell"><span class="label">Inscrição Estadual</span><span class="value">{{NFe.infNFe.transp.transporta.IE}}</span></div>
-        <div class="cell"><span class="label">Quantidade</span><span class="value">{{NFe.infNFe.transp._danfeQVol}}</span></div>
       </div>
 
-      <div class="row" style="grid-template-columns: 24% 24% 18% 16% 18%;">
+      <div class="row" style="grid-template-columns: 12% 16% 16% 16% 20% 20%;">
+        <div class="cell"><span class="label">Quantidade</span><span class="value">{{NFe.infNFe.transp._danfeQVol}}</span></div>
         <div class="cell"><span class="label">Espécie</span><span class="value">{{NFe.infNFe.transp._danfeEsp}}</span></div>
         <div class="cell"><span class="label">Marca</span><span class="value">{{NFe.infNFe.transp._danfeMarca}}</span></div>
         <div class="cell"><span class="label">Numeração</span><span class="value">{{NFe.infNFe.transp._danfeNVol}}</span></div>
-        <div class="cell"><span class="label">Peso bruto</span><span class="value right">{{NFe.infNFe.transp._danfePesoB}}</span></div>
-        <div class="cell"><span class="label">Peso líquido</span><span class="value right">{{NFe.infNFe.transp._danfePesoL}}</span></div>
+        <div class="cell"><span class="label">Peso bruto (Kg)</span><span class="value right">{{NFe.infNFe.transp._danfePesoB}}</span></div>
+        <div class="cell"><span class="label">Peso líquido (Kg)</span><span class="value right">{{NFe.infNFe.transp._danfePesoL}}</span></div>
       </div>
     </section>
 
@@ -604,7 +655,7 @@
             <th style="width:6%;">Cód. produto</th>
             <th style="width:26%;">Descrição do produto / serviço</th>
             <th style="width:6%;">NCM/SH</th>
-            <th style="width:4%;">CST</th>
+            <th style="width:4%;">O/CST</th>
             <th style="width:4%;">CFOP</th>
             <th style="width:4%;">UN</th>
             <th style="width:7%;">Qtde.</th>
@@ -638,18 +689,7 @@
           {{/NFe.infNFe.det}}
         </tbody>
       </table>
-      <div class="fill-box totals-note">{{NFe.infNFe.infAdProd}}{{NFe.infNFe.infAdic.infCpl}}</div>
-    </section>
-
-    <section class="box">
-      <div class="section-label">Cálculo do ISSQN</div>
-      <div class="row" style="grid-template-columns: 20% 22% 22% 18% 18%;">
-        <div class="cell"><span class="label">Inscrição Municipal</span><span class="value">{{NFe.infNFe.emit.IM}}</span></div>
-        <div class="cell"><span class="label">Valor total dos serviços</span><span class="value right">{{NFe.infNFe.total.ISSQNtot.vServ}}</span></div>
-        <div class="cell"><span class="label">Base de cálculo do ISSQN</span><span class="value right">{{NFe.infNFe.total.ISSQNtot.vBC}}</span></div>
-        <div class="cell"><span class="label">Valor do ISSQN</span><span class="value right">{{NFe.infNFe.total.ISSQNtot.vISS}}</span></div>
-        <div class="cell"><span class="label">Dados adicionais município</span><span class="value">{{NFe.infNFe.total.ISSQNtot.cMunFG}}</span></div>
-      </div>
+      <div class="fill-box totals-note">{{NFe.infNFe.infAdProd}}</div>
     </section>
 
     <section class="box">
@@ -666,7 +706,6 @@
       </div>
     </section>
 
-    <div class="footer-note">DANFE modelo 55 - campos alinhados ao XML da NF-e + derivados de backend para renderização</div>
   </div>
 </body>
 </html>

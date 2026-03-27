@@ -505,6 +505,8 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                                 vDesc: fmtMoney(row.valor_desconto || 0),
                                 vOutro: fmtMoney(row.outras_despesas || 0),
                                 vIPI: fmtMoney(row.valor_ipi || 0),
+                                vPIS: fmtMoney(row.valor_pis || 0),
+                                vCOFINS: fmtMoney(row.valor_cofins || 0),
                                 vNF: fmtMoney(valorNF),
                                 vII: '0,00'
                             },
