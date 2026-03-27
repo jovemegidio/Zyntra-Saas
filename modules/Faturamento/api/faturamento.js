@@ -988,23 +988,28 @@ module.exports = (pool, authenticateToken) => {
             const nfe = nfes[0];
             const [itens] = await pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ?', [id]);
 
-            // Dados do emitente via configuração ou env
-            const [cfgRows] = await pool.query(`SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1`);
-            const cfg = cfgRows.length ? JSON.parse(cfgRows[0].valor || '{}') : {};
-            const emit = {
-                razaoSocial: cfg.razaoSocial || process.env.EMITENTE_RAZAO_SOCIAL || 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
-                nomeFantasia: cfg.nomeFantasia || process.env.EMITENTE_NOME_FANTASIA || 'ALUFORCE',
-                cnpj: cfg.cnpj || process.env.EMITENTE_CNPJ || '',
-                ie: cfg.ie || process.env.EMITENTE_IE || '',
-                logradouro: cfg.logradouro || '',
-                numero: cfg.numero || '',
-                bairro: cfg.bairro || '',
-                cidade: cfg.cidade || '',
-                uf: cfg.uf || process.env.EMITENTE_UF || 'MG',
-                cep: cfg.cep || '',
-                telefone: cfg.telefone || '',
-                email: cfg.email || ''
+            // Dados do emitente — prioridade: configuracoes_empresa → configuracoes → env
+            let emit = {
+                razaoSocial: 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
+                nomeFantasia: 'ALUFORCE',
+                cnpj: process.env.EMITENTE_CNPJ || '',
+                ie: process.env.EMITENTE_IE || '',
+                logradouro: '', numero: '', bairro: '', cidade: '',
+                uf: process.env.EMITENTE_UF || 'SP',
+                cep: '', telefone: '', email: '', logoPath: ''
             };
+            try {
+                const [ceRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+                if (ceRows && ceRows[0] && (ceRows[0].cnpj || ceRows[0].razao_social)) {
+                    const e = ceRows[0];
+                    emit = { razaoSocial: e.razao_social || emit.razaoSocial, nomeFantasia: e.nome_fantasia || emit.nomeFantasia, cnpj: e.cnpj || '', ie: e.inscricao_estadual || '', logradouro: e.endereco || '', numero: e.numero || '', bairro: e.bairro || '', cidade: e.cidade || '', uf: e.estado || 'SP', cep: e.cep || '', telefone: e.telefone || '', email: e.email || '', logoPath: e.logo_path || '' };
+                } else {
+                    const [cfgRows] = await pool.query(`SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1`);
+                    const cfg = cfgRows.length ? JSON.parse(cfgRows[0].valor || '{}') : {};
+                    if (cfg.cnpj) emit = { ...emit, ...cfg, cidade: cfg.cidade || cfg.municipio || '', logradouro: cfg.logradouro || cfg.endereco || '' };
+                }
+            } catch (_) {}
+            const emitLogoUrl = emit.logoPath || '/images/Logo Monocromatico - Azul - Aluforce.png';
 
             const fmtMoney = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             const fmtQty   = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
@@ -1038,12 +1043,11 @@ module.exports = (pool, authenticateToken) => {
             // Montar contexto no formato NFe.infNFe (mesmo utilizado pelo danfe-renderer)
             const ctx = {
                 marcaAguaClasse: isPreview ? '' : 'hidden',
-                marcaAguaTexto: isPreview ? 'ESPELHO SEM VALOR FISCAL' : '',
                 avisoTopo: isPreview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
                 paginaAtual: '1',
                 paginaTotal: '1',
                 codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
-                emitenteLogoUrl: '/api/empresa/1/logo',
+                emitenteLogoUrl: emitLogoUrl,
                 portalConsultaUrl: 'www.nfe.fazenda.gov.br/portal',
                 NFe: {
                     infNFe: {

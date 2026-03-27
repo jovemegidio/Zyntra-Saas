@@ -31,29 +31,15 @@
       display:flex;
       align-items:center;
       justify-content:center;
-      font-size:38pt;
-      font-weight:700;
-      letter-spacing:1.2px;
-      color:rgba(0,0,0,.09);
-      transform:rotate(-50deg);
       pointer-events:none;
       user-select:none;
-      text-align:center;
-      line-height:1;
-      padding:0 10mm;
+      z-index:0;
     }
     .watermark.hidden{display:none;}
-    /* Logo watermark (used in preview mode) */
-    .watermark.watermark-logo{
-      transform:none;
-      font-size:0;
-      align-items:center;
-      justify-content:center;
-    }
-    .watermark.watermark-logo img{
-      max-width:54%;
-      max-height:54%;
-      opacity:0.12;
+    .watermark img{
+      max-width:50%;
+      max-height:50%;
+      opacity:0.07;
       pointer-events:none;
       user-select:none;
     }
@@ -371,7 +357,7 @@
 - para duplicatas, mantenha cobr.dup como coleção do XML
 - campos _danfe_* são derivados do XML para exibição quando o grupo do imposto varia por CST/CSOSN</div>
 
-    <div class="watermark {{marcaAguaClasse}}">{{marcaAguaTexto}}</div>
+    <div class="watermark {{marcaAguaClasse}}"><img src="{{emitenteLogoUrl}}" alt="" onerror="this.parentElement.style.display='none'"></div>
 
     <p class="top-note">{{avisoTopo}}</p>
     <h1 class="doc-title">DANFE - Documento Auxiliar da Nota Fiscal Eletrônica</h1>
@@ -380,9 +366,8 @@
       <div class="header-main">
         <div class="issuer">
           <div class="logo-band">
-            <img class="logo-img" src="{{emitenteLogoUrl}}" alt="Logo do emitente" onerror="this.style.display='none'" />
-            <span class="logo-fallback">{{NFe.infNFe.emit.xFant}}</span>
-            <span class="value strong lg brand-name">{{NFe.infNFe.emit.xFant}}</span>
+            <img class="logo-img" src="{{emitenteLogoUrl}}" alt="Logo do emitente" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'" />
+            <span class="logo-fallback" style="display:none;">{{NFe.infNFe.emit.xFant}}</span>
           </div>
           <div class="issuer-body">{{NFe.infNFe.emit.xNome}}
 {{NFe.infNFe.emit.enderEmit.xLgr}}, {{NFe.infNFe.emit.enderEmit.nro}} {{NFe.infNFe.emit.enderEmit.xCpl}}

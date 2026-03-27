@@ -335,9 +335,35 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 } catch (_) {}
             }
 
-            // Emitente (cascata: configuracoes → configuracoes_nfe → empresas)
-            let emit = { razaoSocial: 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA', nomeFantasia: 'ALUFORCE', cnpj: '', ie: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: 'MG', cep: '', telefone: '' };
+            // Emitente (cascata: configuracoes_empresa → configuracoes → configuracoes_nfe → empresas)
+            let emit = { razaoSocial: 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA', nomeFantasia: 'ALUFORCE', cnpj: '', ie: '', logradouro: '', numero: '', bairro: '', cidade: '', uf: 'SP', cep: '', telefone: '', logoPath: '' };
             let emitFilled = false;
+            // 1) configuracoes_empresa (Dados da Empresa no modal Configurações)
+            try {
+                const [ceRows] = await pool.query("SELECT * FROM configuracoes_empresa LIMIT 1");
+                if (ceRows && ceRows[0]) {
+                    const e = ceRows[0];
+                    if (e.cnpj || e.razao_social) {
+                        emit = {
+                            razaoSocial: e.razao_social || emit.razaoSocial,
+                            nomeFantasia: e.nome_fantasia || emit.nomeFantasia,
+                            cnpj: e.cnpj || '',
+                            ie: e.inscricao_estadual || '',
+                            logradouro: e.endereco || '',
+                            numero: e.numero || '',
+                            bairro: e.bairro || '',
+                            cidade: e.cidade || '',
+                            uf: e.estado || 'SP',
+                            cep: e.cep || '',
+                            telefone: e.telefone || '',
+                            logoPath: e.logo_path || ''
+                        };
+                        emitFilled = true;
+                    }
+                }
+            } catch (_) {}
+            // 2) configuracoes chave empresa_emitente
+            if (!emitFilled) {
             try {
                 const [cfgRows] = await pool.query("SELECT * FROM configuracoes WHERE chave = 'empresa_emitente' LIMIT 1");
                 if (cfgRows && cfgRows[0]) {
@@ -348,6 +374,7 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                     }
                 }
             } catch (_) {}
+            }
             if (!emitFilled) {
                 try {
                     const [cfgRows] = await pool.query("SELECT * FROM configuracoes_nfe WHERE ativo = 1 LIMIT 1");
@@ -395,14 +422,15 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 dups = dupRows.map(d => ({ nDup: d.numero || '', dVenc: fmtDate(d.vencimento), vDup: fmtMoney(d.valor) }));
             } catch (_) { /* tabela pode não existir */ }
 
+            const logoUrl = emit.logoPath || '/images/Logo Monocromatico - Azul - Aluforce.png';
+
             const ctx = {
                 marcaAguaClasse: isPreview ? '' : 'hidden',
-                marcaAguaTexto: isPreview ? 'ESPELHO SEM VALOR FISCAL' : '',
                 avisoTopo: isPreview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
                 paginaAtual: '1',
                 paginaTotal: '1',
                 codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
-                emitenteLogoUrl: '/api/empresa/1/logo',
+                emitenteLogoUrl: logoUrl,
                 portalConsultaUrl: 'www.nfe.fazenda.gov.br/portal',
                 NFe: {
                     infNFe: {
