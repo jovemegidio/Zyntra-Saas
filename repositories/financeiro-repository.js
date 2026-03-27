@@ -3,19 +3,21 @@
  * @module repositories/financeiro-repository
  */
 const BaseRepository = require('./base-repository');
+const { CORTE_DATE, buildCorteClause } = require('../src/middleware/financeiro-corte-temporal');
 
 class FinanceiroRepository extends BaseRepository {
     // ===== CONTAS A RECEBER =====
 
     async totalReceberPendente() {
         const row = await this.queryOne(
-            "SELECT COALESCE(SUM(valor), 0) AS total FROM contas_receber WHERE status != 'pago'"
+            `SELECT COALESCE(SUM(valor), 0) AS total FROM contas_receber cr
+             WHERE cr.status != 'pago' AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`
         );
         return parseFloat(row.total);
     }
 
     async listContasReceber(filters = {}) {
-        let where = 'WHERE 1=1';
+        let where = `WHERE ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`;
         const params = [];
         if (filters.status) { where += ' AND cr.status = ?'; params.push(filters.status); }
         if (filters.empresa_id) { where += ' AND cr.empresa_id = ?'; params.push(filters.empresa_id); }
@@ -42,13 +44,14 @@ class FinanceiroRepository extends BaseRepository {
 
     async totalPagarPendente() {
         const row = await this.queryOne(
-            "SELECT COALESCE(SUM(valor), 0) AS total FROM contas_pagar WHERE status != 'pago'"
+            `SELECT COALESCE(SUM(valor), 0) AS total FROM contas_pagar cp
+             WHERE cp.status != 'pago' AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`
         );
         return parseFloat(row.total);
     }
 
     async listContasPagar(filters = {}) {
-        let where = 'WHERE 1=1';
+        let where = `WHERE ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`;
         const params = [];
         if (filters.status) { where += ' AND cp.status = ?'; params.push(filters.status); }
         if (filters.empresa_id) { where += ' AND cp.empresa_id = ?'; params.push(filters.empresa_id); }

@@ -887,7 +887,7 @@
                     document.getElementById('greeting-text').textContent = greeting;
                     
                     const nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
-                    document.getElementById('user-name').textContent = nome;
+                    document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
                     
                     // Buscar avatar corretamente
                     let userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;

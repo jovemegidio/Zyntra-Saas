@@ -9,7 +9,7 @@ const fs = require('fs');
 const CONFIG = {
     server: '31.97.64.102',
     usuario: 'root',
-    senha: 'Aluforce@2026#Vps',
+    senha: process.env.VPS_PASSWORD || '',  // Defina VPS_PASSWORD no ambiente
     remoteDir: '/var/www/aluforce',
     localDir: '/home/derick/GoogleDrive/Outros/Sistema - ALUFORCE - V.2',
     pscpPath: 'scp',

@@ -7,6 +7,8 @@ const express = require('express');
 module.exports = function createLogisticaRoutes(deps) {
     const { pool, authenticateToken, authorizeArea } = deps;
     const router = express.Router();
+    const FinanceiroReactiveService = require('../services/financeiro-reactive.service');
+    const financeiroReactive = new FinanceiroReactiveService(pool);
     router.use(authenticateToken);
     // Logística é sub-módulo de NFe — usa mesma permissão para acesso
     router.use(authorizeArea('nfe'));
@@ -196,6 +198,12 @@ module.exports = function createLogisticaRoutes(deps) {
             // Se status for 'entregue', atualizar também o status principal
             if (status_logistica === 'entregue') {
                 await pool.query('UPDATE pedidos SET status = "entregue" WHERE id = ?', [id]);
+                // INTEGRAÇÃO REATIVA: notificar financeiro da entrega
+                try {
+                    await financeiroReactive.onPedidoEntregue(id, req.user?.email || 'logistica');
+                } catch (intErr) {
+                    console.error('[LOGISTICA→FINANCEIRO] Erro ao notificar entrega:', intErr.message);
+                }
             }
     
             res.json({ message: 'Status atualizado com sucesso', status: status_logistica });

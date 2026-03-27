@@ -443,7 +443,15 @@ module.exports = function createApiNfeRouter({ pool, authenticateToken, authoriz
       const { nfe_id } = req.params;
       const { motivo } = req.body;
       await pool.query('UPDATE nfe SET status = "cancelada", motivo_cancelamento = ? WHERE id = ?', [motivo, nfe_id]);
-      res.json({ message: 'NF-e cancelada.' });
+      // Propagar cancelamento para CR vinculada à NFe
+      await pool.query(
+        `UPDATE contas_receber 
+         SET status = 'cancelada', 
+             observacoes = CONCAT(COALESCE(observacoes, ''), ' [Cancelada via NFe: ', ?, ']')
+         WHERE nfe_id = ? AND status NOT IN ('liquidada', 'pago')`,
+        [motivo || 'Cancelamento NFe', nfe_id]
+      );
+      res.json({ message: 'NF-e cancelada e conta a receber vinculada cancelada.' });
     } catch (error) { next(error); }
   });
 

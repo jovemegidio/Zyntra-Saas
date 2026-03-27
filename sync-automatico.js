@@ -15,7 +15,7 @@ const path = require('path');
 const CONFIG = {
     SERVER: '31.97.64.102',
     USUARIO: 'root',
-    SENHA: 'Aluforce@2026#Vps',
+    SENHA: process.env.VPS_PASSWORD || '',  // Defina VPS_PASSWORD no ambiente
     REMOTE_DIR: '/var/www/aluforce',
     LOCAL_DIR: __dirname,
     PUTTY_PATH: 'C:\\Program Files\\PuTTY',

@@ -331,7 +331,7 @@ function carregarUsuario() {
     .then(function(user) {
         var d = user.dados || user;
         var nome = (d.nome || d.name || 'Usuário').split(' ')[0];
-        document.getElementById('user-name').textContent = nome;
+        document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
         var h = new Date().getHours();
         document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
         var el = document.getElementById('user-initials');

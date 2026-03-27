@@ -200,7 +200,7 @@
                 const hour = new Date().getHours();
                 const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
                 document.getElementById('greeting-text').textContent = greeting;
-                document.getElementById('user-name').textContent = nome;
+                document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
                 document.getElementById('user-initials').textContent = nome.charAt(0).toUpperCase();
                 const fotoUrl = user.avatar || user.foto || user.foto_perfil_url;
                 if (fotoUrl && fotoUrl !== '/avatars/default.webp') {

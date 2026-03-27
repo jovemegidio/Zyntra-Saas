@@ -7,10 +7,22 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+
+// Multer para upload de comprovantes (memoryStorage → buffer)
+const comprovanteUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+    fileFilter: (_req, file, cb) => {
+        const allowed = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+        cb(null, allowed.includes(file.mimetype));
+    }
+});
 
 // Pool e Auth centralizados — sem duplicações
 const pool = require('../../database/pool');
 const { authenticateToken } = require('../../middleware/auth-central');
+const { corteTemporalMiddleware } = require('../middleware/financeiro-corte-temporal');
 
 /**
  * Middleware para controle de acesso ao módulo financeiro
@@ -106,6 +118,12 @@ function authorizeFinanceiro(section) {
 
 // Alias usado pelas rotas de resumo/KPI
 const checkFinanceiroPermission = authorizeFinanceiro;
+
+// =====================================================
+// MIDDLEWARE GLOBAL — CORTE TEMPORAL 2026
+// Nenhum dado anterior a 01/01/2026 é retornado pela API
+// =====================================================
+router.use(corteTemporalMiddleware);
 
 // =====================================================
 // FUNÇÕES DE VALIDAÇÁO - Prioridade 2 QA
@@ -210,37 +228,42 @@ router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visuali
     try {
         console.log('[Financeiro] Buscando resumo KPIs...');
         
-        // Total a receber
+        // Total a receber (com corte temporal 2026)
+        const corte = req.financeiroCorteTemporal;
         const [receberTotal] = await pool.execute(`
             SELECT 
                 COALESCE(SUM(valor), 0) as total,
                 COUNT(*) as quantidade
-            FROM contas_receber 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_receber cr
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corte.crClause('cr')}
         `);
         
-        // Total a pagar
+        // Total a pagar (com corte temporal 2026)
         const [pagarTotal] = await pool.execute(`
             SELECT 
                 COALESCE(SUM(valor), 0) as total,
                 COUNT(*) as quantidade
-            FROM contas_pagar 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_pagar cp
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corte.cpClause('cp')}
         `);
         
-        // Vencidos - com contagem e valor separados por tipo
+        // Vencidos - com contagem e valor separados por tipo (com corte temporal 2026)
         const [vencidosReceber] = await pool.execute(`
             SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
-            FROM contas_receber 
-            WHERE COALESCE(data_vencimento, vencimento) < CURDATE()
-            AND status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_receber cr
+            WHERE COALESCE(cr.data_vencimento, cr.vencimento) < CURDATE()
+            AND cr.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corte.crClause('cr')}
         `);
         
         const [vencidosPagar] = await pool.execute(`
             SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
-            FROM contas_pagar 
-            WHERE COALESCE(data_vencimento, vencimento) < CURDATE()
-            AND status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_pagar cp
+            WHERE COALESCE(cp.data_vencimento, cp.vencimento) < CURDATE()
+            AND cp.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corte.cpClause('cp')}
         `);
         
         const totalReceber = parseFloat(receberTotal[0]?.total || 0);
@@ -292,7 +315,7 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
                 LOWER(cr.status) as status
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
-            WHERE cr.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
               AND COALESCE(cr.data_vencimento, cr.vencimento) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC
             LIMIT ?
@@ -309,7 +332,7 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
                 LOWER(cp.status) as status
             FROM contas_pagar cp
             LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
-            WHERE cp.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
               AND COALESCE(cp.data_vencimento, cp.vencimento) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC
             LIMIT ?
@@ -433,7 +456,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
                 GROUP_CONCAT(DISTINCT COALESCE(c.nome_fantasia, c.razao_social, 'Cliente') SEPARATOR ', ') as descricao
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
-            WHERE cr.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
               AND COALESCE(cr.data_vencimento, cr.vencimento) BETWEEN ? AND ?
             GROUP BY DATE(COALESCE(cr.data_vencimento, cr.vencimento))
             ORDER BY data
@@ -449,7 +472,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
                 GROUP_CONCAT(DISTINCT COALESCE(f.nome_fantasia, f.nome, 'Fornecedor') SEPARATOR ', ') as descricao
             FROM contas_pagar cp
             LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
-            WHERE cp.status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
               AND COALESCE(cp.data_vencimento, cp.vencimento) BETWEEN ? AND ?
             GROUP BY DATE(COALESCE(cp.data_vencimento, cp.vencimento))
             ORDER BY data
@@ -519,7 +542,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
         // Projeções futuras
         const hojeStr = new Date().toISOString().split('T')[0];
         const projecoes = [...movimentacoesReceber, ...movimentacoesPagar]
-            .filter(m => m.data && m.data >= hojeStr && m.status !== 'pago')
+            .filter(m => m.data && m.data >= hojeStr && !['pago', 'liquidada', 'cancelada'].includes(m.status))
             .sort((a, b) => new Date(a.data) - new Date(b.data))
             .slice(0, 10);
 
@@ -561,6 +584,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
 router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando dados de conciliação...');
+        const corte = req.financeiroCorteTemporal;
         
         // Buscar contas bancárias
         const [contas] = await pool.execute(`
@@ -578,15 +602,17 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
                 'receber' as tipo,
                 COUNT(*) as quantidade,
                 COALESCE(SUM(valor), 0) as total
-            FROM contas_receber
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_receber cr
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+              ${corte.crClause('cr')}
             UNION ALL
             SELECT 
                 'pagar' as tipo,
                 COUNT(*) as quantidade,
                 COALESCE(SUM(valor), 0) as total
-            FROM contas_pagar
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_pagar cp
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+              ${corte.cpClause('cp')}
         `);
 
         // Movimentações recentes para conciliar
@@ -601,7 +627,8 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
                 'contas_receber' as tabela
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
-            WHERE cr.status IN ('pendente', 'parcial')
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial')
+              ${corte.crClause('cr')}
             ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC
             LIMIT 20)
             UNION ALL
@@ -615,7 +642,8 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
                 'contas_pagar' as tabela
             FROM contas_pagar cp
             LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
-            WHERE cp.status IN ('pendente', 'parcial')
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial')
+              ${corte.cpClause('cp')}
             ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC
             LIMIT 20)
             ORDER BY data ASC
@@ -661,21 +689,22 @@ router.get('/dashboard', authenticateToken, authorizeFinanceiro('dashboard'), as
             vencendoHoje: 0,
             ultimasTransacoes: []
         };
+        const corte = req.financeiroCorteTemporal;
 
         // Admins veem tudo
         if (userAccess === 'admin') {
             const [receber] = await pool.execute(
-                'SELECT SUM(valor) as total FROM contas_receber WHERE status = "PENDENTE"'
+                'SELECT SUM(valor) as total FROM contas_receber cr WHERE cr.status = "PENDENTE"' + corte.crClause('cr')
             );
             const [pagar] = await pool.execute(
-                'SELECT SUM(valor) as total FROM contas_pagar WHERE status = "PENDENTE"'
+                'SELECT SUM(valor) as total FROM contas_pagar cp WHERE cp.status = "PENDENTE"' + corte.cpClause('cp')
             );
             const [vencendoHojeReceber] = await pool.execute(
-                'SELECT COUNT(*) as count FROM contas_receber WHERE DATE(vencimento) = ? AND status = "PENDENTE"',
+                'SELECT COUNT(*) as count FROM contas_receber cr WHERE DATE(cr.vencimento) = ? AND cr.status = "PENDENTE"' + corte.crClause('cr'),
                 [today]
             );
             const [vencendoHojePagar] = await pool.execute(
-                'SELECT COUNT(*) as count FROM contas_pagar WHERE DATE(vencimento) = ? AND status = "PENDENTE"',
+                'SELECT COUNT(*) as count FROM contas_pagar cp WHERE DATE(cp.vencimento) = ? AND cp.status = "PENDENTE"' + corte.cpClause('cp'),
                 [today]
             );
 
@@ -686,10 +715,10 @@ router.get('/dashboard', authenticateToken, authorizeFinanceiro('dashboard'), as
 
             // Últimas transações (ambas tabelas)
             const [transacoesReceber] = await pool.execute(
-                'SELECT "Receber" as tipo, cliente_id as referencia, descricao, valor, vencimento, status FROM contas_receber ORDER BY data_criacao DESC LIMIT 5'
+                'SELECT "Receber" as tipo, cr.cliente_id as referencia, cr.descricao, cr.valor, cr.vencimento, cr.status FROM contas_receber cr WHERE 1=1' + corte.crClause('cr') + ' ORDER BY cr.data_criacao DESC LIMIT 5'
             );
             const [transacoesPagar] = await pool.execute(
-                'SELECT "Pagar" as tipo, fornecedor_id as referencia, descricao, valor, vencimento, status FROM contas_pagar ORDER BY data_criacao DESC LIMIT 5'
+                'SELECT "Pagar" as tipo, cp.fornecedor_id as referencia, cp.descricao, cp.valor, cp.vencimento, cp.status FROM contas_pagar cp WHERE 1=1' + corte.cpClause('cp') + ' ORDER BY cp.data_criacao DESC LIMIT 5'
             );
             result.ultimasTransacoes = [...transacoesReceber, ...transacoesPagar]
                 .sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento))
@@ -698,14 +727,14 @@ router.get('/dashboard', authenticateToken, authorizeFinanceiro('dashboard'), as
         // Júnior vê apenas contas a receber
         else if (userAccess === 'receber') {
             const [receber] = await pool.execute(
-                'SELECT SUM(valor) as total FROM contas_receber WHERE status = "PENDENTE"'
+                'SELECT SUM(valor) as total FROM contas_receber cr WHERE cr.status = "PENDENTE"' + corte.crClause('cr')
             );
             const [vencendoHoje] = await pool.execute(
-                'SELECT COUNT(*) as count FROM contas_receber WHERE DATE(vencimento) = ? AND status = "PENDENTE"',
+                'SELECT COUNT(*) as count FROM contas_receber cr WHERE DATE(cr.vencimento) = ? AND cr.status = "PENDENTE"' + corte.crClause('cr'),
                 [today]
             );
             const [transacoes] = await pool.execute(
-                'SELECT "Receber" as tipo, cliente as referencia, descricao, valor, vencimento, status FROM contas_receber ORDER BY data_criacao DESC LIMIT 10'
+                'SELECT "Receber" as tipo, cr.cliente as referencia, cr.descricao, cr.valor, cr.vencimento, cr.status FROM contas_receber cr WHERE 1=1' + corte.crClause('cr') + ' ORDER BY cr.data_criacao DESC LIMIT 10'
             );
 
             result.aReceber = receber[0]?.total || 0;
@@ -716,14 +745,14 @@ router.get('/dashboard', authenticateToken, authorizeFinanceiro('dashboard'), as
         // Hellen vê apenas contas a pagar
         else if (userAccess === 'pagar') {
             const [pagar] = await pool.execute(
-                'SELECT SUM(valor) as total FROM contas_pagar WHERE status = "PENDENTE"'
+                'SELECT SUM(valor) as total FROM contas_pagar cp WHERE cp.status = "PENDENTE"' + corte.cpClause('cp')
             );
             const [vencendoHoje] = await pool.execute(
-                'SELECT COUNT(*) as count FROM contas_pagar WHERE DATE(vencimento) = ? AND status = "PENDENTE"',
+                'SELECT COUNT(*) as count FROM contas_pagar cp WHERE DATE(cp.vencimento) = ? AND cp.status = "PENDENTE"' + corte.cpClause('cp'),
                 [today]
             );
             const [transacoes] = await pool.execute(
-                'SELECT "Pagar" as tipo, fornecedor as referencia, descricao, valor, vencimento, status FROM contas_pagar ORDER BY data_criacao DESC LIMIT 10'
+                'SELECT "Pagar" as tipo, cp.fornecedor as referencia, cp.descricao, cp.valor, cp.vencimento, cp.status FROM contas_pagar cp WHERE 1=1' + corte.cpClause('cp') + ' ORDER BY cp.data_criacao DESC LIMIT 10'
             );
 
             result.aPagar = pagar[0]?.total || 0;
@@ -794,13 +823,24 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
                 cr.cartorio,
                 cr.aceita_troca,
                 cr.comissaria,
-                cr.origem_importacao
+                cr.origem_importacao,
+                cr.pago_no_dia,
+                cr.aceita_troca_factory,
+                cr.comprovante_url,
+                cr.dia_recomprado,
+                cr.data_para_cartorio,
+                cr.data_protestado,
+                cr.origem_integracao
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
             LEFT JOIN categorias_financeiro cat ON cr.categoria_id = cat.id
             WHERE 1=1
         `;
         const params = [];
+        const corte = req.financeiroCorteTemporal;
+
+        // CORTE TEMPORAL 2026 — Hard limit
+        query += corte.crClause('cr');
 
         if (status) {
             query += ' AND cr.status = ?';
@@ -841,36 +881,41 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
         const hoje = new Date().toISOString().split('T')[0];
         const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+        const corteStat = req.financeiroCorteTemporal;
         
-        // Total a receber (pendentes)
+        // Total a receber (a_vencer + vencida — novo domínio)
         const [totalReceber] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as total_receber
-            FROM contas_receber 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_receber cr
+            WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corteStat.crClause('cr')}
         `);
         
         // Vencendo em 7 dias
         const [vencendo] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencendo
-            FROM contas_receber 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
-            AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
+            FROM contas_receber cr
+            WHERE cr.status IN ('a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            AND COALESCE(cr.data_vencimento, cr.vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
+            ${corteStat.crClause('cr')}
         `, [hoje, hoje]);
         
         // Vencidas
         const [vencidas] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencidas
-            FROM contas_receber 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
-            AND COALESCE(data_vencimento, vencimento) < ?
+            FROM contas_receber cr
+            WHERE cr.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            AND COALESCE(cr.data_vencimento, cr.vencimento) < ?
+            ${corteStat.crClause('cr')}
         `, [hoje]);
         
-        // Recebidas no mês atual
+        // Liquidadas no mês atual (novo domínio)
         const [recebidasMes] = await pool.execute(`
-            SELECT COALESCE(SUM(valor_recebido), 0) as recebidas_mes
-            FROM contas_receber 
-            WHERE status IN ('recebido', 'recebida', 'RECEBIDO', 'RECEBIDA')
-            AND data_recebimento BETWEEN ? AND ?
+            SELECT COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as recebidas_mes
+            FROM contas_receber cr
+            WHERE cr.status IN ('liquidada', 'recebido', 'recebida', 'RECEBIDO', 'RECEBIDA', 'pago', 'PAGO')
+            AND COALESCE(cr.data_recebimento, cr.pago_no_dia) BETWEEN ? AND ?
+            ${corteStat.crClause('cr')}
         `, [inicioMes, fimMes]);
         
         res.json({
@@ -903,6 +948,64 @@ router.get('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
     } catch (error) {
         console.error('[Financeiro] Erro ao buscar conta a receber:', error);
         res.status(500).json({ error: 'Erro ao buscar conta' });
+    }
+});
+
+/**
+ * GET /api/financeiro/contas-receber/:id/historico
+ * Retorna histórico de movimentações de uma conta a receber
+ */
+router.get('/contas-receber/:id/historico', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar se a conta existe
+        const [conta] = await pool.execute('SELECT id, descricao, valor, status FROM contas_receber WHERE id = ?', [id]);
+        if (conta.length === 0) {
+            return res.status(404).json({ success: false, message: 'Conta não encontrada' });
+        }
+
+        // Buscar conciliações vinculadas
+        const [conciliacoes] = await pool.execute(
+            `SELECT c.id, c.valor, c.tipo_match, c.created_at as data,
+                    'conciliacao' as tipo_evento,
+                    CONCAT('Conciliação ', c.tipo_match, ' - Extrato #', c.extrato_id) as descricao
+             FROM conciliacoes c
+             WHERE c.movimentacao_sistema_id = ? AND c.movimentacao_tabela = 'contas_receber'
+             ORDER BY c.created_at DESC`,
+            [id]
+        );
+
+        // Montar timeline unificada com dados da própria conta
+        const historico = [];
+
+        // Evento de criação
+        if (conta[0]) {
+            historico.push({
+                tipo: 'criacao',
+                descricao: 'Conta a receber criada',
+                valor: conta[0].valor,
+                data: conta[0].data_criacao || null
+            });
+        }
+
+        // Eventos de conciliação
+        conciliacoes.forEach(c => {
+            historico.push({
+                tipo: c.tipo_evento,
+                descricao: c.descricao,
+                valor: c.valor,
+                data: c.data
+            });
+        });
+
+        // Ordenar por data desc
+        historico.sort((a, b) => new Date(b.data || 0) - new Date(a.data || 0));
+
+        res.json({ success: true, conta: conta[0], historico });
+    } catch (error) {
+        console.error('[Financeiro] Erro ao buscar histórico CR:', error);
+        res.status(500).json({ success: false, message: 'Erro ao buscar histórico' });
     }
 });
 
@@ -945,26 +1048,72 @@ router.post('/contas-receber', authenticateToken, authorizeFinanceiro('receber')
 
 /**
  * PUT /api/financeiro/contas-receber/:id
- * Atualiza uma conta a receber
+ * Atualiza uma conta a receber — com novos campos: pago_no_dia, aceita_troca_factory, comprovante_url
  */
 router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { cliente, descricao, valor, vencimento, status, tipo } = req.body;
+        const {
+            cliente, descricao, valor, vencimento, status, tipo,
+            pago_no_dia, aceita_troca_factory, comprovante_url,
+            dia_recomprado, data_para_cartorio, data_protestado,
+            observacoes, forma_recebimento, categoria
+        } = req.body;
 
+        // Validar status contra domínio estrito
+        const STATUS_VALIDOS_CR = ['cancelada', 'liquidada', 'vencida', 'a_vencer'];
+        if (status && !STATUS_VALIDOS_CR.includes(status.toLowerCase())) {
+            return res.status(400).json({
+                error: `Status inválido. Valores aceitos: ${STATUS_VALIDOS_CR.join(', ')}`
+            });
+        }
+
+        // Build dinâmico do UPDATE
+        const updates = [];
+        const params = [];
+
+        if (cliente !== undefined) { updates.push('cliente_nome = ?'); params.push(sanitizeString(cliente)); }
+        if (descricao !== undefined) { updates.push('descricao = ?'); params.push(sanitizeString(descricao)); }
+        if (valor !== undefined) { updates.push('valor = ?'); params.push(parseFloat(valor)); }
+        if (vencimento !== undefined) {
+            updates.push('vencimento = ?', 'data_vencimento = ?');
+            const dv = new Date(vencimento).toISOString().split('T')[0];
+            params.push(dv, dv);
+        }
+        if (status !== undefined) { updates.push('status = ?'); params.push(status.toLowerCase()); }
+        if (tipo !== undefined) { updates.push('tipo = ?'); params.push(tipo); }
+        if (observacoes !== undefined) { updates.push('observacoes = ?'); params.push(sanitizeString(observacoes)); }
+        if (forma_recebimento !== undefined) { updates.push('forma_recebimento = ?'); params.push(forma_recebimento); }
+        if (categoria !== undefined) { updates.push('categoria_nome = ?'); params.push(categoria); }
+
+        // Novos campos (2.3)
+        if (pago_no_dia !== undefined) { updates.push('pago_no_dia = ?'); params.push(pago_no_dia || null); }
+        if (aceita_troca_factory !== undefined) { updates.push('aceita_troca_factory = ?'); params.push(aceita_troca_factory ? 1 : 0); }
+        if (comprovante_url !== undefined) { updates.push('comprovante_url = ?'); params.push(sanitizeString(comprovante_url)); }
+
+        // Campos ETL (2.4)
+        if (dia_recomprado !== undefined) { updates.push('dia_recomprado = ?'); params.push(dia_recomprado || null); }
+        if (data_para_cartorio !== undefined) { updates.push('data_para_cartorio = ?'); params.push(data_para_cartorio || null); }
+        if (data_protestado !== undefined) { updates.push('data_protestado = ?'); params.push(data_protestado || null); }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Nenhum campo para atualizar' });
+        }
+
+        params.push(id);
         const [result] = await pool.execute(
-            'UPDATE contas_receber SET cliente_nome = ?, descricao = ?, valor = ?, vencimento = ?, status = ?, tipo = ? WHERE id = ?',
-            [cliente, descricao, valor, vencimento, status, tipo, id]
+            `UPDATE contas_receber SET ${updates.join(', ')} WHERE id = ?`,
+            params
         );
 
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
 
-        // Se a conta foi paga, registrar data de pagamento
-        if (status === 'PAGO') {
+        // Se a conta foi liquidada, registrar data de pagamento
+        if (status === 'liquidada' || status === 'PAGO') {
             await pool.execute(
-                'UPDATE contas_receber SET data_pagamento = NOW() WHERE id = ?',
+                'UPDATE contas_receber SET data_pagamento = COALESCE(pago_no_dia, NOW()) WHERE id = ?',
                 [id]
             );
         }
@@ -973,6 +1122,92 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
     } catch (error) {
         console.error('[Financeiro] Erro ao atualizar conta a receber:', error);
         res.status(500).json({ error: 'Erro ao atualizar conta' });
+    }
+});
+
+/**
+ * POST /api/financeiro/contas-receber/:id/comprovante
+ * Upload de comprovante de pagamento (imagem/PDF)
+ * Usa o serviço de upload-storage (S3/MinIO/Local)
+ */
+router.post('/contas-receber/:id/comprovante', authenticateToken, authorizeFinanceiro('receber'), comprovanteUpload.single('comprovante'), async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Verificar se a conta existe
+        const [conta] = await pool.execute('SELECT id FROM contas_receber WHERE id = ?', [id]);
+        if (conta.length === 0) {
+            return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado. Use multipart/form-data com campo "comprovante".' });
+        }
+
+        // Validar tipo de arquivo
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+        if (!allowedMimes.includes(req.file.mimetype)) {
+            return res.status(400).json({ error: 'Tipo de arquivo não permitido. Aceitos: JPEG, PNG, GIF, PDF.' });
+        }
+
+        if (req.file.size > 10 * 1024 * 1024) {
+            return res.status(400).json({ error: 'Arquivo muito grande. Máximo: 10MB.' });
+        }
+
+        // Usar upload-storage service
+        const UploadStorage = require('../../services/upload-storage');
+        const storage = new UploadStorage();
+        await storage.init();
+
+        const result = await storage.uploadFile(req.file.buffer, req.file.originalname, {
+            prefix: `financeiro/comprovantes/cr-${id}`,
+            contentType: req.file.mimetype
+        });
+
+        // Salvar URL no banco
+        await pool.execute(
+            'UPDATE contas_receber SET comprovante_url = ? WHERE id = ?',
+            [result.url || result.key, id]
+        );
+
+        res.json({
+            success: true,
+            message: 'Comprovante enviado com sucesso',
+            comprovante_url: result.url || result.key
+        });
+    } catch (error) {
+        console.error('[Financeiro] Erro ao fazer upload de comprovante:', error);
+        res.status(500).json({ error: 'Erro ao enviar comprovante' });
+    }
+});
+
+/**
+ * GET /api/financeiro/status-dominio/:tipo
+ * Retorna os status válidos para CR ou CP (tabela de domínio)
+ */
+router.get('/status-dominio/:tipo', authenticateToken, async (req, res) => {
+    try {
+        const tipo = req.params.tipo === 'receber' ? 'cr' : req.params.tipo === 'pagar' ? 'cp' : req.params.tipo;
+        if (!['cr', 'cp'].includes(tipo)) {
+            return res.status(400).json({ error: 'Tipo deve ser "cr" ou "cp" (ou "receber"/"pagar")' });
+        }
+
+        const [rows] = await pool.execute(
+            'SELECT codigo, label, cor FROM financeiro_status_dominio WHERE tipo = ? AND ativo = 1 ORDER BY ordem',
+            [tipo]
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        // Se a tabela não existe ainda, retorna status hardcoded
+        res.json({
+            success: true,
+            data: [
+                { codigo: 'cancelada', label: 'Cancelada', cor: '#6c757d' },
+                { codigo: 'liquidada', label: 'Liquidada', cor: '#28a745' },
+                { codigo: 'vencida', label: 'Vencida', cor: '#dc3545' },
+                { codigo: 'a_vencer', label: 'A Vencer', cor: '#ffc107' },
+            ]
+        });
     }
 });
 
@@ -991,16 +1226,16 @@ router.delete('/contas-receber/:id', authenticateToken, authorizeFinanceiro('rec
         }
         
         // Não permitir exclusão de contas já pagas
-        if (conta[0].status === 'PAGO' || conta[0].status === 'pago') {
+        if (['liquidada', 'PAGO', 'pago'].includes(conta[0].status)) {
             return res.status(400).json({ 
-                error: 'Não é possível excluir uma conta já paga. Use o estorno primeiro.' 
+                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.' 
             });
         }
         
-        // Soft delete: marcar como cancelado ao invés de deletar
+        // Soft delete: marcar como cancelada ao invés de deletar
         const [result] = await pool.execute(
             `UPDATE contas_receber 
-             SET status = 'CANCELADO', 
+             SET status = 'cancelada', 
                  deleted_at = NOW(),
                  deleted_by = ?,
                  observacoes = CONCAT(COALESCE(observacoes, ''), ' [CANCELADO] Excluído por ', ?, ' em ', NOW())
@@ -1065,6 +1300,10 @@ router.get('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), asy
             WHERE 1=1
         `;
         const params = [];
+        const corteCP = req.financeiroCorteTemporal;
+
+        // CORTE TEMPORAL 2026 — Hard limit
+        query += corteCP.cpClause('cp');
 
         if (status) {
             query += ' AND cp.status = ?';
@@ -1105,36 +1344,41 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
         const hoje = new Date().toISOString().split('T')[0];
         const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+        const corteStat = req.financeiroCorteTemporal;
         
-        // Total a pagar (pendentes)
+        // Total a pagar (a_vencer + vencida — novo domínio, compat legado)
         const [totalPagar] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as total_pagar
-            FROM contas_pagar 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            FROM contas_pagar cp
+            WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            ${corteStat.cpClause('cp')}
         `);
         
         // Vencendo em 7 dias
         const [vencendo] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencendo
-            FROM contas_pagar 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
-            AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
+            FROM contas_pagar cp
+            WHERE cp.status IN ('a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            AND COALESCE(cp.data_vencimento, cp.vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
+            ${corteStat.cpClause('cp')}
         `, [hoje, hoje]);
         
         // Vencidas
         const [vencidas] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencidas
-            FROM contas_pagar 
-            WHERE status IN ('pendente', 'parcial', 'PENDENTE', 'PARCIAL')
-            AND COALESCE(data_vencimento, vencimento) < ?
+            FROM contas_pagar cp
+            WHERE cp.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
+            AND COALESCE(cp.data_vencimento, cp.vencimento) < ?
+            ${corteStat.cpClause('cp')}
         `, [hoje]);
         
-        // Pagas no mês atual
+        // Liquidadas no mês atual (novo domínio)
         const [pagasMes] = await pool.execute(`
-            SELECT COALESCE(SUM(valor_pago), 0) as pagas_mes
-            FROM contas_pagar 
-            WHERE status = 'pago'
-            AND data_recebimento BETWEEN ? AND ?
+            SELECT COALESCE(SUM(COALESCE(valor_pago, valor)), 0) as pagas_mes
+            FROM contas_pagar cp
+            WHERE cp.status IN ('liquidada', 'pago', 'PAGO')
+            AND COALESCE(cp.data_pagamento, cp.data_recebimento) BETWEEN ? AND ?
+            ${corteStat.cpClause('cp')}
         `, [inicioMes, fimMes]);
         
         res.json({
@@ -1265,8 +1509,8 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
 
-        // Se a conta foi paga, registrar data de pagamento
-        if (status === 'PAGO' || status === 'pago') {
+        // Se a conta foi liquidada, registrar data de pagamento
+        if (status === 'liquidada' || status === 'PAGO' || status === 'pago') {
             await pool.execute(
                 'UPDATE contas_pagar SET data_pagamento = NOW() WHERE id = ?',
                 [id]
@@ -1294,17 +1538,17 @@ router.delete('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
         
-        // Não permitir exclusão de contas já pagas
-        if (conta[0].status === 'pago' || conta[0].status === 'PAGO') {
+        // Não permitir exclusão de contas já liquidadas
+        if (['liquidada', 'pago', 'PAGO'].includes(conta[0].status)) {
             return res.status(400).json({ 
-                error: 'Não é possível excluir uma conta já paga. Use o estorno primeiro.' 
+                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.' 
             });
         }
         
-        // Soft delete: marcar como cancelado ao invés de deletar
+        // Soft delete: marcar como cancelada ao invés de deletar
         const [result] = await pool.execute(
             `UPDATE contas_pagar 
-             SET status = 'cancelado', 
+             SET status = 'cancelada', 
                  deleted_at = NOW(),
                  deleted_by = ?,
                  observacoes = CONCAT(COALESCE(observacoes, ''), ' [CANCELADO] Excluído por ', ?, ' em ', NOW())
@@ -1454,7 +1698,7 @@ router.post('/contas-pagar/:id/baixa', authenticateToken, authorizeFinanceiro('p
         const novoValorPago = valorJaPago + valorBaixa;
 
         // Determinar novo status
-        let novoStatus = 'pago';
+        let novoStatus = 'liquidada';
         if (baixa_parcial || novoValorPago < valorOriginal) {
             novoStatus = 'parcial';
         }
@@ -1532,7 +1776,7 @@ router.post('/contas-receber/:id/baixa', authenticateToken, authorizeFinanceiro(
         const novoValorRecebido = valorJaRecebido + valorBaixa;
 
         // Determinar novo status
-        let novoStatus = 'pago';
+        let novoStatus = 'liquidada';
         if (baixa_parcial || novoValorRecebido < valorOriginal) {
             novoStatus = 'parcial';
         }
@@ -1695,6 +1939,7 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
         // Data padrão: próximos 30 dias
         const inicio = dataInicio || new Date().toISOString().split('T')[0];
         const fim = dataFim || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
+        const corte = req.financeiroCorteTemporal;
 
         // Saldo inicial das contas bancárias
         const [saldoInicial] = await pool.execute(
@@ -1708,9 +1953,10 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
                 SUM(valor - COALESCE(valor_recebido, 0)) as valor,
                 'receber' as tipo,
                 COUNT(*) as quantidade
-            FROM contas_receber 
+            FROM contas_receber cr
             WHERE status IN ('pendente', 'parcial')
               AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND ?
+              ${corte.crClause('cr')}
             GROUP BY DATE(COALESCE(data_vencimento, vencimento))
             ORDER BY data
         `, [inicio, fim]);
@@ -1722,9 +1968,10 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
                 SUM(valor - COALESCE(valor_pago, 0)) as valor,
                 'pagar' as tipo,
                 COUNT(*) as quantidade
-            FROM contas_pagar 
+            FROM contas_pagar cp
             WHERE status IN ('pendente', 'parcial')
               AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND ?
+              ${corte.cpClause('cp')}
             GROUP BY DATE(COALESCE(data_vencimento, vencimento))
             ORDER BY data
         `, [inicio, fim]);
@@ -1735,9 +1982,10 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
                 DATE(data_recebimento) as data,
                 SUM(valor_recebido) as valor,
                 'recebido' as tipo
-            FROM contas_receber 
+            FROM contas_receber cr
             WHERE status IN ('pago', 'parcial')
               AND data_recebimento BETWEEN ? AND ?
+              ${corte.crClause('cr')}
             GROUP BY DATE(data_recebimento)
         `, [inicio, fim]);
 
@@ -1746,9 +1994,10 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
                 DATE(data_recebimento) as data,
                 SUM(valor_pago) as valor,
                 'pago' as tipo
-            FROM contas_pagar 
+            FROM contas_pagar cp
             WHERE status IN ('pago', 'parcial')
               AND data_recebimento BETWEEN ? AND ?
+              ${corte.cpClause('cp')}
             GROUP BY DATE(data_recebimento)
         `, [inicio, fim]);
 
@@ -1811,6 +2060,7 @@ router.get('/dre', authenticateToken, async (req, res) => {
         
         const dataInicio = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-01`;
         const dataFim = new Date(anoAtual, mesAtual, 0).toISOString().split('T')[0];
+        const corte = req.financeiroCorteTemporal;
 
         // Receitas por categoria
         const [receitas] = await pool.execute(`
@@ -1819,8 +2069,9 @@ router.get('/dre', authenticateToken, async (req, res) => {
                 SUM(cr.valor_recebido) as valor
             FROM contas_receber cr
             LEFT JOIN categorias_financeiro cat ON cr.categoria_id = cat.id
-            WHERE cr.status = 'pago' 
+            WHERE cr.status IN ('liquidada', 'pago') 
               AND cr.data_recebimento BETWEEN ? AND ?
+              ${corte.crClause('cr')}
             GROUP BY cat.nome
             ORDER BY valor DESC
         `, [dataInicio, dataFim]);
@@ -1832,8 +2083,9 @@ router.get('/dre', authenticateToken, async (req, res) => {
                 SUM(cp.valor_pago) as valor
             FROM contas_pagar cp
             LEFT JOIN categorias_financeiro cat ON cp.categoria_id = cat.id
-            WHERE cp.status = 'pago' 
+            WHERE cp.status IN ('liquidada', 'pago') 
               AND cp.data_recebimento BETWEEN ? AND ?
+              ${corte.cpClause('cp')}
             GROUP BY cat.nome
             ORDER BY valor DESC
         `, [dataInicio, dataFim]);
@@ -1867,6 +2119,54 @@ router.get('/dre', authenticateToken, async (req, res) => {
 });
 
 // =====================================================
+// ROTAS - POSIÇÃO DE FUNDOS (DEV SPEC 3.2)
+// =====================================================
+
+/**
+ * GET /api/financeiro/fundos/posicao
+ * Retorna posição consolidada de fundos por portador/banco
+ * Agrupamento: Portador → A Vencer | Vencido | Liquidado | Total
+ */
+router.get('/fundos/posicao', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
+    try {
+        const corte = req.financeiroCorteTemporal;
+        const hoje = new Date().toISOString().split('T')[0];
+
+        const [posicao] = await pool.execute(`
+            SELECT 
+                COALESCE(cr.portador, 'Sem Portador') as portador,
+                COUNT(*) as total_titulos,
+                SUM(cr.valor) as valor_total,
+                SUM(CASE WHEN cr.status IN ('a_vencer') AND COALESCE(cr.data_vencimento, cr.vencimento) >= ? THEN cr.valor ELSE 0 END) as a_vencer,
+                SUM(CASE WHEN cr.status IN ('vencida') OR (cr.status IN ('a_vencer','pendente') AND COALESCE(cr.data_vencimento, cr.vencimento) < ?) THEN cr.valor ELSE 0 END) as vencido,
+                SUM(CASE WHEN cr.status IN ('liquidada','pago') THEN cr.valor ELSE 0 END) as liquidado,
+                COUNT(CASE WHEN cr.status IN ('a_vencer') AND COALESCE(cr.data_vencimento, cr.vencimento) >= ? THEN 1 END) as qtd_a_vencer,
+                COUNT(CASE WHEN cr.status IN ('vencida') OR (cr.status IN ('a_vencer','pendente') AND COALESCE(cr.data_vencimento, cr.vencimento) < ?) THEN 1 END) as qtd_vencido,
+                COUNT(CASE WHEN cr.status IN ('liquidada','pago') THEN 1 END) as qtd_liquidado
+            FROM contas_receber cr
+            WHERE cr.status != 'cancelada'
+              ${corte.crClause('cr')}
+            GROUP BY COALESCE(cr.portador, 'Sem Portador')
+            ORDER BY valor_total DESC
+        `, [hoje, hoje, hoje, hoje]);
+
+        // Totais gerais
+        const totais = posicao.reduce((acc, p) => ({
+            valor_total: acc.valor_total + (parseFloat(p.valor_total) || 0),
+            a_vencer: acc.a_vencer + (parseFloat(p.a_vencer) || 0),
+            vencido: acc.vencido + (parseFloat(p.vencido) || 0),
+            liquidado: acc.liquidado + (parseFloat(p.liquidado) || 0),
+            total_titulos: acc.total_titulos + (parseInt(p.total_titulos) || 0)
+        }), { valor_total: 0, a_vencer: 0, vencido: 0, liquidado: 0, total_titulos: 0 });
+
+        res.json({ success: true, posicao, totais, dataReferencia: hoje });
+    } catch (error) {
+        console.error('[Financeiro] Erro ao calcular posição de fundos:', error);
+        res.status(500).json({ success: false, message: 'Erro ao calcular posição de fundos' });
+    }
+});
+
+// =====================================================
 // ROTAS - RELATÓRIOS AVANÇADOS
 // =====================================================
 
@@ -1877,17 +2177,17 @@ router.get('/dre', authenticateToken, async (req, res) => {
 router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
     try {
         const hoje = new Date().toISOString().split('T')[0];
-
-        // Contas a pagar vencidas
+        const corte = req.financeiroCorteTemporal;
         const [pagarVencidas] = await pool.execute(`
             SELECT 
                 id, descricao, valor, 
                 COALESCE(data_vencimento, vencimento) as vencimento,
                 DATEDIFF(?, COALESCE(data_vencimento, vencimento)) as dias_atraso,
                 'pagar' as tipo
-            FROM contas_pagar 
-            WHERE status = 'pendente' 
-              AND COALESCE(data_vencimento, vencimento) < ?
+            FROM contas_pagar cp
+            WHERE cp.status = 'pendente' 
+              AND COALESCE(cp.data_vencimento, cp.vencimento) < ?
+              ${corte.cpClause('cp')}
             ORDER BY vencimento
         `, [hoje, hoje]);
 
@@ -1898,9 +2198,10 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
                 COALESCE(data_vencimento, vencimento) as vencimento,
                 DATEDIFF(?, COALESCE(data_vencimento, vencimento)) as dias_atraso,
                 'receber' as tipo
-            FROM contas_receber 
-            WHERE status = 'pendente' 
-              AND COALESCE(data_vencimento, vencimento) < ?
+            FROM contas_receber cr
+            WHERE cr.status = 'pendente' 
+              AND COALESCE(cr.data_vencimento, cr.vencimento) < ?
+              ${corte.crClause('cr')}
             ORDER BY vencimento
         `, [hoje, hoje]);
 
@@ -1909,17 +2210,19 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
         
         const [pagarProximas] = await pool.execute(`
             SELECT id, descricao, valor, COALESCE(data_vencimento, vencimento) as vencimento, 'pagar' as tipo
-            FROM contas_pagar 
-            WHERE status = 'pendente' 
-              AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND ?
+            FROM contas_pagar cp
+            WHERE cp.status = 'pendente' 
+              AND COALESCE(cp.data_vencimento, cp.vencimento) BETWEEN ? AND ?
+              ${corte.cpClause('cp')}
             ORDER BY vencimento
         `, [hoje, em7dias]);
 
         const [receberProximas] = await pool.execute(`
             SELECT id, descricao, valor, COALESCE(data_vencimento, vencimento) as vencimento, 'receber' as tipo
-            FROM contas_receber 
-            WHERE status = 'pendente' 
-              AND COALESCE(data_vencimento, vencimento) BETWEEN ? AND ?
+            FROM contas_receber cr
+            WHERE cr.status = 'pendente' 
+              AND COALESCE(cr.data_vencimento, cr.vencimento) BETWEEN ? AND ?
+              ${corte.crClause('cr')}
             ORDER BY vencimento
         `, [hoje, em7dias]);
 
@@ -1950,15 +2253,17 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
  */
 router.get('/relatorios/por-fornecedor', authenticateToken, async (req, res) => {
     try {
+        const corte = req.financeiroCorteTemporal;
         const [resultado] = await pool.execute(`
             SELECT 
                 COALESCE(f.razao_social, f.nome, cp.cnpj_cpf, 'Não Identificado') as fornecedor,
                 COUNT(*) as quantidade,
                 SUM(cp.valor) as total,
-                SUM(CASE WHEN cp.status = 'pendente' THEN cp.valor ELSE 0 END) as pendente,
-                SUM(CASE WHEN cp.status = 'pago' THEN cp.valor ELSE 0 END) as pago
+                SUM(CASE WHEN cp.status IN ('pendente', 'a_vencer') THEN cp.valor ELSE 0 END) as pendente,
+                SUM(CASE WHEN cp.status IN ('liquidada', 'pago') THEN cp.valor ELSE 0 END) as pago
             FROM contas_pagar cp
             LEFT JOIN fornecedores f ON cp.fornecedor_id = f.id
+            WHERE ${corte.rawClause('cp', { incluirParcelasFuturas: true })}
             GROUP BY fornecedor
             ORDER BY total DESC
             LIMIT 50
@@ -1977,15 +2282,17 @@ router.get('/relatorios/por-fornecedor', authenticateToken, async (req, res) => 
  */
 router.get('/relatorios/por-cliente', authenticateToken, async (req, res) => {
     try {
+        const corte = req.financeiroCorteTemporal;
         const [resultado] = await pool.execute(`
             SELECT 
                 COALESCE(c.razao_social, c.nome_fantasia, cr.descricao, 'Não Identificado') as cliente,
                 COUNT(*) as quantidade,
                 SUM(cr.valor) as total,
-                SUM(CASE WHEN cr.status = 'pendente' THEN cr.valor ELSE 0 END) as pendente,
-                SUM(CASE WHEN cr.status = 'pago' THEN cr.valor ELSE 0 END) as recebido
+                SUM(CASE WHEN cr.status IN ('pendente', 'a_vencer') THEN cr.valor ELSE 0 END) as pendente,
+                SUM(CASE WHEN cr.status IN ('liquidada', 'pago') THEN cr.valor ELSE 0 END) as recebido
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
+            WHERE ${corte.rawClause('cr', { incluirParcelasFuturas: true })}
             GROUP BY cliente
             ORDER BY total DESC
             LIMIT 50
@@ -2714,33 +3021,64 @@ router.post('/importar/contas-receber', authenticateToken, authorizeFinanceiro('
         for (let i = 0; i < dados.length; i++) {
             const item = dados[i];
             try {
-                const cliente = sanitizeString(item.cliente_nome || item.cliente || item.origem || '');
-                const descricao = sanitizeString(item.descricao || item.historico || item.conta_financeira || '');
-                const valor = parseFloat(item.valor || item.valor_bruto || 0);
-                const vencimento = item.data_vencimento || item.vencimento || item.dt_entrada || null;
-                const tipo = sanitizeString(item.tipo || item.tipo_documento || item.conta_financeira || 'VENDA');
-                const observacoes = sanitizeString(item.observacoes || '');
+                const empresa      = sanitizeString(item.empresa || '');
+                const clienteNome  = sanitizeString(item.cliente_nome || item.cliente || item.origem || '');
+                const cnpjCliente  = sanitizeString(item.cnpj_cliente || item.cnpj || '');
+                const notaFiscal   = sanitizeString(item.nota_fiscal || '');
+                const parcelaInfo  = sanitizeString(item.parcela_info || '');
+                const descricao    = sanitizeString(item.descricao || item.tipo || notaFiscal || clienteNome || '');
+                const valor        = parseFloat(item.valor || item.valor_bruto || 0);
+                const vencimento   = item.data_vencimento || item.vencimento || item.dt_entrada || null;
+                const situacao     = sanitizeString(item.situacao || '');
+                const portador     = sanitizeString(item.portador || '');
+                const observacoes  = sanitizeString(item.observacoes || '');
+                const diasVencido  = parseInt(item.dias_vencido) || null;
+                const posicao      = sanitizeString(item.posicao || '');
+                const dataOperacao = item.data_operacao || null;
+                const dataEmissao  = item.data_emissao || null;
+                const diaRecomprado    = item.dia_recomprado || item.dt_recompra || null;
+                const dataParaCartorio = item.data_para_cartorio || item.dt_cartorio || null;
+                const dataProtestado   = item.data_protestado || item.dt_protesto || null;
+
+                // Normalize status (novo domínio + compat legado)
+                let status = sanitizeString(item.status || 'a_vencer').toLowerCase();
+                const statusMap = {
+                    'pendente': 'a_vencer', 'a vencer': 'a_vencer', 'a_vencer': 'a_vencer',
+                    'vencido': 'vencida', 'vencida': 'vencida',
+                    'liquidado': 'liquidada', 'liquidada': 'liquidada', 'recebido': 'liquidada', 'pago': 'liquidada',
+                    'cancelado': 'cancelada', 'cancelada': 'cancelada',
+                    'parcial': 'a_vencer'
+                };
+                status = statusMap[status] || 'a_vencer';
 
                 if (!valor || valor <= 0) {
                     erros.push({ linha: i + 2, erro: 'Valor inválido ou zero' });
                     continue;
                 }
 
-                let dataVenc = null;
-                if (vencimento) {
-                    const d = new Date(vencimento);
-                    if (!isNaN(d.getTime())) {
-                        dataVenc = d.toISOString().split('T')[0];
-                    }
-                }
+                const parseDate = (d) => {
+                    if (!d) return null;
+                    const dt = new Date(d);
+                    return isNaN(dt.getTime()) ? null : dt.toISOString().split('T')[0];
+                };
+
+                const dataVenc = parseDate(vencimento);
                 if (!dataVenc) {
                     erros.push({ linha: i + 2, erro: 'Data de vencimento inválida' });
                     continue;
                 }
 
                 await pool.execute(
-                    'INSERT INTO contas_receber (cliente_nome, descricao, valor, vencimento, data_vencimento, status, categoria_nome) VALUES (?, ?, ?, ?, ?, "PENDENTE", ?)',
-                    [cliente, descricao, valor, dataVenc, dataVenc, tipo]
+                    `INSERT INTO contas_receber
+                     (empresa, cliente_nome, descricao, cnpj_cliente, nota_fiscal, parcela_info,
+                      valor, vencimento, data_vencimento, status, situacao, portador,
+                      dias_vencido, posicao, observacoes, origem_importacao,
+                      dia_recomprado, data_para_cartorio, data_protestado)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'excel', ?, ?, ?)`,
+                    [empresa, clienteNome || descricao, descricao, cnpjCliente, notaFiscal, parcelaInfo,
+                     valor, dataVenc, dataVenc, status, situacao, portador,
+                     diasVencido, posicao, observacoes,
+                     parseDate(diaRecomprado), parseDate(dataParaCartorio), parseDate(dataProtestado)]
                 );
                 importados++;
             } catch (err) {
@@ -2791,6 +3129,158 @@ router.post('/importar/fluxo-caixa', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('[Financeiro] Erro importação fluxo-caixa:', error);
         res.status(500).json({ error: 'Erro na importação' });
+    }
+});
+
+// =====================================================
+// NOTIFICAÇÕES FINANCEIRO
+// =====================================================
+
+/**
+ * CREATE TABLE notificacoes_financeiro se não existir (lazy)
+ */
+async function ensureNotificacoesTable() {
+    await pool.execute(`
+        CREATE TABLE IF NOT EXISTS notificacoes_financeiro (
+            id BIGINT AUTO_INCREMENT PRIMARY KEY,
+            usuario_email VARCHAR(255) NULL,
+            tipo VARCHAR(20) DEFAULT 'info',
+            titulo VARCHAR(255) NOT NULL,
+            mensagem TEXT NULL,
+            icone VARCHAR(50) NULL,
+            cor VARCHAR(50) NULL,
+            lida TINYINT(1) DEFAULT 0,
+            link VARCHAR(500) NULL,
+            dados_extra JSON NULL,
+            data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_usuario (usuario_email),
+            INDEX idx_lida (lida)
+        )
+    `);
+}
+
+/**
+ * GET /api/financeiro/alertas
+ * Carrega notificações do usuário autenticado
+ */
+router.get('/alertas', authenticateToken, async (req, res) => {
+    try {
+        await ensureNotificacoesTable();
+        const email = req.user?.email || null;
+        const [rows] = await pool.execute(
+            `SELECT * FROM notificacoes_financeiro
+             WHERE (usuario_email = ? OR usuario_email IS NULL)
+             ORDER BY data_criacao DESC LIMIT 50`,
+            [email]
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('[Notificações] Erro ao carregar alertas:', error);
+        res.json([]); // Retorna vazio para não quebrar UI
+    }
+});
+
+/**
+ * GET /api/financeiro/notificacoes
+ * Lista notificações do usuário
+ */
+router.get('/notificacoes', authenticateToken, async (req, res) => {
+    try {
+        await ensureNotificacoesTable();
+        const email = req.user?.email || null;
+        const [rows] = await pool.execute(
+            `SELECT * FROM notificacoes_financeiro
+             WHERE (usuario_email = ? OR usuario_email IS NULL)
+             ORDER BY data_criacao DESC LIMIT 100`,
+            [email]
+        );
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('[Notificações] Erro ao listar notificações:', error);
+        res.status(500).json({ error: 'Erro ao listar notificações' });
+    }
+});
+
+/**
+ * POST /api/financeiro/notificacoes
+ * Persiste nova notificação
+ */
+router.post('/notificacoes', authenticateToken, async (req, res) => {
+    try {
+        await ensureNotificacoesTable();
+        const email = req.user?.email || null;
+        const { tipo, titulo, mensagem, icone, cor, lida, link, dados_extra } = req.body;
+
+        if (!titulo) return res.status(400).json({ error: 'Título obrigatório' });
+
+        const [result] = await pool.execute(
+            `INSERT INTO notificacoes_financeiro
+             (usuario_email, tipo, titulo, mensagem, icone, cor, lida, link, dados_extra)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                email,
+                tipo || 'info',
+                String(titulo).substring(0, 255),
+                mensagem || null,
+                icone || null,
+                cor || null,
+                lida ? 1 : 0,
+                link ? String(link).substring(0, 500) : null,
+                dados_extra ? JSON.stringify(dados_extra) : null
+            ]
+        );
+        res.status(201).json({ success: true, id: result.insertId });
+    } catch (error) {
+        console.error('[Notificações] Erro ao criar notificação:', error);
+        res.status(500).json({ error: 'Erro ao criar notificação' });
+    }
+});
+
+/**
+ * POST /api/financeiro/notificacoes/marcar-todas-lidas
+ * Marca todas as notificações do usuário como lidas
+ */
+router.post('/notificacoes/marcar-todas-lidas', authenticateToken, async (req, res) => {
+    try {
+        await ensureNotificacoesTable();
+        const email = req.user?.email || null;
+        await pool.execute(
+            `UPDATE notificacoes_financeiro SET lida = 1
+             WHERE usuario_email = ? AND lida = 0`,
+            [email]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[Notificações] Erro ao marcar todas como lidas:', error);
+        res.status(500).json({ error: 'Erro ao atualizar notificações' });
+    }
+});
+
+/**
+ * PATCH /api/financeiro/notificacoes/:id
+ * Atualiza uma notificação (ex: marcar como lida)
+ */
+router.patch('/notificacoes/:id', authenticateToken, async (req, res) => {
+    try {
+        await ensureNotificacoesTable();
+        const { id } = req.params;
+        const email = req.user?.email || null;
+        const { lida } = req.body;
+
+        // Garantir que o usuário só edite suas próprias notificações
+        const [result] = await pool.execute(
+            `UPDATE notificacoes_financeiro SET lida = ?
+             WHERE id = ? AND (usuario_email = ? OR usuario_email IS NULL)`,
+            [lida ? 1 : 0, id, email]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Notificação não encontrada' });
+        }
+        res.json({ success: true });
+    } catch (error) {
+        console.error('[Notificações] Erro ao atualizar notificação:', error);
+        res.status(500).json({ error: 'Erro ao atualizar notificação' });
     }
 });
 
@@ -2879,13 +3369,16 @@ router.get('/conciliacao', authenticateToken, async (req, res) => {
 router.post('/conciliacao', authenticateToken, async (req, res) => {
     try {
         await ensureConciliacaoTables();
-        const { conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match = 'manual' } = req.body;
+        const { conta_id, movimentacao_sistema_id, movimentacao_tabela, extrato_id, valor, tipo_match = 'manual' } = req.body;
         if (!movimentacao_sistema_id || !extrato_id) {
             return res.status(400).json({ success: false, message: 'IDs do sistema e extrato são obrigatórios' });
         }
+        if (movimentacao_tabela && !['contas_receber', 'contas_pagar'].includes(movimentacao_tabela)) {
+            return res.status(400).json({ success: false, message: 'movimentacao_tabela inválida' });
+        }
         const [result] = await pool.execute(
-            'INSERT INTO conciliacoes (conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match, usuario_id) VALUES (?, ?, ?, ?, ?, ?)',
-            [conta_id || null, movimentacao_sistema_id, extrato_id, valor || 0, tipo_match, req.user?.id || null]
+            'INSERT INTO conciliacoes (conta_id, movimentacao_sistema_id, movimentacao_tabela, extrato_id, valor, tipo_match, usuario_id) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [conta_id || null, movimentacao_sistema_id, movimentacao_tabela || null, extrato_id, valor || 0, tipo_match, req.user?.id || null]
         );
         await pool.execute('UPDATE extrato_bancario SET conciliado = 1 WHERE id = ?', [extrato_id]);
         res.json({ success: true, id: result.insertId, message: 'Conciliação realizada' });
@@ -2914,19 +3407,22 @@ router.post('/conciliacao/automatica', authenticateToken, async (req, res) => {
         );
 
         // Buscar movimentações do sistema pendentes
+        const corte = req.financeiroCorteTemporal;
         const [receber] = await pool.execute(
-            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_receber' as tabela FROM contas_receber WHERE status IN ('pendente','parcial')"
+            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_receber' as tabela FROM contas_receber cr WHERE cr.status IN ('pendente','parcial','a_vencer','vencida')" + corte.crClause('cr')
         );
         const [pagar] = await pool.execute(
-            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_pagar' as tabela FROM contas_pagar WHERE status IN ('pendente','parcial')"
+            "SELECT id, valor, COALESCE(data_vencimento, vencimento) as data, 'contas_pagar' as tabela FROM contas_pagar cp WHERE cp.status IN ('pendente','parcial','a_vencer','vencida')" + corte.cpClause('cp')
         );
-        const sistema = [...receber, ...pagar];
 
         let conciliados = 0;
         const usados = new Set();
         for (const ext of extratos) {
-            const extVal = Math.abs(parseFloat(ext.valor));
-            const match = sistema.find(s => !usados.has(s.tabela + '_' + s.id) && Math.abs(Math.abs(parseFloat(s.valor)) - extVal) < 0.01);
+            const extValor = parseFloat(ext.valor);
+            const extVal = Math.abs(extValor);
+            // Isolamento CR/CP: crédito (valor > 0) → só CR, débito (valor < 0) → só CP
+            const candidatos = extValor >= 0 ? receber : pagar;
+            const match = candidatos.find(s => !usados.has(s.tabela + '_' + s.id) && Math.abs(Math.abs(parseFloat(s.valor)) - extVal) < 0.01);
             if (match) {
                 await pool.execute(
                     'INSERT INTO conciliacoes (conta_id, movimentacao_sistema_id, movimentacao_tabela, extrato_id, valor, tipo_match, usuario_id) VALUES (?, ?, ?, ?, ?, "automatico", ?)',

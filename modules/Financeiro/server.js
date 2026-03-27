@@ -389,19 +389,38 @@ app.get('/api/financeiro/contas-pagar/:id', authenticateToken, async (req, res) 
 // Listar contas a receber
 app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) => {
     try {
-        const { status, cliente_id, vencimento_inicio, vencimento_fim, limite = 2000 } = req.query;
+        const { status, cliente_id, vencimento_inicio, vencimento_fim, limite = 2000, ano_vigente } = req.query;
         
         // Dev Spec 1.1: Corte temporal 2026 aplicado via middleware
         const corte = req.financeiroCorteTemporal;
         let sql = `SELECT cr.*, 
                           COALESCE(cr.cliente_nome, c.nome) as cliente_nome, 
                           COALESCE(cr.cnpj_cliente, c.cpf_cnpj) as cnpj_cpf,
-                          cr.valor as valor_total,
-                          cr.forma_recebimento
+                          COALESCE(cr.valor, cr.valor_total, 0) as valor_total,
+                          cr.forma_recebimento,
+                          cr.empresa, cr.nota_fiscal, cr.parcela_info,
+                          cr.data_emissao, cr.categoria, cr.centro_receita,
+                          cr.numero_documento, cr.numero_boleto, cr.vendedor,
+                          cr.projeto, cr.situacao, cr.portador,
+                          cr.valor_pis, cr.valor_cofins, cr.valor_csll,
+                          cr.valor_ir, cr.valor_iss, cr.valor_inss,
+                          cr.valor_liquido, cr.valor_recebido, cr.a_receber,
+                          cr.dias_vencido,
+                          cr.pago_no_dia, cr.aceita_troca_factory,
+                          cr.comprovante_url,
+                          cr.dia_recomprado, cr.data_para_cartorio, cr.data_protestado,
+                          cr.origem_integracao
                    FROM contas_receber cr
                    LEFT JOIN clientes c ON cr.cliente_id = c.id
                    WHERE 1=1${corte ? corte.crClause('cr') : ''}`;
         const params = [];
+        
+        // Dev Spec 1.3: Filtrar notas do ano vigente + parcelas futuras
+        if (ano_vigente === '1') {
+            const anoAtual = new Date().getFullYear();
+            sql += ` AND (YEAR(cr.data_emissao) = ? OR cr.data_vencimento >= CURDATE())`;
+            params.push(anoAtual);
+        }
         
         if (status) {
             sql += ' AND cr.status = ?';
@@ -431,6 +450,31 @@ app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) =>
     }
 });
 
+// Dev Spec 1.3: Estatísticas de contas a receber
+app.get('/api/financeiro/contas-receber/estatisticas', authenticateToken, async (req, res) => {
+    try {
+        const [totais] = await pool.execute(`
+            SELECT 
+                COALESCE(SUM(CASE WHEN status NOT IN ('recebido','pago','liquidado','cancelada') THEN COALESCE(a_receber, valor - COALESCE(valor_recebido,0)) ELSE 0 END), 0) as total_receber,
+                COALESCE(SUM(CASE WHEN status NOT IN ('recebido','pago','liquidado','cancelada') AND data_vencimento >= CURDATE() THEN COALESCE(a_receber, valor - COALESCE(valor_recebido,0)) ELSE 0 END), 0) as vencendo,
+                COALESCE(SUM(CASE WHEN status NOT IN ('recebido','pago','liquidado','cancelada') AND data_vencimento < CURDATE() THEN COALESCE(a_receber, valor - COALESCE(valor_recebido,0)) ELSE 0 END), 0) as vencidas,
+                COALESCE(SUM(CASE WHEN status IN ('recebido','pago','liquidado') THEN COALESCE(valor_recebido, valor) ELSE 0 END), 0) as recebidas_mes
+            FROM contas_receber
+            WHERE YEAR(data_emissao) >= YEAR(CURDATE()) OR data_vencimento >= CURDATE()
+        `);
+        res.json(totais[0] || { total_receber: 0, vencendo: 0, vencidas: 0, recebidas_mes: 0 });
+    } catch (error) {
+        console.error('❌ Erro estatísticas CR:', error);
+        res.status(500).json({ error: 'Erro ao buscar estatísticas' });
+    }
+});
+
+// Dev Spec 1.3: Receber conta (alias para baixar)
+app.post('/api/financeiro/contas-receber/:id/receber', authenticateToken, async (req, res, next) => {
+    req.url = req.url.replace('/receber', '/baixar');
+    next();
+});
+
 // Criar conta a receber
 app.post('/api/financeiro/contas-receber', authenticateToken, async (req, res) => {
     const connection = await pool.getConnection();
@@ -440,39 +484,54 @@ app.post('/api/financeiro/contas-receber', authenticateToken, async (req, res) =
         const {
             cliente_id,
             descricao,
-            valor_total,
+            valor_total, valor,
             data_emissao,
-            data_vencimento,
+            data_vencimento, vencimento,
             numero_documento,
             categoria_id,
-            observacoes
+            observacoes,
+            forma_recebimento,
+            num_parcelas,
+            status,
+            pago_no_dia,
+            aceita_troca_factory
         } = req.body;
         
+        const valorFinal = valor_total || valor;
+        
         // AUDITORIA ENTERPRISE: Validar valor monetário
-        const valorParsed = parseFloat(valor_total);
+        const valorParsed = parseFloat(valorFinal);
         if (isNaN(valorParsed) || valorParsed <= 0 || valorParsed > 999999999.99) {
             return res.status(400).json({ error: 'Valor total inválido. Deve ser maior que 0' });
         }
         const valorSanitizado = Math.round(valorParsed * 100) / 100;
         
+        const vencFinal = data_vencimento || vencimento;
+        const emissaoFinal = data_emissao || new Date().toISOString().slice(0, 10);
+        
         // AUDITORIA ENTERPRISE: Validar formato de datas
         const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateRegex.test(data_emissao) || !dateRegex.test(data_vencimento)) {
+        if (!dateRegex.test(emissaoFinal) || !dateRegex.test(vencFinal)) {
             return res.status(400).json({ error: 'Datas devem estar no formato YYYY-MM-DD' });
         }
         
-        // Validar que vencimento não é anterior à emissão
-        if (new Date(data_vencimento) < new Date(data_emissao)) {
-            return res.status(400).json({ error: 'Data de vencimento não pode ser anterior à emissão' });
+        // Dev Spec 1.3: Status válidos
+        const statusFinal = status || 'a_vencer';
+        const STATUS_VALIDOS = ['cancelada', 'liquidada', 'vencida', 'a_vencer', 'pendente'];
+        if (!STATUS_VALIDOS.includes(statusFinal)) {
+            return res.status(400).json({ error: `Status inválido. Valores permitidos: ${STATUS_VALIDOS.join(', ')}` });
         }
         
         const [result] = await connection.execute(
             `INSERT INTO contas_receber 
-            (cliente_id, descricao, valor_total, data_emissao, data_vencimento, 
-             numero_documento, categoria_id, observacoes, status, usuario_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?)`,
-            [cliente_id, descricao, valor_total, data_emissao, data_vencimento,
-             numero_documento, categoria_id, observacoes, req.user.id]
+            (cliente_id, descricao, valor, valor_total, data_emissao, data_vencimento, 
+             numero_documento, categoria_id, observacoes, status, usuario_id,
+             forma_recebimento, pago_no_dia, aceita_troca_factory, a_receber)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [cliente_id, descricao, valorSanitizado, valorSanitizado, emissaoFinal, vencFinal,
+             numero_documento, categoria_id, observacoes, statusFinal, req.user.id,
+             forma_recebimento, pago_no_dia || null,
+             aceita_troca_factory ? 1 : 0, valorSanitizado]
         );
         
         await connection.commit();
@@ -483,6 +542,92 @@ app.post('/api/financeiro/contas-receber', authenticateToken, async (req, res) =
         res.status(500).json({ error: 'Erro ao criar conta a receber', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
     } finally {
         connection.release();
+    }
+});
+
+// Dev Spec 1.3: Importar Excel de contas a receber
+app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, upload.single('arquivo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+        
+        const XLSX = require('xlsx');
+        const workbook = XLSX.readFile(req.file.path);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        
+        let importados = 0;
+        let erros = 0;
+        
+        for (const row of rows) {
+            try {
+                const empresa = row['Empresa'] || row['empresa'] || '';
+                const nfe = row['NFe'] || row['nfe'] || row['Nota Fiscal'] || '';
+                const parcela = row['Parcela'] || row['parcela'] || '';
+                const cliente = row['Cliente'] || row['cliente'] || '';
+                const cnpj = row['CNPJ'] || row['cnpj'] || row['CNPJ/CPF'] || '';
+                const emissao = row['Emissao'] || row['Emissão'] || row['emissao'] || '';
+                const vencimento = row['Vencimento'] || row['vencimento'] || '';
+                const valor = parseFloat(String(row['Valor'] || row['valor'] || '0').replace(/\./g,'').replace(',','.')) || 0;
+                const situacao = row['Situacao'] || row['Situação'] || row['situacao'] || '';
+                const portador = row['Portador'] || row['portador'] || '';
+                const statusVal = row['Status'] || row['status'] || 'a_vencer';
+                const obs = row['Observacao'] || row['Observação'] || row['observacao'] || '';
+                const pis = parseFloat(String(row['PIS'] || '0').replace(',','.')) || 0;
+                const cofins = parseFloat(String(row['COFINS'] || '0').replace(',','.')) || 0;
+                const csll = parseFloat(String(row['CSLL'] || '0').replace(',','.')) || 0;
+                const ir = parseFloat(String(row['IR'] || '0').replace(',','.')) || 0;
+                const iss = parseFloat(String(row['ISS'] || '0').replace(',','.')) || 0;
+                const inss = parseFloat(String(row['INSS'] || '0').replace(',','.')) || 0;
+                
+                // Converter datas Excel
+                const parseData = (d) => {
+                    if (!d) return null;
+                    if (typeof d === 'number') {
+                        const dt = XLSX.SSF.parse_date_code(d);
+                        return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
+                    }
+                    const s = String(d);
+                    const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+                    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+                    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+                    return null;
+                };
+                
+                const emissaoFinal = parseData(emissao) || new Date().toISOString().slice(0,10);
+                const vencimentoFinal = parseData(vencimento) || emissaoFinal;
+                const valorLiquido = valor - pis - cofins - csll - ir - iss - inss;
+                
+                await pool.execute(
+                    `INSERT INTO contas_receber 
+                     (empresa, nota_fiscal, parcela_info, cliente_nome, cnpj_cliente,
+                      data_emissao, data_vencimento, valor, valor_total,
+                      situacao, portador, status, observacoes,
+                      valor_pis, valor_cofins, valor_csll, valor_ir, valor_iss, valor_inss,
+                      valor_liquido, a_receber, origem_integracao)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'importacao_excel')`,
+                    [empresa, nfe, parcela, cliente, cnpj,
+                     emissaoFinal, vencimentoFinal, valor, valor,
+                     situacao, portador, statusVal, obs,
+                     pis, cofins, csll, ir, iss, inss,
+                     valorLiquido, valorLiquido]
+                );
+                importados++;
+            } catch (e) {
+                erros++;
+                console.error('Erro importando linha:', e.message);
+            }
+        }
+        
+        // Limpar arquivo temporário
+        try { fs.unlinkSync(req.file.path); } catch(e) {}
+        
+        res.json({ success: true, importados, erros, sheet: sheetName });
+    } catch (error) {
+        console.error('❌ Erro ao importar Excel:', error);
+        res.status(500).json({ error: 'Erro ao importar arquivo', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
     }
 });
 

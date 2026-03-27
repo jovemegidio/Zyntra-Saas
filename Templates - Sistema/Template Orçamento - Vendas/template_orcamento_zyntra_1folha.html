@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{documento.titulo}} Nº {{documento.numero}}</title>
+  <style>
+    :root {
+      --ink: #0c1726;
+      --text: #34495e;
+      --muted: #6b7d90;
+      --line: #d6e2eb;
+      --line-soft: #eaf1f6;
+      --surface: #ffffff;
+      --soft: #f4f9fc;
+      --brand: #0b2842;
+      --brand-2: #103758;
+      --accent: #18b6c8;
+      --accent-soft: #e8f8fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    @page {
+      size: A4;
+      margin: 8mm;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #eef4f8;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--text);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .document {
+      width: 210mm;
+      margin: 0 auto;
+      background: #fff;
+    }
+
+    .page {
+      min-height: auto;
+      padding: 8mm;
+      position: relative;
+      page-break-after: avoid;
+    }
+
+    .top-rule {
+      height: 5px;
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 58%, var(--accent) 100%);
+      border-radius: 999px;
+      margin-bottom: 9px;
+    }
+
+    .header {
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 9px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-box {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 70%, var(--accent) 100%);
+      box-shadow: 0 8px 18px rgba(11, 40, 66, 0.14);
+      flex: 0 0 46px;
+    }
+
+    .logo-box svg {
+      width: 26px;
+      height: 26px;
+      display: block;
+    }
+
+    .brand-name {
+      color: var(--brand);
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .brand-sub {
+      color: var(--muted);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      line-height: 1.4;
+    }
+
+    .issuer {
+      border-left: 1px solid var(--line-soft);
+      padding-left: 14px;
+    }
+
+    .issuer-name {
+      margin: 0 0 5px;
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 800;
+      color: var(--ink);
+      text-transform: uppercase;
+      text-align: right;
+    }
+
+    .issuer-meta {
+      margin-left: auto;
+      width: fit-content;
+      display: grid;
+      gap: 2px;
+      font-size: 10.5px;
+      color: var(--text);
+      text-align: right;
+      line-height: 1.35;
+    }
+
+    .title-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+      padding: 0 0 6px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 7px;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 17px;
+      line-height: 1.08;
+      color: var(--ink);
+      font-weight: 850;
+    }
+
+    .title small {
+      display: block;
+      margin-top: 3px;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+    }
+
+    .doc-badge {
+      border: 1px solid rgba(24, 182, 200, 0.38);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 10px;
+      color: var(--brand);
+      background: linear-gradient(180deg, #ffffff 0%, #f5fbfc 100%);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .section {
+      margin-bottom: 7px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .section-tag {
+      padding: 4px 9px;
+      min-width: 78px;
+      text-align: center;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--brand);
+      border: 1px solid var(--line-soft);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      font-weight: 800;
+    }
+
+    .section-title {
+      margin: 0;
+      font-size: 10.5px;
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .client-panel,
+    .box,
+    .panel,
+    .text-box,
+    .signature-card,
+    .totals {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .client-panel {
+      padding: 7px 9px;
+    }
+
+    .client-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+
+    .client-name {
+      margin: 0;
+      font-size: 12.5px;
+      color: var(--ink);
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    .client-side {
+      font-size: 10px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .client-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 5px 14px;
+      font-size: 10px;
+      line-height: 1.28;
+    }
+
+    .client-grid strong,
+    .meta-grid strong,
+    .install-grid strong {
+      color: var(--ink);
+    }
+
+    .items-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .items thead th {
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 100%);
+      color: #fff;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 8px 8px;
+      text-align: left;
+      font-weight: 800;
+      border-right: 1px solid rgba(255,255,255,0.18);
+    }
+
+    .items thead th:last-child { border-right: 0; }
+
+    .items td {
+      padding: 7px 8px;
+      border-top: 1px solid var(--line-soft);
+      font-size: 10px;
+      vertical-align: middle;
+      color: var(--text);
+      line-height: 1.28;
+    }
+
+    .items tbody tr:nth-child(even) td { background: #fcfdfe; }
+    .items .desc { color: var(--ink); }
+    .num { text-align: right; white-space: nowrap; }
+    .center { text-align: center; }
+
+    .below-items {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 10px;
+      margin-top: 6px;
+      align-items: stretch;
+    }
+
+    .summary-note {
+      padding: 7px 9px;
+      font-size: 10.5px;
+      line-height: 1.45;
+      color: var(--muted);
+      border: 1px dashed var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #fcfeff 0%, #f7fbfd 100%);
+    }
+
+    .totals {
+      overflow: hidden;
+    }
+
+    .totals table td {
+      font-size: 10.5px;
+      padding: 7px 9px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .totals table tr:first-child td { border-top: 0; }
+
+    .totals .label {
+      color: var(--ink);
+      font-weight: 700;
+      width: 58%;
+    }
+
+    .totals .value {
+      text-align: right;
+      background: var(--accent-soft);
+      color: var(--ink);
+      width: 42%;
+      white-space: nowrap;
+    }
+
+    .totals .grand .label,
+    .totals .grand .value {
+      font-weight: 850;
+      font-size: 10.5px;
+    }
+
+    .bottom-grid {
+      break-inside: avoid;
+      display: grid;
+      grid-template-columns: 1.18fr 0.82fr;
+      gap: 8px;
+      align-items: start;
+      margin-top: 8px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 6px;
+    }
+
+    .text-box {
+      padding: 7px 9px;
+      font-size: 9.8px;
+      line-height: 1.48;
+      color: var(--text);
+      white-space: pre-line;
+    }
+
+    .panel-head {
+      padding: 7px 9px;
+      border-bottom: 1px solid var(--line-soft);
+      font-size: 9px;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 0.13em;
+      font-weight: 800;
+      background: linear-gradient(180deg, #f7fbfe 0%, #f1f8fc 100%);
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .install-grid,
+    .meta-grid {
+      padding: 7px 9px 8px;
+      display: grid;
+      gap: 4px;
+      font-size: 9.8px;
+      line-height: 1.32;
+    }
+
+    .install-line,
+    .meta-line {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .signature-card {
+      min-height: 82px;
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(180deg, #fff 0%, #fbfcfe 100%);
+    }
+
+    .signature-card small {
+      color: var(--muted);
+      font-size: 9.4px;
+      line-height: 1.35;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .sign-line {
+      border-top: 1px solid var(--ink);
+      padding-top: 5px;
+      color: var(--ink);
+      font-size: 10.5px;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .footer {
+      margin-top: 6px;
+      padding-top: 5px;
+      border-top: 1px solid var(--line-soft);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 9px;
+      color: var(--muted);
+    }
+
+    .w-code { width: 12%; }
+    .w-desc { width: 40%; }
+    .w-ncm  { width: 14%; }
+    .w-qtd  { width: 9%; }
+    .w-unit { width: 11%; }
+    .w-total{ width: 14%; }
+
+    @media print {
+      html, body { background: #fff; }
+      .document { width: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="document">
+    <section class="page">
+      <div class="top-rule"></div>
+
+      <header class="header">
+        <div class="brand">
+          <div class="logo-box" aria-label="Logo">
+            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17 18H47L21 46H47" stroke="currentColor" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div>
+            <div class="brand-name">ZYNTRA</div>
+            <div class="brand-sub">ERP • Gestão empresarial inteligente</div>
+          </div>
+        </div>
+
+        <div class="issuer">
+          <h2 class="issuer-name">{{empresa.razao_social}}</h2>
+          <div class="issuer-meta">
+            <div>CNPJ: {{empresa.cnpj}}</div>
+            <div>Inscrição Estadual: {{empresa.inscricao_estadual}}</div>
+            <div>{{empresa.endereco_linha_1}}</div>
+            <div>{{empresa.endereco_linha_2}}</div>
+            <div>{{empresa.cidade_uf_cep}}</div>
+            <div>Telefone: {{empresa.telefone}}</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="title-row">
+        <div class="title">
+          <h1>{{documento.titulo}} Nº {{documento.numero}}</h1>
+          <small>{{documento.subtitulo}}</small>
+        </div>
+        <div class="doc-badge">{{documento.status}}</div>
+      </div>
+
+      <section class="section">
+        <div class="section-head">
+          <span class="section-tag">Cliente</span>
+          <h3 class="section-title">Dados para faturamento e contato</h3>
+        </div>
+        <div class="client-panel">
+          <div class="client-top">
+            <p class="client-name">{{cliente.nome}}</p>
+            <div class="client-side">Condição: {{cliente.condicao_pagamento}}</div>
+          </div>
+          <div class="client-grid">
+            <div><strong>Contato:</strong> {{cliente.contato}}</div>
+            <div><strong>CNPJ/CPF:</strong> {{cliente.cnpj}}</div>
+            <div><strong>Inscrição Estadual:</strong> {{cliente.inscricao_estadual}}</div>
+            <div><strong>Telefone:</strong> {{cliente.telefone}}</div>
+            <div><strong>Endereço:</strong> {{cliente.endereco}}</div>
+            <div><strong>Cidade/UF:</strong> {{cliente.cidade_uf_cep}}</div>
+            <div><strong>E-mail:</strong> {{cliente.email}}</div>
+            <div><strong>Contato comercial:</strong> {{informacoes.vendedor}}</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head">
+          <span class="section-tag">Itens</span>
+          <h3 class="section-title">Composição do orçamento</h3>
+        </div>
+
+        <div class="items-wrap">
+          <table class="items">
+            <thead>
+              <tr>
+                <th class="w-code">Código</th>
+                <th class="w-desc">Descrição</th>
+                <th class="w-ncm center">NCM</th>
+                <th class="w-qtd num">Qtd.</th>
+                <th class="w-unit num">Unit.</th>
+                <th class="w-total num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {{#each itens}}
+              <tr>
+                <td>{{codigo}}</td>
+                <td class="desc">{{descricao}}</td>
+                <td class="center">{{ncm}}</td>
+                <td class="num">{{quantidade}}</td>
+                <td class="num">{{valor_unitario}}</td>
+                <td class="num">{{valor_total}}</td>
+              </tr>
+              {{/each}}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="below-items">
+          <div class="summary-note">{{documento.resumo_comercial}}</div>
+          <div class="totals">
+            <table>
+              <tr>
+                <td class="label">Subtotal</td>
+                <td class="value">{{totais.subtotal}}</td>
+              </tr>
+              <tr>
+                <td class="label">IPI</td>
+                <td class="value">{{totais.ipi}}</td>
+              </tr>
+              <tr>
+                <td class="label">ICMS ST</td>
+                <td class="value">{{totais.icms_st}}</td>
+              </tr>
+              <tr class="grand">
+                <td class="label">Total geral</td>
+                <td class="value">{{totais.total}}</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="bottom-grid">
+        <div class="stack">
+          <div>
+            <div class="section-head">
+              <span class="section-tag">Observações</span>
+              <h3 class="section-title">Condições iniciais e regras comerciais</h3>
+            </div>
+            <div class="text-box">{{documento.observacoes_pagina_1}}
+
+{{documento.condicoes_pagina_2}}</div>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="panel">
+            <div class="panel-head">Parcelamento</div>
+            <div class="install-grid">
+              <div class="install-line"><strong>Parcela</strong><span>{{parcelas_resumo.numeros}}</span></div>
+              <div class="install-line"><strong>Vencimento</strong><span>{{parcelas_resumo.datas}}</span></div>
+              <div class="install-line"><strong>Valor</strong><span>{{parcelas_resumo.valores}}</span></div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-head">Informações complementares</div>
+            <div class="meta-grid">
+              <div class="meta-line"><strong>Emitido em</strong><span>{{informacoes.emitido_em}}</span></div>
+              <div class="meta-line"><strong>Faturamento</strong><span>{{informacoes.previsao_faturamento}}</span></div>
+              <div class="meta-line"><strong>Frete</strong><span>{{informacoes.frete}}</span></div>
+              <div class="meta-line"><strong>Validade</strong><span>{{informacoes.validade}}</span></div>
+            </div>
+          </div>
+
+          <div class="signature-card">
+            <small>{{documento.declaracao_aceite}}</small>
+            <div class="sign-line">{{documento.assinatura_label}}</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="footer">
+        <span>{{rodape.empresa}}</span>
+        <span>Documento em 1 folha</span>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

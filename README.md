@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versão-2.1.7-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/versão-2.3.0-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/status-Produção-brightgreen?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
@@ -42,8 +42,8 @@ O **Zyntra ERP** é uma plataforma ERP completa para gestão industrial e empres
 | 📊 **Dashboard** | KPIs, gráficos, alertas, painel executivo | 3 |
 | 🛒 **Vendas** | Pedidos, orçamentos, kanban, comissões, tabelas de preço | 12 |
 | 📦 **Compras** | Requisições, cotações, pedidos, entrada de notas | 8 |
-| 🏭 **PCP** | Ordens de produção, apontamentos, materiais, relatórios Excel | 10 |
-| 💰 **Financeiro** | Contas a pagar/receber, fluxo de caixa, DRE, conciliação, integração bancária | 12 |
+| 🏭 **PCP** | Ordens de produção, apontamentos, materiais, central de relatórios unificada | 10 |
+| 💰 **Financeiro** | Contas a pagar/receber, CNAB 240, fluxo de caixa, DRE, conciliação, integração bancária | 12 |
 | 👥 **RH** | Funcionários, cargos, folha de pagamento, ponto, férias | 8 |
 | 🧾 **Faturamento/NF-e** | Emissão NF-e/NFS-e, importação XML, impostos, manifestação | 10 |
 | 📦 **Estoque** | Inventário, movimentações, requisições, rastreabilidade | 6 |
@@ -73,7 +73,7 @@ Chat empresarial integrado em **todas as 85+ páginas** do sistema:
 
 | Integração | Status |
 |------------|--------|
-| 🏦 **Integração Bancária** | ✅ Produção (Boletos, CNAB, Pagamentos) |
+| 🏦 **Integração Bancária** | ✅ Produção (Boletos, CNAB 240 Remessa/Retorno, Pagamentos) |
 | 📧 **Email SMTP** | ✅ Produção |
 | 📱 **WhatsApp Business** | ✅ Produção |
 | 🧾 **SEFAZ (NF-e/NFS-e)** | ✅ Produção |
@@ -258,6 +258,16 @@ npm run lint
 ---
 
 ## 📊 Changelog Recente
+
+### v2.3.0 — 27/03/2026
+- ✅ **Contas a Receber — Módulo Completo** — Status dropdown (pendente/liquidada/parcial/vencida/protestada/cartório), pago_no_dia, aceita_troca_factory, comprovante de pagamento (upload), aba de rastreamento, simulador PM, aba FUNDOS, workbook switching, 7 novas colunas DB
+- ✅ **CNAB 240 — Contas a Pagar** — Multi-seleção de despesas, geração de remessa CNAB 240 (.REM), importação de retorno CNAB (.RET), baixa automática em lote, pagamento em batch
+- ✅ **Central de Relatórios PCP — Unificação** — Relatórios de Apontamentos incorporados como 5ª aba na Central de Relatórios (KPIs, filtros, tabela detalhada, resumo por funcionário, distribuição por atividade, indicadores de eficiência)
+- ✅ **Sidebar PCP Unificada** — Dois links de relatórios consolidados em um único link em todas as 5 páginas PCP (index, ordens-producao, apontamentos, relatorios, relatorios-apontamentos)
+- ✅ **Financeiro Server** — Novas rotas e colunas para contas a receber (pago_no_dia, aceita_troca_factory, comprovante_url, origem_integracao, dia_recomprado, data_para_cartorio, data_protestado)
+- ✅ **Migration DB** — 002-financeiro-schema-cr.js para schema Contas a Receber
+- ✅ **Deploy VPS** — 46 arquivos deployados + migration DB + PM2 restart
+- ✅ **72+ Relatórios** — Catálogo completo mapeado: Vendas (10), Financeiro (11), PCP (5), NFe (17), Faturamento (17), Compras (6), RH (10)
 
 ### v2.2.2 — 25/03/2026
 - ✅ **Condição de Pagamento** — Modal redesenhado com visual profissional (dark header, inputs focáveis), salva e carrega condições do banco de dados

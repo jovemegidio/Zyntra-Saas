@@ -12,16 +12,19 @@ param(
 
 $servidor = "31.97.64.102"
 $usuario = "root"
-$senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = $PSScriptRoot
 if (-not $caminhoLocal) {
-   $caminhoLocal = "G:\Outros computadores\Meu laptop (2)\Sistema - ALUFORCE - V.2"
+   $caminhoLocal = "G:\Outros computadores\Meu laptop (2)\Zyntra"
 }
 
-# Adicionar PuTTY ao PATH se necessário
-if (-not (Get-Command pscp -ErrorAction SilentlyContinue)) {
-   $env:Path += ";C:\Program Files\PuTTY"
+# Chave SSH sem senha (gerada para auto-deploy)
+$sshKey = "$env:USERPROFILE\.ssh\id_ed25519_vps"
+$sshOpts = "-i `"$sshKey`" -o BatchMode=yes -o StrictHostKeyChecking=no -o ConnectTimeout=15"
+
+function SSH-Run {
+   param([string]$cmd)
+   ssh $sshOpts.Split(' ') "${usuario}@${servidor}" $cmd 2>&1
 }
 
 Write-Host ""
@@ -51,13 +54,13 @@ function Enviar-Arquivo {
    # Criar diretório remoto se necessário
    $dirRemoto = Split-Path $relativoUnix -Parent
    if ($dirRemoto) {
-      plink -batch -pw $senha $usuario@$servidor "mkdir -p $caminhoRemoto/$dirRemoto" 2>$null
+      SSH-Run "mkdir -p $caminhoRemoto/$dirRemoto" | Out-Null
    }
 
    Write-Host "  Enviando: " -NoNewline -ForegroundColor Yellow
    Write-Host $relativo -ForegroundColor White
 
-   pscp -batch -pw $senha -q "$arquivoCompleto" "${usuario}@${servidor}:$caminhoRemoto/$relativoUnix" 2>$null
+   scp $sshOpts.Split(' ') "$arquivoCompleto" "${usuario}@${servidor}:$caminhoRemoto/$relativoUnix" 2>$null
 
    if ($LASTEXITCODE -eq 0) {
       Write-Host "  OK! " -ForegroundColor Green
@@ -126,7 +129,7 @@ if ($enviados -gt 0) {
    if ($reiniciar -eq "s" -or $reiniciar -eq "S") {
       Write-Host ""
       Write-Host "Reiniciando PM2..." -ForegroundColor Cyan
-      plink -batch -pw $senha $usuario@$servidor "pm2 restart aluforce-dashboard --update-env"
+      SSH-Run "pm2 restart aluforce-dashboard --update-env" | Write-Host
       Write-Host "PM2 reiniciado!" -ForegroundColor Green
    }
 

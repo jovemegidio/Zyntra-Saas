@@ -664,7 +664,7 @@
                 var greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
                 document.getElementById('greeting-text').textContent = greeting;
                 var nome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
-                document.getElementById('user-name').textContent = nome;
+                document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
                 var av = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : null;
                 if (!av) av = getAvatarFromEmail(user.email, user.nome);
                 var photoEl = document.getElementById('user-photo');

@@ -37,6 +37,9 @@ module.exports = function createPCPRoutes(deps) {
         if (req.path.startsWith('/api/configuracoes')) {
             return next(); // Configurações são globais, não restritas ao PCP
         }
+        if (req.path.startsWith('/api/transportadoras')) {
+            return next(); // Transportadoras são usadas por Vendas, Logística e PCP
+        }
         // Helper: tenta autorizar por uma área sem enviar resposta de erro
         const tryAuth = (area) => new Promise((resolve) => {
             const fakeRes = {
@@ -381,31 +384,31 @@ module.exports = function createPCPRoutes(deps) {
         try {
             const limit = Math.min(parseInt(req.query.limit) || 200, 500);
             const offset = parseInt(req.query.offset) || 0;
-            const [rows] = await pool.query('SELECT id, codigo_produto, descricao_produto, quantidade, status, data_previsao_entrega, num_pedido, numero_pedido, cliente, observacoes, setor, created_at, updated_at FROM ordens_producao ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
+            const [rows] = await pool.query('SELECT id, codigo, produto_nome, quantidade, status, data_previsao_entrega, numero_pedido, cliente, observacoes, time_producao, created_at, updated_at FROM ordens_producao ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
             res.json(rows);
         } catch (error) { next(error); }
     });
     router.post('/ordens', [
-        body('codigo_produto').trim().notEmpty().withMessage('Código do produto é obrigatório')
-            .isLength({ max: 100 }).withMessage('Código muito longo (máx 100 caracteres)'),
-        body('descricao_produto').trim().notEmpty().withMessage('Descrição do produto é obrigatória')
-            .isLength({ max: 500 }).withMessage('Descrição muito longa (máx 500 caracteres)'),
-        body('quantidade').isInt({ min: 1 }).withMessage('Quantidade deve ser um número inteiro positivo'),
+        body('codigo').trim().notEmpty().withMessage('Código do produto é obrigatório')
+            .isLength({ max: 50 }).withMessage('Código muito longo (máx 50 caracteres)'),
+        body('produto_nome').trim().notEmpty().withMessage('Nome do produto é obrigatório')
+            .isLength({ max: 255 }).withMessage('Nome muito longo (máx 255 caracteres)'),
+        body('quantidade').isFloat({ min: 0.01 }).withMessage('Quantidade deve ser um número positivo'),
         body('data_previsao_entrega').isDate().withMessage('Data de previsão inválida'),
         body('observacoes').optional().trim().isLength({ max: 1000 }).withMessage('Observações muito longas (máx 1000 caracteres)'),
         validate
     ], async (req, res, next) => {
         try {
-            const { codigo_produto, descricao_produto, quantidade, data_previsao_entrega, observacoes } = req.body;
-            const sql = 'INSERT INTO ordens_producao (codigo_produto, descricao_produto, quantidade, data_previsao_entrega, observacoes, status) VALUES (?, ?, ?, ?, ?, \'A Fazer\')';
-            const [result] = await pool.query(sql, [codigo_produto, descricao_produto, quantidade, data_previsao_entrega, observacoes]);
+            const { codigo, produto_nome, quantidade, data_previsao_entrega, observacoes } = req.body;
+            const sql = 'INSERT INTO ordens_producao (codigo, produto_nome, quantidade, data_previsao_entrega, observacoes, status) VALUES (?, ?, ?, ?, ?, \'pendente\')';
+            const [result] = await pool.query(sql, [codigo, produto_nome, quantidade, data_previsao_entrega, observacoes]);
             res.status(201).json({ message: 'Ordem criada com sucesso!', id: result.insertId });
         } catch (error) { next(error); }
     });
     router.put('/ordens/:id/status', [
         param('id').isInt({ min: 1 }).withMessage('ID da ordem inválido'),
-        body('status').isIn(['A Fazer', 'Em Andamento', 'Concluído', 'Cancelado'])
-            .withMessage('Status inválido. Use: A Fazer, Em Andamento, Concluído ou Cancelado'),
+        body('status').isIn(['ativa', 'em_producao', 'pendente', 'concluida', 'cancelada'])
+            .withMessage('Status inválido. Use: ativa, em_producao, pendente, concluida ou cancelada'),
         validate
     ], async (req, res, next) => {
         try {
@@ -1676,7 +1679,7 @@ module.exports = function createPCPRoutes(deps) {
                 used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
                 total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024)
             },
-            version: require('./package.json').version || '2.0.0',
+            version: (() => { try { return require('../package.json').version; } catch(e) { return '2.0.0'; } })(),
             environment: process.env.NODE_ENV || 'development',
             database: DB_AVAILABLE ? 'connected' : 'disconnected',
             features: {
@@ -1704,7 +1707,7 @@ module.exports = function createPCPRoutes(deps) {
             },
             application: {
                 name: 'ALUFORCE v2.0',
-                version: require('./package.json').version || '2.0.0',
+                version: (() => { try { return require('../package.json').version; } catch(e) { return '2.0.0'; } })(),
                 environment: process.env.NODE_ENV || 'development'
             },
             database: {
@@ -1735,7 +1738,7 @@ module.exports = function createPCPRoutes(deps) {
         try {
             // Buscar usuários de funcionários para exibir avatar no login
             const [users] = await pool.query(`
-                SELECT id, nome_completo as nome, email, departamento as role, avatar, foto_perfil_url
+                SELECT id, nome_completo as nome, email, departamento as role, foto_perfil_url, foto_thumb_url
                 FROM funcionarios
                 WHERE ativo = 1 OR ativo IS NULL
                 ORDER BY nome_completo
@@ -1758,7 +1761,7 @@ module.exports = function createPCPRoutes(deps) {
             // Retornar dados sanitizados (sem senhas)
             const sanitizedUsers = users.map(user => {
                 const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
-                let fotoUrl = user.foto_perfil_url || user.avatar || avatarMap[firstName] || '/avatars/default.webp';
+                let fotoUrl = user.foto_perfil_url || user.foto_thumb_url || avatarMap[firstName] || '/avatars/default.webp';
 
                 return {
                     id: user.id,
@@ -4311,7 +4314,7 @@ module.exports = function createPCPRoutes(deps) {
     router.get('/transportadoras', async (req, res, next) => {
         try {
             const _dec = lgpdCrypto ? lgpdCrypto.decryptPII : (v => v);
-            const query = req.query.q || '';
+            const query = req.query.q || req.query.termo || '';
             const limit = parseInt(req.query.limit) || 10;
 
             let sql, params;

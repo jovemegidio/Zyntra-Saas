@@ -16,7 +16,9 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
                 const firstName = req.user.nome
                     ? req.user.nome.split(' ')[0].toLowerCase()
                     : (req.user.email || '').split('@')[0].toLowerCase();
-                if (userPermissions.hasAccess(firstName, moduleName)) {
+                const emailPrefix = (req.user.email || '').split('@')[0].toLowerCase();
+                const fullName = req.user.nome ? req.user.nome.toLowerCase().replace(/\s+/g, '.') : '';
+                if (userPermissions.hasAccess(firstName, moduleName) || userPermissions.hasAccess(emailPrefix, moduleName) || userPermissions.hasAccess(fullName, moduleName)) {
                     if (opts.noCache) {
                         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
                         res.setHeader('Pragma', 'no-cache');
@@ -168,9 +170,40 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
     app.get('/NFe/nfe.html', authenticatePage, modulePageHandler('nfe', 'modules/NFe/index.html'));
 
     // ===== Compras =====
-    app.get('/Compras/compras.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-    app.get('/Compras', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
-    app.get('/Compras/:page', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
+    app.get('/Compras/compras.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/index.html'));
+    app.get('/Compras', authenticatePage, modulePageHandler('compras', 'modules/Compras/index.html'));
+
+    // Compras sub-pages — serve the actual requested page file
+    const comprasPages = [
+        'index.html', 'pedidos.html', 'fornecedores.html', 'cotacoes.html',
+        'requisicoes.html', 'recebimento.html', 'relatorios.html',
+        'gestao-estoque.html', 'qrcode-estoque.html'
+    ];
+    app.get('/Compras/:page', authenticatePage, (req, res) => {
+        if (req.user && (req.user.nome || req.user.email)) {
+            const firstName = req.user.nome
+                ? req.user.nome.split(' ')[0].toLowerCase()
+                : (req.user.email || '').split('@')[0].toLowerCase();
+            const emailPrefix = (req.user.email || '').split('@')[0].toLowerCase();
+            const fullName = req.user.nome ? req.user.nome.toLowerCase().replace(/\s+/g, '.') : '';
+            if (userPermissions.hasAccess(firstName, 'compras') || userPermissions.hasAccess(emailPrefix, 'compras') || userPermissions.hasAccess(fullName, 'compras')) {
+                const page = req.params.page;
+                if (comprasPages.includes(page)) {
+                    return res.sendFile(path.join(__dirname, '..', 'modules', 'Compras', page));
+                }
+                // Fallback: try to serve from modules/Compras directly
+                const filePath = path.join(__dirname, '..', 'modules', 'Compras', page);
+                if (fs.existsSync(filePath)) {
+                    return res.sendFile(filePath);
+                }
+                return res.status(404).send('<h1>Página não encontrada</h1>');
+            } else {
+                return res.status(403).send('<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de Compras.</p>');
+            }
+        } else {
+            return res.redirect('/login.html');
+        }
+    });
 
     // ===== REDIRECTS de módulos ("legacy") =====
     app.get('/modules/RH/public/areaadm.html', authenticatePage, (req, res) => res.redirect('/RH/areaadm.html'));
@@ -194,9 +227,9 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
 
     // Compras redirects
     app.get('/modules/Compras/', authenticatePage, (req, res) => res.redirect('/Compras/compras.html'));
-    app.get('/modules/Compras/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
+    app.get('/modules/Compras/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/index.html'));
     app.get('/modules/Compras/public/', authenticatePage, (req, res) => res.redirect('/Compras/compras.html'));
-    app.get('/modules/Compras/public/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/public/index.html'));
+    app.get('/modules/Compras/public/index.html', authenticatePage, modulePageHandler('compras', 'modules/Compras/index.html'));
 
     // Financeiro redirects
     app.get('/modules/Financeiro/', authenticatePage, (req, res) => res.redirect('/modules/Financeiro/index.html'));

@@ -674,7 +674,7 @@
                     const h = new Date().getHours();
                     const el = document.getElementById('greeting-text');
                     if (el) el.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-                    document.getElementById('user-name').textContent = nome;
+                    document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
                     document.getElementById('user-initials').textContent = nome.charAt(0).toUpperCase();
                     const fotoUrl = u.avatar || u.foto || u.foto_perfil_url;
                     const foto = document.getElementById('user-photo');

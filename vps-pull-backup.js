@@ -6,7 +6,7 @@ const CONFIG = {
     server: {
         host: '31.97.64.102',
         user: 'root',
-        password: 'Aluforce@2026#Vps',
+        password: process.env.VPS_PASSWORD || '',  // Defina VPS_PASSWORD no ambiente
         remotePath: '/var/www/aluforce'
     },
     backupDir: path.join(process.cwd(), 'backups', 'vps-remote'),

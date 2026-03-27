@@ -143,11 +143,45 @@
         .page-title-bar h1{font-size:20px}
         .chart-wrapper{height:280px}
         .dtable th,.dtable td{padding:10px 12px;font-size:12px}
+        .apt-grid{grid-template-columns:1fr}
     }
     @media(max-width:480px){
         .kpi-strip{grid-template-columns:1fr}
         .report-tab .tab-icon{display:none}
     }
+
+    /* ============ APONTAMENTOS TAB ============ */
+    .apt-grid{display:grid;grid-template-columns:1fr 380px;gap:24px;margin-bottom:24px}
+    @media(max-width:1400px){.apt-grid{grid-template-columns:1fr 340px}}
+    @media(max-width:1200px){.apt-grid{grid-template-columns:1fr}}
+    .apt-sidebar{display:flex;flex-direction:column;gap:20px}
+    .apt-func-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--gray-200);border-radius:10px;margin-bottom:10px;transition:all .2s}
+    .apt-func-card:last-child{margin-bottom:0}
+    .apt-func-card:hover{border-color:var(--primary-400);box-shadow:0 2px 8px rgba(99,102,241,0.1)}
+    .apt-func-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
+    .apt-func-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+    .apt-func-info{flex:1;min-width:0}
+    .apt-func-nome{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .apt-func-sub{font-size:11px;color:var(--gray-400)}
+    .apt-func-stats{display:flex;gap:16px;text-align:center;flex-shrink:0}
+    .apt-func-stats .val{font-weight:700;font-size:13px;color:var(--gray-800)}
+    .apt-func-stats .lbl{font-size:10px;color:var(--gray-400);text-transform:uppercase}
+    .apt-atividades-bar{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:12px}
+    .apt-atividades-bar div{height:100%;transition:width .3s}
+    .apt-legenda{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .apt-legenda-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--gray-500)}
+    .apt-legenda-color{width:10px;height:10px;border-radius:3px}
+    .apt-indicadores{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .apt-ind-item{background:var(--gray-50);border-radius:10px;padding:14px;text-align:center}
+    .apt-ind-valor{font-size:22px;font-weight:700;margin-bottom:2px}
+    .apt-ind-label{font-size:11px;color:var(--gray-400)}
+    .apt-atividade-badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;white-space:nowrap}
+    .apt-user-cell{display:flex;align-items:center;gap:10px}
+    .apt-user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:13px;flex-shrink:0}
+    .apt-user-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+    .apt-op-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;background:#e0e7ff;color:#4338ca}
+    .apt-pedido-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:600;background:#fef3c7;color:#92400e}
+    .apt-obs{max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:var(--gray-400)}
     </style>
 
     <!-- Tooltips Profissionais -->
@@ -235,6 +269,10 @@
                         <button class="report-tab" data-report="faturamento" onclick="trocarRelatorio('faturamento')">
                             <span class="tab-icon"><i class="fas fa-money-bill-trend-up"></i></span>
                             <span class="tab-label">Faturamento Mensal<small>Análise financeira anual</small></span>
+                        </button>
+                        <button class="report-tab" data-report="apontamentos" onclick="trocarRelatorio('apontamentos')">
+                            <span class="tab-icon"><i class="fas fa-stopwatch"></i></span>
+                            <span class="tab-label">Apontamentos<small>Produção e eficiência</small></span>
                         </button>
                     </div>
 
@@ -475,6 +513,145 @@
                                 </div>
                                 <div style="overflow-x:auto"><table class="dtable"><thead><tr><th style="width:50px">#</th><th>Cliente</th><th style="text-align:right">Pedidos</th><th style="text-align:right">Valor Total</th></tr></thead>
                                 <tbody id="tbody-faturamento-clientes"><tr><td colspan="4"><div class="empty-state-pro"><div class="empty-icon"><i class="fas fa-trophy"></i></div><h4>Aguardando dados</h4><p>Gere o relatório para visualizar</p></div></td></tr></tbody></table></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =============== 5. APONTAMENTOS DE PRODUÇÃO =============== -->
+                    <div class="report-section" id="section-apontamentos">
+                        <div class="filters-card">
+                            <div class="filter-field"><label>Período Início</label><input type="date" id="apt-data-inicio"></div>
+                            <div class="filter-field"><label>Período Fim</label><input type="date" id="apt-data-fim"></div>
+                            <div class="filter-field"><label>Funcionário</label>
+                                <select id="apt-funcionario"><option value="">Todos</option></select>
+                            </div>
+                            <div class="filter-field"><label>Atividade</label>
+                                <select id="apt-atividade">
+                                    <option value="">Todas</option>
+                                    <option value="ST">Setup</option>
+                                    <option value="1">Início Produção</option>
+                                    <option value="1A">Produção Irregular</option>
+                                    <option value="PR">Parada Refeição</option>
+                                    <option value="PM">Parada Manutenção</option>
+                                    <option value="FM">Falta Mat. Prima</option>
+                                    <option value="ME">Manut. Elétrica</option>
+                                    <option value="MM">Manut. Mecânica</option>
+                                    <option value="PCM">Parada Corretiva</option>
+                                    <option value="TT">Troca de Turno</option>
+                                    <option value="MP">Manut. Preventiva</option>
+                                    <option value="MC">Manut. Corretiva</option>
+                                    <option value="TB">Troca Bobina</option>
+                                    <option value="TM">Troca Material</option>
+                                    <option value="QL">Quebra de Lance</option>
+                                    <option value="QE">Queda Energia</option>
+                                    <option value="AM">Aquec. Máquina</option>
+                                </select>
+                            </div>
+                            <div class="filter-field"><label>Pedido</label>
+                                <input type="text" id="apt-pedido" placeholder="Nº do pedido" style="min-width:120px;">
+                            </div>
+                            <button class="btn-gerar" onclick="carregarApontamentos()"><i class="fas fa-stopwatch"></i> Gerar Relatório</button>
+                        </div>
+
+                        <!-- KPIs -->
+                        <div class="kpi-strip">
+                            <div class="kpi blue">
+                                <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-users"></i></span></div>
+                                <div class="kpi-val" id="apt-total-funcionarios">0</div>
+                                <div class="kpi-lbl">Funcionários Ativos</div>
+                            </div>
+                            <div class="kpi green">
+                                <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-clock"></i></span></div>
+                                <div class="kpi-val" id="apt-total-horas">0h</div>
+                                <div class="kpi-lbl">Horas Trabalhadas</div>
+                            </div>
+                            <div class="kpi amber">
+                                <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-industry"></i></span></div>
+                                <div class="kpi-val" id="apt-horas-producao">0h</div>
+                                <div class="kpi-lbl">Horas em Produção</div>
+                            </div>
+                            <div class="kpi purple">
+                                <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-tasks"></i></span></div>
+                                <div class="kpi-val" id="apt-total-apontamentos">0</div>
+                                <div class="kpi-lbl">Total Apontamentos</div>
+                            </div>
+                            <div class="kpi rose">
+                                <div class="kpi-top"><span class="kpi-icon"><i class="fas fa-percentage"></i></span></div>
+                                <div class="kpi-val" id="apt-eficiencia-geral">0%</div>
+                                <div class="kpi-lbl">Eficiência Geral</div>
+                            </div>
+                        </div>
+
+                        <!-- Main Grid: Table + Sidebar -->
+                        <div class="apt-grid">
+                            <!-- Tabela -->
+                            <div class="table-card">
+                                <div class="table-card-head">
+                                    <h3><span class="ico" style="background:rgba(99,102,241,0.1);color:#6366f1"><i class="fas fa-list-alt"></i></span> Apontamentos Detalhados</h3>
+                                    <span class="table-count" id="apt-total-registros">0 registros</span>
+                                </div>
+                                <div style="overflow-x:auto">
+                                    <table class="dtable">
+                                        <thead><tr>
+                                            <th>Funcionário</th><th>Atividade</th><th>Data</th><th>Início</th><th>Fim</th><th>Duração</th><th>OP</th><th>Pedido</th><th>Observações</th>
+                                        </tr></thead>
+                                        <tbody id="tbody-apontamentos">
+                                            <tr><td colspan="9"><div class="empty-state-pro"><div class="empty-icon"><i class="fas fa-stopwatch"></i></div><h4>Aguardando dados</h4><p>Selecione os filtros e gere o relatório</p></div></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar -->
+                            <div class="apt-sidebar">
+                                <!-- Por Funcionário -->
+                                <div class="table-card">
+                                    <div class="table-card-head">
+                                        <h3><span class="ico" style="background:rgba(59,130,246,0.1);color:#3b82f6"><i class="fas fa-users"></i></span> Por Funcionário</h3>
+                                    </div>
+                                    <div style="padding:16px 20px" id="apt-resumo-funcionarios">
+                                        <div class="empty-state-pro" style="padding:20px"><div class="empty-icon" style="width:48px;height:48px;font-size:20px"><i class="fas fa-chart-pie"></i></div><p>Aguardando dados</p></div>
+                                    </div>
+                                </div>
+
+                                <!-- Por Atividade -->
+                                <div class="table-card">
+                                    <div class="table-card-head">
+                                        <h3><span class="ico" style="background:rgba(139,92,246,0.1);color:#8b5cf6"><i class="fas fa-chart-pie"></i></span> Por Atividade</h3>
+                                    </div>
+                                    <div style="padding:16px 20px">
+                                        <div class="apt-atividades-bar" id="apt-atividades-bar"></div>
+                                        <div class="apt-legenda" id="apt-legenda"></div>
+                                        <table class="dtable" style="margin-top:12px;font-size:12px" id="apt-resumo-atividades"></table>
+                                    </div>
+                                </div>
+
+                                <!-- Indicadores -->
+                                <div class="table-card">
+                                    <div class="table-card-head">
+                                        <h3><span class="ico" style="background:rgba(245,158,11,0.1);color:#f59e0b"><i class="fas fa-tachometer-alt"></i></span> Indicadores</h3>
+                                    </div>
+                                    <div style="padding:16px 20px">
+                                        <div class="apt-indicadores">
+                                            <div class="apt-ind-item">
+                                                <div class="apt-ind-valor" id="apt-ef-produtivo" style="color:#16a34a">0%</div>
+                                                <div class="apt-ind-label">Tempo Produtivo</div>
+                                            </div>
+                                            <div class="apt-ind-item">
+                                                <div class="apt-ind-valor" id="apt-ef-parada" style="color:#ef4444">0%</div>
+                                                <div class="apt-ind-label">Tempo Parado</div>
+                                            </div>
+                                            <div class="apt-ind-item">
+                                                <div class="apt-ind-valor" id="apt-ef-manutencao" style="color:#f59e0b">0%</div>
+                                                <div class="apt-ind-label">Manutenção</div>
+                                            </div>
+                                            <div class="apt-ind-item">
+                                                <div class="apt-ind-valor" id="apt-ef-media-dia" style="color:#6366f1">0h</div>
+                                                <div class="apt-ind-label">Média/Dia</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -890,6 +1067,184 @@
         }
     }
 
+    /* ============================= 5. APONTAMENTOS DE PRODUÇÃO ============================= */
+    var APT_CORES = {
+        'ST':{bg:'#f3e8ff',color:'#7c3aed',icon:'fa-tools',nome:'Setup'},
+        '1':{bg:'#dcfce7',color:'#16a34a',icon:'fa-play',nome:'Início Produção'},
+        '1A':{bg:'#fef3c7',color:'#d97706',icon:'fa-exclamation-triangle',nome:'Produção Irregular'},
+        'PR':{bg:'#f1f5f9',color:'#475569',icon:'fa-utensils',nome:'Parada Refeição'},
+        'PM':{bg:'#fee2e2',color:'#dc2626',icon:'fa-pause-circle',nome:'Parada Manutenção'},
+        'FM':{bg:'#ffedd5',color:'#ea580c',icon:'fa-box-open',nome:'Falta Mat. Prima'},
+        'ME':{bg:'#fef9c3',color:'#ca8a04',icon:'fa-bolt',nome:'Manut. Elétrica'},
+        'MM':{bg:'#e0f2fe',color:'#0284c7',icon:'fa-cogs',nome:'Manut. Mecânica'},
+        'PCM':{bg:'#fee2e2',color:'#b91c1c',icon:'fa-times-circle',nome:'Parada Corretiva'},
+        'TT':{bg:'#e0e7ff',color:'#4f46e5',icon:'fa-exchange-alt',nome:'Troca de Turno'},
+        'MP':{bg:'#d1fae5',color:'#059669',icon:'fa-clipboard-check',nome:'Manut. Preventiva'},
+        'MC':{bg:'#ffe4e6',color:'#e11d48',icon:'fa-wrench',nome:'Manut. Corretiva'},
+        'TB':{bg:'#ccfbf1',color:'#0d9488',icon:'fa-circle-notch',nome:'Troca Bobina'},
+        'TM':{bg:'#f3e8ff',color:'#9333ea',icon:'fa-sync-alt',nome:'Troca Material'},
+        'QL':{bg:'#fce7f3',color:'#db2777',icon:'fa-unlink',nome:'Quebra de Lance'},
+        'QE':{bg:'#f5f5f4',color:'#57534e',icon:'fa-plug',nome:'Queda Energia'},
+        'AM':{bg:'#fef3c7',color:'#d97706',icon:'fa-fire',nome:'Aquec. Máquina'}
+    };
+    var APT_PRODUTIVOS = ['1','1A'];
+    var APT_MANUTENCAO = ['PM','ME','MM','PCM','MP','MC'];
+    var APT_PARADA = ['PR','FM','TT','QE','TB','TM','QL'];
+    var aptDados = [];
+    var aptFuncionarios = [];
+
+    async function carregarApontamentos(silent) {
+        var di = document.getElementById('apt-data-inicio').value;
+        var df = document.getElementById('apt-data-fim').value;
+        var func = document.getElementById('apt-funcionario').value;
+        var ativ = document.getElementById('apt-atividade').value;
+        var ped = document.getElementById('apt-pedido').value;
+        var url = API + '/api/pcp/apontamentos/relatorio?dataInicio=' + di + '&dataFim=' + df;
+        if (func) url += '&usuario=' + encodeURIComponent(func);
+        if (ativ) url += '&atividade=' + encodeURIComponent(ativ);
+        if (ped) url += '&pedido=' + encodeURIComponent(ped);
+        showLoading('Carregando apontamentos...');
+        try {
+            var r = await fetch(url, { credentials: 'include', headers: hdrs() });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            var data = await r.json();
+            hideLoading();
+            aptDados = data.apontamentos || [];
+            aptFuncionarios = data.funcionários || data.funcionarios || [];
+            lastData.apontamentos = data;
+            renderApontamentos(data);
+            if (!silent) showToast('Relatório de apontamentos gerado', 'success');
+        } catch (e) { hideLoading(); showToast('Erro: ' + e.message, 'error'); }
+    }
+
+    function renderApontamentos(data) {
+        /* KPIs */
+        var totalSeg = aptDados.reduce(function(a,b){return a+(b.duracao||0);},0);
+        var prodSeg = aptDados.filter(function(a){return APT_PRODUTIVOS.includes(a.tipo);}).reduce(function(a,b){return a+(b.duracao||0);},0);
+        var manutSeg = aptDados.filter(function(a){return APT_MANUTENCAO.includes(a.tipo);}).reduce(function(a,b){return a+(b.duracao||0);},0);
+        var paradaSeg = aptDados.filter(function(a){return APT_PARADA.includes(a.tipo);}).reduce(function(a,b){return a+(b.duracao||0);},0);
+
+        document.getElementById('apt-total-funcionarios').textContent = data.totalFuncionarios || aptFuncionarios.length || '0';
+        document.getElementById('apt-total-horas').textContent = Math.round(totalSeg/3600*10)/10 + 'h';
+        document.getElementById('apt-horas-producao').textContent = Math.round(prodSeg/3600*10)/10 + 'h';
+        document.getElementById('apt-total-apontamentos').textContent = data.totalApontamentos || aptDados.length;
+        var ef = totalSeg > 0 ? Math.round(prodSeg/totalSeg*100) : 0;
+        document.getElementById('apt-eficiencia-geral').textContent = ef + '%';
+
+        /* Indicadores */
+        document.getElementById('apt-ef-produtivo').textContent = totalSeg > 0 ? Math.round(prodSeg/totalSeg*100)+'%' : '0%';
+        document.getElementById('apt-ef-parada').textContent = totalSeg > 0 ? Math.round(paradaSeg/totalSeg*100)+'%' : '0%';
+        document.getElementById('apt-ef-manutencao').textContent = totalSeg > 0 ? Math.round(manutSeg/totalSeg*100)+'%' : '0%';
+        var diasUn = new Set(aptDados.map(function(a){return a.data;}).filter(Boolean));
+        document.getElementById('apt-ef-media-dia').textContent = (diasUn.size > 0 ? Math.round(totalSeg/3600/diasUn.size*10)/10 : 0) + 'h';
+
+        /* Populate funcionario select */
+        var sel = document.getElementById('apt-funcionario');
+        var curVal = sel.value;
+        sel.innerHTML = '<option value="">Todos</option>';
+        aptFuncionarios.forEach(function(f) {
+            var o = document.createElement('option');
+            o.value = f.id; o.textContent = f.nome;
+            sel.appendChild(o);
+        });
+        sel.value = curVal;
+
+        /* Table */
+        document.getElementById('apt-total-registros').textContent = aptDados.length + ' registros';
+        var tbody = document.getElementById('tbody-apontamentos');
+        if (!aptDados.length) {
+            tbody.innerHTML = '<tr><td colspan="9">' + emptyHTML('stopwatch','Nenhum apontamento','Não há apontamentos para o período e filtros selecionados') + '</td></tr>';
+        } else {
+            var h = '';
+            aptDados.forEach(function(a) {
+                var c = APT_CORES[a.tipo] || {bg:'#f8fafc',color:'#64748b',icon:'fa-ellipsis-h',nome:a.tipo||'Outros'};
+                var nome = a.usuário_nome || a.usuario_nome || 'N/A';
+                var pn = nome.split(' ')[0];
+                var ini = pn[0] ? pn[0].toUpperCase() : '?';
+                var op = a.op_codigo ? '<span class="apt-op-badge"><i class="fas fa-clipboard-list"></i> '+a.op_codigo+'</span>' : '';
+                var ped = a.pedido_número || a.pedido_numero ? '<span class="apt-pedido-badge"><i class="fas fa-file-alt"></i> #'+(a.pedido_número||a.pedido_numero)+'</span>' : '';
+                var obs = a.observacoes ? '<span class="apt-obs" title="'+a.observacoes.replace(/"/g,'&quot;')+'">'+a.observacoes+'</span>' : '';
+                h += '<tr>';
+                h += '<td><div class="apt-user-cell"><div class="apt-user-avatar">'+ini+'</div><span style="font-weight:600;font-size:13px">'+pn+'</span></div></td>';
+                h += '<td><span class="apt-atividade-badge" style="background:'+c.bg+';color:'+c.color+'"><i class="fas '+c.icon+'"></i> '+c.nome+'</span></td>';
+                h += '<td>'+formatarData(a.data)+'</td>';
+                h += '<td>'+(a.hora_inicio||'-')+'</td>';
+                h += '<td>'+(a.hora_fim||'-')+'</td>';
+                h += '<td style="font-family:monospace;font-weight:600">'+aptFormatDuracao(a.duracao)+'</td>';
+                h += '<td>'+op+'</td>';
+                h += '<td>'+ped+'</td>';
+                h += '<td>'+obs+'</td>';
+                h += '</tr>';
+            });
+            tbody.innerHTML = h;
+        }
+
+        /* Resumo por Funcionário */
+        var resumoF = {};
+        aptDados.forEach(function(a) {
+            var key = a.usuário_id || a.usuario_id || a.usuário_nome || a.usuario_nome;
+            if (!resumoF[key]) resumoF[key] = {nome: a.usuário_nome||a.usuario_nome||'', totalSeg:0, prodSeg:0, count:0};
+            resumoF[key].totalSeg += a.duracao||0;
+            resumoF[key].count++;
+            if (APT_PRODUTIVOS.includes(a.tipo)) resumoF[key].prodSeg += a.duracao||0;
+        });
+        var contF = document.getElementById('apt-resumo-funcionarios');
+        var funcs = Object.values(resumoF);
+        if (!funcs.length) {
+            contF.innerHTML = '<div class="empty-state-pro" style="padding:20px"><div class="empty-icon" style="width:48px;height:48px;font-size:20px"><i class="fas fa-users"></i></div><p>Nenhum dado</p></div>';
+        } else {
+            contF.innerHTML = funcs.map(function(f) {
+                var ini = f.nome ? f.nome[0].toUpperCase() : '?';
+                var hTotal = Math.round(f.totalSeg/3600*10)/10 + 'h';
+                var hProd = Math.round(f.prodSeg/3600*10)/10 + 'h';
+                return '<div class="apt-func-card"><div class="apt-func-avatar">'+ini+'</div><div class="apt-func-info"><div class="apt-func-nome">'+(f.nome||'Desconhecido')+'</div><div class="apt-func-sub">'+f.count+' apontamentos</div></div><div class="apt-func-stats"><div><div class="val">'+hTotal+'</div><div class="lbl">Total</div></div><div><div class="val" style="color:#16a34a">'+hProd+'</div><div class="lbl">Produção</div></div></div></div>';
+            }).join('');
+        }
+
+        /* Distribuição por Atividade */
+        var resumoA = {};
+        var totalA = 0;
+        aptDados.forEach(function(a) {
+            var tipo = a.tipo || 'outros';
+            if (!resumoA[tipo]) resumoA[tipo] = 0;
+            resumoA[tipo] += a.duracao||0;
+            totalA += a.duracao||0;
+        });
+        var barEl = document.getElementById('apt-atividades-bar');
+        var legEl = document.getElementById('apt-legenda');
+        var tblEl = document.getElementById('apt-resumo-atividades');
+        if (totalA === 0) {
+            barEl.innerHTML = '<div style="width:100%;height:100%;background:#e2e8f0"></div>';
+            legEl.innerHTML = '';
+            tblEl.innerHTML = '';
+        } else {
+            var sorted = Object.entries(resumoA).sort(function(a,b){return b[1]-a[1];});
+            barEl.innerHTML = sorted.map(function(e){
+                var pct = (e[1]/totalA*100).toFixed(1);
+                var cor = (APT_CORES[e[0]]||{}).color || '#64748b';
+                return '<div style="width:'+pct+'%;background:'+cor+'" title="'+((APT_CORES[e[0]]||{}).nome||e[0])+': '+pct+'%"></div>';
+            }).join('');
+            legEl.innerHTML = sorted.slice(0,8).map(function(e){
+                var cor = (APT_CORES[e[0]]||{}).color || '#64748b';
+                var nome = (APT_CORES[e[0]]||{}).nome || e[0];
+                return '<div class="apt-legenda-item"><div class="apt-legenda-color" style="background:'+cor+'"></div><span>'+nome+'</span></div>';
+            }).join('');
+            tblEl.innerHTML = sorted.map(function(e){
+                var cor = (APT_CORES[e[0]]||{}).color || '#64748b';
+                var nome = (APT_CORES[e[0]]||{}).nome || e[0];
+                var hrs = Math.round(e[1]/3600*10)/10 + 'h';
+                var pct = (e[1]/totalA*100).toFixed(1);
+                return '<tr><td><span style="display:inline-block;width:10px;height:10px;background:'+cor+';border-radius:3px;margin-right:6px;vertical-align:middle"></span>'+nome+'</td><td style="text-align:right;font-weight:600;color:'+cor+';white-space:nowrap">'+hrs+' <span style="font-weight:400;color:var(--gray-400);font-size:11px">('+pct+'%)</span></td></tr>';
+            }).join('');
+        }
+    }
+
+    function aptFormatDuracao(s) {
+        if (!s) return '00:00:00';
+        var h = Math.floor(s/3600), m = Math.floor((s%3600)/60), ss = s%60;
+        return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+    }
+
     /* ============================= INIT ============================= */
     document.addEventListener('DOMContentLoaded', function() {
         atualizarSaudacao();
@@ -905,6 +1260,9 @@
         document.getElementById('vendas-data-fim').value = fim;
         document.getElementById('metros-data-inicio').value = inicio30;
         document.getElementById('metros-data-fim').value = fim;
+
+        document.getElementById('apt-data-inicio').value = inicioAno;
+        document.getElementById('apt-data-fim').value = fim;
 
         var sel = document.getElementById('faturamento-ano');
         var anoAt = hoje.getFullYear();
