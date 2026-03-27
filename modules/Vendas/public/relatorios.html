@@ -2294,7 +2294,7 @@
                     // Usar apelido se disponível, senão primeiro+último nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
-                    const primeiroNome = user.apelido || (_partesNome.length > 1 ? _partesNome[0] + ' ' + _partesNome[_partesNome.length - 1] : (_partesNome[0] || 'Usuário'));
+                    const primeiroNome = user.apelido || (_partesNome[0] || 'Usuário');
                     
                     document.getElementById('user-name').textContent = primeiroNome;
                     document.getElementById('user-initials').textContent = userName.charAt(0).toUpperCase();

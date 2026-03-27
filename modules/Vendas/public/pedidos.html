@@ -2779,22 +2779,28 @@
             if (dias.length === 0) dias = [28];
 
             const valorParcela = valorTotal / dias.length;
+            const resto = valorTotal - (Math.floor(valorParcela * 100) / 100) * dias.length;
 
             tbody.innerHTML = dias.map((d, i) => {
                 const vencimento = new Date(hoje);
                 vencimento.setDate(vencimento.getDate() + d);
-                const vencimentoStr = vencimento.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', weekday: 'short' });
+                const vencimentoStr = vencimento.toLocaleDateString('pt-BR');
                 const percentual = (100 / dias.length).toFixed(0);
+                let vl = Math.floor(valorParcela * 100) / 100;
+                // Ajuste de centavos na última parcela
+                if (i === dias.length - 1) {
+                    vl = Math.round((vl + resto) * 100) / 100;
+                }
 
                 return `
                     <tr ondblclick="editarParcela(${i})">
                         <td><span class="situação-previsao">Previsão</span></td>
                         <td>${String(i + 1).padStart(3, '0')}/${String(dias.length).padStart(3, '0')}</td>
                         <td>${vencimentoStr}</td>
-                        <td>R$ ${valorParcela.toFixed(2).replace('.', ',')}</td>
+                        <td>R$ ${vl.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                         <td>${percentual}%</td>
-                        <td class="text-muted">&lt;não informado&gt;</td>
-                        <td class="text-muted">&lt;não informado&gt;</td>
+                        <td>Boleto</td>
+                        <td>Boleto</td>
                         <td>Não</td>
                     </tr>
                 `;
@@ -2826,6 +2832,15 @@
 
         async function salvarEdicaoPedido() {
             if (!pedidoAtualModal) return;
+
+            // Validar Tipo de Frete obrigatório
+            const tipoFreteVal = document.getElementById('edit-tipo-frete')?.value || '';
+            if (!tipoFreteVal || tipoFreteVal === '') {
+                mostrarAlerta('Selecione o Tipo de Frete (CIF, FOB, etc.)', 'warning');
+                switchModalTabPedidos('frete');
+                document.getElementById('edit-tipo-frete')?.focus();
+                return;
+            }
 
             // Validar condição de pagamento
             const condicaoPagamento = document.getElementById('edit-parcelas')?.value?.replace('Para ', '').trim() || '';
