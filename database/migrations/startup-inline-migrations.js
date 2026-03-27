@@ -137,7 +137,8 @@ async function runInlineMigrations(pool) {
         { name: 'embalagem', sql: "ALTER TABLE produtos ADD COLUMN embalagem VARCHAR(50) DEFAULT NULL AFTER unidade_medida" },
         { name: 'imagem_url', sql: "ALTER TABLE produtos ADD COLUMN imagem_url VARCHAR(255) DEFAULT NULL AFTER embalagem" },
         { name: 'status', sql: "ALTER TABLE produtos ADD COLUMN status VARCHAR(20) DEFAULT 'ativo' AFTER imagem_url" },
-        { name: 'data_criacao', sql: "ALTER TABLE produtos ADD COLUMN data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER status" }
+        { name: 'data_criacao', sql: "ALTER TABLE produtos ADD COLUMN data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER status" },
+        { name: 'controla_estoque', sql: "ALTER TABLE produtos ADD COLUMN controla_estoque TINYINT(1) NOT NULL DEFAULT 1 COMMENT '0 = sob encomenda / fabricar sob demanda (não bloqueia faturamento por falta de estoque)' AFTER data_criacao" }
     ];
 
     for (const column of produtosColumns) {
@@ -158,6 +159,18 @@ async function runInlineMigrations(pool) {
         console.log('✅ Valores padrão aplicados aos produtos existentes');
     } catch (e) {
         console.warn('⚠️ Erro ao atualizar valores padrão:', e.message);
+    }
+
+    // Marcar produtos fabricados sob encomenda (cabos elétricos Aluforce) com controla_estoque = 0
+    // Esses produtos podem ser faturados mesmo sem estoque disponível — produção via PCP
+    try {
+        const prefixosSobEncomenda = ['DUN', 'DUI', 'TRN', 'TRI', 'QDN', 'QDI', 'UN', 'PRO', 'CET', 'POT', 'PEAC', 'ROSE', 'IRIS', 'PANS', 'POPP', 'ASTE', 'PHLO', 'OXLI', 'SNEE', 'CLIP'];
+        const conditions = prefixosSobEncomenda.map(() => 'codigo REGEXP ?').join(' OR ');
+        const params = prefixosSobEncomenda.map(p => `^${p}`);
+        await pool.query(`UPDATE produtos SET controla_estoque = 0 WHERE (${conditions})`, params);
+        console.log('✅ controla_estoque = 0 aplicado aos cabos fabricados sob encomenda');
+    } catch (e2) {
+        console.warn('⚠️ Erro ao marcar produtos sob encomenda:', e2.message);
     }
 
     const produtosIndexes = [

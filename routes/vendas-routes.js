@@ -3696,6 +3696,7 @@ module.exports = function createVendasRoutes(deps) {
                 // Buscar itens do pedido para validação
                 const [itensPedido] = await connection.query(`
                     SELECT pi.*, p.descricao as produto_descricao, p.estoque_atual,
+                        COALESCE(p.controla_estoque, 1) as controla_estoque,
                         COALESCE((SELECT SUM(nfi.quantidade) FROM nfe_itens nfi INNER JOIN nfe n ON nfi.nfe_id = n.id WHERE n.pedido_id = pi.pedido_id AND nfi.produto_id = pi.produto_id AND n.status != 'cancelada'), 0) as qtd_ja_faturada
                     FROM pedido_itens pi
                     INNER JOIN produtos p ON pi.produto_id = p.id
@@ -3715,8 +3716,9 @@ module.exports = function createVendasRoutes(deps) {
                     if (parseFloat(itemFat.quantidade) > qtdRestante) {
                         problemas.push(`Produto ${itemPedido.produto_descricao}: solicitado ${itemFat.quantidade}, disponivel ${qtdRestante}`);
                     }
-                    // Validar estoque disponível
-                    if (parseFloat(itemPedido.estoque_atual || 0) < parseFloat(itemFat.quantidade)) {
+                    // Validar estoque disponível — somente para produtos que controlam estoque (controla_estoque = 1)
+                    // Produtos fabricados sob encomenda (controla_estoque = 0) não bloqueiam por falta de estoque
+                    if (parseInt(itemPedido.controla_estoque) !== 0 && parseFloat(itemPedido.estoque_atual || 0) < parseFloat(itemFat.quantidade)) {
                         problemas.push(`Produto ${itemPedido.produto_descricao}: estoque insuficiente (${itemPedido.estoque_atual || 0} disponivel, ${itemFat.quantidade} solicitado)`);
                     }
                     valorFaturar += parseFloat(itemFat.quantidade) * parseFloat(itemPedido.preco_unitario || 0);
@@ -3835,10 +3837,12 @@ module.exports = function createVendasRoutes(deps) {
             const percentualRestante = Math.round((100 - (parseFloat(pedido.percentual_faturado) || 0)) * 100) / 100;
     
             // FIX-6: Validar estoque ANTES de baixar — rollback se insuficiente
+            // Produtos com controla_estoque = 0 são fabricados sob encomenda e não bloqueiam por falta de estoque
             if (baixarEstoque) {
-                const [itensCheck] = await connection.query('SELECT pi.produto_id, pi.quantidade, p.descricao, p.estoque_atual FROM pedido_itens pi INNER JOIN produtos p ON pi.produto_id = p.id WHERE pi.pedido_id = ?', [id]);
+                const [itensCheck] = await connection.query('SELECT pi.produto_id, pi.quantidade, p.descricao, p.estoque_atual, COALESCE(p.controla_estoque, 1) as controla_estoque FROM pedido_itens pi INNER JOIN produtos p ON pi.produto_id = p.id WHERE pi.pedido_id = ?', [id]);
                 const estoqueProblemas = [];
                 for (const item of itensCheck) {
+                    if (parseInt(item.controla_estoque) === 0) continue; // sob encomenda — sem bloqueio de estoque
                     const estAtual = parseFloat(item.estoque_atual) || 0;
                     const qtdNecessaria = parseFloat(item.quantidade) || 0;
                     if (estAtual < qtdNecessaria) {
