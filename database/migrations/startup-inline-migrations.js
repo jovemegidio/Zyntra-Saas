@@ -204,6 +204,10 @@ async function runInlineMigrations(pool) {
 
     // Colunas extras do modal de clientes (Dados Bancários, Inscrições, Recomendações, Faturamento)
     const clienteExtraCols = [
+        { col: 'celular', type: 'VARCHAR(20)' },
+        { col: 'numero', type: 'VARCHAR(20)' },
+        { col: 'complemento', type: 'VARCHAR(255)' },
+        { col: 'website', type: 'VARCHAR(255)' },
         { col: 'fax', type: 'VARCHAR(20)' },
         { col: 'ddd_fax', type: 'VARCHAR(5)' },
         { col: 'enviar_anexos', type: 'TINYINT(1) DEFAULT 1' },
