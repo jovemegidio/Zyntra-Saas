@@ -24,6 +24,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
         next();
     };
 
+    const safeParseJSON = (str, fallback = []) => { try { return JSON.parse(str); } catch (_) { return fallback; } };
+
     // Separate pool for vendas database
     let vendasPool;
     try {
@@ -153,8 +155,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 SELECT
                     COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as total_faturado,
                     SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado,
-                    COUNT(CASE WHEN status = 'orçamento' THEN 1 END) as total_orcamentos,
-                    SUM(CASE WHEN status = 'orçamento' THEN valor ELSE 0 END) as valor_orcamentos,
+                    COUNT(CASE WHEN status = 'orcamento' THEN 1 END) as total_orcamentos,
+                    SUM(CASE WHEN status = 'orcamento' THEN valor ELSE 0 END) as valor_orcamentos,
                     COUNT(CASE WHEN status = 'analise' THEN 1 END) as total_analise,
                     COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
                     COUNT(*) as total_pedidos,
@@ -252,12 +254,14 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 `SELECT
                     u.id,
                     u.nome,
+                    COALESCE(f.foto_perfil_url, u.foto, u.avatar) AS foto,
                     COUNT(p.id) as vendas,
                     COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) AS valor
                  FROM usuarios u
+                 LEFT JOIN funcionarios f ON f.email = u.email
                  LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.created_at >= CURDATE() - INTERVAL ? DAY
                  WHERE u.area = 'vendas' OR u.role = 'vendedor'
-                 GROUP BY u.id, u.nome
+                 GROUP BY u.id, u.nome, f.foto_perfil_url, u.foto, u.avatar
                  ORDER BY valor DESC
                  LIMIT ?`,
                  [periodDays, limit]
@@ -265,6 +269,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.json(rows.map(r => ({
                 id: r.id,
                 nome: r.nome,
+                foto: r.foto || null,
                 vendas: Number(r.vendas || 0),
                 valor: Number(r.valor || 0)
             })));
@@ -1196,7 +1201,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.get('/clientes', authorizeArea('vendas'), async (req, res) => {
         try {
             const { search } = req.query;
-            let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, email, telefone, celular, cidade, estado, vendedor_responsavel, vendedor_id, status, ativo FROM clientes';
+            let query = 'SELECT id, nome, razao_social, nome_fantasia, cnpj, cnpj_cpf, email, telefone, cidade, estado, vendedor_responsavel, ativo FROM clientes';
             const params = [];
 
             if (search) {
@@ -2149,6 +2154,16 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const chamadas = await cdrScraper.fetchCDRData(di, df);
             const resumo = cdrScraper.gerarResumo(chamadas);
             resumo.periodo = { inicio: di, fim: df };
+
+            // Buscar meta mensal de ligações (se existir)
+            try {
+                const periodo = new Date().toISOString().substring(0, 7);
+                const [metaRows] = await pool.query(
+                    "SELECT valor_meta FROM metas_vendas WHERE tipo = 'ligacoes' AND periodo = ? AND vendedor_id IS NULL LIMIT 1",
+                    [periodo]
+                );
+                resumo.meta_mensal = metaRows.length > 0 ? Number(metaRows[0].valor_meta) : 0;
+            } catch (_) { resumo.meta_mensal = 0; }
 
             res.json(resumo);
         } catch (error) {

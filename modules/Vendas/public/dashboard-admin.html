@@ -2059,8 +2059,9 @@
                         .join('');
                     
                     // Construir avatar: usar imagem se disponível, senão iniciais
-                    const avatarHtml = v.avatar 
-                        ? `<img src="${v.avatar}" alt="${v.nome}" class="vendedor-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    const avatarSrc = v.foto || v.avatar || null;
+                    const avatarHtml = avatarSrc 
+                        ? `<img src="${avatarSrc}" alt="${v.nome}" class="vendedor-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                            <div class="vendedor-avatar" style="display:none;">${iniciais}</div>`
                         : `<div class="vendedor-avatar">${iniciais}</div>`;
                     
@@ -2205,6 +2206,14 @@
                                 <div class="metric-label">Duração Total</div>
                             </div>
                         </div>
+                        <div class="ligacao-metric-card card-meta">
+                            <div class="metric-icon-wrapper"><i class="fas fa-bullseye"></i></div>
+                            <div class="metric-content">
+                                <div class="stat-number" id="ligMetaPercent">-</div>
+                                <div class="metric-label">Meta do Mês</div>
+                                <div style="font-size:11px;color:#94a3b8;margin-top:2px;" id="ligMetaLabel">-</div>
+                            </div>
+                        </div>
                     </div>
                     
                     <div id="ligacoesRamaisChart" style="margin-bottom: 20px;"></div>
@@ -2330,6 +2339,23 @@
                 if (elRealizadas) elRealizadas.textContent = resumo.realizadas || 0;
                 if (elAtendidas) elAtendidas.textContent = resumo.atendidas || 0;
                 if (elDuracao) elDuracao.textContent = formatarDuracao(resumo.duracao_total || 0);
+                
+                // Meta do Mês (ligações)
+                const metaLig = resumo.meta_mensal || 0;
+                const totalLig = resumo.total || 0;
+                const elMetaPercent = document.getElementById('ligMetaPercent');
+                const elMetaLabel = document.getElementById('ligMetaLabel');
+                if (elMetaPercent) {
+                    if (metaLig > 0) {
+                        const pct = Math.min(100, Math.round((totalLig / metaLig) * 100));
+                        elMetaPercent.textContent = pct + '%';
+                        elMetaPercent.style.color = pct >= 100 ? '#22c55e' : pct >= 70 ? '#f59e0b' : '#ef4444';
+                        if (elMetaLabel) elMetaLabel.textContent = totalLig + ' / ' + metaLig + ' ligações';
+                    } else {
+                        elMetaPercent.textContent = totalLig > 0 ? totalLig : '-';
+                        if (elMetaLabel) elMetaLabel.textContent = 'Meta não definida';
+                    }
+                }
                 
                 // Renderizar gráfico por ramal
                 renderizarGraficoRamais(resumo.por_ramal || {});

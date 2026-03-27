@@ -8,6 +8,7 @@ const PEDIDO_SELECT_FIELDS = `
     p.id, p.valor, p.valor as valor_total, p.status, p.created_at, p.created_at as data_pedido,
     p.vendedor_id, p.cliente_id, p.observacao,
     p.nf, p.numero_nf, p.nfe_chave,
+    ROW_NUMBER() OVER (ORDER BY p.id) AS numero,
     COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
     c.email AS cliente_email, c.telefone AS cliente_telefone,
     e.nome_fantasia AS empresa_nome,

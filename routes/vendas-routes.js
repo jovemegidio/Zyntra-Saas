@@ -306,7 +306,7 @@ module.exports = function createVendasRoutes(deps) {
     });
     const cacheService = (() => { try { return require('../services/cache'); } catch(_) { return null; } })();
 
-    router.post('/pedidos', async (req, res, next) => {
+    router.post('/pedidos', authenticateToken, async (req, res, next) => {
         const connection = await pool.getConnection();
         try {
             await connection.beginTransaction();
@@ -2220,6 +2220,8 @@ module.exports = function createVendasRoutes(deps) {
     // METAS, COMISSÕES E RELATÓRIOS (ADMIN)
     router.get('/metas', authorizeAdminOrComercial, async (req, res, next) => {
         try {
+            const [tables] = await pool.query("SHOW TABLES LIKE 'metas_vendas'");
+            if (tables.length === 0) return res.json([]);
             const [rows] = await pool.query(`SELECT m.*, u.nome AS vendedor_nome FROM metas_vendas m LEFT JOIN usuarios u ON m.vendedor_id = u.id ORDER BY m.periodo DESC, m.vendedor_id`);
             res.json(rows);
         } catch (error) { next(error); }
