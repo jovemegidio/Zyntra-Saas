@@ -1545,7 +1545,7 @@
                     fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
                     fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=30d', { saldoInicial: 0, fluxoDiario: [] }),
+                    fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
                     fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=6', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=10', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/resumo-kpis', { data: { vencidos: 0 } })
@@ -1729,13 +1729,18 @@
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
 
+                // Mês atual: do dia 1 ao último dia do mês
+                const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+                const totalDias = ultimoDia.getDate();
+
                 const labels = [];
                 const entradas = [];
                 const saidas = [];
 
-                for (let i = 0; i < 30; i++) {
-                    const data = new Date(hoje);
-                    data.setDate(hoje.getDate() + i);
+                for (let i = 0; i < totalDias; i++) {
+                    const data = new Date(primeiroDia);
+                    data.setDate(primeiroDia.getDate() + i);
 
                     const chave = formatarDataISO(data);
                     const item = fluxoPorData.get(chave) || {};

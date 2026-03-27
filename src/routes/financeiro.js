@@ -309,7 +309,7 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
             SELECT 
                 cr.id,
                 'receber' as tipo,
-                COALESCE(c.nome_fantasia, c.razao_social, cr.descricao, 'N/D') as descricao,
+                COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'N/D') as descricao,
                 cr.valor,
                 COALESCE(cr.data_vencimento, cr.vencimento) as data_vencimento,
                 LOWER(cr.status) as status
@@ -363,7 +363,7 @@ router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission(
             SELECT 
                 cr.id,
                 'Receber' as tipo,
-                COALESCE(c.nome_fantasia, c.razao_social, cr.descricao, 'N/D') as descricao,
+                COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'N/D') as descricao,
                 cr.valor,
                 COALESCE(cr.data_vencimento, cr.vencimento) as data_vencimento,
                 LOWER(cr.status) as status,
@@ -423,18 +423,18 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
                 fim = new Date(hoje);
                 fim.setDate(fim.getDate() + 30);
                 break;
-            case '30d':
-            default:
-                inicio = new Date(hoje);
-                inicio.setDate(inicio.getDate() - 30);
-                fim = new Date(hoje);
-                fim.setDate(fim.getDate() + 60);
-                break;
             case '90d':
                 inicio = new Date(hoje);
                 inicio.setDate(inicio.getDate() - 90);
                 fim = new Date(hoje);
                 fim.setDate(fim.getDate() + 90);
+                break;
+            case 'mes':
+            case '30d':
+            default:
+                // Mês atual: do dia 1 ao último dia do mês
+                inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+                fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
                 break;
         }
         
@@ -453,7 +453,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
                 SUM(valor - COALESCE(valor_recebido, 0)) as valor,
                 'entrada' as tipo,
                 COUNT(*) as quantidade,
-                GROUP_CONCAT(DISTINCT COALESCE(c.nome_fantasia, c.razao_social, 'Cliente') SEPARATOR ', ') as descricao
+                GROUP_CONCAT(DISTINCT COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, 'Cliente') SEPARATOR ', ') as descricao
             FROM contas_receber cr
             LEFT JOIN clientes c ON cr.cliente_id = c.id
             WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
@@ -510,8 +510,8 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
         const [movimentacoesReceber] = await pool.execute(`
             SELECT 
                 'entrada' as tipo,
-                COALESCE(c.nome_fantasia, c.razao_social, cr.descricao, 'Recebimento') as descricao,
-                COALESCE(cat.nome, 'Vendas') as categoria,
+                COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'Recebimento') as descricao,
+                COALESCE(cat.nome, cr.categoria_nome, 'Vendas') as categoria,
                 cr.valor,
                 COALESCE(cr.data_vencimento, cr.vencimento) as data,
                 LOWER(cr.status) as status
