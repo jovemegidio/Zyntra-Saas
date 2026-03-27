@@ -368,10 +368,13 @@ module.exports = function createVendasRoutes(deps) {
 
             // Validar cliente_id: se enviado, verificar se existe na tabela clientes
             let clienteFinalId = sanitize(cliente_id) ? parseInt(cliente_id) : null;
+            let clienteFinalNome = sanitize(cliente_nome) || sanitize(cliente) || null;
             if (clienteFinalId) {
-                const [clienteRows] = await connection.query('SELECT id FROM clientes WHERE id = ? LIMIT 1', [clienteFinalId]);
+                const [clienteRows] = await connection.query('SELECT id, COALESCE(nome_fantasia, razao_social, nome) as nome_resolved FROM clientes WHERE id = ? LIMIT 1', [clienteFinalId]);
                 if (clienteRows.length === 0) {
                     clienteFinalId = null; // ID não existe em clientes, usar NULL
+                } else if (!clienteFinalNome) {
+                    clienteFinalNome = clienteRows[0].nome_resolved;
                 }
             }
 
@@ -394,17 +397,18 @@ module.exports = function createVendasRoutes(deps) {
 
             const [result] = await connection.query(`
                 INSERT INTO pedidos (
-                    empresa_id, cliente_id, vendedor_id, valor, descricao, status,
+                    empresa_id, cliente_id, cliente_nome, vendedor_id, valor, descricao, status,
                     condicao_pagamento, cenario_fiscal,
                     transportadora_nome, tipo_frete, frete,
                     placa_veiculo, veiculo_uf, rntrc,
                     qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
                     peso_liquido, peso_bruto, valor_seguro, outras_despesas,
                     desconto_pct, origem, observacao, parcelas
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 empresaFinalId,
                 clienteFinalId,
+                clienteFinalNome,
                 vendedor_id,
                 valorTotal,
                 obs,
