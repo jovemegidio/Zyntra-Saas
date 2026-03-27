@@ -482,54 +482,36 @@
                 <button class="btn-fechar-omie" onclick="fecharModalEscolha()">Fechar <i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body-omie">
-                <!-- Opão 1: Nota Fiscal Eletrônica -->
+                <!-- Opção 1: Nota Fiscal Eletrônica -->
                 <div class="opcao-metodo" onclick="abrirModalNFe()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Nota Fiscal Eletrônica</div>
+                        <div class="opcao-titulo">Nota Fiscal Eletrônica</div>
                         <p>Importe o arquivo XML de uma Nota Fiscal Eletrônica (NF-e) com os movimentos de estoque e as informações para Contas a Pagar. Válido para a NF-e âmbito nacional.</p>
                     </div>
                     <div class="opcao-icone">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='80' fill='%2384cc16' opacity='0.3'%3E??%3C/text%3E%3C/svg%3E" alt="NF-e" style="width: 80px; opacity: 0.5;">
+                        <i class="fas fa-file-invoice"></i>
                     </div>
                 </div>
 
-                <!-- Opão 2: Código de Barras -->
+                <!-- Opção 2: Código de Barras -->
                 <div class="opcao-metodo" onclick="abrirModalCodigoBarras()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Código de Barras</div>
-                        <p>Informe boletos de cobrança de qualquer banco, conta de gua, luz, telefone, gs e de outras empresas conveniadas, impostos, tributos e pagamentos do Detran.</p>
+                        <div class="opcao-titulo">Código de Barras</div>
+                        <p>Informe boletos de cobrança de qualquer banco, conta de água, luz, telefone, gás e de outras empresas conveniadas, impostos, tributos e pagamentos do Detran.</p>
                     </div>
                     <div class="opcao-icone">
-                        <svg width="80" height="50" style="opacity: 0.3;">
-                            <rect x="0" y="0" width="3" height="50" fill="#84cc16"/>
-                            <rect x="5" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="8" y="0" width="4" height="50" fill="#84cc16"/>
-                            <rect x="14" y="0" width="2" height="50" fill="#84cc16"/>
-                            <rect x="18" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="22" y="0" width="3" height="50" fill="#84cc16"/>
-                            <rect x="28" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="32" y="0" width="2" height="50" fill="#84cc16"/>
-                            <rect x="36" y="0" width="4" height="50" fill="#84cc16"/>
-                            <rect x="42" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="46" y="0" width="2" height="50" fill="#84cc16"/>
-                            <rect x="50" y="0" width="3" height="50" fill="#84cc16"/>
-                            <rect x="56" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="60" y="0" width="2" height="50" fill="#84cc16"/>
-                            <rect x="65" y="0" width="4" height="50" fill="#84cc16"/>
-                            <rect x="72" y="0" width="1" height="50" fill="#84cc16"/>
-                            <rect x="76" y="0" width="3" height="50" fill="#84cc16"/>
-                        </svg>
+                        <i class="fas fa-barcode"></i>
                     </div>
                 </div>
 
-                <!-- Opão 3: Inserão Manual -->
+                <!-- Opção 3: Inserção Manual -->
                 <div class="opcao-metodo" onclick="abrirModalManual()">
                     <div class="opcao-info">
-                        <div class="opcao-título">Inserão Manual</div>
+                        <div class="opcao-titulo">Inserção Manual</div>
                         <p>Digite manualmente a Conta a Pagar</p>
                     </div>
                     <div class="opcao-icone">
-                        <i class="fas fa-edit" style="font-size: 40px; color: #84cc16; opacity: 0.3;"></i>
+                        <i class="fas fa-edit"></i>
                     </div>
                 </div>
             </div>
@@ -1276,7 +1258,7 @@
         .modal-escolha .modal-body-omie {
             padding: 28px;
         }
-        .opão-metodo {
+        .opcao-metodo {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -1288,14 +1270,14 @@
             transition: all 0.2s;
             background: #fff;
         }
-        .opão-metodo:hover {
+        .opcao-metodo:hover {
             border-color: #84cc16;
             background: linear-gradient(135deg, #f8fff0 0%, #f0fdf4 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(132, 204, 22, 0.15);
         }
-        .opão-metodo:last-child { margin-bottom: 0; }
-        .opão-título {
+        .opcao-metodo:last-child { margin-bottom: 0; }
+        .opcao-titulo {
             font-size: 15px;
             font-weight: 700;
             color: #fff;
@@ -1306,26 +1288,27 @@
             display: inline-block;
             box-shadow: 0 2px 6px rgba(132, 204, 22, 0.3);
         }
-        .opão-info p {
+        .opcao-info p {
             font-size: 13px;
             color: #6b7280;
             margin: 0;
             max-width: 400px;
             line-height: 1.5;
         }
-        .opão-icone {
-            width: 48px;
-            height: 48px;
-            background: #f3f4f6;
+        .opcao-icone {
+            width: 80px;
+            height: 80px;
+            background: #f0fdf4;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #9ca3af;
-            font-size: 20px;
+            color: #84cc16;
+            font-size: 32px;
+            flex-shrink: 0;
             transition: all 0.2s;
         }
-        .opão-metodo:hover .opão-icone {
+        .opcao-metodo:hover .opcao-icone {
             background: #84cc16;
             color: #fff;
         }
