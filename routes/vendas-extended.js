@@ -260,7 +260,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                  FROM usuarios u
                  LEFT JOIN funcionarios f ON f.email = u.email
                  LEFT JOIN pedidos p ON p.vendedor_id = u.id AND p.created_at >= CURDATE() - INTERVAL ? DAY
-                 WHERE u.area = 'vendas' OR u.role = 'vendedor'
+                 WHERE JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"') OR u.role = 'vendedor'
                  GROUP BY u.id, u.nome, f.foto_perfil_url, u.foto, u.avatar
                  ORDER BY valor DESC
                  LIMIT ?`,
@@ -1004,15 +1004,19 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 if (vRows.length > 0) vendedorNome = vRows[0].nome;
             } catch (e) { /* nomes opcionais */ }
 
+            // Gerar numero_pedido sequencial
+            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos');
+            const numeroPedido = npRow.next_num || 1;
+
             const [result] = await connection.query(`
                 INSERT INTO pedidos
                 (cliente_id, empresa_id, vendedor_id, valor, descricao, status,
-                 frete, prioridade, produtos_preview, prazo_entrega, endereco_entrega,
+                 numero_pedido, frete, prioridade, produtos_preview, prazo_entrega, endereco_entrega,
                  municipio_entrega, metodo_envio, cliente_nome, vendedor_nome, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
             `, [
                 cliente_id, empresaIdFinal, vendedor_id, valor || 0, descricao || '',
-                status, frete, prioridade, JSON.stringify(produtos || []),
+                status, numeroPedido, frete, prioridade, JSON.stringify(produtos || []),
                 prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio,
                 clienteNome, vendedorNome
             ]);

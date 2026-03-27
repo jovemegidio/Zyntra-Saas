@@ -2133,8 +2133,8 @@
                                 <div class="mbo-field">
                                     <label><i class="fas fa-server" style="color:#84cc16;margin-right:4px;"></i> Ambiente</label>
                                     <select id="integraçãoAmbiente">
-                                        <option value="sandbox">?? Sandbox (Homologação)</option>
-                                        <option value="produção">?? Produção</option>
+                                        <option value="sandbox">🧪 Sandbox (Homologação)</option>
+                                        <option value="produção">🚀 Produção</option>
                                     </select>
                                 </div>
                                 <div class="mbo-field">
@@ -2236,14 +2236,14 @@
                                 <div class="mbo-field mbo-field-full">
                                     <label><i class="fas fa-check-double" style="color:#22c55e;margin-right:4px;"></i> Escopos / Permissões da API</label>
                                     <div class="integração-escopos">
-                                        <label class="escopo-check"><input type="checkbox" id="escopoExtrato" checked> <span>?? Consultar Extrato</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoSaldo" checked> <span>?? Consultar Saldo</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoExtrato" checked> <span>📋 Consultar Extrato</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoSaldo" checked> <span>💰 Consultar Saldo</span></label>
                                         <label class="escopo-check"><input type="checkbox" id="escopoPix" checked> <span>? PIX (enviar/receber)</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoBoleto"> <span>?? Emitir Boletos</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoTransferencia"> <span>?? Transferências (TED/DOC)</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoPagamento"> <span>?? Pagamentos</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoWebhook" checked> <span>?? Webhooks</span></label>
-                                        <label class="escopo-check"><input type="checkbox" id="escopoCNAB"> <span>?? Remessa/Retorno CNAB</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoBoleto"> <span>🏷️ Emitir Boletos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoTransferencia"> <span>💸 Transferências (TED/DOC)</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoPagamento"> <span>💳 Pagamentos</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoWebhook" checked> <span>🔗 Webhooks</span></label>
+                                        <label class="escopo-check"><input type="checkbox" id="escopoCNAB"> <span>📁 Remessa/Retorno CNAB</span></label>
                                     </div>
                                 </div>
                             </div>
@@ -3747,7 +3747,7 @@
             if (!banco) return;
 
             bancoVisualizando = banco;
-            const config = bancosConfig[banco.codigo] || { nome: banco.nome, classe: 'bb', sigla: '??' };
+            const config = bancosConfig[banco.codigo] || { nome: banco.nome, classe: 'bb', sigla: '?' };
 
             // Preencher informações
             document.getElementById('extratoTítulo').textContent = `Extrato - ${banco.apelido || config.nome}`;
@@ -4174,7 +4174,7 @@
             if (!file) return;
             const label = document.getElementById('certFileName');
             const area = document.getElementById('certUploadArea');
-            label.textContent = `?? ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            label.textContent = `📎 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
             area.classList.add('has-file');
         }
 

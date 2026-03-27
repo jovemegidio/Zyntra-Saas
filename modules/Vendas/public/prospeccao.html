@@ -2133,7 +2133,7 @@ Aceita com ou sem formatação"></textarea>
                 this.leads.unshift(lead);
                 localStorage.setItem('crm_leads', JSON.stringify(this.leads));
                 
-                this.toast(`?? Empresa adicionada! ${dadosEnriquecidos.fontes_consultadas.length} fontes consultadas.`, 'success');
+                this.toast(`✅ Empresa adicionada! ${dadosEnriquecidos.fontes_consultadas.length} fontes consultadas.`, 'success');
                 this.atualizarMetricas();
                 this.renderizarKanban();
                 this.renderizarTabela();
@@ -2870,7 +2870,7 @@ Aceita com ou sem formatação"></textarea>
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(link.href);
-            this.toast('?? Relatório XLSX exportado com sucesso!', 'success');
+            this.toast('📊 Relatório XLSX exportado com sucesso!', 'success');
         },
 
         importarCNPJs() {

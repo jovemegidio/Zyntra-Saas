@@ -181,7 +181,7 @@
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-shopping-cart"></i></div>
-                            <h3>Relatério de Pedidos</h3>
+                            <h3>Relatório de Pedidos</h3>
                         </div>
                         <p>Histórico completo de pedidos de compra com valores, fornecedores e status.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
@@ -190,7 +190,7 @@
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-users"></i></div>
-                            <h3>Relatério de Fornecedores</h3>
+                            <h3>Relatório de Fornecedores</h3>
                         </div>
                         <p>Cadastro de fornecedores, avaliações, categorias e dados de contato.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
@@ -199,9 +199,9 @@
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-boxes"></i></div>
-                            <h3>Relatério de Estoque</h3>
+                            <h3>Relatório de Estoque</h3>
                         </div>
-                        <p>Posição de estoque, materiais críticos, custos e nveis de reposição.</p>
+                        <p>Posição de estoque, materiais críticos, custos e níveis de reposição.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
                     </div>
                     <div class="report-card rc-movimentacoes" onclick="RelatoriosCompras.abrirModalRelatorio('movimentacoes')">
@@ -226,7 +226,7 @@
                         <span class="pdf-badge">PDF</span>
                         <div class="report-card-header">
                             <div class="report-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                            <h3>Relatério de Cotações</h3>
+                            <h3>Relatório de Cotações</h3>
                         </div>
                         <p>Análise comparativa de cotações, economia obtida e fornecedores selecionados.</p>
                         <span class="report-action"><i class="fas fa-file-pdf"></i> Exportar PDF</span>
@@ -377,9 +377,9 @@
         abrirModalRelatorio(tipo) {
             const configs = this.getConfigRelatorio(tipo);
             // Remove existing
-            document.getElementById('modal-relatério')?.remove();
+            document.getElementById('modal-relatorio')?.remove();
             const html = `
-            <div class="modal-overlay active" id="modal-relatério" onclick="if(event.target===this) RelatoriosCompras.fecharModal();">
+            <div class="modal-overlay active" id="modal-relatorio" onclick="if(event.target===this) RelatoriosCompras.fecharModal();">
                 <div class="modal" style="max-width:500px;">
                     <div class="modal-header">
                         <h3><i class="${configs.icon}"></i> ${configs.título}</h3>
@@ -417,18 +417,18 @@
 
         getConfigRelatorio(tipo) {
             const configs = {
-                pedidos: { título: 'Relatério de Pedidos', descrição: 'Exportar histórico de pedidos de compra com valores, fornecedores e status.', icon: 'fas fa-shopping-cart' },
-                fornecedores: { titulo: 'Relatério de Fornecedores', descrição: 'Exportar cadastro de fornecedores com contatos, categorias e avaliações.', icon: 'fas fa-users' },
-                estoque: { titulo: 'Relatério de Estoque', descrição: 'Exportar posição atual de estoque com custos e nveis de reposição.', icon: 'fas fa-boxes' },
+                pedidos: { título: 'Relatório de Pedidos', descrição: 'Exportar histórico de pedidos de compra com valores, fornecedores e status.', icon: 'fas fa-shopping-cart' },
+                fornecedores: { titulo: 'Relatório de Fornecedores', descrição: 'Exportar cadastro de fornecedores com contatos, categorias e avaliações.', icon: 'fas fa-users' },
+                estoque: { titulo: 'Relatório de Estoque', descrição: 'Exportar posição atual de estoque com custos e níveis de reposição.', icon: 'fas fa-boxes' },
                 movimentacoes: { titulo: 'Movimentações de Estoque', descrição: 'Exportar entradas, saídas e ajustes de estoque por período.', icon: 'fas fa-exchange-alt' },
                 criticos: { titulo: 'Materiais Críticos', descrição: 'Exportar materiais abaixo do estoque mínimo que precisam de reposição.', icon: 'fas fa-exclamation-triangle' },
-                cotações: { titulo: 'Relatério de Cotações', descrição: 'Exportar análise comparativa de cotações e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
+                cotações: { titulo: 'Relatório de Cotações', descrição: 'Exportar análise comparativa de cotações e economia obtida.', icon: 'fas fa-file-invoice-dollar' }
             };
             return configs[tipo] || configs.pedidos;
         },
 
         fecharModal() {
-            document.getElementById('modal-relatério')?.remove();
+            document.getElementById('modal-relatorio')?.remove();
         },
 
         async gerarRelatorio(tipo) {
@@ -438,10 +438,10 @@
             this.mostrarLoading();
             try {
                 await this.exportarPDF(tipo, dataInicio, dataFim);
-                this.mostrarToast('Relatério PDF gerado com sucesso!', 'success');
+                this.mostrarToast('Relatório PDF gerado com sucesso!', 'success');
             } catch(e) {
                 console.error('Erro ao gerar PDF:', e);
-                this.mostrarToast('Erro ao gerar relatério: ' + e.message, 'error');
+                this.mostrarToast('Erro ao gerar Relatório: ' + e.message, 'error');
             }
             this.esconderLoading();
         },
@@ -491,7 +491,7 @@
                         break;
                     }
                 }
-            } catch(e) { console.log('Erro fetch relatério:', e); }
+            } catch(e) { console.log('Erro fetch Relatório:', e); }
             return [];
         },
 
@@ -527,7 +527,7 @@
                     rows = arr.map(m => { const a = m.estoque_atual||m.quantidade||m.quantidade_estoque||0; const mn = m.estoque_minimo||m.minimo||0; const diff = a - mn; const pct = mn>0?(a/mn*100):0; return `<tr><td class="font-bold">${m.codigo_material||m.código||'-'}</td><td>${m.descrição||m.nome||'-'}</td><td class="text-right font-bold" style="color:#dc2626;">${a}</td><td class="text-right">${mn}</td><td class="text-right font-bold" style="color:#dc2626;">${diff}</td><td><span class="badge badge-${pct<=25?'danger':'warning'}">${pct<=25?'Urgente':'Atenão'}</span></td></tr>`; });
                     break;
                 case 'cotações':
-                    headers = ['N', 'Título / Descrição', 'Fornecedor', 'Valor', 'Data', 'Status'];
+                    headers = ['N', 'Título / descrição', 'Fornecedor', 'Valor', 'Data', 'Status'];
                     resumo = { 'Total Cotações': arr.length, 'Valor Total': this.formatarMoeda(arr.reduce((s,c) => s + (parseFloat(c.valor_total||c.valor||0)), 0)) };
                     rows = arr.map(c => `<tr><td class="font-bold">${c.número||c.id||'-'}</td><td>${c.título||c.descrição||'-'}</td><td>${c.fornecedor||c.fornecedor_nome||'-'}</td><td class="text-right font-bold">${this.formatarMoeda(c.valor_total||c.valor)}</td><td>${this.formatarData(c.data||c.created_at)}</td><td><span class="badge badge-${this.getBadgeClass(c.status)}">${this.formatarStatus(c.status)}</span></td></tr>`);
                     break;
@@ -610,8 +610,8 @@ tbody tr:hover { background: #f1f5f9; }
 </head>
 <body>
 <div class="print-bar">
-    <button class="btn-print" onclick="window.print()">??? Imprimir / Salvar PDF</button>
-    <button class="btn-close" onclick="window.close()">? Fechar</button>
+    <button class="btn-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+    <button class="btn-close" onclick="window.close()">✕ Fechar</button>
 </div>
 <div class="rpt-header">
     <div class="brand">
@@ -619,7 +619,7 @@ tbody tr:hover { background: #f1f5f9; }
         <div class="brand-sub">Zyntra é Módulo de Compras</div>
     </div>
     <div class="rpt-meta">
-        <div class="doc-tag">Relatério</div>
+        <div class="doc-tag">Relatório</div>
         <div class="meta-line">Emitido em: ${dataEmissao} s ${horaEmissao}</div>
         ${períodoTexto ? '<div class="meta-line">' + períodoTexto + '</div>' : ''}
     </div>
@@ -630,7 +630,7 @@ tbody tr:hover { background: #f1f5f9; }
 </div>
 ${this.gerarResumoPDF(resumo)}
 <div class="data-section">
-    <h2>Dados do Relatério</h2>
+    <h2>Dados do Relatório</h2>
     <table>
         <thead><tr>${headers.map(h => '<th>' + h + '</th>').join('')}</tr></thead>
         <tbody>${rows.length ? rows.join('') : '<tr><td colspan="' + headers.length + '" style="text-align:center; padding:24px; color:#94a3b8; font-style:italic;">Nenhum dado encontrado para o período selecionado</td></tr>'}</tbody>

@@ -184,7 +184,7 @@
 
                         <!-- Colar XML -->
                         <div id="xmlTabColar">
-                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o contedo completo do XML da NF-e...&#10;&#10;Exemplo: &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;nfeProc ...&gt;"></textarea>
+                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o conteúdo completo do XML da NF-e...&#10;&#10;Exemplo: &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;nfeProc ...&gt;"></textarea>
                             <div style="display:flex; gap:var(--space-2); margin-top:var(--space-2);">
                                 <button class="btn-import-xml" id="btnImportarXml" onclick="importarXmlTexto()">
                                     <i class="fas fa-magic"></i> Processar e Importar
@@ -458,9 +458,9 @@
     /* ========== XML Import ========== */
     async function importarXmlTexto() {
         const xml = document.getElementById('xmlTextoInput').value.trim();
-        if (!xml) { alert('Cole o contedo XML primeiro'); return; }
+        if (!xml) { alert('Cole o conteúdo XML primeiro'); return; }
         if (!xml.includes('<nfeProc') && !xml.includes('<NFe') && !xml.includes('<infNFe')) {
-            alert('O contedo não parece ser um XML de NF-e válido'); return;
+            alert('O conteúdo não parece ser um XML de NF-e válido'); return;
         }
         const btn = document.getElementById('btnImportarXml');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';

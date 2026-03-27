@@ -1294,12 +1294,15 @@ apiVendasRouter.get('/metas/ranking', async (req, res, next) => {
 
         const [rows] = await pool.query(`
             SELECT
-                u.id, u.nome, u.email, u.avatar,
+                u.id, u.nome, u.email,
+                COALESCE(f.foto_perfil_url, u.avatar, u.foto) as foto,
+                u.avatar,
                 COALESCE(m.valor_meta, 0) as valor_meta,
                 COALESCE(agg.valor_realizado, 0) as valor_realizado,
                 COALESCE(agg.qtd_vendas, 0) as qtd_vendas
             FROM usuarios u
             LEFT JOIN departamentos d ON u.departamento_id = d.id
+            LEFT JOIN funcionarios f ON f.email = u.email
             LEFT JOIN metas_vendas m ON u.id = m.vendedor_id AND m.periodo = ?
             LEFT JOIN (
                 SELECT vendedor_id,

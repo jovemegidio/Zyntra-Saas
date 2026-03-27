@@ -28,7 +28,7 @@ function buildCorteClause(alias, opts = {}) {
     // Hard limit: todas as datas relevantes devem ser >= 2026-01-01
     // Não permite dados de 2025 independente de condição
     return `(
-        COALESCE(${a}data_vencimento, ${a}vencimento, ${a}data_emissao, ${a}data_criacao, ${a}created_at) >= '${CORTE_DATE}'
+        COALESCE(${a}data_vencimento, ${a}vencimento, ${a}data_criacao) >= '${CORTE_DATE}'
     )`;
 }
 

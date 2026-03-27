@@ -536,15 +536,18 @@
                     if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
                     else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
 
-                    document.getElementById('greeting-text').textContent = greeting;
-                    document.getElementById('user-name').textContent = primeiroNome;
-                    document.getElementById('user-initials').textContent = primeiroNome.charAt(0).toUpperCase();
+                    const greetEl = document.getElementById('greeting-text');
+                    const nameEl = document.getElementById('user-name');
+                    const initialsEl = document.getElementById('user-initials');
+                    if (greetEl) greetEl.textContent = greeting;
+                    if (nameEl) nameEl.textContent = primeiroNome;
+                    if (initialsEl) initialsEl.textContent = primeiroNome.charAt(0).toUpperCase();
 
                     const fotoUrl = user.avatar || user.foto || user.foto_perfil_url;
                     const fotoEl = document.getElementById('user-photo');
                     const inicialEl = document.getElementById('user-initials');
 
-                    if (fotoUrl && fotoUrl !== '/avatars/default.webp') {
+                    if (fotoEl && fotoUrl && fotoUrl !== '/avatars/default.webp') {
                         fotoEl.src = fotoUrl;
                         fotoEl.onload = () => {
                             fotoEl.style.display = 'block';

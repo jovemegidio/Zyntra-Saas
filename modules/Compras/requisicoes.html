@@ -309,7 +309,7 @@
                 <div class="page-header">
                     <div class="page-header-top">
                         <div class="page-actions">
-                            <button class="btn btn-primary" onclick="abrirModalNovaRequisicao()"><i class="fas fa-plus"></i> Nova Requisião</button>
+                            <button class="btn btn-primary" onclick="abrirModalNovaRequisicao()"><i class="fas fa-plus"></i> Nova Requisição</button>
                         </div>
                     </div>
                 </div>
@@ -342,7 +342,7 @@
         <div class="filters-bar">
             <div class="search-box">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchRequisicao" placeholder="Buscar requisião...">
+                <input type="text" id="searchRequisicao" placeholder="Buscar Requisição...">
             </div>
             <div class="filter-buttons">
                 <button class="filter-btn active" onclick="filtrarRequisicoes('todos', this)">Todas</button>
@@ -361,7 +361,7 @@
                         <thead>
                             <tr>
                                 <th style="width:50px">#</th>
-                                <th>Nº Requisião</th>
+                                <th>Nº Requisição</th>
                                 <th>Solicitante</th>
                                 <th>Data</th>
                                 <th>Centro de Custo</th>
@@ -382,11 +382,11 @@
         </main><!-- /main-area -->
     </div><!-- /app-container -->
 
-    <!-- Modal: Nova Requisião -->
+    <!-- Modal: Nova Requisição -->
     <div class="modal-overlay" id="modalNovaRequisicao">
         <div class="modal" style="max-width:760px;">
             <div class="modal-header">
-                <h3><i class="fas fa-clipboard-list"></i> Nova Requisião de Compra</h3>
+                <h3><i class="fas fa-clipboard-list"></i> Nova Requisição de Compra</h3>
                 <button class="modal-close" onclick="fecharModalNovaRequisicao()">&times;</button>
             </div>
             <form id="formNovaRequisicao" onsubmit="event.preventDefault();">
@@ -396,7 +396,7 @@
                         <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:var(--space-3);"><i class="fas fa-info-circle" style="margin-right:6px; color:var(--primary-500);"></i>Informações Gerais</h4>
                         <div class="form-grid cols-3">
                             <div class="form-group">
-                                <label>Nº Requisião</label>
+                                <label>Nº Requisição</label>
                                 <input type="text" class="form-control" id="reqNumero" readonly>
                             </div>
                             <div class="form-group">
@@ -457,10 +457,10 @@
                         </div>
                     </div>
 
-                    <!-- Seção: Itens da Requisião -->
+                    <!-- Seção: Itens da Requisição -->
                     <div style="padding-top:var(--space-4); border-top:1.5px solid var(--gray-200); margin-bottom:var(--space-4);">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:var(--space-3);">
-                            <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-boxes" style="margin-right:6px; color:var(--primary-500);"></i>Itens da Requisião</h4>
+                            <h4 style="font-size:0.8rem; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:0.5px;"><i class="fas fa-boxes" style="margin-right:6px; color:var(--primary-500);"></i>Itens da Requisição</h4>
                             <button type="button" class="btn btn-primary btn-sm" onclick="adicionarItemReq()"><i class="fas fa-plus"></i> Adicionar Item</button>
                         </div>
                         <div id="itensContainer"></div>
@@ -500,18 +500,18 @@
                     <button type="button" class="btn btn-secondary" id="btnCancelarRequisicao" onclick="fecharModalNovaRequisicao()">Cancelar</button>
                     <div style="display:flex; gap:var(--space-2);">
                         <button type="button" class="btn btn-secondary" id="btnSalvarRascunho" onclick="salvarRascunho()"><i class="fas fa-save"></i> Salvar Rascunho</button>
-                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao" onclick="enviarRequisicao()"><i class="fas fa-paper-plane"></i> Enviar Requisião</button>
+                        <button type="button" class="btn btn-primary" id="btnEnviarRequisicao" onclick="enviarRequisicao()"><i class="fas fa-paper-plane"></i> Enviar Requisição</button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: Visualizar Requisião -->
+    <!-- Modal: Visualizar Requisição -->
     <div class="modal-overlay" id="modalVisualizarRequisicao">
         <div class="modal" style="max-width:640px;">
             <div class="modal-header">
-                <h3><i class="fas fa-eye"></i> Requisião <span id="viewReqNumero"></span></h3>
+                <h3><i class="fas fa-eye"></i> Requisição <span id="viewReqNumero"></span></h3>
                 <button class="modal-close" onclick="fecharModalVisualizar()">&times;</button>
             </div>
             <div class="modal-body" id="viewReqContent" style="max-height:60vh; overflow-y:auto;">
@@ -612,7 +612,7 @@
     function renderizarTabela(dados) {
         const tbody = document.getElementById('requisicoesTableBody');
         if (!dados.length) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma requisião encontrada</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:var(--space-8); color:var(--gray-400);"><i class="fas fa-inbox"></i> Nenhuma Requisição encontrada</td></tr>';
             return;
         }
         tbody.innerHTML = dados.map((r, i) => `
@@ -643,7 +643,7 @@
         document.getElementById('requisicoesCotacao').textContent = requisicoesData.filter(r => r.status === 'cotação' || r.status === 'em_cotação').length;
     }
 
-    /* ========== Modal: Nova Requisião ========== */
+    /* ========== Modal: Nova Requisição ========== */
     async function abrirModalNovaRequisicao() {
         editingId = null;
         document.getElementById('formNovaRequisicao').reset();
@@ -664,7 +664,7 @@
         } catch (e) { document.getElementById('reqNumero').value = 'RC-' + String(requisicoesData.length + 1).padStart(3, '0'); }
         // Restaurar título do modal para criação
         const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
-        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisião de Compra';
+        if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-clipboard-list"></i> Nova Requisição de Compra';
         adicionarItemReq();
         document.getElementById('modalNovaRequisicao').classList.add('active');
     }
@@ -717,7 +717,7 @@
 
     function removerItem(id) {
         const items = document.querySelectorAll('.item-card');
-        if (items.length <= 1) { showToast('Mínimo 1 item na requisião', 'warning'); return; }
+        if (items.length <= 1) { showToast('Mínimo 1 item na Requisição', 'warning'); return; }
         document.getElementById('item-' + id)?.remove();
         atualizarResumoItens();
     }
@@ -766,7 +766,7 @@
         if (status !== 'rascunho' && !justificativa) { showToast('Preencha a justificativa', 'warning'); return; }
 
         const número = document.getElementById('reqNumero').value;
-        if (!número) { showToast('Número da requisião não gerado. Feche e reabra o formulário.', 'warning'); return; }
+        if (!número) { showToast('Número da Requisição não gerado. Feche e reabra o formulário.', 'warning'); return; }
 
         const items = [];
         document.querySelectorAll('.item-card').forEach(card => {
@@ -816,18 +816,18 @@
                 method, headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(body)
             });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar requisião'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.message || 'Erro ao salvar Requisição'); }
             fecharModalNovaRequisicao();
             carregarRequisicoes();
-            showToast(editingId ? 'Requisião atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisião enviada com sucesso!'), 'success');
+            showToast(editingId ? 'Requisição atualizada com sucesso!' : (status === 'rascunho' ? 'Rascunho salvo com sucesso!' : 'Requisição enviada com sucesso!'), 'success');
             editingId = null;
         } catch (e) {
             showToast('Erro: ' + e.message, 'error');
-            console.error('[Requisião] Erro ao salvar:', e);
+            console.error('[Requisição] Erro ao salvar:', e);
         } finally {
             // Restaurar botões
             salvandoRequisicao = false;
-            if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Requisião'; }
+            if (btnEnviar) { btnEnviar.disabled = false; btnEnviar.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar Requisição'; }
             if (btnRascunho) { btnRascunho.disabled = false; }
         }
     }
@@ -848,7 +848,7 @@
             }
             document.getElementById('viewReqContent').innerHTML =
                 '<div class="view-section"><h4>Informações Gerais</h4><div class="view-grid">' +
-                '<div class="view-item"><label>Nº Requisião</label><p>' + (req.número || '-') + '</p></div>' +
+                '<div class="view-item"><label>Nº Requisição</label><p>' + (req.número || '-') + '</p></div>' +
                 '<div class="view-item"><label>Solicitante</label><p>' + (req.solicitante || '-') + '</p></div>' +
                 '<div class="view-item"><label>Data</label><p>' + formatarData(req.data_solicitação) + '</p></div>' +
                 '<div class="view-item"><label>Centro de Custo</label><p>' + (req.centro_custo || '-') + '</p></div>' +
@@ -859,7 +859,7 @@
                 (itensHtml ? '<div class="view-section"><h4>Itens</h4>' + itensHtml + '</div>' : '') +
                 (req.observacoes ? '<div class="view-section"><h4>Observações</h4><p style="font-size:0.85rem; color:var(--gray-700);">' + req.observacoes + '</p></div>' : '');
             document.getElementById('modalVisualizarRequisicao').classList.add('active');
-        } catch (e) { showToast('Erro ao carregar requisião', 'error'); }
+        } catch (e) { showToast('Erro ao carregar Requisição', 'error'); }
     }
 
     function fecharModalVisualizar() {
@@ -870,10 +870,10 @@
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/requisicoes/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) throw new Error('Erro ao buscar requisião');
+            if (!r.ok) throw new Error('Erro ao buscar Requisição');
             const d = await r.json();
             const req = d.requisicao || d;
-            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta requisião não pode ser editada', 'warning'); return; }
+            if (req.status !== 'rascunho' && req.status !== 'pendente') { showToast('Esta Requisição não pode ser editada', 'warning'); return; }
             await abrirModalNovaRequisicao();
             editingId = id;
             document.getElementById('reqNumero').value = req.número || '';
@@ -912,21 +912,21 @@
             }
             // Atualizar título do modal para edião
             const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
-            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisião de Compra';
-        } catch (e) { showToast('Erro ao carregar para edião', 'error'); console.error('[Requisião] Erro edião:', e); }
+            if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisição de Compra';
+        } catch (e) { showToast('Erro ao carregar para edião', 'error'); console.error('[Requisição] Erro edião:', e); }
     }
 
     let _excluindoRequisicao = false;
     async function excluirRequisicao(id) {
         if (_excluindoRequisicao) return;
-        if (!confirm('Excluir esta requisião?')) return;
+        if (!confirm('Excluir esta Requisição?')) return;
         _excluindoRequisicao = true;
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/requisicoes/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir requisião'); }
+            if (!r.ok) { const err = await r.json().catch(() => ({})); throw new Error(err.error || err.message || 'Erro ao excluir Requisição'); }
             carregarRequisicoes();
-            showToast('Requisião excluída com sucesso!', 'success');
+            showToast('Requisição excluída com sucesso!', 'success');
         } catch (e) { showToast('Erro: ' + e.message, 'error'); } finally { _excluindoRequisicao = false; }
     }
 

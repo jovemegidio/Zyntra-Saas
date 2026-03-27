@@ -1574,7 +1574,7 @@
                     </button>
                 </div>
 
-                <!-- Contedo das Abas -->
+                <!-- Conteúdo das Abas -->
                 <div class="view-tabs-content" style="padding: 20px; max-height: 450px; overflow-y: auto;">
 
                     <!-- Aba Dados -->
@@ -3374,7 +3374,7 @@
             });
             document.querySelector(`.view-tab[data-tab="${nomeAba}"]`)?.classList.add('active');
 
-            // Atualizar contedo
+            // Atualizar Conteúdo
             document.querySelectorAll('.view-tab-panel').forEach(panel => {
                 panel.classList.remove('active');
                 panel.style.display = 'none';
@@ -3554,7 +3554,7 @@
                     }
 
                     // Extrair motivo/tipo do atestado
-                    let tipoAtestado = a.tipo || 'Atestado Mdico';
+                    let tipoAtestado = a.tipo || 'Atestado Médico';
                     let motivoTexto = a.motivo || '';
 
                     // Extrair CID do motivo se existir
@@ -3615,7 +3615,7 @@
             if (typeof confirmarAcao === 'function') {
                 confirmarAcao({
                     título: 'Aprovar Atestado',
-                    mensagem: 'Deseja aprovar este atestado mdico?',
+                    mensagem: 'Deseja aprovar este Atestado Médico?',
                     textoBtnConfirmar: 'Aprovar',
                     onConfirmar: async () => {
                         await executarAprovacaoAtestado(atestadoId);
@@ -3657,7 +3657,7 @@
                                 <i class="fas fa-times-circle" style="font-size: 28px; color: #dc2626;"></i>
                             </div>
                             <h3 style="margin: 0 0 8px 0; color: #1e293b; font-size: 20px;">Recusar Atestado</h3>
-                            <p style="margin: 0; color: #64748b; font-size: 14px;">Informe o motivo da recusa do atestado mdico</p>
+                            <p style="margin: 0; color: #64748b; font-size: 14px;">Informe o motivo da recusa do Atestado Médico</p>
                         </div>
                         <div style="margin-bottom: 20px;">
                             <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #374151;">Motivo da Recusa *</label>

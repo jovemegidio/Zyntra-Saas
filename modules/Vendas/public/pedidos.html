@@ -3075,35 +3075,35 @@
             })
             .then(res => res.json())
             .then(historico => {
-                let historicoHtml = `?? HISTÓRICO DO PEDIDO #${pedidoAtualModal.número || pedidoAtualModal.id}\n`;
-                historicoHtml += '?'.repeat(40) + '\n\n';
+                let historicoHtml = `📋 HISTÓRICO DO PEDIDO #${pedidoAtualModal.número || pedidoAtualModal.id}\n`;
+                historicoHtml += '═'.repeat(40) + '\n\n';
 
                 if (Array.isArray(historico) && historico.length > 0) {
                     historico.forEach(h => {
                         const data = new Date(h.data || h.created_at).toLocaleString('pt-BR');
-                        historicoHtml += `?? ${data}\n`;
+                        historicoHtml += `📅 ${data}\n`;
                         historicoHtml += `   ${h.ação || h.descrição || 'Alteração'}\n`;
-                        if (h.usuario) historicoHtml += `   ?? ${h.usuario}\n`;
+                        if (h.usuario) historicoHtml += `   👤 ${h.usuario}\n`;
                         historicoHtml += '\n';
                     });
                 } else {
                     // Mostrar histórico básico baseado nos dados do pedido
-                    historicoHtml += `?? ${new Date(pedidoAtualModal.created_at || pedidoAtualModal.data_criacao).toLocaleString('pt-BR')}\n`;
+                    historicoHtml += `📅 ${new Date(pedidoAtualModal.created_at || pedidoAtualModal.data_criacao).toLocaleString('pt-BR')}\n`;
                     historicoHtml += `   Pedido criado\n`;
                     historicoHtml += `   Status: ${pedidoAtualModal.status}\n\n`;
 
                     if (pedidoAtualModal.data_aprovacao) {
-                        historicoHtml += `?? ${new Date(pedidoAtualModal.data_aprovacao).toLocaleString('pt-BR')}\n`;
+                        historicoHtml += `✅ ${new Date(pedidoAtualModal.data_aprovacao).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido aprovado\n\n`;
                     }
 
                     if (pedidoAtualModal.data_faturamento) {
-                        historicoHtml += `?? ${new Date(pedidoAtualModal.data_faturamento).toLocaleString('pt-BR')}\n`;
+                        historicoHtml += `📦 ${new Date(pedidoAtualModal.data_faturamento).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido faturado\n\n`;
                     }
                 }
 
-                historicoHtml += '?'.repeat(40) + '\n';
+                historicoHtml += '═'.repeat(40) + '\n';
                 historicoHtml += `Status atual: ${pedidoAtualModal.status?.toUpperCase() || 'N/A'}`;
 
                 showToast('Histórico do pedido carregado', 'info');

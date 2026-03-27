@@ -15,9 +15,6 @@ module.exports = function createPCPRoutes(deps) {
 
     // --- Standard requires for extracted routes ---
     const { body, param, query, validationResult } = require('express-validator');
-    const path = require('path');
-    const multer = require('multer');
-    const fs = require('fs');
     const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 

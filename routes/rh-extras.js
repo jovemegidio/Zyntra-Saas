@@ -895,42 +895,6 @@ router.delete('/penalidades/:id', authenticateToken, async (req, res) => {
  * GET /api/rh/ponto/resumo
  * Resumo do ponto por funcionário
  */
-router.get('/ponto/resumo', authenticateToken, async (req, res) => {
-    try {
-        const { funcionario_id, mes, ano } = req.query;
-
-        const [resumo] = await pool.query(`
-            SELECT 
-                COUNT(DISTINCT data) as dias_trabalhados,
-                COUNT(*) as total_marcacoes,
-                SUM(CASE WHEN tipo = 'entrada' THEN 1 ELSE 0 END) as entradas,
-                SUM(CASE WHEN tipo = 'saida' THEN 1 ELSE 0 END) as saidas
-            FROM ponto_marcacoes
-            WHERE funcionario_id = ?
-            AND MONTH(data) = ? AND YEAR(data) = ?
-        `, [funcionario_id, mes || new Date().getMonth() + 1, ano || new Date().getFullYear()]);
-
-        // Buscar penalidades do mês
-        const [penalidades] = await pool.query(`
-            SELECT COUNT(*) as total, tipo
-            FROM rh_penalidades
-            WHERE funcionario_id = ?
-            AND MONTH(data_penalidade) = ? AND YEAR(data_penalidade) = ?
-            GROUP BY tipo
-        `, [funcionario_id, mes || new Date().getMonth() + 1, ano || new Date().getFullYear()]);
-
-        res.json({ 
-            success: true, 
-            resumo: resumo[0],
-            penalidades
-        });
-
-    } catch (error) {
-        console.error('Erro ao buscar resumo:', error);
-        res.status(500).json({ success: false, message: 'Erro interno no servidor. Tente novamente.' });
-    }
-});
-
 // ==================== ESPELHO DE PONTO (Self-service) ====================
 
 /**

@@ -393,16 +393,20 @@ module.exports = function createVendasRoutes(deps) {
                 valorTotal = sanitizeNum(valor) || 0;
             }
 
+            // Gerar numero_pedido sequencial
+            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos');
+            const numeroPedido = npRow.next_num || 1;
+
             const [result] = await connection.query(`
                 INSERT INTO pedidos (
                     empresa_id, cliente_id, cliente_nome, vendedor_id, valor, descricao, status,
-                    condicao_pagamento, cenario_fiscal,
+                    numero_pedido, condicao_pagamento, cenario_fiscal,
                     transportadora_nome, tipo_frete, frete,
                     placa_veiculo, veiculo_uf, rntrc,
                     qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
                     peso_liquido, peso_bruto, valor_seguro, outras_despesas,
                     desconto_pct, origem, observacao, parcelas
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             `, [
                 empresaFinalId,
                 clienteFinalId,
@@ -411,6 +415,7 @@ module.exports = function createVendasRoutes(deps) {
                 valorTotal,
                 obs,
                 'orcamento',
+                numeroPedido,
                 sanitize(condicao_pagamento),
                 sanitize(cenario_fiscal),
                 sanitize(transportadora_nome) || sanitize(transportadora),
@@ -3583,7 +3588,7 @@ module.exports = function createVendasRoutes(deps) {
                 `SELECT p.*, c.nome as cliente_nome_join, c.cpf_cnpj, c.cnpj,
                         c.email as cliente_email, c.telefone as cliente_telefone,
                         c.endereco, c.numero as num_endereco, c.complemento,
-                        c.bairro, c.cidade, c.uf, c.cep
+                        c.bairro, c.cidade, c.estado AS uf, c.cep
                  FROM pedidos p
                  LEFT JOIN clientes c ON c.id = p.cliente_id
                  WHERE p.id = ? FOR UPDATE`,

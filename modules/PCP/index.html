@@ -21877,9 +21877,9 @@
 
                 case 'select-status':
                     inputHTML = '<select id="' + campo.id + '" class="modal-diario-input" style="cursor: pointer;">' +
-                        '<option value="pendente"' + (valor === 'pendente' ? ' selected' : '') + '>? Pendente</option>' +
-                        '<option value="em_andamento"' + (valor === 'em_andamento' ? ' selected' : '') + '>?? Em Andamento</option>' +
-                        '<option value="concluido"' + (valor === 'concluido' ? ' selected' : '') + '>? Concluído</option>' +
+                        '<option value="pendente"' + (valor === 'pendente' ? ' selected' : '') + '>⏳ Pendente</option>' +
+                        '<option value="em_andamento"' + (valor === 'em_andamento' ? ' selected' : '') + '>🔄 Em Andamento</option>' +
+                        '<option value="concluido"' + (valor === 'concluido' ? ' selected' : '') + '>✅ Concluído</option>' +
                         '</select>';
                     break;
 
@@ -22576,8 +22576,8 @@
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label style="font-weight: 600; color: #374151; margin-bottom: 6px; display: block;">Status</label>
                                 <select id="fat-status" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white;">
-                                    <option value="pendente">?? Pendente</option>
-                                    <option value="faturar_hoje">?? Faturar Hoje</option>
+                                    <option value="pendente">⏳ Pendente</option>
+                                    <option value="faturar_hoje">💰 Faturar Hoje</option>
                                 </select>
                             </div>
 
@@ -23115,8 +23115,8 @@
                 if (response.ok) {
                     const result = await response.json();
                     const msg = result.aguardando_cotação
-                        ? `?? Solicitação ${result.número_pedido} enviada para Compras realizar cotação!`
-                        : `? Ordem de Compra ${result.número_pedido} criada e enviada para aprovação!`;
+                        ? `✅ Solicitação ${result.número_pedido} enviada para Compras realizar cotação!`
+                        : `📋 Ordem de Compra ${result.número_pedido} criada e enviada para aprovação!`;
                     showNotification(msg, 'success');
                     fecharModalOC();
                     carregarOrdensCompra();

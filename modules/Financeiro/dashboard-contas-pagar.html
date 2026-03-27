@@ -541,7 +541,7 @@
                     <div class="notification-item unread">
                         <div class="notification-icon error"><i class="fas fa-exclamation-circle"></i></div>
                         <div class="notification-content">
-                            <div class="notification-title">?? Contas Vencidas!</div>
+                            <div class="notification-title">🔴 Contas Vencidas!</div>
                             <div class="notification-message">Você tem ${vencidas.length} conta(s) vencida(s) totalizando ${formatarMoeda(vencidas.reduce((s, c) => s + parseFloat(c.valor || 0), 0))}</div>
                             <div class="notification-time"><i class="fas fa-clock"></i> Urgente</div>
                         </div>
@@ -660,11 +660,11 @@
 
                     if (isVencida) {
                         statusClass = 'urgente';
-                        statusIcon = '??';
+                        statusIcon = '🔴';
                     } else if (isHoje) {
-                        statusIcon = '??';
+                        statusIcon = '🟡';
                     } else {
-                        statusIcon = '??';
+                        statusIcon = '🟢';
                     }
 
                     return `

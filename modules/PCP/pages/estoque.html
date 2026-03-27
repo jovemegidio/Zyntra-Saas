@@ -439,7 +439,7 @@
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
                                 <fieldset style="border: 1px solid #e5e5e5; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
                                     <legend style="font-size: 11px; color: #999; padding: 0 4px;">Código</legend>
-                                    <div id="view-produto-código" style="font-size: 13px; color: #333; font-weight: 600; padding: 4px 0;">-</div>
+                                    <div id="view-produto-codigo" style="font-size: 13px; color: #333; font-weight: 600; padding: 4px 0;">-</div>
                                 </fieldset>
                                 <fieldset style="border: 1px solid #e5e5e5; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
                                     <legend style="font-size: 11px; color: #999; padding: 0 4px;">SKU</legend>
@@ -1712,8 +1712,8 @@
                 const minimo = p.estoque_minimo ?? 10;
                 return `
                 <tr>
-                    <td><strong>${p.código || '-'}</strong></td>
-                    <td>${p.nome || p.descrição || '-'}</td>
+                    <td><strong>${p.codigo || '-'}</strong></td>
+                    <td>${p.nome || p.descricao || '-'}</td>
                     <td>${p.sku || '-'}</td>
                     <td><span class="badge badge-gray">${p.categoria || '-'}</span></td>
                     <td>${estoque}</td>
@@ -1766,7 +1766,7 @@
         function preencherModalVisualizacao(p) {
             // Header
             document.getElementById('view-produto-nome').textContent = p.nome || p.descricao || 'Produto';
-            document.getElementById('view-produto-código').textContent = p.codigo || '-';
+            document.getElementById('view-produto-codigo').textContent = p.codigo || '-';
             document.getElementById('view-produto-sku').textContent = p.sku || '-';
 
             // Status badge (novo estilo Omie)
@@ -1936,7 +1936,7 @@
                                 </div>
                                 <div class="history-info">
                                     <div class="history-title">${tipo.charAt(0).toUpperCase() + tipo.slice(1)}</div>
-                                    <div class="history-desc">${m.observação || m.motivo || m.referencia || 'Movimentação registrada'}</div>
+                                    <div class="history-desc">${m.observacoes || m.motivo || m.referencia || 'Movimentação registrada'}</div>
                                 </div>
                                 <div class="history-meta">
                                     <div class="history-qty ${qtyClass}">${qtyPrefix}${m.quantidade || 0}</div>
@@ -2212,7 +2212,7 @@
         letter-spacing: 1.5px;
         text-transform: uppercase;
     }
-    .etq-top-bar .etq-código-pill {
+    .etq-top-bar .etq-codigo-pill {
         background: rgba(255,255,255,0.18);
         padding: 1mm 3mm;
         border-radius: 3px;
@@ -2396,7 +2396,7 @@
                         <div class="etq-logo-area">
                             <img class="etq-logo" src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<span style=\'font-size:8pt;font-weight:800;letter-spacing:1.5px\'>ALUFORCE</span>'">
                         </div>
-                        <span class="etq-código-pill">
+                        <span class="etq-codigo-pill">
                             ${corInfo ? '<span class="etq-cor-dot" style="background:' + corInfo.hex + ';"></span>' : ''}
                             ${código}${corLabel ? ' · ' + corLabel : ''}
                         </span>
@@ -2708,7 +2708,7 @@ var qrDataMap = {`;
                                 <td>${parseFloat(m.quantidade_anterior||0).toFixed(2)}</td>
                                 <td style="font-weight:600;">${parseFloat(m.quantidade_atual||0).toFixed(2)}</td>
                                 <td>${m.local||'PRINCIPAL'}</td>
-                                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(m.observacoes||m.observação||m.motivo||'').replace(/"/g,'&quot;')}">${m.observacoes||m.observação||m.motivo||'-'}</td>
+                                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${(m.observacoes||m.motivo||'').replace(/"/g,'&quot;')}">${m.observacoes||m.motivo||'-'}</td>
                                 <td>${m.documento||'-'}</td>
                             </tr>`;
                         }).join('')}</tbody>

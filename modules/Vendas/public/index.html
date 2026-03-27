@@ -5746,7 +5746,7 @@
                     onclick="window.location.href='estoque.html'">
                     <i class="fas fa-boxes-stacked"></i>
                 </button>
-                <button class="sidebar-btn" title="Meu Dashboard" data-page="page.metas"
+                <button class="sidebar-btn btn-meu-dashboard" title="Meu Dashboard" data-page="page.metas" style="display:none"
                     onclick="window.location.href='dashboard.html'">
                     <i class="fas fa-chart-pie"></i>
                 </button>
@@ -10564,7 +10564,7 @@
                     ${nfBadge}
                     ${tipoFatBadge}
                     <div class="card-header">
-                        <span class="card-number">${prefixo} Nº ${item.id}</span>
+                        <span class="card-number">${prefixo} Nº ${item.numero_pedido || item.id}</span>
                         <button class="card-menu" onclick="event.stopPropagation(); abrirModalEditar(${item.id})" title="Editar pedido">
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
@@ -11040,7 +11040,7 @@
             pedidoAtual = pedido;
 
             // Atualizar título do modal
-            document.getElementById('modal-título-pedido').textContent = `Pedido de Venda Nº ${pedido.id}`;
+            document.getElementById('modal-título-pedido').textContent = `Pedido de Venda Nº ${pedido.numero_pedido || pedido.id}`;
 
             // Atualizar avatar do cliente (primeiras 2 letras)
             const clienteNome = pedido.cliente || 'Cliente';
@@ -11877,7 +11877,7 @@
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Recibo - Pedido ${pedidoAtual.id}</title>
+                    <title>Recibo - Pedido ${pedidoAtual.numero_pedido || pedidoAtual.id}</title>
                     <style>
                         @page { margin: 10mm; size: A4; }
                         @media print {
@@ -11930,7 +11930,7 @@
 
                         <div class="doc-title">
                             <h1>${títuloRecibo}</h1>
-                            <div class="número">Pedido Nº ${String(pedidoAtual.id).padStart(5, '0')} | NF: ${pedidoAtual.nf || pedidoAtual.numero_nf || '-'}</div>
+                            <div class="número">Pedido Nº ${String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(5, '0')} | NF: ${pedidoAtual.nf || pedidoAtual.numero_nf || '-'}</div>
                             ${badgeMeiaNota}
                         </div>
 
@@ -12000,7 +12000,7 @@
             // Atualizar número do orçamento no modal
             const numOrc = document.getElementById('pdf-número-orcamento');
             if (numOrc) {
-                numOrc.textContent = `Orçamento Nº ${String(pedidoAtual.id).padStart(6, '0')}`;
+                numOrc.textContent = `Orçamento Nº ${String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(6, '0')}`;
             }
             // Atualizar nome do cliente no modal
             const clienteNome = document.getElementById('pdf-cliente-nome');
@@ -19229,15 +19229,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         function aplicarRestricoesVendedor() {
             console.log('[Vendas] Aplicando restrições de vendedor...');
 
-            // ---- SIDEBAR: esconder "Meu Dashboard" (vendedor) para admin ----
-            if (usuarioLogado.isAdmin || usuarioLogado.isSupervisor) {
-                document.querySelectorAll('.sidebar-btn').forEach(btn => {
-                    if (btn.getAttribute('title') === 'Meu Dashboard') {
-                        btn.style.display = 'none';
-                    }
+            // ---- SIDEBAR: "Meu Dashboard" só visível para vendedores (não admin/supervisor) ----
+            if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {
+                document.querySelectorAll('.btn-meu-dashboard').forEach(btn => {
+                    btn.style.display = '';
                 });
-                console.log('[Vendas] Dashboard vendedor ocultado para admin');
             }
+            // Admin/supervisor: manter oculto (default)
 
             // ---- SIDEBAR: esconder páginas admin para vendedores ----
             if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {

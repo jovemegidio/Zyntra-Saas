@@ -1410,13 +1410,13 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 if (chave_acesso && chave_acesso.length === 44) {
                     try {
                         const [existe] = await connection.query(
-                            'SELECT id FROM nf_entrada WHERE chave_acesso = ?', [chave_acesso]
+                            'SELECT id FROM nf_entrada WHERE chave_nfe = ?', [chave_acesso]
                         );
                         if (existe.length === 0) {
                             await connection.query(`
                                 INSERT INTO nf_entrada (
-                                    chave_acesso, numero_nfe, fornecedor_razao_social,
-                                    valor_total, data_entrada, status, importado_por
+                                    chave_nfe, numero_nfe, emitente_razao,
+                                    valor_total, data_entrada, status, usuario_id
                                 ) VALUES (?, ?, ?, ?, ?, 'importada', ?)
                             `, [
                                 chave_acesso, numero_nfe, pedido.fornecedor_nome,
@@ -1768,14 +1768,22 @@ module.exports = function createComprasExtendedRoutes(deps) {
             await pool.query(`
                 CREATE TABLE IF NOT EXISTS nf_entrada (
                     id INT AUTO_INCREMENT PRIMARY KEY,
-                    chave_acesso VARCHAR(44) UNIQUE,
+                    chave_nfe VARCHAR(44) UNIQUE,
                     numero_nfe VARCHAR(20),
                     serie VARCHAR(5),
-                    fornecedor_cnpj VARCHAR(20),
-                    fornecedor_razao_social VARCHAR(255),
-                    fornecedor_uf CHAR(2),
+                    emitente_cnpj VARCHAR(20),
+                    emitente_razao VARCHAR(255),
+                    emitente_uf CHAR(2),
+                    valor_produtos DECIMAL(15,2) DEFAULT 0,
+                    valor_frete DECIMAL(15,2) DEFAULT 0,
+                    valor_seguro DECIMAL(15,2) DEFAULT 0,
+                    valor_desconto DECIMAL(15,2) DEFAULT 0,
+                    valor_outras_despesas DECIMAL(15,2) DEFAULT 0,
                     valor_total DECIMAL(15,2) DEFAULT 0,
+                    base_icms DECIMAL(15,2) DEFAULT 0,
                     valor_icms DECIMAL(15,2) DEFAULT 0,
+                    base_icms_st DECIMAL(15,2) DEFAULT 0,
+                    valor_icms_st DECIMAL(15,2) DEFAULT 0,
                     valor_ipi DECIMAL(15,2) DEFAULT 0,
                     valor_pis DECIMAL(15,2) DEFAULT 0,
                     valor_cofins DECIMAL(15,2) DEFAULT 0,
@@ -1784,6 +1792,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                     status ENUM('pendente','conferida','aprovada','rejeitada') DEFAULT 'pendente',
                     natureza_operacao VARCHAR(255),
                     xml_content LONGTEXT,
+                    xml_conteudo LONGTEXT,
                     usuario_id INT,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
