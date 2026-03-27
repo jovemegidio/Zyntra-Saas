@@ -370,146 +370,144 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 } catch (_) {}
             }
 
-            const fmt = (v) => v ? parseFloat(v).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00';
-            const fmtD = (d) => d ? new Date(d).toLocaleDateString('pt-BR') : '—';
-            const statusLabel = { pendente: 'Pendente', autorizada: 'Autorizada', cancelada: 'Cancelada', rejeitada: 'Rejeitada', denegada: 'Denegada' };
-            const freteLabel = { '0': 'CIF (Emitente)', '1': 'FOB (Destinatário)', '9': 'Sem Frete' };
+            // Usar danfe-renderer.js para layout DANFE oficial A4
+            const { renderDanfe } = require('./danfe-renderer');
 
-            const itensRows = itens.map((item, i) => `
-              <tr>
-                <td style="padding:5px 8px;font-size:11px;text-align:center;">${i + 1}</td>
-                <td style="padding:5px 8px;font-size:11px;">${escapeXml(item.codigo_produto || item.codigo || '—')}</td>
-                <td style="padding:5px 8px;font-size:11px;">${escapeXml(item.descricao || '—')}</td>
-                <td style="padding:5px 8px;font-size:11px;">${escapeXml(item.ncm || '—')}</td>
-                <td style="padding:5px 8px;font-size:11px;text-align:center;">${escapeXml(item.unidade || 'UN')}</td>
-                <td style="padding:5px 8px;font-size:11px;text-align:right;">${fmt(item.quantidade)}</td>
-                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_unitario)}</td>
-                <td style="padding:5px 8px;font-size:11px;text-align:right;">R$ ${fmt(item.valor_desconto || 0)}</td>
-                <td style="padding:5px 8px;font-size:11px;text-align:right;font-weight:600;">R$ ${fmt(item.valor_total)}</td>
-              </tr>`).join('');
+            const fmtMoney = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtQty   = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            const fmtDate  = d => { if (!d) return ''; const dt = new Date(d); return isNaN(dt.getTime()) ? '' : dt.toLocaleDateString('pt-BR'); };
+            const fmtTime  = d => { if (!d) return ''; const dt = new Date(d); return isNaN(dt.getTime()) ? '' : dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); };
 
+            const isPreview  = !nfe.chave_acesso && !nfe.protocolo;
+            const chave      = nfe.chave_acesso || '';
+            const valorTotal = parseFloat(nfe.valor_total) || 0;
             const totalItens = itens.reduce((s, i) => s + parseFloat(i.valor_total || 0), 0);
-            const totalDesc  = itens.reduce((s, i) => s + parseFloat(i.valor_desconto || 0), 0);
+            const valorNF    = valorTotal || totalItens;
 
-            const html = `<!DOCTYPE html><html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Espelho NF-e #${escapeXml(String(nfe.numero))}</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Segoe UI',Arial,sans-serif; background:#f0f4f8; color:#1e293b; padding:24px; }
-    .danfe { background:white; max-width:980px; margin:0 auto; border:2px solid #1e40af; border-radius:4px; position:relative; z-index:1; }
-    .danfe-header { background:#1e40af; color:white; padding:12px 20px; display:flex; justify-content:space-between; align-items:center; }
-    .danfe-header h1 { font-size:22px; font-weight:800; letter-spacing:2px; }
-    .espelho-badge { background:#fbbf24; color:#1e3a8a; padding:4px 12px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; margin-top:6px; display:inline-block; }
-    .section { border:1px solid #d1d5db; margin:8px; border-radius:4px; overflow:hidden; }
-    .section-title { background:#f8fafc; border-bottom:1px solid #d1d5db; padding:6px 12px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:#64748b; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; }
-    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; }
-    .field { padding:8px 12px; border-right:1px solid #e5e7eb; }
-    .field:last-child { border-right:none; }
-    .field label { display:block; font-size:9px; font-weight:700; text-transform:uppercase; color:#9ca3af; margin-bottom:2px; }
-    .field span { font-size:12px; color:#1e293b; font-weight:500; }
-    .watermark { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-35deg); font-size:90px; font-weight:900; color:rgba(30,64,175,0.05); pointer-events:none; white-space:nowrap; z-index:0; }
-    table.items { width:100%; border-collapse:collapse; font-size:11px; }
-    table.items thead th { background:#f1f5f9; padding:6px 8px; text-align:left; font-size:10px; font-weight:700; text-transform:uppercase; color:#64748b; border-bottom:2px solid #cbd5e1; }
-    table.items tbody tr { border-bottom:1px solid #e5e7eb; }
-    .totais-row { display:flex; justify-content:flex-end; gap:24px; padding:12px 20px; background:#f8fafc; border-top:2px solid #1e40af; flex-wrap:wrap; }
-    .t-item { text-align:right; }
-    .t-item label { font-size:9px; font-weight:700; text-transform:uppercase; color:#9ca3af; display:block; }
-    .t-item span { font-size:14px; font-weight:700; color:#1e40af; }
-    .footer-bar { background:#1e40af; color:rgba(255,255,255,0.8); text-align:center; padding:8px; font-size:10px; }
-    .status-badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:700; }
-    .status-pendente { background:#fef3c7; color:#d97706; }
-    .status-autorizada { background:#d1fae5; color:#059669; }
-    .status-cancelada { background:#fee2e2; color:#dc2626; }
-    @media print { body { background:white; padding:0; } .no-print { display:none !important; } .danfe { border:1px solid #000; max-width:none; } }
-  </style>
-</head>
-<body>
-<div class="watermark">ESPELHO SEM VALOR FISCAL</div>
-<div class="no-print" style="max-width:980px;margin:0 auto 12px;display:flex;gap:8px;justify-content:flex-end;">
-  <button onclick="window.print()" style="background:#1e40af;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;">🖨 Imprimir</button>
-  <button onclick="window.close()" style="background:#6b7280;color:white;border:none;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px;">Fechar</button>
-</div>
-<div class="danfe">
-  <div class="danfe-header">
-    <div><h1>ALUFORCE</h1><div style="font-size:11px;opacity:0.8;">${escapeXml(emit.razaoSocial)}</div></div>
-    <div style="text-align:center;">
-      <div style="font-size:16px;font-weight:700;letter-spacing:2px;">ESPELHO DE NF-e</div>
-      <span class="espelho-badge">⚠ SEM VALOR FISCAL — PRÉ-AUTORIZAÇÃO</span>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:20px;font-weight:800;">Nº ${escapeXml(String(nfe.numero || '—'))}</div>
-      <div style="font-size:12px;opacity:0.8;">Série: ${escapeXml(String(nfe.serie))}</div>
-      <span class="status-badge status-${escapeXml(String(nfe.status).toLowerCase())}" style="margin-top:4px;display:inline-block;">${escapeXml(statusLabel[nfe.status] || nfe.status)}</span>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">📦 Emitente</div>
-    <div class="grid-2">
-      <div class="field"><label>Razão Social / Nome Fantasia</label><span>${escapeXml(emit.razaoSocial)} / ${escapeXml(emit.nomeFantasia)}</span></div>
-      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
-        <div><label>CNPJ</label><span>${escapeXml(emit.cnpj || '—')}</span></div>
-        <div><label>Inscrição Estadual</label><span>${escapeXml(emit.ie || '—')}</span></div>
-      </div>
-    </div>
-    <div class="grid-3">
-      <div class="field"><label>Endereço</label><span>${escapeXml(emit.logradouro + ' ' + emit.numero + (emit.bairro ? ', ' + emit.bairro : ''))}</span></div>
-      <div class="field"><label>Município / UF</label><span>${escapeXml(emit.cidade + ' — ' + emit.uf)}</span></div>
-      <div class="field"><label>CEP / Telefone</label><span>${escapeXml(emit.cep + ' / ' + (emit.telefone || '—'))}</span></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">🏢 Destinatário</div>
-    <div class="grid-2">
-      <div class="field"><label>Nome / Razão Social</label><span>${escapeXml(nfe.destinatario_nome || '—')}</span></div>
-      <div class="field" style="display:grid;grid-template-columns:1fr 1fr;">
-        <div><label>CNPJ / CPF</label><span>${escapeXml(nfe.destinatario_cnpj || '—')}</span></div>
-        <div><label>Inscrição Estadual</label><span>${escapeXml(nfe.destinatario_ie || '—')}</span></div>
-      </div>
-    </div>
-    <div class="grid-3">
-      <div class="field"><label>Endereço</label><span>${escapeXml(nfe.destinatario_end || '—')}</span></div>
-      <div class="field"><label>Município / UF</label><span>${escapeXml(nfe.destinatario_cidade + ' — ' + nfe.destinatario_uf)}</span></div>
-      <div class="field"><label>CEP / E-mail</label><span>${escapeXml(nfe.destinatario_cep + ' / ' + (nfe.destinatario_email || '—'))}</span></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">📋 Dados da NF-e</div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);">
-      <div class="field"><label>Data Emissão</label><span>${fmtD(nfe.data_emissao)}</span></div>
-      <div class="field"><label>Natureza da Operação</label><span>${escapeXml(nfe.natureza_operacao)}</span></div>
-      <div class="field"><label>Tipo</label><span>${nfe.tipo_operacao === '1' ? 'Saída' : 'Entrada'}</span></div>
-      <div class="field"><label>Modalidade Frete</label><span>${escapeXml(freteLabel[nfe.modalidade_frete] || '—')}</span></div>
-      <div class="field"><label>Protocolo / Chave</label><span style="font-size:9px;">${escapeXml(nfe.protocolo || nfe.chave_acesso || '—')}</span></div>
-    </div>
-  </div>
-  <div class="section">
-    <div class="section-title">📦 Itens da NF-e (${itens.length} produto(s))</div>
-    <table class="items">
-      <thead><tr>
-        <th>#</th><th>Código</th><th>Descrição</th><th>NCM</th><th>UN</th>
-        <th style="text-align:right;">Qtd.</th><th style="text-align:right;">Vl. Unit.</th>
-        <th style="text-align:right;">Desconto</th><th style="text-align:right;">Total</th>
-      </tr></thead>
-      <tbody>${itensRows || '<tr><td colspan="9" style="padding:16px;text-align:center;color:#9ca3af;">Nenhum item lançado</td></tr>'}</tbody>
-    </table>
-  </div>
-  <div class="totais-row">
-    <div class="t-item"><label>Qtd. Itens</label><span>${itens.length}</span></div>
-    <div class="t-item"><label>Descontos</label><span style="color:#ef4444;">R$ ${fmt(totalDesc)}</span></div>
-    <div class="t-item"><label>Subtotal</label><span>R$ ${fmt(totalItens)}</span></div>
-    <div class="t-item"><label>VALOR TOTAL NF-e</label><span style="font-size:18px;">R$ ${fmt(nfe.valor_total || totalItens)}</span></div>
-  </div>
-  <div class="footer-bar">
-    Documento sem valor fiscal &nbsp;|&nbsp; Gerado em ${new Date().toLocaleString('pt-BR')} &nbsp;|&nbsp; Sistema Zyntra / Aluforce
-    &nbsp;|&nbsp; NF-e Nº ${escapeXml(String(nfe.numero || '—'))} — Série ${escapeXml(String(nfe.serie))}
-  </div>
-</div>
-</body></html>`;
+            // Separar logradouro / número do destinatário
+            const splitEnd = str => { const m = (str || '').match(/^(.+?),\s*(\S+.*)$/); return m ? [m[1].trim(), m[2].trim()] : [(str || ''), '']; };
+            const [dstLgr, dstNro] = splitEnd(nfe.destinatario_end);
 
+            // Duplicatas (se tabela existir)
+            let dups = [];
+            try {
+                const [dupRows] = await pool.query('SELECT * FROM nfe_duplicatas WHERE nfe_id = ? ORDER BY numero', [row.id]);
+                dups = dupRows.map(d => ({ nDup: d.numero || '', dVenc: fmtDate(d.vencimento), vDup: fmtMoney(d.valor) }));
+            } catch (_) { /* tabela pode não existir */ }
+
+            const ctx = {
+                marcaAguaClasse: isPreview ? '' : 'hidden',
+                marcaAguaTexto: isPreview ? 'ESPELHO SEM VALOR FISCAL' : '',
+                avisoTopo: isPreview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
+                paginaAtual: '1',
+                paginaTotal: '1',
+                codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
+                emitenteLogoUrl: '/api/empresa/1/logo',
+                portalConsultaUrl: 'www.nfe.fazenda.gov.br/portal',
+                NFe: {
+                    infNFe: {
+                        ide: {
+                            nNF: nfe.numero || '',
+                            serie: nfe.serie || '1',
+                            tpNF: nfe.tipo_operacao || '1',
+                            natOp: nfe.natureza_operacao || 'Venda de Mercadoria',
+                            dhEmi: fmtDate(nfe.data_emissao),
+                            dhSaiEnt: fmtDate(row.data_saida || nfe.data_emissao),
+                            _danfeHoraSaida: fmtTime(row.data_saida || nfe.data_emissao)
+                        },
+                        emit: {
+                            xNome: emit.razaoSocial,
+                            xFant: emit.nomeFantasia,
+                            CNPJ: emit.cnpj, CPF: '',
+                            IE: emit.ie, IEST: '', CRT: row.crt || '', IM: '', email: '',
+                            enderEmit: {
+                                xLgr: emit.logradouro, nro: emit.numero, xCpl: '',
+                                xBairro: emit.bairro, xMun: emit.cidade, UF: emit.uf,
+                                CEP: emit.cep, fone: emit.telefone
+                            }
+                        },
+                        dest: {
+                            xNome: nfe.destinatario_nome || '',
+                            CNPJ: (nfe.destinatario_cnpj || '').length > 11 ? (nfe.destinatario_cnpj || '') : '',
+                            CPF: (nfe.destinatario_cnpj || '').length <= 11 ? (nfe.destinatario_cnpj || '') : '',
+                            IE: nfe.destinatario_ie || '',
+                            indIEDest: nfe.destinatario_ie ? '1' : '9',
+                            enderDest: {
+                                xLgr: dstLgr, nro: dstNro, xCpl: '',
+                                xBairro: row.destinatario_bairro || row.cli_bairro || '',
+                                xMun: nfe.destinatario_cidade || '',
+                                UF: nfe.destinatario_uf || '',
+                                CEP: nfe.destinatario_cep || '',
+                                fone: row.destinatario_telefone || row.cli_telefone || ''
+                            }
+                        },
+                        cobr: {
+                            fat: { nFat: nfe.numero || '', vOrig: fmtMoney(valorNF), vLiq: fmtMoney(valorNF) },
+                            dup: dups
+                        },
+                        det: itens.map((item, i) => ({
+                            prod: {
+                                cProd: item.codigo_produto || item.codigo || String(i + 1).padStart(3, '0'),
+                                xProd: item.descricao || '',
+                                NCM: item.ncm || '',
+                                CFOP: item.cfop || '',
+                                uCom: item.unidade || 'UN',
+                                qCom: fmtQty(item.quantidade),
+                                vUnCom: fmtMoney(item.valor_unitario),
+                                vProd: fmtMoney(item.valor_total)
+                            },
+                            _danfeCstCsosn: item.cst || item.csosn || '',
+                            _danfeBcIcms: fmtMoney(item.base_icms || item.valor_total || 0),
+                            _danfeVIcms: fmtMoney(item.valor_icms || 0),
+                            _danfePIcms: item.aliquota_icms ? fmtMoney(item.aliquota_icms) : '',
+                            _danfeVIpi: fmtMoney(item.valor_ipi || 0),
+                            _danfePIpi: item.aliquota_ipi ? fmtMoney(item.aliquota_ipi) : ''
+                        })),
+                        total: {
+                            ICMSTot: {
+                                vBC: fmtMoney(row.base_calculo_icms || 0),
+                                vICMS: fmtMoney(row.valor_icms || 0),
+                                vBCST: fmtMoney(row.base_calculo_st || 0),
+                                vST: fmtMoney(row.valor_icms_st || 0),
+                                vTotTrib: fmtMoney(row.valor_tributos || 0),
+                                vProd: fmtMoney(totalItens),
+                                vFCPSTRet: '0,00',
+                                vFrete: fmtMoney(row.valor_frete || 0),
+                                vSeg: fmtMoney(row.valor_seguro || 0),
+                                vDesc: fmtMoney(row.valor_desconto || 0),
+                                vOutro: fmtMoney(row.outras_despesas || 0),
+                                vIPI: fmtMoney(row.valor_ipi || 0),
+                                vNF: fmtMoney(valorNF),
+                                vII: '0,00'
+                            },
+                            ISSQNtot: { vServ: '', vBC: '', vISS: '', cMunFG: '' }
+                        },
+                        transp: {
+                            modFrete: { '0': '0 - Emitente', '1': '1 - Destinatário', '9': '9 - Sem Frete' }[nfe.modalidade_frete] || '',
+                            transporta: { xNome: row.transportadora_nome || '', CNPJ: '', CPF: '', IE: '', xEnder: '', xMun: '', UF: '' },
+                            veicTransp: { placa: '', UF: '', RNTC: '' },
+                            _danfeQVol: row.qtd_volumes || '', _danfeEsp: row.especie_volumes || '',
+                            _danfeMarca: '', _danfeNVol: '',
+                            _danfePesoB: row.peso_bruto ? fmtMoney(row.peso_bruto) : '',
+                            _danfePesoL: row.peso_liquido ? fmtMoney(row.peso_liquido) : ''
+                        },
+                        infAdProd: '',
+                        infAdic: {
+                            infCpl: row.informacoes_complementares || row.observacao || '',
+                            infAdFisco: row.informacoes_fisco || ''
+                        }
+                    }
+                },
+                protNFe: {
+                    infProt: {
+                        chNFe: chave,
+                        nProt: nfe.protocolo || (isPreview ? 'Pré-autorização' : ''),
+                        dhRecbto: fmtDate(row.data_autorizacao || nfe.data_emissao)
+                    }
+                }
+            };
+
+            const html = renderDanfe(ctx);
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             return res.send(html);
 
