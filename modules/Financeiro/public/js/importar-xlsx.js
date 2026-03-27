@@ -153,8 +153,16 @@ const HEADER_MAP_CONTAS_RECEBER = {
     'STATUS': 'status',
     'DIAS': 'dias_atraso',
     'POSIÇÃO': 'posicao',
-    'RECOMPRADO': 'recomprado',
-    'CARTORIO': 'cartorio',
+    'RECOMPRADO': 'dia_recomprado',
+    'CARTORIO': 'data_para_cartorio',
+    'PROTESTADO': 'data_protestado',
+    'DIA RECOMPRADO': 'dia_recomprado',
+    'DATA PARA CARTÓRIO': 'data_para_cartorio',
+    'DATA CARTÓRIO': 'data_para_cartorio',
+    'DATA PROTESTADO': 'data_protestado',
+    'DT RECOMPRA': 'dia_recomprado',
+    'DT CARTÓRIO': 'data_para_cartorio',
+    'DT PROTESTO': 'data_protestado',
     'OBSERVAÇÃO': 'observacoes',
     // Headers internos simples (fallback)
     'Descrição': 'descricao',
@@ -522,6 +530,28 @@ async function processarArquivoXLSX(file, tipo) {
             }
             
             if (hasData) {
+                // Normalização de campos de data: DD/MM/YYYY → YYYY-MM-DD
+                const DATE_FIELDS = [
+                    'data_emissao', 'data_registro', 'data_vencimento', 'data_previsao',
+                    'data_pagamento', 'data_recebimento', 'data_conciliacao',
+                    'dia_recomprado', 'data_para_cartorio', 'data_protestado'
+                ];
+                for (const df of DATE_FIELDS) {
+                    if (obj[df]) {
+                        const v = String(obj[df]).trim();
+                        // DD/MM/YYYY → YYYY-MM-DD
+                        const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                        if (m) {
+                            obj[df] = `${m[3]}-${m[2]}-${m[1]}`;
+                        } else if (/^\d{4}-\d{2}-\d{2}/.test(v)) {
+                            obj[df] = v.slice(0, 10);
+                        } else if (typeof obj[df] === 'number') {
+                            // Serial Excel → Date
+                            const d = new Date(Math.round((obj[df] - 25569) * 86400 * 1000));
+                            obj[df] = d.toISOString().slice(0, 10);
+                        }
+                    }
+                }
                 // Normalização para template de Pagamentos efetuados (DT. PAGTO como data_vencimento fallback)
                 if (obj.data_pagamento && !obj.data_vencimento) {
                     obj.data_vencimento = obj.data_pagamento;

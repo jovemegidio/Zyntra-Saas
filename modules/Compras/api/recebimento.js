@@ -12,14 +12,14 @@ router.get('/stats', async (req, res) => {
         const [pendentes] = await db.query(`
             SELECT COUNT(*) as total FROM pedidos_compra 
             WHERE status IN ('aprovado', 'enviado', 'pendente') 
-            AND (data_recebimento IS NULL OR data_recebimento = '')
+            AND data_recebimento IS NULL
         `);
         
         // Pedidos atrasados (data_entrega_prevista < hoje e não recebidos)
         const [atrasados] = await db.query(`
             SELECT COUNT(*) as total FROM pedidos_compra 
             WHERE status IN ('aprovado', 'enviado', 'pendente') 
-            AND (data_recebimento IS NULL OR data_recebimento = '')
+            AND data_recebimento IS NULL
             AND data_entrega_prevista < ?
         `, [hoje]);
         
@@ -33,7 +33,7 @@ router.get('/stats', async (req, res) => {
         const [valorPendente] = await db.query(`
             SELECT COALESCE(SUM(valor_total), 0) as total FROM pedidos_compra 
             WHERE status IN ('aprovado', 'enviado', 'pendente') 
-            AND (data_recebimento IS NULL OR data_recebimento = '')
+            AND data_recebimento IS NULL
         `);
         
         res.json({
@@ -66,10 +66,10 @@ router.get('/pedidos', async (req, res) => {
         // Filtrar por status
         if (status === 'pendente') {
             sql += ` AND pc.status IN ('aprovado', 'enviado', 'pendente') 
-                     AND (pc.data_recebimento IS NULL OR pc.data_recebimento = '')`;
+                     AND pc.data_recebimento IS NULL`;
         } else if (status === 'atrasado') {
             sql += ` AND pc.status IN ('aprovado', 'enviado', 'pendente') 
-                     AND (pc.data_recebimento IS NULL OR pc.data_recebimento = '')
+                     AND pc.data_recebimento IS NULL
                      AND pc.data_entrega_prevista < ?`;
             params.push(hoje);
         } else if (status === 'recebido') {

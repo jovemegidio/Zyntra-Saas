@@ -227,7 +227,7 @@ class ModernDashboardVisuals {
     }
 
     modernizeContentCards() {
-        // Moderniza seções de conteúdo (Últimas Atividades, Colaboradores com mais tempo de casa)
+        // Moderniza seções de conteúdo (ÚÚÚltimas Atividades, Colaboradores com mais tempo de casa)
         const contentSections = document.querySelectorAll('div[class*="section"], .content-section, .activity-section');
         
         contentSections.forEach(section => {

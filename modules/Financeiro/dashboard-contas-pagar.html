@@ -7,7 +7,7 @@
     <title>Zyntra: Dashboard Contas a Pagar</title>
 
     <!-- Sistema de Autenticação Unificado -->
-    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <link rel="stylesheet" href="/css/notifications-fix.css?v=20260109">
@@ -254,7 +254,8 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Centros de Custo" data-id="centros-custo" data-rbac="admin,financeiro" onclick="window.location.href='centros-custo.html'">
+                <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
+                <button class="sidebar-btn" title="Centros de Custo" data-id="centros-custo" data-rbac="admin,financeiro" onclick="window.location.href='centros-custo.html'" style="display:none">
                     <i class="fas fa-sitemap"></i>
                 </button>
                 <button class="sidebar-btn" title="Impostos" data-id="impostos" data-rbac="admin,financeiro" onclick="window.location.href='impostos.html'">
@@ -747,7 +748,7 @@
     </script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="public/js/financeiro-user-loader.js?v=20260119"></script>
-    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <!-- Sidebar + Header RBAC Component -->
     <script src="js/financeiro-sidebar.js?v=20260211"></script>

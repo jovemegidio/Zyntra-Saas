@@ -792,7 +792,7 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn active" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
@@ -892,7 +892,7 @@
                            Em breve voc poder consultar e baixar todos os seus holerites diretamente aqui.</p>
                         <div class="notice-info">
                             <i class="fas fa-info-circle"></i>
-                            <span>Por enquanto, consulte o departamento de RH para informaes sobre seu pagamento.</span>
+                            <span>Por enquanto, consulte o departamento de RH para informações sobre seu pagamento.</span>
                         </div>
                     </div>
                 </div>
@@ -914,7 +914,7 @@
                 <div class="empresa-info-section">
                     <h2>ALUFORCE INDSTRIA E COMRCIO LTDA</h2>
                     <p>CNPJ: 00.000.000/0001-00</p>
-                    <p>Endereo: Rua da Empresa, 123 - Cidade/Estado</p>
+                    <p>Endereço: Rua da Empresa, 123 - Cidade/Estado</p>
                 </div>
                 <div id="viewer-content"></div>
             </div>
@@ -946,7 +946,7 @@
                             <li style="margin-bottom:6px;">Os holerites digitais tero a <strong>mesma validade</strong> dos documentos impressos;</li>
                             <li style="margin-bottom:6px;">Poderei acess-los a <strong>qualquer momento</strong> pela plataforma;</li>
                             <li style="margin-bottom:6px;">Poderei <strong>revogar</strong> esta autorizao a qualquer momento, solicitando ao departamento de RH;</li>
-                            <li>A empresa garantir a <strong>segurana e confidencialidade</strong> das informaes.</li>
+                            <li>A empresa garantir a <strong>segurana e confidencialidade</strong> das informações.</li>
                         </ol>
                     </div>
                 </div>
@@ -1130,14 +1130,14 @@
                     <div class="empty-state" style="grid-column: 1 / -1;">
                         <i class="fas fa-file-invoice"></i>
                         <h3>Nenhum holerite encontrado</h3>
-                        <p>No h holerites disponveis para o perodo selecionado</p>
+                        <p>No h holerites disponveis para o período selecionado</p>
                     </div>
                 `;
                 return;
             }
             
             grid.innerHTML = data.map((h, i) => {
-                const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salrio';
+                const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salário';
                 const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
                 const tipoIcon = h.tipo === 'adiantamento' ? 'fa-hand-holding-usd' : 'fa-money-bill-wave';
                 return `
@@ -1151,7 +1151,7 @@
                     </div>
                     <div class="holerite-details">
                         <div class="holerite-value">${formatCurrency(h.salario_liquido)}</div>
-                        <div class="holerite-label">Valor lquido</div>
+                        <div class="holerite-label">Valor líquido</div>
                     </div>
                     <div class="holerite-info">
                         <span>Proventos: ${formatCurrency(h.total_proventos)}</span>
@@ -1170,7 +1170,7 @@
 
         async function visualizarHolerite(id) {
             try {
-                // Registrar visualizao
+                // Registrar visualização
                 await fetch(`/api/rh/holerites/${id}/visualizar`, { credentials: 'include', method: 'POST',
                     headers: getAuthHeaders()
                 });
@@ -1182,7 +1182,7 @@
                     const h = await response.json();
                     const modal = document.getElementById('holerite-modal');
                     const content = document.getElementById('viewer-content');
-                    const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALRIO';
+                    const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALÁRIO';
                     const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
                     
                     content.innerHTML = `
@@ -1220,8 +1220,8 @@
                         <table class="demonstrativo-table">
                             <thead>
                                 <tr>
-                                    <th style="width:60px;">Cdigo</th>
-                                    <th>Descrio</th>
+                                    <th style="width:60px;">Código</th>
+                                    <th>Descrição</th>
                                     <th style="width:70px;">Ref.</th>
                                     <th style="width:100px;text-align:right;">Valor</th>
                                 </tr>
@@ -1245,8 +1245,8 @@
                         <table class="demonstrativo-table">
                             <thead>
                                 <tr>
-                                    <th style="width:60px;">Cdigo</th>
-                                    <th>Descrio</th>
+                                    <th style="width:60px;">Código</th>
+                                    <th>Descrição</th>
                                     <th style="width:70px;">Ref.</th>
                                     <th style="width:100px;text-align:right;">Valor</th>
                                 </tr>
@@ -1274,7 +1274,7 @@
                                 <div class="total-value desconto">${formatCurrency(h.total_descontos)}</div>
                             </div>
                             <div class="total-item">
-                                <div class="total-label">Lquido a Receber</div>
+                                <div class="total-label">Líquido a Receber</div>
                                 <div class="total-value liquido">${formatCurrency(h.salario_liquido)}</div>
                             </div>
                         </div>
@@ -1304,7 +1304,7 @@
         }
 
         async function confirmarRecebimento(id) {
-            if (!confirm('Deseja confirmar o recebimento deste holerite?\n\nEsta ao registrar que voc visualizou e est ciente das informaes do seu pagamento.')) {
+            if (!confirm('Deseja confirmar o recebimento deste holerite?\n\nEsta ao registrar que voc visualizou e est ciente das informações do seu pagamento.')) {
                 return;
             }
             

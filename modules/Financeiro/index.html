@@ -14,7 +14,7 @@
 <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
 
     <!-- Autenticação -->
-    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
     <!-- Fonte Inter -->
@@ -1163,7 +1163,8 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo">
+                <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
+                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
                     <i class="fas fa-sitemap"></i>
                 </a>
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
@@ -1498,7 +1499,7 @@
 
         function calcularTotal(contas) {
             return contas
-                .filter(c => ['pendente', 'parcial'].includes(normalizarStatus(c.status)))
+                .filter(c => ['pendente', 'parcial', 'a_vencer', 'vencida'].includes(normalizarStatus(c.status)))
                 .reduce((soma, conta) => soma + converterNumero(conta.valor_total || conta.valor), 0);
         }
 
@@ -1896,9 +1897,10 @@
 
         function getStatusClass(status) {
             const statusNormalizado = normalizarStatus(status);
-            if (statusNormalizado === 'pago' || statusNormalizado === 'recebido') return 'badge-success';
-            if (statusNormalizado === 'vencido') return 'badge-danger';
-            if (statusNormalizado === 'parcial') return 'badge-warning';
+            if (['pago', 'recebido', 'liquidada', 'recebida'].includes(statusNormalizado)) return 'badge-success';
+            if (['vencido', 'vencida'].includes(statusNormalizado)) return 'badge-danger';
+            if (['parcial'].includes(statusNormalizado)) return 'badge-warning';
+            if (['cancelada'].includes(statusNormalizado)) return 'badge-secondary';
             return 'badge-info';
         }
 
@@ -1908,7 +1910,12 @@
                 recebido: 'Recebido',
                 pendente: 'Pendente',
                 vencido: 'Vencido',
-                parcial: 'Parcial'
+                parcial: 'Parcial',
+                a_vencer: 'A Vencer',
+                vencida: 'Vencida',
+                liquidada: 'Liquidada',
+                recebida: 'Recebida',
+                cancelada: 'Cancelada'
             };
             const statusNormalizado = normalizarStatus(status) || 'pendente';
             return mapa[statusNormalizado] || statusNormalizado;

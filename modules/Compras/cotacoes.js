@@ -35,9 +35,10 @@ class CotacoesManager {
     }
 
     getAuthHeaders() {
-        return {
-            'Content-Type': 'application/json',
-        };
+        const token = localStorage.getItem('token') || localStorage.getItem('authToken');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return headers;
     }
 
     escapeHtml(str) {

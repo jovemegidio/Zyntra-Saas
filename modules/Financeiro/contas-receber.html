@@ -483,13 +483,33 @@
                     <div class="filter-group">
                         <label><i class="fas fa-calendar"></i> Período</label>
                         <select class="filter-input" id="filtro-período" onchange="filtrarContas()">
-                            <option value="todas">Todas</option>
+                            <option value="mes" selected>Este Mês</option>
+                            <option value="mes-anterior">Mês Anterior</option>
+                            <option value="proximos7">Próximos 7 dias</option>
+                            <option value="proximos30">Próximos 30 dias</option>
+                            <option value="proximos60">Próximos 60 dias</option>
+                            <option value="proximos90">Próximos 90 dias</option>
+                            <option value="ultimos30">Últimos 30 dias</option>
+                            <option value="ultimos60">Últimos 60 dias</option>
+                            <option value="ultimos90">Últimos 90 dias</option>
+                            <option value="vencidas">Vencidas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
-                            <option value="mes" selected>Este Mês</option>
-                            <option value="proximos7">Proximos 7 dias</option>
-                            <option value="proximos30">Proximos 30 dias</option>
-                            <option value="vencidas">Vencidas</option>
+                            <option value="2025-11">Novembro/2025</option>
+                            <option value="2025-12">Dezembro/2025</option>
+                            <option value="2026-01">Janeiro/2026</option>
+                            <option value="2026-02">Fevereiro/2026</option>
+                            <option value="2026-03">Março/2026</option>
+                            <option value="2026-04">Abril/2026</option>
+                            <option value="2026-05">Maio/2026</option>
+                            <option value="2026-06">Junho/2026</option>
+                            <option value="2026-07">Julho/2026</option>
+                            <option value="2026-08">Agosto/2026</option>
+                            <option value="2026-09">Setembro/2026</option>
+                            <option value="2026-10">Outubro/2026</option>
+                            <option value="2026-11">Novembro/2026</option>
+                            <option value="2026-12">Dezembro/2026</option>
+                            <option value="todas">Todas</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -691,7 +711,7 @@
                 <div class="tab-pane-view" id="pane-pm">
                     <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;overflow-y:auto;padding:4px 0;">
                         <!-- PM Inputs Row -->
-                        <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;flex-shrink:0;">
+                        <div style="display:flex;align-items:center;gap:16px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px;flex-shrink:0;flex-wrap:wrap;">
                             <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-stopwatch" style="color:#ec4899;margin-right:5px;"></i>Simulação PM</span>
                             <div style="display:flex;align-items:center;gap:6px;">
                                 <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">DT Operação:</label>
@@ -703,6 +723,24 @@
                                 <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">D+:</label>
                                 <input type="number" id="pm-dplus" value="3" min="0" max="30"
                                     style="width:60px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;text-align:center;"
+                                    oninput="atualizarPM()">
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Taxa Juros (% a.m.):</label>
+                                <input type="number" id="pm-taxa-juros" value="1.5" min="0" max="100" step="0.01"
+                                    style="width:72px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;text-align:center;"
+                                    oninput="atualizarPM()">
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Antecipação (%):</label>
+                                <input type="number" id="pm-taxa-antecipacao" value="0" min="0" max="100" step="0.01"
+                                    style="width:72px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;text-align:center;"
+                                    oninput="atualizarPM()">
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;">
+                                <label style="font-size:11px;font-weight:600;color:#6b7280;white-space:nowrap;">Factory (%):</label>
+                                <input type="number" id="pm-taxa-factory" value="0" min="0" max="100" step="0.01"
+                                    style="width:72px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;color:#111827;outline:none;text-align:center;"
                                     oninput="atualizarPM()">
                             </div>
                             <div style="font-size:10px;color:#9ca3af;margin-left:auto;">
@@ -724,11 +762,13 @@
                                     <th style="text-align:right">Valor</th>
                                     <th style="text-align:right">Prazo Nominal</th>
                                     <th style="text-align:right" id="pm-th-dplus">Prazo D+3</th>
-                                    <th style="text-align:right">Pr é Valor</th>
+                                    <th style="text-align:right">Pr × Valor</th>
+                                    <th style="text-align:right">Custo Fin.</th>
+                                    <th style="text-align:right">Valor Líquido</th>
                                     <th>Portador</th><th>Empresa</th>
                                 </tr></thead>
                                 <tbody id="tabela-pm-body">
-                                    <tr><td colspan="7" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
+                                    <tr><td colspan="9" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
                                 </tbody>
                             </table>
                             </div>
@@ -857,6 +897,35 @@
                             <div class="form-row-conta">
                                 <div class="form-group-conta"><label>Observacoes</label><textarea id="observacoes" rows="4" placeholder=""></textarea></div>
                             </div>
+                            <!-- [DEV SPEC 2.4] Novos campos: Status, Pago no dia, Aceita troca factory, Comprovante -->
+                            <div class="form-row-conta">
+                                <div class="form-group-conta">
+                                    <label>Status</label>
+                                    <select id="cr-status">
+                                        <option value="">Automático</option>
+                                        <option value="a_vencer">A Vencer</option>
+                                        <option value="vencida">Vencida</option>
+                                        <option value="liquidada">Liquidada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-conta">
+                                    <label>Pago no Dia</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-pago-no-dia"><i class="fas fa-calendar-check"></i></div>
+                                </div>
+                                <div class="form-group-conta checkbox-conta" style="align-self:flex-end;padding-bottom:8px;">
+                                    <label class="checkbox-label-cr"><input type="checkbox" id="cr-aceita-troca"><span>Aceita Troca (Factory)</span></label>
+                                </div>
+                            </div>
+                            <div class="form-row-conta">
+                                <div class="form-group-conta" style="flex:2;">
+                                    <label>Upload de Comprovante</label>
+                                    <div style="display:flex;gap:8px;align-items:center;">
+                                        <input type="file" id="cr-comprovante" accept=".pdf,.jpg,.jpeg,.png,.webp" style="flex:1;">
+                                        <a href="#" id="cr-comprovante-link" target="_blank" style="display:none;font-size:12px;color:var(--primary-blue);white-space:nowrap;"><i class="fas fa-paperclip"></i> Ver comprovante</a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-impostos">
                             <div class="form-row-conta">
@@ -950,7 +1019,8 @@
                     <span class="input-hint">Selecione o arquivo - todas as colunas serao importadas automaticamente</span>
                 </div>
                 <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Colunas importadas:</strong> Empresa, CNPJ, Razao Social, Emissão, Vencimento, Categoria, Conta Corrente, NFe, Parcela, Documento, Vendedor, Projeto, Valor, PIS, COFINS, CSLL, IR, ISS, INSS, Valor Liquido, Recebido, A Receber</p>
+                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Formato Aluforce (aba FATURAMENTO):</strong> EMPRESA, EMISSÃO, TIPO, NFe, PARCELA, CLIENTE, CNPJ, VALOR, VCTO, SITUAÇÃO, PORTADOR, STATUS, DIAS, POSIÇÃO, OBSERVAÇÃO</p>
+                    <p style="font-size:11px;color:#1e40af;margin:6px 0 0;">Também aceita planilha genérica com colunas: Cliente, Valor, Vencimento, Status.</p>
                 </div>
                 <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-top:12px;">
                     <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>Atenão:</strong> A importação substituira todos os registros importados anteriormente.</p>
@@ -1348,6 +1418,13 @@
             document.getElementById('cr-valor-inss').value = '';
             document.getElementById('cr-total-recebido').value = '0,00';
             document.getElementById('cr-valor-a-receber').value = '0,00';
+            // [DEV SPEC 2.4] Reset novos campos
+            document.getElementById('cr-status').value = '';
+            document.getElementById('cr-pago-no-dia').value = '';
+            document.getElementById('cr-aceita-troca').checked = false;
+            document.getElementById('cr-comprovante').value = '';
+            var comprovanteLink = document.getElementById('cr-comprovante-link');
+            if (comprovanteLink) comprovanteLink.style.display = 'none';
             resetTabsCR();
             if (id) {
                 var c = contas.find(function(x){return x.id===id;}); if (!c) return;
@@ -1380,6 +1457,16 @@
                 var aReceber = parseFloat(c.a_receber||0);
                 document.getElementById('cr-total-recebido').value = recebido.toFixed(2).replace('.',',');
                 document.getElementById('cr-valor-a-receber').value = (aReceber||val-recebido).toFixed(2).replace('.',',');
+                // [DEV SPEC 2.4] Populate novos campos
+                document.getElementById('cr-status').value = (c.status || '').toLowerCase();
+                document.getElementById('cr-pago-no-dia').value = (c.pago_no_dia || '').split('T')[0];
+                document.getElementById('cr-aceita-troca').checked = !!c.aceita_troca_factory;
+                var comprovanteLink = document.getElementById('cr-comprovante-link');
+                if (comprovanteLink && c.comprovante_url) {
+                    comprovanteLink.href = c.comprovante_url;
+                    comprovanteLink.textContent = 'Ver comprovante';
+                    comprovanteLink.style.display = 'inline';
+                }
             }
             document.getElementById('modalContaCR').classList.add('active');
         }
@@ -1415,11 +1502,34 @@
         async function salvarConta(event) {
             event.preventDefault();
             var id = document.getElementById('conta-id').value;
+            var statusVal = document.getElementById('cr-status').value;
+            var pagoNoDia = document.getElementById('cr-pago-no-dia').value;
+            var aceitaTroca = document.getElementById('cr-aceita-troca').checked;
             var dados = { descrição: document.getElementById('descrição').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, número_documento: document.getElementById('número-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
+            // [DEV SPEC 2.4] Novos campos
+            if (statusVal) dados.status = statusVal;
+            if (pagoNoDia) dados.pago_no_dia = pagoNoDia;
+            dados.aceita_troca_factory = aceitaTroca;
+            // Validação: pago_no_dia não pode ser futuro
+            if (pagoNoDia && new Date(pagoNoDia + 'T00:00:00') > new Date()) {
+                showToast('Data de pagamento não pode ser futura', 'warning'); return;
+            }
             try {
                 var url = id ? '/api/financeiro/contas-receber/'+id : '/api/financeiro/contas-receber';
                 var r = await fetch(url, { method: id?'PUT':'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(dados) });
-                if (r.ok) { showToast('Conta salva com sucesso!'); fecharModal(); await init(); } else { showToast('Erro ao salvar conta', 'error'); }
+                if (!r.ok) { showToast('Erro ao salvar conta', 'error'); return; }
+                var savedData = await r.json();
+                var savedId = id || savedData.id;
+                // [DEV SPEC 2.4] Upload comprovante se selecionado
+                var comprovanteInput = document.getElementById('cr-comprovante');
+                if (comprovanteInput && comprovanteInput.files && comprovanteInput.files[0] && savedId) {
+                    var formData = new FormData();
+                    formData.append('comprovante', comprovanteInput.files[0]);
+                    try {
+                        await fetch('/api/financeiro/contas-receber/' + savedId + '/comprovante', { method: 'POST', credentials: 'include', body: formData });
+                    } catch(uploadErr) { console.error('Erro ao upload comprovante:', uploadErr); }
+                }
+                showToast('Conta salva com sucesso!'); fecharModal(); await init();
             } catch(e) { console.error(e); showToast('Erro ao salvar conta', 'error'); }
         }
 
@@ -1432,7 +1542,7 @@
         }
 
         async function enviarCobrancas() {
-            var pendentes = contas.filter(function(c){ return c.status === 'pendente' || c.status === 'vencido'; });
+            var pendentes = contas.filter(function(c){ return c.status === 'pendente' || c.status === 'vencido' || c.status === 'a_vencer' || c.status === 'vencida'; });
             if (pendentes.length === 0) { showToast('Nao ha contas pendentes para cobranca', 'warning'); return; }
             if (!confirm('Enviar cobranca para '+pendentes.length+' conta(s)?')) return;
             try {
@@ -1451,13 +1561,47 @@
             var filtradas = contas.slice();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
             if (período && período !== 'todas') {
-                filtradas = filtradas.filter(function(c){ var v = new Date(String(c.data_vencimento).slice(0,10) + 'T00:00:00'); v.setHours(0,0,0,0); switch(período){ case 'hoje':return v.getTime()===hoje.getTime(); case 'semana':{ var d=hoje.getDay(); var ini=new Date(hoje.getTime()-d*86400000); var fim=new Date(ini.getTime()+6*86400000); return v>=ini&&v<=fim; } case 'mes':return v.getMonth()===hoje.getMonth()&&v.getFullYear()===hoje.getFullYear(); case 'proximos7':return v>=hoje&&v<=new Date(hoje.getTime()+7*86400000); case 'proximos30':return v>=hoje&&v<=new Date(hoje.getTime()+30*86400000); case 'vencidas':return v<hoje&&c.status!=='recebido'&&c.status!=='pago'&&c.status!=='liquidado'; default:return true; } });
+                filtradas = filtradas.filter(function(c){
+                    var vRaw = c.data_vencimento || c.vencimento || '';
+                    var v = new Date(String(vRaw).slice(0,10) + 'T00:00:00');
+                    v.setHours(0,0,0,0);
+                    if (isNaN(v.getTime())) return false;
+                    var h = hoje;
+                    // YYYY-MM month filter
+                    if (/^\d{4}-\d{2}$/.test(período)) {
+                        var p = período.split('-');
+                        return v.getFullYear() === parseInt(p[0]) && (v.getMonth()+1) === parseInt(p[1]);
+                    }
+                    switch(período) {
+                        case 'hoje': return v.getTime()===h.getTime();
+                        case 'semana':{ var d=h.getDay(); var ini=new Date(h.getTime()-d*86400000); var fim=new Date(ini.getTime()+6*86400000); return v>=ini&&v<=fim; }
+                        case 'mes': return v.getMonth()===h.getMonth()&&v.getFullYear()===h.getFullYear();
+                        case 'mes-anterior':{ var ma=new Date(h.getFullYear(),h.getMonth()-1,1); return v.getMonth()===ma.getMonth()&&v.getFullYear()===ma.getFullYear(); }
+                        case 'proximos7': return v>=h&&v<=new Date(h.getTime()+7*86400000);
+                        case 'proximos30': return v>=h&&v<=new Date(h.getTime()+30*86400000);
+                        case 'proximos60': return v>=h&&v<=new Date(h.getTime()+60*86400000);
+                        case 'proximos90': return v>=h&&v<=new Date(h.getTime()+90*86400000);
+                        case 'ultimos30': return v>=new Date(h.getTime()-30*86400000)&&v<=h;
+                        case 'ultimos60': return v>=new Date(h.getTime()-60*86400000)&&v<=h;
+                        case 'ultimos90': return v>=new Date(h.getTime()-90*86400000)&&v<=h;
+                        case 'vencidas': return v<h&&c.status!=='recebido'&&c.status!=='pago'&&c.status!=='liquidado'&&c.status!=='liquidada'&&c.status!=='cancelada';
+                        default: return true;
+                    }
+                });
             }
             if (status) filtradas = filtradas.filter(function(c){ return (c.status||'').toLowerCase() === status.toLowerCase(); });
             if (portador) filtradas = filtradas.filter(function(c){ return c.portador === portador; });
             if (situacao) filtradas = filtradas.filter(function(c){ return (c.situacao||'').toUpperCase() === situacao.toUpperCase(); });
             if (clienteNome) filtradas = filtradas.filter(function(c){ return c.cliente_nome === clienteNome; });
             if (pesquisa) filtradas = filtradas.filter(function(c){ return (c.descricao||'').toLowerCase().indexOf(pesquisa)>-1||(c.cliente_nome||'').toLowerCase().indexOf(pesquisa)>-1||(c.valor+'').indexOf(pesquisa)>-1||(c.número_documento||'').toLowerCase().indexOf(pesquisa)>-1||(c.nota_fiscal||'').toLowerCase().indexOf(pesquisa)>-1||(c.portador||'').toLowerCase().indexOf(pesquisa)>-1||(c.cnpj_cpf||c.cnpj_cliente||'').indexOf(pesquisa)>-1||(c.vendedor||'').toLowerCase().indexOf(pesquisa)>-1; });
+            // Sort by vencimento ascending (vencidas first within vencidas filter, otherwise by date)
+            filtradas.sort(function(a, b) {
+                var da = new Date(String(a.data_vencimento||a.vencimento||'').slice(0,10)+'T00:00:00').getTime();
+                var db = new Date(String(b.data_vencimento||b.vencimento||'').slice(0,10)+'T00:00:00').getTime();
+                if (isNaN(da)) da = Infinity;
+                if (isNaN(db)) db = Infinity;
+                return da - db;
+            });
             return filtradas;
         }
         function filtrarContas() {
@@ -1479,8 +1623,48 @@
         function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-período').value='mes'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situação'))document.getElementById('filtro-situação').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
-        function visualizarConta(id) {
-            abrirModal(id);
+        async function visualizarConta(id) {
+            try {
+                var response = await fetch('/api/financeiro/contas-receber/' + id, { credentials: 'include' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                var contaCompleta = await response.json();
+                // Merge API data into local array for consistency
+                var idx = contas.findIndex(function(x){ return x.id === id; });
+                if (idx >= 0) { Object.assign(contas[idx], contaCompleta); }
+                contaVisualizando = contaCompleta;
+                abrirModal(id);
+                // Populate recebimentos tab with full detail
+                preencherRecebimentosTab(contaCompleta);
+            } catch(e) {
+                console.error('Erro ao carregar detalhes da conta:', e);
+                // Fallback: open with local data
+                abrirModal(id);
+            }
+        }
+        function preencherRecebimentosTab(conta) {
+            var recebido = parseFloat(conta.valor_recebido || 0);
+            var valorTotal = parseFloat(conta.valor_total || conta.valor || 0);
+            var aReceber = parseFloat(conta.a_receber || 0) || (valorTotal - recebido);
+            document.getElementById('cr-total-recebido').value = recebido.toFixed(2).replace('.', ',');
+            document.getElementById('cr-valor-a-receber').value = aReceber.toFixed(2).replace('.', ',');
+            // Update status field if exists
+            var statusEl = document.getElementById('cr-status');
+            if (statusEl) statusEl.value = (conta.status || '').toLowerCase();
+            // Update pago_no_dia if exists
+            var pagoEl = document.getElementById('cr-pago-no-dia');
+            if (pagoEl) pagoEl.value = (conta.pago_no_dia || '').split('T')[0];
+            // Update aceita_troca_factory if exists
+            var trocaEl = document.getElementById('cr-aceita-troca');
+            if (trocaEl) trocaEl.checked = !!conta.aceita_troca_factory;
+            // Update comprovante link if exists
+            var comprovanteLink = document.getElementById('cr-comprovante-link');
+            if (comprovanteLink && conta.comprovante_url) {
+                comprovanteLink.href = conta.comprovante_url;
+                comprovanteLink.textContent = 'Ver comprovante';
+                comprovanteLink.style.display = 'inline';
+            } else if (comprovanteLink) {
+                comprovanteLink.style.display = 'none';
+            }
         }
         function formatarForma(f) { var m={'dinheiro':'Dinheiro','pix':'PIX','transferencia':'Transferencia','cartao':'Cartao','boleto':'Boleto','cheque':'Cheque'}; return m[f]||f||'-'; }
         function fecharModalVisualizar() { fecharModal(); }
@@ -1527,18 +1711,120 @@
         async function executarImportacao() {
             var fileInput = document.getElementById('arquivo-excel');
             if (!fileInput.files || !fileInput.files[0]) { showToast('Selecione um arquivo Excel', 'warning'); return; }
-            var formData = new FormData();
-            formData.append('arquivo', fileInput.files[0]);
+            var file = fileInput.files[0];
             document.getElementById('importar-progresso').style.display = 'block';
             document.getElementById('importar-resultado').style.display = 'none';
             document.getElementById('btn-importar').disabled = true;
             try {
-                var r = await fetch('/api/financeiro/contas-receber/importar-excel', { method: 'POST', credentials: 'include', body: formData });
+                // Parse XLSX client-side
+                var arrayBuffer = await file.arrayBuffer();
+                var wb = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+
+                // Prefer FATURAMENTO sheet, otherwise first sheet
+                var sheetName = wb.SheetNames.indexOf('FATURAMENTO') >= 0 ? 'FATURAMENTO' : wb.SheetNames[0];
+                var ws = wb.Sheets[sheetName];
+                var rawData = XLSX.utils.sheet_to_json(ws, { header: 1, defval: null });
+
+                // Convert Excel serial date to ISO string (UTC)
+                var xlDate = function(n) {
+                    if (!n || isNaN(Number(n))) return null;
+                    var ms = (Number(n) - 25569) * 86400000;
+                    var d = new Date(ms);
+                    return d.getUTCFullYear() + '-' +
+                           String(d.getUTCMonth() + 1).padStart(2, '0') + '-' +
+                           String(d.getUTCDate()).padStart(2, '0');
+                };
+
+                // Parse string date dd/mm/yyyy or ISO
+                var parseDate = function(v) {
+                    if (!v) return null;
+                    if (typeof v === 'number') return xlDate(v);
+                    var s = String(v).trim();
+                    // dd/mm/yyyy
+                    var m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                    if (m) return m[3] + '-' + m[2] + '-' + m[1];
+                    // yyyy-mm-dd
+                    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+                    return null;
+                };
+
+                var dados = [];
+                var isFaturamento = sheetName === 'FATURAMENTO';
+
+                if (isFaturamento) {
+                    // Find header row: look for row containing 'EMPRESA'
+                    var headerRow = -1;
+                    for (var h = 0; h < Math.min(10, rawData.length); h++) {
+                        if (rawData[h] && rawData[h].some(function(c){ return c === 'EMPRESA'; })) { headerRow = h; break; }
+                    }
+                    if (headerRow < 0) throw new Error('Cabeçalho EMPRESA não encontrado na aba FATURAMENTO');
+
+                    var colMap = {};
+                    rawData[headerRow].forEach(function(h, i) { if (h != null) colMap[String(h).trim()] = i; });
+
+                    for (var i = headerRow + 1; i < rawData.length; i++) {
+                        var row = rawData[i];
+                        if (!row || row.every(function(c){ return c === null; })) continue;
+                        var valor = parseFloat(row[colMap['VALOR P']]) || 0;
+                        if (!valor || valor <= 0) continue;
+                        var vcto = parseDate(row[colMap['VCTO']]);
+                        if (!vcto) continue;
+                        var statusRaw = String(row[colMap['STATUS']] || '').trim().toLowerCase();
+                        if (!statusRaw) statusRaw = 'pendente';
+                        dados.push({
+                            empresa:       String(row[colMap['EMPRESA']]  || ''),
+                            data_emissao:  parseDate(row[colMap['EMISSÃO']]),
+                            tipo:          String(row[colMap['TIPO']]     || ''),
+                            nota_fiscal:   String(row[colMap['NFe']]      || ''),
+                            parcela_info:  String(row[colMap['P']]        || ''),
+                            cliente_nome:  String(row[colMap['CLIENTE']]  || ''),
+                            cnpj_cliente:  String(row[colMap['CNPJ']]     || ''),
+                            valor:         valor,
+                            data_vencimento: vcto,
+                            situacao:      String(row[colMap['SITUAÇÃO']] || ''),
+                            portador:      String(row[colMap['PORTADOR']] || ''),
+                            data_operacao: parseDate(row[colMap['DATA']]),
+                            status:        statusRaw,
+                            dias_vencido:  parseInt(row[colMap['DIAS']]) || 0,
+                            posicao:       String(row[colMap['POSIÇÃO']]  || ''),
+                            observacoes:   String(row[colMap['OBSERVAÇÃO']] || '')
+                        });
+                    }
+                } else {
+                    // Generic: first row = headers
+                    var headers = rawData[0] || [];
+                    var norm = function(h) { return String(h||'').toLowerCase().trim().replace(/[^a-z0-9]/g,'_'); };
+                    var hIdx = {};
+                    headers.forEach(function(h, i) { if (h) hIdx[norm(h)] = i; });
+                    var get = function(row, name) { return row[hIdx[name]]; };
+                    for (var i = 1; i < rawData.length; i++) {
+                        var row = rawData[i];
+                        if (!row) continue;
+                        var valor = parseFloat(get(row,'valor')||get(row,'valor_p')||get(row,'valor_bruto')||0)||0;
+                        var vcto = parseDate(get(row,'vencimento')||get(row,'vcto')||get(row,'data_vencimento'));
+                        if (!valor || !vcto) continue;
+                        dados.push({
+                            cliente_nome: String(get(row,'cliente')||get(row,'cliente_nome')||''),
+                            cnpj_cliente: String(get(row,'cnpj')||''),
+                            valor: valor, data_vencimento: vcto,
+                            status: String(get(row,'status')||'pendente').toLowerCase(),
+                            observacoes: String(get(row,'observacoes')||get(row,'descricao')||'')
+                        });
+                    }
+                }
+
+                if (dados.length === 0) throw new Error('Nenhum registro válido encontrado na planilha (verifique coluna VALOR P e VCTO)');
+
+                var r = await fetch('/api/financeiro/importar/contas-receber', {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ dados: dados })
+                });
                 var data = await r.json();
                 document.getElementById('importar-progresso').style.display = 'none';
                 if (r.ok && data.success) {
                     document.getElementById('importar-resultado').style.display = 'block';
-                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-check-circle" style="font-size:28px;color:#16a34a;"></i><p style="font-size:14px;font-weight:700;color:#166534;margin:8px 0 4px;">Importação Concluida!</p><p style="font-size:13px;color:#166534;margin:0;"><strong>'+data.importados+'</strong> registro(s) importado(s)'+(data.erros>0?', <span style="color:#dc2626;">'+data.erros+' erro(s)</span>':'')+'</p><p style="font-size:11px;color:#166534;margin-top:4px;">Aba: '+data.sheet+'</p></div>';
+                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-check-circle" style="font-size:28px;color:#16a34a;"></i><p style="font-size:14px;font-weight:700;color:#166534;margin:8px 0 4px;">Importação Concluída!</p><p style="font-size:13px;color:#166534;margin:0;"><strong>'+data.importados+'</strong> registro(s) importado(s)'+(data.erros&&data.erros.length>0?', <span style="color:#dc2626;">'+data.erros.length+' erro(s)</span>':'')+'</p><p style="font-size:11px;color:#166534;margin-top:4px;">Aba: '+sheetName+'</p></div>';
                     showToast(data.importados+' registros importados com sucesso!');
                     await init();
                 } else {
@@ -1550,7 +1836,9 @@
             } catch(e) {
                 console.error('Erro importação:', e);
                 document.getElementById('importar-progresso').style.display = 'none';
-                showToast('Erro ao importar arquivo', 'error');
+                document.getElementById('importar-resultado').style.display = 'block';
+                document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+e.message+'</p></div>';
+                showToast('Erro: ' + e.message, 'error');
                 document.getElementById('btn-importar').disabled = false;
             }
         }
@@ -1561,7 +1849,7 @@
     <script src="/js/chat-suporte-widgets.js?v=20260319"></script>
     <script src="/_shared/connection-monitor.js?v=20260319"></script>
     <script src="/js/popup-confirmacao.js"></script>
-    <script src="/js/auth-unified.js?v=20260324"></script>
+    <script src="/js/auth-unified.js?v=20260326"></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
     <script src="js/financeiro-sidebar.js?v=20260319"></script>

@@ -50,27 +50,56 @@ class SistemaNotificacoes {
     }
 
     async verificarContasVencendo() {
-        // TODO: Implementar verificação real com API
-        const hoje = new Date();
-        const próximosDias = 7;
-
-        // Simular verificação
-        console.log('🔍 Verificando contas vencendo nos próximos', próximosDias, 'dias...');
+        try {
+            const hoje = new Date().toISOString().split('T')[0];
+            const em7dias = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+            const resp = await fetch(`/api/financeiro/contas-receber?status=pendente&vencimento_ate=${em7dias}`, { credentials: 'include' });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const contas = data.data || data || [];
+            contas.filter(c => c.data_vencimento >= hoje).forEach(c => {
+                this.criar('warning', 'Conta a Receber vencendo', `${c.descricao} — R$ ${parseFloat(c.valor).toFixed(2)} vence em ${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}`, { link: '/Financeiro/index.html#receber', conta_id: c.id });
+            });
+        } catch (e) { /* silencioso em produção */ }
     }
 
     async verificarContasAtrasadas() {
-        // TODO: Implementar verificação real com API
-        console.log('🔍 Verificando contas atrasadas...');
+        try {
+            const ontem = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+            const resp = await fetch(`/api/financeiro/contas-pagar?status=pendente&vencimento_ate=${ontem}`, { credentials: 'include' });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const contas = data.data || data || [];
+            contas.forEach(c => {
+                this.criar('danger', 'Conta a Pagar atrasada', `${c.descricao} — R$ ${parseFloat(c.valor).toFixed(2)} venceu em ${new Date(c.data_vencimento).toLocaleDateString('pt-BR')}`, { link: '/Financeiro/index.html#pagar', conta_id: c.id });
+            });
+        } catch (e) { /* silencioso */ }
     }
 
     async verificarSaldoBaixo() {
-        // TODO: Implementar verificação real com API
-        console.log('🔍 Verificando saldos bancários...');
+        try {
+            const resp = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const contas = data.data || data || [];
+            const LIMITE_BAIXO = 1000;
+            contas.filter(c => parseFloat(c.saldo_atual) < LIMITE_BAIXO).forEach(c => {
+                this.criar('warning', 'Saldo bancário baixo', `Conta ${c.nome}: saldo R$ ${parseFloat(c.saldo_atual).toFixed(2)}`, { link: '/Financeiro/index.html#bancos', conta_id: c.id });
+            });
+        } catch (e) { /* silencioso */ }
     }
 
     async verificarOrcamentoEstourado() {
-        // TODO: Implementar verificação real com API
-        console.log('🔍 Verificando orçamentos...');
+        try {
+            const resp = await fetch('/api/financeiro/orcamentos', { credentials: 'include' });
+            if (!resp.ok) return;
+            const data = await resp.json();
+            const orcamentos = data.data || data || [];
+            orcamentos.filter(o => parseFloat(o.valor_realizado) > parseFloat(o.valor_previsto)).forEach(o => {
+                const excesso = (parseFloat(o.valor_realizado) - parseFloat(o.valor_previsto)).toFixed(2);
+                this.criar('danger', 'Orçamento estourado', `${o.descricao || o.nome}: excesso de R$ ${excesso}`, { link: '/Financeiro/index.html#orcamentos', orcamento_id: o.id });
+            });
+        } catch (e) { /* silencioso */ }
     }
 
     // ===== CRIAR NOTIFICAÇÃO =====
@@ -89,13 +118,12 @@ class SistemaNotificacoes {
         };
 
         try {
-            // TODO: Salvar na API
-            // await fetch('/api/financeiro/notificacoes', {
-            //     credentials: 'include',
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(notificação)
-            // });
+            await fetch('/api/financeiro/notificacoes', {
+                credentials: 'include',
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(notificação)
+            });
 
             this.notificacoes.unshift(notificação);
             this.atualizarBadge();
@@ -109,13 +137,12 @@ class SistemaNotificacoes {
     // ===== MARCAR COMO LIDA =====
     async marcarComoLida(id) {
         try {
-            // TODO: Atualizar na API
-            // await fetch(`/api/financeiro/notificacoes/${id}`, {
-            //     credentials: 'include',
-            //     method: 'PATCH',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({ lida: true })
-            // });
+            await fetch(`/api/financeiro/notificacoes/${id}`, {
+                credentials: 'include',
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ lida: true })
+            });
 
             const notificação = this.notificacoes.find(n => n.id === id);
             if (notificação) {
@@ -130,7 +157,10 @@ class SistemaNotificacoes {
 
     async marcarTodasComoLidas() {
         try {
-            // TODO: Atualizar todas na API
+            await fetch('/api/financeiro/notificacoes/marcar-todas-lidas', {
+                credentials: 'include',
+                method: 'POST'
+            });
             this.notificacoes.forEach(n => n.lida = true);
             this.atualizarBadge();
 

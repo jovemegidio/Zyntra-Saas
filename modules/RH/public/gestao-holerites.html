@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Gesto de Holerites</title>
+    <title>Zyntra: Gestão de Holerites</title>
     
     <!-- Sistema de Autenticao Unificado - DEVE ser carregado primeiro -->
     
@@ -17,7 +17,7 @@
     <link rel="stylesheet" href="/css/modern-saas.css?v=20260210">
     <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260210">
     <style>
-        /* === GESTO DE HOLERITES - DESIGN INSTITUCIONAL === */
+        /* === GESTÃO DE HOLERITES - DESIGN INSTITUCIONAL === */
 
         /* Layout */
         .content-area { flex: 1; overflow-y: auto; padding: 28px 32px; background: #f4f6f9; }
@@ -430,18 +430,18 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
-                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionrios"><i class="fas fa-users"></i></a>
-                <a href="gestao-holerites.html" class="sidebar-btn active" title="Gesto de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="pages/funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="gestão-holerites.html" class="sidebar-btn active" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="pages/gestao-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="pages/gestão-ponto.html" class="sidebar-btn" title="Gesto do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="pages/importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="pages/ferias.html" class="sidebar-btn" title="Frias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="pages/beneficios.html" class="sidebar-btn" title="Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="pages/beneficios.html" class="sidebar-btn" title="Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="pages/calendario-rh.html" class="sidebar-btn" title="Calendrio RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="pages/avaliacoes.html" class="sidebar-btn" title="Avaliaes"><i class="fas fa-star"></i></a>
-                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionrio"><i class="fas fa-user"></i></a>
+                <a href="funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
             </div>
         </aside>
 
@@ -458,7 +458,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gesto de Holerites</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gestão de Holerites</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -522,7 +522,7 @@
                 <!-- Controls -->
                 <div class="controls-bar">
                     <div class="form-group">
-                        <label class="form-label">Funcionrio</label>
+                        <label class="form-label">Funcionário</label>
                         <select class="form-select" id="filtro-funcionario">
                             <option value="">Todos</option>
                         </select>
@@ -565,10 +565,10 @@
                         <label class="form-label">Tipo</label>
                         <select class="form-select" id="filtro-tipo">
                             <option value="">Todos</option>
-                            <option value="salario">Salrio</option>
+                            <option value="salario">Salário</option>
                             <option value="adiantamento">Adiantamento</option>
                             <option value="férias">Frias</option>
-                            <option value="13_salario">13 Salrio</option>
+                            <option value="13_salario">13 Salário</option>
                             <option value="rescisão">Resciso</option>
                         </select>
                     </div>
@@ -576,7 +576,7 @@
                         <i class="fas fa-search"></i> Filtrar
                     </button>
                     <button class="btn btn-outline" onclick="exportarRelatorio()">
-                        <i class="fas fa-download"></i> Relatrio
+                        <i class="fas fa-download"></i> Relatório
                     </button>
                 </div>
 
@@ -585,14 +585,14 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th>Funcionrio</th>
+                                <th>Funcionário</th>
                                 <th>Competncia</th>
                                 <th>Tipo</th>
-                                <th>Salrio Lquido</th>
+                                <th>Salário Líquido</th>
                                 <th>Status</th>
-                                <th>Visualizao</th>
-                                <th>Confirmao</th>
-                                <th>Aes</th>
+                                <th>Visualização</th>
+                                <th>Confirmação</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-holerites">
@@ -617,10 +617,10 @@
                     <input type="hidden" id="holerite-id">
                     
                     <!-- Dados Bsicos -->
-                    <div class="section-title"><i class="fas fa-info-circle"></i> Informaes Bsicas</div>
+                    <div class="section-title"><i class="fas fa-info-circle"></i> Informações Básicas</div>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label class="form-label">Funcionrio *</label>
+                            <label class="form-label">Funcionário *</label>
                             <select class="form-select" id="holerite-funcionario" required>
                                 <option value="">Selecione...</option>
                             </select>
@@ -657,8 +657,8 @@
                             </button>
                         </div>
                         <div class="item-row" style="font-weight: 600; font-size: 0.75rem; color: #64748b;">
-                            <span>Cdigo</span>
-                            <span>Descrio</span>
+                            <span>Código</span>
+                            <span>Descrição</span>
                             <span>Referncia</span>
                             <span>Valor (R$)</span>
                             <span></span>
@@ -677,8 +677,8 @@
                             </button>
                         </div>
                         <div class="item-row" style="font-weight: 600; font-size: 0.75rem; color: #64748b;">
-                            <span>Cdigo</span>
-                            <span>Descrio</span>
+                            <span>Código</span>
+                            <span>Descrição</span>
                             <span>Referncia</span>
                             <span>Valor (R$)</span>
                             <span></span>
@@ -699,7 +699,7 @@
                             <div class="total-value red" id="total-descontos">R$ 0,00</div>
                         </div>
                         <div class="total-box liquido">
-                            <div class="total-label">Salrio Lquido</div>
+                            <div class="total-label">Salário Líquido</div>
                             <div class="total-value purple" id="total-liquido">R$ 0,00</div>
                         </div>
                     </div>
@@ -746,10 +746,10 @@
                 <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
                     <h4 style="color: #166534; margin-bottom: 8px;"><i class="fas fa-info-circle"></i> Como funciona</h4>
                     <ul style="color: #15803d; font-size: 0.875rem; margin: 0; padding-left: 20px; line-height: 1.8;">
-                        <li>Faa upload do <strong>PDF consolidado</strong> da contabilidade com os holerites de todos os funcionrios</li>
-                        <li>O sistema identifica automaticamente cada funcionrio pelo <strong>nome ou CPF</strong> presente no documento</li>
+                        <li>Faça upload do <strong>PDF consolidado</strong> da contabilidade com os holerites de todos os funcionários</li>
+                        <li>O sistema identifica automaticamente cada funcionário pelo <strong>nome ou CPF</strong> presente no documento</li>
                         <li>O <strong>tipo (ADTO/MENSAL)</strong> e a <strong>data (ms/ano)</strong> so detectados automaticamente do PDF</li>
-                        <li>O PDF  separado automaticamente, gerando um <strong>arquivo individual por funcionrio</strong></li>
+                        <li>O PDF  separado automaticamente, gerando um <strong>arquivo individual por funcionário</strong></li>
                         <li>Importe PDFs de <strong>Adiantamento</strong> e <strong>Mensal</strong> separadamente  cada um com seu arquivo da contabilidade</li>
                     </ul>
                 </div>
@@ -760,7 +760,7 @@
                             <label class="form-label">Tipo de Holerite *</label>
                             <select class="form-select" id="import-tipo" required>
                                 <option value="auto">?? Auto-detectar (MENSAL/ADTO)</option>
-                                <option value="salario">Salrio</option>
+                                <option value="salario">Salário</option>
                                 <option value="adiantamento">Adiantamento</option>
                             </select>
                         </div>
@@ -841,7 +841,7 @@
             </div>
             <div class="modal-body">
                 <div style="background:#eef2ff;border:1px solid #c7d2fe;border-radius:12px;padding:16px;margin-bottom:20px;">
-                    <p style="color:#4338ca;font-size:0.85rem;margin:0;"><i class="fas fa-info-circle"></i> Funcionrios que assinaram o termo de consentimento digital para recebimento de holerites. Este documento tem validade jurdica.</p>
+                    <p style="color:#4338ca;font-size:0.85rem;margin:0;"><i class="fas fa-info-circle"></i> Funcionários que assinaram o termo de consentimento digital para recebimento de holerites. Este documento tem validade jurídica.</p>
                 </div>
                 <div id="consentimentos-content">
                     <p style="text-align:center;color:#94a3b8;padding:40px 0;"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>
@@ -853,12 +853,12 @@
         </div>
     </div>
 
-    <!-- Modal Relatrio de Visualizaes -->
+    <!-- Modal Relatório de Visualizaes -->
     <div class="modal" id="modal-relatorio">
         <div class="modal-overlay" onclick="document.getElementById('modal-relatorio').classList.remove('show')"></div>
         <div class="modal-content" style="max-width: 900px; height: 85vh; display: flex; flex-direction: column;">
             <div class="modal-header">
-                <h2><i class="fas fa-chart-bar"></i> Relatrio de Visualizaes</h2>
+                <h2><i class="fas fa-chart-bar"></i> Relatório de Visualizaes</h2>
                 <div style="display:flex;gap:8px;">
                     <button class="modal-close" onclick="window.open(document.getElementById('relatorio-iframe').src, '_blank')" title="Abrir em nova aba" style="background:rgba(255,255,255,0.15);"><i class="fas fa-external-link-alt"></i></button>
                     <button class="modal-close" onclick="document.getElementById('modal-relatorio').classList.remove('show')"><i class="fas fa-times"></i></button>
@@ -977,7 +977,7 @@
                     });
                 }
             } catch (e) {
-                console.error('Erro ao carregar funcionrios:', e);
+                console.error('Erro ao carregar funcionários:', e);
             }
         }
 
@@ -1037,7 +1037,7 @@
             }
 
             tbody.innerHTML = holerites.map(h => {
-                const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salrio';
+                const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salário';
                 const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
                 const tipoIcon = h.tipo === 'adiantamento' ? 'fa-hand-holding-usd' : 'fa-money-bill-wave';
                 return `
@@ -1108,8 +1108,8 @@
             document.getElementById('lista-proventos').innerHTML = '';
             document.getElementById('lista-descontos').innerHTML = '';
             
-            // Adicionar salrio base por padro
-            adicionarItem('provento', '001', 'Salrio Base', '220h', 0);
+            // Adicionar salário base por padro
+            adicionarItem('provento', '001', 'Salário Base', '220h', 0);
             adicionarItem('desconto', '101', 'INSS', '', 0);
             adicionarItem('desconto', '102', 'IRRF', '', 0);
             
@@ -1131,7 +1131,7 @@
             row.id = `item-${id}`;
             row.innerHTML = `
                 <input type="text" placeholder="001" value="${codigo}" data-field="codigo">
-                <input type="text" placeholder="Descrio" value="${descrição}" data-field="descrição" required>
+                <input type="text" placeholder="Descrição" value="${descrição}" data-field="descrição" required>
                 <input type="text" placeholder="220h" value="${referencia}" data-field="referencia">
                 <input type="number" step="0.01" placeholder="0,00" value="${valor}" data-field="valor" onchange="calcularTotais()">
                 <button type="button" class="remove-item-btn" onclick="removerItem('${id}')"><i class="fas fa-times"></i></button>
@@ -1217,7 +1217,7 @@
 
         async function salvarHolerite(dados) {
             if (!dados.funcionário_id || !dados.mes || !dados.ano) {
-                showToast('error', 'Preencha funcionrio, ms e ano');
+                showToast('error', 'Preencha funcionário, mês e ano');
                 return;
             }
 
@@ -1284,7 +1284,7 @@
                 const resp = await fetch(`/api/rh/holerites/${id}`, { headers: getAuthHeaders() });
                 if (resp.ok) {
                     const h = await resp.json();
-                    const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALRIO';
+                    const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALÁRIO';
                     const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
                     
                     const content = document.getElementById('visualizar-content');
@@ -1304,7 +1304,7 @@
                         
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-                                <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">Funcionrio</div>
+                                <div style="font-size:0.7rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;margin-bottom:4px;">Funcionário</div>
                                 <div style="font-weight:600;color:#1e293b;">${h.funcionário_nome}</div>
                             </div>
                             <div style="background: #f8fafc; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
@@ -1329,8 +1329,8 @@
                             <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
                                 <thead>
                                     <tr style="background: #f1f5f9;">
-                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Cdigo</th>
-                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Descrio</th>
+                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Código</th>
+                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Descrição</th>
                                         <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Ref.</th>
                                         <th style="padding: 10px 14px; text-align: right; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Valor</th>
                                     </tr>
@@ -1356,8 +1356,8 @@
                             <table style="width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden;">
                                 <thead>
                                     <tr style="background: #f1f5f9;">
-                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Cdigo</th>
-                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Descrio</th>
+                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Código</th>
+                                        <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Descrição</th>
                                         <th style="padding: 10px 14px; text-align: left; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Ref.</th>
                                         <th style="padding: 10px 14px; text-align: right; font-size: 0.7rem; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">Valor</th>
                                     </tr>
@@ -1386,7 +1386,7 @@
                                 <div class="total-value red">${formatCurrency(h.total_descontos)}</div>
                             </div>
                             <div class="total-box liquido">
-                                <div class="total-label">Salrio Lquido</div>
+                                <div class="total-label">Salário Líquido</div>
                                 <div class="total-value purple">${formatCurrency(h.salario_liquido)}</div>
                             </div>
                         </div>
@@ -1401,7 +1401,7 @@
                         
                         ${h.visualizado ? `
                             <div style="margin-top: 24px; padding: 18px 20px; background: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0;">
-                                <h4 style="color: #166534; margin-bottom: 10px; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-eye"></i> Informaes de Visualizao</h4>
+                                <h4 style="color: #166534; margin-bottom: 10px; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-eye"></i> Informações de Visualização</h4>
                                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:0.8rem;color:#15803d;">
                                     <p><strong>Primeira:</strong> ${h.data_primeira_visualização ? new Date(h.data_primeira_visualização).toLocaleString('pt-BR') : 'N/A'}</p>
                                     <p><strong>ltima:</strong> ${h.data_ultima_visualização ? new Date(h.data_ultima_visualização).toLocaleString('pt-BR') : 'N/A'}</p>
@@ -1412,7 +1412,7 @@
                             </div>
                         ` : `
                             <div style="margin-top: 24px; padding: 16px 20px; background: #fef2f2; border-radius: 12px; border: 1px solid #fecaca;">
-                                <p style="color: #991b1b; font-size: 0.85rem;"><i class="fas fa-eye-slash"></i> Este holerite ainda no foi visualizado pelo funcionrio.</p>
+                                <p style="color: #991b1b; font-size: 0.85rem;"><i class="fas fa-eye-slash"></i> Este holerite ainda no foi visualizado pelo funcionário.</p>
                             </div>
                         `}
                     `;
@@ -1430,7 +1430,7 @@
         }
 
         async function publicarDireto(id) {
-            if (!confirm('Deseja publicar este holerite? O funcionrio ser notificado.')) return;
+            if (!confirm('Deseja publicar este holerite? O funcionário ser notificado.')) return;
             
             try {
                 const resp = await fetch(`/api/rh/holerites/${id}/publicar`, { credentials: 'include', method: 'POST',
@@ -1498,7 +1498,7 @@
                         <div style="text-align:center;padding:40px 0;color:#94a3b8;">
                             <i class="fas fa-file-signature" style="font-size:2.5rem;margin-bottom:12px;display:block;"></i>
                             <h3 style="color:#64748b;margin-bottom:4px;">Nenhum consentimento registrado</h3>
-                            <p style="font-size:0.85rem;">Os funcionrios ainda no assinaram o termo digital.</p>
+                            <p style="font-size:0.85rem;">Os funcionários ainda no assinaram o termo digital.</p>
                         </div>`;
                     return;
                 }
@@ -1508,7 +1508,7 @@
                     <table style="width:100%;border-collapse:separate;border-spacing:0;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
                         <thead>
                             <tr style="background:#f1f5f9;">
-                                <th style="padding:10px 14px;text-align:left;font-size:0.7rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Funcionrio</th>
+                                <th style="padding:10px 14px;text-align:left;font-size:0.7rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Funcionário</th>
                                 <th style="padding:10px 14px;text-align:left;font-size:0.7rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">CPF</th>
                                 <th style="padding:10px 14px;text-align:left;font-size:0.7rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Assinatura</th>
                                 <th style="padding:10px 14px;text-align:left;font-size:0.7rem;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Data</th>
@@ -1636,7 +1636,7 @@
                 formData.append('publicar_automaticamente', true);
 
                 progressBar.style.width = '30%';
-                progressText.textContent = 'Processando e separando por funcionrio...';
+                progressText.textContent = 'Processando e separando por funcionário...';
 
                 const resp = await fetch('/api/rh/holerites/importar-pdf', { credentials: 'include', method: 'POST',
                     credentials: 'include',
@@ -1707,7 +1707,7 @@
                                 <thead>
                                     <tr style="background: #f8fafc;">
                                         <th style="padding: 8px 12px; text-align: left; font-size: 0.75rem; color: #64748b;">Pginas</th>
-                                        <th style="padding: 8px 12px; text-align: left; font-size: 0.75rem; color: #64748b;">Funcionrio</th>
+                                        <th style="padding: 8px 12px; text-align: left; font-size: 0.75rem; color: #64748b;">Funcionário</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 0.75rem; color: #64748b;">Identificao</th>
                                         <th style="padding: 8px 12px; text-align: left; font-size: 0.75rem; color: #64748b;">Status</th>
                                     </tr>

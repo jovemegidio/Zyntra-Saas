@@ -502,6 +502,252 @@ class FinanceiroIntegracaoService {
         return codigoBarras.replace(/(\d{5})(\d{5})(\d{5})(\d{6})(\d{5})(\d{6})(\d{1})(\d{14})/, 
                                    '$1.$2 $3.$4 $5.$6 $7 $8');
     }
+
+    // ============================================================
+    // DEV SPEC 1.2: INTEGRAÇÃO E2E — TRIGGERS ATÔMICOS
+    // ============================================================
+
+    /**
+     * Atualiza status de CR quando status da NFe muda.
+     * Transação ACID — alterações são atômicas.
+     * @param {number} nfe_id
+     * @param {string} novoStatus - novo status da NFe
+     * @param {object} dadosExtras - dados opcionais (motivo, usuario_id)
+     */
+    async sincronizarStatusNFe(nfe_id, novoStatus, dadosExtras = {}) {
+        const connection = await this.pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            const statusMap = {
+                'autorizada':  'a_vencer',
+                'cancelada':   'cancelada',
+                'denegada':    'cancelada',
+                'inutilizada': 'cancelada',
+                'rejeitada':   'cancelada'
+            };
+
+            const statusFinanceiro = statusMap[novoStatus];
+            if (!statusFinanceiro) {
+                await connection.rollback();
+                return { success: false, message: `Status NFe "${novoStatus}" sem mapeamento financeiro` };
+            }
+
+            // Buscar contas vinculadas à NFe
+            const [contas] = await connection.query(
+                'SELECT id, status FROM contas_receber WHERE nfe_id = ?', [nfe_id]
+            );
+
+            if (contas.length === 0) {
+                await connection.rollback();
+                return { success: true, message: 'Nenhuma conta vinculada à NFe', affected: 0 };
+            }
+
+            for (const conta of contas) {
+                // Não alterar contas já liquidadas
+                if (conta.status === 'liquidada') continue;
+
+                await connection.query(
+                    `UPDATE contas_receber SET status = ?, updated_at = NOW() WHERE id = ?`,
+                    [statusFinanceiro, conta.id]
+                );
+
+                // Cancelar parcelas abertas se status é de cancelamento
+                if (statusFinanceiro === 'cancelada') {
+                    await connection.query(
+                        `UPDATE contas_receber_parcelas SET status = 'cancelado' 
+                         WHERE conta_receber_id = ? AND status IN ('aberto', 'a_vencer')`,
+                        [conta.id]
+                    );
+                }
+            }
+
+            // Log de auditoria da integração
+            await connection.query(
+                `INSERT INTO financeiro_integracoes_log 
+                 (origem, tipo_evento, referencia_id, status_anterior, status_novo, dados_json, usuario_id, created_at)
+                 VALUES ('faturamento', 'status_nfe', ?, ?, ?, ?, ?, NOW())`,
+                [nfe_id, contas[0]?.status || null, statusFinanceiro,
+                 JSON.stringify({ nfe_id, novoStatus, ...dadosExtras }),
+                 dadosExtras.usuario_id || null]
+            );
+
+            await connection.commit();
+            return { success: true, affected: contas.length, statusAplicado: statusFinanceiro };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    /**
+     * Atualiza valor das contas quando NFe é corrigida (CC-e).
+     * Recalcula parcelas proporcionalmente.
+     */
+    async sincronizarValorNFe(nfe_id, novoValor) {
+        const connection = await this.pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            const valorNovo = parseFloat(novoValor);
+            if (isNaN(valorNovo) || valorNovo <= 0) {
+                throw new Error('Valor inválido para sincronização');
+            }
+
+            const [contas] = await connection.query(
+                'SELECT id, valor_original, valor_saldo FROM contas_receber WHERE nfe_id = ? AND status != ?',
+                [nfe_id, 'cancelada']
+            );
+
+            for (const conta of contas) {
+                const proporcao = valorNovo / (parseFloat(conta.valor_original) || 1);
+
+                await connection.query(
+                    `UPDATE contas_receber SET valor_original = ?, valor_saldo = ?, updated_at = NOW() WHERE id = ?`,
+                    [valorNovo, Math.round(valorNovo * 100) / 100, conta.id]
+                );
+
+                // Recalcular parcelas abertas proporcionalmente
+                const [parcelas] = await connection.query(
+                    `SELECT id, valor FROM contas_receber_parcelas 
+                     WHERE conta_receber_id = ? AND status IN ('aberto', 'a_vencer')`,
+                    [conta.id]
+                );
+
+                for (const parcela of parcelas) {
+                    const novoValorParcela = Math.round(parseFloat(parcela.valor) * proporcao * 100) / 100;
+                    await connection.query(
+                        'UPDATE contas_receber_parcelas SET valor = ? WHERE id = ?',
+                        [novoValorParcela, parcela.id]
+                    );
+                }
+            }
+
+            await connection.query(
+                `INSERT INTO financeiro_integracoes_log 
+                 (origem, tipo_evento, referencia_id, dados_json, created_at)
+                 VALUES ('faturamento', 'valor_nfe', ?, ?, NOW())`,
+                [nfe_id, JSON.stringify({ nfe_id, novoValor })]
+            );
+
+            await connection.commit();
+            return { success: true, affected: contas.length };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    /**
+     * Gera conta a pagar a partir de NF de compra (Logística/Compras).
+     * Transação ACID — integração Logística → CP.
+     */
+    async gerarContaPagarDeCompra(compra_id, dadosCompra) {
+        const connection = await this.pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            const {
+                fornecedor_id, valor_total, data_emissao, numero_nf,
+                parcelas: numParcelas = 1, intervalo_dias = 30,
+                categoria_id, observacoes
+            } = dadosCompra;
+
+            const valorTotal = parseFloat(valor_total);
+            if (isNaN(valorTotal) || valorTotal <= 0) {
+                throw new Error('Valor total inválido');
+            }
+
+            const [result] = await connection.query(
+                `INSERT INTO contas_pagar (
+                    fornecedor_id, descricao, valor_total, data_emissao, data_vencimento,
+                    numero_documento, categoria_id, observacoes, status, compra_id, created_at
+                 ) VALUES (?, ?, ?, ?, DATE_ADD(?, INTERVAL ? DAY), ?, ?, ?, 'pendente', ?, NOW())`,
+                [fornecedor_id, `NF Compra ${numero_nf}`, valorTotal, data_emissao,
+                 data_emissao, intervalo_dias, numero_nf, categoria_id, observacoes, compra_id]
+            );
+
+            const conta_pagar_id = result.insertId;
+
+            // Gerar parcelas se múltiplas
+            if (numParcelas > 1) {
+                const valorParcela = valorTotal / numParcelas;
+                for (let i = 0; i < numParcelas; i++) {
+                    const valor = i === numParcelas - 1
+                        ? (valorTotal - valorParcela * (numParcelas - 1))
+                        : valorParcela;
+                    await connection.query(
+                        `INSERT INTO contas_pagar_parcelas 
+                         (conta_pagar_id, numero, valor, data_vencimento, status, created_at)
+                         VALUES (?, ?, ?, DATE_ADD(?, INTERVAL ? DAY), 'pendente', NOW())`,
+                        [conta_pagar_id, i + 1, Math.round(valor * 100) / 100,
+                         data_emissao, intervalo_dias * (i + 1)]
+                    );
+                }
+            }
+
+            await connection.query(
+                `INSERT INTO financeiro_integracoes_log 
+                 (origem, tipo_evento, referencia_id, dados_json, created_at)
+                 VALUES ('logistica', 'compra_nf', ?, ?, NOW())`,
+                [compra_id, JSON.stringify({ compra_id, conta_pagar_id, valor_total: valorTotal })]
+            );
+
+            await connection.commit();
+            return { success: true, conta_pagar_id, parcelas: numParcelas };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
+
+    /**
+     * Estorna conta a pagar de compra cancelada (Logística → CP).
+     */
+    async estornarCompraCancelada(compra_id) {
+        const connection = await this.pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            const [contas] = await connection.query(
+                'SELECT id FROM contas_pagar WHERE compra_id = ? AND status != ?',
+                [compra_id, 'cancelada']
+            );
+
+            for (const conta of contas) {
+                await connection.query(
+                    `UPDATE contas_pagar SET status = 'cancelada', updated_at = NOW() WHERE id = ?`,
+                    [conta.id]
+                );
+                await connection.query(
+                    `UPDATE contas_pagar_parcelas SET status = 'cancelado' 
+                     WHERE conta_pagar_id = ? AND status = 'pendente'`,
+                    [conta.id]
+                );
+            }
+
+            await connection.query(
+                `INSERT INTO financeiro_integracoes_log 
+                 (origem, tipo_evento, referencia_id, dados_json, created_at)
+                 VALUES ('logistica', 'compra_cancelada', ?, ?, NOW())`,
+                [compra_id, JSON.stringify({ compra_id, contas_canceladas: contas.length })]
+            );
+
+            await connection.commit();
+            return { success: true, affected: contas.length };
+        } catch (error) {
+            await connection.rollback();
+            throw error;
+        } finally {
+            connection.release();
+        }
+    }
 }
 
 module.exports = FinanceiroIntegracaoService;

@@ -3767,7 +3767,8 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
                     observacoes: pedido.observacoes || ''
                 };
                 const axios = require('axios');
-                const nfeResponse = await axios.post('http://localhost:3003/api/nfe/gerar', nfePayload, {
+                const nfeBaseUrl = process.env.NFE_SERVICE_URL || 'http://localhost:3003';
+                const nfeResponse = await axios.post(`${nfeBaseUrl}/api/nfe/gerar`, nfePayload, {
                     timeout: 30000,
                     headers: { 'Content-Type': 'application/json', 'Authorization': req.headers.authorization }
                 });
@@ -4053,6 +4054,32 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
         } = req.body;
         const user = req.user || {};
 
+        // Tentativa de geração de NF-e ANTES da transação (evita timeout de TX)
+        let nfeDataParcial = null;
+        if (gerarNFe) {
+            try {
+                const [pedRows] = await pool.query('SELECT p.*, c.* FROM pedidos p LEFT JOIN clientes c ON p.cliente_id = c.id WHERE p.id = ?', [id]);
+                const [itsRows] = await pool.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+                if (pedRows.length > 0 && itsRows.length > 0) {
+                    const ped = pedRows[0];
+                    const nfeBaseUrl = process.env.NFE_SERVICE_URL || 'http://localhost:3003';
+                    const axios = require('axios');
+                    const nfeResp = await axios.post(`${nfeBaseUrl}/api/nfe/gerar`, {
+                        pedido_id: id, cfop,
+                        cliente: { nome: ped.razao_social || ped.nome_fantasia, cpf_cnpj: ped.cpf_cnpj || ped.cnpj, email: ped.email, telefone: ped.telefone, endereco: ped.endereco, numero: ped.numero, complemento: ped.complemento, bairro: ped.bairro, cidade: ped.cidade, uf: ped.uf, cep: ped.cep },
+                        produtos: itsRows.map(i => ({ codigo: i.codigo_produto, descricao: i.descricao || i.produto, ncm: i.ncm || '00000000', quantidade: i.quantidade, valor_unitario: i.valor_unitario, valor_total: parseFloat(i.quantidade) * parseFloat(i.valor_unitario) })),
+                        valor_total: parseFloat(ped.valor) * (parseFloat(percentual) / 100),
+                        observacoes: `Faturamento parcial ${percentual}% - ${observacoes}`
+                    }, { timeout: 30000, headers: { 'Content-Type': 'application/json', 'Authorization': req.headers.authorization } });
+                    if (nfeResp.data && nfeResp.data.numero) {
+                        nfeDataParcial = { numero: nfeResp.data.numero, chave: nfeResp.data.chave, protocolo: nfeResp.data.protocolo, danfe_url: nfeResp.data.danfe_url };
+                    }
+                }
+            } catch (nfeErr) {
+                console.error('[FATURAMENTO_PARCIAL] NF-e falhou, prosseguindo sem NF-e eletrônica:', nfeErr.message);
+            }
+        }
+
         // === TRANSAÇÃO ATÔMICA ===
         await connection.beginTransaction();
         try {
@@ -4066,10 +4093,10 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
             const valorTotal = parseFloat(pedido.valor) || 0;
             const percentualFaturar = Math.min(parseFloat(percentual), 100 - (parseFloat(pedido.percentual_faturado) || 0));
             const valorFaturar = (valorTotal * percentualFaturar) / 100;
-            // NF atômica com FOR UPDATE
+            // NF atômica com FOR UPDATE (usa número da NF-e eletrônica se disponível)
             const [nfRows] = await connection.query('SELECT MAX(CAST(nfe_faturamento_numero AS UNSIGNED)) as ultima_nf FROM pedidos WHERE nfe_faturamento_numero IS NOT NULL FOR UPDATE');
             const ultimaNf = nfRows[0]?.ultima_nf || 0;
-            const novoNfNumero = String(ultimaNf + 1).padStart(8, '0');
+            const novoNfNumero = nfeDataParcial?.numero || String(ultimaNf + 1).padStart(8, '0');
 
             const novoPercentualFaturado = (parseFloat(pedido.percentual_faturado) || 0) + percentualFaturar;
             const novoValorFaturado = (parseFloat(pedido.valor_faturado) || 0) + valorFaturar;
@@ -4078,9 +4105,10 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
             await connection.query(`
                 UPDATE pedidos SET tipo_faturamento = ?, percentual_faturado = ?, valor_faturado = ?,
                     valor_pendente = ? - ?, nfe_faturamento_numero = ?, nfe_faturamento_cfop = ?,
-                    status = ?, data_faturamento = IF(data_faturamento IS NULL, NOW(), data_faturamento)
+                    status = ?, data_faturamento = IF(data_faturamento IS NULL, NOW(), data_faturamento),
+                    nfe_chave = COALESCE(?, nfe_chave), nfe_protocolo = COALESCE(?, nfe_protocolo)
                 WHERE id = ?
-            `, [tipo_faturamento, novoPercentualFaturado, novoValorFaturado, valorTotal, novoValorFaturado, novoNfNumero, cfop, novoStatus, id]);
+            `, [tipo_faturamento, novoPercentualFaturado, novoValorFaturado, valorTotal, novoValorFaturado, novoNfNumero, cfop, novoStatus, nfeDataParcial?.chave || null, nfeDataParcial?.protocolo || null, id]);
 
             const [fatResult] = await connection.query(`
                 INSERT INTO pedido_faturamentos
@@ -4117,6 +4145,7 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
                     percentual_faturado: novoPercentualFaturado, valor_faturado: novoValorFaturado,
                     valor_pendente: valorTotal - novoValorFaturado, baixa_estoque: false,
                     conta_receber_id: contaReceberId,
+                    nfe_gerada: !!nfeDataParcial, nfe_data: nfeDataParcial,
                     proximo_passo: novoPercentualFaturado < 100 ? 'Aguardando remessa para completar faturamento' : 'Faturamento completo'
                 }
             });
@@ -4147,6 +4176,32 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
         } = req.body;
         const user = req.user || {};
 
+        // Tentativa de geração de NF-e de remessa ANTES da transação
+        let nfeDataRemessa = null;
+        if (gerarNFe) {
+            try {
+                const [pedRows] = await pool.query('SELECT p.*, c.* FROM pedidos p LEFT JOIN clientes c ON p.cliente_id = c.id WHERE p.id = ?', [id]);
+                const [itsRows] = await pool.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+                if (pedRows.length > 0 && itsRows.length > 0) {
+                    const ped = pedRows[0];
+                    const nfeBaseUrl = process.env.NFE_SERVICE_URL || 'http://localhost:3003';
+                    const axios = require('axios');
+                    const nfeResp = await axios.post(`${nfeBaseUrl}/api/nfe/gerar`, {
+                        pedido_id: id, cfop,
+                        cliente: { nome: ped.razao_social || ped.nome_fantasia, cpf_cnpj: ped.cpf_cnpj || ped.cnpj, email: ped.email, telefone: ped.telefone, endereco: ped.endereco, numero: ped.numero, complemento: ped.complemento, bairro: ped.bairro, cidade: ped.cidade, uf: ped.uf, cep: ped.cep },
+                        produtos: itsRows.map(i => ({ codigo: i.codigo_produto, descricao: i.descricao || i.produto, ncm: i.ncm || '00000000', quantidade: i.quantidade, valor_unitario: i.valor_unitario, valor_total: parseFloat(i.quantidade) * parseFloat(i.valor_unitario) })),
+                        valor_total: ped.valor,
+                        observacoes: `Remessa/Entrega - ${observacoes}`
+                    }, { timeout: 30000, headers: { 'Content-Type': 'application/json', 'Authorization': req.headers.authorization } });
+                    if (nfeResp.data && nfeResp.data.numero) {
+                        nfeDataRemessa = { numero: nfeResp.data.numero, chave: nfeResp.data.chave, protocolo: nfeResp.data.protocolo, danfe_url: nfeResp.data.danfe_url };
+                    }
+                }
+            } catch (nfeErr) {
+                console.error('[REMESSA] NF-e falhou, prosseguindo sem NF-e eletrônica:', nfeErr.message);
+            }
+        }
+
         // === TRANSAÇÃO ATÔMICA: NF + pedido + estoque + financeiro ===
         await connection.beginTransaction();
         try {
@@ -4162,18 +4217,19 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
             const valorRestante = valorTotal - valorFaturado;
             const percentualRestante = 100 - (parseFloat(pedido.percentual_faturado) || 0);
 
-            // NF de remessa atômica
+            // NF de remessa atômica (usa número da NF-e eletrônica se disponível)
             const [nfRows] = await connection.query('SELECT MAX(CAST(nfe_remessa_numero AS UNSIGNED)) as ultima_nf FROM pedidos WHERE nfe_remessa_numero IS NOT NULL FOR UPDATE');
             const ultimaNf = nfRows[0]?.ultima_nf || 0;
-            const novoNfRemessa = String(ultimaNf + 1).padStart(8, '0');
+            const novoNfRemessa = nfeDataRemessa?.numero || String(ultimaNf + 1).padStart(8, '0');
 
             // Atualizar pedido atomicamente
             await connection.query(`
                 UPDATE pedidos SET percentual_faturado = 100, valor_faturado = ?, valor_pendente = 0,
                     estoque_baixado = 1, data_baixa_estoque = NOW(), nfe_remessa_numero = ?,
-                    nfe_remessa_cfop = ?, status = 'faturado', data_entrega_efetiva = NOW()
+                    nfe_remessa_cfop = ?, status = 'faturado', data_entrega_efetiva = NOW(),
+                    nfe_chave = COALESCE(?, nfe_chave), nfe_protocolo = COALESCE(?, nfe_protocolo)
                 WHERE id = ?
-            `, [valorTotal, novoNfRemessa, cfop, id]);
+            `, [valorTotal, novoNfRemessa, cfop, nfeDataRemessa?.chave || null, nfeDataRemessa?.protocolo || null, id]);
 
             const [fatResult] = await connection.query(`
                 INSERT INTO pedido_faturamentos
@@ -4230,6 +4286,7 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
                     pedido_id: id, nf_remessa: novoNfRemessa, cfop,
                     percentual_faturado: 100, valor_total: valorTotal,
                     estoque_baixado: true, conta_receber_id: contaReceberId,
+                    nfe_gerada: !!nfeDataRemessa, nfe_data: nfeDataRemessa,
                     status: 'Faturamento completo'
                 }
             });

@@ -141,12 +141,12 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn active" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -187,7 +187,7 @@
                         <h1 class="page-title"><i class="fas fa-cloud-download-alt"></i> Importar Ponto</h1>
                         <p class="page-subtitle">Sincronize marcaes automaticamente via RHiD Cloud ou importe de arquivo AFD/CSV</p>
                     </div>
-                    <a href="gestao-ponto.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Gestão do Ponto</a>
+                    <a href="gestão-ponto.html" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Gestão do Ponto</a>
                 </div>
 
                 <!-- Tabs -->
@@ -205,7 +205,7 @@
                         <i class="fas fa-broadcast-tower"></i> Tempo Real
                     </button>
                     <button class="tab-btn" onclick="showTab('history')">
-                        <i class="fas fa-history"></i> Histrico
+                        <i class="fas fa-history"></i> Histórico
                     </button>
                 </div>
 
@@ -416,7 +416,7 @@
                 <div id="tab-live" class="tab-content">
                     <div class="card live-card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-broadcast-tower"></i> ltimas Marcaes</h3>
+                            <h3 class="card-title"><i class="fas fa-broadcast-tower"></i> Últimas Marcaes</h3>
                             <div style="display:flex;align-items:center;gap:12px">
                                 <span class="live-indicator"><span class="live-dot"></span> AO VIVO</span>
                                 <button class="btn btn-outline btn-sm" onclick="loadLiveData()"><i class="fas fa-sync-alt"></i></button>
@@ -431,16 +431,16 @@
                     </div>
                 </div>
 
-                <!-- Tab: Histrico -->
+                <!-- Tab: Histórico -->
                 <div id="tab-history" class="tab-content">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-history"></i> Histrico de Importaes</h3>
+                            <h3 class="card-title"><i class="fas fa-history"></i> Histórico de Importaes</h3>
                         </div>
                         <div class="card-body">
                             <div class="table-container">
                                 <table class="data-table">
-                                    <thead><tr><th>Data/Hora</th><th>Perodo</th><th>Origem</th><th>Total</th><th>Importados</th><th>Duplicados</th><th>Erros</th><th>Status</th></tr></thead>
+                                    <thead><tr><th>Data/Hora</th><th>Período</th><th>Origem</th><th>Total</th><th>Importados</th><th>Duplicados</th><th>Erros</th><th>Status</th></tr></thead>
                                     <tbody id="history-tbody">
                                         <tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:40px;">Carregando...</td></tr>
                                     </tbody>
@@ -570,7 +570,7 @@
                     updateCloudStatus('online', 'RHiD Cloud Conectado');
                     document.getElementById('btn-save-rhid').disabled = false;
 
-                    // Mostrar informaes
+                    // Mostrar informações
                     document.getElementById('rhid-info').style.display = 'block';
                     document.getElementById('rhid-domain').textContent = result.connection.customerDomain || '-';
                     document.getElementById('rhid-devices').textContent = result.devices ? result.devices.length : '0';
@@ -653,7 +653,7 @@
             var dateEnd = document.getElementById('sync-date-end').value;
             var employeeId = document.getElementById('sync-employee').value;
 
-            if (!dateStart || !dateEnd) { showToast('Selecione o perodo', 'error'); return; }
+            if (!dateStart || !dateEnd) { showToast('Selecione o período', 'error'); return; }
 
             // Mostrar progress
             document.getElementById('sync-progress').style.display = 'block';
@@ -667,7 +667,7 @@
             var logEl = document.getElementById('sync-log');
             logEl.innerHTML = '';
             addLog(logEl, 'Iniciando sincronizao com RHiD Cloud...', 'info');
-            addLog(logEl, 'Perodo: ' + dateStart + ' a ' + dateEnd, 'info');
+            addLog(logEl, 'Período: ' + dateStart + ' a ' + dateEnd, 'info');
 
             try {
                 document.getElementById('sync-progress-fill').style.width = '50%';
@@ -892,7 +892,7 @@
                     '</tr>';
                 }).join('');
             } catch (e) {
-                console.error('Erro ao carregar histrico:', e);
+                console.error('Erro ao carregar histórico:', e);
             }
         }
 

@@ -231,11 +231,15 @@ function criarItemMovimentacao(mov, origem, conciliada) {
                onchange="toggleSelecao('${mov.id}', '${origem}', this.checked)">
     ` : '<i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>';
 
+    const tipoBadge = mov.tabela === 'contas_receber' ? '<span class="mov-categoria" style="background:#3b82f6;color:white;font-size:10px;padding:2px 6px;border-radius:4px;">CR</span>' 
+                    : mov.tabela === 'contas_pagar' ? '<span class="mov-categoria" style="background:#f59e0b;color:white;font-size:10px;padding:2px 6px;border-radius:4px;">CP</span>' : '';
+
     div.innerHTML = `
         ${checkbox}
         <div style="flex: 1;">
             <div class="mov-header">
                 <span class="mov-data">${formatarData(mov.data)}</span>
+                ${tipoBadge}
                 <span class="mov-valor ${mov.tipo}">${formatarMoeda(mov.valor)}</span>
             </div>
             <div class="mov-descrição">${mov.descrição}</div>
@@ -619,6 +623,41 @@ function atualizarEstatisticas() {
 // ============================================================================
 // UTILITÁRIOS
 // ============================================================================
+
+/**
+ * Aplica filtros de banco, tipo (CR/CP) e período, recarregando dados.
+ */
+function aplicarFiltros() {
+    const tipoFiltro = document.getElementById('filtroTipo')?.value || '';
+    // Filtrar lista do sistema por tipo CR/CP quando selecionado
+    if (tipoFiltro) {
+        const tabela = tipoFiltro === 'receber' ? 'contas_receber' : 'contas_pagar';
+        const filtrado = movimentacoesSistema.filter(m => m.tabela === tabela);
+        renderizarListaSistemaFiltrada(filtrado);
+    } else {
+        renderizarListaSistema();
+    }
+    atualizarEstatisticas();
+}
+
+function renderizarListaSistemaFiltrada(lista) {
+    const container = document.getElementById('lista-sistema');
+    if (!container) return;
+    container.innerHTML = '';
+    if (lista.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">Nenhuma movimentação encontrada</p>';
+        return;
+    }
+    let total = 0;
+    lista.forEach(mov => {
+        const conciliada = movimentacoesConciliadas.some(c => c.movimentacao_sistema_id === mov.id);
+        const item = criarItemMovimentacao(mov, 'sistema', conciliada);
+        container.appendChild(item);
+        total += mov.valor;
+    });
+    const totalEl = document.getElementById('total-sistema');
+    if (totalEl) totalEl.textContent = formatarMoeda(total);
+}
 
 function formatarMoeda(valor) {
     return new Intl.NumberFormat('pt-BR', {

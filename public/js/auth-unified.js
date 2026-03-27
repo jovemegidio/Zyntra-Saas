@@ -161,7 +161,8 @@
 
         // v7.4 FIX: Sempre injetar credentials:'include' para enviar httpOnly cookies
         // Sem isso, requests sem credentials explícito não enviam o authToken cookie
-        if (!init.credentials && url.startsWith('/')) {
+        // v7.5 FIX: também cobrir URLs absolutas do mesmo origin (ex: https://aluforce.api.br/api/...)
+        if (!init.credentials && (url.startsWith('/') || url.startsWith(window.location.origin) || url.startsWith('https://aluforce.api.br'))) {
             init.credentials = 'include';
         }
 

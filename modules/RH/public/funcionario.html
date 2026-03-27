@@ -509,14 +509,14 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- Sidebar - Portal do Funcionrio -->
+        <!-- Sidebar - Portal do Funcionário -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="funcionario.html" class="sidebar-btn active" title="Portal do Funcionrio"><i class="fas fa-home"></i></a>
+                <a href="funcionario.html" class="sidebar-btn active" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="pages/meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="pages/dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="pages/beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="pages/beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="pages/minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="pages/espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="pages/enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
@@ -543,7 +543,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Portal do Funcionrio</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Portal do Funcionário</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -570,7 +570,7 @@
                         <div class="welcome-info">
                             <span class="welcome-greeting">Boas-vindas</span>
                             <h2><span id="welcome-name">Usuário</span></h2>
-                            <p>Portal do Funcionrio  Acesso ao seu espao de trabalho</p>
+                            <p>Portal do Funcionário  Acesso ao seu espao de trabalho</p>
                         </div>
                         <div class="welcome-right">
                             <div class="welcome-stats">
@@ -611,8 +611,8 @@
                         <div class="action-icon orange">
                             <i class="fas fa-gift"></i>
                         </div>
-                        <h3>Benefcios</h3>
-                        <p>Consultar benefcios</p>
+                        <h3>Benefícios</h3>
+                        <p>Consultar benefícios</p>
                     </a>
                     <a href="pages/enviar-atestado.html" class="action-card">
                         <div class="action-icon purple">
@@ -649,7 +649,7 @@
                                         <span class="holerite-status" id="holerite-status" style="display: none;">Disponvel</span>
                                     </div>
                                     <div class="holerite-value" id="holerite-value" style="display: none;"></div>
-                                    <div class="holerite-label" id="holerite-label" style="display: none;">Valor lquido</div>
+                                    <div class="holerite-label" id="holerite-label" style="display: none;">Valor líquido</div>
                                 </div>
                                 <button class="btn-download" id="btn-ver-holerite" onclick="window.location.href='pages/meus-holerites.html'" style="display: none;">
                                     <i class="fas fa-download"></i>
@@ -707,7 +707,7 @@
                             <div class="card-body" id="notificacoes-container">
                                 <div style="text-align: center; padding: 20px; color: #9ca3af;">
                                     <i class="fas fa-spinner fa-spin" style="font-size: 20px;"></i>
-                                    <p style="margin-top: 8px; font-size: 13px;">Carregando notificaes...</p>
+                                    <p style="margin-top: 8px; font-size: 13px;">Carregando notificações...</p>
                                 </div>
                             </div>
                         </div>
@@ -790,7 +790,7 @@
             };
         }
 
-        // Helper: Calcular dias teis no ms at uma data especfica
+        // Helper: Calcular dias teis no mês at uma data especfica
         function calcularDiasUteis(ano, mes, diaFinal) {
             let diasUteis = 0;
             for (let dia = 1; dia <= diaFinal; dia++) {
@@ -885,7 +885,7 @@
                     document.getElementById('stat-dias-trabalhados').textContent = `${diaAtual}/${diasNoMes}`;
                     document.getElementById('stat-horas-mes').textContent = `${horasEstimadas}h`;
 
-                    // Dados do funcionrio
+                    // Dados do funcionário
                     if (user.email) {
                         document.getElementById('info-email').textContent = user.email;
 
@@ -931,7 +931,7 @@
             carregarUsuarioLogado();
             carregarNotificacoes();
             carregarUltimoHolerite();
-            // Atualizar notificaes a cada 30 segundos
+            // Atualizar notificações a cada 30 segundos
             _notifInterval = setInterval(carregarNotificacoes, 30000);
         });
 
@@ -1008,7 +1008,7 @@
             const badge = document.getElementById('notif-badge');
 
             try {
-                // Buscar funcionrio logado
+                // Buscar funcionário logado
                 const meResponse = await fetch('/api/me', { credentials: 'include' });
                 let funcionarioId = null;
                 let userData = null;
@@ -1041,7 +1041,7 @@
                     return;
                 }
 
-                // Buscar notificaes
+                // Buscar notificações
                 const response = await fetch(`/api/rh/notificacoes?funcionario_id=${funcionarioId || ''}&limit=10`, {
                     credentials: 'include',
                     headers: getAuthHeaders()
@@ -1068,7 +1068,7 @@
                         }
                     }
 
-                    // Renderizar notificaes
+                    // Renderizar notificações
                     if (notificações.length === 0) {
                         container.innerHTML = `
                             <div style="text-align: center; padding: 30px; color: #9ca3af;">
@@ -1098,11 +1098,11 @@
                     }).join('');
                 }
             } catch (error) {
-                console.error('Erro ao carregar notificaes:', error);
+                console.error('Erro ao carregar notificações:', error);
                 container.innerHTML = `
                     <div style="text-align: center; padding: 20px; color: #9ca3af;">
                         <i class="fas fa-exclamation-circle" style="font-size: 24px; color: #f59e0b;"></i>
-                        <p style="margin-top: 8px; font-size: 13px;">Erro ao carregar notificaes</p>
+                        <p style="margin-top: 8px; font-size: 13px;">Erro ao carregar notificações</p>
                     </div>
                 `;
             }

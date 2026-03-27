@@ -65,6 +65,9 @@ const {
     securityHeaders
 } = require('../../security-middleware');
 
+// Corte Temporal Hard Limit 2026 (Dev Spec 1.1)
+const { corteTemporalMiddleware, buildCorteClause, CORTE_DATE } = require('../../src/middleware/financeiro-corte-temporal');
+
 const app = express();
 const PORT = process.env.PORT_FINANCEIRO || 3006;
 
@@ -126,6 +129,9 @@ app.use(express.json({ limit: '2mb' })); // SEGURANÇA: Limite de payload
 app.use(express.urlencoded({ extended: true, limit: '2mb' }));
 app.use(cookieParser());
 
+// Dev Spec 1.1: Interceptador global de corte temporal
+app.use('/api/financeiro', corteTemporalMiddleware);
+
 // Servir arquivos estáticos (HTML sem cache para deploy imediato)
 app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
@@ -139,27 +145,29 @@ app.get('/api/financeiro/contas-pagar', authenticateToken, async (req, res) => {
     try {
         const { status, fornecedor_id, vencimento_inicio, vencimento_fim, limite = 100 } = req.query;
         
-        let sql = 'SELECT * FROM contas_pagar WHERE 1=1';
+        // Dev Spec 1.1: Corte temporal 2026 aplicado via middleware
+        const corte = req.financeiroCorteTemporal;
+        let sql = `SELECT * FROM contas_pagar cp WHERE 1=1${corte ? corte.cpClause('cp') : ''}`;
         const params = [];
         
         if (status) {
-            sql += ' AND status = ?';
+            sql += ' AND cp.status = ?';
             params.push(status);
         }
         if (fornecedor_id) {
-            sql += ' AND fornecedor_id = ?';
+            sql += ' AND cp.fornecedor_id = ?';
             params.push(fornecedor_id);
         }
         if (vencimento_inicio) {
-            sql += ' AND data_vencimento >= ?';
+            sql += ' AND cp.data_vencimento >= ?';
             params.push(vencimento_inicio);
         }
         if (vencimento_fim) {
-            sql += ' AND data_vencimento <= ?';
+            sql += ' AND cp.data_vencimento <= ?';
             params.push(vencimento_fim);
         }
         
-        sql += ' ORDER BY data_vencimento DESC LIMIT ?';
+        sql += ' ORDER BY cp.data_vencimento DESC LIMIT ?';
         params.push(parseInt(limite));
         
         const [contas] = await pool.execute(sql, params);
@@ -383,6 +391,8 @@ app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) =>
     try {
         const { status, cliente_id, vencimento_inicio, vencimento_fim, limite = 2000 } = req.query;
         
+        // Dev Spec 1.1: Corte temporal 2026 aplicado via middleware
+        const corte = req.financeiroCorteTemporal;
         let sql = `SELECT cr.*, 
                           COALESCE(cr.cliente_nome, c.nome) as cliente_nome, 
                           COALESCE(cr.cnpj_cliente, c.cpf_cnpj) as cnpj_cpf,
@@ -390,7 +400,7 @@ app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) =>
                           cr.forma_recebimento
                    FROM contas_receber cr
                    LEFT JOIN clientes c ON cr.cliente_id = c.id
-                   WHERE 1=1`;
+                   WHERE 1=1${corte ? corte.crClause('cr') : ''}`;
         const params = [];
         
         if (status) {
@@ -501,7 +511,14 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
             numero_documento,
             dias_lembrete,
             recorrencia,
-            status
+            status,
+            // Dev Spec 1.3: Novos campos CR
+            pago_no_dia,
+            aceita_troca_factory,
+            comprovante_url,
+            dia_recomprado,
+            data_para_cartorio,
+            data_protestado
         } = req.body;
         
         // AUDITORIA ENTERPRISE: Validar valor monetário se fornecido
@@ -515,10 +532,33 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
         }
         
         // AUDITORIA ENTERPRISE: Validar data se fornecida
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
         if (data_vencimento) {
-            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (!dateRegex.test(data_vencimento)) {
                 return res.status(400).json({ error: 'Data de vencimento inválida (YYYY-MM-DD)' });
+            }
+        }
+        
+        // Dev Spec 1.3: Validar pago_no_dia (não pode ser futuro)
+        if (pago_no_dia) {
+            if (!dateRegex.test(pago_no_dia)) {
+                return res.status(400).json({ error: 'Data de pagamento inválida (YYYY-MM-DD)' });
+            }
+            if (new Date(pago_no_dia) > new Date()) {
+                return res.status(400).json({ error: 'Data de pagamento não pode ser futura' });
+            }
+        }
+        
+        // Dev Spec 1.3: Validar status estrito
+        const STATUS_VALIDOS_CR = ['cancelada', 'liquidada', 'vencida', 'a_vencer'];
+        if (status && !STATUS_VALIDOS_CR.includes(status)) {
+            return res.status(400).json({ error: `Status inválido. Valores permitidos: ${STATUS_VALIDOS_CR.join(', ')}` });
+        }
+        
+        // Validar datas opcionais ETL
+        for (const [campo, valor] of [['dia_recomprado', dia_recomprado], ['data_para_cartorio', data_para_cartorio], ['data_protestado', data_protestado]]) {
+            if (valor && !dateRegex.test(valor)) {
+                return res.status(400).json({ error: `${campo} inválida (YYYY-MM-DD)` });
             }
         }
         
@@ -529,11 +569,19 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
                 data_vencimento = COALESCE(?, data_vencimento),
                 forma_recebimento = COALESCE(?, forma_recebimento),
                 observacoes = COALESCE(?, observacoes),
-                status = COALESCE(?, status)
+                status = COALESCE(?, status),
+                pago_no_dia = COALESCE(?, pago_no_dia),
+                aceita_troca_factory = COALESCE(?, aceita_troca_factory),
+                comprovante_url = COALESCE(?, comprovante_url),
+                dia_recomprado = COALESCE(?, dia_recomprado),
+                data_para_cartorio = COALESCE(?, data_para_cartorio),
+                data_protestado = COALESCE(?, data_protestado)
              WHERE id = ?`,
             [descricao, valor_total, data_vencimento, forma_recebimento, 
              `${cliente_nome || ''} | ${categoria || ''} | ${conta_bancaria || ''}`, 
-             status, id]
+             status, pago_no_dia,
+             aceita_troca_factory !== undefined ? (aceita_troca_factory ? 1 : 0) : null,
+             comprovante_url, dia_recomprado, data_para_cartorio, data_protestado, id]
         );
         
         res.json({ success: true, message: 'Conta atualizada com sucesso' });
@@ -565,12 +613,43 @@ app.delete('/api/financeiro/contas-receber/:id', authenticateToken, requireFinan
     }
 });
 
+// Dev Spec 1.3: Upload de comprovante para conta a receber
+app.post('/api/financeiro/contas-receber/:id/comprovante', authenticateToken, upload.single('comprovante'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            return res.status(400).json({ error: 'ID inválido' });
+        }
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+        
+        const comprovante_url = `/uploads/${req.file.filename}`;
+        
+        await pool.execute(
+            'UPDATE contas_receber SET comprovante_url = ? WHERE id = ?',
+            [comprovante_url, idParsed]
+        );
+        
+        res.json({ success: true, comprovante_url, message: 'Comprovante enviado com sucesso' });
+    } catch (error) {
+        console.error('❌ Erro ao fazer upload do comprovante:', error);
+        res.status(500).json({ error: 'Erro ao fazer upload', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
 // GET - Obter conta a receber específica
 app.get('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res) => {
     try {
         const { id } = req.params;
+        
+        // Dev Spec 2.3: Retornar objeto completo (parcelas, recebimentos, histórico)
         const [contas] = await pool.execute(
-            `SELECT cr.*, c.nome as cliente_nome, c.cpf_cnpj
+            `SELECT cr.*, c.nome as cliente_nome, c.cpf_cnpj,
+                    cr.pago_no_dia, cr.aceita_troca_factory, cr.comprovante_url,
+                    cr.dia_recomprado, cr.data_para_cartorio, cr.data_protestado,
+                    cr.origem_integracao
              FROM contas_receber cr
              LEFT JOIN clientes c ON cr.cliente_id = c.id
              WHERE cr.id = ?`,
@@ -581,7 +660,52 @@ app.get('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
         
-        res.json({ success: true, data: contas[0] });
+        const conta = contas[0];
+        
+        // Buscar parcelas vinculadas
+        let parcelas = [];
+        try {
+            const [p] = await pool.execute(
+                `SELECT * FROM contas_receber_parcelas WHERE conta_receber_id = ? ORDER BY numero_parcela`,
+                [id]
+            );
+            parcelas = p;
+        } catch (e) { /* tabela pode não existir */ }
+        
+        // Buscar recebimentos (histórico de movimentações)
+        let recebimentos = [];
+        try {
+            const [r] = await pool.execute(
+                `SELECT fr.*, cb.nome as banco_nome
+                 FROM financeiro_recebimentos fr
+                 LEFT JOIN contas_bancarias cb ON fr.conta_bancaria_id = cb.id
+                 WHERE fr.conta_receber_id = ?
+                 ORDER BY fr.data_recebimento DESC`,
+                [id]
+            );
+            recebimentos = r;
+        } catch (e) { /* tabela pode não existir */ }
+        
+        // Buscar itens da nota (se vinculada a NFe)
+        let itens_nota = [];
+        if (conta.nfe_id) {
+            try {
+                const [items] = await pool.execute(
+                    `SELECT * FROM nfe_itens WHERE nfe_id = ?`, [conta.nfe_id]
+                );
+                itens_nota = items;
+            } catch (e) { /* tabela pode não existir */ }
+        }
+        
+        res.json({ 
+            success: true, 
+            data: {
+                ...conta,
+                parcelas,
+                recebimentos,
+                itens_nota
+            }
+        });
     } catch (error) {
         console.error('❌ Erro ao buscar conta a receber:', error);
         res.status(500).json({ error: 'Erro ao buscar conta a receber', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
@@ -691,20 +815,24 @@ app.post('/api/financeiro/contas-bancarias', authenticateToken, async (req, res)
 
 app.get('/api/financeiro/dashboard', authenticateToken, async (req, res) => {
     try {
+        // Dev Spec 1.1: Corte temporal 2026
+        const cpCorte = ` AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`;
+        const crCorte = ` AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`;
+        
         const [totalPagar] = await pool.execute(
-            "SELECT SUM(valor_total) as total FROM contas_pagar WHERE status = 'pendente'"
+            `SELECT SUM(valor_total) as total FROM contas_pagar cp WHERE status = 'pendente'${cpCorte}`
         );
         
         const [totalReceber] = await pool.execute(
-            "SELECT SUM(valor_total) as total FROM contas_receber WHERE status = 'pendente'"
+            `SELECT SUM(valor_total) as total FROM contas_receber cr WHERE status = 'pendente'${crCorte}`
         );
         
         const [vencidosPagar] = await pool.execute(
-            "SELECT COUNT(*) as total FROM contas_pagar WHERE status = 'pendente' AND data_vencimento < CURDATE()"
+            `SELECT COUNT(*) as total FROM contas_pagar cp WHERE status = 'pendente' AND data_vencimento < CURDATE()${cpCorte}`
         );
         
         const [vencidosReceber] = await pool.execute(
-            "SELECT COUNT(*) as total FROM contas_receber WHERE status = 'pendente' AND data_vencimento < CURDATE()"
+            `SELECT COUNT(*) as total FROM contas_receber cr WHERE status = 'pendente' AND data_vencimento < CURDATE()${crCorte}`
         );
         
         const [saldoContas] = await pool.execute(
@@ -735,15 +863,17 @@ app.get('/api/financeiro/relatorios/dre', authenticateToken, async (req, res) =>
         
         const [receitas] = await pool.execute(
             `SELECT SUM(valor_recebido) as total 
-             FROM contas_receber 
-             WHERE status = 'recebido' AND data_recebimento BETWEEN ? AND ?`,
+             FROM contas_receber cr
+             WHERE cr.status = 'recebido' AND cr.data_recebimento BETWEEN ? AND ?
+             AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`,
             [inicio, fim]
         );
         
         const [despesas] = await pool.execute(
             `SELECT SUM(valor_pago) as total 
-             FROM contas_pagar 
-             WHERE status = 'pago' AND data_pagamento BETWEEN ? AND ?`,
+             FROM contas_pagar cp
+             WHERE cp.status = 'pago' AND cp.data_pagamento BETWEEN ? AND ?
+             AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`,
             [inicio, fim]
         );
         
@@ -770,20 +900,24 @@ app.get('/api/financeiro/fluxo-caixa', authenticateToken, async (req, res) => {
     try {
         const { inicio, fim } = req.query;
         
+        // Dev Spec 1.1: Corte temporal 2026
+        const crCorte = ` AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`;
+        const cpCorte = ` AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`;
+        
         const [entradas] = await pool.execute(
-            `SELECT DATE(data_recebimento) as data, SUM(valor_recebido) as total
-             FROM contas_receber
-             WHERE status = 'recebido' AND data_recebimento BETWEEN ? AND ?
-             GROUP BY DATE(data_recebimento)
+            `SELECT DATE(cr.data_recebimento) as data, SUM(cr.valor_recebido) as total
+             FROM contas_receber cr
+             WHERE cr.status = 'recebido' AND cr.data_recebimento BETWEEN ? AND ?${crCorte}
+             GROUP BY DATE(cr.data_recebimento)
              ORDER BY data`,
             [inicio, fim]
         );
         
         const [saidas] = await pool.execute(
-            `SELECT DATE(data_pagamento) as data, SUM(valor_pago) as total
-             FROM contas_pagar
-             WHERE status = 'pago' AND data_pagamento BETWEEN ? AND ?
-             GROUP BY DATE(data_pagamento)
+            `SELECT DATE(cp.data_pagamento) as data, SUM(cp.valor_pago) as total
+             FROM contas_pagar cp
+             WHERE cp.status = 'pago' AND cp.data_pagamento BETWEEN ? AND ?${cpCorte}
+             GROUP BY DATE(cp.data_pagamento)
              ORDER BY data`,
             [inicio, fim]
         );
@@ -814,16 +948,18 @@ app.get('/api/financeiro/fluxo-caixa-resumo', authenticateToken, async (req, res
 
         const [entradas] = await pool.execute(
             `SELECT DATE(data_vencimento) as data, SUM(valor) as entradas
-             FROM contas_receber
-             WHERE status IN ('aberto','parcial') AND data_vencimento BETWEEN ? AND ?
+             FROM contas_receber cr
+             WHERE cr.status IN ('aberto','parcial') AND cr.data_vencimento BETWEEN ? AND ?
+             AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}
              GROUP BY DATE(data_vencimento) ORDER BY data`,
             [inicioStr, fimStr]
         );
 
         const [saidas] = await pool.execute(
             `SELECT DATE(data_vencimento) as data, SUM(valor) as saidas
-             FROM contas_pagar
-             WHERE status IN ('aberto','parcial') AND data_vencimento BETWEEN ? AND ?
+             FROM contas_pagar cp
+             WHERE cp.status IN ('aberto','parcial') AND cp.data_vencimento BETWEEN ? AND ?
+             AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}
              GROUP BY DATE(data_vencimento) ORDER BY data`,
             [inicioStr, fimStr]
         );
@@ -1372,6 +1508,75 @@ app.delete('/api/financeiro/impostos/:id', authenticateToken, requireFinancePerm
     } catch (error) {
         console.error('❌ Erro ao excluir imposto:', error);
         res.status(500).json({ error: 'Erro ao excluir imposto', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
+// ============================================
+// DEV SPEC 1.2: WEBHOOKS DE INTEGRAÇÃO E2E
+// ============================================
+
+const FinanceiroIntegracaoService = require('../Faturamento/services/financeiro-integracao.service');
+const integracaoService = new FinanceiroIntegracaoService(pool);
+
+// Webhook: Faturamento → Financeiro (mudança de status NFe)
+app.post('/api/financeiro/webhook/nfe-status', authenticateToken, async (req, res) => {
+    try {
+        const { nfe_id, status, motivo } = req.body;
+        if (!nfe_id || !status) {
+            return res.status(400).json({ error: 'nfe_id e status são obrigatórios' });
+        }
+        const result = await integracaoService.sincronizarStatusNFe(nfe_id, status, {
+            motivo, usuario_id: req.user.id
+        });
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Erro webhook nfe-status:', error);
+        res.status(500).json({ error: 'Erro ao processar webhook NFe', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
+// Webhook: Faturamento → Financeiro (alteração de valor NFe / CC-e)
+app.post('/api/financeiro/webhook/nfe-valor', authenticateToken, async (req, res) => {
+    try {
+        const { nfe_id, novo_valor } = req.body;
+        if (!nfe_id || !novo_valor) {
+            return res.status(400).json({ error: 'nfe_id e novo_valor são obrigatórios' });
+        }
+        const result = await integracaoService.sincronizarValorNFe(nfe_id, novo_valor);
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Erro webhook nfe-valor:', error);
+        res.status(500).json({ error: 'Erro ao processar webhook valor NFe', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
+// Webhook: Logística/Compras → Financeiro (NF de compra → CP)
+app.post('/api/financeiro/webhook/compra', authenticateToken, async (req, res) => {
+    try {
+        const { compra_id, fornecedor_id, valor_total, data_emissao, numero_nf, parcelas, intervalo_dias, categoria_id, observacoes } = req.body;
+        if (!compra_id || !fornecedor_id || !valor_total) {
+            return res.status(400).json({ error: 'compra_id, fornecedor_id e valor_total são obrigatórios' });
+        }
+        const result = await integracaoService.gerarContaPagarDeCompra(compra_id, req.body);
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Erro webhook compra:', error);
+        res.status(500).json({ error: 'Erro ao processar webhook compra', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
+// Webhook: Logística/Compras → Financeiro (cancelamento de compra)
+app.post('/api/financeiro/webhook/compra-cancelada', authenticateToken, async (req, res) => {
+    try {
+        const { compra_id } = req.body;
+        if (!compra_id) {
+            return res.status(400).json({ error: 'compra_id é obrigatório' });
+        }
+        const result = await integracaoService.estornarCompraCancelada(compra_id);
+        res.json(result);
+    } catch (error) {
+        console.error('❌ Erro webhook compra-cancelada:', error);
+        res.status(500).json({ error: 'Erro ao processar webhook cancelamento', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
     }
 });
 

@@ -344,7 +344,7 @@ function safeRedirectToLogin() {
 
         // If the app has the overlay/polling logic, allow it to finish first
         const start = Date.now();
-        const maxWait = 3000; // ms
+        const maxWait = 3000; // mês
         const check = () => new Promise((resolve) => {
             const iv = setInterval(() => {
                 try {

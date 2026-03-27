@@ -2,30 +2,30 @@
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#1a2744">
     <meta name="format-detection" content="telephone=no">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <title>Zyntra: Gestão de Pedidos</title>
-    
+
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260301" defer></script>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!-- CSP Fix -->
     <script src="/js/csp-fix.js" defer></script>
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260213">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
-    
+
     <style>
         :root {
             --sidebar-width: 48px;
@@ -365,7 +365,7 @@
         ::-webkit-scrollbar-track { background: #f5f5f5; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #aaa; }
-        
+
         /* Modal Styles */
         .modal-overlay {
             display: none;
@@ -378,7 +378,7 @@
             padding: 20px;
         }
         .modal-overlay.active { display: flex; }
-        
+
         .modal-container {
             background: white;
             border-radius: 12px;
@@ -388,12 +388,12 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             animation: modalSlideIn 0.3s ease;
         }
-        
+
         @keyframes modalSlideIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
+
         .modal-header {
             display: flex;
             justify-content: space-between;
@@ -410,7 +410,7 @@
             gap: 10px;
         }
         .modal-header h2 i { color: var(--primary-orange); }
-        
+
         .modal-close {
             width: 36px; height: 36px;
             border: none;
@@ -425,13 +425,13 @@
             transition: all 0.2s;
         }
         .modal-close:hover { background: rgba(255,255,255,0.2); }
-        
+
         .modal-body {
             padding: 24px;
             overflow-y: auto;
             max-height: calc(90vh - 140px);
         }
-        
+
         .modal-footer {
             display: flex;
             justify-content: flex-end;
@@ -440,7 +440,7 @@
             background: #f9fafb;
             border-top: 1px solid #e5e7eb;
         }
-        
+
         /* Detail Grid */
         .detail-grid {
             display: grid;
@@ -448,7 +448,7 @@
             gap: 20px;
         }
         @media (max-width: 600px) { .detail-grid { grid-template-columns: 1fr; } }
-        
+
         .detail-section {
             background: #f9fafb;
             border-radius: 8px;
@@ -464,7 +464,7 @@
             gap: 8px;
         }
         .detail-section h4 i { color: var(--primary-orange); }
-        
+
         .detail-row {
             display: flex;
             justify-content: space-between;
@@ -475,7 +475,7 @@
         .detail-row:last-child { border-bottom: none; }
         .detail-row .label { color: #6b7280; }
         .detail-row .value { font-weight: 600; color: #1f2937; }
-        
+
         /* Form Styles */
         .form-grid {
             display: grid;
@@ -483,7 +483,7 @@
             gap: 16px;
         }
         @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } }
-        
+
         .form-group { display: flex; flex-direction: column; gap: 6px; }
         .form-group label {
             font-size: 12px;
@@ -494,7 +494,7 @@
             gap: 6px;
         }
         .form-group label i { color: var(--primary-orange); font-size: 11px; }
-        
+
         .form-control {
             padding: 10px 12px;
             border: 1px solid #e5e7eb;
@@ -507,7 +507,7 @@
             border-color: var(--primary-orange);
             box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.1);
         }
-        
+
         textarea.form-control { resize: vertical; min-height: 80px; }
 
         /* ===== MODAL EDITAR ESTILO OMIE ===== */
@@ -1150,7 +1150,7 @@
             backdrop-filter: blur(2px);
         }
         .modal-alerta-overlay.show { display: flex; }
-        
+
         .modal-alerta-content {
             background: white;
             border-radius: 12px;
@@ -1160,17 +1160,17 @@
             animation: alertaSlideIn 0.25s ease;
             overflow: hidden;
         }
-        
+
         @keyframes alertaSlideIn {
             from { transform: scale(0.9) translateY(-20px); opacity: 0; }
             to { transform: scale(1) translateY(0); opacity: 1; }
         }
-        
+
         .modal-alerta-body {
             padding: 32px 24px;
             text-align: center;
         }
-        
+
         .modal-alerta-icon {
             width: 56px;
             height: 56px;
@@ -1181,38 +1181,38 @@
             margin: 0 auto 20px;
             font-size: 28px;
         }
-        
+
         .modal-alerta-icon.warning {
             background: #fef3c7;
             color: #d97706;
             border: 2px solid #fcd34d;
         }
-        
+
         .modal-alerta-icon.error {
             background: #fee2e2;
             color: #dc2626;
             border: 2px solid #fca5a5;
         }
-        
+
         .modal-alerta-icon.success {
             background: #dcfce7;
             color: #16a34a;
             border: 2px solid #86efac;
         }
-        
+
         .modal-alerta-icon.info {
             background: #dbeafe;
             color: #2563eb;
             border: 2px solid #93c5fd;
         }
-        
+
         .modal-alerta-message {
             font-size: 15px;
             color: #374151;
             line-height: 1.5;
             margin-bottom: 24px;
         }
-        
+
         .modal-alerta-btn {
             padding: 12px 32px;
             border: none;
@@ -1222,12 +1222,12 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .modal-alerta-btn.primary {
             background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
             color: white;
         }
-        
+
         .modal-alerta-btn.primary:hover {
             background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
             transform: translateY(-1px);
@@ -1295,7 +1295,7 @@
             justify-content: center;
             box-shadow: 0 2px 8px rgba(34, 197, 94, 0.35);
         }
-        .btn-add-parcelas:hover { 
+        .btn-add-parcelas:hover {
             background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(34, 197, 94, 0.45);
@@ -1386,7 +1386,7 @@
     <script src="/js/anti-copy-protection.js"></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
 
-    
+
     <!-- Verificação de Admin (Gestão de Vendas) -->
     <script src="js/vendas-admin-check.js"></script>
 
@@ -1489,24 +1489,28 @@
                         <div class="metric-header">
                             <div class="metric-icon purple"><i class="fas fa-file-alt"></i></div>
                         </div>
+                        <div class="metric-value" id="totalPedidos">0</div>
                         <div class="metric-label">Total de Pedidos</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
                         </div>
+                        <div class="metric-value" id="pedidosPendentes">0</div>
                         <div class="metric-label">Pendentes</div>
                     </div>
                     <div class="metric-card green">
                         <div class="metric-header">
                             <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
                         </div>
+                        <div class="metric-value" id="pedidosAprovados">0</div>
                         <div class="metric-label">Aprovados</div>
                     </div>
                     <div class="metric-card orange">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-file-invoice"></i></div>
                         </div>
+                        <div class="metric-value" id="pedidosFaturados">0</div>
                         <div class="metric-label">Faturados</div>
                     </div>
                 </div>
@@ -1611,22 +1615,22 @@
             const tbody = document.getElementById('pedidosTableBody');
             tbody.innerHTML = `<tr><td colspan="7"><div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Carregando pedidos...</div></div></td></tr>`;
             try {
-                const response = await fetchWithTimeout('/api/vendas/pedidos?limit=200', { 
+                const response = await fetchWithTimeout('/api/vendas/pedidos?limit=200', {
                     headers: getAuthHeaders()
                 }, 30000);
-                
+
                 // Se não autenticado, redirecionar para login
                 if (response.status === 401) {
                     console.warn('[Pedidos] Não autenticado, redirecionando para login...');
                     window.location.href = '/login.html?redirect=' + encodeURIComponent(window.location.pathname);
                     return;
                 }
-                
+
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({}));
                     throw new Error(errorData.message || `Erro ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 // Mapear campos para compatibilidade
                 todosPedidos = (Array.isArray(data) ? data : []).map(p => ({
@@ -1643,7 +1647,7 @@
                 filtrarPedidos();
             } catch (error) {
                 console.error('Erro ao carregar pedidos:', error);
-                const errorMsg = error.name === 'AbortError' 
+                const errorMsg = error.name === 'AbortError'
                     ? 'Tempo limite excedido. Verifique sua conexão.'
                     : error.message || 'Erro desconhecido';
                 tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Erro ao carregar pedidos</h3><p>${errorMsg}</p></div></td></tr>`;
@@ -1703,19 +1707,19 @@
                 document.getElementById('paginationContainer').style.display = 'none';
                 return;
             }
-            
+
             // Verificar permissões do usuário logado
             const perms = window.ALUFORCE_PERMISSIONS || {};
-            
+
             tbody.innerHTML = pedidosPagina.map(p => {
                 // Verificar se o usuário pode editar este pedido específico
                 const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
-                
+
                 // Botão de editar: desabilitado se não pode editar, ou mostra dica
-                const btnEditar = podeEditar 
+                const btnEditar = podeEditar
                     ? `<button class="action-btn" title="Editar" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i></button>`
                     : `<button class="action-btn" title="Sem permissão para editar este pedido" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-edit"></i></button>`;
-                
+
                 return `
                 <tr>
                     <td><span class="pedido-número">#${p.número || p.id}</span></td>
@@ -1749,12 +1753,12 @@
         }
 
         function mudarPagina(p) { const t = Math.ceil(pedidosFiltrados.length / itensPorPagina); if (p >= 1 && p <= t) { paginaAtual = p; renderizarTabela(); } }
-        
+
         // ============ FUNÇÕES DE AÇÕES ============
-        
+
         // Armazenar pedido atual para o modal
         let pedidoAtualModal = null;
-        
+
         // Visualizar pedido - Abre modal de detalhes (estilo Omie)
         async function verPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
@@ -1762,13 +1766,13 @@
                 showToast('Pedido não encontrado', 'error');
                 return;
             }
-            
+
             pedidoAtualModal = pedido;
-            
+
             // Verificar permissões do usuário logado
             const perms = window.ALUFORCE_PERMISSIONS || {};
             const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
-            
+
             // Criar modal de visualização se não existir
             let modal = document.getElementById('modal-visualizar');
             if (!modal) {
@@ -1795,20 +1799,20 @@
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
                 modal = document.getElementById('modal-visualizar');
             }
-            
+
             document.getElementById('modal-pedido-número').textContent = `#${pedido.número || pedido.id}`;
             modal.classList.add('active');
-            
+
             // Buscar itens do pedido
             let itens = [];
             try {
                 const response = await fetch(`/api/vendas/pedidos/${id}/itens`, { headers: getAuthHeaders() });
                 if (response.ok) itens = await response.json();
             } catch (e) { console.log('Itens não encontrados'); }
-            
+
             // Calcular totais dos itens
             const totalMercadorias = itens.reduce((s, i) => s + (parseFloat(i.valor_total || i.total || i.preco_unitario * i.quantidade) || 0), 0);
-            
+
             // Renderizar detalhes (estilo Omie)
             document.getElementById('modal-visualizar-body').innerHTML = `
                 <!-- Cliente Section -->
@@ -1944,7 +1948,7 @@
                 <button class="sidebar-action-btn" onclick="fecharModalVisualizar()" style="color:#6b7280;"><i class="fas fa-times"></i> Fechar</button>
             `;
         }
-        
+
         // Função auxiliar para tabs do modal de detalhes
         function switchDetalhesTab(btn, tabId) {
             // Desativar todas as tabs
@@ -1961,13 +1965,13 @@
             btn.style.color = 'var(--primary-orange)';
             document.getElementById(tabId).style.display = 'block';
         }
-        
+
         // Duplicar pedido a partir da visualização
         function duplicarPedidoFromView(id) {
             fecharModalVisualizar();
             window.location.href = `index.html?duplicar=${id}`;
         }
-        
+
         // Ver histórico do pedido
         async function verHistoricoPedido(id) {
             try {
@@ -1984,7 +1988,7 @@
                 showToast('Erro ao carregar histórico', 'error');
             }
         }
-        
+
         // Editar pedido - Abre modal de edição estilo Omie
         async function editarPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
@@ -1992,13 +1996,13 @@
                 showToast('Pedido não encontrado', 'error');
                 return;
             }
-            
+
             // ========================================
             // VERIFICAÇÃO DE SEGURANÇA: Checar permissão antes de abrir edição
             // ========================================
             const perms = window.ALUFORCE_PERMISSIONS || {};
             const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
-            
+
             if (!podeEditar) {
                 // Mostrar alerta de que não pode editar
                 const isSupervisor = perms.isSupervisor || false;
@@ -2009,10 +2013,10 @@
                 }
                 return; // Bloquear abertura do modal de edição
             }
-            
+
             pedidoAtualModal = pedido;
             fecharModalVisualizar(); // Fechar modal de visualização se estiver aberto
-            
+
             // Criar modal de edição se não existir
             let modal = document.getElementById('modal-editar');
             if (!modal) {
@@ -2025,7 +2029,7 @@
                     <option value="Márcia do Nascimento Oliveira Scarcella">Márcia Scarcella</option>
                     <option value="Renata Maria Batista do Nascimento ">Renata Nascimento</option>
                 `;
-                
+
                 const modalHtml = `
                 <div id="modal-editar" class="modal-overlay">
                     <div class="modal-content-omie">
@@ -2363,15 +2367,15 @@
                                 <button class="sidebar-action-btn btn-faturar" onclick="faturarPedidoModal()">
                                     <i class="fas fa-file-invoice-dollar"></i> Faturar
                                 </button>
-                                
+
                                 <div class="sidebar-divider"></div>
-                                
+
                                 <button class="sidebar-action-btn" onclick="verHistoricoPedido()">
                                     <i class="fas fa-history"></i> Histórico
                                 </button>
-                                
+
                                 <div class="sidebar-divider"></div>
-                                
+
                                 <button class="sidebar-action-btn danger" onclick="excluirPedidoModal()">
                                     <i class="fas fa-trash"></i> Excluir
                                 </button>
@@ -2470,11 +2474,11 @@
                 document.body.insertAdjacentHTML('beforeend', modalHtml);
                 modal = document.getElementById('modal-editar');
             }
-            
+
             // Preencher dados
             const clienteNome = pedido.cliente_nome || 'Cliente';
             const iniciais = clienteNome.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-            
+
             document.getElementById('modal-título-pedido').textContent = `Orçamento Nº ${pedido.número || pedido.id}`;
             document.getElementById('modal-cliente-avatar').textContent = iniciais;
             document.getElementById('edit-cliente').value = clienteNome;
@@ -2484,19 +2488,19 @@
             document.getElementById('edit-total-mercadorias').value = formatarValor(pedido.valor_total).replace('R$ ', '');
             document.getElementById('edit-observacoes').value = pedido.observacao || '';
             document.getElementById('edit-pedido-id').value = pedido.id;
-            
+
             // Carregar itens do pedido
             await carregarItensPedidoModal(pedido.id);
-            
+
             // Resetar tabs
             document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelector('.modal-tab[data-tab="itens"]').classList.add('active');
             document.getElementById('tab-itens').classList.add('active');
-            
+
             modal.classList.add('active');
         }
-        
+
         // Carregar itens do pedido para o modal de edição
         async function carregarItensPedidoModal(pedidoId) {
             const tbody = document.getElementById('itens-pedido-tbody');
@@ -2504,19 +2508,19 @@
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/itens`, {
                     headers: getAuthHeaders()
                 });
-                
+
                 if (!response.ok) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #999;">Erro ao carregar itens</td></tr>`;
                     return;
                 }
-                
+
                 const itens = await response.json();
-                
+
                 if (!itens || itens.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #999;"><i class="fas fa-box-open" style="font-size: 32px; display: block; margin-bottom: 10px; opacity: 0.5;"></i>Nenhum item cadastrado</td></tr>`;
                     return;
                 }
-                
+
                 tbody.innerHTML = itens.map(item => {
                     const total = (parseFloat(item.quantidade) || 0) * (parseFloat(item.preco_unitario) || 0);
                     return `
@@ -2534,23 +2538,23 @@
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 30px; color: #ef4444;">Erro ao carregar itens</td></tr>`;
             }
         }
-        
+
         // Trocar tabs do modal
         function switchModalTabPedidos(tabId) {
             document.querySelectorAll('.modal-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            
+
             document.querySelector(`.modal-tab[data-tab="${tabId}"]`).classList.add('active');
             document.getElementById(`tab-${tabId}`).classList.add('active');
         }
-        
+
         function fecharModalEditar() {
             const modal = document.getElementById('modal-editar');
             if (modal) modal.classList.remove('active');
         }
-        
+
         // ===== FUNÇÕES PARA MODAL DE PARCELAS =====
-        
+
         // Lista de condições de pagamento (será carregada do banco)
         let condicoesPagamento = [
             'A vista', '14/28', '15/30/45/60', '20/30/40/50/60', '20/40/60',
@@ -2562,7 +2566,7 @@
         ];
         let condicoesPagamentoPage = 1;
         const condicoesPorPagina = 20;
-        
+
         // Carregar condições de pagamento do banco de dados
         async function carregarCondicoesPagamento() {
             try {
@@ -2582,7 +2586,7 @@
                 console.log('Usando condições padrão:', error.message);
             }
         }
-        
+
         function abrirModalParcelas() {
             const modal = document.getElementById('modal-parcelas');
             if (modal) {
@@ -2592,12 +2596,12 @@
                 renderizarListaParcelas(condicoesPagamento);
             }
         }
-        
+
         function fecharModalParcelas() {
             const modal = document.getElementById('modal-parcelas');
             if (modal) modal.classList.remove('show');
         }
-        
+
         function pesquisarParcelas() {
             const termo = document.getElementById('parcelas-search').value.toLowerCase().trim();
             condicoesPagamentoPage = 1;
@@ -2608,49 +2612,49 @@
             const filtradas = condicoesPagamento.filter(p => p.toLowerCase().includes(termo));
             renderizarListaParcelas(filtradas);
         }
-        
+
         function renderizarListaParcelas(lista) {
             const container = document.getElementById('parcelas-list-items');
             const paginationInfo = document.querySelector('.parcelas-pagination span');
             if (!container) return;
-            
+
             if (lista.length === 0) {
                 container.innerHTML = '<div class="parcelas-list-item" style="color: #999; text-align: center;">Nenhuma condição encontrada</div>';
                 if (paginationInfo) paginationInfo.textContent = '0 registros';
                 return;
             }
-            
+
             // Paginação
             const inicio = (condicoesPagamentoPage - 1) * condicoesPorPagina;
             const fim = Math.min(inicio + condicoesPorPagina, lista.length);
             const paginada = lista.slice(inicio, fim);
             const totalPaginas = Math.ceil(lista.length / condicoesPorPagina);
-            
+
             // Destacar "Mais Utilizadas" na primeira página
             let html = '';
             if (condicoesPagamentoPage === 1 && !document.getElementById('parcelas-search').value.trim()) {
                 html = '<div class="parcelas-list-header" style="background: #fef3c7; color: #92400e;">Mais Utilizadas</div>';
             }
-            
-            html += paginada.map(p => 
+
+            html += paginada.map(p =>
                 `<div class="parcelas-list-item" onclick="selecionarParcela('${p}')">${p}</div>`
             ).join('');
-            
+
             container.innerHTML = html;
-            
+
             // Atualizar paginação
             if (paginationInfo) {
                 paginationInfo.textContent = `${inicio + 1} - ${fim} de ${lista.length} registros`;
             }
-            
+
             // Atualizar botões de paginação
             atualizarBotoesPaginacao(totalPaginas);
         }
-        
+
         function atualizarBotoesPaginacao(totalPaginas) {
             const container = document.querySelector('.parcelas-pagination-btns');
             if (!container) return;
-            
+
             container.innerHTML = `
                 <button onclick="irParaPagina(1)" ${condicoesPagamentoPage === 1 ? 'disabled' : ''}><i class="fas fa-angle-double-left"></i></button>
                 <button onclick="paginaAnterior()" ${condicoesPagamentoPage === 1 ? 'disabled' : ''}>anterior</button>
@@ -2661,22 +2665,22 @@
                 <button onclick="irParaPagina(${totalPaginas})" ${condicoesPagamentoPage >= totalPaginas ? 'disabled' : ''}><i class="fas fa-angle-double-right"></i></button>
             `;
         }
-        
+
         function irParaPagina(pagina) {
             condicoesPagamentoPage = pagina;
             const termo = document.getElementById('parcelas-search').value.toLowerCase().trim();
             const lista = termo ? condicoesPagamento.filter(p => p.toLowerCase().includes(termo)) : condicoesPagamento;
             renderizarListaParcelas(lista);
         }
-        
+
         function paginaAnterior() {
             if (condicoesPagamentoPage > 1) irParaPagina(condicoesPagamentoPage - 1);
         }
-        
+
         function proximaPagina(totalPaginas) {
             if (condicoesPagamentoPage < totalPaginas) irParaPagina(condicoesPagamentoPage + 1);
         }
-        
+
         function selecionarParcela(condicao) {
             const input = document.getElementById('edit-parcelas');
             if (input) {
@@ -2685,7 +2689,7 @@
             fecharModalParcelas();
             gerarParcelasTabela(condicao);
         }
-        
+
         function abrirModalNovaParcela() {
             const modal = document.getElementById('modal-nova-parcela');
             if (modal) {
@@ -2693,19 +2697,19 @@
                 document.getElementById('novo-parcelamento').value = '';
             }
         }
-        
+
         function fecharModalNovaParcela() {
             const modal = document.getElementById('modal-nova-parcela');
             if (modal) modal.classList.remove('show');
         }
-        
+
         async function confirmarNovaParcelamento() {
             const novoParcelamento = document.getElementById('novo-parcelamento').value.trim();
             if (!novoParcelamento) {
                 mostrarAlerta('Você precisa informar o número de parcelas.', 'warning');
                 return;
             }
-            
+
             try {
                 // Salvar no banco de dados
                 const response = await fetch('/api/vendas/condicoes-pagamento', { credentials: 'include', method: 'POST',
@@ -2719,13 +2723,13 @@
                         descricao: `Condição cadastrada pelo vendedor`
                     })
                 });
-                
+
                 if (response.ok) {
                     // Adicionar — lista local se não existir
                     if (!condicoesPagamento.includes(novoParcelamento)) {
                         condicoesPagamento.unshift(novoParcelamento); // Adiciona no início
                     }
-                    
+
                     selecionarParcela(novoParcelamento);
                     fecharModalNovaParcela();
                     showToast('success', 'Sucesso', 'Condição de pagamento cadastrada com sucesso!');
@@ -2749,18 +2753,18 @@
                 showToast('info', 'Sucesso', 'Condição aplicada localmente');
             }
         }
-        
+
         function mostrarAjudaParcelamento() {
             showToast('info', 'Ajuda', 'Digite os dias de vencimento separados por barra (/).\nExemplo: 28/35/42 = 3 parcelas com vencimento em 28, 35 e 42 dias.');
         }
-        
+
         function gerarParcelasTabela(condicao) {
             const tbody = document.getElementById('parcelas-tbody');
             if (!tbody) return;
-            
+
             const valorTotal = parseFloat(document.getElementById('edit-valor-total')?.value?.replace(',', '.')) || 0;
             const hoje = new Date();
-            
+
             // Parse da condição de pagamento
             let dias = [];
             if (condicao.toLowerCase() === 'a vista') {
@@ -2771,17 +2775,17 @@
             } else {
                 dias = condicao.split('/').map(d => parseInt(d.trim())).filter(d => !isNaN(d));
             }
-            
+
             if (dias.length === 0) dias = [28];
-            
+
             const valorParcela = valorTotal / dias.length;
-            
+
             tbody.innerHTML = dias.map((d, i) => {
                 const vencimento = new Date(hoje);
                 vencimento.setDate(vencimento.getDate() + d);
                 const vencimentoStr = vencimento.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', weekday: 'short' });
                 const percentual = (100 / dias.length).toFixed(0);
-                
+
                 return `
                     <tr ondblclick="editarParcela(${i})">
                         <td><span class="situação-previsao">Previsão</span></td>
@@ -2796,18 +2800,18 @@
                 `;
             }).join('');
         }
-        
+
         function refazerParcelas() {
             const condicaoAtual = document.getElementById('edit-parcelas')?.value || 'Para 28 dias';
             const condicao = condicaoAtual.replace('Para ', '');
             gerarParcelasTabela(condicao);
             showToast('success', 'Parcelas Atualizadas', 'As parcelas foram recalculadas com sucesso!');
         }
-        
+
         function editarParcela(index) {
             showToast('info', 'Editar Parcela', `Funcionalidade de edição da parcela ${index + 1} em desenvolvimento.`);
         }
-        
+
         // Event listener para pesquisa com Enter
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
@@ -2819,10 +2823,10 @@
                 }
             }, 1000);
         });
-        
+
         async function salvarEdicaoPedido() {
             if (!pedidoAtualModal) return;
-            
+
             // Validar condição de pagamento
             const condicaoPagamento = document.getElementById('edit-parcelas')?.value?.replace('Para ', '').trim() || '';
             if (!condicaoPagamento) {
@@ -2831,7 +2835,7 @@
                 switchModalTabPedidos('parcelas');
                 return;
             }
-            
+
             // Coletar TODOS os dados do formulário de edição
             const dados = {
                 // Dados básicos
@@ -2839,56 +2843,56 @@
                 status: document.getElementById('edit-status')?.value || '',
                 valor: parseFloat(document.getElementById('edit-valor-total')?.value?.replace(',', '.')) || pedidoAtualModal.valor || 0,
                 desconto: parseFloat(document.getElementById('edit-desconto')?.value?.replace(',', '.')) || 0,
-                
+
                 // Condições de pagamento
                 condicoes_pagamento: condicaoPagamento,
-                
+
                 // ===== FRETE E TRANSPORTE =====
                 transportadora: document.getElementById('edit-transportadora')?.value || '',
                 tipo_frete: document.getElementById('edit-tipo-frete')?.value || '',
                 placa_veiculo: document.getElementById('edit-placa-veiculo')?.value || '',
                 veiculo_uf: document.getElementById('edit-veiculo-uf')?.value || '',
                 rntrc: document.getElementById('edit-rntrc')?.value || '',
-                
+
                 // Volumes
                 qtd_volumes: parseInt(document.getElementById('edit-qtd-volumes')?.value) || 0,
                 especie_volumes: document.getElementById('edit-especie-volumes')?.value || '',
                 marca_volumes: document.getElementById('edit-marca-volumes')?.value || '',
                 numeracao_volumes: document.getElementById('edit-numeracao-volumes')?.value || '',
-                
+
                 // Pesos e valores
                 peso_liquido: parseFloat(document.getElementById('edit-peso-liquido')?.value) || 0,
                 peso_bruto: parseFloat(document.getElementById('edit-peso-bruto')?.value) || 0,
                 frete: parseFloat(document.getElementById('edit-valor-frete')?.value) || 0,
                 valor_seguro: parseFloat(document.getElementById('edit-valor-seguro')?.value) || 0,
                 tipo_entrega: document.getElementById('edit-tipo-entrega')?.value || '',
-                
+
                 // Outros dados de frete
                 numero_lacre: document.getElementById('edit-número-lacre')?.value || '',
                 outras_despesas: parseFloat(document.getElementById('edit-outras-despesas')?.value) || 0,
                 prazo_entrega: document.getElementById('edit-previsao-entrega')?.value || '',
                 codigo_rastreio: document.getElementById('edit-código-rastreio')?.value || '',
                 veiculo_proprio: document.getElementById('edit-veiculo-proprio')?.checked ? 1 : 0,
-                
+
                 // ===== INFORMAÇÕES ADICIONAIS =====
                 nf: document.getElementById('edit-nf')?.value || '',
                 origem: document.getElementById('edit-origem')?.value || 'Sistema',
                 info_complementar: document.getElementById('edit-info-complementar')?.value || '',
-                
+
                 // ===== OBSERVAÇÕES =====
                 observacao: document.getElementById('edit-observacoes')?.value || '',
                 observacao_cliente: document.getElementById('edit-observacoes-cliente')?.value || ''
             };
-            
+
             // Remover campos vazios/undefined para não sobrescrever dados existentes
             Object.keys(dados).forEach(key => {
                 if (dados[key] === '' || dados[key] === undefined || dados[key] === null) {
                     delete dados[key];
                 }
             });
-            
+
             console.log('?? Salvando edição do pedido:', pedidoAtualModal.id, dados);
-            
+
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoAtualModal.id}`, { credentials: 'include', method: 'PATCH',
                     headers: {
@@ -2897,15 +2901,15 @@
                     },
                     body: JSON.stringify(dados)
                 });
-                
+
                 if (!response.ok) {
                     const err = await response.json();
                     throw new Error(err.message || 'Erro ao salvar');
                 }
-                
+
                 const result = await response.json();
                 console.log('? Pedido atualizado:', result);
-                
+
                 showToast('Pedido atualizado com sucesso!', 'success');
                 fecharModalEditar();
                 await carregarPedidos(); // Recarregar lista
@@ -2914,18 +2918,18 @@
                 showAlert('Erro ao salvar: ' + error.message, 'Erro', 'error');
             }
         }
-        
+
         // Funções auxiliares do modal
         function imprimirPedidoModal() {
             if (pedidoAtualModal) imprimirPedido(pedidoAtualModal.id);
         }
-        
+
         async function duplicarPedidoModal() {
             if (!pedidoAtualModal) {
                 showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
-            
+
             // Modal de confirmação profissional
             const confirmado = await showConfirmModal({
                 type: 'info',
@@ -2937,7 +2941,7 @@
             if (!confirmado) {
                 return;
             }
-            
+
             // Criar cópia do pedido
             const novoPedido = {
                 empresa_id: pedidoAtualModal.empresa_id,
@@ -2950,7 +2954,7 @@
                 observacoes: `[DUPLICADO do pedido #${pedidoAtualModal.número || pedidoAtualModal.id}] ${pedidoAtualModal.observacoes || ''}`,
                 itens: pedidoAtualModal.itens || []
             };
-            
+
             // Enviar para API
             fetch('/api/vendas/pedidos', { credentials: 'include', method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -2971,25 +2975,25 @@
                 showToast('Erro ao duplicar pedido. Tente novamente.', 'error');
             });
         }
-        
+
         async function faturarPedidoModal() {
             if (!pedidoAtualModal) {
                 showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
-            
+
             if (pedidoAtualModal.status === 'faturado') {
                 showToast('Este pedido já está faturado!', 'warning');
                 return;
             }
-            
+
             if (pedidoAtualModal.status === 'cancelado') {
                 showToast('Não — possível faturar um pedido cancelado!', 'warning');
                 return;
             }
-            
+
             const valorTotal = parseFloat(pedidoAtualModal.valor_total) || 0;
-            
+
             // Modal de confirmação profissional
             const confirmado = await showConfirmModal({
                 type: 'success',
@@ -3004,7 +3008,7 @@
             if (!confirmado) {
                 return;
             }
-            
+
             // Atualizar status e gerar faturamento
             fetch(`/api/vendas/pedidos/${pedidoAtualModal.id}/faturar`, { credentials: 'include', method: 'POST',
                 headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -3030,11 +3034,11 @@
             .then(res => res.json())
             .then(result => {
                 showToast('Pedido faturado com sucesso!', 'success');
-                
+
                 // Atualizar UI
                 document.getElementById('edit-status').value = 'faturado';
                 pedidoAtualModal.status = 'faturado';
-                
+
                 fecharModalEditar();
                 carregarPedidos();
             })
@@ -3043,13 +3047,13 @@
                 showToast('Erro ao faturar pedido. Tente novamente', 'error');
             });
         }
-        
+
         function verHistoricoPedido() {
             if (!pedidoAtualModal) {
                 showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
-            
+
             // Buscar histórico do pedido
             fetch(`/api/vendas/pedidos/${pedidoAtualModal.id}/historico`, {
                 headers: getAuthHeaders()
@@ -3058,7 +3062,7 @@
             .then(historico => {
                 let historicoHtml = `?? HISTÓRICO DO PEDIDO #${pedidoAtualModal.número || pedidoAtualModal.id}\n`;
                 historicoHtml += '?'.repeat(40) + '\n\n';
-                
+
                 if (Array.isArray(historico) && historico.length > 0) {
                     historico.forEach(h => {
                         const data = new Date(h.data || h.created_at).toLocaleString('pt-BR');
@@ -3072,21 +3076,21 @@
                     historicoHtml += `?? ${new Date(pedidoAtualModal.created_at || pedidoAtualModal.data_criacao).toLocaleString('pt-BR')}\n`;
                     historicoHtml += `   Pedido criado\n`;
                     historicoHtml += `   Status: ${pedidoAtualModal.status}\n\n`;
-                    
+
                     if (pedidoAtualModal.data_aprovacao) {
                         historicoHtml += `?? ${new Date(pedidoAtualModal.data_aprovacao).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido aprovado\n\n`;
                     }
-                    
+
                     if (pedidoAtualModal.data_faturamento) {
                         historicoHtml += `?? ${new Date(pedidoAtualModal.data_faturamento).toLocaleString('pt-BR')}\n`;
                         historicoHtml += `   Pedido faturado\n\n`;
                     }
                 }
-                
+
                 historicoHtml += '?'.repeat(40) + '\n';
                 historicoHtml += `Status atual: ${pedidoAtualModal.status?.toUpperCase() || 'N/A'}`;
-                
+
                 showToast('Histórico do pedido carregado', 'info');
             })
             .catch(error => {
@@ -3094,10 +3098,10 @@
                 showToast('Histórico do pedido carregado', 'info');
             });
         }
-        
+
         async function excluirPedidoModal() {
             if (!pedidoAtualModal) return;
-            
+
             const confirmado = await showConfirmModal({
                 type: 'danger',
                 title: 'Excluir Pedido',
@@ -3110,7 +3114,7 @@
                 fecharModalEditar();
             }
         }
-        
+
         // Função para excluir pedido
         async function excluirPedido(id) {
             try {
@@ -3121,7 +3125,7 @@
                         ...getAuthHeaders()
                     }
                 });
-                
+
                 if (response.ok) {
                     showToast('Pedido excluído com sucesso!', 'success');
                     // Remove da lista local
@@ -3138,10 +3142,10 @@
                 showToast('Erro de conexão ao excluir pedido', 'error');
             }
         }
-        
+
         async function cancelarPedidoModal() {
             if (!pedidoAtualModal) return;
-            
+
             const confirmado = await showConfirmModal({
                 type: 'warning',
                 title: 'Cancelar Pedido',
@@ -3154,7 +3158,7 @@
                 salvarEdicaoPedido();
             }
         }
-        
+
         // Imprimir pedido - Gera PDF ou abre janela de impressão
         function imprimirPedido(id) {
             const pedido = todosPedidos.find(p => p.id === id);
@@ -3162,7 +3166,7 @@
                 showToast('Pedido não encontrado', 'error');
                 return;
             }
-            
+
             // Abrir janela de impressão com os dados do pedido
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -3218,7 +3222,7 @@
                             <div class="meta-line">Emitido em: ${new Date().toLocaleString('pt-BR')}</div>
                         </div>
                     </div>
-                    
+
                     <div class="info-grid">
                         <div class="info-section">
                             <h3>INFORMAÇÕES DO PEDIDO</h3>
@@ -3233,15 +3237,15 @@
                             <div class="info-row"><span class="label">Empresa:</span><span class="value">${pedido.empresa_nome || '-'}</span></div>
                         </div>
                     </div>
-                    
+
                     <div class="info-section">
                         <h3>VALORES</h3>
                         <div class="info-row"><span class="label">Valor Total:</span><span class="value valor-destaque">${formatarValor(pedido.valor_total)}</span></div>
                         <div class="info-row"><span class="label">Frete:</span><span class="value">${pedido.frete ? formatarValor(pedido.frete) : 'R$ 0,00'}</span></div>
                     </div>
-                    
+
                     ${pedido.observação ? `<div class="info-section" style="margin-top: 16px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 11px; color: #64748b;">${pedido.observacao}</p></div>` : ''}
-                    
+
                     <div class="rpt-footer">
                         <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
                         <span>Documento gerado automaticamente pelo Zyntra ERP</span>
@@ -3304,17 +3308,17 @@
         async function carregarUsuarioLogado() {
             try {
                 const response = await fetchWithTimeout('/api/me', { headers: getAuthHeaders() }, 15000);
-                
+
                 // Se não autenticado, não fazer nada (carregarPedidos vai redirecionar)
                 if (response.status === 401) {
                     console.warn('[Pedidos] Usuário não autenticado');
                     return;
                 }
-                
+
                 if (response.ok) {
                     const user = await response.json();
                     console.log('[Pedidos] Usuário carregado:', user.nome);
-                    
+
                     // Usar apelido se disponível, senão primeiro+último nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
@@ -3325,7 +3329,7 @@
                     if (!userAvatar) {
                         userAvatar = getAvatarFromEmail(user.email, userName);
                     }
-                    
+
                     // Atualizar saudação dinâmica baseada na hora
                     const greetingTextEl = document.getElementById('greeting-text');
                     if (greetingTextEl) {
@@ -3335,17 +3339,17 @@
                         else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
                         greetingTextEl.textContent = greeting;
                     }
-                    
+
                     // Atualizar nome na saudação do header
                     const userNameEl = document.getElementById('user-name');
                     if (userNameEl) {
                         userNameEl.textContent = primeiroNome;
                     }
-                    
+
                     // Atualizar avatar/foto
                     const userPhotoEl = document.getElementById('user-photo');
                     const userInitialEl = document.getElementById('user-initial');
-                    
+
                     if (userAvatar && userPhotoEl) {
                         userPhotoEl.src = userAvatar;
                         userPhotoEl.classList.add('visible');
@@ -3365,19 +3369,19 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Carregar dados do usuário logado via API
             carregarUsuarioLogado();
-            
+
             // Carregar condições de pagamento do banco
             carregarCondicoesPagamento();
-            
+
             carregarPedidos();
         });
-        
+
         // ===== MODAL DE ALERTA PROFISSIONAL =====
         function mostrarAlerta(mensagem, tipo = 'warning') {
             // Remover modal existente se houver
             const existente = document.getElementById('modal-alerta-parcelas');
             if (existente) existente.remove();
-            
+
             // Ícones por tipo
             const icones = {
                 warning: 'fas fa-exclamation',
@@ -3385,7 +3389,7 @@
                 success: 'fas fa-check',
                 info: 'fas fa-info'
             };
-            
+
             // Criar modal
             const modalHtml = `
                 <div id="modal-alerta-parcelas" class="modal-alerta-overlay show">
@@ -3400,15 +3404,15 @@
                     </div>
                 </div>
             `;
-            
+
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            
+
             // Fechar ao clicar fora
             document.getElementById('modal-alerta-parcelas').addEventListener('click', function(e) {
                 if (e.target === this) fecharModalAlerta();
             });
         }
-        
+
         function fecharModalAlerta() {
             const modal = document.getElementById('modal-alerta-parcelas');
             if (modal) {
@@ -3416,13 +3420,13 @@
                 setTimeout(() => modal.remove(), 200);
             }
         }
-        
+
         // =====================================================
         // FATURAMENTO PARCIAL (50% F9) - ENTREGA FUTURA
         // =====================================================
-        
+
         let statusFaturamentoPedido = null;
-        
+
         // Abrir modal de faturamento parcial
         async function abrirModalFaturamentoParcial(pedidoId) {
             const pedido = todosPedidos.find(p => p.id === pedidoId) || pedidoAtualModal;
@@ -3430,7 +3434,7 @@
                 mostrarAlerta('Pedido não encontrado', 'error');
                 return;
             }
-            
+
             // Buscar status de faturamento do pedido
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/faturamento-status`, {
@@ -3440,17 +3444,17 @@
             } catch (e) {
                 statusFaturamentoPedido = { pedido: pedido };
             }
-            
+
             const valorTotal = parseFloat(pedido.valor_total || pedido.valor) || 0;
             const percentualFaturado = parseFloat(statusFaturamentoPedido?.pedido?.percentual_faturado) || 0;
             const valorPendente = valorTotal - (valorTotal * percentualFaturado / 100);
             const estoqueBaixado = statusFaturamentoPedido?.pedido?.estoque_baixado || false;
-            
+
             // Determinar estado atual e próxima ação
             let etapaAtual = 'inicial';
             let btnFaturamentoDisabled = '';
             let btnRemessaDisabled = 'disabled';
-            
+
             if (percentualFaturado >= 50 && percentualFaturado < 100) {
                 etapaAtual = 'aguardando_remessa';
                 btnFaturamentoDisabled = 'disabled';
@@ -3464,7 +3468,7 @@
                 btnFaturamentoDisabled = 'disabled';
                 btnRemessaDisabled = 'disabled';
             }
-            
+
             const modalHtml = `
             <div id="modal-faturamento-parcial" class="modal-overlay active" style="z-index: 2000;">
                 <div class="modal-container" style="max-width: 700px;">
@@ -3492,7 +3496,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Fluxo Visual -->
                         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 12px;">
                             <div style="text-align: center; flex: 1;">
@@ -3511,7 +3515,7 @@
                                 <div style="font-size: 11px; color: #6b7280;">CFOP 5117/6117</div>
                             </div>
                         </div>
-                        
+
                         <!-- Seleção de Tipo -->
                         <div style="margin-bottom: 20px;">
                             <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">
@@ -3523,14 +3527,14 @@
                                 <option value="normal">Faturamento Normal (100%)</option>
                             </select>
                         </div>
-                        
+
                         <!-- Configuração de Percentual -->
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                             <div>
                                 <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">
                                     Percentual a Faturar
                                 </label>
-                                <input type="number" id="percentual-faturar" value="50" min="1" max="${100 - percentualFaturado}" 
+                                <input type="number" id="percentual-faturar" value="50" min="1" max="${100 - percentualFaturado}"
                                     style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;"
                                     onchange="atualizarValorFaturar()" ${percentualFaturado >= 100 ? 'disabled' : ''}>
                             </div>
@@ -3538,11 +3542,11 @@
                                 <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">
                                     Valor a Faturar
                                 </label>
-                                <input type="text" id="valor-faturar" value="R$ ${(valorTotal * 0.5).toLocaleString('pt-BR', {minimumFractionDigits: 2})}" 
+                                <input type="text" id="valor-faturar" value="R$ ${(valorTotal * 0.5).toLocaleString('pt-BR', {minimumFractionDigits: 2})}"
                                     style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: #f9fafb;" readonly>
                             </div>
                         </div>
-                        
+
                         <!-- CFOP -->
                         <div style="margin-bottom: 20px;">
                             <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">
@@ -3563,7 +3567,7 @@
                                 </optgroup>
                             </select>
                         </div>
-                        
+
                         <!-- Opções Adicionais -->
                         <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
                             <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -3577,16 +3581,16 @@
                                 </label>
                             </div>
                         </div>
-                        
+
                         <!-- Observações -->
                         <div style="margin-bottom: 16px;">
                             <label style="font-size: 13px; font-weight: 600; color: #374151; display: block; margin-bottom: 8px;">
                                 Observações
                             </label>
-                            <textarea id="obs-faturamento" rows="2" placeholder="Observações do faturamento..." 
+                            <textarea id="obs-faturamento" rows="2" placeholder="Observações do faturamento..."
                                 style="width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px; resize: none;"></textarea>
                         </div>
-                        
+
                         <!-- Info Box -->
                         <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
                             <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -3603,7 +3607,7 @@
                         <button onclick="fecharModalFaturamentoParcial()" class="btn-secondary" style="padding: 12px 24px;">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
-                        <button onclick="executarRemessaEntrega(${pedido.id})" class="btn-primary" ${btnRemessaDisabled} 
+                        <button onclick="executarRemessaEntrega(${pedido.id})" class="btn-primary" ${btnRemessaDisabled}
                             style="padding: 12px 24px; background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                             <i class="fas fa-truck"></i> Emitir Remessa
                         </button>
@@ -3614,20 +3618,20 @@
                     </div>
                 </div>
             </div>`;
-            
+
             // Remover modal existente
             const existente = document.getElementById('modal-faturamento-parcial');
             if (existente) existente.remove();
-            
+
             // Inserir modal
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            
+
             // Event listener para fechar ao clicar fora
             document.getElementById('modal-faturamento-parcial').addEventListener('click', function(e) {
                 if (e.target === this) fecharModalFaturamentoParcial();
             });
         }
-        
+
         // Fechar modal de faturamento parcial
         function fecharModalFaturamentoParcial() {
             const modal = document.getElementById('modal-faturamento-parcial');
@@ -3636,22 +3640,22 @@
                 setTimeout(() => modal.remove(), 200);
             }
         }
-        
+
         // Atualizar valor a faturar baseado no percentual
         function atualizarValorFaturar() {
             const pedido = pedidoAtualModal || statusFaturamentoPedido?.pedido;
             if (!pedido) return;
-            
+
             const valorTotal = parseFloat(pedido.valor_total || pedido.valor) || 0;
             const percentual = parseFloat(document.getElementById('percentual-faturar')?.value) || 50;
             const valorFaturar = (valorTotal * percentual) / 100;
-            
+
             const inputValor = document.getElementById('valor-faturar');
             if (inputValor) {
                 inputValor.value = 'R$ ' + valorFaturar.toLocaleString('pt-BR', {minimumFractionDigits: 2});
             }
         }
-        
+
         // Executar faturamento parcial
         async function executarFaturamentoParcial(pedidoId) {
             const tipoFaturamento = document.getElementById('tipo-faturamento-select')?.value || 'parcial_50';
@@ -3660,7 +3664,7 @@
             const gerarFinanceiro = document.getElementById('gerar-financeiro')?.checked ?? true;
             const gerarNFe = document.getElementById('gerar-nfe')?.checked ?? false;
             const observacoes = document.getElementById('obs-faturamento')?.value || '';
-            
+
             // Validar se — faturamento normal
             if (tipoFaturamento === 'normal') {
                 // Redirecionar para faturamento normal
@@ -3672,11 +3676,11 @@
                 }
                 return;
             }
-            
+
             // Confirmar ação
             const valorTotal = parseFloat(pedidoAtualModal?.valor_total || pedidoAtualModal?.valor) || 0;
             const valorFaturar = (valorTotal * percentual) / 100;
-            
+
             const confirmado = await showConfirmModal({
                 type: 'success',
                 title: 'Faturamento Parcial',
@@ -3687,9 +3691,9 @@
                 confirmText: 'Faturar',
                 cancelText: 'Cancelar'
             });
-            
+
             if (!confirmado) return;
-            
+
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/faturamento-parcial`, { credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -3702,9 +3706,9 @@
                         observacoes
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     mostrarAlerta(
                         `? Faturamento parcial realizado!<br><br>` +
@@ -3724,14 +3728,14 @@
                 mostrarAlerta('Erro de conexão ao processar faturamento', 'error');
             }
         }
-        
+
         // Executar remessa/entrega (baixa estoque)
         async function executarRemessaEntrega(pedidoId) {
             const cfop = document.getElementById('cfop-faturamento')?.value || '5117';
             const gerarFinanceiro = document.getElementById('gerar-financeiro')?.checked ?? true;
             const gerarNFe = document.getElementById('gerar-nfe')?.checked ?? false;
             const observacoes = document.getElementById('obs-faturamento')?.value || '';
-            
+
             // Confirmar ação
             const confirmado = await showConfirmModal({
                 type: 'warning',
@@ -3742,9 +3746,9 @@
                 confirmText: 'Emitir Remessa',
                 cancelText: 'Cancelar'
             });
-            
+
             if (!confirmado) return;
-            
+
             try {
                 const response = await fetch(`/api/vendas/pedidos/${pedidoId}/remessa-entrega`, { credentials: 'include', method: 'POST',
                     headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
@@ -3756,9 +3760,9 @@
                         observacoes
                     })
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     mostrarAlerta(
                         `? Remessa emitida com sucesso!<br><br>` +
@@ -3778,24 +3782,24 @@
                 mostrarAlerta('Erro de conexão ao processar remessa', 'error');
             }
         }
-        
+
         // Sobrescrever função de faturar para oferecer opção de parcial
         const _faturarPedidoModalOriginal = typeof faturarPedidoModal === 'function' ? faturarPedidoModal : null;
-        
+
         async function faturarPedidoModalComOpcoes() {
             if (!pedidoAtualModal) {
                 showToast('Nenhum pedido selecionado', 'warning');
                 return;
             }
-            
+
             // Verificar se já está parcialmente faturado
-            if (pedidoAtualModal.tipo_faturamento === 'parcial_50' || 
+            if (pedidoAtualModal.tipo_faturamento === 'parcial_50' ||
                 pedidoAtualModal.percentual_faturado > 0) {
                 // Abrir modal de faturamento parcial
                 abrirModalFaturamentoParcial(pedidoAtualModal.id);
                 return;
             }
-            
+
             // Perguntar se deseja faturamento parcial ou normal
             const opcao = await showConfirmModal({
                 type: 'info',
@@ -3809,9 +3813,9 @@
                 cancelText: 'Cancelar',
                 hideConfirm: true
             });
-            
+
             if (!opcao) return;
-            
+
             if (window._opcaoFaturamento === 'parcial') {
                 abrirModalFaturamentoParcial(pedidoAtualModal.id);
             } else {
@@ -3820,13 +3824,13 @@
                     _faturarPedidoModalOriginal();
                 }
             }
-            
+
             delete window._opcaoFaturamento;
         }
     </script>
-    
+
     <!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->
-    
+
     <!-- Sistema de Monitoramento de Conexão -->
     <script src="/modules/_shared/connection-monitor.js?v=20251223"></script>
     <script src="/js/popup-confirmacao.js"></script>

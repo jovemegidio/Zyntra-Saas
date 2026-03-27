@@ -121,7 +121,7 @@
         .cell-input.empresa { text-transform: uppercase; font-weight: 600; font-size: 0.78rem; color: #6366f1; }
         .cell-total { text-align: right; font-weight: 700; color: #059669; padding: 6px 8px; font-size: 0.85rem; }
 
-        /* Boto remover linha */
+        /* Botão remover linha */
         .btn-remove-row {
             width: 28px; height: 28px; border: none; border-radius: 6px;
             background: transparent; color: #94a3b8; cursor: pointer; display: flex;
@@ -146,7 +146,7 @@
         .btn-danger:hover { background: #dc2626; }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* Barra de aes inferior */
+        /* Barra de ações inferior */
         .actions-footer {
             display: flex; align-items: center; gap: 12px; padding: 16px 20px;
             border-top: 1px solid #e2e8f0; background: #fafbfd; flex-wrap: wrap;
@@ -264,12 +264,12 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn active" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -319,7 +319,7 @@
                         <i class="fas fa-user-plus"></i> Importar Funcionários
                     </button>
                     <button class="btn btn-outline btn-sm" onclick="abrirHistorico()" title="Ver folhas anteriores">
-                        <i class="fas fa-history"></i> Histrico
+                        <i class="fas fa-history"></i> Histórico
                     </button>
                 </div>
 
@@ -362,7 +362,7 @@
                 <!-- Tabs -->
                 <div class="tabs-container">
                     <button class="tab-btn active" id="tab-salário" onclick="trocarTab('SALARIO')">
-                        <i class="fas fa-money-bill-wave"></i> SALRIO
+                        <i class="fas fa-money-bill-wave"></i> SALÁRIO
                         <span class="tab-badge" id="badge-sal">0</span>
                     </button>
                     <button class="tab-btn" id="tab-adiantamento" onclick="trocarTab('ADIANTAMENTO')">
@@ -371,7 +371,7 @@
                     </button>
                 </div>
 
-                <!-- Tabela SALRIO -->
+                <!-- Tabela SALÁRIO -->
                 <div class="table-card" id="card-SALARIO">
                     <div class="table-card-header">
                         <div class="table-card-title">
@@ -389,7 +389,7 @@
                                     <th style="width:30px;">#</th>
                                     <th style="min-width:110px;text-align:left;">EMPRESA</th>
                                     <th style="min-width:180px;text-align:left;">COLABORADOR</th>
-                                    <th style="min-width:110px;">SALRIO</th>
+                                    <th style="min-width:110px;">SALÁRIO</th>
                                     <th style="min-width:110px;">SAL. POR FORA</th>
                                     <th style="min-width:100px;">HE 50%</th>
                                     <th style="min-width:100px;">HE 100%</th>
@@ -489,12 +489,12 @@
         </div>
     </div>
 
-    <!-- Modal: Histrico -->
+    <!-- Modal: Histórico -->
     <div class="modal" id="modalHistorico">
         <div class="modal-overlay" onclick="fecharModal('modalHistorico')"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-history"></i> Histrico de Folhas</h2>
+                <h2><i class="fas fa-history"></i> Histórico de Folhas</h2>
                 <button class="modal-close" onclick="fecharModal('modalHistorico')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" id="histórico-body">
@@ -814,7 +814,7 @@
             if (!resp.ok) throw new Error(data.error || 'Erro ao salvar');
 
             dadosFolha[tipo].id = data.folha_id;
-            showToast(`Folha ${tipo === 'SALARIO' ? 'Salrio' : 'Adiantamento'} salva com sucesso! Total: ${fmt(data.total_geral)}`, 'success');
+            showToast(`Folha ${tipo === 'SALARIO' ? 'Salário' : 'Adiantamento'} salva com sucesso! Total: ${fmt(data.total_geral)}`, 'success');
         } catch (e) {
             showToast(e.message, 'error');
         } finally {
@@ -829,7 +829,7 @@
     async function fecharFolha(tipo) {
         const mes = document.getElementById('sel-mes').value;
         const ano = document.getElementById('sel-ano').value;
-        const tipoLabel = tipo === 'SALARIO' ? 'Salrio' : 'Adiantamento';
+        const tipoLabel = tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
         const totalAtual = dadosFolha[tipo].itens.reduce((s, i) => s + calcularTotalItem(tipo, i), 0);
 
         if (totalAtual <= 0) {
@@ -999,7 +999,7 @@
     }
 
     // ============================================================
-    // HISTRICO
+    // HISTÓRICO
     // ============================================================
     async function abrirHistorico() {
         document.getElementById('modalHistorico').classList.add('show');
@@ -1019,7 +1019,7 @@
             let html = '<div class="historico-list">';
             folhas.forEach(f => {
                 const mesNome = MESES[f.mes] || f.mes;
-                const tipoLabel = f.tipo === 'SALARIO' ? 'Salrio' : 'Adiantamento';
+                const tipoLabel = f.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
                 const statusClass = f.status === 'fechada' ? 'badge-fechada' : 'badge-rascunho';
                 const statusLabel = f.status === 'fechada' ? 'Fechada' : 'Rascunho';
                 html += `<div class="hist-item" style="cursor:pointer;" onclick="carregarDoHistorico(${f.mes},${f.ano})">
@@ -1036,7 +1036,7 @@
             html += '</div>';
             body.innerHTML = html;
         } catch (e) {
-            body.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i><p>Erro ao carregar histrico</p></div>`;
+            body.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i><p>Erro ao carregar histórico</p></div>`;
         }
     }
 

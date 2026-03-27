@@ -569,12 +569,12 @@
             <nav class="sidebar-nav">
                 <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
                 <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
-                <a href="../gestao-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="folha.html" class="sidebar-btn" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
-                <a href="gestao-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
                 <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
                 <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
-                <a href="gestao-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
                 <a href="calendario-rh.html" class="sidebar-btn active" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -755,7 +755,7 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label">Descrio</label>
+                        <label class="form-label">Descrição</label>
                         <textarea class="form-textarea" id="evento-descrição"></textarea>
                     </div>
 
@@ -938,7 +938,7 @@
                     fetch(`/api/rh/calendario?mes=${mesBusca + 1}&ano=${anoBusca}`, {
                         credentials: 'include'
                     }),
-                    // 2. Aniversariantes do ms
+                    // 2. Aniversariantes do mês
                     fetch(`/api/rh/funcionarios/aniversariantes?mes=${mesBusca + 1}`, {
                         credentials: 'include'
                     }),
@@ -948,7 +948,7 @@
                     })
                 ]);
                 
-                // Se o Usuário j navegou para outro ms, descartar resultado
+                // Se o Usuário j navegou para outro mês, descartar resultado
                 if (myVersion !== _navVersion) return;
                 
                 // Processar eventos do Calendário
@@ -1036,14 +1036,14 @@
             const startDay = firstDay.getDay();
             const totalDays = lastDay.getDate();
 
-            // Dias do ms anterior
+            // Dias do mês anterior
             const prevMonthDays = new Date(currentYear, currentMonth, 0).getDate();
             for (let i = startDay - 1; i >= 0; i--) {
                 const day = prevMonthDays - i;
                 container.appendChild(criarDiaCalendario(day, true));
             }
 
-            // Dias do ms atual
+            // Dias do mês atual
             const today = new Date();
             for (let day = 1; day <= totalDays; day++) {
                 const isToday = day === today.getDate() && 
@@ -1052,7 +1052,7 @@
                 container.appendChild(criarDiaCalendario(day, false, isToday));
             }
 
-            // Dias do prximo ms
+            // Dias do prximo mês
             const totalCells = startDay + totalDays;
             const remainingCells = 42 - totalCells;
             for (let day = 1; day <= remainingCells; day++) {
@@ -1131,7 +1131,7 @@
             const startDay = firstDay.getDay();
             const totalDays = lastDay.getDate();
 
-            // Dias do ms anterior
+            // Dias do mês anterior
             const prevMonthDays = new Date(miniYear, miniMonth, 0).getDate();
             for (let i = startDay - 1; i >= 0; i--) {
                 const day = document.createElement('div');
@@ -1140,7 +1140,7 @@
                 container.appendChild(day);
             }
 
-            // Dias do ms atual
+            // Dias do mês atual
             const today = new Date();
             for (let d = 1; d <= totalDays; d++) {
                 const day = document.createElement('div');

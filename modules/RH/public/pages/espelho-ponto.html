@@ -150,7 +150,7 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn active" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
@@ -207,11 +207,11 @@
                     <div class="controls-bar">
                         <div class="form-group">
                             <label class="form-label" for="data-inicio">Data Incio</label>
-                            <input type="date" class="form-input" id="data-inicio" title="Data incio do perodo">
+                            <input type="date" class="form-input" id="data-inicio" title="Data incio do período">
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="data-fim">Data Fim</label>
-                            <input type="date" class="form-input" id="data-fim" title="Data fim do perodo">
+                            <input type="date" class="form-input" id="data-fim" title="Data fim do período">
                         </div>
                         <button class="btn btn-primary" onclick="carregarEspelho()">
                             <i class="fas fa-search"></i>
@@ -418,7 +418,7 @@
             const tbody = document.getElementById('ponto-tbody');
             if (!tbody) return;
             if (!Array.isArray(data) || data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px;">Nenhum registro encontrado para o perodo selecionado.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#64748b;padding:24px;">Nenhum registro encontrado para o período selecionado.</td></tr>';
                 return;
             }
             tbody.innerHTML = data.map(p => {
@@ -500,7 +500,7 @@
         function exportarPDF() {
             const tbody = document.getElementById('ponto-tbody');
             if (!tbody || !tbody.innerHTML.trim()) {
-                showToast('Nenhum dado para exportar. Consulte um perodo primeiro.', 'warning');
+                showToast('Nenhum dado para exportar. Consulte um período primeiro.', 'warning');
                 return;
             }
 
@@ -508,7 +508,7 @@
             const dataFim = document.getElementById('data-fim')?.value || '';
             const períodoTexto = dataInicio && dataFim
                 ? `${new Date(dataInicio + 'T00:00:00').toLocaleDateString('pt-BR')} a ${new Date(dataFim + 'T00:00:00').toLocaleDateString('pt-BR')}`
-                : 'Perodo completo';
+                : 'Período completo';
             const userName = document.getElementById('user-name')?.textContent || 'Colaborador';
             const dataGeracao = new Date().toLocaleString('pt-BR');
 
@@ -565,7 +565,7 @@
     <div class="header-line"></div>
     <div class="doc-title">
         <h1>ESPELHO DE PONTO</h1>
-        <div class="info">Colaborador: ${escHTML(userName)} | Perodo: ${escHTML(períodoTexto)}</div>
+        <div class="info">Colaborador: ${escHTML(userName)} | Período: ${escHTML(períodoTexto)}</div>
     </div>
     <table>
         <thead>
@@ -597,7 +597,7 @@
             carregarUsuarioLogado();
             carregarDadosEmpresa();
 
-            // Definir datas padro: ms atual
+            // Definir datas padro: mês atual
             const hoje = new Date();
             const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             const dataInicioEl = document.getElementById('data-inicio');

@@ -6,7 +6,6 @@
  */
 
 function _escEst(s) { if (s == null) return ''; var d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
- */
 
 // ============================================
 // STATE

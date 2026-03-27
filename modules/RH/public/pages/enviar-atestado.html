@@ -216,7 +216,7 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn active" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
@@ -263,7 +263,7 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-notes-medical"></i>
-                        Enviar Atestado Mdico
+                        Enviar Atestado Médico
                     </h1>
                     <p class="page-subtitle">Envie seus atestados e acompanhe o status</p>
                 </div>
@@ -316,7 +316,7 @@
                                         <input type="date" class="form-input" id="data-fim" required>
                                     </div>
                                     <div class="form-group">
-                                        <label class="form-label">Nome do Mdico</label>
+                                        <label class="form-label">Nome do Médico</label>
                                         <input type="text" class="form-input" id="nome-medico" placeholder="Dr. Nome Completo" required>
                                     </div>
                                     <div class="form-group">
@@ -328,7 +328,7 @@
                                         <select class="form-select" id="tipo-atestado" required>
                                             <option value="">Selecione o tipo</option>
                                             <option value="consulta">Consulta Mdica</option>
-                                            <option value="exame">Exame Mdico</option>
+                                            <option value="exame">Exame Médico</option>
                                             <option value="internacao">Internao</option>
                                             <option value="acompanhamento">Acompanhamento Familiar</option>
                                             <option value="outros">Outros</option>
@@ -340,7 +340,7 @@
                                     </div>
                                     <div class="form-group full-width">
                                         <label class="form-label">Observaes (Opcional)</label>
-                                        <textarea class="form-textarea" id="observacoes" placeholder="Informaes adicionais sobre o atestado"></textarea>
+                                        <textarea class="form-textarea" id="observacoes" placeholder="Informações adicionais sobre o atestado"></textarea>
                                     </div>
                                 </div>
 
@@ -627,7 +627,7 @@
                 const atestados = await response.json();
                 renderizarHistorico(atestados);
             } catch (error) {
-                console.error('Erro ao carregar histrico:', error);
+                console.error('Erro ao carregar histórico:', error);
                 renderizarHistorico([]);
             }
         }
@@ -654,7 +654,7 @@
                             <i class="fas ${statusIcon}"></i>
                         </div>
                         <div class="history-content">
-                            <div class="history-title">${a.tipo_atestado || a.observacoes || 'Atestado Mdico'}</div>
+                            <div class="history-title">${a.tipo_atestado || a.observacoes || 'Atestado Médico'}</div>
                             <div class="history-date">${dataInicio} - ${dias} dia${dias > 1 ? 's' : ''}</div>
                         </div>
                         <span class="history-status ${statusClass}">${statusLabel}</span>

@@ -10,7 +10,7 @@
     <title>Zyntra: Conciliação Bancária</title>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     
-    <script src="/js/auth-unified.js?v=20260324" defer></script>
+    <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
@@ -360,7 +360,8 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo">
+                <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
+                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
                     <i class="fas fa-sitemap"></i>
                 </a>
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
@@ -487,6 +488,14 @@
                             <option value="1" selected>Banco do Brasil - Principal</option>
                             <option value="2">Itaú - Fornecedores</option>
                             <option value="3">Bradesco - Recebimentos</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filtroTipo"><i class="fas fa-exchange-alt"></i> Tipo</label>
+                        <select id="filtroTipo" name="filtroTipo" onchange="aplicarFiltros()">
+                            <option value="">CR + CP</option>
+                            <option value="receber">Contas a Receber</option>
+                            <option value="pagar">Contas a Pagar</option>
                         </select>
                     </div>
                     <div class="filter-group">

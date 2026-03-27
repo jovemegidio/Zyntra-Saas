@@ -323,12 +323,15 @@ function renderizarContasReceber() {
 function renderizarLinhaConta(conta, tipo) {
     const vencimento = new Date(conta.vencimento);
     const hoje = new Date();
-    const vencido = vencimento < hoje && conta.status !== 'pago';
+    const statusLower = (conta.status || '').toLowerCase();
+    const statusFechado = ['pago', 'liquidada', 'recebido', 'recebida', 'cancelada'];
+    const vencido = vencimento < hoje && !statusFechado.includes(statusLower);
     
-    const statusBadge = conta.status === 'pago' ? 'badge-pago' :
+    const statusBadge = statusFechado.includes(statusLower) ? 'badge-pago' :
+                        statusLower === 'cancelada' ? 'badge-secondary' :
                         vencido ? 'badge-atrasado' : 'badge-pendente';
     
-    const statusTexto = conta.status === 'pago' ? 'Pago' :
+    const statusTexto = statusFechado.includes(statusLower) ? (statusLower === 'cancelada' ? 'Cancelada' : 'Pago') :
                         vencido ? 'Atrasado' : 'Pendente';
     
     const podeEditar = tipo === 'pagar' ? 
@@ -354,7 +357,7 @@ function renderizarLinhaConta(conta, tipo) {
                         <i class="fas fa-edit"></i>
                     </button>
                 ` : ''}
-                ${conta.status !== 'pago' ? `
+                ${!['pago', 'liquidada', 'recebido', 'recebida', 'cancelada'].includes((conta.status || '').toLowerCase()) ? `
                     <button class="action-btn" onclick="marcarComoPago(${conta.id}, '${tipo}')" title="Marcar como pago">
                         <i class="fas fa-check-circle"></i>
                     </button>
@@ -371,13 +374,14 @@ function renderizarLinhaConta(conta, tipo) {
 
 // ===== DASHBOARD =====
 function atualizarDashboard() {
+    const statusAberto = ['pendente', 'parcial', 'a_vencer', 'vencida'];
     // Calcular totais
     const totalPagar = contasPagar
-        .filter(c => c.status !== 'pago')
+        .filter(c => statusAberto.includes((c.status || '').toLowerCase()))
         .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
     
     const totalReceber = contasReceber
-        .filter(c => c.status !== 'pago')
+        .filter(c => statusAberto.includes((c.status || '').toLowerCase()))
         .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
     
     const saldoAtual = totalReceber - totalPagar;
@@ -385,8 +389,8 @@ function atualizarDashboard() {
     // Contar vencimentos de hoje
     const hoje = new Date().toISOString().split('T')[0];
     const vencendoHoje = [
-        ...contasPagar.filter(c => c.vencimento === hoje && c.status !== 'pago'),
-        ...contasReceber.filter(c => c.vencimento === hoje && c.status !== 'pago')
+        ...contasPagar.filter(c => c.vencimento === hoje && ['pendente', 'parcial', 'a_vencer', 'vencida'].includes((c.status || '').toLowerCase())),
+        ...contasReceber.filter(c => c.vencimento === hoje && ['pendente', 'parcial', 'a_vencer', 'vencida'].includes((c.status || '').toLowerCase()))
     ].length;
     
     // Atualizar UI (verificar se elementos existem)
@@ -449,8 +453,8 @@ function renderizarMovimentacoesRecentes() {
                         <td class="${conta.tipo === 'pagar' ? 'valor-negativo' : 'valor-positivo'}">
                             ${conta.tipo === 'pagar' ? '-' : '+'} ${formatarMoeda(conta.valor)}
                         </td>
-                        <td><span class="badge ${conta.status === 'pago' ? 'badge-pago' : 'badge-pendente'}">
-                            ${conta.status === 'pago' ? 'Pago' : 'Pendente'}
+                        <td><span class="badge ${conta.status === 'pago' || ['liquidada','recebido','recebida'].includes((conta.status||'').toLowerCase()) ? 'badge-pago' : 'badge-pendente'}">
+                            ${['pago','liquidada','recebido','recebida'].includes((conta.status||'').toLowerCase()) ? 'Pago' : 'Pendente'}
                         </span></td>
                     </tr>
                 `).join('')}
