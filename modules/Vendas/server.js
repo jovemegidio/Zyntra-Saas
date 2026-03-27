@@ -3311,6 +3311,21 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
         // F1-03: Recalcular total do pedido server-side após qualquer PATCH
         await atualizarTotalPedido(id);
 
+        // Emitir evento de movimentação em tempo real para todos os clientes conectados
+        if (updates.status !== undefined) {
+            try {
+                if (io) {
+                    io.emit('kanban_move', {
+                        pedido_id: parseInt(id),
+                        status_novo: updates.status,
+                        status_anterior: existing.status,
+                        usuario_id: user.id || null,
+                        usuario_nome: user.nome || user.email || 'Usuário'
+                    });
+                }
+            } catch (e) { /* ignorar erro de socket */ }
+        }
+
         // Buscar pedido atualizado para retornar
         const [updatedRows] = await pool.query(`
             SELECT p.*,

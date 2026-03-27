@@ -20495,9 +20495,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                     // Se for movimentação de status, recarregar Kanban
                     if (notif.data && notif.data.tipo === 'movimentacao_status') {
-                        if (typeof carregarPedidos === 'function') {
-                            setTimeout(() => carregarPedidos(), 500);
-                        }
+                        setTimeout(() => carregarDadosKanban(filtrosState), 500);
                     }
                 });
 
@@ -20507,6 +20505,26 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     if (data && data.pedidoId) {
                         atualizarCardKanban(data.pedidoId);
                     }
+                });
+
+                // Movimentação de card em tempo real (outro usuário moveu um pedido)
+                socket.on('kanban_move', (data) => {
+                    if (!data) return;
+                    // Ignorar evento que o próprio usuário gerou
+                    if (data.usuario_id && usuarioLogado.id && data.usuario_id === usuarioLogado.id) return;
+                    console.log('📡 Kanban move em tempo real:', data);
+                    const statusLabels = {
+                        'orcamento': 'Orçamento', 'orçamento': 'Orçamento',
+                        'analise': 'Análise de Crédito', 'analise-credito': 'Análise de Crédito',
+                        'aprovado': 'Aprovado', 'pedido-aprovado': 'Pedido Aprovado',
+                        'faturar': 'Faturar', 'faturado': 'Faturado',
+                        'entregue': 'Entregue', 'cancelado': 'Cancelado', 'recibo': 'Recibo'
+                    };
+                    const statusNovo = statusLabels[data.status_novo] || data.status_novo;
+                    const statusAnt = statusLabels[data.status_anterior] || data.status_anterior;
+                    showNotification(`${data.usuario_nome} moveu pedido #${data.pedido_id}: ${statusAnt} → ${statusNovo}`, 'info');
+                    // Recarregar kanban para refletir nova posição do card
+                    setTimeout(() => carregarDadosKanban(filtrosState), 400);
                 });
             }
         }
