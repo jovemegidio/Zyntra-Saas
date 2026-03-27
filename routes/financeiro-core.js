@@ -144,14 +144,14 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
         try {
             const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
             const [users] = await pool.query(
-                'SELECT id, nome_completo as nome, nome_completo as apelido, role, permissoes_financeiro FROM funcionarios WHERE id = ? OR email = ?',
+                'SELECT id, nome_completo as nome, nome_completo as apelido, email, role, permissoes_financeiro FROM funcionarios WHERE id = ? OR email = ?',
                 [user.id, user.email]
             );
             let userData = users[0];
             if (!userData) {
                 try {
                     const [usuarios] = await pool.query(
-                        'SELECT id, nome, role, is_admin FROM usuarios WHERE id = ? OR email = ?',
+                        'SELECT id, nome, email, role, is_admin FROM usuarios WHERE id = ? OR email = ?',
                         [user.id, user.email]
                     );
                     if (usuarios && usuarios.length > 0) userData = usuarios[0];
@@ -177,6 +177,23 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
             let permissoes = {};
             if (userData?.permissoes_financeiro) {
                 try { permissoes = JSON.parse(userData.permissoes_financeiro); } catch (e) { permissoes = {}; }
+            }
+
+            // Defaults para quem tem acesso ao financeiro mas sem permissoes_financeiro configurado
+            const defaults = {
+                contas_receber: true, contas_pagar: true, fluxo_caixa: true,
+                bancos: true, relatorios: true, conciliacao: true,
+                visualizar: true, criar: true, editar: true, excluir: false, aprovar: false
+            };
+            permissoes = Object.assign({}, defaults, permissoes);
+
+            // Restrições específicas por usuário
+            const email = (user.email || userData?.email || '').toLowerCase();
+            if (email.includes('hellen')) {
+                permissoes.contas_receber = false;
+            }
+            if (email.includes('tatiane')) {
+                permissoes.contas_pagar = false;
             }
 
             res.json({

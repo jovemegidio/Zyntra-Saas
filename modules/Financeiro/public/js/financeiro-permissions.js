@@ -11,41 +11,30 @@
 
     // Aguardar o carregamento do DOM e aplicar permissões na sidebar
     document.addEventListener('DOMContentLoaded', function() {
-        // Carregar permissões e aplicar na sidebar
         carregarEAplicarPermissoesSidebar();
     });
 
     function verificarAcessoImediato() {
-        // Buscar permissões do servidor imediatamente
         fetch('/api/financeiro/permissoes', { credentials: 'include' })
             .then(resp => {
-                if (!resp.ok) {
-                    console.log('[FinanceiroPermissions] Erro ao buscar permissões:', resp.status);
-                    return null;
-                }
+                if (!resp.ok) return null;
                 return resp.json();
             })
             .then(data => {
                 if (data && data.permissoes) {
                     const perms = data.permissoes;
                     const pathname = window.location.pathname.toLowerCase();
-                    
-                    console.log('[FinanceiroPermissions] Permissões do servidor:', perms);
-                    
-                    // Salvar permissões para uso posterior
+
                     window.financeiroPermissoes = perms;
-                    
+
                     // Verificar acesso à página atual
-                    if (pathname.includes('contas_pagar') && !perms.contas_pagar) {
-                        console.log('[FinanceiroPermissions] Usuário sem acesso a Contas a Pagar');
+                    if (pathname.includes('contas-pagar') && perms.contas_pagar === false) {
                         redirecionarParaPaginaPermitidaAPI(perms);
                     }
-                    if (pathname.includes('contas_receber') && !perms.contas_receber) {
-                        console.log('[FinanceiroPermissions] Usuário sem acesso a Contas a Receber');
+                    if (pathname.includes('contas-receber') && perms.contas_receber === false) {
                         redirecionarParaPaginaPermitidaAPI(perms);
                     }
-                    
-                    // Aplicar na sidebar se o DOM já estiver pronto
+
                     if (document.readyState !== 'loading') {
                         aplicarPermissoesSidebar(perms);
                     }
@@ -57,13 +46,12 @@
     }
 
     function redirecionarParaPaginaPermitidaAPI(perms) {
-        // Redirecionar para a primeira página que o usuário tem acesso
-        if (perms.contas_receber) {
-            window.location.href = 'contas_receber.html';
-        } else if (perms.contas_pagar) {
-            window.location.href = 'contas_pagar.html';
-        } else if (perms.fluxo_caixa) {
-            window.location.href = 'fluxo_caixa.html';
+        if (perms.contas_receber !== false) {
+            window.location.href = 'contas-receber.html';
+        } else if (perms.contas_pagar !== false) {
+            window.location.href = 'contas-pagar.html';
+        } else if (perms.fluxo_caixa !== false) {
+            window.location.href = 'fluxo-caixa.html';
         } else {
             window.location.href = 'index.html';
         }
@@ -71,13 +59,11 @@
 
     async function carregarEAplicarPermissoesSidebar() {
         try {
-            // Usar permissões já carregadas ou buscar novamente
             if (window.financeiroPermissoes) {
                 aplicarPermissoesSidebar(window.financeiroPermissoes);
                 return;
             }
 
-            // Buscar do servidor
             const resp = await fetch('/api/financeiro/permissoes', { credentials: 'include' });
             if (resp.ok) {
                 const data = await resp.json();
@@ -92,44 +78,61 @@
     }
 
     function aplicarPermissoesSidebar(perms) {
-        console.log('[FinanceiroPermissions] Aplicando permissões na sidebar:', perms);
-
-        // Esconder itens da sidebar baseado nas permissões (usando IDs)
+        // Esconder itens da sidebar baseado nas permissões (por ID)
         ocultarItemSeNaoTemPermissao('menu-contas-receber', perms.contas_receber);
         ocultarItemSeNaoTemPermissao('menu-contas-pagar', perms.contas_pagar);
         ocultarItemSeNaoTemPermissao('menu-fluxo-caixa', perms.fluxo_caixa);
         ocultarItemSeNaoTemPermissao('menu-bancos', perms.bancos);
-        ocultarItemSeNaoTemPermissao('menu-conciliacao', perms.conciliacao !== false); // default true
+        ocultarItemSeNaoTemPermissao('menu-conciliacao', perms.conciliacao);
         ocultarItemSeNaoTemPermissao('menu-relatorios', perms.relatorios);
 
-        // Também tentar por href se os IDs não existirem
-        ocultarLinkPorHref('contas_receber.html', perms.contas_receber);
-        ocultarLinkPorHref('contas_pagar.html', perms.contas_pagar);
-        ocultarLinkPorHref('fluxo_caixa.html', perms.fluxo_caixa);
-        ocultarLinkPorHref('contas_bancarias.html', perms.bancos);
-        ocultarLinkPorHref('conciliacao_bancaria.html', perms.conciliacao !== false);
-        ocultarLinkPorHref('relatorios.html', perms.relatorios);
+        // Por href (nomes de arquivo reais com hífens)
+        ocultarLinkPorHref('contas-receber.html', perms.contas_receber);
+        ocultarLinkPorHref('contas-pagar.html', perms.contas_pagar);
+        ocultarLinkPorHref('fluxo-caixa.html', perms.fluxo_caixa);
+        ocultarLinkPorHref('bancos.html', perms.bancos);
+        ocultarLinkPorHref('conciliacao.html', perms.conciliacao);
+
+        // Esconder aba de relatórios CR/CP conforme permissão
+        aplicarPermissoesRelatorios(perms);
     }
 
     function ocultarItemSeNaoTemPermissao(id, temPermissao) {
-        const item = document.getElementById(id);
-        if (item && !temPermissao) {
-            item.style.display = 'none';
-            console.log('[FinanceiroPermissions] Ocultando item:', id);
+        if (temPermissao === false) {
+            const item = document.getElementById(id);
+            if (item) item.style.display = 'none';
         }
     }
 
     function ocultarLinkPorHref(href, temPermissao) {
-        if (temPermissao) return;
-        
-        const links = document.querySelectorAll('.sidebar-nav a[href*="' + href + '"]');
-        links.forEach(link => {
-            const li = link.closest('li');
-            if (li) {
-                li.style.display = 'none';
-                console.log('[FinanceiroPermissions] Ocultando link:', href);
-            }
-        });
+        if (temPermissao === false) {
+            document.querySelectorAll('.sidebar-nav a[href*="' + href + '"]').forEach(function(link) {
+                var container = link.closest('li') || link;
+                container.style.display = 'none';
+            });
+        }
+    }
+
+    function aplicarPermissoesRelatorios(perms) {
+        // Na página de relatórios, esconder aba CR ou CP conforme permissão
+        if (perms.contas_receber === false) {
+            var tabCR = document.getElementById('tab-btn-cr');
+            if (tabCR) tabCR.style.display = 'none';
+            document.querySelectorAll('[data-aba="cr"]').forEach(function(el) { el.style.display = 'none'; });
+            // Ativar aba CP por padrão se CR bloqueada
+            var tabCP = document.getElementById('tab-btn-cp');
+            if (tabCP) { tabCP.classList.add('ativa'); }
+            document.querySelectorAll('[data-aba="cp"]').forEach(function(el) { el.style.display = ''; });
+        }
+        if (perms.contas_pagar === false) {
+            var tabCP2 = document.getElementById('tab-btn-cp');
+            if (tabCP2) tabCP2.style.display = 'none';
+            document.querySelectorAll('[data-aba="cp"]').forEach(function(el) { el.style.display = 'none'; });
+            // Ativar aba CR por padrão se CP bloqueada
+            var tabCR2 = document.getElementById('tab-btn-cr');
+            if (tabCR2) { tabCR2.classList.add('ativa'); }
+            document.querySelectorAll('[data-aba="cr"]').forEach(function(el) { el.style.display = ''; });
+        }
     }
 
     // Exportar para uso global

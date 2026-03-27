@@ -1234,9 +1234,10 @@ module.exports = function createFinanceiroRoutes(deps) {
 
     router.post('/contas-pagar', async (req, res, next) => {
         try {
-            const { fornecedor_nome, valor, data_vencimento, descricao, categoria } = req.body;
+            const fornecedor_nome = req.body.fornecedor_nome || req.body.fornecedor;
+            const { valor, data_vencimento, descricao, categoria, numero_documento, codigo_barras, data_emissao, conta_bancaria_id, observacoes, data_vencimento_original } = req.body;
 
-            if (!fornecedor_nome || !valor || !data_vencimento) {
+            if (!fornecedor_nome || !valor || !(data_vencimento || data_vencimento_original)) {
                 return res.status(400).json({
                     success: false,
                     message: 'Fornecedor, valor e data de vencimento são obrigatórios'
@@ -1245,9 +1246,9 @@ module.exports = function createFinanceiroRoutes(deps) {
 
             const [result] = await pool.query(`
                 INSERT INTO contas_pagar
-                (fornecedor_nome, valor, data_vencimento, descricao, categoria, status, data_cadastro)
-                VALUES (?, ?, ?, ?, ?, 'pendente', NOW())
-            `, [fornecedor_nome, valor, data_vencimento, descricao, categoria]);
+                (fornecedor_nome, valor, data_vencimento, descricao, categoria, status, numero_documento, data_cadastro)
+                VALUES (?, ?, ?, ?, ?, 'pendente', ?, NOW())
+            `, [fornecedor_nome, valor || 0, data_vencimento || data_vencimento_original, descricao || observacoes || '', categoria, numero_documento || '']);
 
             res.status(201).json({
                 success: true,

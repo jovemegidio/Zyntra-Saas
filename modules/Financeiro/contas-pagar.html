@@ -383,7 +383,8 @@
                     <div class="filter-group">
                         <label>Período</label>
                         <select id="filter-período" onchange="filtrarDados()">
-                            <option value="mes-atual" selected>Mês Atual</option>
+                            <option value="all" selected>Todos</option>
+                            <option value="mes-atual">Mês Atual</option>
                             <option value="mes-anterior">Mês Anterior</option>
                             <option value="proximos-30">Próximos 30 dias</option>
                             <option value="proximos-60">Próximos 60 dias</option>
@@ -393,20 +394,21 @@
                             <option value="ultimos-90">últimos 90 dias</option>
                             <option value="2026-01">Janeiro/2026</option>
                             <option value="2026-02">Fevereiro/2026</option>
-                            <option value="2026-03">Maro/2026</option>
+                            <option value="2026-03">Março/2026</option>
                             <option value="2026-04">Abril/2026</option>
                             <option value="2026-05">Maio/2026</option>
                             <option value="2026-06">Junho/2026</option>
-                            <option value="all">Todos</option>
+
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Status</label>
                         <select id="filter-status" onchange="filtrarDados()">
                             <option value="">Todos</option>
-                            <option value="pendente">Pendente</option>
-                            <option value="pago">Pago</option>
+                            <option value="pendente">A Vencer</option>
                             <option value="vencido">Vencido</option>
+                            <option value="pago">Liquidado</option>
+                            <option value="parcial">Parcial</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -446,6 +448,7 @@
                                 <tr>
                                     <th>Documento</th>
                                     <th>Fornecedor</th>
+                                    <th>Descrição</th>
                                     <th>Categoria</th>
                                     <th>Venc. Original</th>
                                     <th>Venc. Atualizado</th>
@@ -2346,7 +2349,7 @@
             const tbody = document.getElementById('tabela-contas');
 
             if (contasPagar.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhuma conta a pagar cadastrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhuma conta a pagar cadastrada</td></tr>';
                 return;
             }
 
@@ -2391,6 +2394,7 @@
 
                 const fornecedor = c.fornecedor || c.fornecedor_nome || '-';
                 const documento = c.numero_documento || c.documento || '-';
+                const descricao = c.descricao || c.observacoes || '-';
 
                 const vencimentoOriginal = c.data_vencimento_original || c.vencimento_original || vencimento;
                 const vencimentoAtualizado = c.data_vencimento_atualizado || c.vencimento_atualizado || vencimento;
@@ -2399,6 +2403,7 @@
                     <tr data-id="${c.id}">
                         <td><strong>${documento}</strong></td>
                         <td>${fornecedor}</td>
+                        <td>${descricao}</td>
                         <td>${categoriaLabel}</td>
                         <td>${formatarData(vencimentoOriginal)}</td>
                         <td>${formatarData(vencimentoAtualizado)}</td>
@@ -2419,33 +2424,34 @@
 
         function atualizarStats() {
             const hoje = new Date().toISOString().split('T')[0];
+            var fonte = todasContas.length > 0 ? todasContas : contasPagar;
 
-            const pendentes = contasPagar.filter(c => c.status !== 'pago');
-            const totalPagar = pendentes.reduce((sum, c) => {
-                const valor = parseFloat(c.valor_total || c.valor || 0);
-                const pago = parseFloat(c.valor_pago || c.pago || 0);
+            var pendentes = fonte.filter(function(c) { return c.status !== 'pago'; });
+            var totalPagar = pendentes.reduce(function(sum, c) {
+                var valor = parseFloat(c.valor_total || c.valor || 0);
+                var pago = parseFloat(c.valor_pago || c.pago || 0);
                 return sum + (valor - pago);
             }, 0);
 
-            const venceHoje = contasPagar.filter(c => {
-                const venc = c.data_vencimento || c.vencimento;
-                return venc === hoje && c.status !== 'pago';
-            }).reduce((sum, c) => {
-                const valor = parseFloat(c.valor_total || c.valor || 0);
-                const pago = parseFloat(c.valor_pago || c.pago || 0);
+            var venceHoje = fonte.filter(function(c) {
+                var venc = c.data_vencimento || c.vencimento;
+                return venc && String(venc).slice(0,10) === hoje && c.status !== 'pago';
+            }).reduce(function(sum, c) {
+                var valor = parseFloat(c.valor_total || c.valor || 0);
+                var pago = parseFloat(c.valor_pago || c.pago || 0);
                 return sum + (valor - pago);
             }, 0);
 
-            const vencidos = contasPagar.filter(c => {
-                const venc = c.data_vencimento || c.vencimento;
-                return venc < hoje && c.status !== 'pago';
-            }).reduce((sum, c) => {
-                const valor = parseFloat(c.valor_total || c.valor || 0);
-                const pago = parseFloat(c.valor_pago || c.pago || 0);
+            var vencidos = fonte.filter(function(c) {
+                var venc = c.data_vencimento || c.vencimento;
+                return venc && String(venc).slice(0,10) < hoje && c.status !== 'pago';
+            }).reduce(function(sum, c) {
+                var valor = parseFloat(c.valor_total || c.valor || 0);
+                var pago = parseFloat(c.valor_pago || c.pago || 0);
                 return sum + (valor - pago);
             }, 0);
 
-            const pagoMes = contasPagar.filter(c => c.status === 'pago').reduce((sum, c) => {
+            var pagoMes = fonte.filter(function(c) { return c.status === 'pago'; }).reduce(function(sum, c) {
                 return sum + parseFloat(c.valor_pago || c.pago || c.valor_total || c.valor || 0);
             }, 0);
 
