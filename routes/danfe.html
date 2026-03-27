@@ -240,6 +240,7 @@
       width:100%;
       max-height:10mm;
       object-fit:contain;
+      margin-bottom:0.8mm;
     }
     .barcode-fallback{
       display:block;
@@ -251,6 +252,7 @@
       text-align:center;
       line-height:1.15;
       overflow-wrap:anywhere;
+      word-break:break-all;
     }
     .key-box{
       border:var(--thin);
@@ -386,6 +388,9 @@
 </head>
 <body>
   <div class="page">
+    <div style="text-align:center;margin:0 0 8px;font-family:sans-serif;display:none">
+      <button onclick="window.print()" style="padding:8px 16px;font-size:12px;cursor:pointer;background:#2563eb;color:#fff;border:none;border-radius:4px;font-weight:600;">🖨️ Imprimir</button>
+    </div>
     <div class="mapping-note">ROOT ESPERADA PARA O TEMPLATE:
 - XML autorizado parseado como objeto com ramos NFe.infNFe e protNFe.infProt
 - campos extras de backend: paginaAtual, paginaTotal, portalConsultaUrl, codigoBarrasUrl, marcaAguaTexto, marcaAguaClasse, avisoTopo
@@ -572,9 +577,9 @@
       <table>
         <thead>
           <tr>
-            <th style="width:34%;">Número</th>
-            <th style="width:33%;">Vencimento</th>
-            <th style="width:33%;">Valor</th>
+            <th style="width:25%;">Número</th>
+            <th style="width:35%;">Vencimento</th>
+            <th style="width:40%;">Valor</th>
           </tr>
         </thead>
         <tbody>
@@ -623,11 +628,11 @@
 
       <div class="row" style="grid-template-columns: 38% 12% 18% 10% 10% 12%;">
         <div class="cell"><span class="label">Razão Social</span><span class="value">{{NFe.infNFe.transp.transporta.xNome}}</span></div>
-        <div class="cell"><span class="label">Frete por conta</span><span class="value">{{NFe.infNFe.transp.modFrete}}</span></div>
+        <div class="cell"><span class="label">CNPJ / CPF</span><span class="value">{{NFe.infNFe.transp.transporta.CNPJ}}{{NFe.infNFe.transp.transporta.CPF}}</span></div>
         <div class="cell"><span class="label">Código ANTT</span><span class="value">{{NFe.infNFe.transp.veicTransp.RNTC}}</span></div>
         <div class="cell"><span class="label">Placa do veículo</span><span class="value">{{NFe.infNFe.transp.veicTransp.placa}}</span></div>
         <div class="cell"><span class="label">UF</span><span class="value">{{NFe.infNFe.transp.veicTransp.UF}}</span></div>
-        <div class="cell"><span class="label">CNPJ / CPF</span><span class="value">{{NFe.infNFe.transp.transporta.CNPJ}}{{NFe.infNFe.transp.transporta.CPF}}</span></div>
+        <div class="cell"><span class="label">Frete por conta</span><span class="value">{{NFe.infNFe.transp.modFrete}}</span></div>
       </div>
 
       <div class="row" style="grid-template-columns: 52% 18% 12% 18%;">
@@ -637,7 +642,7 @@
         <div class="cell"><span class="label">Inscrição Estadual</span><span class="value">{{NFe.infNFe.transp.transporta.IE}}</span></div>
       </div>
 
-      <div class="row" style="grid-template-columns: 12% 16% 16% 16% 20% 20%;">
+      <div class="row" style="grid-template-columns: 12% 18% 18% 18% 17% 17%;">
         <div class="cell"><span class="label">Quantidade</span><span class="value">{{NFe.infNFe.transp._danfeQVol}}</span></div>
         <div class="cell"><span class="label">Espécie</span><span class="value">{{NFe.infNFe.transp._danfeEsp}}</span></div>
         <div class="cell"><span class="label">Marca</span><span class="value">{{NFe.infNFe.transp._danfeMarca}}</span></div>
@@ -696,11 +701,11 @@
       <div class="section-label">Dados adicionais</div>
       <div class="additional">
         <div>
-          <div class="label" style="padding:1mm 1.2mm 0;">Informações complementares</div>
+          <div class=\"label\" style=\"padding:1mm 1.2mm 0;white-space:nowrap\">Informações complementares</div>
           <div class="fill-box">{{NFe.infNFe.infAdic.infCpl}}</div>
         </div>
         <div>
-          <div class="label" style="padding:1mm 1.2mm 0;">Reservado ao Fisco</div>
+          <div class=\"label\" style=\"padding:1mm 1.2mm 0;white-space:nowrap\">Reservado ao Fisco</div>
           <div class="fill-box">{{NFe.infNFe.infAdic.infAdFisco}}</div>
         </div>
       </div>

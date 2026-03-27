@@ -933,8 +933,6 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                         vDesc: fmtMoney(desconto),
                         vOutro: fmtMoney(outras),
                         vIPI: fmtMoney(pedido.total_ipi || 0),
-                        vPIS: fmtMoney(pedido.total_pis || 0),
-                        vCOFINS: fmtMoney(pedido.total_cofins || 0),
                         vNF: fmtMoney(valorNF),
                         vII: '0,00'
                     },
