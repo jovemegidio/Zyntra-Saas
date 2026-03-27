@@ -764,6 +764,13 @@ function renderDanfe(ctx) {
  * @returns {object} template context
  */
 function buildDanfeCtx(pedido, itens, opts = {}) {
+  const firstFilled = (...vals) => {
+    for (const v of vals) {
+      if (v === 0) return 0;
+      if (v != null && String(v).trim() !== '') return v;
+    }
+    return '';
+  };
     const fmtMoney = v =>
         (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const fmtQty = v =>
@@ -787,13 +794,16 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const outras     = parseFloat(pedido.outras_despesas) || 0;
     const valorBruto = valorTotal + frete + seguro + outras;
     const valorNF    = valorBruto - desconto;
-    let chave        = pedido.nfe_chave || pedido.chave_acesso || '';
+    let chave        = String(pedido.nfe_chave || pedido.chave_acesso || '').replace(/\D/g, '');
 
     // Configuração fiscal padrão da empresa
     const cfgFiscal = opts.cfgFiscal || {};
     const cfopPadrao = cfgFiscal.cfop_venda_estado || '5102';
 
     // Em modo preview sem chave real, gerar chave de acesso ilustrativa
+    if (chave.length !== 44) {
+      chave = '';
+    }
     if (!chave && opts.preview) {
         const cnpjClean = (pedido.empresa_cnpj || '').replace(/\D/g, '').padEnd(14, '0').slice(0, 14);
         const uf = '35'; // SP
@@ -803,7 +813,7 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
         const serie = String(pedido.serie_nf || '1').padStart(3, '0');
         const nnf = String(pedido.id || 0).padStart(9, '0');
         const tpEmis = '1';
-        const codNum = String(Math.floor(Math.random() * 99999999)).padStart(8, '0');
+        const codNum = String((pedido.id || 0) % 100000000).padStart(8, '0');
         const base43 = uf + aamm + cnpjClean + modelo + serie + nnf + tpEmis + codNum;
         // DV mod11 simplificado
         let soma = 0, peso = 2;
@@ -861,13 +871,25 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
 
     // Se nenhuma duplicata foi gerada (ex: A Vista), criar fatura única
     if (dups.length === 0) {
-        const dataFat = new Date(pedido.data_faturamento || pedido.data_emissao || pedido.created_at || new Date());
+      const dataFat = new Date(pedido.data_faturamento || pedido.faturado_em || pedido.created_at || new Date());
         dups.push({
             nDup: nfNumero || '001',
             dVenc: fmtDate(dataFat),
             vDup: fmtMoney(valorNF)
         });
     }
+    const vencFat = dups[0]?.dVenc || fmtDate(pedido.data_faturamento || pedido.faturado_em || pedido.created_at);
+
+    const regime = String(cfgFiscal.regime_tributario || '').toLowerCase();
+    const cstPadrao = regime === 'simples_nacional' ? '102' : '00';
+    const aliquotaIcmsPadrao = parseFloat(cfgFiscal.icms_padrao) || 0;
+    const aliquotaIpiPadrao = parseFloat(cfgFiscal.ipi_padrao) || 0;
+    const transportadoraNome =
+      firstFilled(pedido.transportadora_razao_social, pedido.transportadora_nome_fantasia, pedido.transportadora_nome, pedido.transportadora) || '';
+    const transportadoraDoc = String(firstFilled(pedido.transportadora_cnpj_cpf, pedido.transportadora_cnpj, pedido.transportadora_cpf) || '');
+    const transportadoraDigits = transportadoraDoc.replace(/\D/g, '');
+    const transportadoraCnpj = transportadoraDigits.length > 11 ? transportadoraDoc : '';
+    const transportadoraCpf = transportadoraDigits.length > 0 && transportadoraDigits.length <= 11 ? transportadoraDoc : '';
 
     return {
         marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
@@ -887,9 +909,9 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                     serie: pedido.serie_nf || '1',
                     tpNF: '1',
                     natOp: pedido.natureza_operacao || 'Venda de Mercadoria',
-                    dhEmi: fmtDate(pedido.data_emissao || pedido.created_at),
-                    dhSaiEnt: fmtDate(pedido.data_faturamento || pedido.data_emissao || pedido.created_at),
-                    _danfeHoraSaida: fmtTime(pedido.data_faturamento || pedido.data_emissao || pedido.created_at)
+                  dhEmi: fmtDate(pedido.data_emissao || pedido.faturado_em || pedido.created_at),
+                  dhSaiEnt: fmtDate(pedido.data_faturamento || pedido.data_emissao || pedido.faturado_em || pedido.created_at),
+                  _danfeHoraSaida: fmtTime(pedido.data_faturamento || pedido.data_emissao || pedido.faturado_em || pedido.created_at)
                 },
                 emit: {
                     xNome: pedido.empresa_razao_social || pedido.empresa_nome || '',
@@ -932,29 +954,38 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                 cobr: {
                     fat: {
                         nFat: nfNumero,
+                    dVenc: vencFat,
                         vOrig: fmtMoney(valorBruto),
                         vLiq: fmtMoney(valorNF)
                     },
                     dup: dups
                 },
-                det: itens.map((item, i) => ({
+                det: itens.map((item, i) => {
+                  const subtotal = parseFloat(item.subtotal) || 0;
+                  const aliqIcms = parseFloat(firstFilled(item.aliquota_icms, item.icms_percent, item.produto_aliquota_icms, aliquotaIcmsPadrao)) || 0;
+                  const aliqIpi = parseFloat(firstFilled(item.aliquota_ipi, item.produto_aliquota_ipi, aliquotaIpiPadrao)) || 0;
+                  const vIcms = parseFloat(firstFilled(item.icms_value, item.v_icms, subtotal * (aliqIcms / 100))) || 0;
+                  const vIpi = parseFloat(firstFilled(item.valor_ipi, item.v_ipi, subtotal * (aliqIpi / 100))) || 0;
+                  const bcIcms = parseFloat(firstFilled(item.bc_icms, aliqIcms > 0 ? (vIcms / (aliqIcms / 100)) : subtotal)) || subtotal;
+                  return {
                     prod: {
-                        cProd: item.codigo || String(i + 1).padStart(3, '0'),
-                        xProd: item.descricao || '',
-                        NCM: item.ncm || '',
-                        CFOP: item.cfop || cfopPadrao,
-                        uCom: item.unidade || 'UN',
-                        qCom: fmtQty(item.quantidade),
-                        vUnCom: fmtMoney(item.preco_unitario),
-                        vProd: fmtMoney(item.subtotal)
+                      cProd: item.codigo || String(i + 1).padStart(3, '0'),
+                      xProd: item.descricao || '',
+                      NCM: firstFilled(item.ncm, item.produto_ncm) || '',
+                      CFOP: firstFilled(item.cfop, item.produto_cfop, cfopPadrao) || cfopPadrao,
+                      uCom: item.unidade || 'UN',
+                      qCom: fmtQty(item.quantidade),
+                      vUnCom: fmtMoney(item.preco_unitario),
+                      vProd: fmtMoney(item.subtotal)
                     },
-                    _danfeCstCsosn: item.cst || item.csosn || '000',
-                    _danfeBcIcms: fmtMoney(item.bc_icms || item.icms_value ? (parseFloat(item.icms_value) / (parseFloat(item.aliquota_icms || item.icms_percent) / 100 || 1)) : (parseFloat(item.subtotal) || 0)),
-                    _danfeVIcms: fmtMoney(item.icms_value || item.v_icms || 0),
-                    _danfePIcms: fmtMoney(item.aliquota_icms || item.icms_percent || 0),
-                    _danfeVIpi: fmtMoney(item.valor_ipi || item.v_ipi || 0),
-                    _danfePIpi: fmtMoney(item.aliquota_ipi || 0)
-                })),
+                    _danfeCstCsosn: firstFilled(item.cst, item.csosn, item.produto_cst_icms, item.produto_csosn_icms, cstPadrao) || cstPadrao,
+                    _danfeBcIcms: fmtMoney(bcIcms),
+                    _danfeVIcms: fmtMoney(vIcms),
+                    _danfePIcms: fmtMoney(aliqIcms),
+                    _danfeVIpi: fmtMoney(vIpi),
+                    _danfePIpi: fmtMoney(aliqIpi)
+                  };
+                }),
                 total: {
                     ICMSTot: {
                         vBC: fmtMoney(pedido.base_calculo_icms || 0),
@@ -984,25 +1015,25 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
                 transp: {
                     modFrete: (pedido.tipo_frete || '').toUpperCase() === 'CIF' ? '0 - Emitente' : '1 - Destinat\u00e1rio',
                     transporta: {
-                        xNome: pedido.transportadora_nome || '',
-                        CNPJ: '',
-                        CPF: '',
-                        IE: '',
-                        xEnder: '',
-                        xMun: '',
-                        UF: ''
+                    xNome: transportadoraNome,
+                    CNPJ: transportadoraCnpj,
+                    CPF: transportadoraCpf,
+                    IE: firstFilled(pedido.transportadora_ie, pedido.transportadora_inscricao_estadual) || '',
+                    xEnder: firstFilled(pedido.transportadora_endereco) || '',
+                    xMun: firstFilled(pedido.transportadora_cidade) || '',
+                    UF: firstFilled(pedido.transportadora_uf, pedido.transportadora_estado) || ''
                     },
                     veicTransp: {
                         placa: pedido.placa_veiculo || '',
                         UF: pedido.veiculo_uf || '',
-                        RNTC: ''
+                    RNTC: firstFilled(pedido.rntrc, pedido.transportadora_rntrc) || ''
                     },
-                    _danfeQVol: pedido.qtd_volumes || '',
-                    _danfeEsp: pedido.especie_volumes || '',
-                    _danfeMarca: pedido.marca_volumes || '',
-                    _danfeNVol: '',
-                    _danfePesoB: pedido.peso_bruto || '',
-                    _danfePesoL: pedido.peso_liquido || ''
+                  _danfeQVol: firstFilled(pedido.qtd_volumes, itens.length) || '',
+                  _danfeEsp: firstFilled(pedido.especie_volumes, itens.length ? 'VOLUMES' : '') || '',
+                  _danfeMarca: firstFilled(pedido.marca_volumes) || '',
+                  _danfeNVol: firstFilled(pedido.numeracao_volumes) || '',
+                  _danfePesoB: firstFilled(pedido.peso_bruto) || '',
+                  _danfePesoL: firstFilled(pedido.peso_liquido) || ''
                 },
                 infAdProd: '',
                 infAdic: {

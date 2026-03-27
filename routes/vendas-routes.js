@@ -4146,16 +4146,42 @@ module.exports = function createVendasRoutes(deps) {
                        e.cnpj AS empresa_cnpj, e.inscricao_estadual AS empresa_ie,
                        e.endereco AS empresa_endereco, e.bairro AS empresa_bairro,
                        e.cidade AS empresa_cidade, e.estado AS empresa_uf, e.cep AS empresa_cep,
-                       e.telefone AS empresa_telefone
+                       e.telefone AS empresa_telefone,
+                       t.razao_social AS transportadora_razao_social,
+                       t.nome_fantasia AS transportadora_nome_fantasia,
+                       t.cnpj_cpf AS transportadora_cnpj_cpf,
+                       t.inscricao_estadual AS transportadora_inscricao_estadual,
+                       t.endereco AS transportadora_endereco,
+                       t.cidade AS transportadora_cidade,
+                       t.estado AS transportadora_estado
                 FROM pedidos p
                 LEFT JOIN clientes c ON p.cliente_id = c.id
                 LEFT JOIN empresas e ON p.empresa_id = e.id
+                LEFT JOIN transportadoras t ON p.transportadora_id = t.id
                 WHERE p.id = ?
             `, [id]);
 
             if (!pedido) {
                 return res.status(404).json({ message: 'Pedido não encontrado' });
             }
+
+            // Sempre usar dados da empresa configurada (ALUFORCE) como emitente
+            const [[cfgEmpresa]] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+            if (cfgEmpresa) {
+                pedido.empresa_razao_social = cfgEmpresa.razao_social;
+                pedido.empresa_nome = cfgEmpresa.nome_fantasia;
+                pedido.empresa_cnpj = cfgEmpresa.cnpj;
+                pedido.empresa_ie = cfgEmpresa.inscricao_estadual;
+                pedido.empresa_endereco = cfgEmpresa.endereco + (cfgEmpresa.numero ? ', ' + cfgEmpresa.numero : '');
+                pedido.empresa_bairro = cfgEmpresa.bairro;
+                pedido.empresa_cidade = cfgEmpresa.cidade;
+                pedido.empresa_uf = cfgEmpresa.estado;
+                pedido.empresa_cep = cfgEmpresa.cep;
+                pedido.empresa_telefone = cfgEmpresa.telefone;
+            }
+
+            // Buscar configuração fiscal da empresa para defaults
+            const [[cfgFiscal]] = await pool.query('SELECT * FROM config_fiscal_empresa LIMIT 1').catch(() => [[]]);
 
             // Em modo preview, NF não precisa estar emitida
             if (!isPreview) {
@@ -4165,13 +4191,25 @@ module.exports = function createVendasRoutes(deps) {
                 }
             }
 
-            // Buscar itens do pedido
+            // Buscar itens do pedido com dados fiscais
             let itens = [];
             try {
-                const [rows] = await pool.query(
-                    'SELECT codigo, descricao, quantidade, unidade, preco_unitario, desconto, subtotal FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC',
-                    [id]
-                );
+                const [rows] = await pool.query(`
+                    SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario, 
+                           pi.desconto, pi.subtotal, pi.produto_id,
+                           pi.icms_percent, pi.icms_value, pi.aliquota_icms, pi.aliquota_ipi,
+                           pi.valor_ipi, pi.valor_icms_st, pi.cfop,
+                           COALESCE(pr_id.ncm, pr_cod.ncm) AS ncm,
+                           COALESCE(pr_id.cfop_saida_interna, pr_cod.cfop_saida_interna) AS produto_cfop,
+                           COALESCE(pr_id.cst_icms, pr_cod.cst_icms) AS produto_cst_icms,
+                           COALESCE(pr_id.csosn_icms, pr_cod.csosn_icms) AS produto_csosn_icms,
+                           COALESCE(pr_id.aliquota_icms, pr_cod.aliquota_icms) AS produto_aliquota_icms,
+                           COALESCE(pr_id.aliquota_ipi, pr_cod.aliquota_ipi) AS produto_aliquota_ipi
+                    FROM pedido_itens pi
+                    LEFT JOIN produtos pr_id ON pi.produto_id = pr_id.id
+                    LEFT JOIN produtos pr_cod ON pi.produto_id IS NULL AND pr_cod.codigo = pi.codigo
+                    WHERE pi.pedido_id = ? ORDER BY pi.id ASC
+                `, [id]);
                 itens = rows;
             } catch (e) { /* tabela pode não existir */ }
 
@@ -4192,7 +4230,7 @@ module.exports = function createVendasRoutes(deps) {
 
             // Gerar HTML da DANFE usando template oficial (routes/danfe-renderer.js)
             const { renderDanfe, buildDanfeCtx } = require('./danfe-renderer');
-            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview }));
+            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview, cfgFiscal }));
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);
