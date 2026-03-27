@@ -1621,6 +1621,36 @@
             // Aba Faturamento
             document.getElementById('clienteLimiteCredito').value = cliente.limite_credito || '';
             
+            // Dados Bancários
+            if (document.getElementById('clienteFax')) document.getElementById('clienteFax').value = cliente.fax || '';
+            if (document.getElementById('clienteDDDFax')) document.getElementById('clienteDDDFax').value = cliente.ddd_fax || '';
+            if (document.getElementById('clienteEnviarAnexos')) document.getElementById('clienteEnviarAnexos').checked = cliente.enviar_anexos !== 0;
+            if (document.getElementById('clienteBanco')) document.getElementById('clienteBanco').value = cliente.banco || '';
+            if (document.getElementById('clienteAgencia')) document.getElementById('clienteAgencia').value = cliente.agencia || '';
+            if (document.getElementById('clienteConta')) document.getElementById('clienteConta').value = cliente.conta || '';
+            if (document.getElementById('clientePix')) document.getElementById('clientePix').value = cliente.pix || '';
+            if (document.getElementById('clienteTitularDoc')) document.getElementById('clienteTitularDoc').value = cliente.titular_doc || '';
+            if (document.getElementById('clienteTitularNome')) document.getElementById('clienteTitularNome').value = cliente.titular_nome || '';
+            
+            // Inscrições / CNAE
+            if (document.getElementById('clienteSuframa')) document.getElementById('clienteSuframa').value = cliente.suframa || '';
+            if (document.getElementById('clienteSimplesNacional')) document.getElementById('clienteSimplesNacional').checked = !!cliente.simples_nacional;
+            if (document.getElementById('clienteProdutorRural')) document.getElementById('clienteProdutorRural').checked = !!cliente.produtor_rural;
+            if (document.getElementById('clienteTipoAtividade')) document.getElementById('clienteTipoAtividade').value = cliente.tipo_atividade || '';
+            if (document.getElementById('clienteCnae')) document.getElementById('clienteCnae').value = cliente.cnae || '';
+            if (document.getElementById('clienteObsInternas')) document.getElementById('clienteObsInternas').value = cliente.obs_internas || '';
+            if (document.getElementById('clienteObsDetalhadas')) document.getElementById('clienteObsDetalhadas').value = cliente.obs_detalhadas || '';
+            
+            // Recomendações
+            if (document.getElementById('clienteParcelasPadrao')) document.getElementById('clienteParcelasPadrao').value = cliente.parcelas_padrao || '';
+            if (document.getElementById('clienteVendedorPadrao')) document.getElementById('clienteVendedorPadrao').value = cliente.vendedor_padrao || '';
+            if (document.getElementById('clienteEmailNFe')) document.getElementById('clienteEmailNFe').value = cliente.email_nfe || '';
+            if (document.getElementById('clienteTransportadora')) document.getElementById('clienteTransportadora').value = cliente.transportadora || '';
+            if (document.getElementById('clienteCodigoReceita')) document.getElementById('clienteCodigoReceita').value = cliente.codigo_receita || '';
+            
+            // Faturamento
+            if (document.getElementById('clienteBloquearFaturamento')) document.getElementById('clienteBloquearFaturamento').checked = !!cliente.bloquear_faturamento;
+            
             // Atualizar avatar
             atualizarAvatarModal(cliente.nome);
             
@@ -1731,7 +1761,33 @@
                 inscricao_estadual: document.getElementById('clienteIE').value.trim(),
                 inscricao_municipal: document.getElementById('clienteIM').value.trim(),
                 limite_credito: document.getElementById('clienteLimiteCredito').value.trim(),
-                ativo: 1
+                ativo: 1,
+                // Dados Bancários
+                fax: (document.getElementById('clienteFax') || {}).value || '',
+                ddd_fax: (document.getElementById('clienteDDDFax') || {}).value || '',
+                enviar_anexos: (document.getElementById('clienteEnviarAnexos') || {}).checked ? 1 : 0,
+                banco: (document.getElementById('clienteBanco') || {}).value || '',
+                agencia: (document.getElementById('clienteAgencia') || {}).value || '',
+                conta: (document.getElementById('clienteConta') || {}).value || '',
+                pix: (document.getElementById('clientePix') || {}).value || '',
+                titular_doc: (document.getElementById('clienteTitularDoc') || {}).value || '',
+                titular_nome: (document.getElementById('clienteTitularNome') || {}).value || '',
+                // Inscrições / CNAE
+                suframa: (document.getElementById('clienteSuframa') || {}).value || '',
+                simples_nacional: (document.getElementById('clienteSimplesNacional') || {}).checked ? 1 : 0,
+                produtor_rural: (document.getElementById('clienteProdutorRural') || {}).checked ? 1 : 0,
+                tipo_atividade: (document.getElementById('clienteTipoAtividade') || {}).value || '',
+                cnae: (document.getElementById('clienteCnae') || {}).value || '',
+                obs_internas: (document.getElementById('clienteObsInternas') || {}).value || '',
+                obs_detalhadas: (document.getElementById('clienteObsDetalhadas') || {}).value || '',
+                // Recomendações
+                parcelas_padrao: (document.getElementById('clienteParcelasPadrao') || {}).value || '',
+                vendedor_padrao: (document.getElementById('clienteVendedorPadrao') || {}).value || '',
+                email_nfe: (document.getElementById('clienteEmailNFe') || {}).value || '',
+                transportadora: (document.getElementById('clienteTransportadora') || {}).value || '',
+                codigo_receita: (document.getElementById('clienteCodigoReceita') || {}).value || '',
+                // Faturamento
+                bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0
             };
             
             if (!cliente.nome) { mostrarToast('Razão Social é obrigatória', 'error'); return; }

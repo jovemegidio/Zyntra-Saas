@@ -59,11 +59,22 @@
             if (response.ok) {
                 const user = await response.json();
                 
-                // Se É admin autorizado, MOSTRAR o botão (remover CSS de ocultação)
                 if (isAdminAutorizado(user)) {
+                    // Admin: MOSTRAR "Gestão de Vendas" e OCULTAR "Meu Dashboard"
                     mostrarBotaoGestao();
+                    var hideDash = document.createElement('style');
+                    hideDash.id = 'vendas-dashboard-hide-css';
+                    hideDash.textContent = [
+                        'button[onclick*="dashboard.html"]:not([onclick*="dashboard-admin"]),',
+                        'a[href*="dashboard.html"]:not([href*="dashboard-admin"]),',
+                        'button[title="Meu Dashboard"],',
+                        'button[data-title="Meu Dashboard"] {',
+                        '  display: none !important;',
+                        '}'
+                    ].join('\n');
+                    (document.head || document.documentElement).appendChild(hideDash);
                 }
-                // Se NÃO é admin, o CSS já está ocultando — não precisa fazer nada
+                // Se NÃO é admin, o CSS já está ocultando Gestão de Vendas — não precisa fazer nada
                 
                 // Expor função globalmente para uso em outras partes do código
                 window.isVendasAdminAutorizado = true;

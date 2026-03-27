@@ -1011,10 +1011,17 @@
                 if (response.ok) {
                     const user = await response.json();
                     _cachedUserData = user; // Cache for reuse in carregarDashboard
-                    // Usar apelido se disponível, senão primeiro+último nome
+
+                    // Admin redirect: admins should use dashboard-admin.html
+                    const isAdm = user.is_admin === 1 || user.is_admin === true || user.role === 'admin';
+                    if (isAdm) {
+                        window.location.href = 'dashboard-admin.html';
+                        return;
+                    }
+
                     const userName = user.apelido || user.nome || 'Usuário';
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
-                    const primeiroNome = user.apelido || (_partesNome.length > 1 ? _partesNome[0] + ' ' + _partesNome[_partesNome.length - 1] : (_partesNome[0] || 'Usuário'));
+                    const primeiroNome = user.apelido || (_partesNome[0] || 'Usuário');
                     // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;

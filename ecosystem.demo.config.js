@@ -14,7 +14,7 @@ module.exports = {
       BRAND: 'zyntra',
       DEMO_MODE: 'true',
       // ===== DATABASE =====
-      DB_NAME: 'zyntra_demo',
+      DB_NAME: 'aluforce_vendas',
       DB_HOST: 'localhost',
       DB_USER: 'aluforce',
       DB_PASSWORD: 'Aluforce2026VpsDB',

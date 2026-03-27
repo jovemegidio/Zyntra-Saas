@@ -1963,6 +1963,8 @@ module.exports = function createVendasRoutes(deps) {
     router.get('/clientes/:id/resumo', async (req, res, next) => {
         try {
             const clienteId = parseInt(req.params.id);
+            if (isNaN(clienteId)) return res.status(400).json({ message: 'ID inválido.' });
+
             const [clienteRows] = await pool.query('SELECT id, data_cadastro, created_at FROM clientes WHERE id = ?', [clienteId]);
             if (clienteRows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
 
@@ -1979,31 +1981,43 @@ module.exports = function createVendasRoutes(deps) {
                 tempo_cliente = { anos, meses, dias, total_dias: totalDias, data_inicio: dataInicio };
             }
 
-            const [stats] = await pool.query(
-                `SELECT COUNT(*) as total_pedidos, COALESCE(SUM(valor_total),0) as valor_total,
-                        COALESCE(AVG(valor_total),0) as ticket_medio, COALESCE(MAX(valor_total),0) as maior_pedido,
-                        SUM(CASE WHEN status IN ('entregue','faturado') THEN 1 ELSE 0 END) as pedidos_concluidos,
-                        SUM(CASE WHEN status = 'aprovado' OR status = 'pedido-aprovado' THEN 1 ELSE 0 END) as pedidos_aprovados,
-                        SUM(CASE WHEN status IN ('orcamento','analise','analise-credito') THEN 1 ELSE 0 END) as pedidos_em_aberto,
-                        SUM(CASE WHEN status = 'cancelado' THEN 1 ELSE 0 END) as pedidos_cancelados
-                 FROM pedidos WHERE cliente_id = ?`, [clienteId]
-            );
+            let stats = { total_pedidos: 0, valor_total: 0, ticket_medio: 0, maior_pedido: 0, pedidos_concluidos: 0, pedidos_aprovados: 0, pedidos_em_aberto: 0, pedidos_cancelados: 0 };
+            try {
+                const [statsRows] = await pool.query(
+                    `SELECT COUNT(*) as total_pedidos, COALESCE(SUM(valor_total),0) as valor_total,
+                            COALESCE(AVG(valor_total),0) as ticket_medio, COALESCE(MAX(valor_total),0) as maior_pedido,
+                            SUM(CASE WHEN status IN ('entregue','faturado') THEN 1 ELSE 0 END) as pedidos_concluidos,
+                            SUM(CASE WHEN status = 'aprovado' OR status = 'pedido-aprovado' THEN 1 ELSE 0 END) as pedidos_aprovados,
+                            SUM(CASE WHEN status IN ('orcamento','analise','analise-credito') THEN 1 ELSE 0 END) as pedidos_em_aberto,
+                            SUM(CASE WHEN status = 'cancelado' THEN 1 ELSE 0 END) as pedidos_cancelados
+                     FROM pedidos WHERE cliente_id = ?`, [clienteId]
+                );
+                if (statsRows[0]) stats = statsRows[0];
+            } catch (e) { console.error('[Vendas] Erro stats resumo cliente:', e.message); }
 
-            const [pedidosRecentes] = await pool.query(
-                `SELECT id, created_at, valor_total as valor, status FROM pedidos WHERE cliente_id = ? ORDER BY created_at DESC LIMIT 5`, [clienteId]
-            );
+            let pedidosRecentes = [];
+            try {
+                const [rows] = await pool.query(
+                    `SELECT id, created_at, valor_total as valor, status FROM pedidos WHERE cliente_id = ? ORDER BY created_at DESC LIMIT 5`, [clienteId]
+                );
+                pedidosRecentes = rows;
+            } catch (e) { console.error('[Vendas] Erro pedidos recentes:', e.message); }
 
-            const [produtosMais] = await pool.query(
-                `SELECT p.nome, SUM(pi.quantidade) as quantidade
-                 FROM pedido_itens pi JOIN produtos p ON pi.produto_id = p.id
-                 JOIN pedidos ped ON pi.pedido_id = ped.id
-                 WHERE ped.cliente_id = ? GROUP BY p.id, p.nome ORDER BY quantidade DESC LIMIT 5`, [clienteId]
-            );
+            let produtosMais = [];
+            try {
+                const [rows] = await pool.query(
+                    `SELECT p.nome, SUM(pi.quantidade) as quantidade
+                     FROM pedido_itens pi JOIN produtos p ON pi.produto_id = p.id
+                     JOIN pedidos ped ON pi.pedido_id = ped.id
+                     WHERE ped.cliente_id = ? GROUP BY p.id, p.nome ORDER BY quantidade DESC LIMIT 5`, [clienteId]
+                );
+                produtosMais = rows;
+            } catch (e) { console.error('[Vendas] Erro produtos mais:', e.message); }
 
-            let financeiro = { valor_pago: 0, valor_pendente: 0, valor_vencido: 0, total_títulos: 0 };
+            let financeiro = { valor_pago: 0, valor_pendente: 0, valor_vencido: 0, total_titulos: 0 };
             try {
                 const [fin] = await pool.query(
-                    `SELECT COUNT(*) as total_títulos,
+                    `SELECT COUNT(*) as total_titulos,
                             COALESCE(SUM(CASE WHEN status = 'pago' THEN valor ELSE 0 END),0) as valor_pago,
                             COALESCE(SUM(CASE WHEN status = 'pendente' AND data_vencimento >= CURDATE() THEN valor ELSE 0 END),0) as valor_pendente,
                             COALESCE(SUM(CASE WHEN status = 'pendente' AND data_vencimento < CURDATE() THEN valor ELSE 0 END),0) as valor_vencido
@@ -2013,7 +2027,7 @@ module.exports = function createVendasRoutes(deps) {
             } catch (_) { /* contas_receber may not exist */ }
 
             res.json({
-                estatisticas: stats[0],
+                estatisticas: stats,
                 tempo_cliente,
                 pedidos_recentes: pedidosRecentes,
                 produtos_mais_comprados: produtosMais,
@@ -2032,7 +2046,11 @@ module.exports = function createVendasRoutes(deps) {
             const inscricao_estadual = b.inscricao_estadual || b.ie || null;
             const { nome_fantasia, contato, telefone, celular, email, website,
                     complemento, bairro, cidade, uf, cep,
-                    inscricao_municipal, limite_credito, ativo, empresa_id } = b;
+                    inscricao_municipal, limite_credito, ativo, empresa_id,
+                    fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+                    suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
+                    obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
+                    email_nfe, transportadora, codigo_receita, bloquear_faturamento } = b;
             if (!nome) {
                 return res.status(400).json({ message: 'Nome / Razão Social é obrigatório.' });
             }
@@ -2046,15 +2064,26 @@ module.exports = function createVendasRoutes(deps) {
             const [result] = await pool.query(
                 `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
                  endereco, numero, complemento, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal,
-                 credito_total, ativo, empresa_id, data_cadastro, incluido_por)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+                 credito_total, ativo, empresa_id, data_cadastro, incluido_por,
+                 fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+                 suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
+                 obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
+                 email_nfe, transportadora, codigo_receita, bloquear_faturamento)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?,
+                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [nome, nome_fantasia || null, nome || null, cnpj || null, contato || null,
                  telefone || null, celular || null, email || null, website || null,
                  endereco || null, numero || null, complemento || null, bairro || null,
                  cidade || null, uf || null, cep || null, inscricao_estadual || null,
                  inscricao_municipal || null, limite_credito ? parseFloat(limite_credito) : 0,
                  ativo !== undefined ? (ativo ? 1 : 0) : 1,
-                 req.user.empresa_id, req.user ? req.user.nome : 'Sistema']
+                 req.user.empresa_id, req.user ? req.user.nome : 'Sistema',
+                 fax || null, ddd_fax || null, enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
+                 banco || null, agencia || null, conta || null, pix || null, titular_doc || null, titular_nome || null,
+                 suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
+                 tipo_atividade || null, cnae || null,
+                 obs_internas || null, obs_detalhadas || null, parcelas_padrao || null, vendedor_padrao || null,
+                 email_nfe || null, transportadora || null, codigo_receita || null, bloquear_faturamento ? 1 : 0]
             );
             res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
         } catch (error) { next(error); }
@@ -2082,7 +2111,11 @@ module.exports = function createVendasRoutes(deps) {
             const inscricao_estadual = body.inscricao_estadual || body.ie || null;
             const { nome_fantasia, contato, telefone, celular, email, website,
                     complemento, bairro, cidade, uf, cep,
-                    inscricao_municipal, limite_credito, empresa_id } = body;
+                    inscricao_municipal, limite_credito, empresa_id,
+                    fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+                    suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
+                    obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
+                    email_nfe, transportadora, codigo_receita, bloquear_faturamento } = body;
 
             if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
@@ -2091,7 +2124,12 @@ module.exports = function createVendasRoutes(deps) {
                  telefone = ?, celular = ?, email = ?, website = ?,
                  endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?,
                  estado = ?, cep = ?, inscricao_estadual = ?, inscricao_municipal = ?,
-                 credito_total = ?, ativo = ?, empresa_id = ?
+                 credito_total = ?, ativo = ?, empresa_id = ?,
+                 fax = ?, ddd_fax = ?, enviar_anexos = ?, banco = ?, agencia = ?, conta = ?,
+                 pix = ?, titular_doc = ?, titular_nome = ?,
+                 suframa = ?, simples_nacional = ?, produtor_rural = ?, tipo_atividade = ?, cnae = ?,
+                 obs_internas = ?, obs_detalhadas = ?, parcelas_padrao = ?, vendedor_padrao = ?,
+                 email_nfe = ?, transportadora = ?, codigo_receita = ?, bloquear_faturamento = ?
                  WHERE id = ?`,
                 [nome, nome_fantasia || null, nome, cnpj || null, contato || null,
                  telefone || null, celular || null, email || null, website || null,
@@ -2100,7 +2138,15 @@ module.exports = function createVendasRoutes(deps) {
                  inscricao_municipal || null,
                  limite_credito ? parseFloat(limite_credito) : 0,
                  body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
-                 empresa_id || req.user.empresa_id, id]
+                 empresa_id || req.user.empresa_id,
+                 fax || null, ddd_fax || null, enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
+                 banco || null, agencia || null, conta || null,
+                 pix || null, titular_doc || null, titular_nome || null,
+                 suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
+                 tipo_atividade || null, cnae || null,
+                 obs_internas || null, obs_detalhadas || null, parcelas_padrao || null, vendedor_padrao || null,
+                 email_nfe || null, transportadora || null, codigo_receita || null,
+                 bloquear_faturamento ? 1 : 0, id]
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
             res.json({ message: 'Cliente atualizado com sucesso.' });

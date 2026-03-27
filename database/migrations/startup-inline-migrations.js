@@ -202,6 +202,35 @@ async function runInlineMigrations(pool) {
         }
     }
 
+    // Colunas extras do modal de clientes (Dados Bancários, Inscrições, Recomendações, Faturamento)
+    const clienteExtraCols = [
+        { col: 'fax', type: 'VARCHAR(20)' },
+        { col: 'ddd_fax', type: 'VARCHAR(5)' },
+        { col: 'enviar_anexos', type: 'TINYINT(1) DEFAULT 1' },
+        { col: 'banco', type: 'VARCHAR(100)' },
+        { col: 'agencia', type: 'VARCHAR(20)' },
+        { col: 'conta', type: 'VARCHAR(30)' },
+        { col: 'pix', type: 'VARCHAR(255)' },
+        { col: 'titular_doc', type: 'VARCHAR(30)' },
+        { col: 'titular_nome', type: 'VARCHAR(255)' },
+        { col: 'suframa', type: 'VARCHAR(20)' },
+        { col: 'simples_nacional', type: 'TINYINT(1) DEFAULT 0' },
+        { col: 'produtor_rural', type: 'TINYINT(1) DEFAULT 0' },
+        { col: 'tipo_atividade', type: 'VARCHAR(50)' },
+        { col: 'cnae', type: 'VARCHAR(100)' },
+        { col: 'obs_internas', type: 'TEXT' },
+        { col: 'obs_detalhadas', type: 'TEXT' },
+        { col: 'parcelas_padrao', type: 'VARCHAR(50)' },
+        { col: 'vendedor_padrao', type: 'VARCHAR(255)' },
+        { col: 'email_nfe', type: 'VARCHAR(255)' },
+        { col: 'transportadora', type: 'VARCHAR(255)' },
+        { col: 'codigo_receita', type: 'VARCHAR(50)' },
+        { col: 'bloquear_faturamento', type: 'TINYINT(1) DEFAULT 0' }
+    ];
+    for (const c of clienteExtraCols) {
+        try { await pool.query(`ALTER TABLE clientes ADD COLUMN ${c.col} ${c.type}`); } catch (_) { /* exists */ }
+    }
+
     console.log('✅ Migração da tabela produtos concluída!\n');
 
     // ============================================================

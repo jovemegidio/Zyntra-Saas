@@ -38,6 +38,19 @@
         .workbook-tab .tab-color.teal { background:#00bfa5; }
         .workbook-tab .tab-color.gray { background:#80868b; }
 
+        /* PM & Fundos Tabs */
+        .pm-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; margin-bottom:24px; }
+        .pm-card { background:#fff; border:1px solid var(--gray-200); border-radius:12px; padding:20px; text-align:center; }
+        .pm-card label { font-size:11px; font-weight:600; color:var(--gray-500); text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:8px; }
+        .pm-card .pm-value { font-size:28px; font-weight:800; color:#7c3aed; }
+        .pm-simulator { background:#fff; border:1px solid var(--gray-200); border-radius:12px; padding:24px; margin-bottom:24px; }
+        .pm-simulator h3 { margin:0 0 16px; font-size:15px; font-weight:700; color:var(--gray-800); }
+        .pm-sim-grid { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; }
+        .pm-sim-grid .filter-group { min-width:140px; }
+        .pm-resultado { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; padding:16px; background:var(--gray-50); border-radius:8px; }
+        .pm-resultado div { text-align:center; }
+        .pm-resultado label { font-size:10px; color:var(--gray-500); text-transform:uppercase; display:block; margin-bottom:4px; }
+        .pm-resultado span { font-size:16px; font-weight:700; }
 
         .search-bar-global { margin-bottom: 16px; }
         .search-input-wrapper { position: relative; display: flex; align-items: center; }
@@ -369,14 +382,16 @@
                 <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color blue"></span> RESUMO</a>
                 <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color orange"></span> FATURAMENTO</a>
                 <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color blue"></span> DISPONIVEL</a>
-                <a href="#" class="workbook-tab active"><span class="tab-color red"></span> A RECEBER</a>
+                <a href="#" class="workbook-tab active" onclick="switchWorkbookTab(event,'tab-areceber')"><span class="tab-color red"></span> A RECEBER</a>
                 <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color green"></span> DIARIO</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color blue"></span> FUNDOS</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color purple"></span> PM</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-fundos')"><span class="tab-color blue"></span> FUNDOS</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-pm')"><span class="tab-color purple"></span> PM</a>
                 <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color green"></span> TD</a>
             </div>
 
             <div class="content-area">
+                <!-- Tab: A RECEBER (default active) -->
+                <div id="tab-areceber" class="workbook-content active">
                 <div class="page-header" style="justify-content: flex-end;">
                     <div class="page-actions">
                         <button class="btn btn-success" onclick="abrirModalImportar()"><i class="fas fa-file-excel"></i> Importar XLSX</button>
@@ -431,10 +446,10 @@
                     <div class="filter-group">
                         <label><i class="fas fa-calendar"></i> Periodo</label>
                         <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()">
-                            <option value="todas">Todas</option>
+                            <option value="todas" selected>Todas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
-                            <option value="mes" selected>Este Mês</option>
+                            <option value="mes">Este Mês</option>
                             <option value="proximos7">Proximos 7 dias</option>
                             <option value="proximos30">Proximos 30 dias</option>
                             <option value="vencidas">Vencidas</option>
@@ -444,9 +459,10 @@
                         <label><i class="fas fa-tag"></i> Status</label>
                         <select class="filter-input" id="filtro-status" onchange="filtrarContas()">
                             <option value="">Todos</option>
-                            <option value="a vencer">A Vencer</option>
-                            <option value="vencido">Vencido</option>
-                            <option value="liquidado">Liquidado</option>
+                            <option value="a_vencer">A Vencer</option>
+                            <option value="vencida">Vencida</option>
+                            <option value="liquidada">Liquidada</option>
+                            <option value="cancelada">Cancelada</option>
                             <option value="pendente">Pendente</option>
                             <option value="recebido">Recebido</option>
                             <option value="parcial">Parcial</option>
@@ -554,6 +570,115 @@
                     </table>
                     </div>
                 </div>
+                </div><!-- /tab-areceber -->
+
+                <!-- Tab: FUNDOS -->
+                <div id="tab-fundos" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-landmark" style="color:#4285f4;margin-right:8px;"></i>Posicao dos Fundos / Portadores</h2>
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Detalhamento por Portador</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Parceiro / Portador</th>
+                                    <th>A Vencer</th>
+                                    <th>Vencido</th>
+                                    <th>Total em Aberto</th>
+                                    <th>Liquidado</th>
+                                    <th>% do Total</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-fundos-detail">
+                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div><!-- /tab-fundos -->
+
+                <!-- Tab: PM (Prazo Medio) -->
+                <div id="tab-pm" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calculator" style="color:#a142f4;margin-right:8px;"></i>Simulador de Prazo Medio</h2>
+                    <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:16px;margin-bottom:20px;">
+                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Medio (PM):</strong> Calculado com base nos titulos em aberto. PM = Soma(Valor x Dias) / Soma(Valor). As taxas sao aplicadas conforme tabela de referencia.</p>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">PM Recebimento</div>
+                            <div style="font-size:24px;font-weight:800;color:#7c3aed;margin-top:4px;" id="pm-recebimento">0 dias</div>
+                        </div>
+                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Total Ponderado</div>
+                            <div style="font-size:24px;font-weight:800;color:#1e40af;margin-top:4px;" id="pm-total-ponderado">R$ 0,00</div>
+                        </div>
+                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Titulos em Aberto</div>
+                            <div style="font-size:24px;font-weight:800;color:#059669;margin-top:4px;" id="pm-titulos-aberto">0</div>
+                        </div>
+                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Custo Financeiro Est.</div>
+                            <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:4px;" id="pm-custo-financeiro">R$ 0,00</div>
+                        </div>
+                    </div>
+                    <!-- Simulador -->
+                    <div class="table-container" style="margin-bottom:20px;">
+                        <div class="table-header">
+                            <h3 class="table-title"><i class="fas fa-sliders-h" style="margin-right:6px;"></i> Simulacao de Prazo</h3>
+                        </div>
+                        <div style="padding:16px;">
+                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-percentage"></i> Taxa Mensal (%)</label>
+                                    <input type="number" id="pm-taxa-mensal" value="1.50" step="0.01" min="0" max="100" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" onchange="calcularPM()">
+                                </div>
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-calendar-alt"></i> Prazo Simulado (dias)</label>
+                                    <input type="number" id="pm-prazo-simulado" value="30" min="1" max="365" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" onchange="calcularPM()">
+                                </div>
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-money-bill"></i> Valor Base Simulacao</label>
+                                    <input type="text" id="pm-valor-simulacao" placeholder="0,00" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" oninput="formatarMoedaInput(this);calcularPM()">
+                                </div>
+                                <div class="form-group-conta" style="display:flex;align-items:flex-end;">
+                                    <button type="button" onclick="calcularPM()" style="padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%;"><i class="fas fa-calculator"></i> Calcular</button>
+                                </div>
+                            </div>
+                            <div id="pm-resultado-simulacao" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:14px;display:none;">
+                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+                                    <div><span style="font-size:11px;color:#6b7280;">Custo Total Estimado:</span><div style="font-size:16px;font-weight:700;color:#7c3aed;" id="pm-sim-custo">R$ 0,00</div></div>
+                                    <div><span style="font-size:11px;color:#6b7280;">Valor Liquido Estimado:</span><div style="font-size:16px;font-weight:700;color:#059669;" id="pm-sim-liquido">R$ 0,00</div></div>
+                                    <div><span style="font-size:11px;color:#6b7280;">Taxa Efetiva:</span><div style="font-size:16px;font-weight:700;color:#dc2626;" id="pm-sim-taxa-efetiva">0,00%</div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Tabela PM por Portador -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title"><i class="fas fa-table" style="margin-right:6px;"></i> Prazo Medio por Portador</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Portador</th>
+                                    <th>Qtd. Titulos</th>
+                                    <th>Valor Total</th>
+                                    <th>PM (dias)</th>
+                                    <th>Custo Fin. Estimado</th>
+                                    <th>% Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pm-body">
+                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                </div><!-- /tab-pm -->
             </div>
         </main>
     </div>
@@ -601,10 +726,33 @@
                                 <select id="cr-conta-corrente"><option value="">Selecione...</option></select>
                             </div>
                         </div>
+                        <div class="form-row-conta">
+                            <div class="form-group-conta">
+                                <label><i class="fas fa-flag"></i> Status</label>
+                                <select id="cr-status">
+                                    <option value="a_vencer">A Vencer</option>
+                                    <option value="vencida">Vencida</option>
+                                    <option value="liquidada">Liquidada</option>
+                                    <option value="cancelada">Cancelada</option>
+                                </select>
+                            </div>
+                            <div class="form-group-conta">
+                                <label><i class="fas fa-calendar-check"></i> Pago no Dia</label>
+                                <div class="input-icon-conta"><input type="date" id="cr-pago-no-dia"><i class="fas fa-calendar-check"></i></div>
+                            </div>
+                            <div class="form-group-conta" style="display:flex;align-items:flex-end;">
+                                <label class="checkbox-label-cr" style="padding-bottom:10px;">
+                                    <input type="checkbox" id="cr-aceita-troca-factory">
+                                    <span><i class="fas fa-exchange-alt"></i> Aceita Troca Factory</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                     <div class="tabs-conta">
                         <button type="button" class="tab-conta active" data-tab="cr-detalhes">Detalhes</button>
                         <button type="button" class="tab-conta" data-tab="cr-impostos">Impostos Retidos</button>
+                        <button type="button" class="tab-conta" data-tab="cr-comprovante"><i class="fas fa-file-invoice" style="margin-right:4px;opacity:0.6;"></i> Comprovante</button>
+                        <button type="button" class="tab-conta" data-tab="cr-rastreamento"><i class="fas fa-search-location" style="margin-right:4px;opacity:0.6;"></i> Rastreamento</button>
                         <button type="button" class="tab-conta" data-tab="cr-departamentos">Departamentos</button>
                         <button type="button" class="tab-conta" data-tab="cr-repeticao">Repeticao</button>
                         <button type="button" class="tab-conta" data-tab="cr-recebimentos">Recebimentos</button>
@@ -659,6 +807,49 @@
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-iss"><span>Reter</span></label></div>
                                 <div class="form-group-conta" style="max-width:150px;"><label>Valor INSS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-inss" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-inss"><span>Reter</span></label></div>
+                            </div>
+                        </div>
+                        <div class="tab-pane-conta" id="tab-cr-comprovante">
+                            <div class="form-row-conta">
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-file-upload"></i> Comprovante de Pagamento</label>
+                                    <input type="file" id="cr-comprovante-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;width:100%;">
+                                    <span style="font-size:11px;color:#9ca3af;margin-top:4px;display:block;">PDF, JPG, PNG, DOC (max 10MB). O anexo ficara salvo em banco.</span>
+                                </div>
+                            </div>
+                            <div id="cr-comprovante-preview" style="margin-top:12px;display:none;">
+                                <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px;display:flex;align-items:center;gap:12px;">
+                                    <i class="fas fa-file-check" style="font-size:24px;color:#16a34a;"></i>
+                                    <div style="flex:1;">
+                                        <p style="font-size:13px;font-weight:600;color:#166534;margin:0;">Comprovante Anexado</p>
+                                        <a href="#" id="cr-comprovante-link" target="_blank" style="font-size:12px;color:#1e40af;text-decoration:underline;">Visualizar comprovante</a>
+                                    </div>
+                                    <button type="button" onclick="removerComprovante()" style="background:#fee2e2;border:none;color:#dc2626;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <div style="margin-top:16px;">
+                                <button type="button" onclick="uploadComprovante()" class="btn-registrar-recebimento" style="background:#dbeafe;color:#1e40af;">
+                                    <i class="fas fa-cloud-upload-alt"></i> Enviar Comprovante
+                                </button>
+                            </div>
+                        </div>
+                        <div class="tab-pane-conta" id="tab-cr-rastreamento">
+                            <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-bottom:16px;">
+                                <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Rastreamento:</strong> Datas de recompra, encaminhamento para cartorio e protesto sao preenchidas automaticamente via importacao ou manualmente.</p>
+                            </div>
+                            <div class="form-row-conta">
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-redo"></i> Dia Recomprado</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-dia-recomprado"><i class="fas fa-calendar"></i></div>
+                                </div>
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-gavel"></i> Data para Cartorio</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-data-cartorio"><i class="fas fa-calendar"></i></div>
+                                </div>
+                                <div class="form-group-conta">
+                                    <label><i class="fas fa-exclamation-triangle"></i> Data Protestado</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-data-protestado"><i class="fas fa-calendar"></i></div>
+                                </div>
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-departamentos">
@@ -990,7 +1181,7 @@
 
         async function carregarContas() {
             try {
-                var response = await fetch('/api/financeiro/contas-receber', { credentials: 'include' });
+                var response = await fetch('/api/financeiro/contas-receber?ano_vigente=1', { credentials: 'include' });
                 if (response.ok) {
                     var r = await response.json();
                     var raw = r.data || r || [];
@@ -1018,9 +1209,9 @@
         }
 
         function getTableHeaders() {
-            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','Situacao','Portador','Status','Dias','Acoes'];
+            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','Situacao','Portador','Pago no Dia','Status','Dias','Acoes'];
             if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Liquido','Recebido','A Receber','Acoes'];
-            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situacao','Portador','Status','Dias','Acoes'];
+            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situacao','Portador','Pago no Dia','Status','Dias','Acoes'];
         }
 
         function renderizarTabela(dados, pesquisa) {
@@ -1033,7 +1224,7 @@
             if (dados.length === 0) { tbody.innerHTML = '<tr><td colspan="'+colspan+'" style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:48px;margin-bottom:16px;display:block;"></i>Nenhuma conta encontrada</td></tr>'; return; }
             tbody.innerHTML = dados.map(function(c) {
                 var st = (c.status || 'pendente').toLowerCase();
-                var badges = { 'pendente':'<span class="badge badge-pending">Pendente</span>', 'a vencer':'<span class="badge badge-pending"><i class="fas fa-clock"></i> A Vencer</span>', 'recebido':'<span class="badge badge-paid">Recebido</span>', 'pago':'<span class="badge badge-paid">Recebido</span>', 'liquidado':'<span class="badge badge-paid"><i class="fas fa-check"></i> Liquidado</span>', 'vencido':'<span class="badge badge-overdue"><i class="fas fa-exclamation-circle"></i> Vencido</span>', 'parcial':'<span class="badge badge-partial">Parcial</span>' };
+                var badges = { 'pendente':'<span class="badge badge-pending">Pendente</span>', 'a_vencer':'<span class="badge badge-pending"><i class="fas fa-clock"></i> A Vencer</span>', 'a vencer':'<span class="badge badge-pending"><i class="fas fa-clock"></i> A Vencer</span>', 'recebido':'<span class="badge badge-paid">Recebido</span>', 'pago':'<span class="badge badge-paid">Recebido</span>', 'liquidada':'<span class="badge badge-paid"><i class="fas fa-check"></i> Liquidada</span>', 'liquidado':'<span class="badge badge-paid"><i class="fas fa-check"></i> Liquidado</span>', 'vencida':'<span class="badge badge-overdue"><i class="fas fa-exclamation-circle"></i> Vencida</span>', 'vencido':'<span class="badge badge-overdue"><i class="fas fa-exclamation-circle"></i> Vencido</span>', 'cancelada':'<span class="badge" style="background:#f3f4f6;color:#6b7280;"><i class="fas fa-ban"></i> Cancelada</span>', 'parcial':'<span class="badge badge-partial">Parcial</span>' };
                 var hl = function(t) { if(!pesquisa||!t) return t||'-'; try{var e=pesquisa.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(new RegExp('('+e+')','gi'),'<span class="highlight">$1</span>');}catch(ex){return String(t);} };
                 var dias = parseInt(c.dias_vencido) || 0;
                 var diasStyle = dias > 0 ? 'color:#dc2626;font-weight:700;' : '';
@@ -1043,12 +1234,12 @@
                 acoes += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
 
                 if (currentView === 'completa') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
                 }
                 if (currentView === 'impostos') {
                     return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+acoes+'</tr>';
                 }
-                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
+                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
             }).join('');
         }
 
@@ -1121,6 +1312,14 @@
             document.getElementById('cr-valor-inss').value = '';
             document.getElementById('cr-total-recebido').value = '0,00';
             document.getElementById('cr-valor-a-receber').value = '0,00';
+            document.getElementById('cr-status').value = 'a_vencer';
+            document.getElementById('cr-pago-no-dia').value = '';
+            document.getElementById('cr-aceita-troca-factory').checked = false;
+            document.getElementById('cr-dia-recomprado').value = '';
+            document.getElementById('cr-data-cartorio').value = '';
+            document.getElementById('cr-data-protestado').value = '';
+            document.getElementById('cr-comprovante-preview').style.display = 'none';
+            document.getElementById('cr-comprovante-file').value = '';
             resetTabsCR();
             if (id) {
                 var c = contas.find(function(x){return x.id===id;}); if (!c) return;
@@ -1153,6 +1352,21 @@
                 var aReceber = parseFloat(c.a_receber||0);
                 document.getElementById('cr-total-recebido').value = recebido.toFixed(2).replace('.',',');
                 document.getElementById('cr-valor-a-receber').value = (aReceber||val-recebido).toFixed(2).replace('.',',');
+                // Dev Spec 1.3: Novos campos
+                var statusMap = {'a vencer':'a_vencer','a_vencer':'a_vencer','vencido':'vencida','vencida':'vencida','liquidado':'liquidada','liquidada':'liquidada','cancelada':'cancelada','pendente':'a_vencer','recebido':'liquidada','pago':'liquidada'};
+                document.getElementById('cr-status').value = statusMap[(c.status||'').toLowerCase()] || 'a_vencer';
+                document.getElementById('cr-pago-no-dia').value = (c.pago_no_dia||'').split('T')[0];
+                document.getElementById('cr-aceita-troca-factory').checked = !!(c.aceita_troca_factory);
+                document.getElementById('cr-dia-recomprado').value = (c.dia_recomprado||'').split('T')[0];
+                document.getElementById('cr-data-cartorio').value = (c.data_para_cartorio||'').split('T')[0];
+                document.getElementById('cr-data-protestado').value = (c.data_protestado||'').split('T')[0];
+                // Comprovante
+                if (c.comprovante_url) {
+                    document.getElementById('cr-comprovante-preview').style.display = 'block';
+                    document.getElementById('cr-comprovante-link').href = c.comprovante_url;
+                } else {
+                    document.getElementById('cr-comprovante-preview').style.display = 'none';
+                }
             }
             document.getElementById('modalContaCR').classList.add('active');
         }
@@ -1188,11 +1402,38 @@
         async function salvarConta(event) {
             event.preventDefault();
             var id = document.getElementById('conta-id').value;
-            var dados = { descricao: document.getElementById('descricao').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
+            var dados = {
+                descricao: document.getElementById('descricao').value,
+                cliente_id: document.getElementById('cliente-id').value,
+                categoria_id: document.getElementById('categoria-id').value,
+                valor: parseMoeda(document.getElementById('conta-valor').value),
+                valor_total: parseMoeda(document.getElementById('conta-valor').value),
+                data_vencimento: document.getElementById('conta-vencimento').value,
+                vencimento: document.getElementById('conta-vencimento').value,
+                forma_recebimento: document.getElementById('forma-pagamento').value,
+                observacoes: document.getElementById('observacoes').value,
+                numero_documento: document.getElementById('numero-documento').value,
+                num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1,
+                status: document.getElementById('cr-status').value,
+                pago_no_dia: document.getElementById('cr-pago-no-dia').value || null,
+                aceita_troca_factory: document.getElementById('cr-aceita-troca-factory').checked,
+                dia_recomprado: document.getElementById('cr-dia-recomprado').value || null,
+                data_para_cartorio: document.getElementById('cr-data-cartorio').value || null,
+                data_protestado: document.getElementById('cr-data-protestado').value || null
+            };
             try {
                 var url = id ? '/api/financeiro/contas-receber/'+id : '/api/financeiro/contas-receber';
                 var r = await fetch(url, { method: id?'PUT':'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify(dados) });
-                if (r.ok) { showToast('Conta salva com sucesso!'); fecharModal(); await init(); } else { showToast('Erro ao salvar conta', 'error'); }
+                if (r.ok) {
+                    // Upload comprovante se selecionado
+                    var comprovanteFile = document.getElementById('cr-comprovante-file').files[0];
+                    if (comprovanteFile) {
+                        var contaId = id || (await r.json()).id;
+                        if (!id) { /* ja temos o id do response */ }
+                        await uploadComprovanteFile(contaId || id, comprovanteFile);
+                    }
+                    showToast('Conta salva com sucesso!'); fecharModal(); await init();
+                } else { showToast('Erro ao salvar conta', 'error'); }
             } catch(e) { console.error(e); showToast('Erro ao salvar conta', 'error'); }
         }
 
@@ -1237,7 +1478,7 @@
         var pesquisaTimeout;
         function pesquisarGlobal() { clearTimeout(pesquisaTimeout); var i=document.getElementById('pesquisa-global'); i.parentElement.querySelector('.btn-clear-search').style.display=i.value?'flex':'none'; pesquisaTimeout=setTimeout(function(){filtrarContas();},300); }
         function limparPesquisa() { document.getElementById('pesquisa-global').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-periodo').value='mes'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-periodo').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
         function visualizarConta(id) {
@@ -1313,6 +1554,192 @@
                 document.getElementById('importar-progresso').style.display = 'none';
                 showToast('Erro ao importar arquivo', 'error');
                 document.getElementById('btn-importar').disabled = false;
+            }
+        }
+
+        // Dev Spec 1.3: Upload de comprovante
+        async function uploadComprovante() {
+            var id = document.getElementById('conta-id').value;
+            var fileInput = document.getElementById('cr-comprovante-file');
+            if (!fileInput.files || !fileInput.files[0]) { showToast('Selecione um arquivo', 'warning'); return; }
+            if (!id) { showToast('Salve a conta antes de enviar o comprovante', 'warning'); return; }
+            await uploadComprovanteFile(id, fileInput.files[0]);
+        }
+        async function uploadComprovanteFile(id, file) {
+            try {
+                var formData = new FormData();
+                formData.append('comprovante', file);
+                var r = await fetch('/api/financeiro/contas-receber/'+id+'/comprovante', { method:'POST', credentials:'include', body:formData });
+                if (r.ok) {
+                    var data = await r.json();
+                    document.getElementById('cr-comprovante-preview').style.display = 'block';
+                    document.getElementById('cr-comprovante-link').href = data.comprovante_url;
+                    showToast('Comprovante enviado com sucesso!');
+                } else { showToast('Erro ao enviar comprovante', 'error'); }
+            } catch(e) { console.error(e); showToast('Erro ao enviar comprovante', 'error'); }
+        }
+        function removerComprovante() {
+            document.getElementById('cr-comprovante-preview').style.display = 'none';
+            document.getElementById('cr-comprovante-file').value = '';
+        }
+
+        // Dev Spec 1.3: Workbook Tab Switching
+        function switchWorkbookTab(event, tabId) {
+            event.preventDefault();
+            document.querySelectorAll('.workbook-tab').forEach(function(t){ t.classList.remove('active'); });
+            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.workbook-content').forEach(function(c){ c.style.display='none'; c.classList.remove('active'); });
+            var target = document.getElementById(tabId);
+            if (target) { target.style.display='block'; target.classList.add('active'); }
+            // Carregar dados da aba se necessario
+            if (tabId === 'tab-pm') calcularPM();
+            if (tabId === 'tab-fundos') renderizarFundosDetalhado();
+        }
+
+        // Dev Spec 1.3: Simulador de Prazo Medio
+        function calcularPM() {
+            var hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            var taxaMensal = parseFloat(document.getElementById('pm-taxa-mensal').value) || 1.5;
+            var prazoSimulado = parseInt(document.getElementById('pm-prazo-simulado').value) || 30;
+            var valorSimulacao = parseMoeda(document.getElementById('pm-valor-simulacao').value) || 0;
+
+            var somaValorDias = 0;
+            var somaValor = 0;
+            var qtdAberto = 0;
+            var porPortador = {};
+            var totalGeral = 0;
+
+            contas.forEach(function(c) {
+                var bruto = parseFloat(c.valor_total || c.valor || 0) || 0;
+                var recebido = parseFloat(c.valor_recebido || 0) || 0;
+                var valorAberto = parseFloat(c.a_receber);
+                if (isNaN(valorAberto)) valorAberto = bruto - recebido;
+                if (valorAberto <= 0) return;
+
+                var status = String(c.status || '').toLowerCase();
+                if (status === 'recebido' || status === 'pago' || status === 'liquidada' || status === 'liquidado' || status === 'cancelada') return;
+
+                var vencimentoRaw = c.data_vencimento || c.vencimento;
+                var vencimento = vencimentoRaw ? new Date(String(vencimentoRaw).slice(0,10) + 'T00:00:00') : null;
+                if (!vencimento || isNaN(vencimento.getTime())) return;
+                vencimento.setHours(0,0,0,0);
+
+                var diasAteVenc = Math.round((vencimento.getTime() - hoje.getTime()) / 86400000);
+                if (diasAteVenc < 0) diasAteVenc = 0;
+
+                somaValorDias += valorAberto * diasAteVenc;
+                somaValor += valorAberto;
+                qtdAberto++;
+                totalGeral += valorAberto;
+
+                var portador = c.portador || 'SEM PORTADOR';
+                if (!porPortador[portador]) {
+                    porPortador[portador] = { qtd: 0, valor: 0, somaVD: 0 };
+                }
+                porPortador[portador].qtd++;
+                porPortador[portador].valor += valorAberto;
+                porPortador[portador].somaVD += valorAberto * diasAteVenc;
+            });
+
+            var pmDias = somaValor > 0 ? Math.round(somaValorDias / somaValor) : 0;
+            var taxaDiaria = taxaMensal / 30 / 100;
+            var custoFinanceiro = somaValor * taxaDiaria * pmDias;
+
+            document.getElementById('pm-recebimento').textContent = pmDias + ' dias';
+            document.getElementById('pm-total-ponderado').textContent = fmtMoeda(somaValor);
+            document.getElementById('pm-titulos-aberto').textContent = qtdAberto;
+            document.getElementById('pm-custo-financeiro').textContent = fmtMoeda(custoFinanceiro);
+
+            // Tabela PM por portador
+            var pmBody = document.getElementById('tabela-pm-body');
+            var portadorKeys = Object.keys(porPortador).sort();
+            if (portadorKeys.length === 0) {
+                pmBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum titulo em aberto</td></tr>';
+            } else {
+                pmBody.innerHTML = portadorKeys.map(function(nome) {
+                    var item = porPortador[nome];
+                    var pmPort = item.valor > 0 ? Math.round(item.somaVD / item.valor) : 0;
+                    var custoPort = item.valor * taxaDiaria * pmPort;
+                    var pctVolume = totalGeral > 0 ? (item.valor / totalGeral * 100).toFixed(1) : '0.0';
+                    return '<tr>' +
+                        '<td><strong>' + nome + '</strong></td>' +
+                        '<td style="text-align:center;">' + item.qtd + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.valor) + '</td>' +
+                        '<td style="text-align:center;font-weight:700;color:#7c3aed;">' + pmPort + '</td>' +
+                        '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(custoPort) + '</td>' +
+                        '<td style="text-align:center;">' + pctVolume + '%</td>' +
+                    '</tr>';
+                }).join('');
+                // Linha total
+                pmBody.innerHTML += '<tr style="background:#f5f3ff;font-weight:700;">' +
+                    '<td>TOTAL</td>' +
+                    '<td style="text-align:center;">' + qtdAberto + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(somaValor) + '</td>' +
+                    '<td style="text-align:center;color:#7c3aed;">' + pmDias + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(custoFinanceiro) + '</td>' +
+                    '<td style="text-align:center;">100%</td></tr>';
+            }
+
+            // Simulacao
+            if (valorSimulacao > 0) {
+                document.getElementById('pm-resultado-simulacao').style.display = 'block';
+                var custoSim = valorSimulacao * taxaDiaria * prazoSimulado;
+                var liquidoSim = valorSimulacao - custoSim;
+                var taxaEfetiva = valorSimulacao > 0 ? (custoSim / valorSimulacao * 100) : 0;
+                document.getElementById('pm-sim-custo').textContent = fmtMoeda(custoSim);
+                document.getElementById('pm-sim-liquido').textContent = fmtMoeda(liquidoSim);
+                document.getElementById('pm-sim-taxa-efetiva').textContent = taxaEfetiva.toFixed(2) + '%';
+            } else {
+                document.getElementById('pm-resultado-simulacao').style.display = 'none';
+            }
+        }
+
+        // Dev Spec 1.3: Fundos detalhado
+        function renderizarFundosDetalhado() {
+            var hoje = new Date();
+            hoje.setHours(0,0,0,0);
+            var porPortador = {};
+            var totalGeral = 0;
+
+            contas.forEach(function(c) {
+                var bruto = parseFloat(c.valor_total || c.valor || 0) || 0;
+                var recebido = parseFloat(c.valor_recebido || 0) || 0;
+                var valorAberto = parseFloat(c.a_receber);
+                if (isNaN(valorAberto)) valorAberto = bruto - recebido;
+                if (valorAberto < 0) valorAberto = 0;
+
+                var status = String(c.status || '').toLowerCase();
+                var vencimentoRaw = c.data_vencimento || c.vencimento;
+                var vencimento = vencimentoRaw ? new Date(String(vencimentoRaw).slice(0,10) + 'T00:00:00') : null;
+                if (vencimento && !isNaN(vencimento.getTime())) vencimento.setHours(0,0,0,0);
+
+                var liquidado = status === 'recebido' || status === 'pago' || status === 'liquidada' || status === 'liquidado' || valorAberto === 0;
+                var vencido = !liquidado && vencimento && vencimento < hoje;
+                var parceiro = c.portador || 'SEM PORTADOR';
+
+                if (!porPortador[parceiro]) porPortador[parceiro] = { aVencer: 0, vencido: 0, total: 0, liquidado: 0 };
+                if (liquidado) { porPortador[parceiro].liquidado += recebido > 0 ? recebido : bruto; }
+                else if (vencido) { porPortador[parceiro].vencido += valorAberto; porPortador[parceiro].total += valorAberto; totalGeral += valorAberto; }
+                else { porPortador[parceiro].aVencer += valorAberto; porPortador[parceiro].total += valorAberto; totalGeral += valorAberto; }
+            });
+
+            var fundosBody = document.getElementById('tabela-fundos-detail');
+            var keys = Object.keys(porPortador).sort();
+            if (keys.length === 0) {
+                fundosBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
+            } else {
+                fundosBody.innerHTML = keys.map(function(nome) {
+                    var item = porPortador[nome];
+                    var pct = totalGeral > 0 ? (item.total / totalGeral * 100).toFixed(1) : '0.0';
+                    return '<tr>' +
+                        '<td><strong>' + nome + '</strong></td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.aVencer) + '</td>' +
+                        '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(item.vencido) + '</td>' +
+                        '<td style="text-align:right;font-weight:700;">' + fmtMoeda(item.total) + '</td>' +
+                        '<td style="text-align:right;color:#059669;">' + fmtMoeda(item.liquidado) + '</td>' +
+                        '<td style="text-align:center;">' + pct + '%</td></tr>';
+                }).join('');
             }
         }
 
