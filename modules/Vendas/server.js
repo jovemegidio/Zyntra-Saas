@@ -474,8 +474,8 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
         const currentUser = req.user;
         let isAdmin = verificarSeAdmin(currentUser);
 
-        // Se não temos o objeto completo, buscar do banco
-        if (!currentUser.role && currentUser.id) {
+        // Sempre buscar role/is_admin atualizado do banco (JWT pode estar desatualizado após mudança de role)
+        if (currentUser.id) {
             try {
                 const [userRows] = await pool.query('SELECT id, nome, email, role, is_admin FROM usuarios WHERE id = ?', [currentUser.id]);
                 if (userRows.length > 0) {
@@ -2805,6 +2805,15 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
 
         const existing = existingRows[0];
         const user = req.user || {};
+
+        // Sempre buscar role/is_admin atualizado do banco (JWT pode estar desatualizado após mudança de role)
+        if (user.id) {
+            try {
+                const [freshUser] = await pool.query('SELECT role, is_admin FROM usuarios WHERE id = ?', [user.id]);
+                if (freshUser.length > 0) Object.assign(user, freshUser[0]);
+            } catch (e) { /* ignorar erro, usar dados do JWT */ }
+        }
+
         const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
         const isSupervisor = isKanbanSupervisor(user);
 
