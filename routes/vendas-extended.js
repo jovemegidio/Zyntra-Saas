@@ -319,7 +319,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 SELECT p.*,
                        p.valor as valor_total,
                        p.created_at as data_pedido,
-                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, 'Cliente não informado') as cliente_nome,
+                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') as cliente_nome,
                        c.email as cliente_email,
                        c.telefone as cliente_telefone,
                        e.nome_fantasia as empresa_nome,

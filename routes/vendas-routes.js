@@ -24,8 +24,6 @@ module.exports = function createVendasRoutes(deps) {
 
     // --- Standard requires for extracted routes ---
     const { body, param, query, validationResult } = require('express-validator');
-    const path = require('path');
-    const multer = require('multer');
     const fs = require('fs');
     const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
     const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
@@ -219,7 +217,7 @@ module.exports = function createVendasRoutes(deps) {
             const [[pedido]] = await pool.query(`
                 SELECT p.*, p.valor as valor_total, p.created_at as data_pedido,
                        p.transportadora_id, p.transportadora_nome,
-                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, 'Cliente não informado') AS cliente_nome,
+                       COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
                        c.email AS cliente_email, c.telefone AS cliente_telefone,
                        e.nome_fantasia AS empresa_nome, e.razao_social AS empresa_razao_social,
                        u.nome AS vendedor_nome,

@@ -697,7 +697,7 @@ module.exports = function createMiscRoutes(deps) {
             try {
                 const query = `
                     SELECT p.*,
-                           COALESCE(c.nome_fantasia, c.razao_social, c.nome, 'Cliente não informado') as cliente_nome,
+                           COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') as cliente_nome,
                            c.email as cliente_email,
                            c.telefone as cliente_telefone,
                            u.nome as vendedor_nome,

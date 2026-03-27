@@ -8,7 +8,7 @@ const PEDIDO_SELECT_FIELDS = `
     p.id, p.valor, p.valor as valor_total, p.status, p.created_at, p.created_at as data_pedido,
     p.vendedor_id, p.cliente_id, p.observacao,
     p.nf, p.numero_nf, p.nfe_chave,
-    COALESCE(c.nome_fantasia, c.razao_social, c.nome, 'Cliente não informado') AS cliente_nome,
+    COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
     c.email AS cliente_email, c.telefone AS cliente_telefone,
     e.nome_fantasia AS empresa_nome,
     u.nome AS vendedor_nome`;
@@ -22,7 +22,7 @@ const PEDIDO_JOINS = `
 const PEDIDO_DETAIL_SELECT = `
     p.*, p.valor as valor_total, p.created_at as data_pedido,
     p.transportadora_id, p.transportadora_nome,
-    COALESCE(c.nome_fantasia, c.razao_social, c.nome, 'Cliente não informado') AS cliente_nome,
+    COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
     c.email AS cliente_email, c.telefone AS cliente_telefone,
     e.nome_fantasia AS empresa_nome, e.razao_social AS empresa_razao_social,
     u.nome AS vendedor_nome,
