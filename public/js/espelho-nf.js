@@ -117,7 +117,7 @@ function visualizarEspelhoNF(id) {
     const iframe = document.getElementById('espelho-nf-iframe');
     if (!viewer || !iframe) return;
     viewer.style.display = 'block';
-    iframe.src = '/api/nfe/' + encodeURIComponent(id) + '/espelho';
+    iframe.src = '/api/nfe/' + encodeURIComponent(id) + '/espelho?_t=' + Date.now();
     viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 

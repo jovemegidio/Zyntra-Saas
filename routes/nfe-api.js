@@ -509,6 +509,8 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
 
             const html = renderDanfe(ctx);
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
             return res.send(html);
 
         } catch (err) {
