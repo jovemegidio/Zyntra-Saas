@@ -88,16 +88,6 @@ async function runInlineMigrations(pool) {
     }
 
     // ============================================================
-    // Expand role ENUM to include supervisor/gerente
-    // ============================================================
-    try {
-        await pool.query("ALTER TABLE usuarios MODIFY COLUMN role ENUM('admin','user','comercial','consultoria','rh','recursos_humanos','supervisor','gerente') NOT NULL DEFAULT 'user'");
-        console.log('✅ ENUM role expandido com supervisor/gerente');
-    } catch (e) {
-        if (!e.message.includes('Duplicate')) console.warn('⚠️ role ENUM:', e.message);
-    }
-
-    // ============================================================
     // Seed funcionarios (example + admin + test users)
     // ============================================================
     try {

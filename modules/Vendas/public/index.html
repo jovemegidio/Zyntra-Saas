@@ -19178,6 +19178,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             if (!user) return false;
             // Admin já tem todas as permissões
             if (verificarSeAdmin(user)) return true;
+            // Verificar pelo role do banco (supervisor, gerente)
+            if (user.role && ['supervisor', 'gerente', 'gerente_comercial'].includes(user.role.toLowerCase())) return true;
             // Verificar pelo departamento
             if (user.departamento) {
                 const deptMin = user.departamento.toLowerCase();
@@ -19318,12 +19320,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     console.log('[Vendas] Usuário logado:', usuarioLogado.nome, '| Admin:', usuarioLogado.isAdmin, '| Supervisor:', usuarioLogado.isSupervisor, '| SupervisorVendas:', usuarioLogado.isSupervisorVendas, '| Vendedor:', usuarioLogado.isVendedor, '| CanFaturar:', usuarioLogado.canFaturar, '| ID:', usuarioLogado.id);
 
                     // Preencher filtro de vendedor com o usuário logado
-                    const filtroVendedor = document.getElementById('filtro-vendedor');
-                    if (filtroVendedor && usuarioLogado.nome) {
-                        filtroVendedor.value = usuarioLogado.nome;
-                        // Atualizar estado do filtro
-                        filtrosState.vendedor = usuarioLogado.id;
-                        filtrosState.vendedorNome = usuarioLogado.nome;
+                    // Admin/Supervisor: não pré-filtrar — veem todos os pedidos por padrão
+                    if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {
+                        const filtroVendedor = document.getElementById('filtro-vendedor');
+                        if (filtroVendedor && usuarioLogado.nome) {
+                            filtroVendedor.value = usuarioLogado.nome;
+                            // Atualizar estado do filtro
+                            filtrosState.vendedor = usuarioLogado.id;
+                            filtrosState.vendedorNome = usuarioLogado.nome;
+                        }
                     }
 
                     // ========================================

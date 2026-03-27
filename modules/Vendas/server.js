@@ -524,8 +524,8 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
             queryParams.push(...statusExcluidos);
         }
 
-        // Filtro de vendedor (somente se for admin, pois vendedor já está filtrado)
-        if (isAdmin && vendedor && vendedor !== 'todos') {
+        // Filtro de vendedor (opcional para admin/supervisor via modal de filtros)
+        if ((isAdmin || isSupervisor) && vendedor && vendedor !== 'todos') {
             whereConditions.push('p.vendedor_id = ?');
             queryParams.push(vendedor);
         }
