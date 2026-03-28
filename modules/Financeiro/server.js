@@ -396,15 +396,18 @@ app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) =>
         let sql = `SELECT cr.*, 
                           COALESCE(cr.cliente_nome, c.nome) as cliente_nome, 
                           COALESCE(cr.cnpj_cliente, c.cpf_cnpj) as cnpj_cpf,
-                          COALESCE(cr.valor, cr.valor_total, 0) as valor_total,
+                          cr.cnpj_empresa,
+                          COALESCE(cr.valor, 0) as valor_total,
                           cr.forma_recebimento,
                           cr.empresa, cr.nota_fiscal, cr.parcela_info,
-                          cr.data_emissao, cr.categoria, cr.centro_receita,
+                          cr.data_emissao, cr.categoria_nome as categoria, cr.conta_corrente_nome as centro_receita,
                           cr.numero_documento, cr.numero_boleto, cr.vendedor,
                           cr.projeto, cr.situacao, cr.portador,
                           cr.valor_pis, cr.valor_cofins, cr.valor_csll,
                           cr.valor_ir, cr.valor_iss, cr.valor_inss,
-                          cr.valor_liquido, cr.valor_recebido, cr.a_receber,
+                          (cr.valor - COALESCE(cr.valor_pis,0) - COALESCE(cr.valor_cofins,0) - COALESCE(cr.valor_csll,0) - COALESCE(cr.valor_ir,0) - COALESCE(cr.valor_iss,0) - COALESCE(cr.valor_inss,0)) as valor_liquido,
+                          cr.valor_recebido,
+                          (cr.valor - COALESCE(cr.valor_recebido,0)) as a_receber,
                           cr.dias_vencido,
                           cr.pago_no_dia, cr.aceita_troca_factory,
                           cr.comprovante_url,
@@ -554,77 +557,206 @@ app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, upl
         
         const XLSX = require('xlsx');
         const workbook = XLSX.readFile(req.file.path);
-        const sheetName = workbook.SheetNames[0];
+        
+        // Auto-detect best sheet: prefer FATURAMENTO, then first sheet
+        const preferredSheets = ['FATURAMENTO', 'A RECEBER', 'CONTAS A RECEBER'];
+        let sheetName = workbook.SheetNames[0];
+        for (const pref of preferredSheets) {
+            if (workbook.SheetNames.includes(pref)) { sheetName = pref; break; }
+        }
         const sheet = workbook.Sheets[sheetName];
-        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
+        console.log('[IMPORTAR-CR] Usando aba:', sheetName, '| Abas disponíveis:', workbook.SheetNames.join(', '));
+        
+        // Read raw rows (array of arrays) to auto-detect header row
+        const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+        if (!rawData || rawData.length < 2) {
+            throw new Error('Arquivo vazio ou sem dados');
+        }
+        
+        // Detect header row: find row containing known keywords
+        const HEADER_KEYWORDS = ['EMPRESA', 'CLIENTE', 'CNPJ', 'VALOR', 'VCTO', 'NFe', 'EMISSÃO', 'EMISSAO', 'Empresa', 'Cliente', 'Vencimento'];
+        let headerRowIdx = 0;
+        for (let i = 0; i < Math.min(rawData.length, 15); i++) {
+            const row = rawData[i];
+            if (!row) continue;
+            const rowStr = row.map(c => String(c || '')).join('|').toUpperCase();
+            const matches = HEADER_KEYWORDS.filter(kw => rowStr.includes(kw.toUpperCase()));
+            if (matches.length >= 3) { headerRowIdx = i; break; }
+        }
+        const headers = (rawData[headerRowIdx] || []).map(h => String(h || '').trim());
+        console.log('[IMPORTAR-CR] Header na linha:', headerRowIdx + 1, '| Colunas:', headers.join(', '));
+        
+        // Column name mapping: Excel header → DB field
+        // Supports both ALUFORCE FATURAMENTO and standard templates
+        const COLUMN_MAP = {
+            'EMPRESA': 'empresa', 'Empresa': 'empresa', 'empresa': 'empresa',
+            'EMISSÃO': 'data_emissao', 'Emissão': 'data_emissao', 'Emissao': 'data_emissao', 'emissao': 'data_emissao', 'Data de Emissão': 'data_emissao',
+            'TIPO': 'tipo_documento', 'Tipo': 'tipo_documento', 'tipo': 'tipo_documento', 'Tipo de Documento': 'tipo_documento',
+            'NFe': 'nota_fiscal', 'nfe': 'nota_fiscal', 'Nota Fiscal': 'nota_fiscal', 'NF': 'nota_fiscal',
+            'P': 'parcela_info', 'Parcela': 'parcela_info', 'parcela': 'parcela_info',
+            'CLIENTE': 'cliente_nome', 'Cliente': 'cliente_nome', 'cliente': 'cliente_nome',
+            'CNPJ': 'cnpj_cliente', 'cnpj': 'cnpj_cliente', 'CNPJ/CPF': 'cnpj_cliente',
+            'VALOR P': 'valor', 'Valor': 'valor', 'valor': 'valor', 'Valor da Conta': 'valor',
+            'VCTO': 'data_vencimento', 'Vencimento': 'data_vencimento', 'vencimento': 'data_vencimento', 'Data de Vencimento': 'data_vencimento',
+            'SITUAÇÃO': 'situacao', 'Situação': 'situacao', 'Situacao': 'situacao', 'situacao': 'situacao',
+            'PORTADOR': 'portador', 'Portador': 'portador', 'portador': 'portador',
+            'DATA': 'data_operacao',
+            'STATUS': 'status', 'Status': 'status', 'status': 'status',
+            'DIAS': 'dias_vencido',
+            'POSIÇÃO': 'posicao', 'Posição': 'posicao',
+            'RECOMPRADO': 'recomprado',
+            'CARTORIO': 'cartorio',
+            'OBSERVAÇÃO': 'observacoes', 'Observação': 'observacoes', 'Observacao': 'observacoes', 'Observações': 'observacoes',
+            'ACEITA TROCA  FACTORY': 'aceita_troca', 'ACEITA TROCA FACTORY': 'aceita_troca',
+            'COMISSÁRIA': 'comissaria', 'COMISSARIA': 'comissaria',
+            'Vendedor': 'vendedor', 'VENDEDOR': 'vendedor',
+            'Conta Corrente': 'conta_corrente_nome', 'CONTA CORRENTE': 'conta_corrente_nome',
+            'Categoria': 'categoria_nome', 'CATEGORIA': 'categoria_nome',
+            'Número do Documento': 'numero_documento', 'DOCUMENTO': 'numero_documento',
+            'Número do Boleto': 'numero_boleto', 'BOLETO': 'numero_boleto',
+            'Projeto': 'projeto', 'PROJETO': 'projeto',
+            'PIS': 'valor_pis', 'COFINS': 'valor_cofins', 'CSLL': 'valor_csll',
+            'IR': 'valor_ir', 'ISS': 'valor_iss', 'INSS': 'valor_inss'
+        };
+        
+        // Build column index mapping
+        const colMap = {}; // { dbField: colIndex }
+        for (let i = 0; i < headers.length; i++) {
+            const mapped = COLUMN_MAP[headers[i]];
+            if (mapped && !(mapped in colMap)) colMap[mapped] = i;
+        }
+        console.log('[IMPORTAR-CR] Mapeamento:', JSON.stringify(colMap));
+        
+        const getVal = (row, field) => {
+            if (!(field in colMap)) return null;
+            const v = row[colMap[field]];
+            return (v !== undefined && v !== null && v !== '') ? v : null;
+        };
+        
+        // Converter datas Excel
+        const parseData = (d) => {
+            if (!d) return null;
+            if (d instanceof Date) return d.toISOString().slice(0, 10);
+            if (typeof d === 'number') {
+                const dt = XLSX.SSF.parse_date_code(d);
+                if (dt) return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
+            }
+            const s = String(d).trim();
+            const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+            return null;
+        };
+        
+        const parseValor = (v) => {
+            if (!v) return 0;
+            if (typeof v === 'number') return v;
+            const s = String(v).replace(/[^\d,.-]/g, '').replace(',', '.');
+            return parseFloat(s) || 0;
+        };
+        
+        // Delete previous imports (importacao_excel + broken records with all key fields NULL)
+        const [delResult] = await pool.execute(`DELETE FROM contas_receber WHERE 
+            origem_integracao = 'importacao_excel' 
+            OR (empresa IS NULL AND nota_fiscal IS NULL AND cnpj_cliente IS NULL AND data_emissao IS NULL AND origem_integracao = 'manual')`);
+        console.log('[IMPORTAR-CR] Registros anteriores removidos:', delResult.affectedRows);
         
         let importados = 0;
         let erros = 0;
+        let erroDetalhe = [];
         
-        for (const row of rows) {
+        for (let i = headerRowIdx + 1; i < rawData.length; i++) {
+            const row = rawData[i];
+            if (!row || row.length === 0) continue;
+            
             try {
-                const empresa = row['Empresa'] || row['empresa'] || '';
-                const nfe = row['NFe'] || row['nfe'] || row['Nota Fiscal'] || '';
-                const parcela = row['Parcela'] || row['parcela'] || '';
-                const cliente = row['Cliente'] || row['cliente'] || '';
-                const cnpj = row['CNPJ'] || row['cnpj'] || row['CNPJ/CPF'] || '';
-                const emissao = row['Emissao'] || row['Emissão'] || row['emissao'] || '';
-                const vencimento = row['Vencimento'] || row['vencimento'] || '';
-                const valor = parseFloat(String(row['Valor'] || row['valor'] || '0').replace(/\./g,'').replace(',','.')) || 0;
-                const situacao = row['Situacao'] || row['Situação'] || row['situacao'] || '';
-                const portador = row['Portador'] || row['portador'] || '';
-                const statusVal = row['Status'] || row['status'] || 'a_vencer';
-                const obs = row['Observacao'] || row['Observação'] || row['observacao'] || '';
-                const pis = parseFloat(String(row['PIS'] || '0').replace(',','.')) || 0;
-                const cofins = parseFloat(String(row['COFINS'] || '0').replace(',','.')) || 0;
-                const csll = parseFloat(String(row['CSLL'] || '0').replace(',','.')) || 0;
-                const ir = parseFloat(String(row['IR'] || '0').replace(',','.')) || 0;
-                const iss = parseFloat(String(row['ISS'] || '0').replace(',','.')) || 0;
-                const inss = parseFloat(String(row['INSS'] || '0').replace(',','.')) || 0;
+                const cliente = getVal(row, 'cliente_nome');
+                const valorRaw = getVal(row, 'valor');
+                const valor = parseValor(valorRaw);
                 
-                // Converter datas Excel
-                const parseData = (d) => {
-                    if (!d) return null;
-                    if (typeof d === 'number') {
-                        const dt = XLSX.SSF.parse_date_code(d);
-                        return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
-                    }
-                    const s = String(d);
-                    const m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-                    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
-                    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
-                    return null;
-                };
+                // Skip empty/header/total rows
+                if (!cliente && !valor) continue;
+                if (String(cliente || '').toUpperCase() === 'CLIENTE') continue;
+                if (String(getVal(row, 'empresa') || '').toUpperCase() === 'DADOS DA NF') continue;
                 
-                const emissaoFinal = parseData(emissao) || new Date().toISOString().slice(0,10);
-                const vencimentoFinal = parseData(vencimento) || emissaoFinal;
+                const empresa = String(getVal(row, 'empresa') || '').trim();
+                const nfe = String(getVal(row, 'nota_fiscal') || '').trim();
+                const parcela = String(getVal(row, 'parcela_info') || '').trim();
+                const cnpj = String(getVal(row, 'cnpj_cliente') || '').trim();
+                const emissao = parseData(getVal(row, 'data_emissao'));
+                const vencimento = parseData(getVal(row, 'data_vencimento'));
+                const situacao = String(getVal(row, 'situacao') || '').trim();
+                const portador = String(getVal(row, 'portador') || '').trim();
+                const dataOp = parseData(getVal(row, 'data_operacao'));
+                const statusRaw = String(getVal(row, 'status') || '').trim().toUpperCase();
+                const diasRaw = getVal(row, 'dias_vencido');
+                const dias = diasRaw ? parseInt(diasRaw) || 0 : null;
+                const posicao = String(getVal(row, 'posicao') || '').trim();
+                const recomprado = String(getVal(row, 'recomprado') || '').trim();
+                const cartorio = String(getVal(row, 'cartorio') || '').trim();
+                const obs = String(getVal(row, 'observacoes') || '').trim();
+                const aceitaTroca = String(getVal(row, 'aceita_troca') || '').trim();
+                const comissaria = String(getVal(row, 'comissaria') || '').trim();
+                const tipoDoc = String(getVal(row, 'tipo_documento') || '').trim();
+                const vendedor = String(getVal(row, 'vendedor') || '').trim();
+                const contaCorrente = String(getVal(row, 'conta_corrente_nome') || '').trim();
+                const categoria = String(getVal(row, 'categoria_nome') || '').trim();
+                const numDocumento = String(getVal(row, 'numero_documento') || '').trim();
+                const numBoleto = String(getVal(row, 'numero_boleto') || '').trim();
+                const projeto = String(getVal(row, 'projeto') || '').trim();
+                
+                const pis = parseValor(getVal(row, 'valor_pis'));
+                const cofins = parseValor(getVal(row, 'valor_cofins'));
+                const csll = parseValor(getVal(row, 'valor_csll'));
+                const ir = parseValor(getVal(row, 'valor_ir'));
+                const iss = parseValor(getVal(row, 'valor_iss'));
+                const inss = parseValor(getVal(row, 'valor_inss'));
+                
+                // Map status: LIQUIDADO→liquidada, VENCIDO→vencida, A VENCER→a_vencer
+                let statusFinal = 'a_vencer';
+                if (statusRaw === 'LIQUIDADO' || statusRaw === 'LIQUIDADA') statusFinal = 'liquidada';
+                else if (statusRaw === 'VENCIDO' || statusRaw === 'VENCIDA') statusFinal = 'vencida';
+                else if (statusRaw === 'A VENCER') statusFinal = 'a_vencer';
+                else if (statusRaw === 'RECOMPRADO' || statusRaw === 'RECOMPRADA') statusFinal = 'liquidada';
+                else if (statusRaw) statusFinal = statusRaw.toLowerCase().replace(/ /g, '_');
+                
+                const emissaoFinal = emissao || new Date().toISOString().slice(0,10);
+                const vencimentoFinal = vencimento || emissaoFinal;
                 const valorLiquido = valor - pis - cofins - csll - ir - iss - inss;
                 
                 await pool.execute(
                     `INSERT INTO contas_receber 
                      (empresa, nota_fiscal, parcela_info, cliente_nome, cnpj_cliente,
-                      data_emissao, data_vencimento, valor, valor_total,
-                      situacao, portador, status, observacoes,
+                      data_emissao, data_vencimento, valor, tipo_documento,
+                      situacao, portador, data_operacao, status, dias_vencido,
+                      posicao, recomprado, cartorio, observacoes,
+                      aceita_troca, comissaria, vendedor,
+                      conta_corrente_nome, categoria_nome, numero_documento, numero_boleto, projeto,
                       valor_pis, valor_cofins, valor_csll, valor_ir, valor_iss, valor_inss,
                       valor_liquido, a_receber, origem_integracao)
-                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'importacao_excel')`,
-                    [empresa, nfe, parcela, cliente, cnpj,
-                     emissaoFinal, vencimentoFinal, valor, valor,
-                     situacao, portador, statusVal, obs,
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'importacao_excel')`,
+                    [empresa || null, nfe || null, parcela || null, cliente || null, cnpj || null,
+                     emissaoFinal, vencimentoFinal, valor, tipoDoc || null,
+                     situacao || null, portador || null, dataOp, statusFinal, dias,
+                     posicao || null, recomprado || null, cartorio || null, obs || null,
+                     aceitaTroca || null, comissaria || null, vendedor || null,
+                     contaCorrente || null, categoria || tipoDoc || null, numDocumento || null, numBoleto || null, projeto || null,
                      pis, cofins, csll, ir, iss, inss,
                      valorLiquido, valorLiquido]
                 );
                 importados++;
             } catch (e) {
                 erros++;
-                console.error('Erro importando linha:', e.message);
+                erroDetalhe.push({ linha: i + 1, erro: e.message });
+                console.error(`Erro importando linha ${i + 1}:`, e.message);
             }
         }
         
         // Limpar arquivo temporário
         try { fs.unlinkSync(req.file.path); } catch(e) {}
         
-        res.json({ success: true, importados, erros, sheet: sheetName });
+        console.log('[IMPORTAR-CR] Concluído:', importados, 'importados |', erros, 'erros | Aba:', sheetName);
+        res.json({ success: true, importados, erros, sheet: sheetName, erroDetalhe: erroDetalhe.slice(0, 10) });
     } catch (error) {
         console.error('❌ Erro ao importar Excel:', error);
         res.status(500).json({ error: 'Erro ao importar arquivo', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
@@ -1075,7 +1207,8 @@ app.get('/api/financeiro/fluxo-caixa', authenticateToken, async (req, res) => {
 });
 
 // Fluxo de caixa - Resumo (próximos N dias)
-app.get('/api/financeiro/fluxo-caixa-resumo', authenticateToken, async (req, res) => {
+// Supports both /fluxo-caixa-resumo and /fluxo-caixa/resumo
+app.get(['/api/financeiro/fluxo-caixa-resumo', '/api/financeiro/fluxo-caixa/resumo'], authenticateToken, async (req, res) => {
     try {
         const periodo = req.query.periodo || '30d';
         const dias = parseInt(periodo) || 30;
