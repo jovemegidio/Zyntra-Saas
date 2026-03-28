@@ -298,19 +298,20 @@ router.post('/movimentacao', async (req, res) => {
         }
         
         // Calcular nova quantidade
+        // AUDIT-FIX SEC-003: Use parsed qtdNum (not raw string quantidade) to prevent string concatenation
         let nova_quantidade;
         if (tipo_movimentacao === 'entrada') {
-            nova_quantidade = quantidade_atual + quantidade;
+            nova_quantidade = quantidade_atual + qtdNum;
         } else {
-            if (quantidade_atual < quantidade) {
+            if (quantidade_atual < qtdNum) {
                 await connection.rollback();
                 return res.status(400).json({ 
                     error: 'Quantidade insuficiente em estoque',
                     estoque_atual: quantidade_atual,
-                    quantidade_solicitada: quantidade
+                    quantidade_solicitada: qtdNum
                 });
             }
-            nova_quantidade = quantidade_atual - quantidade;
+            nova_quantidade = quantidade_atual - qtdNum;
         }
         
         // Atualizar estoque
@@ -329,7 +330,7 @@ router.post('/movimentacao', async (req, res) => {
             [
                 material_id,
                 tipo_movimentacao,
-                quantidade,
+                qtdNum,
                 quantidade_atual,
                 nova_quantidade,
                 motivo,

@@ -116,6 +116,14 @@ app.use(express.json({ limit: '2mb' })); // SEGURANÇA: Limite de payload
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+// AUDIT-FIX SEC-001: Block server-side source files from static serving
+app.use((req, res, next) => {
+    const blocked = ['/server.js', '/database.js', '/package.json', '/package-lock.json', '/.env'];
+    if (blocked.includes(req.path.toLowerCase()) || req.path.toLowerCase().startsWith('/api/')) {
+        return res.status(404).end();
+    }
+    next();
+});
 app.use(express.static(__dirname));
 app.use('/css', express.static(path.join(__dirname, '../../css')));
 app.use('/js', express.static(path.join(__dirname, '../../js')));
@@ -193,7 +201,7 @@ app.use('/api/compras/centros-custo', authenticateToken, authorizeCompras, centr
 
 // ============ NF-e ENTRADA & RECEBIMENTO ROUTES ============
 // Rota de recebimento via pedido (match frontend: POST /api/compras/pedidos/:id/receber)
-app.post('/api/compras/pedidos/:id/receber', authenticateToken, async (req, res) => {
+app.post('/api/compras/pedidos/:id/receber', authenticateToken, authorizeCompras, async (req, res) => {
     const connection = await mysqlPool.getConnection();
     try {
         await connection.beginTransaction();
@@ -336,8 +344,9 @@ app.post('/api/compras/nf-entrada/importar-xml-texto', authenticateToken, async 
 
 // Dashboard endpoint - COM AUTENTICAÇÃO
 app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
+    let conn;
     try {
-        const conn = await mysqlPool.getConnection();
+        conn = await mysqlPool.getConnection();
 
         // Total de pedidos e valor
         const [totais] = await conn.query(`
@@ -434,6 +443,7 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             atividades_recentes: atividades
         });
     } catch (error) {
+        if (conn) conn.release();
         console.error('Erro ao buscar dashboard:', error);
         // Fallback com dados básicos
         res.json({
@@ -451,23 +461,11 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
     }
 });
 
-// AUDIT-FIX ARCH-005: Added authenticateToken + requireComprasPermission('criar')
-app.post('/api/pedidos', authenticateToken, requireComprasPermission('criar'), (req, res) => {
-    const pedido = req.body;
-    console.log('Novo pedido recebido:', pedido);
-
-    // Simular salvamento do pedido
-    const novoPedido = {
-        id: 'PC-' + Date.now().toString().slice(-6),
-        ...pedido,
-        dataCriacao: new Date().toISOString(),
-        status: 'pendente'
-    };
-
-    res.json({
-        success: true,
-        message: 'Pedido criado com sucesso',
-        pedido: novoPedido
+// AUDIT-FIX SEC-002: Fake endpoint removed — never persisted data. Use /api/compras/pedidos
+app.post('/api/pedidos', authenticateToken, (req, res) => {
+    res.status(410).json({
+        success: false,
+        message: 'Endpoint descontinuado. Use POST /api/compras/pedidos'
     });
 });
 

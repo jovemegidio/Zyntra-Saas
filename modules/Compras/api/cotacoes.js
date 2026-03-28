@@ -297,6 +297,27 @@ router.put('/:id/selecionar-vencedor', async (req, res) => {
             return res.status(400).json({ error: 'ID da proposta é obrigatório' });
         }
         
+        // AUDIT-FIX HIGH-003: Verify cotação is open and proposta belongs to this cotação
+        const [cotacaoCheck] = await connection.query(
+            'SELECT status FROM cotacoes WHERE id = ?', [req.params.id]
+        );
+        if (cotacaoCheck.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Cotação não encontrada' });
+        }
+        if (cotacaoCheck[0].status !== 'aberta' && cotacaoCheck[0].status !== 'em_analise') {
+            await connection.rollback();
+            return res.status(409).json({ error: 'Cotação não está aberta para seleção' });
+        }
+        
+        const [propostaCheck] = await connection.query(
+            'SELECT id FROM propostas_cotacao WHERE id = ? AND cotacao_id = ?', [proposta_id, req.params.id]
+        );
+        if (propostaCheck.length === 0) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Proposta não pertence a esta cotação' });
+        }
+        
         // Marcar proposta como vencedora
         await connection.query(
             `UPDATE propostas_cotacao SET 

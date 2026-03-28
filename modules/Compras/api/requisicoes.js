@@ -289,11 +289,15 @@ router.put('/:id/aprovar', async (req, res) => {
         const db = getDatabase();
         const { aprovador, observacoes_aprovacao } = req.body;
         
+        // AUDIT-FIX HIGH-004: Store approval audit trail (aprovador + observacoes)
         const [result] = await db.query(
             `UPDATE requisicoes_compras SET 
-                status = 'aprovada'
+                status = 'aprovada',
+                aprovador = ?,
+                data_aprovacao = NOW(),
+                observacoes_aprovacao = ?
             WHERE id = ? AND status = 'pendente'`,
-            [req.params.id]
+            [aprovador || req.user?.nome || null, observacoes_aprovacao || null, req.params.id]
         );
         
         if (result.affectedRows === 0) {
@@ -320,11 +324,15 @@ router.put('/:id/reprovar', async (req, res) => {
             return res.status(400).json({ error: 'Motivo da reprovação é obrigatório' });
         }
         
+        // AUDIT-FIX HIGH-004: Store rejection audit trail (aprovador + motivo)
         const [result] = await db.query(
             `UPDATE requisicoes_compras SET 
-                status = 'rejeitada'
+                status = 'rejeitada',
+                aprovador = ?,
+                data_aprovacao = NOW(),
+                motivo_reprovacao = ?
             WHERE id = ? AND status = 'pendente'`,
-            [req.params.id]
+            [aprovador || req.user?.nome || null, motivo_reprovacao, req.params.id]
         );
         
         if (result.affectedRows === 0) {

@@ -120,6 +120,14 @@ router.put('/:id', async (req, res) => {
             observacoes, ativo
         } = req.body;
         
+        // AUDIT-FIX HIGH-001: Validate required fields to prevent wiping data to NULL
+        if (!razao_social || !razao_social.trim()) {
+            return res.status(400).json({ error: 'Razão social é obrigatória' });
+        }
+        if (!cnpj || !cnpj.trim()) {
+            return res.status(400).json({ error: 'CNPJ é obrigatório' });
+        }
+        
         const result = await run(`
             UPDATE fornecedores SET
                 razao_social = ?, nome_fantasia = ?, cnpj = ?, ie = ?,

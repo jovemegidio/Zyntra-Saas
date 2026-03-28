@@ -351,11 +351,13 @@ router.post('/:id/cancelar', async (req, res) => {
             
             for (const item of itens) {
                 if (item.material_id) {
+                    // AUDIT-FIX SEC-004: Use received qty (not ordered qty) for stock reversal
+                    const qtdReverter = item.quantidade_recebida || item.quantidade;
                     await connection.query(`
                         UPDATE estoque SET 
                             quantidade_atual = quantidade_atual - ?
                         WHERE material_id = ?
-                    `, [item.quantidade, item.material_id]);
+                    `, [qtdReverter, item.material_id]);
                     
                     // Registrar movimentação de estorno
                     try {
@@ -364,7 +366,7 @@ router.post('/:id/cancelar', async (req, res) => {
                                 material_id, tipo_movimentacao, quantidade, 
                                 motivo, documento, data_movimentacao
                             ) VALUES (?, 'saida', ?, 'Cancelamento de recebimento', ?, NOW())
-                        `, [item.material_id, item.quantidade, `Pedido #${pedidoId} - ${motivo || 'Cancelado'}`]);
+                        `, [item.material_id, qtdReverter, `Pedido #${pedidoId} - ${motivo || 'Cancelado'}`]);
                     } catch (e) {
                         console.log('Erro ao registrar movimentação de estorno:', e.message);
                     }

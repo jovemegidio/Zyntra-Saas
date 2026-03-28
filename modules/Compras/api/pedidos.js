@@ -240,6 +240,18 @@ router.put('/:id', async (req, res) => {
         let valor_total = 0;
         
         if (itens && itens.length > 0) {
+            // AUDIT-FIX HIGH-002: Validate items on update (same as POST)
+            for (const item of itens) {
+                if (!Number.isFinite(item.quantidade) || item.quantidade <= 0) {
+                    await connection.rollback();
+                    return res.status(400).json({ error: `Quantidade inválida: ${item.quantidade}. Deve ser > 0` });
+                }
+                if (!Number.isFinite(item.preco_unitario) || item.preco_unitario <= 0) {
+                    await connection.rollback();
+                    return res.status(400).json({ error: `Preço unitário inválido: ${item.preco_unitario}. Deve ser > 0` });
+                }
+            }
+            
             valor_total = itens.reduce((sum, item) => sum + (item.quantidade * item.preco_unitario), 0);
             
             // Deletar itens antigos
@@ -279,8 +291,8 @@ router.put('/:id', async (req, res) => {
             [
                 fornecedor_id,
                 data_entrega_prevista,
-                valor_total || null,
-                valor_total || null,
+                valor_total !== undefined ? valor_total : null,
+                valor_total !== undefined ? valor_total : null,
                 observacoes,
                 req.params.id
             ]

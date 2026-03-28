@@ -766,7 +766,9 @@ app.post('/api/auth/verify-email', async (req, res) => {
         if (!user) {
             console.log(`[PASSWORD_RESET] email not found: ${email}`);
             // AUDIT-FIX MOD-002: Generic response to prevent user enumeration
-            return res.json({ message: 'Se o email existir no sistema, as instruções serão enviadas.', resetToken: 'invalid' });
+            // AUDIT-FIX SEC-006: Use random token to prevent enumeration via token value comparison
+            const fakeToken = require('crypto').randomBytes(32).toString('hex');
+            return res.json({ message: 'Se o email existir no sistema, as instruções serão enviadas.', resetToken: fakeToken });
         }
 
         // SECURITY: Criar token temporário para o fluxo de reset
@@ -8146,12 +8148,10 @@ app.post('/api/pcp/apontamentos', authRequired, async (req, res) => {
 
         // Validações
         if (!ordem_producao_id || !etapa_id) {
-            connection.release();
             return res.status(400).json({ success: false, message: 'OP e Etapa são obrigatórios' });
         }
 
         if (!quantidade_produzida || quantidade_produzida <= 0) {
-            connection.release();
             return res.status(400).json({ success: false, message: 'Quantidade produzida deve ser maior que zero' });
         }
 
@@ -8935,12 +8935,21 @@ function proxyToMainApp(req, res) {
     proxy.on('error', () => res.status(502).json({ error: 'Main app unavailable' }));
     req.pipe(proxy, { end: true });
 }
-app.get('/api/pcp/pedidos/:id/materiais', proxyToMainApp);
-app.get('/api/pcp/ordens-producao/:id/itens', proxyToMainApp);
-app.get('/api/pcp/ordens-producao/:id/etiqueta-bobina', proxyToMainApp);
-app.get('/api/pcp/ordens-producao/:id/etiqueta-produto', proxyToMainApp);
+// AUDIT-FIX SEC-005: Added authRequired to proxy routes (were completely unauthenticated)
+app.get('/api/pcp/pedidos/:id/materiais', authRequired, proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/itens', authRequired, proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/etiqueta-bobina', authRequired, proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/etiqueta-produto', authRequired, proxyToMainApp);
 
 // Serve static files (after ALL API routes) so API endpoints are not shadowed by static fallback
+// AUDIT-FIX SEC-001: Block server-side source files from being served as static assets
+app.use((req, res, next) => {
+    const blocked = ['/server.js', '/database.js', '/package.json', '/package-lock.json', '/.env'];
+    if (blocked.includes(req.path.toLowerCase()) || req.path.toLowerCase().startsWith('/api/')) {
+        return res.status(404).end();
+    }
+    next();
+});
 app.use(express.static(__dirname, { dotfiles: 'deny', index: false }));
 
 // API JSON 404 handler: make sure any unmatched /api routes return JSON (not HTML)
