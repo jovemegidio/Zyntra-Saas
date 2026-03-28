@@ -804,6 +804,12 @@
                             <option value="">Todos</option>
                         </select>
                     </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-folder"></i> Categoria</label>
+                        <select class="filter-input" id="filtro-categoria-select" onchange="filtrarContas()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
                     <div class="filter-group" style="align-self:end;">
                         <button class="btn-limpar-filtros" onclick="limparFiltros()">
                             <i class="fas fa-eraser"></i> Limpar
@@ -1205,10 +1211,10 @@
                 const hl = (text) => { if (!pesquisa || !text) return text || '-'; try { const escaped = pesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const regex = new RegExp(`(${escaped})`, 'gi'); const safe = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return safe.replace(regex, '<span class="highlight">$1</span>'); } catch(e) { return String(text) || '-'; } };
                 const checked = contasSelecionadas.has(conta.id) ? 'checked' : '';
                 const isPendente = status === 'pendente' || status === 'vencido' || status === 'parcial';
-                return `<tr>
+                return `<tr style="cursor:pointer;" ondblclick="visualizarConta(${conta.id})">
                     <td style="text-align:center;">${isPendente ? `<input type="checkbox" class="cb-conta" data-id="${conta.id}" data-valor="${parseFloat(conta.valor_total || conta.valor) || 0}" ${checked} onchange="toggleSelectConta(this)">` : ''}</td>
                     <td>#${conta.id}</td>
-                    <td><strong>${hl(conta.descrição || 'Sem Descrição')}</strong></td>
+                    <td><strong>${hl(conta.descrição || conta.descricao || 'Sem Descrição')}</strong></td>
                     <td>${hl(conta.fornecedor_nome || '-')}</td>
                     <td>${formatarDataSegura(conta.data_vencimento || conta.vencimento)}</td>
                     <td><strong>R$ ${(parseFloat(conta.valor_total || conta.valor) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
@@ -1249,7 +1255,7 @@
         async function carregarCategorias() {
             try {
                 const response = await fetch('/api/financeiro/categorias', { credentials: 'include' });
-                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const select = document.getElementById('categoria-id'); select.innerHTML = '<option value="">Selecione...</option>' + categorias.filter(c => c.tipo === 'despesa').map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); }
+                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const despesas = categorias.filter(c => c.tipo === 'despesa'); const select = document.getElementById('categoria-id'); select.innerHTML = '<option value="">Selecione...</option>' + despesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); const selectFiltro = document.getElementById('filtro-categoria-select'); if (selectFiltro) selectFiltro.innerHTML = '<option value="">Todas</option>' + despesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); }
             } catch (error) { console.error('Erro ao carregar categorias:', error); }
         }
 
@@ -1364,6 +1370,8 @@
             }
             if (status) filtradas = filtradas.filter(c => c.status === status);
             if (fornecedorId) filtradas = filtradas.filter(c => c.fornecedor_id == fornecedorId);
+            const categoriaId = document.getElementById('filtro-categoria-select')?.value;
+            if (categoriaId) filtradas = filtradas.filter(c => c.categoria_id == categoriaId);
             if (pesquisa) filtradas = filtradas.filter(c => (c.descrição || '').toLowerCase().includes(pesquisa) || (c.fornecedor_nome || '').toLowerCase().includes(pesquisa) || (c.valor?.toString() || '').includes(pesquisa) || (c.id?.toString() || '').includes(pesquisa) || (c.numero_documento || '').toLowerCase().includes(pesquisa));
             renderizarTabela(filtradas, pesquisa);
         }
@@ -1377,7 +1385,7 @@
             pesquisaTimeout = setTimeout(() => filtrarContas(), 300);
         }
         function limparPesquisa() { document.getElementById('pesquisa-global').value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value = ''; document.getElementById('filtro-periodo').value = 'todas'; document.getElementById('filtro-status').value = ''; document.getElementById('filtro-fornecedor-select').value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; renderizarTabela(contas); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value = ''; document.getElementById('filtro-periodo').value = 'todas'; document.getElementById('filtro-status').value = ''; document.getElementById('filtro-fornecedor-select').value = ''; var catFiltro = document.getElementById('filtro-categoria-select'); if (catFiltro) catFiltro.value = ''; document.querySelector('.btn-clear-search').style.display = 'none'; renderizarTabela(contas); }
 
         // ===== VISUALIZAR =====
         let contaVisualizando = null;

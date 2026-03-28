@@ -721,12 +721,12 @@
                 const receber = await rReceber.json();
                 const itensPagar = (pagar.data || []).map(c => ({
                     id: 'p_' + c.id, dbId: c.id, tabela: 'contas_pagar',
-                    data: c.data_vencimento || c.data_emissao, descrição: c.descrição || c.fornecedor,
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descrição || c.fornecedor_nome || c.fornecedor || ('Conta #' + c.id),
                     tipo: 'saida', valor: Number(c.valor), conciliado: false
                 }));
                 const itensReceber = (receber.data || []).map(c => ({
                     id: 'r_' + c.id, dbId: c.id, tabela: 'contas_receber',
-                    data: c.data_vencimento || c.data_emissao, descrição: c.descrição || c.cliente,
+                    data: c.data_vencimento || c.data_emissao, descrição: c.descricao || c.descrição || c.cliente_nome || c.cliente || ('Conta #' + c.id),
                     tipo: 'entrada', valor: Number(c.valor), conciliado: false
                 }));
                 lancamentosSistema = [...itensPagar, ...itensReceber].sort((a, b) => new Date(String(b.data).slice(0,10) + 'T00:00:00') - new Date(String(a.data).slice(0,10) + 'T00:00:00'));

@@ -628,9 +628,10 @@
         }
 
         /* MODAL - Classes Padrão (Padrão SaaS Empresarial) */
-        -webkit-backdrop-filter: blur(8px); }
-        .modal-overlay-padrão { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); }
+        .modal-overlay-padrão { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .modal-overlay-padrão.active { display: flex !important; }
+        [id="modal-orçamento"] { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 99999; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        [id="modal-orçamento"].active { display: flex !important; }
         .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 24px !important; width: 100% !important; max-width: 650px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeInOrcamentos 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
         @keyframes modalFadeInOrcamentos { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
         .modal-header-padrão { padding: 0 !important; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important; color: white !important; position: relative !important; overflow: hidden !important; flex-shrink: 0 !important; border-radius: 24px 24px 0 0 !important; }

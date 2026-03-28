@@ -1325,9 +1325,26 @@
                 var c = contas.find(function(x){return x.id===id;}); if (!c) return;
                 document.getElementById('modal-titulo').textContent = 'Editar Conta a Receber';
                 document.getElementById('conta-id').value = c.id;
-                document.getElementById('descricao').value = c.descricao || '';
-                document.getElementById('cliente-id').value = c.cliente_id || '';
-                document.getElementById('categoria-id').value = c.categoria_id || '';
+                document.getElementById('descricao').value = c.descricao || [c.cliente_nome, c.nota_fiscal ? 'NFe ' + c.nota_fiscal : '', c.parcela_info].filter(Boolean).join(' - ') || '';
+                // Match cliente by ID or by name fallback
+                var clienteId = c.cliente_id || '';
+                if (!clienteId && c.cliente_nome) {
+                    var selCli = document.getElementById('cliente-id');
+                    for (var ii = 0; ii < selCli.options.length; ii++) {
+                        if (selCli.options[ii].text.trim().toLowerCase() === c.cliente_nome.trim().toLowerCase()) { clienteId = selCli.options[ii].value; break; }
+                    }
+                }
+                document.getElementById('cliente-id').value = clienteId;
+                // Match categoria by ID or by name fallback
+                var catId = c.categoria_id || '';
+                if (!catId && (c.categoria_nome || c.categoria)) {
+                    var catNome = (c.categoria_nome || c.categoria || '').trim().toLowerCase();
+                    var selCat = document.getElementById('categoria-id');
+                    for (var jj = 0; jj < selCat.options.length; jj++) {
+                        if (selCat.options[jj].text.trim().toLowerCase() === catNome) { catId = selCat.options[jj].value; break; }
+                    }
+                }
+                document.getElementById('categoria-id').value = catId;
                 var val = parseFloat(c.valor_total || c.valor || 0);
                 document.getElementById('conta-valor').value = val ? val.toFixed(2).replace('.',',') : '';
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];

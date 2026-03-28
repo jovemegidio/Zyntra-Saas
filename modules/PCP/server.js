@@ -8920,6 +8920,26 @@ function formatarDuracaoServer(segundos) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
+// --- Proxy missing routes to main app (port 3003) ---
+// These routes exist in pcp-routes.js (main app) but not here
+const httpProxy = require('http');
+function proxyToMainApp(req, res) {
+    const options = {
+        hostname: '127.0.0.1', port: 3003, path: req.originalUrl,
+        method: req.method, headers: { ...req.headers, host: '127.0.0.1:3003' }
+    };
+    const proxy = httpProxy.request(options, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res, { end: true });
+    });
+    proxy.on('error', () => res.status(502).json({ error: 'Main app unavailable' }));
+    req.pipe(proxy, { end: true });
+}
+app.get('/api/pcp/pedidos/:id/materiais', proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/itens', proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/etiqueta-bobina', proxyToMainApp);
+app.get('/api/pcp/ordens-producao/:id/etiqueta-produto', proxyToMainApp);
+
 // Serve static files (after ALL API routes) so API endpoints are not shadowed by static fallback
 app.use(express.static(__dirname, { dotfiles: 'deny', index: false }));
 

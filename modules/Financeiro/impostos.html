@@ -604,11 +604,11 @@
 
             tbody.innerHTML = dados.map(i => `
                 <tr>
-                    <td><strong>${i.código}</strong></td>
+                    <td><strong>${i.codigo || i.código || '-'}</strong></td>
                     <td>${i.nome}</td>
-                    <td><span class="badge badge-purple">${i.tipo.charAt(0).toUpperCase() + i.tipo.slice(1)}</span></td>
+                    <td><span class="badge badge-purple">${(i.tipo || '').charAt(0).toUpperCase() + (i.tipo || '').slice(1)}</span></td>
                     <td><strong>${i.aliquota}%</strong></td>
-                    <td>${formatarBase(i.base)}</td>
+                    <td>${formatarBase(i.base || i.base_calculo)}</td>
                     <td><span class="badge ${i.ativo ? 'badge-success' : 'badge-danger'}">${i.ativo ? 'Ativo' : 'Inativo'}</span></td>
                     <td>
                         <button class="btn-action view" title="Ver" onclick="verImposto(${i.id})"><i class="fas fa-eye"></i></button>

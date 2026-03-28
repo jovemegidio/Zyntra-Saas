@@ -47,27 +47,17 @@
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260325">
     <style>
-        .report-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 14px; }
-        .option-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; cursor: pointer; transition: all 0.22s ease; display: flex; flex-direction: column; gap: 10px; }
-        .option-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.10); border-color: #93c5fd; }
-        .option-card-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: #eff6ff; color: #2563eb; flex-shrink: 0; }
-        .option-card-icon.green { background: #f0fdf4; color: #16a34a; }
-        .option-card-icon.yellow { background: #fefce8; color: #ca8a04; }
-        .option-card-icon.purple { background: #faf5ff; color: #9333ea; }
-        .option-card-icon.cyan { background: #ecfeff; color: #0891b2; }
-        .option-card-icon.red { background: #fef2f2; color: #ef4444; }
-        .option-card-icon.orange { background: #fff7ed; color: #ea580c; }
-        .option-card-title { font-size: 13px; font-weight: 600; color: #1e293b; line-height: 1.3; }
-        .option-card-desc { font-size: 11px; color: #64748b; line-height: 1.4; }
-        .section-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .quick-action { text-align: left; flex-direction: row; gap: 14px; padding: 18px; }
+        .quick-action .action-icon { width: 38px; height: 38px; border-radius: 8px; font-size: 15px; flex-shrink: 0; }
+        .quick-action .action-text { display: flex; flex-direction: column; gap: 3px; }
+        .quick-action .action-text span:first-child { font-size: 13px; font-weight: 600; color: #111827; }
+        .quick-action .action-desc { font-size: 11px; color: #6b7280; line-height: 1.4; font-weight: 400; }
         .modal-overlay { display: none; }
         .modal-overlay.active { display: flex; }
         .report-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
         .summary-card { background: #f9fafb; border-radius: 6px; padding: 14px; text-align: center; }
         .summary-card .label { font-size: 11px; color: #6b7280; text-transform: uppercase; }
         .summary-card .value { font-size: 20px; font-weight: 700; color: var(--fat-primary, #10b981); margin-top: 4px; }
-        .card-header h3, .card-header { display: flex; align-items: center; gap: 8px; }
-        .card-header .section-badge { margin-left: auto; }
     </style>
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260325">
@@ -145,123 +135,154 @@
                 </div>
             </div>
 
-            <!-- Section 1: Ordens de Serviço (5 templates) -->
-            <div class="card fade-in">
+            <!-- Section 1: Ordens de Serviço -->
+            <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-tools"></i> Ordens de Serviço
-                    <span class="section-badge">5 relatórios</span>
+                    <i class="fas fa-clipboard-list"></i> Ordens de Serviço
                 </div>
                 <div class="card-body">
-                    <div class="report-grid">
-                        <div class="option-card" onclick="gerarRelatorio('os_abertas')">
-                            <div class="option-card-icon"><i class="fas fa-folder-open"></i></div>
-                            <div class="option-card-title">OS Abertas</div>
-                            <div class="option-card-desc">Ordens abertas com foco em faturamento potencial</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('os_concluidas')">
-                            <div class="option-card-icon green"><i class="fas fa-check-circle"></i></div>
-                            <div class="option-card-title">OS Concluídas</div>
-                            <div class="option-card-desc">Ordens finalizadas no período</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('os_pendentes')">
-                            <div class="option-card-icon yellow"><i class="fas fa-clock"></i></div>
-                            <div class="option-card-title">OS Pendentes</div>
-                            <div class="option-card-desc">Aguardando aprovação ou peças</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('os_por_tecnico')">
-                            <div class="option-card-icon cyan"><i class="fas fa-user-cog"></i></div>
-                            <div class="option-card-title">OS por Técnico</div>
-                            <div class="option-card-desc">Desempenho de faturamento por técnico</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('faturamento_os')">
-                            <div class="option-card-icon purple"><i class="fas fa-dollar-sign"></i></div>
-                            <div class="option-card-title">Faturamento de OS</div>
-                            <div class="option-card-desc">Receita gerada pelas ordens de serviço</div>
-                        </div>
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('os_abertas')">
+                            <div class="action-icon"><i class="fas fa-clipboard"></i></div>
+                            <div class="action-text">
+                                <span>OS Abertas</span>
+                                <span class="action-desc">Ordens de serviço em aberto</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_periodo')">
+                            <div class="action-icon"><i class="fas fa-calendar"></i></div>
+                            <div class="action-text">
+                                <span>OS por Período</span>
+                                <span class="action-desc">Filtrar por data de abertura</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_tecnico')">
+                            <div class="action-icon"><i class="fas fa-user-cog"></i></div>
+                            <div class="action-text">
+                                <span>OS por Técnico</span>
+                                <span class="action-desc">Agrupado por técnico responsável</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_status')">
+                            <div class="action-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="action-text">
+                                <span>OS por Status</span>
+                                <span class="action-desc">Distribuião por status atual</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 2: Contratos (5 templates) -->
-            <div class="card fade-in">
+            <!-- Section 2: Contratos de Serviço -->
+            <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-file-signature"></i> Contratos
-                    <span class="section-badge">5 relatórios</span>
+                    <i class="fas fa-file-contract"></i> Contratos de Serviço
                 </div>
                 <div class="card-body">
-                    <div class="report-grid">
-                        <div class="option-card" onclick="gerarRelatorio('contratos_ativos')">
-                            <div class="option-card-icon green"><i class="fas fa-file-alt"></i></div>
-                            <div class="option-card-title">Contratos Ativos</div>
-                            <div class="option-card-desc">Contratos ativos acompanhados pelo faturamento</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('contratos_vencer')">
-                            <div class="option-card-icon yellow"><i class="fas fa-calendar-check"></i></div>
-                            <div class="option-card-title">Contratos a Vencer</div>
-                            <div class="option-card-desc">Próximos vencimentos de contratos</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('contratos_vencidos')">
-                            <div class="option-card-icon red"><i class="fas fa-calendar-times"></i></div>
-                            <div class="option-card-title">Contratos Vencidos</div>
-                            <div class="option-card-desc">Contratos já vencidos sem renovação</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('contratos_clientes')">
-                            <div class="option-card-icon cyan"><i class="fas fa-users"></i></div>
-                            <div class="option-card-title">Contratos por Cliente</div>
-                            <div class="option-card-desc">Visão contratual consolidada por cliente</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('receita_contratos')">
-                            <div class="option-card-icon"><i class="fas fa-chart-line"></i></div>
-                            <div class="option-card-title">Receita de Contratos</div>
-                            <div class="option-card-desc">Receita contratual, recorrência e expansão</div>
-                        </div>
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_ativos')">
+                            <div class="action-icon"><i class="fas fa-file-signature"></i></div>
+                            <div class="action-text">
+                                <span>Contratos Ativos</span>
+                                <span class="action-desc">Contratos vigentes</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_vencimento')">
+                            <div class="action-icon"><i class="fas fa-clock"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Vencimento</span>
+                                <span class="action-desc">Próximos a vencer</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_valor')">
+                            <div class="action-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Valor</span>
+                                <span class="action-desc">Ordenados por valor mensal</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_cliente')">
+                            <div class="action-icon"><i class="fas fa-users"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Cliente</span>
+                                <span class="action-desc">Agrupado por cliente</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('renovacoes')">
+                            <div class="action-icon"><i class="fas fa-redo"></i></div>
+                            <div class="action-text">
+                                <span>Renovações Pendentes</span>
+                                <span class="action-desc">Contratos para renovação</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_cancelados')">
+                            <div class="action-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="action-text">
+                                <span>Contratos Cancelados</span>
+                                <span class="action-desc">Histórico de cancelamentos</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('receita_recorrente')">
+                            <div class="action-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="action-text">
+                                <span>Receita Recorrente</span>
+                                <span class="action-desc">MRR e evoluão mensal</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- Section 3: Faturamento & NF-e (7 templates) -->
-            <div class="card fade-in">
+            <!-- Section 3: Faturamento -->
+            <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-file-invoice-dollar"></i> Faturamento &amp; NF-e
-                    <span class="section-badge">7 relatórios</span>
+                    <i class="fas fa-chart-bar"></i> Faturamento
                 </div>
                 <div class="card-body">
-                    <div class="report-grid">
-                        <div class="option-card" onclick="gerarRelatorio('nfe_emitidas')">
-                            <div class="option-card-icon"><i class="fas fa-file-invoice"></i></div>
-                            <div class="option-card-title">NF-e Emitidas</div>
-                            <div class="option-card-desc">Notas fiscais emitidas — conferência e volume</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('nfe_canceladas')">
-                            <div class="option-card-icon red"><i class="fas fa-ban"></i></div>
-                            <div class="option-card-title">NF-e Canceladas</div>
-                            <div class="option-card-desc">Notas fiscais canceladas no período</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('nfe_por_cliente')">
-                            <div class="option-card-icon cyan"><i class="fas fa-user-tag"></i></div>
-                            <div class="option-card-title">NF-e por Cliente</div>
-                            <div class="option-card-desc">Notas agrupadas por cliente</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('faturamento_mensal')">
-                            <div class="option-card-icon green"><i class="fas fa-chart-bar"></i></div>
-                            <div class="option-card-title">Faturamento Mensal</div>
-                            <div class="option-card-desc">Evolução mensal da receita faturada</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('impostos')">
-                            <div class="option-card-icon purple"><i class="fas fa-percentage"></i></div>
-                            <div class="option-card-title">Impostos de Faturamento</div>
-                            <div class="option-card-desc">ICMS, IPI, PIS, COFINS recolhidos</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('logistica_nfe')">
-                            <div class="option-card-icon orange"><i class="fas fa-truck"></i></div>
-                            <div class="option-card-title">Logística de NF-e</div>
-                            <div class="option-card-desc">Entregas, expedição e rastreamento</div>
-                        </div>
-                        <div class="option-card" onclick="gerarRelatorio('inadimplencia')">
-                            <div class="option-card-icon red"><i class="fas fa-exclamation-triangle"></i></div>
-                            <div class="option-card-title">Inadimplência</div>
-                            <div class="option-card-desc">Títulos em atraso e devedores</div>
-                        </div>
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('faturamento_mensal')">
+                            <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="action-text">
+                                <span>Faturamento Mensal</span>
+                                <span class="action-desc">Total faturado por mês</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('nfe_status')">
+                            <div class="action-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="action-text">
+                                <span>NFe por Status</span>
+                                <span class="action-desc">Autorizadas, canceladas, etc</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('top_clientes')">
+                            <div class="action-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="action-text">
+                                <span>Top Clientes</span>
+                                <span class="action-desc">Maiores compradores</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('produtos_vendidos')">
+                            <div class="action-icon"><i class="fas fa-box"></i></div>
+                            <div class="action-text">
+                                <span>Produtos Mais Vendidos</span>
+                                <span class="action-desc">Ranking de produtos</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('impostos')">
+                            <div class="action-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="action-text">
+                                <span>Impostos Recolhidos</span>
+                                <span class="action-desc">ICMS, IPI, PIS, COFINS</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('comparativo_anual')">
+                            <div class="action-icon"><i class="fas fa-chart-area"></i></div>
+                            <div class="action-text">
+                                <span>Comparativo Anual</span>
+                                <span class="action-desc">Ano atual vs anterior</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -341,26 +362,6 @@ function showAlert(msg, type) {
 
 var dadosRelatorioAtual = null;
 
-var relatorioNomes = {
-    os_abertas: 'OS Abertas Faturamento', os_concluidas: 'OS Concluídas', os_pendentes: 'OS Pendentes',
-    os_por_tecnico: 'OS por Técnico', faturamento_os: 'Faturamento de OS',
-    contratos_ativos: 'Contratos Ativos', contratos_vencer: 'Contratos a Vencer', contratos_vencidos: 'Contratos Vencidos',
-    contratos_clientes: 'Contratos por Cliente', receita_contratos: 'Receita de Contratos',
-    nfe_emitidas: 'NF-e Emitidas', nfe_canceladas: 'NF-e Canceladas', nfe_por_cliente: 'NF-e por Cliente',
-    faturamento_mensal: 'Faturamento Mensal', impostos: 'Impostos de Faturamento',
-    logistica_nfe: 'Logística de NF-e', inadimplencia: 'Inadimplência'
-};
-
-var relatorioTemplates = {
-    os_abertas: 'os-abertas-faturamento', os_concluidas: 'os-concluidas', os_pendentes: 'os-pendentes',
-    os_por_tecnico: 'os-por-tecnico-faturamento', faturamento_os: 'faturamento-de-os',
-    contratos_ativos: 'contratos-ativos-faturamento', contratos_vencer: 'contratos-a-vencer', contratos_vencidos: 'contratos-vencidos',
-    contratos_clientes: 'contratos-por-cliente-faturamento', receita_contratos: 'receita-de-contratos',
-    nfe_emitidas: 'nf-e-emitidas', nfe_canceladas: 'nf-e-canceladas', nfe_por_cliente: 'nf-e-por-cliente',
-    faturamento_mensal: 'faturamento-mensal', impostos: 'impostos-de-faturamento',
-    logistica_nfe: 'logistica-de-nf-e', inadimplencia: 'inadimplencia'
-};
-
 function gerarRelatorio(tipo) {
     var di = document.getElementById('reportDataInicio').value;
     var df = document.getElementById('reportDataFim').value;
@@ -368,11 +369,9 @@ function gerarRelatorio(tipo) {
     params.append('tipo', tipo);
     if (di) params.append('dataInicio', di);
     if (df) params.append('dataFim', df);
-    if (relatorioTemplates[tipo]) params.append('template', relatorioTemplates[tipo]);
 
-    var nomeRelatorio = relatorioNomes[tipo] || tipo;
-    document.getElementById('previewTitle').textContent = nomeRelatorio + ' — Carregando...';
-    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando ' + _escHtml(nomeRelatorio) + '...</p></div>';
+    document.getElementById('previewTitle').textContent = 'Carregando...';
+    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando relatério...</p></div>';
     document.getElementById('previewSection').classList.add('active');
     document.getElementById('currentReportType').value = tipo;
 
@@ -388,21 +387,18 @@ function gerarRelatorio(tipo) {
     })
     .catch(function(err) {
         dadosRelatorioAtual = null;
-        var nomeErr = relatorioNomes[tipo] || tipo;
-        document.getElementById('previewTitle').textContent = nomeErr;
+        document.getElementById('previewTitle').textContent = 'Relatério Indisponível';
         document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:48px 24px;">' +
             '<i class="fas fa-database" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>' +
             '<h3 style="color:var(--text-primary);font-size:16px;margin-bottom:8px;">Dados não disponíveis</h3>' +
-            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatório requer dados do servidor. Verifique se o endpoint da API está configurado ou tente novamente mais tarde.</p>' +
+            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatério requer dados do servidor. Verifique se o endpoint da API está configurado ou tente novamente mais tarde.</p>' +
             '</div>';
     });
 }
 
 function renderizarRelatorio(dados) {
-    var tipoAtual = document.getElementById('currentReportType').value;
-    var nomeRel = dados.titulo || relatorioNomes[tipoAtual] || 'Relatório';
-    document.getElementById('previewTitle').textContent = nomeRel;
-    document.title = 'Aluforce: ' + nomeRel;
+    document.getElementById('previewTitle').textContent = dados.título || 'Relatério';
+    document.title = 'Aluforce: ' + (dados.titulo || 'Relatério');
 
     var período = '';
     var di = document.getElementById('reportDataInicio').value;
