@@ -4,6 +4,36 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.3.2] — 2026-03-28
+
+### Corrigido (Auditoria Compras + PCP)
+- **[CRITICAL] cotacoes.html**: Corrigido accent mismatch `cotaçãoId` → `cotacaoId` que impedia o toast de sucesso e a atualização da tabela após salvar cotação
+- **[CRITICAL] cotacoes.html**: Corrigido accent mismatch `cotaçõesManager` → `cotacoesManager` (4 refs) — tabela não recarregava após save
+- **[CRITICAL] relatorios.html**: Corrigido `RelatóriosCompras` → `RelatoriosCompras` — todas as 9 onclick dos cards de relatório PDF estavam quebradas (ReferenceError)
+- **[CRITICAL] gestao-estoque.html**: Corrigido `fecharModal('modal-histórico')` → `modal-historico` — modal de histórico não fechava (user ficava preso)
+- **[CRITICAL] faturamento.html (PCP)**: Adicionados 4 `<div class="metric-value">` com IDs (`fat-programados`, `fat-emitidos`, `fat-pendentes`, `fat-cancelados`) — cards de estatísticas crashavam com TypeError
+- **[CRITICAL] estoque.html (PCP)**: Removidos acentos de 6 IDs HTML (`view-estoque-mínimo` → `minimo`, `máximo` → `maximo`, `est-mínimo`, `est-máximo`) + 4 refs no inline JS — ficha do produto exibia valores sempre zerados
+- **[CRITICAL] gestao-producao.html (PCP)**: Corrigido `m.código` → `m.codigo` (2 refs) — tabela de máquinas renderizava `undefined` no campo código
+- **[CRITICAL] ordem-compra.html (PCP)**: Adicionados 4 `<div class="metric-value">` com IDs (`oc-abertas`, `oc-aprovadas`, `oc-aguardando`, `oc-valor`) — cards de estatísticas crashavam
+- **[CRITICAL] ordem-compra.html (PCP)**: Corrigido `item.código`/`item.descrição` → `item.codigo`/`item.descricao` — itens OC renderizavam `undefined`
+- **[HIGH] relatorios.html**: Corrigido encoding corrupto `Diferena` → `Diferença`, `Atenão` → `Atenção` nos relatórios PDF de materiais críticos
+- **[HIGH] relatorios.html**: Corrigido encoding PDF: `é` → `—` (em dashes), `s` → `às` no cabeçalho/rodapé do relatório
+- **[HIGH] fornecedores.html**: Corrigida vulnerabilidade XSS — adicionada função `esc()` para sanitizar todos os campos da API antes de innerHTML no modal de visualização
+- **[HIGH] fornecedores.html**: Corrigido accent fallback `f.avaliação` → `f.avaliacao || f.avaliação` na avaliação por estrelas
+- **[HIGH] pedidos.js**: Adicionado `Authorization: Bearer` header em `carregarPedidos()` e `carregarFornecedores()` — requests falhavam com 401
+- **[MEDIUM] requisicoes.html**: Corrigido encoding corrupto `requisiães` → `requisições`, `edião` → `edição` (toast + console)
+
+### Auditoria
+- 75 issues identificadas (13 CRITICAL, 19 HIGH, 27 MEDIUM, 15 LOW) nos módulos Compras (9 páginas) e PCP (7 páginas + 4 JS)
+- 15 fixes aplicados cobrindo todos os CRITICAL e principais HIGH
+- 10 arquivos modificados: 6 Compras + 4 PCP
+
+### Implantação
+- 10 arquivos deployados na VPS via SCP
+- PM2 reiniciado com validação
+
+---
+
 ## [2.3.1] — 2026-03-28
 
 ### Alterado

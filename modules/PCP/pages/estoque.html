@@ -480,11 +480,11 @@
                                 </div>
                                 <div style="background: #f8fafc; border: 1px solid #e5e5e5; border-radius: 4px; padding: 16px; text-align: center;">
                                     <div style="font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 6px;">Mínimo</div>
-                                    <div id="view-estoque-mínimo" style="font-size: 28px; font-weight: 700; color: #333;">0</div>
+                                    <div id="view-estoque-minimo" style="font-size: 28px; font-weight: 700; color: #333;">0</div>
                                 </div>
                                 <div style="background: #f8fafc; border: 1px solid #e5e5e5; border-radius: 4px; padding: 16px; text-align: center;">
                                     <div style="font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 6px;">Máximo</div>
-                                    <div id="view-estoque-máximo" style="font-size: 28px; font-weight: 700; color: #333;">0</div>
+                                    <div id="view-estoque-maximo" style="font-size: 28px; font-weight: 700; color: #333;">0</div>
                                 </div>
                                 <div style="background: #f8fafc; border: 1px solid #e5e5e5; border-radius: 4px; padding: 16px; text-align: center;">
                                     <div style="font-size: 11px; color: #999; text-transform: uppercase; margin-bottom: 6px;">Reservado</div>
@@ -560,8 +560,8 @@
                                             <td style="padding: 10px 12px; color: #333; font-weight: 500;">PADRÃO - Local de Estoque Padrão</td>
                                             <td id="view-est-disponivel" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
                                             <td id="view-est-reservado" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
-                                            <td id="view-est-mínimo" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
-                                            <td id="view-est-máximo" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
+                                            <td id="view-est-minimo" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
+                                            <td id="view-est-maximo" style="padding: 10px 12px; text-align: right; color: #333;">0</td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1791,15 +1791,15 @@
             const unidadeAbrev = (p.unidade || 'UN').toLowerCase();
             const unidadeLabel = unidadeAbrev === 'un' ? 'un' : unidadeAbrev === 'm' ? 'm' : unidadeAbrev === 'kg' ? 'kg' : unidadeAbrev === 'pç' || unidadeAbrev === 'pc' ? 'pç' : unidadeAbrev;
             document.getElementById('view-estoque-atual').innerHTML = estoque.toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
-            document.getElementById('view-estoque-mínimo').innerHTML = minimo.toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
-            document.getElementById('view-estoque-máximo').innerHTML = (p.estoque_maximo || 1000).toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
+            document.getElementById('view-estoque-minimo').innerHTML = minimo.toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
+            document.getElementById('view-estoque-maximo').innerHTML = (p.estoque_maximo || 1000).toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
             document.getElementById('view-estoque-reservado').innerHTML = (p.estoque_reservado || 0).toLocaleString('pt-BR') + ' <span style="font-size:14px;font-weight:400;color:#999;">(' + unidadeLabel + ')</span>';
 
             // Tabela de estoque (aba Estoque)
             const elDisp = document.getElementById('view-est-disponivel');
             const elRes = document.getElementById('view-est-reservado');
-            const elMin = document.getElementById('view-est-mínimo');
-            const elMax = document.getElementById('view-est-máximo');
+            const elMin = document.getElementById('view-est-minimo');
+            const elMax = document.getElementById('view-est-maximo');
             if (elDisp) elDisp.textContent = estoque.toLocaleString('pt-BR');
             if (elRes) elRes.textContent = (p.estoque_reservado || 0).toLocaleString('pt-BR');
             if (elMin) elMin.textContent = minimo.toLocaleString('pt-BR');

@@ -497,49 +497,50 @@
     }
 
     async function visualizarFornecedorModal(id) {
+        function esc(s) { if (!s) return '-'; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
         try {
             const token = localStorage.getItem('token');
             const r = await fetch(`/api/compras/fornecedores/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
             const d = await r.json();
             const f = d.fornecedor || d;
-            document.getElementById('viewFornNome').innerHTML = '<i class="fas fa-building"></i> ' + (f.razao_social || f.nome_fantasia || 'Fornecedor');
+            document.getElementById('viewFornNome').innerHTML = '<i class="fas fa-building"></i> ' + esc(f.razao_social || f.nome_fantasia || 'Fornecedor');
             let stars = '';
-            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avaliação || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
+            for (let i = 1; i <= 5; i++) stars += '<i class="fas fa-star" style="color:' + (i <= (f.avaliacao || f.avaliação || 0) ? '#f59e0b' : '#d1d5db') + '; font-size:0.8rem;"></i>';
             document.getElementById('viewFornBody').innerHTML =
                 '<div class="view-section"><h4><i class="fas fa-building"></i> Dados Gerais</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>Razão Social</label><p>' + (f.razao_social || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Nome Fantasia</label><p>' + (f.nome_fantasia || '-') + '</p></div>' +
+                    '<div class="view-item"><label>Raz\u00e3o Social</label><p>' + esc(f.razao_social) + '</p></div>' +
+                    '<div class="view-item"><label>Nome Fantasia</label><p>' + esc(f.nome_fantasia) + '</p></div>' +
                     '<div class="view-item"><label>CNPJ</label><p>' + formatarCNPJ(f.cnpj) + '</p></div>' +
-                    '<div class="view-item"><label>IE</label><p>' + (f.inscricao_estadual || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Categoria</label><p>' + (f.categoria || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Status</label><p><span class="badge badge-' + (f.status === 'ativo' ? 'approved' : f.status === 'inativo' ? 'cancelled' : 'pending') + '">' + (f.status || '-') + '</span></p></div>' +
+                    '<div class="view-item"><label>IE</label><p>' + esc(f.inscricao_estadual) + '</p></div>' +
+                    '<div class="view-item"><label>Categoria</label><p>' + esc(f.categoria) + '</p></div>' +
+                    '<div class="view-item"><label>Status</label><p><span class="badge badge-' + (f.status === 'ativo' ? 'approved' : f.status === 'inativo' ? 'cancelled' : 'pending') + '">' + esc(f.status) + '</span></p></div>' +
                 '</div></div>' +
-                '<div class="view-section"><h4><i class="fas fa-map-marker-alt"></i> Endereço</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>CEP</label><p>' + (f.cep || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Endereço</label><p>' + (f.endereco || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Bairro</label><p>' + (f.bairro || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Cidade/UF</label><p>' + (f.cidade || '-') + '/' + (f.estado || '-') + '</p></div>' +
+                '<div class="view-section"><h4><i class="fas fa-map-marker-alt"></i> Endere\u00e7o</h4><div class="view-grid">' +
+                    '<div class="view-item"><label>CEP</label><p>' + esc(f.cep) + '</p></div>' +
+                    '<div class="view-item"><label>Endere\u00e7o</label><p>' + esc(f.endereco) + '</p></div>' +
+                    '<div class="view-item"><label>Bairro</label><p>' + esc(f.bairro) + '</p></div>' +
+                    '<div class="view-item"><label>Cidade/UF</label><p>' + esc(f.cidade) + '/' + esc(f.estado) + '</p></div>' +
                 '</div></div>' +
                 '<div class="view-section"><h4><i class="fas fa-address-book"></i> Contato</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>Contato</label><p>' + (f.contato_principal || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Cargo</label><p>' + (f.cargo_contato || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Telefone</label><p>' + (f.telefone || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Email</label><p>' + (f.email || '-') + '</p></div>' +
-                    '<div class="view-item"><label>WhatsApp</label><p>' + (f.whatsapp || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Website</label><p>' + (f.website || '-') + '</p></div>' +
+                    '<div class="view-item"><label>Contato</label><p>' + esc(f.contato_principal) + '</p></div>' +
+                    '<div class="view-item"><label>Cargo</label><p>' + esc(f.cargo_contato) + '</p></div>' +
+                    '<div class="view-item"><label>Telefone</label><p>' + esc(f.telefone) + '</p></div>' +
+                    '<div class="view-item"><label>Email</label><p>' + esc(f.email) + '</p></div>' +
+                    '<div class="view-item"><label>WhatsApp</label><p>' + esc(f.whatsapp) + '</p></div>' +
+                    '<div class="view-item"><label>Website</label><p>' + esc(f.website) + '</p></div>' +
                 '</div></div>' +
                 '<div class="view-section"><h4><i class="fas fa-dollar-sign"></i> Financeiro</h4><div class="view-grid">' +
-                    '<div class="view-item"><label>Pagamento</label><p>' + (f.condicoes_pagamento || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Prazo Entrega</label><p>' + (f.prazo_entrega || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Banco</label><p>' + (f.banco || '-') + ' Ag:' + (f.agencia || '-') + ' CC:' + (f.conta || '-') + '</p></div>' +
-                    '<div class="view-item"><label>PIX</label><p>' + (f.chave_pix || '-') + '</p></div>' +
-                    '<div class="view-item"><label>Avaliação</label><p>' + stars + '</p></div>' +
+                    '<div class="view-item"><label>Pagamento</label><p>' + esc(f.condicoes_pagamento) + '</p></div>' +
+                    '<div class="view-item"><label>Prazo Entrega</label><p>' + esc(f.prazo_entrega) + '</p></div>' +
+                    '<div class="view-item"><label>Banco</label><p>' + esc(f.banco) + ' Ag:' + esc(f.agencia) + ' CC:' + esc(f.conta) + '</p></div>' +
+                    '<div class="view-item"><label>PIX</label><p>' + esc(f.chave_pix) + '</p></div>' +
+                    '<div class="view-item"><label>Avalia\u00e7\u00e3o</label><p>' + stars + '</p></div>' +
                 '</div></div>' +
                 (f.produtos_fornecidos || f.certificacoes || f.observacoes ?
-                    '<div class="view-section"><h4><i class="fas fa-file-alt"></i> Informações Adicionais</h4>' +
-                    (f.produtos_fornecidos ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Produtos</label><p>' + f.produtos_fornecidos + '</p></div>' : '') +
-                    (f.certificacoes ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certificações</label><p>' + f.certificacoes + '</p></div>' : '') +
-                    (f.observacoes ? '<div class="view-item"><label>Observações</label><p>' + f.observacoes + '</p></div>' : '') +
+                    '<div class="view-section"><h4><i class="fas fa-file-alt"></i> Informa\u00e7\u00f5es Adicionais</h4>' +
+                    (f.produtos_fornecidos ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Produtos</label><p>' + esc(f.produtos_fornecidos) + '</p></div>' : '') +
+                    (f.certificacoes ? '<div class="view-item" style="margin-bottom:var(--space-2);"><label>Certifica\u00e7\u00f5es</label><p>' + esc(f.certificacoes) + '</p></div>' : '') +
+                    (f.observacoes ? '<div class="view-item"><label>Observa\u00e7\u00f5es</label><p>' + esc(f.observacoes) + '</p></div>' : '') +
                     '</div>' : '');
             document.getElementById('modalVisualizarFornecedor').classList.add('active');
         } catch (e) { alert('Erro ao carregar detalhes'); }

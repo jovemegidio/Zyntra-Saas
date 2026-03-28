@@ -570,7 +570,7 @@
                 const data = await r.json();
                 requisicoesData = data.requisicoes || data || [];
             }
-        } catch (e) { console.log('Erro requisiães:', e); requisicoesData = []; }
+        } catch (e) { console.log('Erro requisições:', e); requisicoesData = []; }
         atualizarContadores();
         filtrarRequisicoes(filtroAtual);
     }
@@ -910,10 +910,10 @@
                     if (specEl) specEl.value = it.observacao || '';
                 });
             }
-            // Atualizar título do modal para edião
+            // Atualizar título do modal para edição
             const modalTitle = document.querySelector('#modalNovaRequisicao .modal-header h3');
             if (modalTitle) modalTitle.innerHTML = '<i class="fas fa-edit"></i> Editar Requisição de Compra';
-        } catch (e) { showToast('Erro ao carregar para edião', 'error'); console.error('[Requisição] Erro edião:', e); }
+        } catch (e) { showToast('Erro ao carregar para edição', 'error'); console.error('[Requisição] Erro edição:', e); }
     }
 
     let _excluindoRequisicao = false;

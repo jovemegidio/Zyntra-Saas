@@ -137,7 +137,8 @@ async function inicializarSistema() {
 async function carregarPedidos() {
     try {
         // Tentar carregar do backend
-        const response = await fetch('/api/compras/pedidos', { credentials: 'include' });
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/compras/pedidos', { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
         if (response.ok) {
             const data = await response.json();
             pedidos = Array.isArray(data) ? data : (data.pedidos || []);
@@ -177,7 +178,8 @@ async function carregarPedidos() {
 
 async function carregarFornecedores() {
     try {
-        const response = await fetch('/api/compras/fornecedores', { credentials: 'include' });
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/compras/fornecedores', { credentials: 'include', headers: { 'Authorization': `Bearer ${token}` } });
         if (response.ok) {
             const data = await response.json();
             fornecedores = Array.isArray(data) ? data : (data.fornecedores || []);

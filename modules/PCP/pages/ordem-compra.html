@@ -356,24 +356,28 @@
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-file-alt"></i></div>
                             </div>
+                            <div class="metric-value" id="oc-abertas">0</div>
                             <div class="metric-label">OCs Abertas</div>
                         </div>
                         <div class="metric-card green">
                             <div class="metric-header">
                                 <div class="metric-icon green"><i class="fas fa-check-double"></i></div>
                             </div>
+                            <div class="metric-value" id="oc-aprovadas">0</div>
                             <div class="metric-label">Aprovadas</div>
                         </div>
                         <div class="metric-card orange">
                             <div class="metric-header">
                                 <div class="metric-icon orange"><i class="fas fa-hourglass-half"></i></div>
                             </div>
+                            <div class="metric-value" id="oc-aguardando">0</div>
                             <div class="metric-label">Aguardando</div>
                         </div>
                         <div class="metric-card blue">
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                             </div>
+                            <div class="metric-value" id="oc-valor">R$ 0,00</div>
                             <div class="metric-label">Valor Total</div>
                         </div>
                     </div>
@@ -898,8 +902,8 @@
             tbody.innerHTML = itensOC.map(item => `
                 <tr>
                     <td>${item.id}</td>
-                    <td>${item.código}</td>
-                    <td>${item.descrição}</td>
+                    <td>${item.codigo}</td>
+                    <td>${item.descricao}</td>
                     <td style="text-align: center;">${item.quantidade}</td>
                     <td style="text-align: right;">${formatarMoeda(item.precoUnit)}</td>
                     <td style="text-align: right; font-weight: 600;">${formatarMoeda(item.total)}</td>

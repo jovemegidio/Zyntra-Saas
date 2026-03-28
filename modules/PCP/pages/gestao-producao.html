@@ -1011,7 +1011,7 @@
             }
             tbody.innerHTML = maquinasData.map(m => `
                 <tr>
-                    <td><strong>${m.código}</strong></td>
+                    <td><strong>${m.codigo}</strong></td>
                     <td>${m.nome}</td>
                     <td>${m.setor || '-'}</td>
                     <td>${m.capacidade || '-'}</td>
@@ -1419,7 +1419,7 @@
         function novoRegistroDiario() {
             const select = document.getElementById('diario-maquina');
             select.innerHTML = '<option value="">Selecione...</option>' +
-                maquinasData.map(m => `<option value="${m.id}">${m.código} - ${m.nome}</option>`).join('');
+                maquinasData.map(m => `<option value="${m.id}">${m.codigo} - ${m.nome}</option>`).join('');
 
             document.getElementById('diario-hora').value = new Date().toTimeString().substring(0, 5);
             document.getElementById('modalDiario').style.display = 'flex';

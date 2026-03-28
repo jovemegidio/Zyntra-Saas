@@ -281,8 +281,8 @@
         if (overlay) overlay.classList.toggle('active');
     }
 
-    /* ========== RelatóriosCompras ========== */
-    const RelatóriosCompras = {
+    /* ========== RelatoriosCompras ========== */
+    const RelatoriosCompras = {
         init() {
             this.carregarDados();
             this.configurarBotoes();
@@ -522,9 +522,9 @@
                     rows = arr.map(m => `<tr><td>${this.formatarData(m.data||m.created_at)}</td><td class="font-bold">${m.material||m.descrição||'-'}</td><td><span class="badge badge-${m.tipo==='entrada'?'success':'warning'}">${m.tipo==='entrada'?'Entrada':'Saída'}</span></td><td class="text-right font-bold">${m.quantidade||0}</td><td>${m.responsavel||m.usuário||'-'}</td><td>${m.observação||'-'}</td></tr>`);
                     break;
                 case 'criticos':
-                    headers = ['Código', 'Material', 'Qtd. Atual', 'Estoque Mínimo', 'Diferena', 'Criticidade'];
+                    headers = ['Código', 'Material', 'Qtd. Atual', 'Estoque Mínimo', 'Diferença', 'Criticidade'];
                     resumo = { 'Materiais Críticos': arr.length, 'Necessitam Reposição Urgente': arr.length };
-                    rows = arr.map(m => { const a = m.estoque_atual||m.quantidade||m.quantidade_estoque||0; const mn = m.estoque_minimo||m.minimo||0; const diff = a - mn; const pct = mn>0?(a/mn*100):0; return `<tr><td class="font-bold">${m.codigo_material||m.código||'-'}</td><td>${m.descrição||m.nome||'-'}</td><td class="text-right font-bold" style="color:#dc2626;">${a}</td><td class="text-right">${mn}</td><td class="text-right font-bold" style="color:#dc2626;">${diff}</td><td><span class="badge badge-${pct<=25?'danger':'warning'}">${pct<=25?'Urgente':'Atenão'}</span></td></tr>`; });
+                    rows = arr.map(m => { const a = m.estoque_atual||m.quantidade||m.quantidade_estoque||0; const mn = m.estoque_minimo||m.minimo||0; const diff = a - mn; const pct = mn>0?(a/mn*100):0; return `<tr><td class="font-bold">${m.codigo_material||m.código||'-'}</td><td>${m.descrição||m.nome||'-'}</td><td class="text-right font-bold" style="color:#dc2626;">${a}</td><td class="text-right">${mn}</td><td class="text-right font-bold" style="color:#dc2626;">${diff}</td><td><span class="badge badge-${pct<=25?'danger':'warning'}">${pct<=25?'Urgente':'Atenção'}</span></td></tr>`; });
                     break;
                 case 'cotações':
                     headers = ['N', 'Título / descrição', 'Fornecedor', 'Valor', 'Data', 'Status'];
@@ -616,11 +616,11 @@ tbody tr:hover { background: #f1f5f9; }
 <div class="rpt-header">
     <div class="brand">
         <div class="brand-name">ALUFORCE</div>
-        <div class="brand-sub">Zyntra é Módulo de Compras</div>
+        <div class="brand-sub">Zyntra — Módulo de Compras</div>
     </div>
     <div class="rpt-meta">
         <div class="doc-tag">Relatório</div>
-        <div class="meta-line">Emitido em: ${dataEmissao} s ${horaEmissao}</div>
+        <div class="meta-line">Emitido em: ${dataEmissao} às ${horaEmissao}</div>
         ${períodoTexto ? '<div class="meta-line">' + períodoTexto + '</div>' : ''}
     </div>
 </div>
@@ -638,10 +638,10 @@ ${this.gerarResumoPDF(resumo)}
     <div style="text-align:right; margin-top:8px; font-size:10px; color:#94a3b8;">${rows.length} registro(s) encontrado(s)</div>
 </div>
 <div class="rpt-footer">
-    <span>ALUFORCE é Sistema Integrado de Gestão Empresarial</span>
+    <span>ALUFORCE — Sistema Integrado de Gestão Empresarial</span>
     <span>Documento gerado automaticamente pelo Zyntra ERP</span>
 </div>
-<div class="confidential">Documento Confidencial é Uso Interno</div>
+<div class="confidential">Documento Confidencial — Uso Interno</div>
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
 </body>
 </html>`);
@@ -676,7 +676,7 @@ ${this.gerarResumoPDF(resumo)}
         }
     };
 
-    document.addEventListener('DOMContentLoaded', () => RelatóriosCompras.init());
+    document.addEventListener('DOMContentLoaded', () => RelatoriosCompras.init());
     </script>
 
     <!-- Module Scripts -->

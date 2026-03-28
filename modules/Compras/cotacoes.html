@@ -421,14 +421,14 @@
                     throw new Error(err.message || 'Erro ao salvar cotação');
                 }
 
-                showToast(cotaçãoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
+                showToast(cotacaoId ? 'Cotação atualizada com sucesso!' : 'Cotação salva com sucesso!', 'success');
                 fecharModalCotacao();
 
                 // Recarregar dados na tabela
-                if (typeof cotaçõesManager !== 'undefined') {
-                    await cotaçõesManager.carregarDados();
-                    cotaçõesManager.atualizarCards();
-                    cotaçõesManager.renderizarTabela();
+                if (typeof cotacoesManager !== 'undefined') {
+                    await cotacoesManager.carregarDados();
+                    cotacoesManager.atualizarCards();
+                    cotacoesManager.renderizarTabela();
                 }
             } catch (e) {
                 showToast('Erro: ' + e.message, 'error');
