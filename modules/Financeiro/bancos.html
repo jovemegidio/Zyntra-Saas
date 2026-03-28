@@ -292,14 +292,15 @@
         }
 
         /* MODAL SAAS EMPRESARIAL */
-        -webkit-backdrop-filter: blur(6px); }
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .modal-overlay.active { display: flex !important; }
 
         /* MODAL PADRÃO - Corrigido para classes com encoding */
-        -webkit-backdrop-filter: blur(6px); }
-        .modal-overlay-padrão { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); }
+        .modal-overlay-padrão { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
         .modal-overlay-padrão.active { display: flex !important; }
+        /* ID-based backup selectors for encoding safety */
+        [id="modalBanco"], [id="modalTransferencia"], [id="modalMovimento"], [id="modalExtrato"] { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); z-index: 99999; align-items: center; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+        [id="modalBanco"].active, [id="modalTransferencia"].active, [id="modalMovimento"].active, [id="modalExtrato"].active { display: flex !important; }
         .modal-padrão { display: flex !important; flex-direction: column !important; background: white !important; border-radius: 20px !important; width: 100% !important; max-width: 720px !important; min-height: 580px !important; max-height: 90vh !important; overflow: hidden !important; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15) !important; animation: modalFadeIn 0.25s ease-out !important; position: relative !important; margin: 16px !important; }
         .modal-padrão.modal-extrato-lg { max-width: 900px !important; }
         .modal-header-padrão { background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%); padding: 0; color: white; position: relative; overflow: hidden; border-bottom: none; flex-shrink: 0; }

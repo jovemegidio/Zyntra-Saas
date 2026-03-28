@@ -690,7 +690,7 @@
                                 <i class="fas fa-arrow-${m.tipo === 'entrada' ? 'down' : 'up'}"></i>
                             </div>
                             <div>
-                                <div class="list-item-title">${m.descrição || m.cliente || m.fornecedor || 'Sem descrição'}</div>
+                                <div class="list-item-title">${m.descricao || m.descrição || m.cliente_nome || m.fornecedor_nome || m.numero_documento || 'Sem descrição'}</div>
                                 <div class="list-item-desc" ${descStyle}>${descVenc}</div>
                             </div>
                         </div>
@@ -734,8 +734,8 @@
                 return `
                     <tr>
                         <td class="data">${formatarData(m.data)}</td>
-                        <td>${m.descrição || m.cliente || m.fornecedor || '-'}</td>
-                        <td>${m.categoria || '-'}</td>
+                        <td>${m.descricao || m.descrição || m.cliente_nome || m.fornecedor_nome || m.numero_documento || '-'}</td>
+                        <td>${m.categoria || m.categoria_nome || '-'}</td>
                         <td class="valor ${m.tipo === 'entrada' ? 'entrada' : ''}">${m.tipo === 'entrada' ? formatarMoeda(valor) : '-'}</td>
                         <td class="valor ${m.tipo === 'saida' ? 'saida' : ''}">${m.tipo === 'saida' ? formatarMoeda(valor) : '-'}</td>
                         <td class="valor ${saldoDia >= 0 ? 'entrada' : 'saida'}">${saldoDia >= 0 ? '+' : ''}${formatarMoeda(saldoDia)}</td>
