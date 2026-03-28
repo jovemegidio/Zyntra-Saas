@@ -395,7 +395,7 @@ app.get('/api/financeiro/contas-receber', authenticateToken, async (req, res) =>
         const corte = req.financeiroCorteTemporal;
         let sql = `SELECT cr.*, 
                           COALESCE(cr.cliente_nome, c.nome) as cliente_nome, 
-                          COALESCE(cr.cnpj_cliente, c.cpf_cnpj) as cnpj_cpf,
+                          COALESCE(cr.cnpj_cliente, c.cnpj_cpf) as cnpj_cpf,
                           cr.cnpj_empresa,
                           COALESCE(cr.valor, 0) as valor_total,
                           cr.forma_recebimento,
@@ -923,7 +923,7 @@ app.get('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
         
         // Dev Spec 2.3: Retornar objeto completo (parcelas, recebimentos, histórico)
         const [contas] = await pool.execute(
-            `SELECT cr.*, c.nome as cliente_nome, c.cpf_cnpj,
+            `SELECT cr.*, c.nome as cliente_nome, c.cnpj_cpf,
                     cr.pago_no_dia, cr.aceita_troca_factory, cr.comprovante_url,
                     cr.dia_recomprado, cr.data_para_cartorio, cr.data_protestado,
                     cr.origem_integracao

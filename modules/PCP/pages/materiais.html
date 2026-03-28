@@ -398,11 +398,11 @@
 
             tbody.innerHTML = filtrados.map(m => `
                 <tr>
-                    <td><strong>${m.código || '-'}</strong></td>
-                    <td>${m.descrição || '-'}</td>
-                    <td><span class="badge badge-purple">${m.tipo || '-'}</span></td>
-                    <td>${m.ncm || '-'}</td>
-                    <td>${m.gtin || '-'}</td>
+                    <td><strong>${m.codigo || '-'}</strong></td>
+                    <td>${m.descricao || '-'}</td>
+                    <td><span class="badge badge-purple">${m.tipo || m.tipo_material || '-'}</span></td>
+                    <td>${m.ncm || m.codigo_ncm || '-'}</td>
+                    <td>${m.gtin || m.codigo_gtin || m.codigo_barras || '-'}</td>
                     <td>${m.unidade || '-'}</td>
                     <td>${m.estoque || 0}</td>
                     <td>${formatarMoeda(m.preco)}</td>

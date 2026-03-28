@@ -945,7 +945,7 @@
                     const userPhoto = document.getElementById('user-photo');
                     const userInitial = document.getElementById('user-initials');
 
-                    if (user.foto_perfil_url || user.avatar || user.foto) {
+                    if (userPhoto && (user.foto_perfil_url || user.avatar || user.foto)) {
                         userPhoto.src = user.avatar || user.foto || user.foto_perfil_url;
                         userPhoto.onload = () => {
                             userPhoto.classList.add('visible');
