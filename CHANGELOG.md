@@ -4,6 +4,22 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.3.1] — 2026-03-28
+
+### Alterado
+- **QR Code Integrado (Compras + PCP + RH)**: Funcionalidade de QR Code refatorada como painel inline interno ao módulo Compras (gestão de estoque), deixando de ser uma página separada (`qrcode-estoque.html`). Agora busca automaticamente em todos os módulos: Compras (matérias-primas), PCP (produtos acabados e materiais), RH (identificação de funcionário). Ação sugerida automática: matéria-prima → Entrada, produto acabado → Baixa/Saída
+- **Sidebar Compras**: Todos os 7 botões QR Code na sidebar (index, fornecedores, requisições, cotações, recebimento, relatórios, gestao-estoque) agora redirecionam para o painel inline em `gestao-estoque.html?qr=1` ao invés da página standalone
+- **Dashboard Compras**: Quick-action "QR Code Estoque" aponta para o painel integrado
+- **QR Code Format**: Novo formato padronizado `ZYNTRA:MP:<código>` (matéria-prima), `ZYNTRA:PROD:<código>` (produto PCP), `ZYNTRA:MAT:<código>` (material PCP), `ZYNTRA:RH:<matrícula>` (funcionário). Compatível com formato antigo e labels PCP (JSON)
+- **Filtro por Módulo**: Pills de filtro no painel QR (Todos, Compras MP, PCP Produtos, PCP Materiais, RH) para refinar buscas
+- **Geração QR Multi-Módulo**: Tab "Gerar QR" busca e gera etiquetas para itens de Compras + PCP com prefixo de módulo
+
+### Implantação
+- 8 arquivos HTML deployados na VPS via SCP
+- PM2 reiniciado
+
+---
+
 ## [2.3.0] — 2026-03-27
 
 ### Adicionado

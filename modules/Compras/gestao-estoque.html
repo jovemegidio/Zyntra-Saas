@@ -249,8 +249,8 @@
                             <div style="display:flex;align-items:center;gap:12px;">
                                 <i class="fas fa-qrcode" style="font-size:1.3rem;color:#fff;"></i>
                                 <div>
-                                    <h3 style="margin:0;color:#fff;font-size:1rem;font-weight:700;">QR Code - Estoque</h3>
-                                    <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.75rem;">Escaneie, gere etiquetas ou registre movimentações por código</p>
+                                    <h3 style="margin:0;color:#fff;font-size:1rem;font-weight:700;">QR Code Integrado</h3>
+                                    <p style="margin:0;color:rgba(255,255,255,0.7);font-size:0.75rem;">Compras &bull; PCP &bull; RH &mdash; Materiais, Matérias-Primas e Produtos</p>
                                 </div>
                             </div>
                             <div style="display:flex;gap:8px;align-items:center;">
@@ -261,6 +261,14 @@
                                 </div>
                                 <button onclick="toggleQrCodePanel()" style="background:rgba(255,255,255,0.2);border:none;width:32px;height:32px;border-radius:8px;color:#fff;cursor:pointer;font-size:14px;" title="Fechar"><i class="fas fa-times"></i></button>
                             </div>
+                        </div>
+                        <!-- Module filter pills -->
+                        <div style="padding:10px 20px 0;display:flex;gap:6px;flex-wrap:wrap;" id="qr-module-filters">
+                            <button class="qr-mod-pill active" data-mod="todos" onclick="qrFilterModule('todos')" style="padding:4px 14px;border-radius:20px;border:1px solid #6366f1;background:#6366f1;color:#fff;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.2s;">Todos</button>
+                            <button class="qr-mod-pill" data-mod="compras" onclick="qrFilterModule('compras')" style="padding:4px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><i class="fas fa-shopping-cart"></i> Compras (MP)</button>
+                            <button class="qr-mod-pill" data-mod="pcp-produtos" onclick="qrFilterModule('pcp-produtos')" style="padding:4px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><i class="fas fa-industry"></i> PCP Produtos</button>
+                            <button class="qr-mod-pill" data-mod="pcp-materiais" onclick="qrFilterModule('pcp-materiais')" style="padding:4px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><i class="fas fa-cogs"></i> PCP Materiais</button>
+                            <button class="qr-mod-pill" data-mod="rh" onclick="qrFilterModule('rh')" style="padding:4px 14px;border-radius:20px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:0.7rem;font-weight:600;cursor:pointer;transition:all 0.2s;"><i class="fas fa-user-tie"></i> RH</button>
                         </div>
                         <div style="padding:20px;">
                             <!-- Tab: Escanear -->
@@ -731,10 +739,25 @@
     <!-- QR Code Library + Inline QR Logic -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js" defer></script>
     <script>
-    // ==================== QR CODE INLINE ====================
+    // ==================== QR CODE INTEGRADO (Compras + PCP + RH) ====================
     let qrInlineCameraStream = null;
     let qrInlineScanInterval = null;
     let qrInlineSelectedMaterial = null;
+    let qrActiveModule = 'todos';
+
+    // Auto-open QR panel if ?qr=1 param is present
+    document.addEventListener('DOMContentLoaded', function() {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('qr') === '1') {
+            setTimeout(() => toggleQrCodePanel(), 300);
+        }
+        const manualInput = document.getElementById('qr-inline-manual-code');
+        if (manualInput) {
+            manualInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') qrInlineSearchManual();
+            });
+        }
+    });
 
     function toggleQrCodePanel() {
         const panel = document.getElementById('qr-code-inline-panel');
@@ -765,9 +788,45 @@
         if (tab !== 'scan') qrInlineStopCamera();
     }
 
+    function qrFilterModule(mod) {
+        qrActiveModule = mod;
+        document.querySelectorAll('.qr-mod-pill').forEach(btn => {
+            btn.style.background = '#fff';
+            btn.style.color = '#64748b';
+            btn.style.borderColor = '#e2e8f0';
+            btn.classList.remove('active');
+        });
+        const active = document.querySelector(`.qr-mod-pill[data-mod="${mod}"]`);
+        if (active) {
+            active.style.background = '#6366f1';
+            active.style.color = '#fff';
+            active.style.borderColor = '#6366f1';
+            active.classList.add('active');
+        }
+    }
+
     function getQrAuthHeaders() {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
         return { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+    }
+
+    // ---- QR Code Format Detection ----
+    function parseQrCode(rawCode) {
+        // Format: ZYNTRA:MP:<codigo> = Matéria-Prima (Compras)
+        // Format: ZYNTRA:PROD:<codigo> = Produto Acabado (PCP)
+        // Format: ZYNTRA:MAT:<codigo> = Material (PCP)
+        // Format: ZYNTRA:RH:<matricula> = Funcionário (RH)
+        // Format: JSON {...} = PCP label format
+        // Fallback: plain code = search everywhere
+        if (rawCode.startsWith('ZYNTRA:')) {
+            const parts = rawCode.split(':');
+            return { type: parts[1], code: parts.slice(2).join(':'), raw: rawCode };
+        }
+        try {
+            const json = JSON.parse(rawCode);
+            if (json.cod) return { type: 'PCP_LABEL', code: json.cod, data: json, raw: rawCode };
+        } catch(e) {}
+        return { type: 'AUTO', code: rawCode, raw: rawCode };
     }
 
     // ---- Camera / QR Scanner ----
@@ -821,7 +880,6 @@
             ctx.drawImage(video, 0, 0);
             try {
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                // Use jsQR if available, otherwise try BarcodeDetector
                 if (typeof jsQR === 'function') {
                     const code = jsQR(imageData.data, imageData.width, imageData.height);
                     if (code && code.data && code.data !== lastScanned) {
@@ -841,118 +899,512 @@
         }, 500);
     }
 
-    async function qrInlineHandleScan(code) {
-        showToast('QR Code detectado: ' + code, 'success');
+    async function qrInlineHandleScan(rawCode) {
+        showToast('QR Code detectado!', 'success');
         qrInlineStopCamera();
-        await qrInlineLoadMaterial(code, 'qr-inline-result-panel');
+        const parsed = parseQrCode(rawCode);
+        await qrInlineLoadUnified(parsed, 'qr-inline-result-panel');
     }
 
     // ---- Manual Search ----
     async function qrInlineSearchManual() {
         const code = document.getElementById('qr-inline-manual-code').value.trim();
         if (!code) return;
-        await qrInlineLoadMaterial(code, 'qr-inline-manual-result');
+        const parsed = parseQrCode(code);
+        await qrInlineLoadUnified(parsed, 'qr-inline-manual-result');
     }
 
-    async function qrInlineLoadMaterial(code, targetId) {
+    // ---- Unified Multi-Module Loader ----
+    async function qrInlineLoadUnified(parsed, targetId) {
         const panel = document.getElementById(targetId);
         if (!panel) return;
-        panel.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#6366f1;"></i></div>';
-        try {
-            const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(code), { headers: getQrAuthHeaders() });
-            if (!response.ok) throw new Error('Erro ao buscar');
-            const data = await response.json();
-            const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
-            const match = items.find(m => m.codigo === code || m.código === code) || items[0];
-            if (!match) {
-                panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Material não encontrado</p></div>';
+        panel.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#6366f1;"></i><p style="margin-top:8px;font-size:0.8rem;color:#94a3b8;">Buscando em todos os módulos...</p></div>';
+
+        const results = [];
+        const code = parsed.code;
+        const headers = getQrAuthHeaders();
+        const mod = qrActiveModule;
+
+        // 1) Compras - Matérias-Primas
+        if (mod === 'todos' || mod === 'compras') {
+            try {
+                const r = await fetch('/api/compras/estoque/materiais-com-entrada?search=' + encodeURIComponent(code), { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
+                    items.forEach(m => {
+                        results.push({
+                            id: m.id,
+                            codigo: m.codigo || m.código || m.codigo_material || '',
+                            nome: m.descricao || m.descrição || m.nome || '',
+                            estoque: m.estoque_atual || m.quantidade_estoque || m.estoque || 0,
+                            minimo: m.estoque_min || m.estoque_minimo || m.minimo || 0,
+                            unidade: m.unidade || m.unidade_medida || 'UN',
+                            tipo_item: 'materia-prima',
+                            modulo: 'Compras',
+                            modulo_icon: 'fa-shopping-cart',
+                            modulo_color: '#6366f1',
+                            acao_primaria: 'entrada',
+                            acao_label: 'Entrada (Recebimento MP)',
+                            _raw: m
+                        });
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // Also try QR lookup endpoint for exact match
+        if (mod === 'todos' || mod === 'compras') {
+            try {
+                const r = await fetch('/api/compras/estoque/qrcode/lookup?code=' + encodeURIComponent(code), { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const m = data.material;
+                    if (m && !results.find(x => x.codigo === (m.codigo || ''))) {
+                        results.push({
+                            id: m.id,
+                            codigo: m.codigo || '',
+                            nome: m.descricao || '',
+                            estoque: m.estoque_atual || 0,
+                            minimo: m.estoque_min || 0,
+                            unidade: m.unidade || 'UN',
+                            tipo_item: m.tipo === 'produto' ? 'produto' : 'materia-prima',
+                            modulo: 'Compras',
+                            modulo_icon: 'fa-shopping-cart',
+                            modulo_color: '#6366f1',
+                            acao_primaria: m.tipo === 'produto' ? 'saida' : 'entrada',
+                            acao_label: m.tipo === 'produto' ? 'Baixa (Saída Produto)' : 'Entrada (Recebimento MP)',
+                            _raw: m
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 2) PCP - Produtos
+        if (mod === 'todos' || mod === 'pcp-produtos') {
+            try {
+                const r = await fetch('/api/pcp/produtos?search=' + encodeURIComponent(code) + '&limit=10', { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = data.produtos || data.data || (Array.isArray(data) ? data : []);
+                    items.forEach(p => {
+                        results.push({
+                            id: p.id,
+                            codigo: p.codigo || p.codigo_produto || p.sku || '',
+                            nome: p.nome || p.descricao || '',
+                            estoque: p.estoque_atual || p.quantidade || 0,
+                            minimo: p.estoque_minimo || 0,
+                            unidade: p.unidade || p.unidade_medida || 'UN',
+                            tipo_item: 'produto',
+                            modulo: 'PCP',
+                            modulo_icon: 'fa-industry',
+                            modulo_color: '#0891b2',
+                            acao_primaria: 'saida',
+                            acao_label: 'Baixa (Saída Produto)',
+                            _raw: p
+                        });
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // 3) PCP - Materiais
+        if (mod === 'todos' || mod === 'pcp-materiais') {
+            try {
+                const r = await fetch('/api/pcp/materiais/buscar?q=' + encodeURIComponent(code), { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = data.materiais || data.data || (Array.isArray(data) ? data : []);
+                    items.forEach(m => {
+                        if (!results.find(x => x.codigo === (m.codigo || m.codigo_material || ''))) {
+                            results.push({
+                                id: m.id,
+                                codigo: m.codigo || m.codigo_material || '',
+                                nome: m.nome || m.descricao || '',
+                                estoque: m.estoque_atual || m.quantidade || 0,
+                                minimo: m.estoque_minimo || 0,
+                                unidade: m.unidade || m.unidade_medida || 'UN',
+                                tipo_item: 'material-pcp',
+                                modulo: 'PCP',
+                                modulo_icon: 'fa-cogs',
+                                modulo_color: '#059669',
+                                acao_primaria: 'entrada',
+                                acao_label: 'Entrada (Material PCP)',
+                                _raw: m
+                            });
+                        }
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // 4) PCP - Matérias-Primas (by code lookup)
+        if ((mod === 'todos' || mod === 'pcp-materiais') && parsed.type === 'PCP_LABEL') {
+            try {
+                const r = await fetch('/api/pcp/produtos/codigo/' + encodeURIComponent(parsed.data?.cod || code), { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const p = data.produto || data;
+                    if (p && p.id && !results.find(x => x.id === p.id && x.modulo === 'PCP')) {
+                        results.push({
+                            id: p.id,
+                            codigo: p.codigo || p.codigo_produto || '',
+                            nome: p.nome || p.descricao || '',
+                            estoque: p.estoque_atual || 0,
+                            minimo: p.estoque_minimo || 0,
+                            unidade: p.unidade || 'UN',
+                            tipo_item: 'produto',
+                            modulo: 'PCP',
+                            modulo_icon: 'fa-industry',
+                            modulo_color: '#0891b2',
+                            acao_primaria: 'saida',
+                            acao_label: 'Baixa (Saída Produto)',
+                            localizacao: parsed.data?.loc || null,
+                            _raw: p
+                        });
+                    }
+                }
+            } catch(e) {}
+        }
+
+        // 5) RH - Funcionário (for authorization/tracking)
+        if ((mod === 'todos' || mod === 'rh') && parsed.type === 'RH') {
+            try {
+                const r = await fetch('/api/rh/funcionarios?search=' + encodeURIComponent(code), { headers });
+                if (r.ok) {
+                    const data = await r.json();
+                    const items = data.funcionarios || data.data || (Array.isArray(data) ? data : []);
+                    items.forEach(f => {
+                        results.push({
+                            id: f.id,
+                            codigo: f.matricula || f.cpf || '',
+                            nome: f.nome || f.nome_completo || '',
+                            cargo: f.cargo || f.funcao || '',
+                            setor: f.setor || f.departamento || '',
+                            tipo_item: 'funcionario',
+                            modulo: 'RH',
+                            modulo_icon: 'fa-user-tie',
+                            modulo_color: '#d97706',
+                            acao_primaria: 'identificar',
+                            acao_label: 'Identificar Responsável',
+                            _raw: f
+                        });
+                    });
+                }
+            } catch(e) {}
+        }
+
+        // Render results
+        if (results.length === 0) {
+            panel.innerHTML = '<div style="text-align:center;padding:24px;color:#ef4444;">' +
+                '<i class="fas fa-exclamation-triangle" style="font-size:2rem;margin-bottom:10px;display:block;opacity:0.6;"></i>' +
+                '<p style="font-size:0.9rem;font-weight:600;">Nenhum item encontrado</p>' +
+                '<p style="font-size:0.75rem;color:#94a3b8;margin-top:4px;">Código: ' + escapeHtml(parsed.code) + '</p>' +
+                '</div>';
+            return;
+        }
+
+        // If single result with specific type, auto-select
+        if (results.length === 1 || (parsed.type !== 'AUTO' && parsed.type !== 'todos')) {
+            qrInlineRenderItem(results[0], panel);
+        } else {
+            qrInlineRenderList(results, panel);
+        }
+    }
+
+    function qrInlineRenderList(results, panel) {
+        let html = '<div style="max-height:360px;overflow-y:auto;">';
+        html += '<p style="font-size:0.75rem;color:#64748b;margin-bottom:8px;font-weight:600;"><i class="fas fa-list"></i> ' + results.length + ' itens encontrados — selecione para movimentar:</p>';
+        results.forEach((item, idx) => {
+            const tipoLabel = item.tipo_item === 'produto' ? 'Produto' :
+                              item.tipo_item === 'materia-prima' ? 'Matéria-Prima' :
+                              item.tipo_item === 'material-pcp' ? 'Material PCP' :
+                              item.tipo_item === 'funcionario' ? 'Funcionário' : 'Material';
+            const tipoBg = item.tipo_item === 'produto' ? '#dbeafe' :
+                           item.tipo_item === 'materia-prima' ? '#fef3c7' :
+                           item.tipo_item === 'funcionario' ? '#fce7f3' : '#d1fae5';
+            const tipoColor = item.tipo_item === 'produto' ? '#1d4ed8' :
+                              item.tipo_item === 'materia-prima' ? '#d97706' :
+                              item.tipo_item === 'funcionario' ? '#db2777' : '#059669';
+            html += '<div onclick="qrInlineSelectFromList(' + idx + ')" style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:6px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\';this.style.background=\'#f0f0ff\'" onmouseout="this.style.borderColor=\'#e2e8f0\';this.style.background=\'#f8fafc\'">' +
+                '<div style="width:36px;height:36px;border-radius:8px;background:' + item.modulo_color + '15;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fas ' + item.modulo_icon + '" style="color:' + item.modulo_color + ';font-size:14px;"></i></div>' +
+                '<div style="flex:1;min-width:0;">' +
+                    '<div style="font-weight:600;font-size:0.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + escapeHtml(item.nome) + '</div>' +
+                    '<div style="display:flex;gap:6px;align-items:center;margin-top:2px;">' +
+                        '<span style="font-size:0.7rem;font-family:monospace;color:#64748b;">' + escapeHtml(item.codigo) + '</span>' +
+                        '<span style="font-size:0.6rem;padding:1px 6px;border-radius:8px;background:' + tipoBg + ';color:' + tipoColor + ';font-weight:600;">' + tipoLabel + '</span>' +
+                        '<span style="font-size:0.6rem;padding:1px 6px;border-radius:8px;background:' + item.modulo_color + '15;color:' + item.modulo_color + ';font-weight:600;">' + item.modulo + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="text-align:right;flex-shrink:0;">' +
+                    (item.tipo_item !== 'funcionario' ? '<div style="font-size:1rem;font-weight:700;color:#1e293b;">' + (item.estoque || 0) + '</div><div style="font-size:0.65rem;color:#94a3b8;">' + (item.unidade || '') + '</div>' : '<div style="font-size:0.75rem;color:#64748b;">' + escapeHtml(item.cargo || '') + '</div>') +
+                '</div>' +
+                '<i class="fas fa-chevron-right" style="color:#cbd5e1;font-size:10px;"></i>' +
+            '</div>';
+        });
+        html += '</div>';
+        panel.innerHTML = html;
+        window._qrSearchResults = results;
+    }
+
+    function qrInlineSelectFromList(idx) {
+        const results = window._qrSearchResults;
+        if (!results || !results[idx]) return;
+        const item = results[idx];
+        const panels = ['qr-inline-result-panel', 'qr-inline-manual-result'];
+        for (const pid of panels) {
+            const panel = document.getElementById(pid);
+            if (panel && panel.innerHTML.includes('itens encontrados')) {
+                qrInlineRenderItem(item, panel);
                 return;
             }
-            qrInlineSelectedMaterial = match;
-            const estoque = match.quantidade_estoque || match.estoque || 0;
-            const minimo = match.estoque_minimo || match.minimo || 0;
-            const status = estoque <= 0 ? 'critico' : estoque <= minimo ? 'baixo' : 'adequado';
-            const statusLabel = estoque <= 0 ? 'Crítico' : estoque <= minimo ? 'Baixo' : 'Adequado';
-            const statusColor = estoque <= 0 ? '#ef4444' : estoque <= minimo ? '#f59e0b' : '#22c55e';
-            const nome = match.descricao || match.descrição || match.nome || '—';
-            const codigo = match.codigo || match.código || '—';
-            panel.innerHTML = 
+        }
+    }
+
+    function qrInlineRenderItem(item, panel) {
+        qrInlineSelectedMaterial = item;
+        const estoque = item.estoque || 0;
+        const minimo = item.minimo || 0;
+        const status = estoque <= 0 ? 'critico' : estoque <= minimo ? 'baixo' : 'adequado';
+        const statusLabel = estoque <= 0 ? 'Crítico' : estoque <= minimo ? 'Baixo' : 'Adequado';
+        const statusColor = estoque <= 0 ? '#ef4444' : estoque <= minimo ? '#f59e0b' : '#22c55e';
+
+        const tipoLabel = item.tipo_item === 'produto' ? 'Produto Acabado' :
+                          item.tipo_item === 'materia-prima' ? 'Matéria-Prima' :
+                          item.tipo_item === 'material-pcp' ? 'Material (PCP)' :
+                          item.tipo_item === 'funcionario' ? 'Funcionário' : 'Material';
+
+        if (item.tipo_item === 'funcionario') {
+            panel.innerHTML =
                 '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">' +
                     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
-                        '<div><div style="font-weight:700;font-size:1rem;">' + escapeHtml(nome) + '</div>' +
-                        '<span style="font-size:0.75rem;color:#64748b;font-family:monospace;background:#e2e8f0;padding:2px 8px;border-radius:4px;">' + escapeHtml(codigo) + '</span></div>' +
-                        '<span style="padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;background:' + statusColor + '20;color:' + statusColor + ';">' + statusLabel + '</span>' +
+                        '<div><span style="font-size:0.65rem;padding:2px 8px;border-radius:8px;background:#d9770615;color:#d97706;font-weight:600;"><i class="fas fa-user-tie"></i> RH — Funcionário</span></div>' +
+                        '<button onclick="qrInlineBackToList(this)" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;" title="Voltar"><i class="fas fa-arrow-left"></i></button>' +
                     '</div>' +
-                    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + estoque + '</div><div style="font-size:0.7rem;color:#64748b;">Atual</div></div>' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + minimo + '</div><div style="font-size:0.7rem;color:#64748b;">Mínimo</div></div>' +
-                        '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + (match.unidade || 'UN') + '</div><div style="font-size:0.7rem;color:#64748b;">Unidade</div></div>' +
+                    '<div style="text-align:center;padding:16px;">' +
+                        '<div style="width:60px;height:60px;border-radius:50%;background:#d9770620;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;"><i class="fas fa-user" style="font-size:24px;color:#d97706;"></i></div>' +
+                        '<div style="font-weight:700;font-size:1.1rem;">' + escapeHtml(item.nome) + '</div>' +
+                        '<div style="font-size:0.8rem;color:#64748b;margin-top:4px;">' + escapeHtml(item.cargo || '') + ' — ' + escapeHtml(item.setor || '') + '</div>' +
+                        '<div style="font-family:monospace;font-size:0.75rem;color:#94a3b8;margin-top:4px;">Matrícula: ' + escapeHtml(item.codigo) + '</div>' +
                     '</div>' +
-                    '<div style="display:flex;gap:8px;">' +
-                        '<button onclick="qrInlineMovement(\'entrada\')" class="btn btn-secondary" style="flex:1;background:#22c55e;color:#fff;border-color:#22c55e;font-size:0.8rem;"><i class="fas fa-arrow-down"></i> Entrada</button>' +
-                        '<button onclick="qrInlineMovement(\'saida\')" class="btn btn-secondary" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-size:0.8rem;"><i class="fas fa-arrow-up"></i> Saída / Baixa</button>' +
+                    '<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:10px;text-align:center;margin-top:10px;">' +
+                        '<i class="fas fa-check-circle" style="color:#2563eb;"></i> <span style="font-size:0.8rem;color:#1e40af;font-weight:600;">Funcionário identificado — responsável registrado na movimentação</span>' +
                     '</div>' +
                 '</div>';
-        } catch (err) {
-            panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-circle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Erro ao buscar material</p></div>';
+            return;
+        }
+
+        const acaoPrimariaIcon = item.acao_primaria === 'entrada' ? 'fa-arrow-down' : 'fa-arrow-up';
+        const acaoPrimariaBg = item.acao_primaria === 'entrada' ? '#22c55e' : '#ef4444';
+        const acaoSecundariaIcon = item.acao_primaria === 'entrada' ? 'fa-arrow-up' : 'fa-arrow-down';
+        const acaoSecundariaBg = item.acao_primaria === 'entrada' ? '#ef4444' : '#22c55e';
+        const acaoSecundariaLabel = item.acao_primaria === 'entrada' ? 'Saída / Baixa' : 'Entrada';
+
+        panel.innerHTML =
+            '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px;">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">' +
+                    '<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">' +
+                        '<span style="font-size:0.65rem;padding:2px 8px;border-radius:8px;background:' + item.modulo_color + '15;color:' + item.modulo_color + ';font-weight:600;"><i class="fas ' + item.modulo_icon + '"></i> ' + item.modulo + '</span>' +
+                        '<span style="font-size:0.65rem;padding:2px 8px;border-radius:8px;background:#f1f5f9;color:#475569;font-weight:600;">' + tipoLabel + '</span>' +
+                    '</div>' +
+                    '<div style="display:flex;gap:6px;align-items:center;">' +
+                        '<span style="padding:4px 12px;border-radius:12px;font-size:0.7rem;font-weight:600;background:' + statusColor + '20;color:' + statusColor + ';">' + statusLabel + '</span>' +
+                        '<button onclick="qrInlineBackToList(this)" style="background:none;border:none;color:#64748b;cursor:pointer;font-size:12px;" title="Voltar"><i class="fas fa-arrow-left"></i></button>' +
+                    '</div>' +
+                '</div>' +
+                '<div style="margin-bottom:12px;">' +
+                    '<div style="font-weight:700;font-size:1rem;">' + escapeHtml(item.nome) + '</div>' +
+                    '<span style="font-size:0.75rem;color:#64748b;font-family:monospace;background:#e2e8f0;padding:2px 8px;border-radius:4px;">' + escapeHtml(item.codigo) + '</span>' +
+                '</div>' +
+                '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;">' +
+                    '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + estoque + '</div><div style="font-size:0.7rem;color:#64748b;">Atual</div></div>' +
+                    '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + minimo + '</div><div style="font-size:0.7rem;color:#64748b;">Mínimo</div></div>' +
+                    '<div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;"><div style="font-size:1.3rem;font-weight:800;color:#1e293b;">' + (item.unidade || 'UN') + '</div><div style="font-size:0.7rem;color:#64748b;">Unidade</div></div>' +
+                '</div>' +
+                (item.localizacao ? '<div style="margin-bottom:10px;padding:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:0.75rem;"><i class="fas fa-map-marker-alt" style="color:#16a34a;"></i> <strong>Localização:</strong> ' + escapeHtml(typeof item.localizacao === 'object' ? (item.localizacao.alm || '') + '/' + (item.localizacao.cor || '') + '/' + (item.localizacao.prt || '') + '/' + (item.localizacao.pos || '') : item.localizacao) + '</div>' : '') +
+                '<div style="background:' + acaoPrimariaBg + '10;border:1px dashed ' + acaoPrimariaBg + '40;border-radius:8px;padding:8px;margin-bottom:10px;text-align:center;">' +
+                    '<span style="font-size:0.7rem;color:' + acaoPrimariaBg + ';font-weight:600;"><i class="fas fa-magic"></i> Ação sugerida: ' + item.acao_label + '</span>' +
+                '</div>' +
+                '<div style="display:flex;gap:8px;">' +
+                    '<button onclick="qrInlineMovement(\'entrada\')" class="btn btn-secondary" style="flex:1;background:#22c55e;color:#fff;border-color:#22c55e;font-size:0.8rem;' + (item.acao_primaria === 'entrada' ? 'box-shadow:0 0 0 2px #22c55e40;' : '') + '"><i class="fas fa-arrow-down"></i> Entrada</button>' +
+                    '<button onclick="qrInlineMovement(\'saida\')" class="btn btn-secondary" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-size:0.8rem;' + (item.acao_primaria === 'saida' ? 'box-shadow:0 0 0 2px #ef444440;' : '') + '"><i class="fas fa-arrow-up"></i> Saída / Baixa</button>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function qrInlineBackToList(btn) {
+        const panel = btn.closest('#qr-inline-result-panel, #qr-inline-manual-result');
+        if (panel && window._qrSearchResults && window._qrSearchResults.length > 1) {
+            qrInlineRenderList(window._qrSearchResults, panel);
         }
     }
 
     function qrInlineMovement(tipo) {
         if (!qrInlineSelectedMaterial) return;
         const mat = qrInlineSelectedMaterial;
-        const id = mat.id || mat.material_id;
+        const rawMat = mat._raw || mat;
+        const id = rawMat.id || mat.id;
+
+        // For PCP products/materials, call PCP API
+        if (mat.modulo === 'PCP' && (mat.tipo_item === 'produto' || mat.tipo_item === 'material-pcp')) {
+            qrInlinePCPMovement(tipo, mat);
+            return;
+        }
+
+        // Default: Compras module movement
         if (tipo === 'entrada') {
             if (typeof abrirEntrada === 'function') {
-                abrirEntrada(id, mat.descricao || mat.descrição || '', mat.quantidade_estoque || mat.estoque || 0);
+                abrirEntrada(id, mat.nome || rawMat.descricao || '', mat.estoque || 0);
             } else {
                 const el = document.getElementById('entrada-id'); if (el) el.value = id;
-                const n = document.getElementById('entrada-nome'); if (n) n.value = mat.descricao || mat.descrição || '';
-                const ea = document.getElementById('entrada-estoque-atual'); if (ea) ea.value = mat.quantidade_estoque || mat.estoque || 0;
-                abrirModal('modal-entrada');
+                const n = document.getElementById('entrada-nome'); if (n) n.value = mat.nome || rawMat.descricao || '';
+                const ea = document.getElementById('entrada-estoque-atual'); if (ea) ea.value = mat.estoque || 0;
+                if (typeof abrirModal === 'function') abrirModal('modal-entrada');
             }
         } else {
             if (typeof abrirSaida === 'function') {
-                abrirSaida(id, mat.descricao || mat.descrição || '', mat.quantidade_estoque || mat.estoque || 0);
+                abrirSaida(id, mat.nome || rawMat.descricao || '', mat.estoque || 0);
             } else {
                 const el = document.getElementById('saida-id'); if (el) el.value = id;
-                const n = document.getElementById('saida-nome'); if (n) n.value = mat.descricao || mat.descrição || '';
-                const d = document.getElementById('saida-disponivel'); if (d) d.value = mat.quantidade_estoque || mat.estoque || 0;
-                abrirModal('modal-saida');
+                const n = document.getElementById('saida-nome'); if (n) n.value = mat.nome || rawMat.descricao || '';
+                const d = document.getElementById('saida-disponivel'); if (d) d.value = mat.estoque || 0;
+                if (typeof abrirModal === 'function') abrirModal('modal-saida');
             }
         }
     }
 
-    // ---- Generate QR ----
+    async function qrInlinePCPMovement(tipo, mat) {
+        const rawMat = mat._raw || {};
+        const id = rawMat.id || mat.id;
+        const endpoint = tipo === 'entrada'
+            ? '/api/pcp/materias-primas/' + id + '/entrada'
+            : '/api/pcp/materias-primas/' + id + '/saida';
+
+        const quantidade = prompt((tipo === 'entrada' ? 'Quantidade para ENTRADA' : 'Quantidade para SAÍDA/BAIXA') + ' de "' + (mat.nome || '') + '":', '1');
+        if (!quantidade || isNaN(quantidade) || Number(quantidade) <= 0) return;
+
+        const motivo = prompt('Motivo da movimentação (opcional):', 'Via QR Code integrado');
+
+        try {
+            const r = await fetch(endpoint, {
+                method: 'POST',
+                headers: getQrAuthHeaders(),
+                body: JSON.stringify({
+                    quantidade: Number(quantidade),
+                    motivo: motivo || 'Via QR Code integrado',
+                    observacoes: '[QR] Movimentação via painel QR Code integrado - módulo ' + mat.modulo
+                })
+            });
+            if (r.ok) {
+                showToast((tipo === 'entrada' ? 'Entrada' : 'Saída') + ' registrada com sucesso! (' + mat.modulo + ')', 'success');
+                // Refresh the estoque page if applicable
+                if (typeof carregarEstoque === 'function') carregarEstoque();
+            } else {
+                const err = await r.json().catch(() => ({}));
+                showToast('Erro: ' + (err.error || err.message || 'Falha na movimentação'), 'error');
+            }
+        } catch(e) {
+            showToast('Erro de conexão: ' + e.message, 'error');
+        }
+    }
+
+    // ---- Generate QR (Multi-Module) ----
     async function qrInlineSearchGenerate(query) {
         const container = document.getElementById('qr-inline-gen-results');
         if (!container) return;
         if (!query || query.length < 2) { container.innerHTML = ''; return; }
+
+        const headers = getQrAuthHeaders();
+        const allItems = [];
+
+        // Search Compras
         try {
-            const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(query), { headers: getQrAuthHeaders() });
-            const data = await response.json();
-            const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
-            if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:10px;">Nenhum material encontrado</p>'; return; }
-            container.innerHTML = items.slice(0, 10).map(m => {
-                const nome = escapeHtml(m.descricao || m.descrição || m.nome || '—');
-                const cod = escapeHtml(m.codigo || m.código || '—');
-                return '<div onclick="qrInlineGenerateFor(\'' + (m.codigo || m.código || '') + '\', \'' + nome.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
-                    '<div><div style="font-weight:600;font-size:0.85rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
-                    '<i class="fas fa-qrcode" style="color:#6366f1;"></i></div>';
-            }).join('');
-        } catch (e) { container.innerHTML = '<p style="color:#ef4444;font-size:0.8rem;">Erro ao buscar</p>'; }
+            const r = await fetch('/api/compras/estoque/materiais-com-entrada?search=' + encodeURIComponent(query), { headers });
+            if (r.ok) {
+                const data = await r.json();
+                const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
+                items.forEach(m => allItems.push({
+                    codigo: m.codigo || m.código || '',
+                    nome: m.descricao || m.descrição || m.nome || '',
+                    modulo: 'Compras',
+                    modulo_icon: 'fa-shopping-cart',
+                    modulo_color: '#6366f1',
+                    qr_prefix: 'ZYNTRA:MP:'
+                }));
+            }
+        } catch(e) {}
+
+        // Search PCP Produtos
+        try {
+            const r = await fetch('/api/pcp/produtos?search=' + encodeURIComponent(query) + '&limit=5', { headers });
+            if (r.ok) {
+                const data = await r.json();
+                const items = data.produtos || data.data || (Array.isArray(data) ? data : []);
+                items.forEach(p => allItems.push({
+                    codigo: p.codigo || p.codigo_produto || p.sku || '',
+                    nome: p.nome || p.descricao || '',
+                    modulo: 'PCP',
+                    modulo_icon: 'fa-industry',
+                    modulo_color: '#0891b2',
+                    qr_prefix: 'ZYNTRA:PROD:'
+                }));
+            }
+        } catch(e) {}
+
+        // Search PCP Materiais
+        try {
+            const r = await fetch('/api/pcp/materiais/buscar?q=' + encodeURIComponent(query), { headers });
+            if (r.ok) {
+                const data = await r.json();
+                const items = data.materiais || data.data || (Array.isArray(data) ? data : []);
+                items.forEach(m => {
+                    if (!allItems.find(x => x.codigo === (m.codigo || m.codigo_material || ''))) {
+                        allItems.push({
+                            codigo: m.codigo || m.codigo_material || '',
+                            nome: m.nome || m.descricao || '',
+                            modulo: 'PCP',
+                            modulo_icon: 'fa-cogs',
+                            modulo_color: '#059669',
+                            qr_prefix: 'ZYNTRA:MAT:'
+                        });
+                    }
+                });
+            }
+        } catch(e) {}
+
+        if (allItems.length === 0) {
+            container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:10px;">Nenhum item encontrado</p>';
+            return;
+        }
+
+        container.innerHTML = allItems.slice(0, 15).map(m => {
+            const nome = escapeHtml(m.nome);
+            const cod = escapeHtml(m.codigo);
+            const prefix = m.qr_prefix || 'ZYNTRA:MP:';
+            return '<div onclick="qrInlineGenerateFor(\'' + prefix + (m.codigo || '').replace(/'/g, "\\'") + '\', \'' + nome.replace(/'/g, "\\'") + '\', \'' + m.modulo + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f8fafc;border-radius:8px;margin-bottom:6px;cursor:pointer;border:1px solid #e2e8f0;transition:all 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
+                '<div style="display:flex;align-items:center;gap:10px;">' +
+                    '<div style="width:28px;height:28px;border-radius:6px;background:' + m.modulo_color + '15;display:flex;align-items:center;justify-content:center;"><i class="fas ' + m.modulo_icon + '" style="color:' + m.modulo_color + ';font-size:11px;"></i></div>' +
+                    '<div><div style="font-weight:600;font-size:0.85rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + ' <span style="color:' + m.modulo_color + ';font-weight:600;">(' + m.modulo + ')</span></div></div>' +
+                '</div>' +
+                '<i class="fas fa-qrcode" style="color:#6366f1;"></i></div>';
+        }).join('');
     }
 
-    function qrInlineGenerateFor(codigo, nome) {
+    function qrInlineGenerateFor(qrData, nome, modulo) {
         const preview = document.getElementById('qr-inline-gen-preview');
         if (!preview) return;
-        preview.innerHTML = '<div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;"><canvas id="qr-inline-canvas"></canvas>' +
-            '<div style="margin-top:10px;"><div style="font-weight:700;font-size:0.95rem;">' + nome + '</div><div style="font-size:0.75rem;color:#64748b;font-family:monospace;">' + escapeHtml(codigo) + '</div></div>' +
+        const moduloDisplay = modulo || 'Compras';
+        preview.innerHTML = '<div style="background:#fff;border-radius:12px;padding:24px;border:1px solid #e2e8f0;text-align:center;">' +
+            '<canvas id="qr-inline-canvas" style="display:block;margin:0 auto;"></canvas>' +
+            '<div style="margin-top:12px;"><div style="font-weight:700;font-size:0.95rem;">' + escapeHtml(nome) + '</div>' +
+            '<div style="font-size:0.7rem;color:#64748b;font-family:monospace;margin-top:4px;">' + escapeHtml(qrData) + '</div>' +
+            '<div style="margin-top:6px;"><span style="font-size:0.65rem;padding:2px 8px;border-radius:8px;background:#6366f115;color:#6366f1;font-weight:600;">' + moduloDisplay + '</span></div></div>' +
             '<div style="display:flex;gap:8px;margin-top:14px;">' +
             '<button onclick="qrInlineDownloadQR()" class="btn btn-secondary" style="flex:1;font-size:0.8rem;"><i class="fas fa-download"></i> Baixar PNG</button>' +
             '<button onclick="qrInlinePrintQR()" class="btn btn-primary" style="flex:1;font-size:0.8rem;"><i class="fas fa-print"></i> Imprimir</button></div></div>';
         if (typeof QRCode !== 'undefined') {
-            QRCode.toCanvas(document.getElementById('qr-inline-canvas'), codigo, { width: 180, margin: 2 });
+            QRCode.toCanvas(document.getElementById('qr-inline-canvas'), qrData, { width: 180, margin: 2 });
         }
     }
 
@@ -969,7 +1421,7 @@
         const canvas = document.getElementById('qr-inline-canvas');
         if (!canvas) return;
         const win = window.open('', '', 'width=400,height=500');
-        win.document.write('<html><body style="text-align:center;padding:20px;"><img src="' + canvas.toDataURL() + '" style="max-width:200px;"><br><p>' + (qrInlineSelectedMaterial?.descricao || '') + '</p></body></html>');
+        win.document.write('<html><body style="text-align:center;padding:20px;"><img src="' + canvas.toDataURL() + '" style="max-width:200px;"><br><p>' + escapeHtml(qrInlineSelectedMaterial?.nome || '') + '</p></body></html>');
         win.document.close();
         win.print();
     }
@@ -981,16 +1433,6 @@
         div.appendChild(document.createTextNode(text));
         return div.innerHTML;
     }
-
-    // Enter key for manual search
-    document.addEventListener('DOMContentLoaded', function() {
-        const manualInput = document.getElementById('qr-inline-manual-code');
-        if (manualInput) {
-            manualInput.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') qrInlineSearchManual();
-            });
-        }
-    });
     </script>
 </body>
 </html>
