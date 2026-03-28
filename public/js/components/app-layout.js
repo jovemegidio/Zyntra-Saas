@@ -164,9 +164,61 @@
 
     function getGreeting() {
         const hour = new Date().getHours();
-        if (hour < 12) return 'Bom dia';
-        if (hour < 18) return 'Boa tarde';
+        if (hour >= 5 && hour < 12) return 'Bom dia';
+        if (hour >= 12 && hour < 18) return 'Boa tarde';
         return 'Boa noite';
+    }
+
+    function normalizeTitleText(value) {
+        if (!value) return '';
+        return String(value).replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
+    function getCurrentPageLabel(config) {
+        const explicitTitle = document.body?.dataset?.pageTitle;
+        if (explicitTitle) return explicitTitle;
+
+        const fileName = (window.location.pathname.split('/').pop() || '').toLowerCase();
+        const hash = (window.location.hash || '').replace(/^#/, '').toLowerCase();
+        const currentKey = (currentPage || '').toLowerCase();
+
+        if (config && Array.isArray(config.items)) {
+            const currentItem = config.items.find(item => {
+                const itemKey = (item.key || '').toLowerCase();
+                const itemPage = (item.page || '').toLowerCase();
+                const itemFile = itemPage.split('#')[0] || '';
+                const itemHash = itemPage.includes('#') ? itemPage.split('#')[1] : '';
+
+                if (itemKey && itemKey === currentKey) return true;
+                if (itemFile && itemFile === fileName) {
+                    if (!itemHash) return true;
+                    return itemHash === hash;
+                }
+                if (itemFile === 'index.html' && itemHash && itemHash === hash) return true;
+                return false;
+            });
+
+            if (currentItem && currentItem.title) return currentItem.title;
+        }
+
+        const pageTitleEl = document.querySelector('.page-title, .page-header h1, h1.page-title');
+        if (pageTitleEl && pageTitleEl.textContent) {
+            const cleanPageTitle = normalizeTitleText(pageTitleEl.textContent);
+            if (cleanPageTitle) return cleanPageTitle;
+        }
+
+        const docTitle = normalizeTitleText(document.title || '');
+        if (docTitle) {
+            const reducedTitle = docTitle.split('|')[0].split('—')[0].trim();
+            if (reducedTitle) return reducedTitle;
+        }
+
+        if (currentPage) {
+            const formatted = normalizeTitleText(currentPage);
+            if (formatted) return formatted;
+        }
+
+        return config?.label || 'Página';
     }
 
     function getInitial(name) {
@@ -267,6 +319,7 @@
         const userName = currentUser ? getFirstName(currentUser.nome || currentUser.name) : 'Usuário';
         const userInitial = getInitial(userName);
         const greeting = getGreeting();
+        const pageLabel = getCurrentPageLabel(config);
 
         header.innerHTML = `
             <div class="alf-header-left">
@@ -274,9 +327,11 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="alf-header-brand">
-                    <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE">
+                    <img class="alf-brand-logo-zyntra" src="/images/zyntra-branco.png" alt="Zyntra">
                     <span class="alf-separator">|</span>
-                    <span class="alf-module-name">${config.label}</span>
+                    <img class="alf-brand-logo-aluforce" src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE">
+                    <span class="alf-brand-multiplier">×</span>
+                    <span class="alf-page-name">${pageLabel}</span>
                 </div>
             </div>
             <div class="alf-header-right">
