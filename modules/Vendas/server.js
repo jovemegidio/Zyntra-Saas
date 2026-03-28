@@ -1115,6 +1115,14 @@ apiVendasRouter.get('/metas/vendedor/:vendedorId', async (req, res, next) => {
     try {
         const { vendedorId } = req.params;
         const periodo = req.query.periodo || new Date().toISOString().substring(0, 7);
+        
+        // AUDIT-FIX HIGH-02: Enforce ownership — non-admin can only view own metas
+        const user = req.user || {};
+        const isAdmin = await verificarSeAdmin(user);
+        if (!isAdmin && parseInt(vendedorId) !== user.id) {
+            return res.status(403).json({ message: 'Sem permiss\u00e3o para visualizar metas de outro vendedor.' });
+        }
+
 
         const [rows] = await pool.query(`
             SELECT m.*, u.nome as vendedor_nome,
@@ -1366,15 +1374,14 @@ apiVendasRouter.get('/comissoes/configuracao', async (req, res, next) => {
     }
 });
 
-// Atualizar configuração de comissão de vendedor (Apenas Andreia e Antonio T.I.)
+// Atualizar configuração de comissão de vendedor (Apenas admin)
 apiVendasRouter.put('/comissoes/configuracao/:vendedorId', async (req, res, next) => {
     try {
         const user = req.user;
-        const username = (user.email || '').split('@')[0].toLowerCase();
-        const USERS_PERMITIDOS_COMISSAO = ['andreia', 'antonio', 'ti', 'tialuforce'];
-        const podeAlterarComissao = USERS_PERMITIDOS_COMISSAO.includes(username);
-        if (!podeAlterarComissao) {
-            return res.status(403).json({ message: 'Apenas Andreia e Antonio (T.I.) podem alterar comissões.' });
+        // AUDIT-FIX SEC-010: Use DB-based admin check instead of hardcoded email usernames
+        const isAdmin = verificarSeAdmin(user);
+        if (!isAdmin) {
+            return res.status(403).json({ message: 'Apenas administradores podem alterar comissões.' });
         }
 
         const { vendedorId } = req.params;
@@ -1553,6 +1560,11 @@ apiVendasRouter.get('/comissoes/historico', async (req, res, next) => {
 // Exportar relatório de comissões
 apiVendasRouter.get('/comissoes/exportar', async (req, res, next) => {
     try {
+        // AUDIT-FIX HIGH-01: Admin check required — commission data is confidential
+        const isAdmin = verificarSeAdmin(req.user);
+        if (!isAdmin) {
+            return res.status(403).json({ message: 'Acesso restrito a administradores.' });
+        }
         const { periodo, formato } = req.query;
         const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
 
@@ -3168,23 +3180,35 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
         const query = `UPDATE pedidos SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
         if (DEBUG) { console.log(`📝 Query: ${query}`); console.log(`📝 Values:`, values); }
 
-        const [result] = await pool.query(query, values);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: 'Pedido não encontrado.' });
+        // AUDIT-FIX SEC-007: Use transaction for status update + stock reversal to prevent partial commit
+        let usedConnection = null;
+        if (updates.status === 'cancelado' && ['analise-credito', 'pedido-aprovado'].includes(existing.status)) {
+            usedConnection = await pool.getConnection();
+            await usedConnection.beginTransaction();
+            const [txResult] = await usedConnection.query(query, values);
+            if (txResult.affectedRows === 0) {
+                await usedConnection.rollback(); usedConnection.release();
+                return res.status(404).json({ message: 'Pedido não encontrado.' });
+            }
+        } else {
+            const [result] = await pool.query(query, values);
+            if (result.affectedRows === 0) {
+                return res.status(404).json({ message: 'Pedido não encontrado.' });
+            }
         }
 
-        if (DEBUG) console.log(`✅ Pedido ${id} atualizado com sucesso! (${result.affectedRows} linha(s) afetada(s))`);
+        if (DEBUG) console.log(`✅ Pedido ${id} atualizado com sucesso!`);
 
         // ========================================
         // ESTORNO DE ESTOQUE AO CANCELAR (via PATCH/Kanban)
         // ========================================
         let estornoEstoque = [];
         if (updates.status === 'cancelado' && ['analise-credito', 'pedido-aprovado'].includes(existing.status)) {
+            const queryFn = usedConnection ? usedConnection : pool;
             try {
                 if (DEBUG) console.log(`[ESTORNO_ESTOQUE] Cancelamento via PATCH do pedido #${id} a partir de "${existing.status}"`);
 
-                const [movimentacoes] = await pool.query(`
+                const [movimentacoes] = await queryFn.query(`
                     SELECT id, codigo_material, quantidade, quantidade_anterior, quantidade_atual
                     FROM estoque_movimentacoes
                     WHERE documento_tipo = 'pedido' AND documento_id = ? AND tipo_movimento = 'saida'
@@ -3260,6 +3284,19 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
                 }
             } catch (estornoErr) {
                 console.error(`[ESTORNO_ESTOQUE] ❌ Erro ao estornar estoque:`, estornoErr.message);
+                // AUDIT-FIX: Rollback transaction if stock reversal fails
+                if (usedConnection) {
+                    try { await usedConnection.rollback(); } catch(e) {}
+                    usedConnection.release();
+                    usedConnection = null;
+                    return res.status(500).json({ message: 'Erro ao estornar estoque. Cancelamento revertido.', error: estornoErr.message });
+                }
+            }
+            // Commit the transaction (status update + stock reversal)
+            if (usedConnection) {
+                await usedConnection.commit();
+                usedConnection.release();
+                usedConnection = null;
             }
         }
 
@@ -3580,6 +3617,16 @@ apiVendasRouter.get('/pedidos/:pedidoId/itens/:itemId', async (req, res, next) =
         await ensurePedidoItensTable();
         const { pedidoId, itemId } = req.params;
 
+        // AUDIT-FIX HIGH-03: Ownership check (mirrors PUT/DELETE verbs)
+        const [pedidoRows] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [pedidoId]);
+        if (pedidoRows.length === 0) {
+            return res.status(404).json({ message: 'Pedido não encontrado.' });
+        }
+        const isAdmin = verificarSeAdmin(req.user);
+        if (!isAdmin && pedidoRows[0].vendedor_id !== req.user?.id) {
+            return res.status(403).json({ message: 'Sem permissão para visualizar itens deste pedido.' });
+        }
+
         const [rows] = await pool.query(
             'SELECT * FROM pedido_itens WHERE id = ? AND pedido_id = ?',
             [itemId, pedidoId]
@@ -3740,6 +3787,9 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
         const { gerarNFe = true } = req.body;
         const user = req.user || {};
 
+        // AUDIT-FIX SEC-009: Ownership/admin check for faturamento
+        const isAdmin = verificarSeAdmin(user);
+
         // Verificar se pedido existe
         const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ?', [id]);
         if (pedidoRows.length === 0) {
@@ -3748,6 +3798,11 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
         }
 
         const pedido = pedidoRows[0];
+
+        if (!isAdmin && pedido.vendedor_id !== user.id) {
+            connection.release();
+            return res.status(403).json({ message: 'Sem permissão para faturar este pedido.' });
+        }
 
         // F2-08: Pre-faturamento validation
         if (pedido.status !== 'faturar') {
@@ -3967,6 +4022,9 @@ apiVendasRouter.post('/pedidos/:id/duplicar', authenticateToken, async (req, res
             ]);
         }
 
+        // AUDIT-FIX HIGH-04: Recalculate total from copied items (don't copy stale valor)
+        await atualizarTotalPedido(novoPedidoId);
+
         // Registrar no histórico do pedido original
         await registrarHistorico(
             id,
@@ -4093,6 +4151,14 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
         } = req.body;
         const user = req.user || {};
 
+        // AUDIT-FIX SEC-013: Ownership/admin check for partial invoicing
+        const isAdmin = verificarSeAdmin(user);
+        const [ownerCheck] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [id]);
+        if (ownerCheck.length > 0 && !isAdmin && ownerCheck[0].vendedor_id !== user.id) {
+            connection.release();
+            return res.status(403).json({ message: 'Sem permissão para faturar este pedido.' });
+        }
+
         // Tentativa de geração de NF-e ANTES da transação (evita timeout de TX)
         let nfeDataParcial = null;
         if (gerarNFe) {
@@ -4214,6 +4280,14 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
             observacoes = ''
         } = req.body;
         const user = req.user || {};
+
+        // AUDIT-FIX SEC-014: Ownership/admin check for remessa-entrega
+        const isAdmin = verificarSeAdmin(user);
+        const [ownerCheckR] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [id]);
+        if (ownerCheckR.length > 0 && !isAdmin && ownerCheckR[0].vendedor_id !== user.id) {
+            connection.release();
+            return res.status(403).json({ message: 'Sem permissão para operar neste pedido.' });
+        }
 
         // Tentativa de geração de NF-e de remessa ANTES da transação
         let nfeDataRemessa = null;
@@ -4579,12 +4653,30 @@ apiVendasRouter.put('/empresas/:id', authenticateToken, async (req, res, next) =
 });
 
 apiVendasRouter.delete('/empresas/:id', authenticateToken, authorizeAdmin, async (req, res, next) => {
+    const connection = await pool.getConnection();
     try {
+        await connection.beginTransaction();
         const { id } = req.params;
-        await pool.query('DELETE FROM clientes WHERE empresa_id = ?', [id]);
-        await pool.query('DELETE FROM pedidos WHERE empresa_id = ?', [id]);
-        const [result] = await pool.query('DELETE FROM empresas WHERE id = ?', [id]);
-        if (result.affectedRows === 0) return res.status(404).json({ message: 'Empresa não encontrada.' });
+        
+        // AUDIT-FIX SEC-008: Block deletion if empresa has faturado/recibo pedidos (fiscal records)
+        const [fiscal] = await connection.query(
+            'SELECT COUNT(*) as total FROM pedidos WHERE empresa_id = ? AND status IN (\'faturado\', \'recibo\', \'entregue\')',
+            [id]
+        );
+        if (fiscal[0].total > 0) {
+            await connection.rollback(); connection.release();
+            return res.status(409).json({ message: `Empresa possui ${fiscal[0].total} pedido(s) faturado(s)/entregue(s). Não é possível excluir.` });
+        }
+        
+        await connection.query('DELETE FROM clientes WHERE empresa_id = ?', [id]);
+        await connection.query('DELETE FROM pedidos WHERE empresa_id = ?', [id]);
+        const [result] = await connection.query('DELETE FROM empresas WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            await connection.rollback(); connection.release();
+            return res.status(404).json({ message: 'Empresa não encontrada.' });
+        }
+        await connection.commit();
+        connection.release();
         res.status(204).send();
     } catch (error) {
         next(error);
@@ -6219,10 +6311,11 @@ apiVendasRouter.get('/relatorios/comissoes/pdf', authenticateToken, async (req, 
     try {
         const { data_inicio, data_fim, vendedor_id, percentual_comissao } = req.query;
         const pct = parseFloat(percentual_comissao) || 1;
+        // AUDIT-FIX SEC-011: Use parameterized query instead of string interpolation
         let query = `SELECT p.vendedor_nome, COUNT(*) as qtd, SUM(p.valor) as total_vendas,
-                     SUM(p.valor * ${pct} / 100) as comissao
+                     SUM(p.valor * ? / 100) as comissao
                      FROM pedidos p WHERE p.status IN ('faturado','entregue','aprovado')`;
-        const params = [];
+        const params = [pct];
         if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
         if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
         if (vendedor_id) { query += ' AND p.vendedor_id = ?'; params.push(vendedor_id); }
@@ -6482,6 +6575,16 @@ app.get('/api/pedidos', authenticateToken, async (req, res) => {
             return res.json([]);
         }
 
+        // AUDIT-FIX SEC-012: Add ownership filter — non-admin users only see their own orders
+        const user = req.user || {};
+        const isAdmin = verificarSeAdmin(user);
+        let ownershipClause = '';
+        const params = [];
+        if (!isAdmin && user.id) {
+            ownershipClause = 'WHERE p.vendedor_id = ?';
+            params.push(user.id);
+        }
+
         const [rows] = await pool.query(`
             SELECT
                 p.id,
@@ -6497,9 +6600,10 @@ app.get('/api/pedidos', authenticateToken, async (req, res) => {
             FROM pedidos p
             LEFT JOIN empresas e ON p.empresa_id = e.id
             LEFT JOIN usuarios u ON p.vendedor_id = u.id
+            ${ownershipClause}
             ORDER BY p.id DESC
             LIMIT 200
-        `);
+        `, params);
 
         res.json(rows);
     } catch (error) {

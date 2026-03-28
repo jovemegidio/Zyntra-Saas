@@ -1695,6 +1695,8 @@
         function formatarData(data) { if (!data) return '-'; return new Date(data).toLocaleDateString('pt-BR'); }
         function formatarValor(valor) { if (!valor) return 'R$ 0,00'; return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`; }
         function getStatusClass(s) { return { orcamento: 'orcamento', aprovado: 'aprovado', faturado: 'faturado', entregue: 'entregue', pendente: 'pendente', cancelado: 'cancelado' }[s] || 'pendente'; }
+        // AUDIT-FIX FRONTEND XSS: Escape HTML to prevent stored XSS from user-supplied fields
+        function esc(str) { if (!str) return ''; return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
         function getStatusLabel(s) { return { orcamento: 'Orçamento', aprovado: 'Aprovado', faturado: 'Faturado', entregue: 'Entregue', pendente: 'Pendente', cancelado: 'Cancelado' }[s] || s; }
 
         function renderizarTabela() {
@@ -1722,12 +1724,12 @@
 
                 return `
                 <tr>
-                    <td><span class="pedido-número">#${p.numero || p.id}</span></td>
-                    <td><span class="cliente-nome" title="${p.cliente_nome || ''}">${p.cliente_nome || 'Cliente não informado'}</span></td>
+                    <td><span class="pedido-número">#${esc(p.numero || p.id)}</span></td>
+                    <td><span class="cliente-nome" title="${esc(p.cliente_nome || '')}">${esc(p.cliente_nome) || 'Cliente não informado'}</span></td>
                     <td>${formatarData(p.data_pedido || p.created_at)}</td>
                     <td><span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span></td>
                     <td class="valor-cell">${formatarValor(p.valor_total)}</td>
-                    <td>${p.vendedor_nome || '-'}</td>
+                    <td>${esc(p.vendedor_nome) || '-'}</td>
                     <td>
                         <button class="action-btn" title="Ver" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
                         ${btnEditar}
@@ -1821,8 +1823,8 @@
                         ${(pedido.cliente_nome || 'C').charAt(0).toUpperCase()}
                     </div>
                     <div style="flex:1;">
-                        <div style="font-size:16px;font-weight:700;color:#1e293b;">${pedido.cliente_nome || 'Cliente não informado'}</div>
-                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Pedido #${pedido.numero || pedido.id} — ${formatarData(pedido.data_pedido || pedido.created_at)}</div>
+                        <div style="font-size:16px;font-weight:700;color:#1e293b;">${esc(pedido.cliente_nome) || 'Cliente não informado'}</div>
+                        <div style="font-size:12px;color:#64748b;margin-top:2px;">Pedido #${esc(pedido.numero || pedido.id)} — ${formatarData(pedido.data_pedido || pedido.created_at)}</div>
                     </div>
                     <span class="status-badge ${getStatusClass(pedido.status)}" style="font-size:12px;">${getStatusLabel(pedido.status)}</span>
                 </div>
@@ -1849,7 +1851,7 @@
 
                 <!-- Info Row -->
                 <div style="display:flex;gap:16px;margin-bottom:20px;padding:12px 16px;background:#f9fafb;border-radius:8px;border:1px solid #e5e7eb;flex-wrap:wrap;">
-                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><i class="fas fa-user-tie" style="color:var(--primary-orange);"></i><span style="color:#6b7280;">Vendedor:</span><strong style="color:#1e293b;">${pedido.vendedor_nome || '-'}</strong></div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><i class="fas fa-user-tie" style="color:var(--primary-orange);"></i><span style="color:#6b7280;">Vendedor:</span><strong style="color:#1e293b;">${esc(pedido.vendedor_nome) || '-'}</strong></div>
                     <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><i class="fas fa-calendar" style="color:var(--primary-orange);"></i><span style="color:#6b7280;">Previsão:</span><strong style="color:#1e293b;">${pedido.data_previsao ? formatarData(pedido.data_previsao) : '-'}</strong></div>
                     <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><i class="fas fa-credit-card" style="color:var(--primary-orange);"></i><span style="color:#6b7280;">Tipo:</span><strong style="color:#1e293b;">${pedido.tipo || pedido.prioridade || 'À Vista'}</strong></div>
                 </div>
@@ -1885,8 +1887,8 @@
                             ${itens.map((item, idx) => `
                                 <tr>
                                     <td style="color:#94a3b8;">${idx + 1}</td>
-                                    <td><span style="background:#f1f5f9;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">${item.código || '-'}</span></td>
-                                    <td style="font-weight:500;">${item.descrição || item.produto_nome || '-'}</td>
+                                    <td><span style="background:#f1f5f9;padding:2px 8px;border-radius:4px;font-family:monospace;font-size:11px;">${esc(item.código) || '-'}</span></td>
+                                    <td style="font-weight:500;">${esc(item.descrição || item.produto_nome) || '-'}</td>
                                     <td style="text-align:center;">${item.quantidade || 0} ${item.unidade || 'UN'}</td>
                                     <td style="text-align:right;">R$ ${(parseFloat(item.preco_unitario || item.valor_unitario) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                                     <td style="text-align:right;font-weight:600;color:#059669;">R$ ${(parseFloat(item.valor_total || item.total || item.subtotal) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
@@ -1920,7 +1922,7 @@
                 <!-- Tab: Observações -->
                 <div id="tab-vis-obs" class="tab-content-vis" style="display:none;">
                     <div style="background:#f9fafb;border-radius:8px;padding:20px;">
-                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${pedido.observacao}</p>
+                        <p style="color:#374151;font-size:14px;line-height:1.6;white-space:pre-wrap;">${esc(pedido.observacao)}</p>
                     </div>
                 </div>` : ''}
             `;

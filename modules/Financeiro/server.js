@@ -133,7 +133,22 @@ app.use(cookieParser());
 app.use('/api/financeiro', corteTemporalMiddleware);
 
 // Servir arquivos estáticos (HTML sem cache para deploy imediato)
-app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
+// AUDIT-FIX SEC-001: Block server-side source files from static serving
+const ALLOWED_STATIC_EXT = ['.html', '.css', '.js', '.png', '.jpg', '.jpeg', '.gif', '.webp', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map'];
+app.use('/modules/Financeiro', (req, res, next) => {
+    const ext = path.extname(req.path).toLowerCase();
+    if (!ext || !ALLOWED_STATIC_EXT.includes(ext)) {
+        return res.status(404).end();
+    }
+    const blocked = ['/server.js', '/database.js', '/auth.js', '/database_schema.sql'];
+    if (blocked.some(b => req.path.toLowerCase().endsWith(b))) {
+        return res.status(404).end();
+    }
+    if (req.path.toLowerCase().includes('/uploads/') || req.path.toLowerCase().includes('/api/')) {
+        return res.status(404).end();
+    }
+    next();
+}, express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 
 // ============================================
@@ -179,7 +194,7 @@ app.get('/api/financeiro/contas-pagar', authenticateToken, async (req, res) => {
 });
 
 // Criar conta a pagar
-app.post('/api/financeiro/contas-pagar', authenticateToken, async (req, res) => {
+app.post('/api/financeiro/contas-pagar', authenticateToken, requireFinancePermission('criar'), async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -236,7 +251,7 @@ app.post('/api/financeiro/contas-pagar', authenticateToken, async (req, res) => 
 });
 
 // Atualizar conta a pagar
-app.put('/api/financeiro/contas-pagar/:id', authenticateToken, async (req, res) => {
+app.put('/api/financeiro/contas-pagar/:id', authenticateToken, requireFinancePermission('editar'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -295,7 +310,7 @@ app.put('/api/financeiro/contas-pagar/:id', authenticateToken, async (req, res) 
 });
 
 // Baixar conta a pagar (pagamento) - Suporta /baixar e /pagar
-app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (req, res) => {
+app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, requireFinancePermission('aprovar'), async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -303,13 +318,37 @@ app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (re
         const { id } = req.params;
         const { data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes } = req.body;
         
+        // AUDIT-FIX SEC-002: Validate all inputs to prevent double-pay and bad data
+        const valorParsed = parseFloat(valor_pago);
+        if (!Number.isFinite(valorParsed) || valorParsed <= 0) {
+            connection.release();
+            return res.status(400).json({ error: 'Valor pago inválido' });
+        }
+        const valorSanitizado = Math.round(valorParsed * 100) / 100;
+        
+        if (!data_pagamento || !/^\d{4}-\d{2}-\d{2}/.test(data_pagamento)) {
+            connection.release();
+            return res.status(400).json({ error: 'Data de pagamento inválida' });
+        }
+        
+        // Check existence and prevent double-pay
+        const [conta] = await connection.execute('SELECT status FROM contas_pagar WHERE id = ?', [id]);
+        if (conta.length === 0) {
+            await connection.rollback(); connection.release();
+            return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+        if (conta[0].status === 'pago') {
+            await connection.rollback(); connection.release();
+            return res.status(409).json({ error: 'Esta conta já foi paga' });
+        }
+        
         // Atualizar conta a pagar
         await connection.execute(
             `UPDATE contas_pagar 
              SET status = 'pago', data_pagamento = ?, valor_pago = ?, 
                  conta_bancaria_id = ?, forma_pagamento = ?, observacoes_pagamento = ?
              WHERE id = ?`,
-            [data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes, id]
+            [data_pagamento, valorSanitizado, conta_bancaria_id, forma_pagamento, observacoes, id]
         );
         
         // Registrar pagamento
@@ -317,7 +356,7 @@ app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (re
             `INSERT INTO financeiro_pagamentos 
              (conta_pagar_id, data_pagamento, valor, conta_bancaria_id, forma_pagamento, usuario_id)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [id, data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, req.user.id]
+            [id, data_pagamento, valorSanitizado, conta_bancaria_id, forma_pagamento, req.user.id]
         );
         
         await connection.commit();
@@ -479,7 +518,7 @@ app.post('/api/financeiro/contas-receber/:id/receber', authenticateToken, async 
 });
 
 // Criar conta a receber
-app.post('/api/financeiro/contas-receber', authenticateToken, async (req, res) => {
+app.post('/api/financeiro/contas-receber', authenticateToken, requireFinancePermission('criar'), async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
@@ -764,7 +803,7 @@ app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, upl
 });
 
 // Editar conta a receber
-app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res) => {
+app.put('/api/financeiro/contas-receber/:id', authenticateToken, requireFinancePermission('editar'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -854,8 +893,8 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
                 data_para_cartorio = COALESCE(?, data_para_cartorio),
                 data_protestado = COALESCE(?, data_protestado)
              WHERE id = ?`,
-            [descricao, valor_total, data_vencimento, forma_recebimento, 
-             `${cliente_nome || ''} | ${categoria || ''} | ${conta_bancaria || ''}`, 
+            [descricao, valorSanitizado, data_vencimento, forma_recebimento, 
+             req.body.observacoes || null, 
              status, pago_no_dia,
              aceita_troca_factory !== undefined ? (aceita_troca_factory ? 1 : 0) : null,
              comprovante_url, dia_recomprado, data_para_cartorio, data_protestado, id]
@@ -1068,15 +1107,28 @@ app.get('/api/financeiro/contas-bancarias', authenticateToken, async (req, res) 
     }
 });
 
-app.post('/api/financeiro/contas-bancarias', authenticateToken, async (req, res) => {
+app.post('/api/financeiro/contas-bancarias', authenticateToken, requireFinancePermission('criar'), async (req, res) => {
     try {
         const { banco, agencia, conta, tipo_conta, saldo_inicial, descricao } = req.body;
+        
+        // AUDIT-FIX HIGH-02: Validate required fields and types
+        if (!banco || typeof banco !== 'string' || banco.trim().length === 0) {
+            return res.status(400).json({ error: 'Nome do banco é obrigatório' });
+        }
+        const TIPOS_VALIDOS = ['corrente', 'poupanca', 'investimento', 'caixa', 'outros'];
+        if (tipo_conta && !TIPOS_VALIDOS.includes(tipo_conta)) {
+            return res.status(400).json({ error: 'Tipo de conta inválido' });
+        }
+        const saldoSanitizado = saldo_inicial !== undefined ? parseFloat(saldo_inicial) : 0;
+        if (isNaN(saldoSanitizado)) {
+            return res.status(400).json({ error: 'Saldo inicial deve ser um número' });
+        }
         
         const [result] = await pool.execute(
             `INSERT INTO contas_bancarias 
              (banco, agencia, conta, tipo_conta, saldo_inicial, saldo_atual, descricao)
              VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [banco, agencia, conta, tipo_conta, saldo_inicial, saldo_inicial, descricao]
+            [banco.trim(), agencia || null, conta || null, tipo_conta || null, saldoSanitizado, saldoSanitizado, descricao || null]
         );
         
         res.json({ success: true, id: result.insertId, message: 'Conta bancária criada' });
@@ -1137,6 +1189,15 @@ app.get('/api/financeiro/dashboard', authenticateToken, async (req, res) => {
 app.get('/api/financeiro/relatorios/dre', authenticateToken, async (req, res) => {
     try {
         const { inicio, fim, periodo } = req.query;
+        
+        // AUDIT-FIX HIGH-06: Validate date format to prevent injection via BETWEEN clause
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!inicio || !fim || !dateRegex.test(inicio) || !dateRegex.test(fim)) {
+            return res.status(400).json({ error: 'Parâmetros inicio e fim são obrigatórios no formato YYYY-MM-DD' });
+        }
+        if (new Date(inicio) > new Date(fim)) {
+            return res.status(400).json({ error: 'Data de início não pode ser maior que data de fim' });
+        }
         
         const [receitas] = await pool.execute(
             `SELECT SUM(valor_recebido) as total 
@@ -1366,7 +1427,7 @@ app.post('/api/financeiro/bancos', authenticateToken, async (req, res) => {
 });
 
 // Atualizar banco
-app.put('/api/financeiro/bancos/:id', authenticateToken, async (req, res) => {
+app.put('/api/financeiro/bancos/:id', authenticateToken, requireFinancePermission('editar'), async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -1939,9 +2000,33 @@ async function startServer() {
                     const tabela = tipo === 'pagar' ? 'contas_pagar' : 'contas_receber';
                     const campo_entidade = tipo === 'pagar' ? 'fornecedor_id' : 'cliente_id';
                     
-                    for (const parcela of parcelas) {
+                    // AUDIT-FIX HIGH-04: Validate parcelas array
+                    if (!Array.isArray(parcelas) || parcelas.length === 0) {
+                        await connection.rollback();
+                        connection.release();
+                        return res.status(400).json({ error: 'Parcelas deve ser uma lista não vazia' });
+                    }
+                    if (parcelas.length > 120) {
+                        await connection.rollback();
+                        connection.release();
+                        return res.status(400).json({ error: 'Número máximo de parcelas é 120' });
+                    }
+                    const dateRegexP = /^\d{4}-\d{2}-\d{2}$/;
+                    for (let i = 0; i < parcelas.length; i++) {
+                        const parcela = parcelas[i];
+                        const valorParcela = parseFloat(parcela.valor);
+                        if (isNaN(valorParcela) || valorParcela <= 0) {
+                            await connection.rollback();
+                            connection.release();
+                            return res.status(400).json({ error: `Parcela ${i + 1}: valor deve ser um número positivo` });
+                        }
+                        if (!parcela.vencimento || !dateRegexP.test(parcela.vencimento)) {
+                            await connection.rollback();
+                            connection.release();
+                            return res.status(400).json({ error: `Parcela ${i + 1}: vencimento deve estar no formato YYYY-MM-DD` });
+                        }
                         const sql = `INSERT INTO ${tabela} (${campo_entidade}, valor, descricao, data_vencimento, status, forma_pagamento, conta_bancaria_id) VALUES (?, ?, ?, ?, 'pendente', ?, ?)`;
-                        await connection.execute(sql, [entidade_id, parcela.valor, parcela.descricao, parcela.vencimento, forma_pagamento, conta_bancaria_id]);
+                        await connection.execute(sql, [entidade_id, valorParcela, parcela.descricao || null, parcela.vencimento, forma_pagamento, conta_bancaria_id]);
                     }
                     
                     await connection.commit();
@@ -2046,6 +2131,22 @@ async function startServer() {
         app.delete('/api/financeiro/anexos/:id', authenticateToken, requireFinancePermission('excluir'), async (req, res) => {
             try {
                 const { id } = req.params;
+                
+                // AUDIT-FIX HIGH-01: Check existence, then delete file from disk to prevent orphaned files
+                const [anexo] = await pool.execute('SELECT caminho_arquivo FROM financeiro_anexos WHERE id = ?', [id]);
+                if (anexo.length === 0) {
+                    return res.status(404).json({ error: 'Anexo não encontrado' });
+                }
+                
+                // Delete physical file (best-effort — don't fail if file missing)
+                try {
+                    const fs = require('fs');
+                    if (fs.existsSync(anexo[0].caminho_arquivo)) {
+                        fs.unlinkSync(anexo[0].caminho_arquivo);
+                    }
+                } catch(e) {
+                    console.warn('⚠️ Não foi possível excluir arquivo físico do anexo:', e.message);
+                }
                 
                 await pool.execute('DELETE FROM financeiro_anexos WHERE id = ?', [id]);
                 
