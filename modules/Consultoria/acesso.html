@@ -75,18 +75,18 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
-                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Consultoria</span>
-                    </div>
+                    <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                    <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                    <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                    <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">×</span>
+                    <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Consultoria</span>
+                </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <button class="header-btn" title="Notificações"><i class="fas fa-bell"></i></button>
                     <div class="user-greeting">
-                        <span>Olá, <strong id="user-name">Consultor</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Consultor</strong></span>
                         <div class="user-avatar"><span id="user-initials">C</span></div>
                     </div>
                 </div>
@@ -118,5 +118,22 @@
 
     <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
     <script src="/js/user-dropdown.js?v=20260319" defer></script>
+
+    <script>
+    (function(){
+        const h = new Date().getHours();
+        const el = document.getElementById('greeting-text');
+        if(el) el.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+        fetch('/api/me', {credentials:'include'})
+            .then(r => r.json())
+            .then(u => {
+                const nome = (u.nome || u.name || 'Consultor').split(' ')[0];
+                const nameEl = document.getElementById('user-name');
+                if(nameEl) nameEl.textContent = nome;
+                const initEl = document.getElementById('user-initials');
+                if(initEl) initEl.textContent = nome.charAt(0).toUpperCase();
+            }).catch(() => {});
+    })();
+    </script>
 </body>
 </html>

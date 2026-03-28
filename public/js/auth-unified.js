@@ -82,8 +82,6 @@
 
     // Flag para evitar múltiplos redirecionamentos
     let isRedirecting = false;
-    let _uiSyncTimer = null;
-    const CHAT_WIDGET_VERSION = '20260615';
 
     // =========================================================================
     // 🔄 TOKEN REFRESH INTERCEPTOR
@@ -421,190 +419,6 @@
         return false;
     }
 
-    function escapeHtml(value) {
-        return String(value || '').replace(/[&<>"']/g, function (ch) {
-            return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch] || ch;
-        });
-    }
-
-    function getDynamicGreeting(date = new Date()) {
-        const hour = date.getHours();
-        if (hour >= 5 && hour < 12) return 'Bom dia';
-        if (hour >= 12 && hour < 18) return 'Boa tarde';
-        return 'Boa noite';
-    }
-
-    function normalizeText(value) {
-        return String(value || '').replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
-    }
-
-    function toTitleCaseFromSlug(value) {
-        const normalized = normalizeText(value);
-        if (!normalized) return '';
-        return normalized.replace(/\b\w/g, function (ch) { return ch.toUpperCase(); });
-    }
-
-    function resolvePageLabel() {
-        const body = document.body;
-        const explicit = body?.dataset?.pageTitle;
-        if (explicit) return explicit;
-
-        const pageTitleEl = document.querySelector('.page-title, .page-header h1, h1.page-title, h1');
-        if (pageTitleEl && pageTitleEl.textContent) {
-            const pageTitle = normalizeText(pageTitleEl.textContent);
-            if (pageTitle) return pageTitle;
-        }
-
-        const activeLegacy = document.querySelector('.sidebar-btn.active[title]');
-        if (activeLegacy && activeLegacy.getAttribute('title')) {
-            return activeLegacy.getAttribute('title').trim();
-        }
-
-        const activeGlobal = document.querySelector('.alf-sidebar-btn.active[data-tooltip]');
-        if (activeGlobal && activeGlobal.getAttribute('data-tooltip')) {
-            return activeGlobal.getAttribute('data-tooltip').trim();
-        }
-
-        const dataPage = body?.dataset?.page;
-        if (dataPage) {
-            const formatted = toTitleCaseFromSlug(dataPage);
-            if (formatted) return formatted;
-        }
-
-        const docTitle = normalizeText(document.title || '');
-        if (docTitle) {
-            const reduced = docTitle.split('|')[0].split('—')[0].trim();
-            if (reduced) return reduced;
-        }
-
-        return 'Página';
-    }
-
-    function resolveUserFirstName(userOverride) {
-        const user = userOverride || getTabUserData() || {};
-        const raw = user.apelido || user.nome || user.name || user.userName || user.email || 'Usuário';
-        return String(raw).trim().split(/\s+/)[0] || 'Usuário';
-    }
-
-    function syncHeaderGreeting(userOverride) {
-        if (isLoginPage()) return;
-
-        const firstName = resolveUserFirstName(userOverride);
-        const initial = firstName.charAt(0).toUpperCase();
-        const greeting = getDynamicGreeting();
-
-        ['greeting-text', 'alf-greeting-text'].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = greeting;
-        });
-
-        ['user-name', 'userName', 'alf-user-name'].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = firstName;
-        });
-
-        ['user-initial', 'user-initials', 'alf-user-initial'].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = initial;
-        });
-    }
-
-    function ensureHeaderBrandStyles() {
-        if (document.getElementById('zyntra-header-standard-style')) return;
-
-        const style = document.createElement('style');
-        style.id = 'zyntra-header-standard-style';
-        style.textContent = [
-            '.zyntra-global-brand{display:flex;align-items:center;gap:10px;}',
-            '.zyntra-global-brand img{height:22px;object-fit:contain;pointer-events:none;}',
-            '.zyntra-global-brand .zyntra-separator{color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;}',
-            '.zyntra-global-brand .zyntra-multiplier{color:rgba(255,255,255,0.2);font-weight:300;font-size:16px;user-select:none;}',
-            '.zyntra-global-brand .zyntra-page-name{font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;white-space:nowrap;}',
-            '@media (max-width:768px){.zyntra-global-brand img{height:20px;}.zyntra-global-brand .zyntra-page-name{max-width:140px;overflow:hidden;text-overflow:ellipsis;}}'
-        ].join('');
-        document.head.appendChild(style);
-    }
-
-    function normalizeHeaderBrand() {
-        if (isLoginPage()) return;
-
-        const brands = document.querySelectorAll('.header .header-brand, .alf-header .alf-header-brand');
-        if (!brands.length) return;
-
-        const pageLabel = escapeHtml(resolvePageLabel());
-
-        brands.forEach(function (brand) {
-            if (!brand.dataset.zyntraStandardized) {
-                brand.dataset.zyntraStandardized = '1';
-                brand.style.display = 'flex';
-                brand.style.alignItems = 'center';
-                brand.style.gap = '10px';
-            }
-
-            brand.innerHTML =
-                '<span class="zyntra-global-brand">' +
-                    '<img src="/images/zyntra-branco.png" alt="Zyntra">' +
-                    '<span class="zyntra-separator">|</span>' +
-                    '<img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE">' +
-                    '<span class="zyntra-multiplier">×</span>' +
-                    '<span class="zyntra-page-name">' + pageLabel + '</span>' +
-                '</span>';
-        });
-    }
-
-    function normalizeLegacyChatIncludes() {
-        if (isLoginPage()) return;
-
-        const cssUrl = '/chat-teams/chat-widget.css?v=' + CHAT_WIDGET_VERSION;
-        const jsUrl = '/chat-teams/chat-widget.js?v=' + CHAT_WIDGET_VERSION;
-
-        document.querySelectorAll('link[href*="/chat/widget.css"]').forEach(function (link) {
-            link.setAttribute('href', cssUrl);
-        });
-
-        document.querySelectorAll('script[src*="/chat/widget.js"]').forEach(function (script) {
-            script.setAttribute('src', jsUrl);
-        });
-    }
-
-    function ensureChatWidgetLoaded() {
-        if (isLoginPage()) return;
-
-        normalizeLegacyChatIncludes();
-
-        if (window.__chatTeamsLoaded) return;
-        if (document.querySelector('script[src*="/chat-teams/chat-widget.js"], script[data-chat-teams-loader="1"]')) return;
-
-        if (!document.querySelector('link[href*="/chat-teams/chat-widget.css"]')) {
-            const cssLink = document.createElement('link');
-            cssLink.rel = 'stylesheet';
-            cssLink.href = '/chat-teams/chat-widget.css?v=' + CHAT_WIDGET_VERSION;
-            document.head.appendChild(cssLink);
-        }
-
-        const script = document.createElement('script');
-        script.src = '/chat-teams/chat-widget.js?v=' + CHAT_WIDGET_VERSION;
-        script.defer = true;
-        script.dataset.chatTeamsLoader = '1';
-        (document.body || document.head).appendChild(script);
-    }
-
-    function runUiStandardization(userOverride) {
-        if (isLoginPage()) return;
-        ensureHeaderBrandStyles();
-        normalizeHeaderBrand();
-        syncHeaderGreeting(userOverride);
-        const hasAuthenticatedUser = !!(userOverride || getTabUserData());
-        if (hasAuthenticatedUser) ensureChatWidgetLoaded();
-    }
-
-    function startUiSyncTimer() {
-        if (_uiSyncTimer) return;
-        _uiSyncTimer = setInterval(function () {
-            runUiStandardization();
-        }, 60 * 1000);
-    }
-
     // Função para redirecionar para login (com proteção contra loop)
     function redirectToLogin(reason = 'Não autenticado') {
         if (isRedirecting) {
@@ -640,12 +454,6 @@
             debugLog(`🔔 Outra aba modificou ${event.key} - IGNORANDO (esta aba usa sessionStorage)`);
             // Não fazer nada - esta aba continua com seu próprio token/dados em sessionStorage
         }
-    });
-
-    window.addEventListener('authSuccess', function (event) {
-        const user = event?.detail?.user || null;
-        runUiStandardization(user);
-        startUiSyncTimer();
     });
 
     // Função para verificar autenticação via API
@@ -813,16 +621,9 @@
     function initAuth() {
         debugLog('🔧 Inicializando sistema de autenticação v7.5 (Tab-Isolated + Server Validation)...');
 
-        const runInitialUi = function () {
-            runUiStandardization();
-            startUiSyncTimer();
-        };
-
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', runInitialUi, { once: true });
             document.addEventListener('DOMContentLoaded', verifyAuth);
         } else {
-            runInitialUi();
             verifyAuth();
         }
 
