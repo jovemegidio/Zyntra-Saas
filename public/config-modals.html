@@ -458,8 +458,9 @@
                             <input type="password" name="certificado_senha" placeholder="Digite a senha">
                         </div>
                         <div class="config-form-group">
-                            <label>Validade</label>
-                            <input type="date" name="certificado_validade">
+                            <label>Validade Detectada</label>
+                            <input type="date" id="certificado-validade-input" name="certificado_validade" readonly>
+                            <small>Campo preenchido automaticamente apos a validacao do certificado.</small>
                         </div>
                     </div>
                 </div>
@@ -468,11 +469,43 @@
                     <h4 class="config-form-section-title">
                         <i class="fas fa-info-circle"></i> Informações
                     </h4>
-                    <div id="certificado-info" class="config-message" style="display:none;">
+                    <div id="certificado-empty-state" class="config-message info">
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <strong>Nenhum certificado instalado</strong><br>
+                            <small>Faça o upload de um arquivo A1 (.pfx ou .p12) para habilitar a emissão e assinatura de NF-e.</small>
+                        </div>
+                    </div>
+
+                    <div id="certificado-info" class="config-message success" style="display:none;">
                         <i class="fas fa-check-circle"></i>
                         <div>
-                            <strong>Certificado válido</strong><br>
+                            <strong id="certificado-status-titulo">Certificado válido</strong><br>
                             <small>Expira em: <span id="certificado-expiracao">--</span></small>
+                        </div>
+                    </div>
+
+                    <div id="certificado-detalhes" style="display:none; margin-top: 16px;">
+                        <div class="config-form-row">
+                            <div class="config-form-group">
+                                <label>Razão Social</label>
+                                <input type="text" id="certificado-razao-social" readonly placeholder="--">
+                            </div>
+                            <div class="config-form-group">
+                                <label>CNPJ</label>
+                                <input type="text" id="certificado-cnpj" readonly placeholder="--">
+                            </div>
+                        </div>
+
+                        <div class="config-form-row">
+                            <div class="config-form-group">
+                                <label>Status</label>
+                                <input type="text" id="certificado-status" readonly placeholder="--">
+                            </div>
+                            <div class="config-form-group">
+                                <label>Dias Restantes</label>
+                                <input type="text" id="certificado-dias-restantes" readonly placeholder="--">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -480,12 +513,16 @@
         </div>
 
         <div class="config-detail-footer">
-            <div class="config-detail-footer-left"></div>
+            <div class="config-detail-footer-left">
+                <button id="btn-remover-certificado" class="config-btn config-btn-danger" onclick="deleteCertificadoConfig()" style="display:none;">
+                    <i class="fas fa-trash"></i> Remover Certificado
+                </button>
+            </div>
             <div class="config-detail-footer-right">
                 <button class="config-btn config-btn-secondary" onclick="closeConfigModal('modal-certificado')">
                     <i class="fas fa-times"></i> Cancelar
                 </button>
-                <button class="config-btn config-btn-primary" onclick="saveCertificadoConfig()">
+                <button id="btn-salvar-certificado" class="config-btn config-btn-primary" onclick="saveCertificadoConfig()">
                     <i class="fas fa-save"></i> Salvar Certificado
                 </button>
             </div>

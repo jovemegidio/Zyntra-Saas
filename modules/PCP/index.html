@@ -20015,6 +20015,13 @@
         async function verMateriaisPedido(pedidoId) {
             try {
                 const response = await fetch(`/api/pcp/pedidos/${pedidoId}/materiais`, { credentials: 'include' });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    mostrarAlertaPCP('Erro', errData.error || errData.message || `Erro ${response.status} ao carregar materiais`, 'error');
+                    return;
+                }
+
                 const data = await response.json();
 
                 if (data.error) {
@@ -20022,7 +20029,9 @@
                     return;
                 }
 
-                const { pedido, itens, totais } = data;
+                const pedido = data.pedido || {};
+                const itens = data.itens || [];
+                const totais = data.totais || {};
 
                 // Gerar HTML dos itens - só mostra se tiver mais de 1 produto
                 let itensHTML = '';

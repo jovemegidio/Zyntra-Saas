@@ -1724,18 +1724,68 @@ async function excluirProjeto(id) {
 // CERTIFICADO DIGITAL
 // =========================
 
+function formatCertificadoDate(dateValue) {
+    if (!dateValue) return '--';
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return '--';
+
+    return date.toLocaleDateString('pt-BR');
+}
+
+function formatCertificadoDateInput(dateValue) {
+    if (!dateValue) return '';
+
+    const date = new Date(dateValue);
+    if (Number.isNaN(date.getTime())) return '';
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+function getCertificadoStatusMeta(status) {
+    switch (status) {
+        case 'expirado':
+            return { badgeClass: 'danger', label: 'Expirado', title: 'Certificado expirado' };
+        case 'expirando':
+            return { badgeClass: 'warning', label: 'Expirando', title: 'Certificado proximo do vencimento' };
+        case 'valido':
+            return { badgeClass: 'success', label: 'Valido', title: 'Certificado valido' };
+        default:
+            return { badgeClass: 'info', label: 'Nao configurado', title: 'Nenhum certificado instalado' };
+    }
+}
+
+function resetCertificadoForm() {
+    const form = document.getElementById('form-certificado');
+    if (form) {
+        form.reset();
+    }
+
+    const fileLabel = document.querySelector('#form-certificado .config-file-upload-name');
+    if (fileLabel) {
+        fileLabel.textContent = 'Nenhum certificado selecionado';
+    }
+}
+
 /**
  * Carrega dados do certificado
  */
 async function loadCertificadoData() {
     try {
         const response = await fetch('/api/configuracoes/certificado');
-        if (response.ok) {
-            const data = await response.json();
-            displayCertificadoInfo(data);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Erro ao carregar certificado');
         }
+
+        const data = await response.json();
+        displayCertificadoInfo(data);
     } catch (error) {
         console.error('Erro ao carregar certificado:', error);
+        displayCertificadoInfo({ configurado: false, status: 'nao_configurado' });
     }
 }
 
@@ -1743,15 +1793,58 @@ async function loadCertificadoData() {
  * Exibe informações do certificado
  */
 function displayCertificadoInfo(data) {
-    if (!data || !data.validade) return;
-
+    const emptyState = document.getElementById('certificado-empty-state');
     const info = document.getElementById('certificado-info');
     const expiracao = document.getElementById('certificado-expiracao');
-    
-    if (info && expiracao) {
-        info.style.display = 'flex';
-        expiracao.textContent = new Date(data.validade).toLocaleDateString('pt-BR');
+    const statusTitulo = document.getElementById('certificado-status-titulo');
+    const detalhes = document.getElementById('certificado-detalhes');
+    const razaoSocial = document.getElementById('certificado-razao-social');
+    const cnpj = document.getElementById('certificado-cnpj');
+    const statusField = document.getElementById('certificado-status');
+    const diasRestantes = document.getElementById('certificado-dias-restantes');
+    const validadeInput = document.getElementById('certificado-validade-input');
+    const removeButton = document.getElementById('btn-remover-certificado');
+    const saveButton = document.getElementById('btn-salvar-certificado');
+    const isConfigured = Boolean(data && data.configurado);
+
+    if (!isConfigured) {
+        if (emptyState) emptyState.style.display = 'flex';
+        if (info) info.style.display = 'none';
+        if (detalhes) detalhes.style.display = 'none';
+        if (removeButton) removeButton.style.display = 'none';
+        if (saveButton) {
+            saveButton.innerHTML = '<i class="fas fa-save"></i> Salvar Certificado';
+        }
+        if (validadeInput) validadeInput.value = '';
+        if (razaoSocial) razaoSocial.value = '';
+        if (cnpj) cnpj.value = '';
+        if (statusField) statusField.value = '';
+        if (diasRestantes) diasRestantes.value = '';
+        return;
     }
+
+    const meta = getCertificadoStatusMeta(data.status);
+
+    if (emptyState) emptyState.style.display = 'none';
+    if (info) {
+        info.style.display = 'flex';
+        info.className = `config-message ${meta.badgeClass}`;
+    }
+    if (statusTitulo) statusTitulo.textContent = meta.title;
+    if (expiracao) expiracao.textContent = formatCertificadoDate(data.validade);
+    if (detalhes) detalhes.style.display = 'block';
+    if (removeButton) removeButton.style.display = 'inline-flex';
+    if (saveButton) {
+        saveButton.innerHTML = '<i class="fas fa-save"></i> Substituir Certificado';
+    }
+
+    if (razaoSocial) razaoSocial.value = data.razaoSocial || data.nome || '';
+    if (cnpj) cnpj.value = data.cnpj || '';
+    if (statusField) statusField.value = meta.label;
+    if (diasRestantes) {
+        diasRestantes.value = data.diasRestantes != null ? `${data.diasRestantes} dias` : '--';
+    }
+    if (validadeInput) validadeInput.value = formatCertificadoDateInput(data.validade);
 }
 
 /**
@@ -1784,16 +1877,45 @@ async function saveCertificadoConfig() {
             body: formData
         });
 
-        if (response.ok) {
-            showNotification('Certificado salvo com sucesso!', 'success');
-            closeConfigModal('modal-certificado');
-            loadCertificadoData();
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            throw new Error(result.error || 'Erro ao salvar certificado');
+        }
+
+        showNotification(result.message || 'Certificado salvo com sucesso!', 'success');
+        resetCertificadoForm();
+        if (result.status) {
+            displayCertificadoInfo(result.status);
         } else {
-            throw new Error('Erro ao salvar certificado');
+            await loadCertificadoData();
         }
     } catch (error) {
         console.error('Erro ao salvar certificado:', error);
-        showNotification('Erro ao salvar certificado', 'error');
+        showNotification(error.message || 'Erro ao salvar certificado', 'error');
+    }
+}
+
+async function deleteCertificadoConfig() {
+    const confirmed = window.confirm('Remover o certificado digital ativo? Esta acao interrompe a assinatura e emissao de NF-e ate um novo certificado ser instalado.');
+    if (!confirmed) return;
+
+    try {
+        const response = await fetch('/api/configuracoes/certificado', {
+            method: 'DELETE'
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result.error || 'Erro ao remover certificado');
+        }
+
+        resetCertificadoForm();
+        displayCertificadoInfo({ configurado: false, status: 'nao_configurado' });
+        showNotification(result.message || 'Certificado removido com sucesso!', 'success');
+    } catch (error) {
+        console.error('Erro ao remover certificado:', error);
+        showNotification(error.message || 'Erro ao remover certificado', 'error');
     }
 }
 

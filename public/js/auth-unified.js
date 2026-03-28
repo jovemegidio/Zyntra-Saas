@@ -496,18 +496,19 @@
                 _scheduleProactiveRefresh();
 
                 // 🔐 MULTI-DEVICE: Verificar se deviceId corresponde
+                // FIX v7.6: Nova aba sem deviceId deve ADOTAR o do servidor (não rejeitar)
                 if (userData.deviceId) {
                     const localDeviceId = getDeviceId();
-                    if (localDeviceId && localDeviceId !== userData.deviceId) {
-                        debugLog('⚠️ DeviceId não corresponde! Sessão de outro dispositivo/aba.');
-                        debugLog(`   Local: ${localDeviceId.substring(0, 8)}... vs Server: ${userData.deviceId.substring(0, 8)}...`);
-                        // A sessão no cookie/servidor pode ter sido sobrescrita por outra aba
-                        // Forçar re-login nesta aba
-                        return null;
-                    }
                     if (!localDeviceId) {
+                        // Nova aba: adotar deviceId do servidor em vez de forçar re-login
                         sessionStorage.setItem('deviceId', userData.deviceId);
-                        debugLog('📱 DeviceId salvo:', userData.deviceId.substring(0, 8) + '...');
+                        debugLog('📱 DeviceId adotado do servidor (nova aba):', userData.deviceId.substring(0, 8) + '...');
+                    } else if (localDeviceId !== userData.deviceId) {
+                        debugLog('⚠️ DeviceId não corresponde! Atualizando para sessão atual do servidor.');
+                        debugLog(`   Local: ${localDeviceId.substring(0, 8)}... vs Server: ${userData.deviceId.substring(0, 8)}...`);
+                        // Atualizar para o deviceId mais recente do servidor em vez de forçar re-login
+                        // O servidor é a fonte de verdade — se ele autenticou com sucesso, a sessão é válida
+                        sessionStorage.setItem('deviceId', userData.deviceId);
                     }
                 }
 

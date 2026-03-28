@@ -11,7 +11,132 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     const path = require('path');
     const fs = require('fs');
     const multer = require('multer');
+    const CertificadoService = require('../../src/nfe/services/CertificadoService');
     const upload = multer({ dest: path.join(__dirname, '..', '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+    const certUpload = multer({
+        storage: multer.memoryStorage(),
+        limits: { fileSize: 5 * 1024 * 1024 },
+        fileFilter: (req, file, cb) => {
+            const lowerName = (file.originalname || '').toLowerCase();
+            if (lowerName.endsWith('.pfx') || lowerName.endsWith('.p12')) {
+                cb(null, true);
+                return;
+            }
+
+            cb(new Error('Envie um arquivo de certificado no formato .pfx ou .p12'));
+        }
+    });
+    const certificadoService = new CertificadoService(pool);
+
+    function runCertUpload(req, res) {
+        return new Promise((resolve, reject) => {
+            certUpload.single('certificado')(req, res, (error) => {
+                if (!error) {
+                    resolve();
+                    return;
+                }
+
+                if (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE') {
+                    reject(new Error('O certificado deve ter no maximo 5 MB'));
+                    return;
+                }
+
+                reject(error);
+            });
+        });
+    }
+
+    async function getCertificadoResumo(empresaId = 1) {
+        const [nfeConfig] = await pool.query(`
+            SELECT certificado_validade as validade,
+                   certificado_cnpj as cnpj,
+                   certificado_nome as nome,
+                   created_at,
+                   updated_at,
+                   CASE WHEN certificado_pfx IS NOT NULL THEN 1 ELSE 0 END as tem_certificado
+            FROM nfe_configuracoes
+            WHERE empresa_id = ?
+            LIMIT 1
+        `, [empresaId]);
+
+        if (nfeConfig && nfeConfig.length > 0 && nfeConfig[0].tem_certificado) {
+            const cert = nfeConfig[0];
+            const validade = cert.validade ? new Date(cert.validade) : null;
+            const diasRestantes = validade
+                ? Math.ceil((validade - new Date()) / (1000 * 60 * 60 * 24))
+                : null;
+
+            return {
+                configurado: true,
+                validade: cert.validade,
+                cnpj: cert.cnpj,
+                nome: cert.nome,
+                razaoSocial: cert.nome,
+                diasRestantes,
+                status: diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado',
+                created_at: cert.created_at,
+                updated_at: cert.updated_at
+            };
+        }
+
+        try {
+            const [legacyRows] = await pool.query(`
+                SELECT validade, created_at, updated_at, arquivo_nome
+                FROM certificados_digitais
+                ORDER BY id DESC LIMIT 1
+            `);
+
+            if (legacyRows.length > 0) {
+                const legacy = legacyRows[0];
+                const validade = legacy.validade ? new Date(legacy.validade) : null;
+                const diasRestantes = validade
+                    ? Math.ceil((validade - new Date()) / (1000 * 60 * 60 * 24))
+                    : null;
+
+                return {
+                    configurado: true,
+                    validade: legacy.validade,
+                    cnpj: '',
+                    nome: legacy.arquivo_nome || 'Certificado legado',
+                    razaoSocial: legacy.arquivo_nome || 'Certificado legado',
+                    diasRestantes,
+                    status: diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado',
+                    created_at: legacy.created_at,
+                    updated_at: legacy.updated_at,
+                    legado: true
+                };
+            }
+        } catch (legacyError) {
+            console.warn('⚠️ Falha ao consultar certificados_legado:', legacyError.message);
+        }
+
+        return {
+            configurado: false,
+            status: 'nao_configurado'
+        };
+    }
+
+    async function syncLegacyCertificado(originalName, senhaCriptografada, validade) {
+        try {
+            const [legacyRows] = await pool.query('SELECT id FROM certificados_digitais ORDER BY id DESC LIMIT 1');
+
+            if (legacyRows.length > 0) {
+                await pool.query(`
+                    UPDATE certificados_digitais
+                    SET arquivo_nome = ?, senha_hash = ?, validade = ?, updated_at = NOW()
+                    WHERE id = ?
+                `, [originalName, senhaCriptografada, validade, legacyRows[0].id]);
+                return;
+            }
+
+            await pool.query(`
+                INSERT INTO certificados_digitais (arquivo_nome, senha_hash, validade, created_at, updated_at)
+                VALUES (?, ?, ?, NOW(), NOW())
+            `, [originalName, senhaCriptografada, validade]);
+        } catch (legacyError) {
+            console.warn('⚠️ Falha ao sincronizar certificados_digitais:', legacyError.message);
+        }
+    }
 
     // ========================================
     // API: CONFIGURAÇÕES DA EMPRESA
@@ -2315,55 +2440,7 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             console.log('📋 Buscando certificado digital...');
 
             const empresaId = 1; // Empresa padrão
-
-            // Primeiro tentar buscar da tabela nfe_configuracoes (mais completa)
-            const [nfeConfig] = await pool.query(`
-                SELECT certificado_validade as validade,
-                       certificado_cnpj as cnpj,
-                       certificado_nome as nome,
-                       created_at,
-                       updated_at,
-                       CASE WHEN certificado_pfx IS NOT NULL THEN 1 ELSE 0 END as tem_certificado
-                FROM nfe_configuracoes
-                WHERE empresa_id = ?
-                LIMIT 1
-            `, [empresaId]);
-
-            if (nfeConfig && nfeConfig.length > 0 && nfeConfig[0].tem_certificado) {
-                const cert = nfeConfig[0];
-                const diasRestantes = cert.validade ?
-                    Math.ceil((new Date(cert.validade) - new Date()) / (1000 * 60 * 60 * 24)) : null;
-
-                res.json({
-                    configurado: true,
-                    validade: cert.validade,
-                    cnpj: cert.cnpj,
-                    nome: cert.nome,
-                    diasRestantes: diasRestantes,
-                    status: diasRestantes > 30 ? 'valido' : diasRestantes > 0 ? 'expirando' : 'expirado',
-                    created_at: cert.created_at,
-                    updated_at: cert.updated_at
-                });
-                return;
-            }
-
-            // Fallback: buscar da tabela certificados_digitais
-            const [rows] = await pool.query(`
-                SELECT validade, created_at, updated_at
-                FROM certificados_digitais
-                ORDER BY id DESC LIMIT 1
-            `);
-
-            if (rows.length > 0) {
-                res.json({
-                    configurado: true,
-                    ...rows[0]
-                });
-            } else {
-                res.json({
-                    configurado: false
-                });
-            }
+            res.json(await getCertificadoResumo(empresaId));
         } catch (error) {
             console.error('❌ Erro ao buscar certificado:', error);
             res.status(500).json({ error: 'Erro ao buscar certificado' });
@@ -2371,9 +2448,10 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     });
 
     // POST - Salvar certificado digital (integrado com módulo NFe)
-    router.post('/api/configuracoes/certificado', authenticateToken, authorizeAdmin, upload.single('certificado'), async (req, res) => {
+    router.post('/api/configuracoes/certificado', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
             console.log('💾 Salvando certificado digital...');
+            await runCertUpload(req, res);
 
             if (!req.file) {
                 return res.status(400).json({ error: 'Arquivo de certificado não enviado' });
@@ -2385,122 +2463,75 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
             }
 
             const empresaId = 1; // Empresa padrão
-            const pfxBuffer = req.file.buffer;
+            const senhaLimpa = String(senha).trim();
+            const result = await certificadoService.uploadCertificado(req.file.buffer, senhaLimpa, empresaId);
+            const senhaCriptografada = certificadoService.criptografarSenha(senhaLimpa);
 
-            // Validar certificado usando node-forge
-            let certInfo = null;
-            try {
-                const forge = require('node-forge');
-                const pfxBase64 = pfxBuffer.toString('base64');
-                const pfxAsn1 = forge.util.decode64(pfxBase64);
-                const p12Asn1 = forge.asn1.fromDer(pfxAsn1);
-                const p12 = forge.pkcs12.pkcs12FromAsn1(p12Asn1, senha);
-
-                const certBags = p12.getBags({ bagType: forge.pki.oids.certBag });
-                if (certBags && certBags[forge.pki.oids.certBag] && certBags[forge.pki.oids.certBag].length > 0) {
-                    const cert = certBags[forge.pki.oids.certBag][0].cert;
-
-                    // Extrair informações
-                    const cn = cert.subject.getField('CN');
-                    const cnValue = cn ? cn.value : '';
-                    const cnpjMatch = cnValue.match(/(\d{14})/);
-
-                    certInfo = {
-                        cnpj: cnpjMatch ? cnpjMatch[1] : '',
-                        razaoSocial: cnValue.split(':')[0].trim(),
-                        validade: cert.validity.notAfter,
-                        emissao: cert.validity.notBefore
-                    };
-
-                    // Verificar se certificado está válido
-                    const agora = new Date();
-                    if (cert.validity.notAfter < agora) {
-                        return res.status(400).json({ error: 'Certificado expirado' });
-                    }
-                }
-            } catch (forgeError) {
-                console.error('❌ Erro ao validar certificado:', forgeError.message);
-                if (forgeError.message.includes('Invalid password')) {
-                    return res.status(400).json({ error: 'Senha do certificado incorreta' });
-                }
-                return res.status(400).json({ error: 'Certificado inválido: ' + forgeError.message });
-            }
-
-            // Criptografar senha (base64 simples - em produção usar algo mais seguro)
-            const senhaCriptografada = Buffer.from(senha).toString('base64');
-
-            // Verificar se já existe configuração para a empresa na tabela nfe_configuracoes
-            const [existing] = await pool.query(
-                'SELECT id FROM nfe_configuracoes WHERE empresa_id = ?',
-                [empresaId]
-            );
-
-            if (existing && existing.length > 0) {
-                // Atualizar configuração existente
-                await pool.query(`
-                    UPDATE nfe_configuracoes
-                    SET certificado_pfx = ?,
-                        certificado_senha = ?,
-                        certificado_validade = ?,
-                        certificado_cnpj = ?,
-                        certificado_nome = ?,
-                        updated_at = NOW()
-                    WHERE empresa_id = ?
-                `, [
-                    pfxBuffer,
-                    senhaCriptografada,
-                    certInfo ? certInfo.validade : null,
-                    certInfo ? certInfo.cnpj : null,
-                    certInfo ? certInfo.razaoSocial : req.file.originalname,
-                    empresaId
-                ]);
-            } else {
-                // Criar nova configuração
-                await pool.query(`
-                    INSERT INTO nfe_configuracoes
-                    (empresa_id, certificado_pfx, certificado_senha, certificado_validade, certificado_cnpj, certificado_nome, ambiente, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, 'homologacao', NOW(), NOW())
-                `, [
-                    empresaId,
-                    pfxBuffer,
-                    senhaCriptografada,
-                    certInfo ? certInfo.validade : null,
-                    certInfo ? certInfo.cnpj : null,
-                    certInfo ? certInfo.razaoSocial : req.file.originalname
-                ]);
-            }
-
-            // Também salvar na tabela certificados_digitais para compatibilidade
-            await pool.query(`
-                INSERT INTO certificados_digitais (arquivo_nome, senha_hash, validade, created_at, updated_at)
-                VALUES (?, ?, ?, NOW(), NOW())
-                ON DUPLICATE KEY UPDATE
-                    arquivo_nome = VALUES(arquivo_nome),
-                    senha_hash = VALUES(senha_hash),
-                    validade = VALUES(validade),
-                    updated_at = NOW()
-            `, [
+            await syncLegacyCertificado(
                 req.file.originalname,
                 senhaCriptografada,
-                certInfo ? certInfo.validade : new Date(Date.now() + 365*24*60*60*1000)
-            ]);
+                result.info ? result.info.validade : null
+            );
+
+            if (typeof writeAuditLog === 'function') {
+                await writeAuditLog(req, 'config_certificado_upload', {
+                    empresaId,
+                    cnpj: result.info ? result.info.cnpj : null,
+                    validade: result.info ? result.info.validade : null
+                });
+            }
 
             console.log('✅ Certificado salvo com sucesso nas tabelas nfe_configuracoes e certificados_digitais');
 
             res.json({
                 success: true,
-                message: 'Certificado instalado com sucesso',
-                info: certInfo ? {
-                    cnpj: certInfo.cnpj,
-                    razaoSocial: certInfo.razaoSocial,
-                    validade: certInfo.validade,
-                    diasRestantes: Math.ceil((certInfo.validade - new Date()) / (1000 * 60 * 60 * 24))
-                } : null
+                message: result.message,
+                info: result.info,
+                status: await getCertificadoResumo(empresaId)
             });
 
         } catch (error) {
             console.error('❌ Erro ao salvar certificado:', error);
-            res.status(500).json({ error: 'Erro ao salvar certificado: ' + error.message });
+            const message = error && error.message ? error.message : 'Erro ao salvar certificado';
+            const statusCode = /senha|inválido|invalido|vencido|válido/i.test(message) ? 400 : 500;
+            res.status(statusCode).json({ error: message });
+        }
+    });
+
+    // DELETE - Remover certificado digital ativo
+    router.delete('/api/configuracoes/certificado', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            const empresaId = 1;
+            const resumoAtual = await getCertificadoResumo(empresaId);
+
+            if (!resumoAtual.configurado) {
+                return res.status(404).json({ error: 'Nenhum certificado instalado para remover' });
+            }
+
+            await certificadoService.removerCertificado(empresaId);
+
+            try {
+                await pool.query('DELETE FROM certificados_digitais');
+            } catch (legacyError) {
+                console.warn('⚠️ Falha ao limpar certificados_digitais:', legacyError.message);
+            }
+
+            const certificadoPath = path.join(__dirname, '..', '..', 'uploads', 'certificados', `empresa_${empresaId}.pfx`);
+            if (fs.existsSync(certificadoPath)) {
+                await fs.promises.unlink(certificadoPath);
+            }
+
+            if (typeof writeAuditLog === 'function') {
+                await writeAuditLog(req, 'config_certificado_delete', { empresaId });
+            }
+
+            res.json({
+                success: true,
+                message: 'Certificado removido com sucesso'
+            });
+        } catch (error) {
+            console.error('❌ Erro ao remover certificado:', error);
+            res.status(500).json({ error: 'Erro ao remover certificado' });
         }
     });
 

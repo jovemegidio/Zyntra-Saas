@@ -1385,6 +1385,8 @@ app.get('/api/pcp/materiais/buscar', authRequired, async (req, res) => {
                 'Matéria-Prima' as tipo_sugerido
             FROM produtos p
             WHERE (p.ativo = 1 OR p.ativo IS NULL)
+              AND (p.categoria IS NULL OR p.categoria NOT IN ('CABO', 'CABOS', 'PRODUTO_ACABADO', 'PRODUTO ACABADO'))
+              AND (p.nome NOT LIKE 'CABO %' OR p.categoria IN ('MATERIA_PRIMA', 'MATERIA-PRIMA', 'INSUMO', 'MP'))
         `;
 
         const params = [];
@@ -1595,7 +1597,7 @@ app.post('/api/pcp/ordens', authRequired, async (req, res) => {
 });
 
 // Rota para atualizar o STATUS de uma Ordem de Produção
-// 🔐 SECURITY AUDIT: Added audit logging for status changes
+// 🔐 SECURITY AUDIT: Added audit logging + transition validation for status changes
 app.put('/api/pcp/ordens/:id/status', authRequired, async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
@@ -1603,6 +1605,25 @@ app.put('/api/pcp/ordens/:id/status', authRequired, async (req, res) => {
         // Buscar status anterior para auditoria
         const [ordemAnterior] = await db.query("SELECT status FROM ordens_producao WHERE id = ?", [id]);
         const statusAnterior = ordemAnterior[0]?.status || 'unknown';
+
+        // Validar transição de status — bloquear retornos após finalização
+        const VALID_TRANSITIONS = {
+            'pendente':      ['ativa', 'em_producao', 'cancelada'],
+            'ativa':         ['em_producao', 'qualidade', 'cancelada', 'pendente'],
+            'em_producao':   ['qualidade', 'conferido', 'concluida', 'cancelada'],
+            'qualidade':     ['conferido', 'concluida', 'em_producao'],
+            'conferido':     ['concluida', 'qualidade'],
+            'concluida':     ['armazenado'],
+            'armazenado':    []  // Terminal — no transitions allowed
+        };
+
+        const permitidas = VALID_TRANSITIONS[statusAnterior];
+        if (permitidas && !permitidas.includes(status)) {
+            return res.status(400).json({
+                message: `Transição inválida: "${statusAnterior}" → "${status}" não é permitida.`,
+                transicoes_permitidas: permitidas
+            });
+        }
 
         const [result] = await db.query("UPDATE ordens_producao SET status = ? WHERE id = ?", [status, id]);
         if (result.affectedRows > 0) {
@@ -2999,11 +3020,46 @@ app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
 });
 
 // Atualizar status da ordem no Kanban (suporta ambas as tabelas)
+// FIX: Added transition validation to prevent invalid moves after concluido/armazenado
 app.put('/api/pcp/ordens-kanban/:id', authRequired, async (req, res) => {
     console.log('[API_ORDENS_KANBAN] Atualizando ordem ID:', req.params.id);
     try {
         const { id } = req.params;
         const { status, origem } = req.body;
+
+        // Buscar status atual para validar transição
+        let statusAtual = null;
+        if (origem === 'ordens') {
+            const [rows] = await db.query('SELECT status FROM ordens_producao WHERE id = ?', [id]);
+            statusAtual = rows[0]?.status;
+        } else {
+            const [rows] = await db.query('SELECT status FROM ordens_producao_kanban WHERE id = ?', [id]);
+            statusAtual = rows[0]?.status;
+        }
+
+        // Validar transição — bloquear retornos após finalização
+        const KANBAN_TRANSITIONS = {
+            'a_produzir':  ['produzindo', 'qualidade', 'conferido', 'concluido'],
+            'produzindo':  ['a_produzir', 'qualidade', 'conferido', 'concluido'],
+            'qualidade':   ['produzindo', 'conferido', 'concluido'],
+            'conferido':   ['qualidade', 'concluido'],
+            'concluido':   ['armazenado'],
+            'armazenado':  []
+        };
+        // Map ordens_producao status codes to kanban codes for validation
+        const statusToKanban = {
+            'pendente': 'a_produzir', 'ativa': 'a_produzir', 'em_producao': 'produzindo',
+            'qualidade': 'qualidade', 'conferido': 'conferido',
+            'concluida': 'concluido', 'armazenado': 'armazenado'
+        };
+        const kanbanStatusAtual = statusToKanban[statusAtual] || statusAtual || 'a_produzir';
+        const permitidas = KANBAN_TRANSITIONS[kanbanStatusAtual];
+        if (permitidas && !permitidas.includes(status)) {
+            return res.status(400).json({
+                error: `Transição inválida: "${kanbanStatusAtual}" → "${status}" não é permitida.`,
+                transicoes_permitidas: permitidas
+            });
+        }
 
         // Mapear status do kanban para status da tabela ordens_producao
         // Manter status granulares (qualidade, conferido, armazenado) para não perder posição no kanban
@@ -8920,8 +8976,167 @@ function formatarDuracaoServer(segundos) {
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
-// --- Proxy missing routes to main app (port 3003) ---
-// These routes exist in pcp-routes.js (main app) but not here
+// --- Direct implementation of materiais route (FIX: was proxy to port 3003 causing 403) ---
+app.get('/api/pcp/pedidos/:id/materiais', authRequired, async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`[API_MATERIAIS_PEDIDO] Calculando materiais para pedido ${id}`);
+
+        const [pedidos] = await db.query(`
+            SELECT p.id, p.cliente_id, p.valor, p.status,
+                   c.razao_social as cliente, c.nome_fantasia
+            FROM pedidos p
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            WHERE p.id = ?
+        `, [id]);
+
+        if (pedidos.length === 0) {
+            return res.status(404).json({ error: 'Pedido não encontrado' });
+        }
+
+        const pedido = pedidos[0];
+
+        const [itens] = await db.query(`
+            SELECT pi.id, pi.produto_id, pi.codigo, pi.descricao,
+                   pi.quantidade as metros, pi.preco_unitario, pi.subtotal,
+                   pi.embalagem, pi.lances,
+                   pr.codigo as produto_codigo
+            FROM pedido_itens pi
+            LEFT JOIN produtos pr ON pi.produto_id = pr.id
+            WHERE pi.pedido_id = ?
+        `, [id]);
+
+        // Pre-load all active compositions
+        const [allComposicoes] = await db.query(`SELECT id, codigo, descricao, cores, bitola,
+            peso_aluminio_kg_m, peso_pe_kg_m, peso_xlpe_kg_m, peso_xlpe_at_kg_m, peso_hepr_kg_m,
+            peso_pvc_kg_m, peso_mb_pvc_kg_m, peso_mbuvpe_kg_m, peso_total_kg_m,
+            peso_mbuvpt_kg_m, peso_mbuvcz_kg_m, peso_mbuvaz_kg_m, peso_mbuvvm_kg_m,
+            peso_mbpvccz_kg_m, peso_mbpvcpt_kg_m,
+            peso_mbpeam_kg_m, peso_mbpevd_kg_m, peso_mbpevm_kg_m, peso_mbpeaz_kg_m,
+            peso_mbpebc_kg_m, peso_mbpelj_kg_m, peso_mbpemr_kg_m
+            FROM cabos_composicao WHERE ativo = 1`);
+        const composicaoMap = new Map();
+        for (const comp of allComposicoes) {
+            if (!composicaoMap.has(comp.codigo)) composicaoMap.set(comp.codigo, []);
+            composicaoMap.get(comp.codigo).push(comp);
+        }
+
+        const itensCalculados = [];
+        let totalAlKg = 0, totalPeKg = 0, totalXlpeKg = 0, totalPvcKg = 0;
+        let totalPesoLiquido = 0, totalPesoBruto = 0, totalMetros = 0;
+        let totalPigPt = 0, totalPigCz = 0, totalPigAz = 0;
+        let totalPigAm = 0, totalPigVd = 0, totalPigBc = 0;
+        let totalPigLj = 0, totalPigMr = 0;
+
+        for (const item of itens) {
+            const codigoOriginal = item.codigo || item.produto_codigo || '';
+            const metros = parseFloat(item.metros) || 0;
+            totalMetros += metros;
+
+            let composicao = [];
+            const codigosParaTentar = [
+                codigoOriginal,
+                codigoOriginal.replace(/[A-Z]$/i, ''),
+                codigoOriginal.replace(/C$/i, ''),
+                codigoOriginal.replace(/N$/i, ''),
+                codigoOriginal.replace(/I$/i, ''),
+            ];
+
+            let codigoEncontrado = null;
+            for (const codigoTeste of codigosParaTentar) {
+                if (!codigoTeste) continue;
+                const comp = composicaoMap.get(codigoTeste);
+                if (comp && comp.length > 0) { composicao = comp; codigoEncontrado = codigoTeste; break; }
+            }
+
+            if (composicao.length === 0 && codigoOriginal.length >= 3) {
+                const prefix = codigoOriginal.substring(0, codigoOriginal.length - 1);
+                for (const [key, comp] of composicaoMap.entries()) {
+                    if (key.startsWith(prefix) && comp.length > 0) {
+                        composicao = [comp[0]]; codigoEncontrado = comp[0].codigo; break;
+                    }
+                }
+            }
+
+            let itemCalculado = {
+                id: item.id, codigo: codigoOriginal, codigo_composicao: codigoEncontrado,
+                descricao: item.descricao, metros, embalagem: item.embalagem || 'Bobina',
+                lances: item.lances || '1x1000',
+                al_kg: 0, pe_kg: 0, xlpe_kg: 0, pvc_kg: 0, peso_liquido: 0, peso_bruto: 0,
+                al_kg_m: 0, pe_kg_m: 0, xlpe_kg_m: 0, pvc_kg_m: 0, peso_total_kg_m: 0,
+                composicao_encontrada: false,
+                pigmentos: { pt: 0, cz: 0, az: 0, am: 0, vd: 0, bc: 0, lj: 0, mr: 0 },
+                cores: ''
+            };
+
+            if (composicao.length > 0) {
+                const comp = composicao[0];
+                const alKgM = parseFloat(comp.peso_aluminio_kg_m) || 0;
+                const peKgM = parseFloat(comp.peso_pe_kg_m) || 0;
+                const xlpeKgM = parseFloat(comp.peso_xlpe_kg_m) || 0;
+                const pvcKgM = parseFloat(comp.peso_pvc_kg_m) || 0;
+                const pesoTotalKgM = parseFloat(comp.peso_total_kg_m) || 0;
+
+                itemCalculado.al_kg_m = alKgM; itemCalculado.pe_kg_m = peKgM;
+                itemCalculado.xlpe_kg_m = xlpeKgM; itemCalculado.pvc_kg_m = pvcKgM;
+                itemCalculado.peso_total_kg_m = pesoTotalKgM;
+                itemCalculado.al_kg = alKgM * metros; itemCalculado.pe_kg = peKgM * metros;
+                itemCalculado.xlpe_kg = xlpeKgM * metros; itemCalculado.pvc_kg = pvcKgM * metros;
+                itemCalculado.peso_liquido = pesoTotalKgM * metros;
+                itemCalculado.peso_bruto = itemCalculado.peso_liquido * 1.05;
+                itemCalculado.composicao_encontrada = true;
+                itemCalculado.cores = comp.cores || '';
+
+                const pf = (campo) => (parseFloat(comp[campo]) || 0) * metros;
+                itemCalculado.pigmentos = {
+                    pt: pf('peso_mbuvpt_kg_m') + pf('peso_mbpvcpt_kg_m'),
+                    cz: pf('peso_mbuvcz_kg_m') + pf('peso_mbpvccz_kg_m'),
+                    az: pf('peso_mbuvaz_kg_m') + pf('peso_mbpeaz_kg_m'),
+                    am: pf('peso_mbpeam_kg_m'), vd: pf('peso_mbpevd_kg_m'),
+                    bc: pf('peso_mbpebc_kg_m'), lj: pf('peso_mbpelj_kg_m'),
+                    mr: pf('peso_mbpemr_kg_m')
+                };
+
+                totalAlKg += itemCalculado.al_kg; totalPeKg += itemCalculado.pe_kg;
+                totalXlpeKg += itemCalculado.xlpe_kg; totalPvcKg += itemCalculado.pvc_kg;
+                totalPesoLiquido += itemCalculado.peso_liquido;
+                totalPesoBruto += itemCalculado.peso_bruto;
+                totalPigPt += itemCalculado.pigmentos.pt; totalPigCz += itemCalculado.pigmentos.cz;
+                totalPigAz += itemCalculado.pigmentos.az; totalPigAm += itemCalculado.pigmentos.am;
+                totalPigVd += itemCalculado.pigmentos.vd; totalPigBc += itemCalculado.pigmentos.bc;
+                totalPigLj += itemCalculado.pigmentos.lj; totalPigMr += itemCalculado.pigmentos.mr;
+            }
+
+            itensCalculados.push(itemCalculado);
+        }
+
+        res.json({
+            pedido: {
+                id: pedido.id, cliente: pedido.cliente || pedido.nome_fantasia,
+                valor: pedido.valor, status: pedido.status
+            },
+            itens: itensCalculados,
+            totais: {
+                metros: totalMetros, al_kg: totalAlKg, pe_kg: totalPeKg,
+                xlpe_kg: totalXlpeKg, pvc_kg: totalPvcKg,
+                peso_liquido: totalPesoLiquido, peso_bruto: totalPesoBruto,
+                kg_por_km: totalMetros > 0 ? (totalPesoLiquido / totalMetros) * 1000 : 0,
+                itens_count: itensCalculados.length,
+                composicoes_encontradas: itensCalculados.filter(i => i.composicao_encontrada).length,
+                pigmentos: {
+                    pt: totalPigPt, cz: totalPigCz, az: totalPigAz,
+                    am: totalPigAm, vd: totalPigVd, bc: totalPigBc,
+                    lj: totalPigLj, mr: totalPigMr
+                }
+            }
+        });
+    } catch (error) {
+        console.error('[API_MATERIAIS_PEDIDO] Erro:', error.message);
+        res.status(500).json({ error: 'Erro ao calcular materiais' });
+    }
+});
+
+// --- Proxy remaining routes to main app (port 3003) ---
 const httpProxy = require('http');
 function proxyToMainApp(req, res) {
     const options = {
@@ -8935,7 +9150,6 @@ function proxyToMainApp(req, res) {
     proxy.on('error', () => res.status(502).json({ error: 'Main app unavailable' }));
     req.pipe(proxy, { end: true });
 }
-app.get('/api/pcp/pedidos/:id/materiais', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/itens', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/etiqueta-bobina', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/etiqueta-produto', proxyToMainApp);

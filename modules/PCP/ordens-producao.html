@@ -251,171 +251,182 @@
         }
 
         /* ========================================
-           KANBAN CARDS
+           KANBAN CARDS (Padrão visual Vendas — SaaS Premium)
            ======================================== */
         .kanban-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 16px;
             cursor: grab;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
             position: relative;
             border-left: 4px solid #64748b;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .kanban-card:hover {
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(10, 79, 126, 0.08);
+            transform: translateY(-3px);
         }
 
         .kanban-card.dragging {
             opacity: 0.5;
-            transform: rotate(2deg);
+            transform: rotate(2deg) scale(1.02);
             cursor: grabbing;
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
         }
 
         /* Cores por etapa do Kanban */
-        .kanban-card.status-fila {
-            border-left-color: #3b82f6; /* Azul - A Produzir */
-            background: linear-gradient(to right, rgba(59, 130, 246, 0.05), white);
+        .kanban-card.status-fila,
+        .kanban-card.status-a_produzir {
+            border-left-color: #3b82f6;
         }
-        .kanban-card.status-producao {
-            border-left-color: #f59e0b; /* Amarelo - Produzindo */
-            background: linear-gradient(to right, rgba(245, 158, 11, 0.05), white);
+        .kanban-card.status-producao,
+        .kanban-card.status-produzindo {
+            border-left-color: #f59e0b;
         }
         .kanban-card.status-qualidade {
-            border-left-color: #8b5cf6; /* Roxo - Qualidade */
-            background: linear-gradient(to right, rgba(139, 92, 246, 0.05), white);
+            border-left-color: #8b5cf6;
         }
         .kanban-card.status-conferido {
-            border-left-color: #06b6d4; /* Ciano - Conferido */
-            background: linear-gradient(to right, rgba(6, 182, 212, 0.05), white);
+            border-left-color: #06b6d4;
         }
         .kanban-card.status-concluido {
-            border-left-color: #22c55e; /* Verde - Concluído */
-            background: linear-gradient(to right, rgba(34, 197, 94, 0.05), white);
+            border-left-color: #22c55e;
         }
         .kanban-card.status-armazenado {
-            border-left-color: #64748b; /* Cinza - Armazenado */
-            background: linear-gradient(to right, rgba(100, 116, 139, 0.05), white);
+            border-left-color: #64748b;
+            opacity: 0.85;
         }
 
         .kanban-card.concluida {
             border-left-color: #22c55e;
+            opacity: 0.9;
         }
 
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
         }
 
         .card-op-number {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
         }
 
         .card-status-badge {
             display: inline-block;
             padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 600;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .card-status-badge.atrasada {
             background: #fef2f2;
             color: #dc2626;
+            border: 1px solid #fecaca;
         }
 
         .card-status-badge.concluida {
             background: #f0fdf4;
             color: #16a34a;
+            border: 1px solid #bbf7d0;
         }
 
         .card-status-badge.em-dia {
             background: #eff6ff;
             color: #2563eb;
+            border: 1px solid #bfdbfe;
         }
 
         .card-menu {
-            width: 24px;
-            height: 24px;
+            width: 26px;
+            height: 26px;
             border: none;
             background: transparent;
-            color: #999;
-            border-radius: 4px;
+            color: #94a3b8;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.15s;
         }
 
         .card-menu:hover {
-            background: #f5f5f5;
-            color: var(--text-primary);
+            background: #f1f5f9;
+            color: #334155;
         }
 
         .card-title {
             font-size: 13px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
+            font-weight: 700;
+            color: #0f172a;
             line-height: 1.4;
+            letter-spacing: -0.2px;
         }
 
         .card-product-code {
             font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-family: monospace;
+            color: #94a3b8;
+            font-family: 'SF Mono', 'Consolas', monospace;
+            letter-spacing: 0.3px;
         }
 
         .card-meta {
             font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 4px;
+            color: #64748b;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 5px;
         }
 
         .card-meta i {
             width: 14px;
             text-align: center;
+            color: #94a3b8;
         }
 
         .card-quantity {
             display: flex;
             align-items: center;
             gap: 6px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid #f0f0f0;
+            margin-top: 4px;
+            padding-top: 8px;
+            border-top: 1px solid #f1f5f9;
         }
 
         .card-quantity i {
-            color: var(--primary-500);
-            font-size: 14px;
+            color: #3b82f6;
+            font-size: 13px;
         }
 
         .card-quantity-text {
             font-size: 12px;
-            color: var(--text-primary);
+            color: #334155;
         }
 
         .card-quantity-text strong {
-            font-weight: 600;
+            font-weight: 800;
+            color: #0f172a;
         }
 
         .card-produced {
-            font-size: 11px;
-            color: var(--text-secondary);
+            font-size: 10px;
+            color: #94a3b8;
             margin-left: auto;
+            font-weight: 500;
         }
 
         /* Empty State */
@@ -2682,6 +2693,24 @@
             if (!ordem) return;
 
             const statusAntigo = ordem.status;
+
+            // Validação de transição — bloquear movimentos inválidos após finalização
+            const VALID_TRANSITIONS = {
+                'a_produzir':  ['produzindo', 'qualidade', 'conferido', 'concluido'],
+                'produzindo':  ['a_produzir', 'qualidade', 'conferido', 'concluido'],
+                'qualidade':   ['produzindo', 'conferido', 'concluido'],
+                'conferido':   ['qualidade', 'concluido'],
+                'concluido':   ['armazenado'],
+                'armazenado':  []
+            };
+            const permitidas = VALID_TRANSITIONS[statusAntigo] || [];
+            if (!permitidas.includes(novoStatus)) {
+                const nomeStatus = { a_produzir: 'A Produzir', produzindo: 'Produzindo', qualidade: 'Qualidade', conferido: 'Conferido', concluido: 'Concluído', armazenado: 'Armazenado' };
+                showToast(`Transição bloqueada: "${nomeStatus[statusAntigo] || statusAntigo}" → "${nomeStatus[novoStatus] || novoStatus}" não é permitida`, 'error');
+                renderizarKanban();
+                return;
+            }
+
             ordem.status = novoStatus;
 
             // Atualizar status texto

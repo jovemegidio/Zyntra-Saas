@@ -1906,32 +1906,8 @@ module.exports = function createPCPRoutes(deps) {
 
         } catch (error) {
             console.error('❌ Erro ao buscar materiais:', error);
-
-            // Fallback com dados de exemplo
-            const materiaisExemplo = [
-                {
-                    id: 1,
-                    codigo_material: 'ALU-001',
-                    descricao: 'Perfil de Alumínio 20x20mm',
-                    unidade_medida: 'M',
-                    preco_unitario: 15.50,
-                    quantidade_estoque: 100,
-                    fornecedor_padrao: 'ALUFORCE',
-                    categoria: 'Perfis'
-                },
-                {
-                    id: 2,
-                    codigo_material: 'ALU-002',
-                    descricao: 'Chapa de Alumínio 2mm',
-                    unidade_medida: 'M2',
-                    preco_unitario: 85.00,
-                    quantidade_estoque: 50,
-                    fornecedor_padrao: 'ALUFORCE',
-                    categoria: 'Chapas'
-                }
-            ];
-
-            res.json(materiaisExemplo);
+            // Retornar array vazio em vez de dados mock para não confundir com dados reais
+            res.json([]);
         }
     });
 
