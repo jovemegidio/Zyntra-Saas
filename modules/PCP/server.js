@@ -2720,7 +2720,6 @@ async function getOrdensProducaoCols() {
 let _ordensProducaoMigrated = false;
 async function ensureOrdensProducaoSchema() {
     if (_ordensProducaoMigrated) return;
-    _ordensProducaoMigrated = true;
     const needed = {
         codigo: 'VARCHAR(100)', revisao: 'VARCHAR(20)', numero_pedido: 'VARCHAR(100)',
         numero_orcamento: 'VARCHAR(100)', data_liberacao: 'DATE', produto_nome: 'VARCHAR(500)',
@@ -2765,6 +2764,7 @@ async function ensureOrdensProducaoSchema() {
                 }
             }
         }
+        _ordensProducaoMigrated = true;
     } catch (e) {
         console.warn('[MIGRATION] Schema check failed:', e.message);
     }
@@ -2825,6 +2825,9 @@ app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
         if (!d.numero_orcamento && d['número_orçamento']) d.numero_orcamento = d['número_orçamento'];
         if (!d.num_orcamento && d['num_orçamento']) d.num_orcamento = d['num_orçamento'];
         if (!d.descricao && d['descrição']) d.descricao = d['descrição'];
+        if (!d.revisao && d['revisão']) d.revisao = d['revisão'];
+        if (!d.observacoes && d['observações']) d.observacoes = d['observações'];
+        if (!d.codigo && d['código']) d.codigo = d['código'];
 
         // ── Normalizar chaves acentuadas dentro de cada produto ──
         if (d.produtos && Array.isArray(d.produtos)) {
@@ -2952,7 +2955,7 @@ app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
                 d.transportadora_endereco || null,                           // transportadora_endereco
                 d.forma_pagamento || null,                                    // forma_pagamento
                 d.metodo_pagamento || null,                                  // metodo_pagamento
-                d.percentual_pagamento || 100,                               // percentual_pagamento
+                d.percentual_pagamento != null ? parseFloat(d.percentual_pagamento) : 100,  // percentual_pagamento
                 d.condicoes_pagamento || null,                               // condicoes_pagamento
                 d.formas_pagamento ? JSON.stringify(d.formas_pagamento) : null, // formas_pagamento_json
                 valorTotal,                                                   // valor_total
@@ -7506,9 +7509,9 @@ async function handleGerarOrdemExcel(req, res) {
             if (cell.sharedFormula) cell.sharedFormula = undefined;
         });
 
-        // CPF/CNPJ - Formatado com pontuação
+        // CPF/CNPJ do cliente - C10 (área do cliente)
         const cpfCnpjFormatado = formatarCpfCnpjExcel(dados.cpf_cnpj || '');
-        wsVendas.getCell('C15').value = cpfCnpjFormatado;
+        wsVendas.getCell('C10').value = cpfCnpjFormatado;
 
         // Email NF-e (usa o email do cliente se não informado)
         wsVendas.getCell('G15').value = dados.email_nfe || dados.email_cliente || dados.email || '';
