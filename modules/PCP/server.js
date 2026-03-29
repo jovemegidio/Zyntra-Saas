@@ -1598,7 +1598,7 @@ app.post('/api/pcp/ordens', authRequired, async (req, res) => {
 
 // Rota para atualizar o STATUS de uma Ordem de Produção
 // 🔐 SECURITY AUDIT: Added audit logging + transition validation for status changes
-app.put('/api/pcp/ordens/:id/status', authRequired, async (req, res) => {
+app.put('/api/pcp/ordens/:id/status', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP'), async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
     try {
@@ -2700,10 +2700,81 @@ app.get('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
 // ============================================================
 // CRIAR ORDEM DE PRODUÇÃO — ENTERPRISE (persiste TODOS os campos)
 // ============================================================
+
+// Cache de colunas da tabela ordens_producao (evita repeated information_schema)
+let _ordensProducaoCols = null;
+async function getOrdensProducaoCols() {
+    if (_ordensProducaoCols) return _ordensProducaoCols;
+    try {
+        const [cols] = await db.query(
+            "SELECT COLUMN_NAME FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'ordens_producao'"
+        );
+        _ordensProducaoCols = new Set(cols.map(r => r.COLUMN_NAME));
+    } catch (e) {
+        _ordensProducaoCols = new Set();
+    }
+    return _ordensProducaoCols;
+}
+
+// Migração lazy: garante que todas as colunas necessárias existem
+let _ordensProducaoMigrated = false;
+async function ensureOrdensProducaoSchema() {
+    if (_ordensProducaoMigrated) return;
+    _ordensProducaoMigrated = true;
+    const needed = {
+        codigo: 'VARCHAR(100)', revisao: 'VARCHAR(20)', numero_pedido: 'VARCHAR(100)',
+        numero_orcamento: 'VARCHAR(100)', data_liberacao: 'DATE', produto_nome: 'VARCHAR(500)',
+        quantidade: 'DECIMAL(15,2) DEFAULT 0', unidade: "VARCHAR(20) DEFAULT 'UN'",
+        status: "VARCHAR(50) DEFAULT 'ativa'", prioridade: "VARCHAR(20) DEFAULT 'media'",
+        data_inicio: 'DATE', data_prevista: 'DATE', observacoes: 'TEXT',
+        cliente_nome: 'VARCHAR(300)', cliente_cnpj: 'VARCHAR(20)',
+        cliente_contato: 'VARCHAR(200)', cliente_telefone: 'VARCHAR(30)',
+        cliente_email: 'VARCHAR(200)', cliente_endereco: 'VARCHAR(500)',
+        cliente_cep: 'VARCHAR(15)', cliente_email_nfe: 'VARCHAR(200)',
+        vendedor: 'VARCHAR(200)', prazo_entrega: 'VARCHAR(100)',
+        tipo_frete: "VARCHAR(10) DEFAULT 'CIF'",
+        transportadora_nome: 'VARCHAR(200)', transportadora_cnpj: 'VARCHAR(20)',
+        transportadora_telefone: 'VARCHAR(30)', transportadora_cep: 'VARCHAR(15)',
+        transportadora_email_nfe: 'VARCHAR(200)', transportadora_endereco: 'VARCHAR(500)',
+        forma_pagamento: 'VARCHAR(50)', metodo_pagamento: 'VARCHAR(50)',
+        percentual_pagamento: 'DECIMAL(5,2) DEFAULT 100',
+        condicoes_pagamento: 'VARCHAR(200)', formas_pagamento_json: 'TEXT',
+        valor_total: 'DECIMAL(15,2) DEFAULT 0', data_previsao_entrega: 'DATE',
+        qtd_volumes: 'INT', tipo_embalagem_entrega: 'VARCHAR(100)', observacoes_entrega: 'TEXT',
+        extrusora: 'VARCHAR(100)', time_producao: 'VARCHAR(200)', previsao_producao: 'DATE',
+        bobinas: 'INT DEFAULT 0', qtd_bobinas: 'INT DEFAULT 0',
+        metragem: 'DECIMAL(15,2) DEFAULT 0', peso_bruto: 'DECIMAL(15,4) DEFAULT 0',
+        peso_liquido: 'DECIMAL(15,4) DEFAULT 0', al_kg: 'DECIMAL(15,4) DEFAULT 0',
+        cores_pe: 'VARCHAR(200)', secao: 'VARCHAR(100)', veias: 'INT DEFAULT 0',
+        semana: 'VARCHAR(20)', created_by: 'INT', created_by_name: 'VARCHAR(200)',
+        produtos_json: 'LONGTEXT', pedido_vinculado_id: 'INT',
+        progresso: 'INT DEFAULT 0', responsavel: 'VARCHAR(200)'
+    };
+    try {
+        const existing = await getOrdensProducaoCols();
+        for (const [col, def] of Object.entries(needed)) {
+            if (!existing.has(col)) {
+                try {
+                    await db.query(`ALTER TABLE ordens_producao ADD COLUMN \`${col}\` ${def}`);
+                    existing.add(col);
+                    console.log(`[MIGRATION] Added ordens_producao.${col}`);
+                } catch (e) {
+                    if (!e.message.includes('Duplicate column')) {
+                        console.warn(`[MIGRATION] Could not add ${col}:`, e.message);
+                    }
+                }
+            }
+        }
+    } catch (e) {
+        console.warn('[MIGRATION] Schema check failed:', e.message);
+    }
+}
+
 app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
     console.log('[API_ORDENS_KANBAN_V2] Criando nova ordem — ENTERPRISE');
 
-    // Garantir tabelas auxiliares existem (migração lazy)
+    // Garantir schema + tabelas auxiliares existem (migração lazy)
+    await ensureOrdensProducaoSchema();
     try {
         await db.query(`CREATE TABLE IF NOT EXISTS ordens_producao_itens (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -2752,7 +2823,17 @@ app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
         if (!d.cliente && d.cliente_nome) d.cliente = d.cliente_nome;
         if (!d.numero_pedido && d['número_pedido']) d.numero_pedido = d['número_pedido'];
         if (!d.numero_orcamento && d['número_orçamento']) d.numero_orcamento = d['número_orçamento'];
+        if (!d.num_orcamento && d['num_orçamento']) d.num_orcamento = d['num_orçamento'];
         if (!d.descricao && d['descrição']) d.descricao = d['descrição'];
+
+        // ── Normalizar chaves acentuadas dentro de cada produto ──
+        if (d.produtos && Array.isArray(d.produtos)) {
+            d.produtos = d.produtos.map(p => {
+                if (!p.descricao && p['descrição']) p.descricao = p['descrição'];
+                if (!p.descricao && p.nome) p.descricao = p.nome;
+                return p;
+            });
+        }
 
         // ── Validações enterprise ──
         const erros = [];
@@ -2916,7 +2997,7 @@ app.post('/api/pcp/ordens-kanban', authRequired, async (req, res) => {
                         idOrdensProd,
                         i + 1,
                         p.codigo || '',
-                        p.descricao || p.nome || '',
+                        p.descricao || p['descrição'] || p.nome || '',
                         p.embalagem || 'Bobina',
                         p.codigo_cores || null,
                         p.lances || '1x100',
@@ -8181,10 +8262,11 @@ app.post('/api/pcp/ordens/:id/etapas/padrao', authRequired, async (req, res) => 
 });
 
 // Registrar apontamento
-// 🔒 SECURITY AUDIT: Added authRequired - production reporting requires authentication
-app.post('/api/pcp/apontamentos', authRequired, async (req, res) => {
-    const connection = await db.getConnection();
+// 🔒 SECURITY AUDIT: authRequired + RBAC - only PCP-related roles can register
+app.post('/api/pcp/apontamentos', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP', 'OPERATOR'), async (req, res) => {
+    let connection = null;
     try {
+        connection = await db.getConnection();
         await connection.beginTransaction();
         const {
             ordem_producao_id,
@@ -8202,13 +8284,45 @@ app.post('/api/pcp/apontamentos', authRequired, async (req, res) => {
 
         // Validações
         if (!ordem_producao_id || !etapa_id) {
-            connection.release();
             return res.status(400).json({ success: false, message: 'OP e Etapa são obrigatórios' });
         }
 
         if (!quantidade_produzida || quantidade_produzida <= 0) {
-            connection.release();
             return res.status(400).json({ success: false, message: 'Quantidade produzida deve ser maior que zero' });
+        }
+
+        // Lock pessimista da OP para evitar corrida entre apontamento e mudança de status
+        const [ordemRows] = await connection.query(
+            'SELECT id, status FROM ordens_producao WHERE id = ? FOR UPDATE',
+            [ordem_producao_id]
+        );
+        if (!ordemRows || ordemRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Ordem de produção não encontrada' });
+        }
+
+        const statusAtualOP = String(ordemRows[0].status || '').toLowerCase();
+        const statusBloqueados = ['cancelada', 'concluida', 'concluída', 'finalizada'];
+        if (statusBloqueados.includes(statusAtualOP)) {
+            return res.status(409).json({ success: false, message: `OP em status ${ordemRows[0].status} não aceita apontamentos` });
+        }
+
+        // Lock pessimista da etapa para evitar overshoot de quantidade prevista
+        const [etapaRows] = await connection.query(
+            'SELECT id, quantidade_prevista, quantidade_produzida FROM etapas_producao WHERE id = ? AND ordem_producao_id = ? FOR UPDATE',
+            [etapa_id, ordem_producao_id]
+        );
+        if (!etapaRows || etapaRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Etapa não encontrada para esta OP' });
+        }
+
+        const qtdAtualEtapa = Number(etapaRows[0].quantidade_produzida || 0);
+        const qtdPrevistaEtapa = Number(etapaRows[0].quantidade_prevista || 0);
+        const qtdNovaEtapa = qtdAtualEtapa + Number(quantidade_produzida || 0);
+        if (qtdPrevistaEtapa > 0 && qtdNovaEtapa > qtdPrevistaEtapa) {
+            return res.status(409).json({
+                success: false,
+                message: `Apontamento excede limite da etapa (${qtdNovaEtapa}/${qtdPrevistaEtapa})`
+            });
         }
 
         // Inserir apontamento
@@ -8233,11 +8347,10 @@ app.post('/api/pcp/apontamentos', authRequired, async (req, res) => {
             WHERE id = ?
         `, [quantidade_produzida, tempo_producao || 0, etapa_id]);
 
-        // Verificar se etapa foi Concluída
-        const [etapa] = await connection.query('SELECT quantidade_prevista, quantidade_produzida FROM etapas_producao WHERE id = ?', [etapa_id]);
-        if (etapa.length > 0 && etapa[0].quantidade_produzida >= etapa[0].quantidade_prevista) {
+        // Verificar conclusão usando os valores já travados na transação
+        if (qtdPrevistaEtapa > 0 && qtdNovaEtapa >= qtdPrevistaEtapa) {
             await connection.query("UPDATE etapas_producao SET status = 'concluida', data_fim = NOW() WHERE id = ?", [etapa_id]);
-        } else if (etapa.length > 0 && etapa[0].quantidade_produzida > 0) {
+        } else if (qtdNovaEtapa > 0) {
             await connection.query("UPDATE etapas_producao SET status = 'em_andamento', data_inicio = COALESCE(data_inicio, NOW()) WHERE id = ?", [etapa_id]);
         }
 
@@ -8286,11 +8399,13 @@ app.post('/api/pcp/apontamentos', authRequired, async (req, res) => {
             id: result.insertId
         });
     } catch (error) {
-        await connection.rollback();
+        if (connection) {
+            try { await connection.rollback(); } catch (_) {}
+        }
         console.error('[API_APONTAMENTOS] Erro:', error.message);
         res.status(500).json({ success: false, message: 'Erro ao registrar apontamento' + (process.env.NODE_ENV === 'development' ? ': ' + error.message : '') });
     } finally {
-        connection.release();
+        if (connection) connection.release();
     }
 });
 

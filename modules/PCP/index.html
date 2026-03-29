@@ -10915,6 +10915,14 @@
         }
 
         // ============================================
+        // UTILITY: XSS-safe HTML escaping
+        // ============================================
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        // ============================================
         // CATÁLOGO DE PRODUTOS ALUFORCE
         // (Mesmo catálogo do template Excel N18:O174)
         // ============================================
@@ -10998,12 +11006,13 @@
                         const produtos = await response.json();
 
                         if (produtos && produtos.length > 0) {
-                            dropdown.innerHTML = produtos.map(p => `
-                                <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${(p.descrição || '').replace(/'/g, "\\'")}')">
-                                    <strong>${p.codigo}</strong>
-                                    <span>${p.descrição || ''}</span>
-                                </div>
-                            `).join('');
+                            dropdown.innerHTML = produtos.map(p => {
+                                const desc = p.descricao || p.descrição || '';
+                                return `<div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${escapeHtml(p.codigo)}', '${escapeHtml(desc)}')">
+                                    <strong>${escapeHtml(p.codigo)}</strong>
+                                    <span>${escapeHtml(desc)}</span>
+                                </div>`;
+                            }).join('');
                             dropdown.style.display = 'block';
                             return;
                         }
@@ -11023,9 +11032,9 @@
                     }
 
                     dropdown.innerHTML = resultados.map(p => `
-                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${p.descrição.replace(/'/g, "\\'")}')">
-                            <strong>${p.codigo}</strong>
-                            <span>${p.descrição}</span>
+                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${escapeHtml(p.codigo)}', '${escapeHtml(p.descrição)}')">
+                            <strong>${escapeHtml(p.codigo)}</strong>
+                            <span>${escapeHtml(p.descrição)}</span>
                         </div>
                     `).join('');
                     dropdown.style.display = 'block';
@@ -11041,9 +11050,9 @@
 
                     if (resultados.length > 0) {
                         dropdown.innerHTML = resultados.map(p => `
-                            <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${p.descrição.replace(/'/g, "\\'")}')">
-                                <strong>${p.codigo}</strong>
-                                <span>${p.descrição}</span>
+                            <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${escapeHtml(p.codigo)}', '${escapeHtml(p.descrição)}')">
+                                <strong>${escapeHtml(p.codigo)}</strong>
+                                <span>${escapeHtml(p.descrição)}</span>
                             </div>
                         `).join('');
                         dropdown.style.display = 'block';
@@ -11694,12 +11703,13 @@
 
             let html = '';
             clientes.forEach(cliente => {
-                const nome = cliente.razao_social || cliente.nome || cliente.nome_fantasia || 'Sem nome';
-                const cnpj = cliente.cnpj_cpf || cliente.cnpj || '';
-                const cidade = cliente.cidade ? `${cliente.cidade}/${cliente.estado || ''}` : '';
+                const nome = escapeHtml(cliente.razao_social || cliente.nome || cliente.nome_fantasia || 'Sem nome');
+                const cnpj = escapeHtml(cliente.cnpj_cpf || cliente.cnpj || '');
+                const cidade = cliente.cidade ? escapeHtml(`${cliente.cidade}/${cliente.estado || ''}`) : '';
+                const safeId = parseInt(cliente.id) || 0;
 
                 html += `
-                    <div class="autocomplete-item" onclick="selecionarClienteOP(${cliente.id})">
+                    <div class="autocomplete-item" onclick="selecionarClienteOP(${safeId})">
                         <div class="autocomplete-item-main">
                             <i class="fas fa-building"></i>
                             <span class="autocomplete-nome">${nome}</span>
@@ -11885,12 +11895,13 @@
 
             let html = '';
             transportadoras.forEach(transp => {
-                const nome = transp.razao_social || transp.nome || transp.nome_fantasia || 'Sem nome';
-                const cnpj = transp.cnpj || transp.cnpj_cpf || '';
-                const cidade = transp.cidade ? `${transp.cidade}/${transp.estado || ''}` : '';
+                const nome = escapeHtml(transp.razao_social || transp.nome || transp.nome_fantasia || 'Sem nome');
+                const cnpj = escapeHtml(transp.cnpj || transp.cnpj_cpf || '');
+                const cidade = transp.cidade ? escapeHtml(`${transp.cidade}/${transp.estado || ''}`) : '';
+                const safeId = parseInt(transp.id) || 0;
 
                 html += `
-                    <div class="autocomplete-item" onclick="selecionarTransportadoraOP(${transp.id})">
+                    <div class="autocomplete-item" onclick="selecionarTransportadoraOP(${safeId})">
                         <div class="autocomplete-item-main">
                             <i class="fas fa-truck"></i>
                             <span class="autocomplete-nome">${nome}</span>

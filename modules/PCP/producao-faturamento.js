@@ -491,10 +491,16 @@
         const modal = document.getElementById('modal-nova-ordem');
         modal.classList.remove('hidden');
         
-        // Gerar código automático
-        const proximoNumero = ordensProducao.length + 1;
-        const codigo = `OP-${currentYear}-${String(proximoNumero).padStart(3, '0')}`;
-        document.getElementById('ordem-codigo').value = codigo;
+        // Buscar próximo número de OP do servidor
+        fetch('/api/pcp/ordens-kanban/proximo-numero', { credentials: 'include' })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (data) {
+                    const campo = document.getElementById('num_pedido');
+                    if (campo && !campo.value) campo.value = data.número || data.numero || '';
+                }
+            })
+            .catch(() => {});
         
         // Definir data de hoje como data de início
         const hoje = new Date().toISOString().split('T')[0];
