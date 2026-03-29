@@ -7494,11 +7494,11 @@ async function handleGerarOrdemExcel(req, res) {
         // Frete
         wsVendas.getCell('J9').value = dados.tipo_frete || 'FOB';
 
-        // CEP
-        wsVendas.getCell('C13').value = dados.cep || '';
+        // CEP (seção transportadora/entrega — C13)
+        wsVendas.getCell('C13').value = dados.transportadora_cep || dados.cep || '';
 
         // Endereço
-        wsVendas.getCell('F13').value = dados.endereco || '';
+        wsVendas.getCell('F13').value = dados.transportadora_endereco || dados.endereco || '';
 
         // Dados para cobrança (Linha 14) - Em branco por padrão
         // NÃO PREENCHER - deve ficar vazio conforme modelo padrão
@@ -7509,9 +7509,9 @@ async function handleGerarOrdemExcel(req, res) {
             if (cell.sharedFormula) cell.sharedFormula = undefined;
         });
 
-        // CPF/CNPJ do cliente - C10 (área do cliente)
+        // CPF/CNPJ do cliente - C15 (seção "Dados para cobrança")
         const cpfCnpjFormatado = formatarCpfCnpjExcel(dados.cpf_cnpj || '');
-        wsVendas.getCell('C10').value = cpfCnpjFormatado;
+        wsVendas.getCell('C15').value = cpfCnpjFormatado;
 
         // Email NF-e (usa o email do cliente se não informado)
         wsVendas.getCell('G15').value = dados.email_nfe || dados.email_cliente || dados.email || '';
@@ -7587,12 +7587,12 @@ async function handleGerarOrdemExcel(req, res) {
         // TRANSPORTADORA (Linhas 11-15) - Células corretas conforme MAPEAMENTO_EXCEL_OP.md
         wsVendas.getCell('C12').value = dados.transportadora_nome || '';
         // H12 = Fórmula =H8 (não preencher)
-        wsVendas.getCell('C13').value = dados.transportadora_cep || dados.cep || '';
-        wsVendas.getCell('F13').value = dados.transportadora_endereco || dados.endereco || '';
+        // C13/F13 já preenchidos acima com fallback transportadora→cliente
 
-        // CPF/CNPJ da transportadora com formatação (se diferente do cliente)
-        const cpfCnpjTransp = dados.transportadora_cpf_cnpj || dados.cpf_cnpj || '';
-        wsVendas.getCell('C15').value = formatarCpfCnpjExcel(cpfCnpjTransp);
+        // CPF/CNPJ transportadora — só sobrescreve C15 se for DIFERENTE do cliente
+        if (dados.transportadora_cpf_cnpj && dados.transportadora_cpf_cnpj !== dados.cpf_cnpj) {
+            wsVendas.getCell('C15').value = formatarCpfCnpjExcel(dados.transportadora_cpf_cnpj);
+        }
         // G15 = Fórmula =C9 (não preencher)
 
         // OBSERVAÇÕES (Linhas 36-42)
