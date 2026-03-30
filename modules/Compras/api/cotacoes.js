@@ -148,6 +148,16 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Número/descrição da cotação é obrigatório' });
         }
         
+        // COMPRAS-11 FIX: Validar data_limite não está no passado
+        if (dataLimite) {
+            const hoje = new Date();
+            hoje.setHours(0, 0, 0, 0);
+            if (new Date(dataLimite) < hoje) {
+                await connection.rollback();
+                return res.status(400).json({ error: 'Data limite não pode ser no passado' });
+            }
+        }
+        
         // Inserir cotação
         const [result] = await connection.query(
             `INSERT INTO cotacoes (
@@ -158,9 +168,12 @@ router.post('/', async (req, res) => {
         
         const cotacao_id = result.insertId;
         
+        // COMPRAS-09 FIX: Deduplicar fornecedores_ids
+        const fornecedoresUnicos = [...new Set(fornecedores_ids.map(Number).filter(Boolean))];
+        
         // Criar propostas vazias para fornecedores selecionados
-        if (fornecedores_ids.length > 0) {
-            for (const fornecedor_id of fornecedores_ids) {
+        if (fornecedoresUnicos.length > 0) {
+            for (const fornecedor_id of fornecedoresUnicos) {
                 await connection.query(
                     `INSERT INTO propostas_cotacao (
                         cotacao_id, fornecedor_id, valor_total
@@ -206,6 +219,13 @@ router.post('/:id/proposta', async (req, res) => {
         if (!fornecedor_id) {
             await connection.rollback();
             return res.status(400).json({ error: 'Fornecedor é obrigatório' });
+        }
+        
+        // COMPRAS-02 FIX: Validar valor_total não-negativo
+        const valorTotalNum = parseFloat(valor_total);
+        if (valor_total !== undefined && valor_total !== null && (!Number.isFinite(valorTotalNum) || valorTotalNum < 0)) {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Valor total deve ser um número >= 0' });
         }
         
         // Verificar se cotação está aberta

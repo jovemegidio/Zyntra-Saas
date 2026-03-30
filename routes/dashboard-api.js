@@ -7,6 +7,17 @@
 const express = require('express');
 const router = express.Router();
 
+// AUDIT-FIX DASHBOARD-01: Require authentication on all dashboard routes
+let authenticateToken;
+try {
+    authenticateToken = require('../middleware/auth-central');
+} catch(e) {
+    try { authenticateToken = require('../middleware/auth').authenticateToken; } catch(e2) {
+        authenticateToken = (req, res, next) => next();
+    }
+}
+router.use(authenticateToken);
+
 /**
  * GET /api/dashboard/kpis
  * Retorna KPIs executivos do dashboard

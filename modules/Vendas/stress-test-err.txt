@@ -1,0 +1,440 @@
+FAIL test/pcp-stress.test.js (108.861 s)
+  VOLUME STRESS & MEMORY EXHAUSTION
+    V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante
+      × FINDING: Aceita payload com campos observações de 1MB sem validação de tamanho (9 ms)
+      × FINDING: Rota legada /api/pcp/ordens aceita campos extras arbitrários via JSON
+      × Express JSON limit rejeita payload > 10MB
+    V2: PDF Stress — 50 requisições simultâneas GET /api/pcp/ordens-compra/:id/pdf
+      × FINDING: 50 PDFs simultâneos processados sem controle de concorrência
+    V3: Report Tsunami — GET /api/pcp/apontamentos/relatorio com range de 5 anos
+      × FINDING: Query de relatório SEM LIMIT retorna todos os registros do período
+      × FINDING: Relatório Excel também sem LIMIT — todas as ordens na memória
+  EXTREME CONCURRENCY & RACE CONDITIONS
+    C1: Race Condition — 5 apontamentos simultâneos excedem limite da OP
+      × FINDING: Sem SELECT FOR UPDATE — múltiplos apontamentos podem exceder quantidade_prevista
+      × EVIDENCE: Query SQL de leitura da etapa NÃO usa FOR UPDATE
+    C2: Status Change vs Apontamento — cancelamento concurrent com apontamento
+      × FINDING: PUT status e POST apontamento podem executar simultaneamente na mesma OP
+      × FINDING: Apontamento NÃO verifica status da OP antes de inserir
+    C3: Idempotency — 10 cliques rápidos criam 10 OPs duplicadas
+      × FINDING: 10 POST idênticos criam 10 ordens duplicadas (1 ms)
+      × FINDING: codigo não tem UNIQUE constraint verificação antes do INSERT
+  CHAOS ENGINEERING & NETWORK FAILURES
+    CH1: Zombie Transaction — conexão cai no meio da transação
+      × VERIFY: Rollback é executado quando commit falha
+      × VERIFY: Connection é liberada mesmo quando rollback falha (finally block)
+      × FINDING: getConnection failure retorna 500 genérico — sem retry (1 ms)
+      × FINDING: Transação parcial — DB error após INSERT mas antes do UPDATE etapa
+    CH2: Re-hydration — payload duplicado pós-offline cria dados duplicados
+      × FINDING: Mesmo apontamento enviado 2x cria 2 registros (sem idempotência)
+      × FINDING: Apontamento chão de fábrica também sem deduplicação
+  RBAC under Stress
+    × RBAC blocks unauthorized users even under concurrent load
+    × FINDING: PUT status change NOT protected by requireProductionRole
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante › FINDING: Aceita payload com campos observações de 1MB sem validação de tamanho
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante › FINDING: Rota legada /api/pcp/ordens aceita campos extras arbitrários via JSON
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante › Express JSON limit rejeita payload > 10MB
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V2: PDF Stress — 50 requisições simultâneas GET /api/pcp/ordens-compra/:id/pdf › FINDING: 50 PDFs simultâneos processados sem controle de concorrência
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V3: Report Tsunami — GET /api/pcp/apontamentos/relatorio com range de 5 anos › FINDING: Query de relatório SEM LIMIT retorna todos os registros do período
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● VOLUME STRESS & MEMORY EXHAUSTION › V3: Report Tsunami — GET /api/pcp/apontamentos/relatorio com range de 5 anos › FINDING: Relatório Excel também sem LIMIT — todas as ordens na memória
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C1: Race Condition — 5 apontamentos simultâneos excedem limite da OP › FINDING: Sem SELECT FOR UPDATE — múltiplos apontamentos podem exceder quantidade_prevista
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C1: Race Condition — 5 apontamentos simultâneos excedem limite da OP › EVIDENCE: Query SQL de leitura da etapa NÃO usa FOR UPDATE
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C2: Status Change vs Apontamento — cancelamento concurrent com apontamento › FINDING: PUT status e POST apontamento podem executar simultaneamente na mesma OP
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C2: Status Change vs Apontamento — cancelamento concurrent com apontamento › FINDING: Apontamento NÃO verifica status da OP antes de inserir
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C3: Idempotency — 10 cliques rápidos criam 10 OPs duplicadas › FINDING: 10 POST idênticos criam 10 ordens duplicadas
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● EXTREME CONCURRENCY & RACE CONDITIONS › C3: Idempotency — 10 cliques rápidos criam 10 OPs duplicadas › FINDING: codigo não tem UNIQUE constraint verificação antes do INSERT
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › VERIFY: Rollback é executado quando commit falha
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › VERIFY: Connection é liberada mesmo quando rollback falha (finally block)
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › FINDING: getConnection failure retorna 500 genérico — sem retry
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › FINDING: Transação parcial — DB error após INSERT mas antes do UPDATE etapa
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH2: Re-hydration — payload duplicado pós-offline cria dados duplicados › FINDING: Mesmo apontamento enviado 2x cria 2 registros (sem idempotência)
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH2: Re-hydration — payload duplicado pós-offline cria dados duplicados › FINDING: Apontamento chão de fábrica também sem deduplicação
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● RBAC under Stress › RBAC blocks unauthorized users even under concurrent load
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+  ● RBAC under Stress › FINDING: PUT status change NOT protected by requireProductionRole
+
+    TypeError: server.listeners is not a function
+
+    [0m [90m 489 |[39m         process[33m.[39menv[33m.[39m[33mCORS_ORIGIN[39m
+     [90m 490 |[39m     ][33m.[39mfilter([33mBoolean[39m)[33m;[39m
+    [31m[1m>[22m[39m[90m 491 |[39m     [36mconst[39m io [33m=[39m [36mnew[39m [33mServer[39m(httpServer[33m,[39m {
+     [90m     |[39m                [31m[1m^[22m[39m
+     [90m 492 |[39m         cors[33m:[39m {
+     [90m 493 |[39m             origin[33m:[39m [36mfunction[39m(origin[33m,[39m cb) {
+     [90m 494 |[39m                 [36mif[39m ([33m![39morigin [33m||[39m socketAllowedOrigins[33m.[39mincludes(origin)) [36mreturn[39m cb([36mnull[39m[33m,[39m [36mtrue[39m)[33m;[39m[0m
+
+      at Server.attach (../PCP/node_modules/engine.io/build/server.js:633:34)
+      at attach (../PCP/node_modules/engine.io/build/engine.io.js:52:12)
+      at Server.initEngine (../PCP/node_modules/socket.io/dist/index.js:293:43)
+      at Server.attach (../PCP/node_modules/socket.io/dist/index.js:232:14)
+      at new Server (../PCP/node_modules/socket.io/dist/index.js:119:18)
+      at Object.<anonymous> (../PCP/server.js:491:16)
+      at Object.require (test/pcp-stress.test.js:276:3)
+
+Test Suites: 1 failed, 1 total
+Tests:       20 failed, 20 total
+Snapshots:   0 total
+Time:        109.794 s
+Ran all test suites within paths "test/pcp-stress.test.js".
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

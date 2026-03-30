@@ -312,6 +312,15 @@ router.put('/:id/status', async (req, res) => {
             return res.status(400).json({ error: 'Status inválido' });
         }
         
+        // COMPRAS-04 FIX: RBAC — aprovação requer gerente/supervisor/admin
+        if (status === 'aprovado') {
+            const role = (req.user?.role || req.user?.cargo || '').toLowerCase();
+            const isAdmin = req.user?.is_admin === true || req.user?.is_admin === 1 || role === 'admin' || role === 'administrador';
+            if (!isAdmin && !['gerente', 'supervisor'].includes(role)) {
+                return res.status(403).json({ error: 'Sem permissão para aprovar pedidos de compra' });
+            }
+        }
+        
         // Transições válidas: evita reapproval ou transições inválidas
         const transicoesPermitidas = {
             'pendente': ['aprovado', 'cancelado'],

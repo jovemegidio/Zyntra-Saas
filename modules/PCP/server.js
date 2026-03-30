@@ -1480,9 +1480,25 @@ app.get('/api/pcp/produtos/sku/:sku', authRequired, async (req, res) => {
 
 // Rota para criar uma nova Ordem de Produção
 // Create new production order — adapted to accept extra fields without requiring an immediate schema migration.
-app.post('/api/pcp/ordens', authRequired, async (req, res) => {
+// 🔒 BUG-04 FIX: Added RBAC
+app.post('/api/pcp/ordens', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP'), async (req, res) => {
     const { codigo_produto, descricao_produto, quantidade, data_previsao_entrega } = req.body;
     let observacoes = req.body.observacoes || null;
+
+    // BUG-08 FIX: Validar quantidade > 0
+    if (!quantidade || parseFloat(quantidade) <= 0) {
+        return res.status(400).json({ message: 'Quantidade deve ser maior que zero.' });
+    }
+
+    // BUG-14 FIX: Validar que data prevista não esteja no passado
+    if (data_previsao_entrega) {
+        const dataPrevista = new Date(data_previsao_entrega);
+        const hoje = new Date();
+        hoje.setHours(0, 0, 0, 0);
+        if (dataPrevista < hoje) {
+            return res.status(400).json({ message: 'Data de previsão de entrega não pode estar no passado.' });
+        }
+    }
 
     // List of additional fields coming from the UI/modal that we'd like to persist if the table supports them
     const candidateFields = ['cliente','contato','email','telefone','frete','vendedor','numero_orcamento','revisao','pedido_referencia','data_liberacao', 'variacao', 'embalagem', 'lances'];
@@ -1656,17 +1672,58 @@ app.delete('/api/pcp/ordens/:id', authRequired, requireProductionRole('ADMIN', '
             return res.status(404).json({ message: "Ordem de produção não encontrada." });
         }
 
-        // Verificar status - não permitir excluir ordens em produção ou finalizadas
-        const statusBloqueados = ['em_producao', 'finalizada', 'concluida'];
+        // BUG-13 FIX: Verificar status - não permitir excluir ordens em produção, qualidade, conferido, concluida ou armazenado
+        const statusBloqueados = ['em_producao', 'finalizada', 'concluida', 'qualidade', 'conferido', 'armazenado'];
         if (statusBloqueados.includes(ordem[0].status)) {
             return res.status(400).json({
-                message: `não é possível excluir ordem com status "${ordem[0].status}". Apenas ordens pendentes ou canceladas podem ser excluídas.`
+                message: `não é possível excluir ordem com status "${ordem[0].status}". Apenas ordens pendentes, ativas ou canceladas podem ser excluídas.`
             });
         }
 
         if (soft === 'true') {
-            // Soft delete - marca como cancelada
-            await db.query("UPDATE ordens_producao SET status = 'cancelada', updated_at = NOW() WHERE id = ?", [id]);
+            // BUG-03 FIX: Soft delete com reversão de estoque de materiais
+            const txConn = await db.getConnection();
+            try {
+                await txConn.beginTransaction();
+
+                // Reverter movimentações de saída de materiais vinculados a esta OP
+                try {
+                    const [movimentacoes] = await txConn.query(`
+                        SELECT me.material_id, me.quantidade, me.tipo
+                        FROM movimentacoes_estoque me
+                        WHERE me.observacoes LIKE ? AND me.tipo = 'SAIDA'
+                    `, [`%OP ${id}%`]);
+
+                    for (const mov of (movimentacoes || [])) {
+                        if (mov.material_id && mov.quantidade > 0) {
+                            await txConn.query(
+                                'UPDATE materiais SET quantidade_estoque = quantidade_estoque + ? WHERE id = ?',
+                                [mov.quantidade, mov.material_id]
+                            );
+                            await txConn.query(`
+                                INSERT INTO movimentacoes_estoque
+                                (material_id, tipo, quantidade, quantidade_anterior, quantidade_atual, observacoes, usuario_id, criado_em)
+                                VALUES (?, 'ENTRADA', ?, 0, 0, ?, ?, NOW())
+                            `, [mov.material_id, mov.quantidade, `Reversão automática - Cancelamento OP #${id}`, req.user?.id || null]);
+                        }
+                    }
+                    if (movimentacoes && movimentacoes.length > 0) {
+                        console.log(`[DELETE_OP] Revertidas ${movimentacoes.length} movimentações de estoque para OP ${id}`);
+                    }
+                } catch (revErr) {
+                    console.warn('[DELETE_OP] Tabela movimentacoes_estoque não encontrada ou erro na reversão:', revErr.message);
+                }
+
+                // Marca como cancelada
+                await txConn.query("UPDATE ordens_producao SET status = 'cancelada', updated_at = NOW() WHERE id = ?", [id]);
+
+                await txConn.commit();
+            } catch (txError) {
+                try { await txConn.rollback(); } catch (_) {}
+                throw txError;
+            } finally {
+                txConn.release();
+            }
 
             // Log de auditoria
             await logProductionAudit(db, 'SOFT_DELETE', 'ORDEM_PRODUCAO', id, req.user, {
@@ -1702,7 +1759,8 @@ app.delete('/api/pcp/ordens/:id', authRequired, requireProductionRole('ADMIN', '
 });
 
 // Rota para EXCLUIR uma Ordem do Kanban
-app.delete('/api/pcp/ordens-kanban/:id', authRequired, async (req, res) => {
+// 🔒 BUG-10 FIX: Added RBAC - only production roles can delete kanban orders
+app.delete('/api/pcp/ordens-kanban/:id', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP'), async (req, res) => {
     const { id } = req.params;
 
     try {
@@ -1855,7 +1913,8 @@ app.get('/api/pcp/controle-pcp', authRequired, async (req, res) => {
 });
 
 // Atualizar status de uma ordem no controle PCP
-app.put('/api/pcp/controle-pcp/:id/status', authRequired, async (req, res) => {
+// 🔒 BUG-01 FIX: Added RBAC + VALID_TRANSITIONS validation (was bypass of state machine)
+app.put('/api/pcp/controle-pcp/:id/status', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP'), async (req, res) => {
     const { id } = req.params;
     const { status, observacao } = req.body;
     console.log(`[API_CONTROLE_PCP] Atualizando status da ordem ${id} para ${status}...`);
@@ -1865,8 +1924,35 @@ app.put('/api/pcp/controle-pcp/:id/status', authRequired, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Status é obrigatório' });
         }
 
+        // BUG-01 FIX: Normalizar status e validar transição via state machine
+        const statusNorm = status.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const VALID_TRANSITIONS_CTRL = {
+            'pendente':    ['ativa', 'em_producao', 'cancelada'],
+            'ativa':       ['em_producao', 'qualidade', 'cancelada', 'pendente'],
+            'em_producao': ['qualidade', 'conferido', 'concluida', 'cancelada'],
+            'qualidade':   ['conferido', 'concluida', 'em_producao'],
+            'conferido':   ['concluida', 'qualidade'],
+            'concluida':   ['armazenado'],
+            'armazenado':  []
+        };
+
+        // Buscar status atual da ordem
+        const [ordemAtual] = await db.query('SELECT status FROM ordens_producao WHERE id = ?', [id]);
+        if (!ordemAtual || ordemAtual.length === 0) {
+            return res.status(404).json({ success: false, message: 'Ordem não encontrada' });
+        }
+
+        const statusAtual = (ordemAtual[0].status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        const transicoesPermitidas = VALID_TRANSITIONS_CTRL[statusAtual] || [];
+        if (!transicoesPermitidas.includes(statusNorm)) {
+            return res.status(400).json({
+                success: false,
+                message: `Transição de "${statusAtual}" para "${statusNorm}" não é permitida. Transições válidas: ${transicoesPermitidas.join(', ') || 'nenhuma'}`
+            });
+        }
+
         let updateSql = 'UPDATE ordens_producao SET status = ?, updated_at = NOW()';
-        let params = [status];
+        let params = [statusNorm];
 
         if (observacao) {
             updateSql += ', observacoes = ?';
@@ -1874,7 +1960,7 @@ app.put('/api/pcp/controle-pcp/:id/status', authRequired, async (req, res) => {
         }
 
         // Atualizar data de conclusão se status for concluída
-        if (status === 'concluida' || status === 'Concluída') {
+        if (statusNorm === 'concluida') {
             updateSql += ', data_conclusao = NOW(), progresso = 100';
         }
 
@@ -1884,7 +1970,7 @@ app.put('/api/pcp/controle-pcp/:id/status', authRequired, async (req, res) => {
         const [result] = await db.query(updateSql, params);
 
         if (result.affectedRows > 0) {
-            console.log(`[API_CONTROLE_PCP] Status da ordem ${id} atualizado para ${status}`);
+            console.log(`[API_CONTROLE_PCP] Status da ordem ${id} atualizado para ${statusNorm}`);
             res.json({ success: true, message: 'Status atualizado com sucesso' });
         } else {
             res.status(404).json({ success: false, message: 'Ordem não encontrada' });
@@ -3654,6 +3740,19 @@ app.put('/api/pcp/produtos/:id', authRequired, async (req, res) => {
         const estoqueAtualFinal = estoque !== undefined ? estoque : 0;
         const estoqueMinimoFinal = estoque_minimo !== undefined ? estoque_minimo : 0;
 
+        // BUG-02 FIX: Validar que estoque não seja negativo
+        if (estoqueAtualFinal < 0) {
+            return res.status(400).json({ message: 'Estoque não pode ser negativo.' });
+        }
+
+        // BUG-09 FIX: Validar que preço não seja negativo
+        if (precoVendaFinal < 0) {
+            return res.status(400).json({ message: 'Preço de venda não pode ser negativo.' });
+        }
+        if (preco_custo !== undefined && preco_custo < 0) {
+            return res.status(400).json({ message: 'Preço de custo não pode ser negativo.' });
+        }
+
         console.log('[UPDATE_PRODUCT] Valores finais:', { precoVendaFinal, estoqueAtualFinal, estoqueMinimoFinal });
 
         const sql = `UPDATE produtos SET
@@ -4047,7 +4146,8 @@ app.get('/api/pcp/materias-primas/:id', authRequired, async (req, res) => {
 });
 
 // Registrar SAÍDA de matéria-prima (baixa de material)
-app.post('/api/pcp/materias-primas/:id/saida', authRequired, async (req, res) => {
+// 🔒 BUG-05 FIX: Added RBAC - only production roles can deduct stock
+app.post('/api/pcp/materias-primas/:id/saida', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP', 'OPERATOR'), async (req, res) => {
     const { id } = req.params;
     const { quantidade, destino, documento, observacao, usuario_nome } = req.body;
 
@@ -4162,7 +4262,8 @@ app.post('/api/pcp/materias-primas/:id/saida', authRequired, async (req, res) =>
 });
 
 // Registrar ENTRADA de matéria-prima
-app.post('/api/pcp/materias-primas/:id/entrada', authRequired, async (req, res) => {
+// 🔒 BUG-05 FIX: Added RBAC
+app.post('/api/pcp/materias-primas/:id/entrada', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP', 'OPERATOR'), async (req, res) => {
     const { id } = req.params;
     const { quantidade, origem, documento, observacao, usuario_nome } = req.body;
 
@@ -4295,22 +4396,60 @@ app.get('/api/pcp/materias-primas/:id/movimentacoes', authRequired, async (req, 
 });
 
 // Rota para atualizar um material (incluindo estoque)
-// 🔐 SECURITY: Added authRequired
-app.put('/api/pcp/materiais/:id', authRequired, async (req, res) => {
+// � BUG-07 FIX: Added RBAC + transaction + movimentacao audit trail for estoque changes
+app.put('/api/pcp/materiais/:id', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP'), async (req, res) => {
     const { id } = req.params;
     const { descricao, unidade_medida, quantidade_estoque, fornecedor_padrao } = req.body;
+
+    // Validar estoque não-negativo
+    if (quantidade_estoque !== undefined && quantidade_estoque !== null && parseFloat(quantidade_estoque) < 0) {
+        return res.status(400).json({ message: 'Quantidade de estoque não pode ser negativa.' });
+    }
+
+    const txConn = await db.getConnection();
     try {
-        const sql = "UPDATE materiais SET descricao = ?, unidade_medida = ?, quantidade_estoque = ?, fornecedor_padrao = ? WHERE id = ?";
-        const [result] = await db.query(sql, [descricao, unidade_medida, quantidade_estoque, fornecedor_padrao, id]);
-        if (result.affectedRows > 0) {
-            res.json({ message: "Material atualizado com sucesso!" });
-            broadcastMaterials();
-        } else {
-            res.status(404).json({ message: "Material não encontrado." });
+        await txConn.beginTransaction();
+
+        // Buscar estoque atual para registrar movimentação
+        const [matAtual] = await txConn.query('SELECT quantidade_estoque FROM materiais WHERE id = ?', [id]);
+        if (!matAtual || matAtual.length === 0) {
+            await txConn.rollback();
+            txConn.release();
+            return res.status(404).json({ message: 'Material não encontrado.' });
         }
+
+        const estoqueAnterior = parseFloat(matAtual[0].quantidade_estoque) || 0;
+        const estoqueNovo = quantidade_estoque !== undefined ? parseFloat(quantidade_estoque) : estoqueAnterior;
+
+        // Atualizar material
+        await txConn.query(
+            "UPDATE materiais SET descricao = ?, unidade_medida = ?, quantidade_estoque = ?, fornecedor_padrao = ? WHERE id = ?",
+            [descricao, unidade_medida, estoqueNovo, fornecedor_padrao, id]
+        );
+
+        // Se estoque mudou, registrar movimentação de ajuste
+        if (estoqueNovo !== estoqueAnterior) {
+            const diff = estoqueNovo - estoqueAnterior;
+            try {
+                await txConn.query(`
+                    INSERT INTO movimentacoes_estoque
+                    (material_id, tipo, quantidade, quantidade_anterior, quantidade_atual, observacoes, usuario_id, criado_em)
+                    VALUES (?, 'AJUSTE', ?, ?, ?, ?, ?, NOW())
+                `, [id, Math.abs(diff), estoqueAnterior, estoqueNovo, 'Ajuste manual via edição de material', req.user?.id || null]);
+            } catch (movErr) {
+                console.warn('[PUT_MATERIAIS] Não foi possível registrar movimentação:', movErr.message);
+            }
+        }
+
+        await txConn.commit();
+        res.json({ message: "Material atualizado com sucesso!" });
+        if (typeof broadcastMaterials === 'function') broadcastMaterials();
     } catch (error) {
+        try { await txConn.rollback(); } catch (_) {}
         console.error("Erro ao atualizar material:", error);
         res.status(500).json({ message: "Erro ao atualizar material." });
+    } finally {
+        txConn.release();
     }
 });
 
@@ -7335,49 +7474,80 @@ app.get('/api/pcp/locations', authRequired, async (req, res) => {
 });
 
 // Register a stock movement
+// 🔒 BUG-06 FIX: Added transaction to prevent race condition on OUT movements
 app.post('/api/pcp/stock_movements', authRequired, async (req, res) => {
     const { produto_id, location_from, location_to, quantidade, tipo, referencia, lote } = req.body;
     if (!produto_id || !quantidade || !tipo) return res.status(400).json({ message: 'produto_id, quantidade e tipo são obrigatórios.' });
+
+    const txConn = await db.getConnection();
     try {
-        // if OUT movement, validate saldo at location_from
+        await txConn.beginTransaction();
+
+        // if OUT movement, validate saldo at location_from (inside transaction to prevent race)
         if (tipo === 'OUT') {
-            if (!location_from) return res.status(400).json({ message: 'location_from é obrigatório para movimentos OUT.' });
-            const [rows] = await db.query(`
+            if (!location_from) {
+                await txConn.rollback();
+                txConn.release();
+                return res.status(400).json({ message: 'location_from é obrigatório para movimentos OUT.' });
+            }
+            const [rows] = await txConn.query(`
                 SELECT COALESCE(SUM(CASE WHEN tipo='IN' THEN quantidade WHEN tipo='OUT' THEN -quantidade WHEN tipo='TRANSFER' AND location_to=? THEN quantidade WHEN tipo='TRANSFER' AND location_from=? THEN -quantidade WHEN tipo='ADJUST' THEN quantidade ELSE 0 END),0) AS saldo
-                FROM stock_movements WHERE produto_id = ?
+                FROM stock_movements WHERE produto_id = ? FOR UPDATE
             `, [location_from, location_from, produto_id]);
             const saldo = rows && rows[0] ? parseFloat(rows[0].saldo) : 0;
-            if (saldo < quantidade) return res.status(400).json({ message: `Saldo insuficiente na localização ${location_from}. Saldo atual: ${saldo}` });
+            if (saldo < quantidade) {
+                await txConn.rollback();
+                txConn.release();
+                return res.status(400).json({ message: `Saldo insuficiente na localização ${location_from}. Saldo atual: ${saldo}` });
+            }
         }
         const sql = 'INSERT INTO stock_movements (produto_id, location_from, location_to, quantidade, tipo, referencia, lote, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
         const created_by = req.user ? req.user.id : null;
-        const [r] = await db.query(sql, [produto_id, location_from || null, location_to || null, quantidade, tipo, referencia || null, lote || null, created_by]);
+        const [r] = await txConn.query(sql, [produto_id, location_from || null, location_to || null, quantidade, tipo, referencia || null, lote || null, created_by]);
+
+        await txConn.commit();
         res.status(201).json({ id: r.insertId });
     } catch (e) {
+        try { await txConn.rollback(); } catch (_) {}
         console.error('Erro ao gravar movimento:', e && e.message ? e.message : e);
         res.status(500).json({ message: 'Erro ao gravar movimento.' });
+    } finally {
+        txConn.release();
     }
 });
 
 // Enhanced transfer endpoint with validation to prevent negative balances
+// 🔒 BUG-06 FIX: Added transaction to prevent race condition
 app.post('/api/pcp/transfer', authRequired, async (req, res) => {
     const { produto_id, from_location, to_location, quantidade, referencia, lote } = req.body;
     if (!produto_id || !from_location || !to_location || !quantidade) return res.status(400).json({ message: 'produto_id, from_location, to_location e quantidade são obrigatórios.' });
+
+    const txConn = await db.getConnection();
     try {
-        // compute current saldo for produto at from_location
-        const [rows] = await db.query(`
+        await txConn.beginTransaction();
+
+        // compute current saldo for produto at from_location (with lock)
+        const [rows] = await txConn.query(`
             SELECT COALESCE(SUM(CASE WHEN tipo='IN' THEN quantidade WHEN tipo='OUT' THEN -quantidade WHEN tipo='TRANSFER' AND location_to=? THEN quantidade WHEN tipo='TRANSFER' AND location_from=? THEN -quantidade WHEN tipo='ADJUST' THEN quantidade ELSE 0 END),0) AS saldo
-            FROM stock_movements WHERE produto_id = ?
+            FROM stock_movements WHERE produto_id = ? FOR UPDATE
         `, [from_location, from_location, produto_id]);
         const saldo = rows && rows[0] ? parseFloat(rows[0].saldo) : 0;
-        if (saldo < quantidade) return res.status(400).json({ message: `Saldo insuficiente na localização ${from_location}. Saldo atual: ${saldo}` });
-        // Insert transfer as two entries or as a single transfer record depending on your accounting; we'll use single transfer record
+        if (saldo < quantidade) {
+            await txConn.rollback();
+            txConn.release();
+            return res.status(400).json({ message: `Saldo insuficiente na localização ${from_location}. Saldo atual: ${saldo}` });
+        }
         const created_by = req.user ? req.user.id : null;
-        const [r] = await db.query('INSERT INTO stock_movements (produto_id, location_from, location_to, quantidade, tipo, referencia, lote, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [produto_id, from_location, to_location, quantidade, 'TRANSFER', referencia || null, lote || null, created_by]);
+        const [r] = await txConn.query('INSERT INTO stock_movements (produto_id, location_from, location_to, quantidade, tipo, referencia, lote, created_by) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [produto_id, from_location, to_location, quantidade, 'TRANSFER', referencia || null, lote || null, created_by]);
+
+        await txConn.commit();
         res.status(201).json({ id: r.insertId });
     } catch (e) {
+        try { await txConn.rollback(); } catch (_) {}
         console.error('Erro ao executar transfer:', e && e.message ? e.message : e);
         res.status(500).json({ message: 'Erro ao executar transfer.' });
+    } finally {
+        txConn.release();
     }
 });
 
@@ -8435,14 +8605,22 @@ app.get('/api/pcp/ordens/:id/apontamentos', authRequired, async (req, res) => {
 });
 
 // Atualizar status de uma etapa
-// 🔒 SECURITY AUDIT: Added authRequired - stage status update requires authentication
-app.put('/api/pcp/etapas/:id/status', authRequired, async (req, res) => {
+// 🔒 BUG-11 FIX: Added RBAC + status validation
+app.put('/api/pcp/etapas/:id/status', authRequired, requireProductionRole('ADMIN', 'SUPERVISOR', 'PCP', 'OPERATOR'), async (req, res) => {
     const { id } = req.params;
     const { status, operador_nome, maquina } = req.body;
     console.log(`[API_APONTAMENTOS] Atualizando status da etapa ${id} para ${status}...`);
+
+    // BUG-11 FIX: Validar valores permitidos de status
+    const VALID_ETAPA_STATUS = ['pendente', 'em_andamento', 'concluida', 'pausada'];
+    const statusNorm = (status || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    if (!VALID_ETAPA_STATUS.includes(statusNorm)) {
+        return res.status(400).json({ success: false, message: `Status "${status}" inválido. Valores permitidos: ${VALID_ETAPA_STATUS.join(', ')}` });
+    }
+
     try {
         let updateFields = 'status = ?';
-        let params = [status];
+        let params = [statusNorm];
 
         if (status === 'em_andamento') {
             updateFields += ', data_inicio = COALESCE(data_inicio, NOW())';

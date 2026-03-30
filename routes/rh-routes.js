@@ -379,14 +379,8 @@ module.exports = function createRHRoutes(deps) {
             // Verificar se o funcionário existe
             const [funcionario] = await pool.query('SELECT id FROM funcionarios WHERE id = ?', [id]);
             if (funcionario.length === 0) {
-                // Tenta verificar na tabela usuarios
-                const [usuario] = await pool.query('SELECT id FROM usuarios WHERE id = ?', [id]);
-                if (usuario.length === 0) {
-                    return res.status(404).json({ message: 'Funcionário não encontrado.' });
-                }
-                // Deleta da tabela usuarios
-                await pool.query('DELETE FROM usuarios WHERE id = ?', [id]);
-                return res.status(204).send();
+                // AUDIT-FIX RH-ROUTES-01: Do NOT fallback to deleting from usuarios table
+                return res.status(404).json({ message: 'Funcionário não encontrado.' });
             }
 
             // AUDIT-FIX HIGH-003: Use explicit cascade list + transaction instead of dynamic FK lookup

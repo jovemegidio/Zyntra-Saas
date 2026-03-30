@@ -149,6 +149,13 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Código, descrição e unidade de medida são obrigatórios' });
         }
         
+        // COMPRAS-10 FIX: Validar estoque_minimo <= estoque_maximo
+        const eMin = parseFloat(estoque_minimo) || 0;
+        const eMax = parseFloat(estoque_maximo) || 0;
+        if (eMax > 0 && eMin > eMax) {
+            return res.status(400).json({ error: 'Estoque mínimo não pode ser maior que estoque máximo' });
+        }
+        
         // Verificar se código já existe
         const [existente] = await db.query(
             'SELECT id FROM materiais WHERE codigo_material = ?',

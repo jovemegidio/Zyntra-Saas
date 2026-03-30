@@ -2095,8 +2095,15 @@
                 if (dropdownEmail) dropdownEmail.textContent = userEmail;
 
                 // Verificar se é admin
+                const adminEmailsList = [
+                    'ti@aluforce.ind.br', 'douglas@aluforce.ind.br', 'andreia@aluforce.ind.br',
+                    'fernando@aluforce.ind.br', 'fernando.kofugi@aluforce.ind.br',
+                    'antonio@aluforce.ind.br', 'aluforce@aluforce.ind.br',
+                    'gerenciavendas@aluforce.ind.br'
+                ];
                 const isAdmin = user.is_admin === 1 || user.is_admin === true ||
-                    user.role === 'admin' || user.role === 'administrador';
+                    user.role === 'admin' || user.role === 'administrador' ||
+                    adminEmailsList.includes(userEmail);
 
                 // Verificar se é usuário da consultoria (Lumière)
                 const isConsultoria = userEmail && (
@@ -2142,6 +2149,8 @@
             'rh@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
             'fernando@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
             'fernando.kofugi@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
+            // Andreia Trovão (gerenciavendas) - Administradora
+            'gerenciavendas@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
             // Financeiro - Apenas Financeiro + RH (funcionário)
             'financeiro2@aluforce.ind.br': ['financeiro', 'rh'],
             'financeiro3@aluforce.ind.br': ['financeiro', 'rh'],

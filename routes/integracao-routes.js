@@ -52,11 +52,12 @@ module.exports = function createIntegracaoRoutes(deps) {
     
             for (const item of itens) {
                 try {
-                    // Verificar disponibilidade
+                    // AUDIT-FIX AUDIT3-013: FOR UPDATE lock to prevent race condition
                     const [estoque] = await connection.query(`
                         SELECT quantidade_fisica, quantidade_reservada, quantidade_disponivel
                         FROM estoque_saldos
                         WHERE codigo_material = ?
+                        FOR UPDATE
                     `, [item.codigo_material]);
     
                     if (estoque.length === 0) {

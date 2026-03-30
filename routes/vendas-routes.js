@@ -353,14 +353,12 @@ module.exports = function createVendasRoutes(deps) {
 
             if (!empresaFinalId && !nomeCliente) {
                 await connection.rollback();
-                connection.release();
                 return res.status(400).json({ message: 'Informe o cliente ou empresa.' });
             }
 
             // Validar tipo de frete obrigatório
             if (!sanitize(tipo_frete) && sanitize(tipo_frete) !== '0' && sanitize(tipo_frete) !== 0) {
                 await connection.rollback();
-                connection.release();
                 return res.status(400).json({ message: 'Selecione o Tipo de Frete (CIF, FOB, etc.).' });
             }
 
@@ -754,6 +752,7 @@ module.exports = function createVendasRoutes(deps) {
             // Verificar se pedido existe — Sprint E2E-S1: usa patchConn (transação)
             const [existingRows] = await patchConn.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (existingRows.length === 0) {
+                await patchConn.rollback();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
 
@@ -763,6 +762,7 @@ module.exports = function createVendasRoutes(deps) {
 
             // Verificar permissão
             if (!isAdmin && existing.vendedor_id && Number(existing.vendedor_id) !== Number(user.id)) {
+                await patchConn.rollback();
                 return res.status(403).json({ message: 'Acesso negado: somente o vendedor responsável ou admin podem editar este pedido.' });
             }
 
@@ -770,6 +770,7 @@ module.exports = function createVendasRoutes(deps) {
             // Toda mudança de status DEVE usar PUT /pedidos/:id/status (com máquina de estados + FOR UPDATE)
             if (updates.status !== undefined) {
                 console.log(`🚫 PATCH bloqueado: tentativa de alterar status do pedido #${id} via PATCH. Use PUT /pedidos/${id}/status.`);
+                await patchConn.rollback();
                 return res.status(400).json({
                     message: 'Alteração de status não é permitida via PATCH. Use o endpoint PUT /pedidos/:id/status.',
                     endpoint_correto: `PUT /api/vendas/pedidos/${id}/status`
@@ -787,6 +788,7 @@ module.exports = function createVendasRoutes(deps) {
                 const blockedFields = [...financialFields, ...deliveryFields].filter(f => updates[f] !== undefined);
                 if (blockedFields.length > 0) {
                     console.log(`🚫 PATCH bloqueado: pedido #${id} status=${statusAtual}, campos protegidos: ${blockedFields.join(', ')}`);
+                    await patchConn.rollback();
                     return res.status(403).json({
                         message: `Pedido com status "${statusAtual}" não permite alteração de campos financeiros/entrega (${blockedFields.join(', ')}). Contate um administrador.`
                     });
@@ -809,6 +811,7 @@ module.exports = function createVendasRoutes(deps) {
                 }
                 if (opAtiva.length > 0 && !isAdmin) {
                     console.log(`🚫 PATCH bloqueado: pedido #${id} tem OP ativa ${opAtiva[0].codigo}, campos: ${camposCriticosAlterados.join(', ')}`);
+                    await patchConn.rollback();
                     return res.status(403).json({
                         message: `Pedido com ordem de produção ativa (${opAtiva[0].codigo}) não permite alteração de ${camposCriticosAlterados.join(', ')}. Cancele a OP primeiro ou contate um administrador.`,
                         op_ativa: opAtiva[0]
@@ -1097,6 +1100,7 @@ module.exports = function createVendasRoutes(deps) {
             // Se não há campos para atualizar
             if (fieldsToUpdate.length === 0) {
                 console.log(`⚠️ Nenhum campo válido para atualizar`);
+                await patchConn.rollback();
                 return res.status(400).json({ message: 'Nenhum campo válido para atualizar.' });
             }
 
@@ -1109,6 +1113,7 @@ module.exports = function createVendasRoutes(deps) {
             const [result] = await patchConn.query(query, values);
 
             if (result.affectedRows === 0) {
+                await patchConn.rollback();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
 
@@ -3596,7 +3601,6 @@ module.exports = function createVendasRoutes(deps) {
             );
             if (pedidoRows.length === 0) {
                 await connection.rollback();
-                connection.release();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
             }
 
@@ -3605,7 +3609,6 @@ module.exports = function createVendasRoutes(deps) {
             // Validar: pedido já faturado não pode ser faturado novamente
             if (['faturado', 'entregue', 'cancelado'].includes(pedido.status)) {
                 await connection.rollback();
-                connection.release();
                 return res.status(400).json({ message: `Pedido já está com status "${pedido.status}" e não pode ser faturado novamente.` });
             }
 

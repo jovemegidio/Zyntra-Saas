@@ -7,29 +7,41 @@
 const express = require('express');
 const crypto = require('crypto');
 
-// Chave para criptografia dos secrets (usar variável de ambiente em produção)
-const ENCRYPT_KEY = process.env.INTEGRACAO_ENCRYPT_KEY || 'aluforce-integracao-bancaria-2026-key!';
+// AUDIT-FIX INT-BANCARIA-04: Chave de criptografia obrigatória em produção
+const ENCRYPT_KEY = process.env.INTEGRACAO_ENCRYPT_KEY || (process.env.NODE_ENV === 'production' ? (() => { throw new Error('INTEGRACAO_ENCRYPT_KEY deve ser configurada em produção'); })() : 'aluforce-dev-only-key-not-for-prod!');
 const ENCRYPT_IV_LENGTH = 16;
 
 function encrypt(text) {
     if (!text) return '';
-    const key = crypto.scryptSync(ENCRYPT_KEY, 'salt', 32);
+    // AUDIT-FIX INT-BANCARIA-05: Salt aleatório por operação em vez de fixo
+    const salt = crypto.randomBytes(16);
+    const key = crypto.scryptSync(ENCRYPT_KEY, salt, 32);
     const iv = crypto.randomBytes(ENCRYPT_IV_LENGTH);
     const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
     let encrypted = cipher.update(text, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    return iv.toString('hex') + ':' + encrypted;
+    return salt.toString('hex') + ':' + iv.toString('hex') + ':' + encrypted;
 }
 
 function decrypt(text) {
     if (!text || !text.includes(':')) return '';
     try {
-        const key = crypto.scryptSync(ENCRYPT_KEY, 'salt', 32);
         const parts = text.split(':');
-        const iv = Buffer.from(parts.shift(), 'hex');
-        const encrypted = parts.join(':');
+        // Suporta formato novo (salt:iv:data) e legado (iv:data)
+        let salt, iv, encryptedData;
+        if (parts.length >= 3) {
+            salt = Buffer.from(parts[0], 'hex');
+            iv = Buffer.from(parts[1], 'hex');
+            encryptedData = parts.slice(2).join(':');
+        } else {
+            // Formato legado sem salt — usar salt fixo para compatibilidade
+            salt = Buffer.from('salt');
+            iv = Buffer.from(parts[0], 'hex');
+            encryptedData = parts.slice(1).join(':');
+        }
+        const key = crypto.scryptSync(ENCRYPT_KEY, salt, 32);
         const decipher = crypto.createDecipheriv('aes-256-cbc', key, iv);
-        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+        let decrypted = decipher.update(encryptedData, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
     } catch {

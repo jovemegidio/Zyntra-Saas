@@ -202,7 +202,7 @@ router.post('/registrar', async (req, res) => {
             pedido_id
         ]);
         
-        // Registrar recebimento detalhado (se houver tabela)
+        // Registrar recebimento detalhado
         try {
             await connection.query(`
                 INSERT INTO recebimentos_compras (
@@ -218,7 +218,10 @@ router.post('/registrar', async (req, res) => {
                 observacoes
             ]);
         } catch (e) {
-            // Tabela pode não existir, continuar sem erro
+            // COMPRAS-06 FIX: Só ignorar se tabela não existir (ER_NO_SUCH_TABLE)
+            if (e.code !== 'ER_NO_SUCH_TABLE' && e.errno !== 1146) {
+                throw e; // Re-throw erros reais para causar rollback
+            }
             console.log('Tabela recebimentos_compras não existe, continuando...');
         }
         
@@ -351,11 +354,25 @@ router.post('/:id/cancelar', async (req, res) => {
             
             for (const item of itens) {
                 if (item.material_id) {
+                    // COMPRAS-07 FIX: Verificar se estoque ficaria negativo antes de subtrair
+                    const [estoqueCheck] = await connection.query(
+                        'SELECT quantidade_atual FROM estoque WHERE material_id = ? FOR UPDATE',
+                        [item.material_id]
+                    );
+                    const estoqueAtual = estoqueCheck.length > 0 ? estoqueCheck[0].quantidade_atual : 0;
+                    const qtdReverter = parseFloat(item.quantidade) || 0;
+                    if (estoqueAtual < qtdReverter) {
+                        await connection.rollback();
+                        return res.status(400).json({
+                            error: `Estoque insuficiente para reverter material ${item.material_id}. Atual: ${estoqueAtual}, Reverter: ${qtdReverter}`
+                        });
+                    }
+                    
                     await connection.query(`
                         UPDATE estoque SET 
                             quantidade_atual = quantidade_atual - ?
                         WHERE material_id = ?
-                    `, [item.quantidade, item.material_id]);
+                    `, [qtdReverter, item.material_id]);
                     
                     // Registrar movimentação de estorno
                     try {

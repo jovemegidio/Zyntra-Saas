@@ -121,7 +121,7 @@
             .totais-bar { justify-content: flex-start; }
             .tabs-oc { flex-wrap: nowrap; }
         }
-    
+
         /* === Metric Card Standard (prospeccao.html) === */
         .metrics-grid {
             display: grid;
@@ -355,24 +355,28 @@
                         <div class="metric-card blue">
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-file-alt"></i></div>
+                                <span class="metric-value" id="oc-abertas">0</span>
                             </div>
                             <div class="metric-label">OCs Abertas</div>
                         </div>
                         <div class="metric-card green">
                             <div class="metric-header">
                                 <div class="metric-icon green"><i class="fas fa-check-double"></i></div>
+                                <span class="metric-value" id="oc-aprovadas">0</span>
                             </div>
                             <div class="metric-label">Aprovadas</div>
                         </div>
                         <div class="metric-card orange">
                             <div class="metric-header">
                                 <div class="metric-icon orange"><i class="fas fa-hourglass-half"></i></div>
+                                <span class="metric-value" id="oc-aguardando">0</span>
                             </div>
                             <div class="metric-label">Aguardando</div>
                         </div>
                         <div class="metric-card blue">
                             <div class="metric-header">
                                 <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
+                                <span class="metric-value" id="oc-valor">R$ 0,00</span>
                             </div>
                             <div class="metric-label">Valor Total</div>
                         </div>
@@ -726,10 +730,14 @@
             const aguardando = ordensCompraData.filter(oc => oc.status === 'aguardando' || oc.status === 'em_aprovacao').length;
             const valorTotal = ordensCompraData.reduce((sum, oc) => sum + (parseFloat(oc.valor_total) || 0), 0);
 
-            document.getElementById('oc-abertas').textContent = pendentes;
-            document.getElementById('oc-aprovadas').textContent = aprovadas;
-            document.getElementById('oc-aguardando').textContent = aguardando;
-            document.getElementById('oc-valor').textContent = formatarMoeda(valorTotal);
+            const elAbertas = document.getElementById('oc-abertas');
+            const elAprovadas = document.getElementById('oc-aprovadas');
+            const elAguardando = document.getElementById('oc-aguardando');
+            const elValor = document.getElementById('oc-valor');
+            if (elAbertas) elAbertas.textContent = pendentes;
+            if (elAprovadas) elAprovadas.textContent = aprovadas;
+            if (elAguardando) elAguardando.textContent = aguardando;
+            if (elValor) elValor.textContent = formatarMoeda(valorTotal);
         }
 
         function renderizarOrdensCompra() {

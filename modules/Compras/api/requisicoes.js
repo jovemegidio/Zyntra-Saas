@@ -289,6 +289,13 @@ router.put('/:id/aprovar', async (req, res) => {
         const db = getDatabase();
         const { aprovador, observacoes_aprovacao } = req.body;
         
+        // COMPRAS-03 FIX: RBAC — apenas gerente/supervisor/admin pode aprovar
+        const role = (req.user?.role || req.user?.cargo || '').toLowerCase();
+        const isAdmin = req.user?.is_admin === true || req.user?.is_admin === 1 || role === 'admin' || role === 'administrador';
+        if (!isAdmin && !['gerente', 'supervisor'].includes(role)) {
+            return res.status(403).json({ error: 'Sem permissão para aprovar requisições' });
+        }
+        
         const [result] = await db.query(
             `UPDATE requisicoes_compras SET 
                 status = 'aprovada'
@@ -345,6 +352,23 @@ router.put('/:id/reprovar', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
+        
+        // COMPRAS-08 FIX: Verificar se requisição aprovada tem pedidos vinculados
+        const [reqStatus] = await db.query(
+            'SELECT status FROM requisicoes_compras WHERE id = ?',
+            [req.params.id]
+        );
+        if (reqStatus.length > 0 && reqStatus[0].status === 'aprovada') {
+            const [pedidosVinculados] = await db.query(
+                "SELECT COUNT(*) as total FROM pedidos_compra WHERE requisicao_id = ? AND status NOT IN ('cancelado')",
+                [req.params.id]
+            ).catch(() => [[{ total: 0 }]]);
+            if (pedidosVinculados[0]?.total > 0) {
+                return res.status(400).json({
+                    error: `Requisição possui ${pedidosVinculados[0].total} pedido(s) vinculado(s). Cancele-os primeiro.`
+                });
+            }
+        }
         
         const [result] = await db.query(
             "UPDATE requisicoes_compras SET status = 'rejeitada' WHERE id = ? AND status IN ('pendente','aprovada')",

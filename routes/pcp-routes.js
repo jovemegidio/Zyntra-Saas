@@ -3389,6 +3389,7 @@ module.exports = function createPCPRoutes(deps) {
             const { etapas, alterarNumeracao } = req.body;
 
             if (!Array.isArray(etapas) || etapas.length < 2) {
+                await connection.rollback();
                 return res.status(400).json({
                     success: false,
                     message: 'É necessário pelo menos 2 etapas'
@@ -4948,7 +4949,6 @@ module.exports = function createPCPRoutes(deps) {
 
             // Validações
             if (!fornecedor_id || !materiais || materiais.length === 0) {
-                connection.release();
                 return res.status(400).json({
                     erro: 'fornecedor_id e materiais são obrigatórios'
                 });

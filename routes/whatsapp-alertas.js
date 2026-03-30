@@ -126,6 +126,18 @@ function formatDate(date) {
     return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
+// AUDIT-FIX AUDIT3-012: API key guard for webhook endpoints
+const WEBHOOK_KEY = process.env.WHATSAPP_WEBHOOK_KEY || process.env.N8N_API_KEY;
+function requireWebhookKey(req, res, next) {
+    if (!WEBHOOK_KEY) return next(); // skip if not configured
+    const key = req.headers['x-api-key'] || req.query.key;
+    if (!key || key !== WEBHOOK_KEY) {
+        return res.status(401).json({ success: false, message: 'Webhook não autorizado' });
+    }
+    next();
+}
+router.use(requireWebhookKey);
+
 // ============================================
 // POST /api/whatsapp-alertas/contas-pagar
 // Alerta de contas a pagar (vencendo + vencidas)

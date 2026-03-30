@@ -1366,15 +1366,12 @@ apiVendasRouter.get('/comissoes/configuracao', async (req, res, next) => {
     }
 });
 
-// Atualizar configuração de comissão de vendedor (Apenas Andreia e Antonio T.I.)
+// Atualizar configuração de comissão de vendedor (Apenas Administradores)
 apiVendasRouter.put('/comissoes/configuracao/:vendedorId', async (req, res, next) => {
     try {
         const user = req.user;
-        const username = (user.email || '').split('@')[0].toLowerCase();
-        const USERS_PERMITIDOS_COMISSAO = ['andreia', 'antonio', 'ti', 'tialuforce'];
-        const podeAlterarComissao = USERS_PERMITIDOS_COMISSAO.includes(username);
-        if (!podeAlterarComissao) {
-            return res.status(403).json({ message: 'Apenas Andreia e Antonio (T.I.) podem alterar comissões.' });
+        if (!verificarSeAdmin(user)) {
+            return res.status(403).json({ message: 'Apenas administradores podem alterar comissões.' });
         }
 
         const { vendedorId } = req.params;
@@ -2078,7 +2075,7 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
         const frete = sanitizeNum(req.body.frete) || 0.00;
         const redespacho = sanitizeBool(req.body.redespacho);
         const observacao = sanitize(req.body.observacao || req.body.observacoes) || null;
-        const status = 'orcamento'; // F2-03: Novos pedidos SEMPRE iniciam como orçamento — ignorar body.status
+        const status = 'analise-credito'; // Novos pedidos são criados e movidos automaticamente para Análise de Crédito
         const condicao_pagamento = sanitize(req.body.condicao_pagamento) || 'À Vista';
         const cenario_fiscal = sanitize(req.body.cenario_fiscal) || null;
         const previsao_faturamento = sanitize(req.body.previsao_faturamento || req.body.data_previsao) || null;
@@ -2105,7 +2102,8 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
         const outras_despesas = sanitizeNum(req.body.outras_despesas) || null;
         const numero_lacre = sanitize(req.body.numero_lacre) || null;
         const codigo_rastreio = sanitize(req.body.codigo_rastreio) || null;
-        const desconto_pct = sanitizeNum(req.body.desconto_pct) || 0;
+        const desconto_pct_raw = sanitizeNum(req.body.desconto_pct) || 0;
+        const desconto_pct = Math.max(0, Math.min(desconto_pct_raw, 100)); // Bloqueia negativo e acima de 100%
 
         // Campos adicionais de observações e informações
         const observacao_cliente = sanitize(req.body.observacao_cliente) || null;
@@ -2130,9 +2128,9 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
             : (userObj.id || null);
 
         // Validação flexível - aceita empresa_id OU cliente_nome
+        // FIX RT-DR01: connection.release() removido; finally (linha ~2283) já cuida  evita double-release
         if (!empresa_id && !cliente_nome) {
             await connection.rollback();
-            connection.release();
             return res.status(400).json({ message: 'Informe a empresa ou o nome do cliente.' });
         }
 
@@ -2253,8 +2251,8 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
             const valorFormatado = valorReal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             global.createNotification(
                 'order',
-                `Novo Pedido #${insertedId}`,
-                `${nomeUsuario} criou pedido para ${cliente_nome || 'Cliente'} - ${valorFormatado}`,
+                `Novo Orçamento #${insertedId}`,
+                `${nomeUsuario} criou orçamento para ${cliente_nome || 'Cliente'} - ${valorFormatado}`,
                 {
                     pedido_id: insertedId,
                     cliente: cliente_nome,
@@ -2265,6 +2263,32 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
                     tipo: 'novo_pedido'
                 }
             );
+        }
+
+        // Emitir evento de novo orçamento via Socket.IO para atualização em tempo real
+        const io = req.app.get('io') || global.io;
+        if (io) {
+            const user = req.user || {};
+            io.emit('novo_orcamento', {
+                pedido_id: insertedId,
+                vendedor_nome: user.nome || user.email || 'Vendedor',
+                cliente: cliente_nome || 'Cliente',
+                usuario_id: user.id || null
+            });
+            // Notificação direcionada para gestores (Andreia e Guilherme)
+            io.emit('notification', {
+                type: 'order',
+                title: `Novo Orçamento #${insertedId}`,
+                message: `${user.nome || 'Vendedor'} criou orçamento para ${cliente_nome || 'Cliente'}`,
+                important: true,
+                data: {
+                    pedido_id: insertedId,
+                    tipo: 'novo_orcamento_gestor',
+                    destinatarios: ['andreia', 'gerenciavendas', 'guilherme', 'compras'],
+                    vendedor_nome: user.nome || 'Vendedor',
+                    cliente: cliente_nome || 'Cliente'
+                }
+            });
         }
 
         res.status(201).json({ message: 'Pedido criado com sucesso!', id: insertedId, insertId: insertedId });
@@ -2714,6 +2738,40 @@ apiVendasRouter.put('/pedidos/:id/status', async (req, res, next) => {
             await connection.rollback();
             connection.release();
             throw txErr;
+        }
+
+        // ====== REGISTRAR APROVAÇÃO DE CRÉDITO NO HISTÓRICO ======
+        if (req.body.aprovacao_credito && ['aprovado', 'pedido-aprovado'].includes(status)) {
+            try {
+                const aprov = req.body.aprovacao_credito;
+                const nomeAnalista = user.nome || user.name || user.email || 'Sistema';
+                const parecerLabel = aprov.parecer === 'aprovado_condicional' ? 'Aprovado com Restrição' : 'Aprovado';
+                const descricaoAprov = `Análise de crédito: ${parecerLabel} — Crédito liberado: R$ ${Number(aprov.credito_liberado || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })} — Condição: ${aprov.condicao_pagamento || 'N/A'} — Analista: ${nomeAnalista}`;
+
+                await pool.query(
+                    'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
+                    [
+                        id,
+                        user.id || null,
+                        nomeAnalista,
+                        'aprovacao_credito',
+                        descricaoAprov,
+                        JSON.stringify({
+                            credito_liberado: aprov.credito_liberado,
+                            condicao_pagamento: aprov.condicao_pagamento,
+                            prazo_entrega: aprov.prazo_entrega || null,
+                            parecer: aprov.parecer,
+                            observacoes: aprov.observacoes || null,
+                            valor_pedido: null,
+                            analista: nomeAnalista,
+                            data_aprovacao: new Date().toISOString()
+                        })
+                    ]
+                );
+                if (DEBUG) console.log(`[APROVACAO_CREDITO] ✅ Dados de aprovação registrados para pedido #${id}`);
+            } catch (aprovErr) {
+                console.error(`[APROVACAO_CREDITO] ⚠️ Erro ao registrar aprovação no histórico do pedido #${id}:`, aprovErr.message);
+            }
         }
 
         // ====== NOTIFICAÇÃO DE MOVIMENTAÇÃO ======
@@ -3426,9 +3484,15 @@ apiVendasRouter.post('/pedidos/:id/itens', async (req, res, next) => {
             return res.status(400).json({ message: 'Código e descrição são obrigatórios.' });
         }
 
-        const qty = parseFloat(quantidade) || 1;
+        const qty = parseFloat(quantidade);
+        if (!qty || qty <= 0) {
+            return res.status(400).json({ message: 'Quantidade deve ser maior que zero.' });
+        }
         const qtyParcial = parseFloat(quantidade_parcial) || 0;
         let preco = parseFloat(preco_unitario) || 0;
+        if (preco < 0) {
+            return res.status(400).json({ message: 'Preço unitário não pode ser negativo.' });
+        }
         const desc = parseFloat(desconto) || 0;
         const vIPI = parseFloat(valor_ipi) || 0;
         const vICMSST = parseFloat(valor_icms_st) || 0;
@@ -3438,14 +3502,14 @@ apiVendasRouter.post('/pedidos/:id/itens', async (req, res, next) => {
             const [prodRows] = await pool.query('SELECT preco_venda FROM produtos WHERE codigo = ? LIMIT 1', [codigo]);
             if (prodRows.length > 0 && prodRows[0].preco_venda > 0) {
                 const precoRef = parseFloat(prodRows[0].preco_venda);
+                // Se preço não informado, usar preço cadastrado
+                if (preco === 0) preco = precoRef;
                 const tolerancia = precoRef * 0.05;
-                if (preco > 0 && Math.abs(preco - precoRef) > tolerancia && !isAdmin) {
+                if (Math.abs(preco - precoRef) > tolerancia && !isAdmin) {
                     return res.status(400).json({
                         message: `Preço unitário (${preco.toFixed(2)}) diverge do preço cadastrado (${precoRef.toFixed(2)}) além da tolerância de 5%. Solicite aprovação administrativa.`
                     });
                 }
-                // Se preço não informado, usar preço cadastrado
-                if (preco === 0) preco = precoRef;
             }
         }
 
@@ -3511,9 +3575,15 @@ apiVendasRouter.put('/pedidos/:pedidoId/itens/:itemId', async (req, res, next) =
         const { codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto,
                 produto_id, valor_ipi, valor_icms_st, aliquota_ipi, aliquota_icms, mva_st, cfop, cenario_fiscal, observacoes, preco_custo } = req.body;
 
-        const qty = parseFloat(quantidade) || 1;
+        const qty = parseFloat(quantidade);
+        if (!qty || qty <= 0) {
+            return res.status(400).json({ message: 'Quantidade deve ser maior que zero.' });
+        }
         const qtyParcial = parseFloat(quantidade_parcial) || 0;
         let preco = parseFloat(preco_unitario) || 0;
+        if (preco < 0) {
+            return res.status(400).json({ message: 'Preço unitário não pode ser negativo.' });
+        }
         const desc = parseFloat(desconto) || 0;
         const vIPI = parseFloat(valor_ipi) || 0;
         const vICMSST = parseFloat(valor_icms_st) || 0;
@@ -3523,13 +3593,14 @@ apiVendasRouter.put('/pedidos/:pedidoId/itens/:itemId', async (req, res, next) =
             const [prodRows] = await pool.query('SELECT preco_venda FROM produtos WHERE codigo = ? LIMIT 1', [codigo]);
             if (prodRows.length > 0 && prodRows[0].preco_venda > 0) {
                 const precoRef = parseFloat(prodRows[0].preco_venda);
+                // Se preço não informado, usar preço cadastrado
+                if (preco === 0) preco = precoRef;
                 const tolerancia = precoRef * 0.05;
-                if (preco > 0 && Math.abs(preco - precoRef) > tolerancia && !isAdmin) {
+                if (Math.abs(preco - precoRef) > tolerancia && !isAdmin) {
                     return res.status(400).json({
                         message: `Preço unitário (${preco.toFixed(2)}) diverge do preço cadastrado (${precoRef.toFixed(2)}) além da tolerância de 5%. Solicite aprovação administrativa.`
                     });
                 }
-                if (preco === 0) preco = precoRef;
             }
         }
 
@@ -4093,6 +4164,18 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
         } = req.body;
         const user = req.user || {};
 
+        // F3-01: Ownership check — apenas vendedor do pedido ou admin
+        const [ownerRows] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [id]);
+        if (ownerRows.length === 0) {
+            connection.release();
+            return res.status(404).json({ message: 'Pedido não encontrado.' });
+        }
+        const isAdmin = verificarSeAdmin(user);
+        if (!isAdmin && Number(ownerRows[0].vendedor_id) !== Number(user.id)) {
+            connection.release();
+            return res.status(403).json({ message: 'Sem permissão para faturar este pedido.' });
+        }
+
         // Tentativa de geração de NF-e ANTES da transação (evita timeout de TX)
         let nfeDataParcial = null;
         if (gerarNFe) {
@@ -4214,6 +4297,18 @@ apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
             observacoes = ''
         } = req.body;
         const user = req.user || {};
+
+        // F3-01: Ownership check — apenas vendedor do pedido ou admin
+        const [ownerRows] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [id]);
+        if (ownerRows.length === 0) {
+            connection.release();
+            return res.status(404).json({ message: 'Pedido não encontrado.' });
+        }
+        const isAdmin = verificarSeAdmin(user);
+        if (!isAdmin && Number(ownerRows[0].vendedor_id) !== Number(user.id)) {
+            connection.release();
+            return res.status(403).json({ message: 'Sem permissão para processar remessa deste pedido.' });
+        }
 
         // Tentativa de geração de NF-e de remessa ANTES da transação
         let nfeDataRemessa = null;
@@ -4728,25 +4823,34 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
     try {
         const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
                 endereco, numero, complemento, bairro, cidade, uf, cep,
-                inscricao_estadual, inscricao_municipal, limite_credito, ativo, empresa_id } = req.body;
+                inscricao_estadual, inscricao_municipal, limite_credito, ativo, empresa_id,
+                fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+                suframa, simples_nacional, produtor_rural, tipo_atividade, cnae, obs_internas, obs_detalhadas,
+                parcelas_padrao, vendedor_padrao, email_nfe, transportadora, codigo_receita, bloquear_faturamento } = req.body;
         if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
-        // Montar endereço completo
-        let enderecoFinal = endereco || null;
-        if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-        if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
-
         const [result] = await pool.query(
-            `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, email,
-             endereco, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal,
-             credito_total, ativo, empresa_id, data_cadastro, incluido_por)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
+            `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
+             endereco, numero, complemento, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal,
+             credito_total, ativo, empresa_id, data_cadastro, incluido_por,
+             fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+             suframa, simples_nacional, produtor_rural, tipo_atividade, cnae, obs_internas, obs_detalhadas,
+             parcelas_padrao, vendedor_padrao, email_nfe, transportadora, codigo_receita, bloquear_faturamento)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?,
+                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [nome, nome_fantasia || null, nome || null, cnpj || null, contato || null,
-             telefone || null, email || null, enderecoFinal, bairro || null,
+             telefone || null, celular || null, email || null, website || null,
+             endereco || null, numero || null, complemento || null, bairro || null,
              cidade || null, uf || null, cep || null, inscricao_estadual || null,
              inscricao_municipal || null, limite_credito ? parseFloat(limite_credito) : 0,
              ativo !== undefined ? (ativo ? 1 : 0) : 1,
-             empresa_id || 1, req.user ? req.user.nome : 'Sistema']
+             empresa_id || 1, req.user ? req.user.nome : 'Sistema',
+             fax || null, ddd_fax || null, enviar_anexos ? 1 : 0,
+             banco || null, agencia || null, conta || null, pix || null, titular_doc || null, titular_nome || null,
+             suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
+             tipo_atividade || null, cnae || null, obs_internas || null, obs_detalhadas || null,
+             parcelas_padrao || null, vendedor_padrao || null, email_nfe || null,
+             transportadora || null, codigo_receita || null, bloquear_faturamento ? 1 : 0]
         );
         res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
     } catch (error) {
@@ -4754,7 +4858,7 @@ apiVendasRouter.post('/clientes', async (req, res, next) => {
     }
 });
 
-apiVendasRouter.put('/clientes/:id', async (req, res, next) => {
+apiVendasRouter.put('/clientes/:id', authenticateToken, async (req, res, next) => {
     try {
         const { id } = req.params;
         const body = req.body;
@@ -4771,27 +4875,41 @@ apiVendasRouter.put('/clientes/:id', async (req, res, next) => {
 
         const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
                 endereco, numero, complemento, bairro, cidade, uf, cep,
-                inscricao_estadual, inscricao_municipal, limite_credito, empresa_id } = body;
+                inscricao_estadual, inscricao_municipal, limite_credito, empresa_id,
+                fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
+                suframa, simples_nacional, produtor_rural, tipo_atividade, cnae, obs_internas, obs_detalhadas,
+                parcelas_padrao, vendedor_padrao, email_nfe, transportadora, codigo_receita, bloquear_faturamento } = body;
         if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
-
-        let enderecoFinal = endereco || null;
-        if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-        if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
 
         const [result] = await pool.query(
             `UPDATE clientes SET nome = ?, nome_fantasia = ?, cnpj = ?, contato = ?,
-             telefone = ?, email = ?, endereco = ?, bairro = ?, cidade = ?,
+             telefone = ?, celular = ?, email = ?, website = ?,
+             endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?,
              estado = ?, cep = ?, inscricao_estadual = ?, inscricao_municipal = ?,
              credito_total = ?, ativo = ?, empresa_id = ?,
+             fax = ?, ddd_fax = ?, enviar_anexos = ?, banco = ?, agencia = ?, conta = ?,
+             pix = ?, titular_doc = ?, titular_nome = ?,
+             suframa = ?, simples_nacional = ?, produtor_rural = ?,
+             tipo_atividade = ?, cnae = ?, obs_internas = ?, obs_detalhadas = ?,
+             parcelas_padrao = ?, vendedor_padrao = ?, email_nfe = ?,
+             transportadora = ?, codigo_receita = ?, bloquear_faturamento = ?,
              data_ultima_alteracao = NOW(), alterado_por = ?
              WHERE id = ?`,
             [nome, nome_fantasia || null, cnpj || null, contato || null,
-             telefone || null, email || null, enderecoFinal, bairro || null,
+             telefone || null, celular || null, email || null, website || null,
+             endereco || null, numero || null, complemento || null, bairro || null,
              cidade || null, uf || null, cep || null, inscricao_estadual || null,
              inscricao_municipal || null,
              limite_credito ? parseFloat(limite_credito) : 0,
              body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
              empresa_id || 1,
+             fax || null, ddd_fax || null, enviar_anexos ? 1 : 0,
+             banco || null, agencia || null, conta || null,
+             pix || null, titular_doc || null, titular_nome || null,
+             suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
+             tipo_atividade || null, cnae || null, obs_internas || null, obs_detalhadas || null,
+             parcelas_padrao || null, vendedor_padrao || null, email_nfe || null,
+             transportadora || null, codigo_receita || null, bloquear_faturamento ? 1 : 0,
              req.user ? req.user.nome : 'Sistema', id]
         );
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
@@ -4897,7 +5015,7 @@ apiVendasRouter.get('/clientes/:id/resumo', authenticateToken, async (req, res, 
         // Financeiro (estimativa com base em pedidos)
         const [finRows] = await pool.query(`
             SELECT COALESCE(SUM(CASE WHEN status IN ('faturado','recibo') THEN valor ELSE 0 END), 0) AS valor_pago,
-                   COALESCE(SUM(CASE WHEN status IN ('orcamento','analise','aprovado','faturar') THEN valor ELSE 0 END), 0) AS valor_pendente,
+                   COALESCE(SUM(CASE WHEN status NOT IN ('cancelado','faturado','recibo') THEN valor ELSE 0 END), 0) AS valor_pendente,
                    0 AS valor_vencido,
                    COUNT(*) AS total_titulos
             FROM pedidos WHERE empresa_id = ?`, [empresaId]);
@@ -4959,8 +5077,8 @@ apiVendasRouter.post('/pedidos/:id/gerar-nf', authenticateToken, async (req, res
     try {
         const { id } = req.params;
         const [pedidoRows] = await connection.query('SELECT id, nf_numero FROM pedidos WHERE id = ?', [id]);
+        // FIX RT-DR02: connection.release() removido dos early-returns; finally já cuida  evita double-release
         if (pedidoRows.length === 0) {
-            connection.release();
             return res.status(404).json({ message: 'Pedido não encontrado.' });
         }
 
@@ -4968,7 +5086,6 @@ apiVendasRouter.post('/pedidos/:id/gerar-nf', authenticateToken, async (req, res
 
         // Se já tem NF, retorna a existente
         if (pedido.nf_numero) {
-            connection.release();
             return res.json({ nf_numero: pedido.nf_numero, ja_existia: true });
         }
 
@@ -5072,33 +5189,63 @@ apiVendasRouter.get('/produtos', async (req, res, next) => {
 });
 
 // Autocomplete de produtos - busca rápida para dropdown
-apiVendasRouter.get('/produtos/autocomplete/:termo', async (req, res, next) => {
+// Suporta tanto query param (?termo=) quanto path param (/:termo) para compatibilidade com o front-end
+async function _autocompleteHandler(req, res, next) {
     try {
         await ensureProdutosTable();
-        const { termo } = req.params;
-        const limit = parseInt(req.query.limit) || 15;
+        // Aceitar termo via query param OU path param
+        const termo = (req.query.termo || req.params.termo || '').trim();
+        const limit = Math.min(parseInt(req.query.limit) || 15, 100);
 
-        const [rows] = await pool.query(
-            `SELECT id, codigo, descricao, unidade, preco_venda, COALESCE(estoque_atual, 0) as estoque_atual, local_estoque
-             FROM produtos
-             WHERE (codigo LIKE ? OR descricao LIKE ? OR ean LIKE ?)
-             ORDER BY
-                CASE
-                    WHEN codigo = ? THEN 1
-                    WHEN codigo LIKE ? THEN 2
-                    ELSE 3
-                END,
-                descricao ASC
-             LIMIT ?`,
-            [`%${termo}%`, `%${termo}%`, `%${termo}%`, termo, `${termo}%`, limit]
-        );
+        // Retornar todos os produtos ATIVOS independentemente do estoque (produção sob demanda)
+        let rows;
+        if (!termo) {
+            const [r] = await pool.query(
+                `SELECT id, codigo, descricao, nome, unidade,
+                        COALESCE(preco_venda, 0) as preco_venda,
+                        COALESCE(preco_custo, 0) as preco_custo,
+                        COALESCE(estoque_atual, 0) as estoque_atual,
+                        local_estoque, categoria
+                 FROM produtos
+                 WHERE COALESCE(situacao, 'ativo') = 'ativo'
+                 ORDER BY codigo ASC
+                 LIMIT ?`,
+                [limit]
+            );
+            rows = r;
+        } else {
+            const [r] = await pool.query(
+                `SELECT id, codigo, descricao, nome, unidade,
+                        COALESCE(preco_venda, 0) as preco_venda,
+                        COALESCE(preco_custo, 0) as preco_custo,
+                        COALESCE(estoque_atual, 0) as estoque_atual,
+                        local_estoque, categoria
+                 FROM produtos
+                 WHERE COALESCE(situacao, 'ativo') = 'ativo'
+                   AND (codigo LIKE ? OR descricao LIKE ? OR nome LIKE ? OR ean LIKE ?)
+                 ORDER BY
+                    CASE
+                        WHEN codigo = ? THEN 1
+                        WHEN codigo LIKE ? THEN 2
+                        ELSE 3
+                    END,
+                    descricao ASC
+                 LIMIT ?`,
+                [`%${termo}%`, `%${termo}%`, `%${termo}%`, `%${termo}%`, termo, `${termo}%`, limit]
+            );
+            rows = r;
+        }
 
         res.json(rows);
     } catch (error) {
         if (error.code === 'ER_NO_SUCH_TABLE') return res.json([]);
         next(error);
     }
-});
+}
+// Rota com query param: GET /produtos/autocomplete?termo=TRN
+apiVendasRouter.get('/produtos/autocomplete', _autocompleteHandler);
+// Rota com path param (legado): GET /produtos/autocomplete/:termo
+apiVendasRouter.get('/produtos/autocomplete/:termo', _autocompleteHandler);
 
 // Buscar produto por ID
 apiVendasRouter.get('/produtos/:id', async (req, res, next) => {

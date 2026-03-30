@@ -2548,6 +2548,12 @@
             document.getElementById(`tab-${tabId}`).classList.add('active');
         }
 
+        function fecharModalVisualizar() {
+            const modal = document.getElementById('modal-visualizar');
+            if (modal) modal.classList.remove('active');
+            pedidoAtualModal = null;
+        }
+
         function fecharModalEditar() {
             const modal = document.getElementById('modal-editar');
             if (modal) modal.classList.remove('active');

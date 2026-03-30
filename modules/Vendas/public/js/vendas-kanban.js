@@ -230,6 +230,29 @@ function renderizarKanban() {
 
     // Adicionar eventos de drag and drop
     configurarDragAndDrop();
+
+    // Ocultar colunas restritas para vendedores
+    ocultarColunasVendedor();
+}
+
+// Ocultar colunas análise, aprovado e faturar para vendedores (não-admin/não-supervisor)
+function ocultarColunasVendedor() {
+    const isAdminUser = (usuarioLogado && (
+        VendasAuth.isAdmin(usuarioLogado) || 
+        (window.ALUFORCE_PERMISSIONS && window.ALUFORCE_PERMISSIONS.isAdmin) ||
+        (window.ALUFORCE_PERMISSIONS && window.ALUFORCE_PERMISSIONS.isSupervisor) ||
+        (window.VendasAccessControl && window.VendasAccessControl.isSupervisor(usuarioLogado))
+    ));
+
+    // Colunas que devem ser ocultadas para vendedores
+    const colunasRestritas = ['analise', 'faturar'];
+
+    colunasRestritas.forEach(status => {
+        const coluna = document.querySelector(`.kanban-column[data-status="${status}"]`);
+        if (coluna) {
+            coluna.style.display = isAdminUser ? '' : 'none';
+        }
+    });
 }
 
 // Atualizar contadores - Estilo Omie
@@ -926,9 +949,18 @@ style.textContent = `
 document.head.appendChild(style);
 
 // Inicialização
-document.addEventListener('DOMContentLoaded', () => {
-    carregarUsuario();
+document.addEventListener('DOMContentLoaded', async () => {
+    await carregarUsuario();
     carregarPedidosDaAPI();
+
+    // Re-aplicar ocultação quando permissões do access-control forem carregadas
+    const checkPerms = setInterval(() => {
+        if (window.ALUFORCE_PERMISSIONS) {
+            clearInterval(checkPerms);
+            ocultarColunasVendedor();
+        }
+    }, 300);
+    setTimeout(() => clearInterval(checkPerms), 5000);
 
     // Event listeners para filtros
     const btnFiltrar = document.querySelector('.btn-filtrar');

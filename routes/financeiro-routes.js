@@ -266,28 +266,32 @@ module.exports = function createFinanceiroRoutes(deps) {
     });
 
     // 1e. Conciliação automática (server-side)
+    // AUDIT-FIX FIN-ROUTES-03: Wrapped in transaction with FOR UPDATE to prevent race conditions
     router.post('/conciliacao/automatica', async (req, res, next) => {
+        const conn = await pool.getConnection();
         try {
             const { conta_id, data_inicio, data_fim } = req.body;
-            if (!conta_id) return res.status(400).json({ success: false, message: 'conta_id é obrigatório' });
+            if (!conta_id) { conn.release(); return res.status(400).json({ success: false, message: 'conta_id é obrigatório' }); }
 
             const usuario_id = req.user?.id || null;
 
+            await conn.beginTransaction();
+
             // Buscar movimentações do sistema (não conciliadas)
-            const [movSistema] = await pool.query(
+            const [movSistema] = await conn.query(
                 `SELECT id, valor, data, descricao, tipo FROM movimentacoes_bancarias
                  WHERE banco_id = ? AND id NOT IN (SELECT COALESCE(movimentacao_sistema_id,0) FROM conciliacoes_bancarias WHERE conta_id = ?)
                  ${data_inicio && data_fim ? 'AND data BETWEEN ? AND ?' : ''}
-                 ORDER BY data`,
+                 ORDER BY data FOR UPDATE`,
                 data_inicio && data_fim ? [conta_id, conta_id, data_inicio, data_fim] : [conta_id, conta_id]
             );
 
-            // Buscar extrato não conciliado
-            const [extrato] = await pool.query(
+            // Buscar extrato não conciliado — FOR UPDATE impede conciliação duplicada
+            const [extrato] = await conn.query(
                 `SELECT id, valor, data, descricao, tipo FROM extratos_importados
                  WHERE conta_id = ? AND conciliado = 0
                  ${data_inicio && data_fim ? 'AND data BETWEEN ? AND ?' : ''}
-                 ORDER BY data`,
+                 ORDER BY data FOR UPDATE`,
                 data_inicio && data_fim ? [conta_id, data_inicio, data_fim] : [conta_id]
             );
 
@@ -305,12 +309,12 @@ module.exports = function createFinanceiroRoutes(deps) {
                     e.tipo === mov.tipo
                 );
                 if (match) {
-                    await pool.query(
+                    await conn.query(
                         `INSERT INTO conciliacoes_bancarias (conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match, usuario_id)
                          VALUES (?, ?, ?, ?, 'automatico', ?)`,
                         [conta_id, mov.id, match.id, mov.valor, usuario_id]
                     );
-                    await pool.query('UPDATE extratos_importados SET conciliado = 1 WHERE id = ?', [match.id]);
+                    await conn.query('UPDATE extratos_importados SET conciliado = 1 WHERE id = ?', [match.id]);
                     usedExtrato.add(match.id);
                     usedSistema.add(mov.id);
                     conciliadas++;
@@ -328,22 +332,26 @@ module.exports = function createFinanceiroRoutes(deps) {
                     return Math.abs(Number(e.valor) - Number(mov.valor)) < 0.01 && diffDays <= 3 && e.tipo === mov.tipo;
                 });
                 if (match) {
-                    await pool.query(
+                    await conn.query(
                         `INSERT INTO conciliacoes_bancarias (conta_id, movimentacao_sistema_id, extrato_id, valor, tipo_match, observacoes, usuario_id)
                          VALUES (?, ?, ?, ?, 'automatico', 'Match por valor (±3 dias)', ?)`,
                         [conta_id, mov.id, match.id, mov.valor, usuario_id]
                     );
-                    await pool.query('UPDATE extratos_importados SET conciliado = 1 WHERE id = ?', [match.id]);
+                    await conn.query('UPDATE extratos_importados SET conciliado = 1 WHERE id = ?', [match.id]);
                     usedExtrato.add(match.id);
                     usedSistema.add(mov.id);
                     conciliadas++;
                 }
             }
 
+            await conn.commit();
             res.json({ success: true, message: `Conciliação automática: ${conciliadas} lançamento(s) conciliado(s)`, conciliadas });
         } catch (error) {
+            await conn.rollback().catch(() => {});
             console.error('[Conciliação] Erro automática:', error);
             next(error);
+        } finally {
+            conn.release();
         }
     });
 

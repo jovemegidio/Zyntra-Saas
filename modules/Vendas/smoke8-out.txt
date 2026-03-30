@@ -1,0 +1,203 @@
+  console.log
+    [dotenv@17.2.1] injecting env (7) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+
+      at _log (node_modules/dotenv/lib/main.js:139:11)
+
+  console.log
+    DB connection OK
+
+      at log (server.js:107:17)
+
+  console.warn
+    [AUTH] Cache indisponível para verificar inatividade: _cacheService.cacheGet is not a function
+
+    [0m [90m 110 |[39m             } [36mcatch[39m (cacheErr) {
+     [90m 111 |[39m                 [90m// CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar[39m
+    [31m[1m>[22m[39m[90m 112 |[39m                 console[33m.[39mwarn([32m'[AUTH] Cache indisponível para verificar inatividade:'[39m[33m,[39m cacheErr[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                         [31m[1m^[22m[39m
+     [90m 113 |[39m                 [90m// Inatividade é menos crítica que blacklist — permitir passagem com warning[39m
+     [90m 114 |[39m             }
+     [90m 115 |[39m         }[0m
+
+      at warn (../../middleware/auth-central.js:112:25)
+      at ../../node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (../../node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.<anonymous>.module.exports [as verify] (../../node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (../../middleware/auth-central.js:67:9)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:94:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:113:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at SendStream.error (node_modules/serve-static/index.js:121:7)
+      at SendStream.error (node_modules/send/index.js:270:17)
+      at SendStream.onStatError (node_modules/send/index.js:417:12)
+      at next (node_modules/send/index.js:730:16)
+      at node_modules/send/index.js:738:23
+
+  console.warn
+    [AUTH] Cache indisponível para verificar inatividade: _cacheService.cacheGet is not a function
+
+    [0m [90m 110 |[39m             } [36mcatch[39m (cacheErr) {
+     [90m 111 |[39m                 [90m// CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar[39m
+    [31m[1m>[22m[39m[90m 112 |[39m                 console[33m.[39mwarn([32m'[AUTH] Cache indisponível para verificar inatividade:'[39m[33m,[39m cacheErr[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                         [31m[1m^[22m[39m
+     [90m 113 |[39m                 [90m// Inatividade é menos crítica que blacklist — permitir passagem com warning[39m
+     [90m 114 |[39m             }
+     [90m 115 |[39m         }[0m
+
+      at warn (../../middleware/auth-central.js:112:25)
+      at ../../node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (../../node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.<anonymous>.module.exports [as verify] (../../node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (../../middleware/auth-central.js:67:9)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:94:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:113:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at SendStream.error (node_modules/serve-static/index.js:121:7)
+      at SendStream.error (node_modules/send/index.js:270:17)
+      at SendStream.onStatError (node_modules/send/index.js:417:12)
+      at next (node_modules/send/index.js:730:16)
+      at node_modules/send/index.js:738:23
+
+  console.warn
+    [AUTH] Cache indisponível para verificar inatividade: _cacheService.cacheGet is not a function
+
+    [0m [90m 110 |[39m             } [36mcatch[39m (cacheErr) {
+     [90m 111 |[39m                 [90m// CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar[39m
+    [31m[1m>[22m[39m[90m 112 |[39m                 console[33m.[39mwarn([32m'[AUTH] Cache indisponível para verificar inatividade:'[39m[33m,[39m cacheErr[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                         [31m[1m^[22m[39m
+     [90m 113 |[39m                 [90m// Inatividade é menos crítica que blacklist — permitir passagem com warning[39m
+     [90m 114 |[39m             }
+     [90m 115 |[39m         }[0m
+
+      at warn (../../middleware/auth-central.js:112:25)
+      at ../../node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (../../node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.<anonymous>.module.exports [as verify] (../../node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (../../middleware/auth-central.js:67:9)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:85:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    🔐 Verificação de permissão - Usuário: Admin Geral | Admin: true | Status desejado: faturar | Status atual: aprovado
+
+      at log (server.js:2544:28)
+
+  console.error
+    ⚠️ Erro ao criar notificação de status: io is not defined
+
+    [0m [90m 2771 |[39m             }
+     [90m 2772 |[39m         } [36mcatch[39m (notifErr) {
+    [31m[1m>[22m[39m[90m 2773 |[39m             console[33m.[39merror([32m'⚠️ Erro ao criar notificação de status:'[39m[33m,[39m notifErr[33m.[39mmessage)[33m;[39m
+     [90m      |[39m                     [31m[1m^[22m[39m
+     [90m 2774 |[39m         }
+     [90m 2775 |[39m
+     [90m 2776 |[39m         res[33m.[39mjson({[0m
+
+      at error (server.js:2773:21)
+
+  console.warn
+    [AUTH] Cache indisponível para verificar inatividade: _cacheService.cacheGet is not a function
+
+    [0m [90m 110 |[39m             } [36mcatch[39m (cacheErr) {
+     [90m 111 |[39m                 [90m// CHAOS-FIX BD-002: fail-closed — se cache indisponível, continuar mas logar[39m
+    [31m[1m>[22m[39m[90m 112 |[39m                 console[33m.[39mwarn([32m'[AUTH] Cache indisponível para verificar inatividade:'[39m[33m,[39m cacheErr[33m.[39mmessage)[33m;[39m
+     [90m     |[39m                         [31m[1m^[22m[39m
+     [90m 113 |[39m                 [90m// Inatividade é menos crítica que blacklist — permitir passagem com warning[39m
+     [90m 114 |[39m             }
+     [90m 115 |[39m         }[0m
+
+      at warn (../../middleware/auth-central.js:112:25)
+      at ../../node_modules/jsonwebtoken/verify.js:261:12
+      at getSecret (../../node_modules/jsonwebtoken/verify.js:97:14)
+      at Object.<anonymous>.module.exports [as verify] (../../node_modules/jsonwebtoken/verify.js:101:10)
+      at verify (../../middleware/auth-central.js:67:9)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at Function.handle (node_modules/express/lib/router/index.js:175:3)
+      at router (node_modules/express/lib/router/index.js:47:12)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:85:7)
+      at Layer.handle [as handle_request] (node_modules/express/lib/router/layer.js:95:5)
+      at trim_prefix (node_modules/express/lib/router/index.js:328:13)
+      at node_modules/express/lib/router/index.js:286:9
+      at Function.process_params (node_modules/express/lib/router/index.js:346:12)
+      at next (node_modules/express/lib/router/index.js:280:10)
+      at node_modules/body-parser/lib/read.js:137:5
+      at invokeCallback (node_modules/raw-body/index.js:238:16)
+      at done (node_modules/raw-body/index.js:227:7)
+      at IncomingMessage.onEnd (node_modules/raw-body/index.js:287:7)
+
+  console.log
+    🔐 Verificação de permissão - Usuário: Admin Geral | Admin: true | Status desejado: entregue | Status atual: aprovado
+
+      at log (server.js:2544:28)
+

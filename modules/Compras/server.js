@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const mysql = require('mysql2/promise');
@@ -220,12 +220,11 @@ app.post('/api/compras/pedidos/:id/receber', authenticateToken, async (req, res)
         `, [data_recebimento, data_recebimento, numero_nfe, chave_acesso, novoStatus, atualizar_estoque ? 1 : 0,
             `[${new Date().toLocaleString('pt-BR')}] Recebimento ${tipo} por ${responsavel || 'Sistema'}: NF-e ${numero_nfe || 'N/A'}`, pedidoId]);
 
-        // Atualizar estoque
+        // COMPRAS-05 FIX: Usar material_id do item em vez de matching por índice de array
         if (atualizar_estoque && itens.length > 0) {
-            const [itensPedido] = await connection.query('SELECT * FROM pedidos_compra_itens WHERE pedido_id = ?', [pedidoId]);
-            for (let i = 0; i < itens.length; i++) {
-                const qtd = parseFloat(itens[i].quantidade_recebida) || 0;
-                const materialId = itensPedido[i]?.material_id;
+            for (const item of itens) {
+                const qtd = parseFloat(item.quantidade_recebida) || 0;
+                const materialId = item.material_id;
                 if (qtd <= 0 || !materialId) continue;
                 const [est] = await connection.query('SELECT id FROM estoque WHERE material_id = ?', [materialId]);
                 if (est.length > 0) {
@@ -336,8 +335,9 @@ app.post('/api/compras/nf-entrada/importar-xml-texto', authenticateToken, async 
 
 // Dashboard endpoint - COM AUTENTICAÇÃO
 app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
+    let conn; // FIX RT-PL01: declarado fora do try para garantir release no finally
     try {
-        const conn = await mysqlPool.getConnection();
+        conn = await mysqlPool.getConnection();
 
         // Total de pedidos e valor
         const [totais] = await conn.query(`
@@ -419,8 +419,7 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             LIMIT 10
         `).catch(() => [[]]);
 
-        conn.release();
-
+        // FIX RT-PL01: conn.release() movido para finally
         res.json({
             total_pedidos: totais[0].total_pedidos || 0,
             valor_total_pedidos: parseFloat(totais[0].valor_total_pedidos) || 0,
@@ -448,6 +447,9 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             pedidos_recentes: [],
             atividades_recentes: []
         });
+    } finally {
+        // FIX RT-PL01: garante release mesmo com erro — evita pool starvation
+        if (conn) conn.release();
     }
 });
 

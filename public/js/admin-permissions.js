@@ -59,7 +59,8 @@
                 'fernando.kofugi@aluforce.ind.br',
                 'ti@aluforce.ind.br',
                 'adm@aluforce.ind.br',
-                'antonio@aluforce.ind.br'
+                'antonio@aluforce.ind.br',
+                'gerenciavendas@aluforce.ind.br'
             ];
 
             // Usar email do login (localStorage) em vez do /api/me

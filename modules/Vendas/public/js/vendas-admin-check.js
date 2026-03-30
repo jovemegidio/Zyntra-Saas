@@ -24,7 +24,7 @@
     (document.head || document.documentElement).appendChild(hideStyle);
     
     // Lista de admins autorizados a ver o Dashboard Admin de Vendas
-    const ADMINS_AUTORIZADOS = ['ti', 'douglas', 'andreia', 'fernando', 'consultoria', 'admin'];
+    const ADMINS_AUTORIZADOS = ['ti', 'douglas', 'andreia', 'fernando', 'consultoria', 'admin', 'gerenciavendas'];
     
     function isAdminAutorizado(user) {
         if (!user) return false;

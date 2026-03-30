@@ -10814,6 +10814,19 @@
                 if (colunaOrigemId === colunaDestino) return;
 
                 // ========================================
+                // INTERCEPTAR MOVIMENTO PARA "APROVADO"
+                // ========================================
+                // Quando mover para coluna "aprovado", mostrar modal de aprovação de crédito
+                if (colunaDestino === 'aprovado') {
+                    const pedidoParaAprovar = dadosVendas[colunaOrigemId]?.find(p => p.id == pedidoId);
+                    if (pedidoParaAprovar) {
+                        pedidoAtual = { ...pedidoParaAprovar, _coluna: colunaOrigemId };
+                        abrirModalAprovacaoCredito(pedidoId, colunaOrigemId);
+                    }
+                    return;
+                }
+
+                // ========================================
                 // INTERCEPTAR MOVIMENTO PARA "FATURAR"
                 // ========================================
                 // Quando mover para coluna "faturar", mostrar modal de escolha de tipo de faturamento
@@ -12456,6 +12469,17 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 return;
             }
 
+            // VALIDAÇÃO: Bloquear faturamento se houver itens com preço R$ 0,00
+            const itensSemPreco = itensPedidoAtual.filter(it => !(parseFloat(it.preco_unitario) > 0));
+            if (itensSemPreco.length > 0) {
+                showNotification(
+                    'Atenção: Existem produtos sem preço definido. Verifique a tabela de preços antes de prosseguir.',
+                    'error'
+                );
+                window._faturandoPedido = false;
+                return;
+            }
+
             // Verificar se o pedido tem valor
             const valorPedido = parseFloat(pedidoAtual.valor) || 0;
             if (valorPedido <= 0) {
@@ -12631,6 +12655,268 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         function fecharModalEscolhaFaturamentoKanban() {
             const modal = document.getElementById('modal-escolha-faturamento-kanban');
             if (modal) modal.remove();
+        }
+
+        // ========================================
+        // MODAL DE APROVAÇÃO DE CRÉDITO (Kanban)
+        // ========================================
+        function abrirModalAprovacaoCredito(pedidoId, colunaOrigem) {
+            fecharModalAprovacaoCredito();
+
+            const valorFormatado = formatarMoeda(pedidoAtual.valor);
+            const clienteNome = pedidoAtual.cliente || pedidoAtual.cliente_nome || 'N/A';
+
+            const modalHtml = `
+            <div id="modal-aprovacao-credito-kanban" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-out;" onclick="if(event.target===this) fecharModalAprovacaoCredito()">
+                <div style="background: #ffffff; border-radius: 16px; width: 95%; max-width: 560px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto;">
+                    <!-- Header -->
+                    <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 24px; text-align: center;">
+                        <div style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
+                            <i class="fas fa-clipboard-check" style="color: white; font-size: 28px;"></i>
+                        </div>
+                        <h2 style="margin: 0; font-size: 20px; font-weight: 700; color: white;">Aprovação de Crédito</h2>
+                        <p style="margin: 8px 0 0; font-size: 13px; color: rgba(255,255,255,0.85);">Pedido #${pedidoId} | ${escaparHTML(clienteNome.substring(0, 40))}${clienteNome.length > 40 ? '...' : ''}</p>
+                        <p style="margin: 4px 0 0; font-size: 14px; color: rgba(255,255,255,0.95); font-weight: 600;">Valor: ${valorFormatado}</p>
+                    </div>
+
+                    <!-- Corpo -->
+                    <div style="padding: 24px;">
+                        <!-- Crédito Liberado -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-dollar-sign" style="color: #059669; margin-right: 6px;"></i>Crédito Liberado (R$) <span style="color: #ef4444;">*</span>
+                            </label>
+                            <input type="text" id="aprov-credito-liberado" placeholder="Ex: 50.000,00"
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'"
+                                oninput="mascaraMoedaAprov(this)">
+                        </div>
+
+                        <!-- Condição de Pagamento -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-credit-card" style="color: #3b82f6; margin-right: 6px;"></i>Condição de Pagamento <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="aprov-condicao-pagamento"
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; background: white; cursor: pointer; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                                <option value="">Selecione...</option>
+                                <option value="a_vista">À Vista</option>
+                                <option value="30dd">30 DD</option>
+                                <option value="30_60dd">30/60 DD</option>
+                                <option value="30_60_90dd">30/60/90 DD</option>
+                                <option value="28dd">28 DD</option>
+                                <option value="28_56dd">28/56 DD</option>
+                                <option value="28_56_84dd">28/56/84 DD</option>
+                                <option value="boleto_30">Boleto 30 dias</option>
+                                <option value="boleto_60">Boleto 60 dias</option>
+                                <option value="cartao">Cartão</option>
+                                <option value="cheque">Cheque</option>
+                                <option value="outro">Outro (especificar)</option>
+                            </select>
+                        </div>
+
+                        <!-- Condição personalizada (oculto por padrão) -->
+                        <div id="aprov-condicao-custom-wrapper" style="margin-bottom: 16px; display: none;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-edit" style="color: #8b5cf6; margin-right: 6px;"></i>Especificar Condição
+                            </label>
+                            <input type="text" id="aprov-condicao-custom" placeholder="Descreva a condição de pagamento..."
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                        </div>
+
+                        <!-- Prazo de Entrega -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-truck" style="color: #f59e0b; margin-right: 6px;"></i>Prazo de Entrega
+                            </label>
+                            <input type="text" id="aprov-prazo-entrega" placeholder="Ex: 15 dias úteis, Imediato..."
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                        </div>
+
+                        <!-- Parecer -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-gavel" style="color: #059669; margin-right: 6px;"></i>Parecer <span style="color: #ef4444;">*</span>
+                            </label>
+                            <select id="aprov-parecer"
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; background: white; cursor: pointer; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                                <option value="">Selecione...</option>
+                                <option value="aprovado">Aprovado</option>
+                                <option value="aprovado_condicional">Aprovado com Restrição</option>
+                            </select>
+                        </div>
+
+                        <!-- Observações -->
+                        <div style="margin-bottom: 16px;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-comment-alt" style="color: #6366f1; margin-right: 6px;"></i>Observações da Análise
+                            </label>
+                            <textarea id="aprov-observacoes" rows="3" placeholder="Observações sobre a análise de crédito..."
+                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; resize: vertical; font-family: inherit; box-sizing: border-box;"
+                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+                        </div>
+
+                        <!-- Info -->
+                        <div style="padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #059669;">
+                            <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                <i class="fas fa-info-circle" style="color: #059669; margin-top: 1px;"></i>
+                                <div style="font-size: 11px; color: #166534; line-height: 1.5;">
+                                    <strong>Importante:</strong> Estes dados serão registrados no histórico do pedido para conferência futura. O preenchimento do crédito liberado, condição de pagamento e parecer é obrigatório.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div style="padding: 12px 24px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid #e5e7eb;">
+                        <button onclick="fecharModalAprovacaoCredito()" style="padding: 10px 24px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                        <button onclick="confirmarAprovacaoCredito()" id="btn-confirmar-aprovacao" style="padding: 10px 24px; background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fas fa-check-circle"></i> Aprovar Pedido
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Listener para mostrar/ocultar campo personalizado
+            document.getElementById('aprov-condicao-pagamento').addEventListener('change', function() {
+                const wrapper = document.getElementById('aprov-condicao-custom-wrapper');
+                wrapper.style.display = this.value === 'outro' ? 'block' : 'none';
+            });
+        }
+
+        function fecharModalAprovacaoCredito() {
+            const modal = document.getElementById('modal-aprovacao-credito-kanban');
+            if (modal) modal.remove();
+        }
+
+        function mascaraMoedaAprov(input) {
+            let v = input.value.replace(/\D/g, '');
+            if (!v) { input.value = ''; return; }
+            v = (parseInt(v) / 100).toFixed(2);
+            v = v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            input.value = v;
+        }
+
+        async function confirmarAprovacaoCredito() {
+            const creditoLiberadoStr = document.getElementById('aprov-credito-liberado')?.value?.trim();
+            const condicaoPagamento = document.getElementById('aprov-condicao-pagamento')?.value;
+            const condicaoCustom = document.getElementById('aprov-condicao-custom')?.value?.trim();
+            const prazoEntrega = document.getElementById('aprov-prazo-entrega')?.value?.trim();
+            const parecer = document.getElementById('aprov-parecer')?.value;
+            const observacoes = document.getElementById('aprov-observacoes')?.value?.trim();
+
+            // Validações
+            if (!creditoLiberadoStr) {
+                showToast('Informe o valor do crédito liberado.', 'warning');
+                document.getElementById('aprov-credito-liberado')?.focus();
+                return;
+            }
+            if (!condicaoPagamento) {
+                showToast('Selecione a condição de pagamento.', 'warning');
+                document.getElementById('aprov-condicao-pagamento')?.focus();
+                return;
+            }
+            if (condicaoPagamento === 'outro' && !condicaoCustom) {
+                showToast('Especifique a condição de pagamento.', 'warning');
+                document.getElementById('aprov-condicao-custom')?.focus();
+                return;
+            }
+            if (!parecer) {
+                showToast('Selecione o parecer da análise.', 'warning');
+                document.getElementById('aprov-parecer')?.focus();
+                return;
+            }
+
+            // Converter valor
+            const creditoLiberado = parseFloat(creditoLiberadoStr.replace(/\./g, '').replace(',', '.')) || 0;
+            if (creditoLiberado <= 0) {
+                showToast('O valor do crédito liberado deve ser maior que zero.', 'warning');
+                return;
+            }
+
+            const condicaoFinal = condicaoPagamento === 'outro' ? condicaoCustom : condicaoPagamento;
+
+            // Desabilitar botão durante o processamento
+            const btn = document.getElementById('btn-confirmar-aprovacao');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aprovando...';
+            }
+
+            try {
+                const pedidoId = pedidoAtual.id;
+                const colunaOrigem = pedidoAtual._coluna;
+
+                // Salvar dados de aprovação + mudar status em uma única chamada
+                const statusAPI = colunaParaStatus['aprovado'] || 'pedido-aprovado';
+                const resp = await fetch(`/api/vendas/pedidos/${pedidoId}/status`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        status: statusAPI,
+                        aprovacao_credito: {
+                            credito_liberado: creditoLiberado,
+                            condicao_pagamento: condicaoFinal,
+                            prazo_entrega: prazoEntrega || null,
+                            parecer: parecer,
+                            observacoes: observacoes || null
+                        }
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errorData = await resp.json().catch(() => ({}));
+                    throw new Error(errorData.message || 'Erro ao aprovar pedido');
+                }
+
+                // Sucesso — mover card visualmente
+                const colDestino = document.getElementById('col-aprovado');
+                if (colDestino && draggedCard) {
+                    const emptyState = colDestino.querySelector('.empty-column');
+                    if (emptyState) emptyState.remove();
+                    colDestino.appendChild(draggedCard);
+
+                    // Atualizar label
+                    const cardNumberEl = draggedCard.querySelector('.card-number');
+                    if (cardNumberEl) {
+                        cardNumberEl.textContent = `Pedido Nº ${pedidoId}`;
+                    }
+                    draggedCard.setAttribute('data-coluna', 'aprovado');
+                }
+
+                // Atualizar dados locais
+                const pedidoIdx = dadosVendas[colunaOrigem]?.findIndex(p => p.id == pedidoId);
+                if (pedidoIdx !== undefined && pedidoIdx !== -1) {
+                    const [pedido] = dadosVendas[colunaOrigem].splice(pedidoIdx, 1);
+                    if (!dadosVendas['aprovado']) dadosVendas['aprovado'] = [];
+                    pedido._statusOriginal = statusAPI;
+                    dadosVendas['aprovado'].push(pedido);
+                }
+
+                updateCounters();
+                fecharModalAprovacaoCredito();
+
+                const parecerLabel = parecer === 'aprovado_condicional' ? 'Aprovado com Restrição' : 'Aprovado';
+                showToast(`Pedido #${pedidoId} aprovado com sucesso!\nParecer: ${parecerLabel} | Crédito: R$ ${creditoLiberadoStr}`, 'success');
+
+            } catch (err) {
+                console.error('Erro ao aprovar pedido:', err);
+                showToast('Erro ao aprovar pedido: ' + err.message, 'error');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-check-circle"></i> Aprovar Pedido';
+                }
+            }
         }
 
         // Faturamento normal via drag-drop no Kanban
@@ -12988,11 +13274,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                 if (result.success) {
                     // Mover para coluna RECIBO (pedidos meia nota vão para recibos)
-                    const colunaAtual = pedidoAtual._coluna;
-                    const idx = dadosVendas[colunaAtual]?.findIndex(p => p.id === pedidoAtual.id);
-
-                    if (idx !== undefined && idx !== -1) {
-                        dadosVendas[colunaAtual].splice(idx, 1);
+                    const colunaAtual = pedidoAtual._coluna || pedidoAtual.status?.toLowerCase() || 'faturar';
+                    if (dadosVendas[colunaAtual]) {
+                        const idx = dadosVendas[colunaAtual].findIndex(p => p.id === pedidoAtual.id);
+                        if (idx !== -1) {
+                            dadosVendas[colunaAtual].splice(idx, 1);
+                        }
                     }
 
                     // Atualizar dados do pedido
@@ -15411,8 +15698,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     const rawItens = await response.json();
                     itensPedidoAtual = rawItens.map(it => ({
                         ...it,
+                        // Normalizar campos com e sem acento
                         código: it.código || it.codigo || '',
-                        descrição: it.descrição || it.descricao || '',
+                        codigo: it.codigo || it.código || '',
+                        descrição: it.descrição || it.descricao || it.nome || '',
+                        descricao: it.descricao || it.descrição || it.nome || '',
+                        // Garantir preco_unitario como número
+                        preco_unitario: parseFloat(it.preco_unitario || it.preco_venda || it.valor_unitario || 0),
                     }));
                 } else {
                     itensPedidoAtual = [];
@@ -15632,6 +15924,18 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                 // Obter dados do produto selecionado
                 const produtoInput = document.getElementById('item-pedido-produto').value.trim();
+
+                // VALIDAÇÃO: Bloquear item com preço R$ 0,00
+                const precoValorStr = document.getElementById('item-pedido-preco').value;
+                const precoValorNum = parseDecimal(precoValorStr);
+                if (!precoValorNum || precoValorNum <= 0) {
+                    showNotification(
+                        'Atenção: Existem produtos sem preço definido. Verifique a tabela de preços antes de prosseguir.',
+                        'error'
+                    );
+                    document.getElementById('item-pedido-preco').focus();
+                    return;
+                }
 
                 // Extrair código e descrição do input
                 let código = '';
@@ -20476,11 +20780,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         ? window.AluforceAuth.getTabToken()
                         : sessionStorage.getItem('tabAuthToken');
                     socket = io({
-                        transports: ['websocket'],
-                        upgrade: false,
+                        transports: ['polling', 'websocket'],
+                        upgrade: true,
                         reconnection: true,
-                        reconnectionAttempts: 5,
+                        reconnectionAttempts: 10,
                         reconnectionDelay: 2000,
+                        timeout: 10000,
                         auth: authToken ? { token: authToken } : {}
                     });
                     window._aluforceSocket = socket;
@@ -20525,6 +20830,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     showNotification(`${data.usuario_nome} moveu pedido #${data.pedido_id}: ${statusAnt} → ${statusNovo}`, 'info');
                     // Recarregar kanban para refletir nova posição do card
                     setTimeout(() => carregarDadosKanban(filtrosState), 400);
+                });
+
+                // Novo orçamento criado por outro vendedor — recarregar kanban em tempo real
+                socket.on('novo_orcamento', (data) => {
+                    if (!data) return;
+                    if (data.usuario_id && usuarioLogado && data.usuario_id === usuarioLogado.id) return;
+                    console.log('📡 Novo orçamento criado:', data);
+                    showNotification(`${data.vendedor_nome} criou orçamento #${data.pedido_id} para ${data.cliente}`, 'info');
+                    setTimeout(() => carregarDadosKanban(filtrosState), 500);
                 });
             }
         }

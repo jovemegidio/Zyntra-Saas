@@ -24,7 +24,8 @@
                 'ti@aluforce.ind.br',
                 'andreia@aluforce.ind.br',
                 'fernando@aluforce.ind.br',
-                'douglas@aluforce.ind.br'
+                'douglas@aluforce.ind.br',
+                'gerenciavendas@aluforce.ind.br'
             ],
             // Cargos/funções que podem ver KPIs, alertas e contadores
             allowedRoles: ['admin', 'administrador', 'consultoria', 'consultor', 'diretoria', 'gerente']

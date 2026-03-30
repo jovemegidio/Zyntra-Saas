@@ -1,0 +1,40 @@
+PASS test/pcp-stress.test.js (12.543 s)
+  VOLUME STRESS & MEMORY EXHAUSTION
+    V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante
+      √ FINDING: Aceita payload com campos observações de 1MB sem validação de tamanho (202 ms)
+      √ FINDING: Rota legada /api/pcp/ordens aceita campos extras arbitrários via JSON (11 ms)
+      √ Express JSON limit rejeita payload > 10MB (428 ms)
+    V2: PDF Stress — 50 requisições simultâneas GET /api/pcp/ordens-compra/:id/pdf
+      √ FINDING: 50 PDFs simultâneos processados sem controle de concorrência (283 ms)
+    V3: Report Tsunami — GET /api/pcp/apontamentos/relatorio com range de 5 anos
+      √ FINDING: Query de relatório SEM LIMIT retorna todos os registros do período (22 ms)
+      √ FINDING: Relatório Excel também sem LIMIT — todas as ordens na memória (8 ms)
+  EXTREME CONCURRENCY & RACE CONDITIONS
+    C1: Race Condition — 5 apontamentos simultâneos excedem limite da OP
+      √ FINDING: Sem SELECT FOR UPDATE — múltiplos apontamentos podem exceder quantidade_prevista (30 ms)
+      √ EVIDENCE: Query SQL de leitura da etapa NÃO usa FOR UPDATE (8 ms)
+    C2: Status Change vs Apontamento — cancelamento concurrent com apontamento
+      √ FINDING: PUT status e POST apontamento podem executar simultaneamente na mesma OP (13 ms)
+      √ FINDING: Apontamento NÃO verifica status da OP antes de inserir (7 ms)
+    C3: Idempotency — 10 cliques rápidos criam 10 OPs duplicadas
+      √ FINDING: 10 POST idênticos criam 10 ordens duplicadas (53 ms)
+      √ FINDING: codigo não tem UNIQUE constraint verificação antes do INSERT (9 ms)
+  CHAOS ENGINEERING & NETWORK FAILURES
+    CH1: Zombie Transaction — conexão cai no meio da transação
+      √ VERIFY: Rollback é executado quando commit falha (8 ms)
+      √ VERIFY: Connection é liberada mesmo quando rollback falha (finally block) (6 ms)
+      √ FINDING: getConnection failure retorna 500 genérico — sem retry (6 ms)
+      √ FINDING: Transação parcial — DB error após INSERT mas antes do UPDATE etapa (7 ms)
+    CH2: Re-hydration — payload duplicado pós-offline cria dados duplicados
+      √ FINDING: Mesmo apontamento enviado 2x cria 2 registros (sem idempotência) (16 ms)
+      √ FINDING: Apontamento chão de fábrica também sem deduplicação (12 ms)
+  RBAC under Stress
+    √ RBAC blocks unauthorized users even under concurrent load (106 ms)
+    √ FINDING: PUT status change NOT protected by requireProductionRole (10 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        13.383 s, estimated 75 s
+Ran all test suites within paths "test/pcp-stress.test.js".
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

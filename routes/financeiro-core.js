@@ -314,6 +314,9 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
         try {
             const { descricao, valor, vencimento, fornecedor_id, categoria_id, observacoes } = req.body;
             if (!descricao || !valor || !vencimento) return res.status(400).json({ message: 'Campos obrigatórios: descricao, valor, vencimento' });
+            // AUDIT-FIX FIN-CORE-06: Validar valor positivo e dentro do limite
+            const valorNum = parseFloat(valor);
+            if (isNaN(valorNum) || valorNum <= 0 || valorNum > 999999999.99) return res.status(400).json({ message: 'Valor deve ser positivo e menor que 999.999.999,99' });
             const [result] = await pool.query(
                 'INSERT INTO contas_pagar (descricao, valor, vencimento, fornecedor_id, categoria_id, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [descricao, valor, vencimento, fornecedor_id || null, categoria_id || null, observacoes || '', 'pendente']
@@ -409,6 +412,9 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
         try {
             const { descricao, valor, vencimento, cliente_id, categoria_id, observacoes } = req.body;
             if (!descricao || !valor || !vencimento) return res.status(400).json({ message: 'Campos obrigatórios: descricao, valor, vencimento' });
+            // AUDIT-FIX FIN-CORE-06: Validar valor positivo e dentro do limite
+            const valorNum = parseFloat(valor);
+            if (isNaN(valorNum) || valorNum <= 0 || valorNum > 999999999.99) return res.status(400).json({ message: 'Valor deve ser positivo e menor que 999.999.999,99' });
             const [result] = await pool.query(
                 'INSERT INTO contas_receber (descricao, valor, vencimento, cliente_id, categoria_id, observacoes, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
                 [descricao, valor, vencimento, cliente_id || null, categoria_id || null, observacoes || '', 'pendente']

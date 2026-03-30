@@ -17,7 +17,8 @@ function createProdutosRouter(pool, authenticateToken, io) {
             const { termo } = req.query;
             const rawLimit = req.query.limit;
             let limitParam = typeof rawLimit !== 'undefined' ? parseInt(rawLimit) : 1000;
-            if (isNaN(limitParam) || limitParam < 0) limitParam = 1000;
+            if (isNaN(limitParam) || limitParam <= 0) limitParam = 1000;
+            if (limitParam > 5000) limitParam = 5000;
 
             let query = `
                 SELECT 
@@ -44,12 +45,8 @@ function createProdutosRouter(pool, authenticateToken, io) {
                 params = [termoLike, termoLike, termoLike];
             }
             
-            if (limitParam === 0) {
-                query += ' ORDER BY nome';
-            } else {
-                query += ' ORDER BY nome LIMIT ?';
-                params.push(limitParam);
-            }
+            query += ' ORDER BY nome LIMIT ?';
+            params.push(limitParam);
             
             const [produtos] = await pool.query(query, params);
             

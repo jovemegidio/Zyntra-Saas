@@ -82,6 +82,13 @@ const userPermissions = {
         isAdmin: false
     },
 
+    // Andreia Trovão (gerenciavendas@aluforce.ind.br) - Administradora
+    'gerenciavendas': {
+        areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'],
+        rhType: 'areaadm',
+        isAdmin: true
+    },
+
     // Douglas (aluforce@aluforce.ind.br) - alias pelo email prefix
     'aluforce': {
         areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'],
@@ -233,7 +240,7 @@ function isAdmin(userName) {
     // Verifica se tem a flag isAdmin ou se está na lista de admins
     if (userPerms && userPerms.isAdmin) return true;
 
-    const adminUsers = ['douglas', 'andreia', 'ti', 'rh', 'antonio', 'egidio', 'junior', 'eldir', 'adm', 'aluforce'];
+    const adminUsers = ['douglas', 'andreia', 'ti', 'rh', 'antonio', 'egidio', 'junior', 'eldir', 'adm', 'aluforce', 'gerenciavendas'];
     return adminUsers.includes(userKey) || adminUsers.includes(normalizedKey);
 }
 

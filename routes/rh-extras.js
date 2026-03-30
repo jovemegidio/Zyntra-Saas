@@ -164,7 +164,7 @@ router.put('/notificacoes/ler-todas', authenticateToken, async (req, res) => {
  * POST /api/rh/notificacoes
  * Criar nova notificação (admin)
  */
-router.post('/notificacoes', authenticateToken, async (req, res) => {
+router.post('/notificacoes', authenticateToken, requireAdminOrRH, async (req, res) => {
     try {
         const { funcionario_id, tipo, titulo, descricao, link } = req.body;
 

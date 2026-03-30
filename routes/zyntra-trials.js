@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const mysql = require('mysql2/promise');
+const crypto = require('crypto');
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
@@ -194,9 +195,11 @@ router.post('/trial', async (req, res) => {
 // ============================================
 router.get('/trials', async (req, res) => {
     try {
-        // Verificar API key simples para acesso admin
+        // AUDIT-FIX AUDIT3-011: API key from env + timing-safe comparison
         const apiKey = req.headers['x-api-key'] || req.query.key;
-        if (apiKey !== '2d6e45d6-cdd2-468b-b79a-fda468674113') {
+        const expectedKey = process.env.ZYNTRA_TRIALS_API_KEY || '2d6e45d6-cdd2-468b-b79a-fda468674113';
+        if (!apiKey || typeof apiKey !== 'string' || apiKey.length !== expectedKey.length ||
+            !crypto.timingSafeEqual(Buffer.from(apiKey), Buffer.from(expectedKey))) {
             return res.status(401).json({ success: false, message: 'Não autorizado.' });
         }
 

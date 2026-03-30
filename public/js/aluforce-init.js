@@ -141,6 +141,7 @@
                 'admin': 'admin',
                 'rh': 'Rh',
                 'andreia': 'Andreia',
+                'gerenciavendas': 'Andreia',
                 'guilherme': 'Guilherme'
             };
             avatarFileName = emailMap[emailUser] || firstName;
@@ -242,8 +243,15 @@
             return;
         }
         
+        // Fallback: também verificar pelo prefixo do email
+        const emailPrefix = user.email ? user.email.split('@')[0].toLowerCase().trim() : '';
+        
         // Se não há sistema de permissões ou é admin, mostrar tudo
-        if (!window.UserPermissions || user.role === 'admin' || user.is_admin) {
+        const isAdminByPermissions = window.UserPermissions && (
+            window.UserPermissions.isAdmin(userName) || 
+            (emailPrefix && window.UserPermissions.isAdmin(emailPrefix))
+        );
+        if (!window.UserPermissions || user.role === 'admin' || user.is_admin || isAdminByPermissions) {
             console.log('✅ Admin detectado - mostrando todos os módulos');
             cards.forEach(card => {
                 card.style.display = '';
@@ -253,9 +261,10 @@
             return;
         }
         
-        // Aplicar permissões normais
-        const userAreas = window.UserPermissions.getUserAreas(userName);
-        console.log('📋 Áreas disponíveis:', userAreas);
+        // Aplicar permissões normais (tentar nome E email prefix)
+        const effectiveUser = (window.UserPermissions.getUserAreas(userName).length > 1) ? userName : emailPrefix || userName;
+        const userAreas = window.UserPermissions.getUserAreas(effectiveUser);
+        console.log('📋 Áreas disponíveis para', effectiveUser, ':', userAreas);
         
         cards.forEach(card => {
             const area = card.getAttribute('data-area');
@@ -265,7 +274,7 @@
                 return;
             }
             
-            const hasAccess = window.UserPermissions.hasAccess(userName, area);
+            const hasAccess = window.UserPermissions.hasAccess(effectiveUser, area);
             
             if (hasAccess) {
                 card.style.display = '';
@@ -273,7 +282,7 @@
                 
                 // Configurar URL especial para RH
                 if (area === 'rh') {
-                    const rhType = window.UserPermissions.getRHType(userName);
+                    const rhType = window.UserPermissions.getRHType(effectiveUser);
                     const rhURL = rhType === 'areaadm' 
                         ? '/modules/RH/public/areaadm.html' 
                         : '/modules/RH/public/funcionario.html';
@@ -378,7 +387,10 @@
             
             // 5. Aplicar permissões (mas não ocultar cards)
             const userName = (user.nome || '').trim().split(/\s+/)[0];
-            if (user.role === 'admin' || user.is_admin) {
+            const emailPrefix = user.email ? user.email.split('@')[0].toLowerCase().trim() : '';
+            const isAdminUser = user.role === 'admin' || user.is_admin || 
+                (window.UserPermissions && (window.UserPermissions.isAdmin(userName) || window.UserPermissions.isAdmin(emailPrefix)));
+            if (isAdminUser) {
                 console.log('👑 Admin - todos os módulos visíveis');
             } else {
                 console.log('👤 Usuário regular:', userName);

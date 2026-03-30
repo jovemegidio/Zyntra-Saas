@@ -1,0 +1,340 @@
+  console.log
+    
+    ══════════════════════════════════════════════════════════
+
+      at Object.log (test/pcp-stress.test.js:384:13)
+
+  console.log
+      STRESS TEST FINDINGS SUMMARY
+
+      at Object.log (test/pcp-stress.test.js:385:13)
+
+  console.log
+    ══════════════════════════════════════════════════════════
+
+      at Object.log (test/pcp-stress.test.js:386:13)
+
+  console.log
+      [HIGH] VOLUME — Payload com campo de 1MB aceito sem validação
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/ordens-producao aceita observacoes de 1MB. Sem validação de tamanho por campo. Express limit=10MB protege globalmente, mas campos individuais não têm max length.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [MEDIUM] VOLUME — Rota legada aceita 100+ campos extras sem whitelist
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/ordens processa candidateFields ilimitadamente. Além disso, executa query information_schema em cada POST (performance hit).
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] VOLUME — 50 PDFs simultâneos sem controle de concorrência
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: GET /api/pcp/ordens-compra/:id/pdf processou 50/50 PDFs simultaneamente. Sem semáforo, sem fila, sem limite de concorrência. Em produção com pdfkit real, cada instância consome ~50MB RAM → 2.5GB total.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [CRITICAL] VOLUME — Relatório sem LIMIT — OOM com 5 anos de dados
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: GET /api/pcp/apontamentos/relatorio: SQL não contém LIMIT. Data range 2021-2026 retornaria milhões de registros em produção. Cálculo de totalHoras feito em JS (reduce) em vez de SQL → duplo risco OOM (rows + computation).
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] VOLUME — Excel export sem LIMIT — carrega todas as ordens na memória
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: GET /api/pcp/relatorio/ordens-excel: SQL SELECT sem LIMIT nem paginação. Com ExcelJS real, cada célula é bufferizada em memória antes de write(). 100K ordens × 8 colunas = 800K cells em RAM.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [CRITICAL] CONCURRENCY — Race condition: 5 apontamentos produziram 150/100 peças
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/apontamentos: 5 requests simultâneos acumularam 150 peças (limite: 100). Sem SELECT FOR UPDATE na leitura de etapa/OP, sem check quantidade_produzida < quantidade_prevista ANTES do INSERT. Resultado: etapa com 50% a mais que o previsto.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [CRITICAL] CONCURRENCY — SELECT de etapa sem FOR UPDATE dentro de transação
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: A query "SELECT quantidade_prevista, quantidade_produzida FROM etapas_producao WHERE id = ?" NÃO usa FOR UPDATE. Múltiplas transações concorrentes lêem o mesmo valor stale e todas passam.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [CRITICAL] CONCURRENCY — Status change + apontamento executam simultaneamente
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: PUT /api/pcp/ordens/200/status → cancelada E POST /api/pcp/apontamentos na mesma OP ambos retornam 200. O apontamento deveria verificar se a OP foi cancelada ANTES de inserir. Status change não usa transação, não há mutex, nem pessimistic lock na OP.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] CONCURRENCY — Apontamento não verifica status da OP
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/apontamentos: a transação INSERT → UPDATE → SELECT etapa → UPDATE OP NUNCA verifica se OP.status está em "cancelada" ou "concluida". Qualquer apontamento em OP cancelada é aceito silenciosamente.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] CONCURRENCY — 10 OPs duplicadas criadas por cliques simultâneos
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/ordens-producao: 10 INSERTs executados para payload idêntico. Sem chave de idempotência, sem unique constraint em codigo, sem deduplicação temporal. Em produção, cada double-click pode criar 2+ ordens.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [MEDIUM] CONCURRENCY — Sem verificação de duplicidade de codigo antes do INSERT
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/ordens-producao: Não executa SELECT para verificar se codigo já existe antes do INSERT. Se DB não tiver UNIQUE constraint, duplicatas passam silenciosamente.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] CHAOS — Re-hydration: 2 apontamentos duplicados após sync offline
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/apontamentos: payload idêntico aceito 2x → 2 INSERTs, 2 UPDATEs em etapas_producao. Quantidade duplicada: 25 × 2 = 50 peças contabilizadas. Sem idempotency_key, sem hash de deduplicação, sem verificação de operador + OP + etapa + timestamp recente.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [HIGH] CHAOS — Apontamento chão de fábrica sem deduplicação
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: POST /api/pcp/apontamentos/chao: mesmo payload aceito N vezes sem verificação. Sem unique constraint em (usuario_id, data, hora_inicio, hora_fim), operador pode registrar horas duplicadas acidentalmente após reconexão.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      [CRITICAL] RBAC — PUT /api/pcp/ordens/:id/status sem requireProductionRole
+
+      at Object.log (test/pcp-stress.test.js:388:15)
+
+  console.log
+        Evidence: Rota de mudança de status aceita qualquer usuário autenticado. Vendedor pode cancelar OPs de produção. Falta middleware requireProductionRole.
+
+      at Object.log (test/pcp-stress.test.js:389:15)
+
+  console.log
+
+
+      at Object.log (test/pcp-stress.test.js:390:15)
+
+  console.log
+      Total: 14 findings
+
+      at Object.log (test/pcp-stress.test.js:392:13)
+
+  console.log
+    ══════════════════════════════════════════════════════════
+
+      at Object.log (test/pcp-stress.test.js:393:13)
+
+FAIL test/pcp-stress.test.js (70.526 s)
+  VOLUME STRESS & MEMORY EXHAUSTION
+    V1: Fat Payload — POST /api/pcp/ordens-producao com payload gigante
+      √ FINDING: Aceita payload com campos observações de 1MB sem validação de tamanho (175 ms)
+      √ FINDING: Rota legada /api/pcp/ordens aceita campos extras arbitrários via JSON (12 ms)
+      √ Express JSON limit rejeita payload > 10MB (246 ms)
+    V2: PDF Stress — 50 requisições simultâneas GET /api/pcp/ordens-compra/:id/pdf
+      √ FINDING: 50 PDFs simultâneos processados sem controle de concorrência (274 ms)
+    V3: Report Tsunami — GET /api/pcp/apontamentos/relatorio com range de 5 anos
+      √ FINDING: Query de relatório SEM LIMIT retorna todos os registros do período (19 ms)
+      √ FINDING: Relatório Excel também sem LIMIT — todas as ordens na memória (9 ms)
+  EXTREME CONCURRENCY & RACE CONDITIONS
+    C1: Race Condition — 5 apontamentos simultâneos excedem limite da OP
+      √ FINDING: Sem SELECT FOR UPDATE — múltiplos apontamentos podem exceder quantidade_prevista (31 ms)
+      √ EVIDENCE: Query SQL de leitura da etapa NÃO usa FOR UPDATE (8 ms)
+    C2: Status Change vs Apontamento — cancelamento concurrent com apontamento
+      √ FINDING: PUT status e POST apontamento podem executar simultaneamente na mesma OP (13 ms)
+      √ FINDING: Apontamento NÃO verifica status da OP antes de inserir (7 ms)
+    C3: Idempotency — 10 cliques rápidos criam 10 OPs duplicadas
+      √ FINDING: 10 POST idênticos criam 10 ordens duplicadas (54 ms)
+      √ FINDING: codigo não tem UNIQUE constraint verificação antes do INSERT (9 ms)
+  CHAOS ENGINEERING & NETWORK FAILURES
+    CH1: Zombie Transaction — conexão cai no meio da transação
+      √ VERIFY: Rollback é executado quando commit falha (8 ms)
+      × VERIFY: Connection é liberada mesmo quando rollback falha (finally block) (30013 ms)
+      × FINDING: getConnection failure retorna 500 genérico — sem retry (30010 ms)
+      √ FINDING: Transação parcial — DB error após INSERT mas antes do UPDATE etapa (14 ms)
+    CH2: Re-hydration — payload duplicado pós-offline cria dados duplicados
+      √ FINDING: Mesmo apontamento enviado 2x cria 2 registros (sem idempotência) (20 ms)
+      √ FINDING: Apontamento chão de fábrica também sem deduplicação (18 ms)
+  RBAC under Stress
+    √ RBAC blocks unauthorized users even under concurrent load (140 ms)
+    √ FINDING: PUT status change NOT protected by requireProductionRole (14 ms)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › VERIFY: Connection é liberada mesmo quando rollback falha (finally block)
+
+    Connection already closed
+
+    [0m [90m 1002 |[39m         beginTransaction[33m:[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(undefined)[33m,[39m
+     [90m 1003 |[39m         commit[33m:[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(undefined)[33m,[39m
+    [31m[1m>[22m[39m[90m 1004 |[39m         rollback[33m:[39m jest[33m.[39mfn()[33m.[39mmockRejectedValue([36mnew[39m [33mError[39m([32m'Connection already closed'[39m))[33m,[39m
+     [90m      |[39m                                               [31m[1m^[22m[39m
+     [90m 1005 |[39m         release[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 1006 |[39m       }[33m;[39m
+     [90m 1007 |[39m[0m
+
+      at Object.<anonymous> (test/pcp-stress.test.js:1004:47)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › VERIFY: Connection é liberada mesmo quando rollback falha (finally block)
+
+    thrown: "Exceeded timeout of 30000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m  997 |[39m     })[33m;[39m
+     [90m  998 |[39m
+    [31m[1m>[22m[39m[90m  999 |[39m     test([32m'VERIFY: Connection é liberada mesmo quando rollback falha (finally block)'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m      |[39m     [31m[1m^[22m[39m
+     [90m 1000 |[39m       [36mconst[39m conn [33m=[39m {
+     [90m 1001 |[39m         query[33m:[39m jest[33m.[39mfn()[33m.[39mmockRejectedValue([36mnew[39m [33mError[39m([32m'DEADLOCK detected'[39m))[33m,[39m
+     [90m 1002 |[39m         beginTransaction[33m:[39m jest[33m.[39mfn()[33m.[39mmockResolvedValue(undefined)[33m,[39m[0m
+
+      at test (test/pcp-stress.test.js:999:5)
+      at describe (test/pcp-stress.test.js:964:3)
+      at Object.describe (test/pcp-stress.test.js:960:1)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › FINDING: getConnection failure retorna 500 genérico — sem retry
+
+    Too many connections
+
+    [0m [90m 1024 |[39m
+     [90m 1025 |[39m     test([32m'FINDING: getConnection failure retorna 500 genérico — sem retry'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 1026 |[39m       mockPool[33m.[39mgetConnection[33m.[39mmockRejectedValue([36mnew[39m [33mError[39m([32m'Too many connections'[39m))[33m;[39m
+     [90m      |[39m                                                [31m[1m^[22m[39m
+     [90m 1027 |[39m
+     [90m 1028 |[39m       [36mconst[39m res [33m=[39m [36mawait[39m request(app)
+     [90m 1029 |[39m         [33m.[39mpost([32m'/api/pcp/apontamentos'[39m)[0m
+
+      at Object.<anonymous> (test/pcp-stress.test.js:1026:48)
+
+  ● CHAOS ENGINEERING & NETWORK FAILURES › CH1: Zombie Transaction — conexão cai no meio da transação › FINDING: getConnection failure retorna 500 genérico — sem retry
+
+    thrown: "Exceeded timeout of 30000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m 1023 |[39m     })[33m;[39m
+     [90m 1024 |[39m
+    [31m[1m>[22m[39m[90m 1025 |[39m     test([32m'FINDING: getConnection failure retorna 500 genérico — sem retry'[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m      |[39m     [31m[1m^[22m[39m
+     [90m 1026 |[39m       mockPool[33m.[39mgetConnection[33m.[39mmockRejectedValue([36mnew[39m [33mError[39m([32m'Too many connections'[39m))[33m;[39m
+     [90m 1027 |[39m
+     [90m 1028 |[39m       [36mconst[39m res [33m=[39m [36mawait[39m request(app)[0m
+
+      at test (test/pcp-stress.test.js:1025:5)
+      at describe (test/pcp-stress.test.js:964:3)
+      at Object.describe (test/pcp-stress.test.js:960:1)
+
+Test Suites: 1 failed, 1 total
+Tests:       2 failed, 18 passed, 20 total
+Snapshots:   0 total
+Time:        71.349 s, estimated 76 s
+Ran all test suites matching /pcp-stress.test.js/i.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

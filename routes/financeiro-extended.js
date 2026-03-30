@@ -73,35 +73,29 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 });
             }
 
-            // Verificar permissões específicas do usuário baseado no nome/apelido
-            const userName = (userData?.apelido || userData?.nome || user.nome || '').toLowerCase().split(' ')[0];
-
-            // Permissões específicas por usuário
-            const permissoesUsuarios = {
-                'hellen': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'helen': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'junior': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'eldir': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true }
-            };
-
-            // Verificar se usuário tem permissões específicas
-            if (permissoesUsuarios[userName]) {
-                const perms = permissoesUsuarios[userName];
-                return res.json({
-                    success: true,
-                    permissoes: {
-                        acesso: 'parcial',
-                        contas_receber: perms.contas_receber,
-                        contas_pagar: perms.contas_pagar,
-                        fluxo_caixa: perms.fluxo_caixa,
-                        bancos: perms.bancos,
-                        relatorios: perms.relatorios,
-                        visualizar: true,
-                        criar: true,
-                        editar: true,
-                        excluir: false
-                    }
-                });
+            // AUDIT-FIX FIN-EXT-02: Permissões via DB (permissoes_financeiro), sem nomes hardcoded
+            if (userData?.permissoes_financeiro) {
+                let permsDB = userData.permissoes_financeiro;
+                if (typeof permsDB === 'string') {
+                    try { permsDB = JSON.parse(permsDB); } catch (e) { permsDB = {}; }
+                }
+                if (permsDB && typeof permsDB === 'object' && Object.keys(permsDB).length > 0) {
+                    return res.json({
+                        success: true,
+                        permissoes: {
+                            acesso: 'parcial',
+                            contas_receber: !!permsDB.contas_receber,
+                            contas_pagar: !!permsDB.contas_pagar,
+                            fluxo_caixa: !!permsDB.fluxo_caixa,
+                            bancos: !!permsDB.bancos,
+                            relatorios: !!permsDB.relatorios,
+                            visualizar: !!permsDB.visualizar,
+                            criar: !!permsDB.criar,
+                            editar: !!permsDB.editar,
+                            excluir: !!permsDB.excluir
+                        }
+                    });
+                }
             }
 
             // Usuários com role financeiro têm acesso
@@ -429,20 +423,20 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
             // Validação Enterprise: campos obrigatórios
             if (!banco_id || !tipo || !valor || !descricao) {
-                connection.release();
+                await connection.rollback();
                 return res.status(400).json({ error: 'Campos obrigatórios: banco_id, tipo, valor, descricao' });
             }
 
             // Validação Enterprise: tipo de movimentação
             if (!['entrada', 'saida'].includes(tipo)) {
-                connection.release();
+                await connection.rollback();
                 return res.status(400).json({ error: 'Tipo de movimentação inválido. Use "entrada" ou "saida"' });
             }
 
             // Validação Enterprise: valor monetário (evitar float impreciso)
             const valorNum = parseFloat(valor);
             if (isNaN(valorNum) || valorNum <= 0 || valorNum > 999999999.99) {
-                connection.release();
+                await connection.rollback();
                 return res.status(400).json({ error: 'Valor inválido. Deve ser maior que 0' });
             }
             const valorSanitizado = Math.round(valorNum * 100) / 100;
@@ -450,7 +444,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             // Validação Enterprise: data no formato correto
             const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
             if (data && !dateRegex.test(data)) {
-                connection.release();
+                await connection.rollback();
                 return res.status(400).json({ error: 'Data inválida. Use formato YYYY-MM-DD' });
             }
 
@@ -458,7 +452,6 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             const [banco] = await connection.query('SELECT saldo_atual FROM bancos WHERE id = ? FOR UPDATE', [banco_id]);
             if (!banco || banco.length === 0) {
                 await connection.rollback();
-                connection.release();
                 return res.status(404).json({ error: 'Banco não encontrado' });
             }
 
