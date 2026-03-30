@@ -1054,7 +1054,46 @@ app.post('/api/pcp/arvore-produto/aplicar-precos', authRequired, async (req, res
             );
             atualizados += result.affectedRows;
         }
-        res.json({ success: true, atualizados, total: precos.length });
+
+        // Propagar preços para orçamentos e pedidos em análise (não altera pedidos já aprovados/faturados)
+        let orcamentosAtualizados = 0;
+        try {
+            const statusPropagar = ['orcamento', 'orçamento', 'analise', 'analise-credito'];
+            const placeholders = statusPropagar.map(() => '?').join(',');
+            for (const item of precos) {
+                if (!item.codigo || item.preco_venda === undefined) continue;
+                const pv = parseFloat(item.preco_venda);
+                if (isNaN(pv) || pv < 0) continue;
+                // Atualizar preco_unitario e subtotal em pedido_itens de orçamentos/análise
+                const [updItens] = await db.query(
+                    `UPDATE pedido_itens pi
+                     INNER JOIN pedidos p ON pi.pedido_id = p.id
+                     SET pi.preco_unitario = ?,
+                         pi.subtotal = pi.quantidade * ?
+                     WHERE (pi.codigo = ? OR TRIM(pi.codigo) = ?)
+                       AND p.status IN (${placeholders})`,
+                    [pv, pv, item.codigo, item.codigo.trim(), ...statusPropagar]
+                );
+                orcamentosAtualizados += updItens.affectedRows;
+            }
+            // Recalcular valor total dos pedidos afetados
+            if (orcamentosAtualizados > 0) {
+                await db.query(
+                    `UPDATE pedidos p
+                     SET p.valor = (
+                         SELECT COALESCE(SUM(pi.subtotal), 0)
+                         FROM pedido_itens pi
+                         WHERE pi.pedido_id = p.id
+                     )
+                     WHERE p.status IN (${placeholders})`,
+                    [...statusPropagar]
+                );
+            }
+        } catch (propErr) {
+            console.error('[PCP] Aviso: erro ao propagar preços para orçamentos:', propErr.message);
+        }
+
+        res.json({ success: true, atualizados, orcamentos_atualizados: orcamentosAtualizados, total: precos.length });
     } catch (err) {
         console.error('[PCP] Erro ao aplicar preços:', err.message);
         res.status(500).json({ success: false, message: 'Erro ao aplicar preços.' });

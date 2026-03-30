@@ -9503,7 +9503,7 @@
                 if (!resp.ok) throw new Error('Erro ' + resp.status);
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.message || 'Erro ao carregar');
-                _cpParâmetros = data.parâmetros || data.config;
+                _cpParâmetros = data.parâmetros || data.parametros || data.config || {};
                 // Restaurar estado salvo
                 if (_cpParâmetros.estado_selecionado) _cpEstado = _cpParâmetros.estado_selecionado;
                 if (_cpParâmetros.tipo_cliente) _cpTipoCliente = _cpParâmetros.tipo_cliente;
@@ -10117,7 +10117,11 @@
                 const data = await resp.json();
                 if (!data.success) throw new Error(data.message || 'Erro');
                 cpShowNotif(data.atualizados + ' produtos atualizados no banco!');
-                showNotification(data.atualizados + ' produtos tiveram o preço de venda atualizado com sucesso!', 'success');
+                let msg = data.atualizados + ' produtos tiveram o preço de venda atualizado com sucesso!';
+                if (data.orcamentos_atualizados > 0) {
+                    msg += '\n' + data.orcamentos_atualizados + ' itens de orçamentos/pedidos em análise também foram atualizados.';
+                }
+                showNotification(msg, 'success');
             } catch (err) {
                 console.error('Erro ao aplicar preços:', err);
                 showNotification('Erro ao aplicar preços: ' + err.message, 'error');
