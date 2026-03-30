@@ -3131,8 +3131,7 @@
                 cancelText: 'Cancelar'
             });
             if (confirmado) {
-                excluirPedido(pedidoAtualModal.id);
-                fecharModalEditar();
+                await excluirPedido(pedidoAtualModal.id);
             }
         }
 
@@ -3140,7 +3139,6 @@
         async function excluirPedido(id) {
             try {
                 const response = await fetch(`/api/vendas/pedidos/${id}`, { credentials: 'include', method: 'DELETE',
-                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                         ...getAuthHeaders()
@@ -3150,17 +3148,21 @@
                 if (response.ok) {
                     showToast('Pedido excluído com sucesso!', 'success');
                     // Remove da lista local
-                    todosPedidos = todosPedidos.filter(p => p.id !== id);
-                    pedidosFiltrados = pedidosFiltrados.filter(p => p.id !== id);
+                    todosPedidos = todosPedidos.filter(p => Number(p.id) !== Number(id));
+                    pedidosFiltrados = pedidosFiltrados.filter(p => Number(p.id) !== Number(id));
                     renderizarTabela();
                     fecharModalEditar();
+                    await carregarPedidos();
+                    return true;
                 } else {
                     const data = await response.json();
                     showToast(data.message || 'Erro ao excluir pedido', 'error');
+                    return false;
                 }
             } catch (error) {
                 console.error('Erro ao excluir pedido:', error);
                 showToast('Erro de conexão ao excluir pedido', 'error');
+                return false;
             }
         }
 
@@ -3205,7 +3207,8 @@
                         .print-bar .btn-print { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
                         .print-bar .btn-close { background: #f1f5f9; color: #475569; }
                         .rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }
-                        .brand-name { font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+                        .brand-name { height: 40px; }
+                        .brand-name img { height: 100%; width: auto; }
                         .brand-sub { font-size: 11px; color: #64748b; font-weight: 400; margin-top: 3px; }
                         .rpt-meta { text-align: right; }
                         .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
@@ -3234,7 +3237,7 @@
                     </div>
                     <div class="rpt-header">
                         <div>
-                            <div class="brand-name">ALUFORCE</div>
+                            <div class="brand-name"><img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=\'font-size:24px;font-weight:800;color:#1e293b\'>ALUFORCE</div>'"></div>
                             <div class="brand-sub">Zyntra — Módulo de Vendas</div>
                         </div>
                         <div class="rpt-meta">
