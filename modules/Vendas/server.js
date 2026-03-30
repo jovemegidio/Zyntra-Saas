@@ -306,6 +306,25 @@ function sanitizeBoolean(value) {
     return value === true || value === 'true' || value === '1' || value === 1;
 }
 
+let _pedidosSoftDeleteReady = false;
+async function ensurePedidosSoftDeleteColumn() {
+    if (_pedidosSoftDeleteReady || !dbAvailable) return;
+    try {
+        const [cols] = await pool.query("SHOW COLUMNS FROM pedidos LIKE 'deleted_at'");
+        if (!Array.isArray(cols) || cols.length === 0) {
+            await pool.query('ALTER TABLE pedidos ADD COLUMN deleted_at DATETIME NULL DEFAULT NULL');
+            try {
+                await pool.query('ALTER TABLE pedidos ADD INDEX idx_pedidos_deleted_at (deleted_at)');
+            } catch (e) {
+                // Index may already exist; ignore.
+            }
+        }
+        _pedidosSoftDeleteReady = true;
+    } catch (e) {
+        console.warn('ensurePedidosSoftDeleteColumn failed', e && e.message ? e.message : e);
+    }
+}
+
 // Admin: invalidate cache keys (single key or prefix)
 app.post('/api/admin/cache/invalidate', authorizeAdmin, express.json(), async (req, res) => {
     try {
@@ -470,6 +489,8 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
             return res.json([]);
         }
 
+        await ensurePedidosSoftDeleteColumn();
+
         // Usar usuário do token (obrigatório após authenticateToken)
         const currentUser = req.user;
         let isAdmin = verificarSeAdmin(currentUser);
@@ -504,6 +525,9 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
         // Construir condições WHERE dinâmicas
         let whereConditions = [];
         let queryParams = [];
+
+        // Não exibir pedidos excluídos logicamente
+        whereConditions.push('p.deleted_at IS NULL');
 
         // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos (supervisores veem todos)
         const isSupervisor = isKanbanSupervisor(currentUser);
@@ -1928,6 +1952,8 @@ apiVendasRouter.get('/pedidos/filtro-avancado', async (req, res, next) => {
 // Lista de pedidos (paginada) - usada pelo frontend para preencher tabelas/kanban
 apiVendasRouter.get('/pedidos', async (req, res, next) => {
     try {
+        await ensurePedidosSoftDeleteColumn();
+
         const page = Math.max(parseInt(req.query.page || '1'), 1);
         const limit = Math.max(parseInt(req.query.limit || '50'), 1);
         const offset = (page - 1) * limit;
@@ -1969,6 +1995,9 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
 
         let where = [];
         let params = [];
+
+        // Não listar pedidos excluídos logicamente
+        where.push('p.deleted_at IS NULL');
 
         // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos (igual ao Kanban)
         if (currentUser && !isAdmin) {
@@ -2031,7 +2060,8 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
 apiVendasRouter.get('/pedidos/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
-        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+        await ensurePedidosSoftDeleteColumn();
+        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ? AND deleted_at IS NULL', [id]);
         if (rows.length === 0) {
             return res.status(404).json({ message: "Pedido não encontrado." });
         }
@@ -2499,8 +2529,10 @@ apiVendasRouter.delete('/pedidos/:id/anexos/:anexoId', async (req, res, next) =>
 apiVendasRouter.delete('/pedidos/:id', async (req, res, next) => {
     try {
         const { id } = req.params;
+        await ensurePedidosSoftDeleteColumn();
+
         // F2-07: Buscar status para bloquear DELETE de pedidos faturados
-        const [rows] = await pool.query('SELECT vendedor_id, status FROM pedidos WHERE id = ?', [id]);
+        const [rows] = await pool.query('SELECT vendedor_id, status FROM pedidos WHERE id = ? AND deleted_at IS NULL', [id]);
         if (rows.length === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
         const pedido = rows[0];
         const user = req.user || {};
@@ -2515,9 +2547,12 @@ apiVendasRouter.delete('/pedidos/:id', async (req, res, next) => {
             return res.status(403).json({ message: `Pedido com status "${pedido.status}" não pode ser excluído pois possui registros fiscais. Use cancelamento.` });
         }
 
-        const [result] = await pool.query('DELETE FROM pedidos WHERE id = ?', [id]);
+        const [result] = await pool.query(
+            'UPDATE pedidos SET deleted_at = NOW(), status = ? WHERE id = ? AND deleted_at IS NULL',
+            ['cancelado', id]
+        );
         if (result.affectedRows === 0) return res.status(404).json({ message: "Pedido não encontrado." });
-        res.status(204).send();
+        res.status(200).json({ message: 'Pedido excluído com sucesso.' });
     } catch (error) {
         next(error);
     }
@@ -6272,8 +6307,14 @@ function criarPdfRelatorio(titulo, colunas, linhas, filtrosTexto) {
     const buffers = [];
     doc.on('data', b => buffers.push(b));
 
-    // Header
-    doc.fontSize(20).font('Helvetica-Bold').fillColor('#1a1a2e').text('ALUFORCE', 40, 30);
+    // Header - Tentar usar logo, senão texto
+    const fs = require('fs');
+    const logoPath = require('path').join(__dirname, '..', '..', 'public', 'images', 'Logo Monocromatico - Azul - Aluforce.png');
+    if (fs.existsSync(logoPath)) {
+        doc.image(logoPath, 40, 25, { height: 36 });
+    } else {
+        doc.fontSize(20).font('Helvetica-Bold').fillColor('#1a1a2e').text('ALUFORCE', 40, 30);
+    }
     doc.fontSize(10).font('Helvetica').fillColor('#6b7280').text('Sistema de Gestão Empresarial', 40, 55);
     doc.moveTo(40, 72).lineTo(doc.page.width - 40, 72).strokeColor('#e5e7eb').stroke();
 
