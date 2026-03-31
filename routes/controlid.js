@@ -584,10 +584,16 @@ router.post('/rhid/test', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('[RHiD] Erro ao testar conexão:', error.message);
         var message = 'Falha na conexão com RHiD Cloud';
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            message = 'Email ou senha incorretos';
+        if (error.response) {
+            var status = error.response.status;
+            var rhidErr = error.response.data && error.response.data.error;
+            if (status === 400 || status === 401 || status === 403) {
+                message = rhidErr || 'Email ou senha incorretos';
+            }
         } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
             message = 'Servidor RHiD indisponível';
+        } else if (error.code === 'ECONNABORTED' || (error.message && error.message.includes('timeout'))) {
+            message = 'Tempo limite excedido. Verifique sua conexão e tente novamente.';
         }
         res.json({ success: false, message: message });
     }
