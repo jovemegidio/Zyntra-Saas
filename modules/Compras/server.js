@@ -84,7 +84,7 @@ const mysqlPool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'aluforce_vendas',
     waitForConnections: true,
-    connectionLimit: 5
+    connectionLimit: 2
 });
 
 // Inicializar MySQL pool no módulo database.js para as APIs

@@ -35,7 +35,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'railway',
     charset: 'utf8mb4',
-    connectionLimit: 10,
+    connectionLimit: 2,
     waitForConnections: true
 });
 

@@ -36,7 +36,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             password: process.env.DB_PASSWORD || '',
             database: 'aluforce_vendas',
             waitForConnections: true,
-            connectionLimit: 10,
+            connectionLimit: 2,
             charset: 'utf8mb4'
         });
     } catch (e) {

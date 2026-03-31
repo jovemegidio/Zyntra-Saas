@@ -59,6 +59,10 @@ function forceHttpsMiddleware(req, res, next) {
         return next();
     }
     
+    // Headers de segurança mesmo no redirect
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+
     // Redireciona para HTTPS
     const httpsUrl = `https://${req.hostname}${req.url}`;
     res.redirect(301, httpsUrl);

@@ -97,6 +97,17 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[LOGIN/SSO] 🔄 ReturnTo detectado:', decodeURIComponent(returnTo));
   }
 
+  // ==================== WELCOME FROM SIGNUP ====================
+  if (urlParams.get('welcome') === '1') {
+    const welcomeBanner = document.createElement('div');
+    welcomeBanner.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#00B894,#00A381);color:#fff;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:500;z-index:9999;box-shadow:0 8px 24px rgba(0,184,148,0.3);animation:slideDown 0.4s ease;display:flex;align-items:center;gap:10px;';
+    welcomeBanner.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg> Conta criada com sucesso! Faça login para começar.';
+    document.body.appendChild(welcomeBanner);
+    setTimeout(() => { welcomeBanner.style.opacity = '0'; welcomeBanner.style.transition = 'opacity 0.4s'; setTimeout(() => welcomeBanner.remove(), 500); }, 5000);
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+  }
+
   // Limpeza preventiva ao abrir a tela de login
   try { if (window.AluforceAuth && typeof AluforceAuth.clearAuth === 'function') AluforceAuth.clearAuth(); } catch {}
   try { ['chatSupportUser','chatSupportConversations','chatSupportTickets','chatUser','supportTickets','chatVoiceEnabled'].forEach(k => localStorage.removeItem(k)); } catch {}
@@ -126,6 +137,45 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
           </div>
           <button onclick="this.closest('#terminated-account-modal').remove()" style="background:transparent;border:1px solid hsl(222,30%,30%);color:hsl(215,20%,65%);padding:10px 30px;border-radius:0.75rem;cursor:pointer;font-size:0.875rem;transition:all 0.3s ease;font-family:inherit;">Fechar</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    modal.querySelector('div').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) modal.remove();
+    });
+    const handleEsc = (e) => { if (e.key === 'Escape') { modal.remove(); document.removeEventListener('keydown', handleEsc); } };
+    document.addEventListener('keydown', handleEsc);
+  }
+
+  // ==================== TRIAL EXPIRED MODAL ====================
+  function showTrialExpiredModal(message, upgradeUrl) {
+    const existingModal = document.getElementById('trial-expired-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'trial-expired-modal';
+    modal.innerHTML = `
+      <div style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:10000;animation:fadeIn 0.3s ease;">
+        <div style="background:linear-gradient(135deg,hsl(222,47%,10%) 0%,hsl(222,47%,14%) 100%);border:1px solid hsl(210,40%,98%,0.08);border-radius:1.25rem;padding:2.5rem;max-width:440px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);animation:slideUp 0.4s ease;">
+          <div style="width:80px;height:80px;background:linear-gradient(135deg,hsl(35,100%,50%),hsl(25,100%,45%));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 8px 20px hsla(35,100%,50%,0.4);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h2 style="color:hsl(210,40%,98%);margin:0 0 15px;font-size:1.5rem;font-weight:600;">Período de Teste Encerrado</h2>
+          <p style="color:hsl(35,100%,70%);font-size:1rem;margin:0 0 15px;font-weight:500;">${message || 'Seu período de teste expirou.'}</p>
+          <p style="color:hsl(215,20%,65%);font-size:0.875rem;margin:0 0 25px;line-height:1.5;">Escolha um plano para continuar usando todas as funcionalidades do Zyntra. Seus dados estão salvos e seguros.</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <a href="${upgradeUrl || '/lp/pages/planos-e-precos.html'}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,hsl(258,89%,64%),hsl(258,89%,54%));color:white;padding:14px 28px;border-radius:0.75rem;text-decoration:none;font-weight:600;font-size:1rem;transition:all 0.3s ease;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              Ver Planos e Preços
+            </a>
+            <a href="https://wa.me/551140028922?text=Olá! Gostaria de contratar o Zyntra." target="_blank" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;background:transparent;border:1px solid hsl(142,70%,45%);color:hsl(142,70%,55%);padding:12px 24px;border-radius:0.75rem;text-decoration:none;font-weight:500;transition:all 0.3s ease;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.832-1.438A9.955 9.955 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+              Falar com Comercial
+            </a>
+          </div>
+          <button onclick="this.closest('#trial-expired-modal').remove()" style="margin-top:16px;background:transparent;border:1px solid hsl(222,30%,30%);color:hsl(215,20%,65%);padding:10px 30px;border-radius:0.75rem;cursor:pointer;font-size:0.875rem;transition:all 0.3s ease;font-family:inherit;">Fechar</button>
         </div>
       </div>
     `;
@@ -812,6 +862,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!response.ok) {
         if (data && data.code === 'ACCOUNT_TERMINATED') {
           showTerminatedAccountModal(data.message || 'Seu vínculo com a empresa foi encerrado.');
+          setLoading(false);
+          return;
+        }
+        if (data && data.trialExpired) {
+          showTrialExpiredModal(data.message, data.upgradeUrl);
           setLoading(false);
           return;
         }

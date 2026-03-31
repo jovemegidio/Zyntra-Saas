@@ -40,7 +40,7 @@ function getPool() {
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME || 'aluforce_vendas',
             waitForConnections: true,
-            connectionLimit: 5,
+            connectionLimit: 2,
             queueLimit: 0
         });
     }

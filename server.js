@@ -81,6 +81,14 @@ const authUnified = require('./middleware/auth-unified');
 // Zyntra Branding Middleware (ativado via env BRAND=zyntra)
 const { zyntraBrandingMiddleware, zyntraBrandInfo } = require('./middleware/zyntra-branding');
 
+// 🏢 SECTOR: Configuração de ramo de atuação (industria, comercio, servicos, agropecuario)
+const { sectorMiddleware, getSectorConfig, getSectorConfigAPI, isModuleEnabled } = require('./config/sector');
+
+// 🏢 MULTI-EMPRESAS: Sistema multi-tenant
+const { empresaMiddleware } = require('./middleware/empresa');
+const createEmpresaRouter = require('./routes/empresas');
+const createOnboardingRouter = require('./routes/onboarding');
+
 // AUDIT-FIX R-17/R-18/R-19/R-20: Módulo LGPD compliance
 const { createLGPDRouter } = require('./routes/lgpd');
 
@@ -92,6 +100,9 @@ const { v4: uuidv4 } = require('uuid');
 
 // Request-ID tracing middleware (observability)
 const { requestIdMiddleware } = require('./middleware/request-id');
+
+// ☁️ CLOUDFLARE: Integração com proxy Cloudflare (IP real, cache, segurança)
+const { cloudflareMiddleware, configureCloudflareProxy, cloudflareCacheHeaders, cloudflareSecurityHeaders } = require('./middleware/cloudflare');
 
 // ⚡ ENTERPRISE: Cache distribuído (Redis/Map) e Resiliência
 const cacheService = require('./services/cache');
@@ -166,9 +177,15 @@ const asyncHandler = fn => (req, res, next) => {
 // =================================================================
 const app = express();
 
-// Trust proxy - necessário quando atrás de Nginx/reverse proxy
-// Isso permite que express-rate-limit e outros middlewares identifiquem corretamente o IP real do cliente
-app.set('trust proxy', 1);
+// ☁️ CLOUDFLARE: Configurar trust proxy inteligente
+// Se CLOUDFLARE_ENABLED=true, usa validação de IPs do CF; senão, trust proxy padrão
+if (process.env.CLOUDFLARE_ENABLED === 'true') {
+    configureCloudflareProxy(app);
+    console.log('☁️  Cloudflare proxy trust configurado (validação de IPs CF)');
+} else {
+    // Trust proxy padrão - necessário quando atrás de Nginx/reverse proxy
+    app.set('trust proxy', 1);
+}
 
 const PORT = parseInt(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -581,6 +598,18 @@ async function enviarEmail(to, subject, text, html) {
 // 3. MIDDLEWARES GERAIS
 // =================================================================
 
+// ☁️ CLOUDFLARE: Middleware de integração (deve ser o PRIMEIRO middleware)
+// Extrai IP real, geo-localização, Ray ID para tracking
+if (process.env.CLOUDFLARE_ENABLED === 'true') {
+    app.use(cloudflareMiddleware({
+        enforceCloudflare: process.env.CF_ENFORCE === 'true',
+        debug: process.env.NODE_ENV !== 'production'
+    }));
+    app.use(cloudflareSecurityHeaders());
+    app.use(cloudflareCacheHeaders());
+    console.log('☁️  Cloudflare middlewares ativos (IP real, cache, security headers)');
+}
+
 // ⚡ PERFORMANCE: Compressão gzip/deflate para reduzir tamanho das respostas em ~70%
 app.use(compression({
     filter: (req, res) => {
@@ -694,6 +723,21 @@ app.use(csrfProtection);
 // Zyntra Branding: aplica branding e banner demo em respostas HTML
 app.use(zyntraBrandInfo);
 app.use(zyntraBrandingMiddleware);
+
+// 🏢 SECTOR: Injeta configuração do setor em cada request
+app.use(sectorMiddleware);
+
+// 🏢 MULTI-EMPRESAS: Injeta contexto da empresa no request (após auth)
+app.use(empresaMiddleware(pool));
+
+// 📝 ONBOARDING: Rota pública de cadastro (LP)
+const onboardingRouter = createOnboardingRouter(pool);
+app.use('/api', onboardingRouter);
+
+// 🏢 SECTOR: API pública para frontend consultar configuração do setor
+app.get('/api/sector/config', (req, res) => {
+    res.json(getSectorConfigAPI());
+});
 
 // Aplicar middlewares de segurança avançados (Auditoria 30/01/2026)
 // FIX: CSRF desabilitado aqui pois já é aplicado acima via security-middleware.js (csrfProtection)
@@ -915,9 +959,32 @@ app.use((req, res, next) => {
     next();
 });
 
-// Rota raiz: redirecionar para página de login
+// ========================================
+// LANDING PAGE (LP) - Zyntra-SGE
+// ========================================
+const lpPath = path.join(__dirname, 'lp');
+app.use('/lp', express.static(lpPath, {
+    dotfiles: 'deny',
+    index: 'index.html',
+    maxAge: '1d',
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+            res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+            res.setHeader('Pragma', 'no-cache');
+            res.setHeader('Expires', '0');
+        }
+    }
+}));
+
+// Rota raiz
 app.get('/', (req, res) => {
-    res.redirect('/login.html');
+    if (process.env.LP_ONLY === 'true') {
+        res.sendFile(path.join(lpPath, 'index.html'));
+    } else {
+        res.redirect('/login.html');
+    }
 });
 
 // Dashboard principal (Painel de Controle) — requer autenticação
@@ -1945,6 +2012,10 @@ const companySettingsRouter = companySettingsFactory({
     requireAdmin: reqAdmin
 });
 app.use('/api', companySettingsRouter);
+
+// 🏢 MULTI-EMPRESAS: Rotas de gestão multi-tenant
+const empresaRouter = createEmpresaRouter(pool, authToken);
+app.use('/api', empresaRouter);
 // =================================================================
 
 

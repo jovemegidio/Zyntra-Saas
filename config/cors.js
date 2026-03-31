@@ -26,6 +26,9 @@ const allowedOrigins = [
     'http://tauri.localhost',
     'https://tauri.localhost',
     'tauri://localhost',
+    // Cloudflare domains
+    process.env.CF_DOMAIN ? `https://${process.env.CF_DOMAIN}` : null,
+    process.env.CF_DOMAIN ? `https://www.${process.env.CF_DOMAIN}` : null,
     process.env.CORS_ORIGIN
 ].filter(Boolean);
 

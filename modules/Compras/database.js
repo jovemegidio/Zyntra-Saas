@@ -27,7 +27,7 @@ async function initMySQLPool() {
             password: process.env.DB_PASSWORD || '',
             database: process.env.DB_NAME || 'railway',
             waitForConnections: true,
-            connectionLimit: 10,
+            connectionLimit: 3,
             queueLimit: 50,
             charset: 'utf8mb4',
             enableKeepAlive: true,

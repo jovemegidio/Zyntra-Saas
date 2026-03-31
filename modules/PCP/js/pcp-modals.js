@@ -43,18 +43,18 @@ function formatarMoeda(valor) {
 function mostrarConfirmacaoPCP(titulo, mensagem, tipo = 'warning') {
     return new Promise((resolve) => {
         confirmacaoResolve = resolve;
-        
+
         const modal = document.getElementById('modal-confirmacao-pcp');
         if (!modal) {
             resolve(confirm(mensagem));
             return;
         }
-        
+
         const icon = document.getElementById('confirmacao-icon');
         const tituloEl = document.getElementById('confirmacao-titulo');
         const mensagemEl = document.getElementById('confirmacao-mensagem');
         const btnConfirmar = document.getElementById('confirmacao-btn-confirmar');
-        
+
         // Configurar ícone e cores baseado no tipo
         const configs = {
             warning: { icon: 'fa-exclamation-triangle', bg: '#fef3c7', color: '#f59e0b', btnBg: 'linear-gradient(135deg, #f97316, #ea580c)' },
@@ -62,9 +62,9 @@ function mostrarConfirmacaoPCP(titulo, mensagem, tipo = 'warning') {
             info: { icon: 'fa-info-circle', bg: '#dbeafe', color: '#3b82f6', btnBg: 'linear-gradient(135deg, #3b82f6, #2563eb)' },
             success: { icon: 'fa-check-circle', bg: '#dcfce7', color: '#22c55e', btnBg: 'linear-gradient(135deg, #22c55e, #16a34a)' }
         };
-        
+
         const config = configs[tipo] || configs.warning;
-        
+
         if (icon) {
             icon.style.background = config.bg;
             icon.innerHTML = `<i class="fas ${config.icon}" style="font-size: 28px; color: ${config.color};"></i>`;
@@ -72,7 +72,7 @@ function mostrarConfirmacaoPCP(titulo, mensagem, tipo = 'warning') {
         if (tituloEl) tituloEl.textContent = titulo;
         if (mensagemEl) mensagemEl.textContent = mensagem;
         if (btnConfirmar) btnConfirmar.style.background = config.btnBg;
-        
+
         modal.style.display = 'flex';
     });
 }
@@ -95,7 +95,7 @@ function mostrarAlertaPCP(titulo, mensagem, tipo = 'info') {
         alert(mensagem);
         return;
     }
-    
+
     const configs = {
         warning: { icon: 'fa-exclamation-triangle', bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', color: '#f59e0b' },
         danger: { icon: 'fa-times-circle', bg: 'linear-gradient(135deg, #fee2e2, #fecaca)', color: '#ef4444' },
@@ -103,14 +103,14 @@ function mostrarAlertaPCP(titulo, mensagem, tipo = 'info') {
         success: { icon: 'fa-check-circle', bg: 'linear-gradient(135deg, #dcfce7, #bbf7d0)', color: '#22c55e' },
         error: { icon: 'fa-times-circle', bg: 'linear-gradient(135deg, #fee2e2, #fecaca)', color: '#ef4444' }
     };
-    
+
     const config = configs[tipo] || configs.info;
-    
+
     const iconContainer = document.getElementById('alerta-icon-container');
     const iconEl = document.getElementById('alerta-icon');
     const tituloEl = document.getElementById('alerta-titulo');
     const mensagemEl = document.getElementById('alerta-mensagem');
-    
+
     if (iconContainer) iconContainer.style.background = config.bg;
     if (iconEl) {
         iconEl.className = `fas ${config.icon}`;
@@ -118,7 +118,7 @@ function mostrarAlertaPCP(titulo, mensagem, tipo = 'info') {
     }
     if (tituloEl) tituloEl.textContent = titulo;
     if (mensagemEl) mensagemEl.textContent = mensagem;
-    
+
     modal.style.display = 'flex';
 }
 
@@ -166,29 +166,29 @@ async function verProduto(produtoId) {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/produtos/${produtoId}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Produto não encontrado');
-        
+
         const produto = await response.json();
         produtoAtualPCP = produto;
-        
+
         // Preencher modal de visualização
         const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
         const estoque = produto.estoque_atual ?? produto.estoque ?? 0;
         const minimo = produto.estoque_minimo || 10;
         const unidade = produto.unidade || produto.unidade_medida || 'UN';
         const unidadeAbrev = unidade.toUpperCase().replace('METRO', 'M').replace('UNIDADE', 'UN').replace('QUILOGRAMA', 'KG').replace('LITRO', 'L');
-        
+
         // Função auxiliar para formatar com unidade
         const fmtUn = (val) => {
             const num = parseFloat(val) || 0;
             return num.toLocaleString('pt-BR') + ' (' + unidadeAbrev.toLowerCase() + ')';
         };
-        
+
         // Header
         setTxt('view-produto-nome', produto.nome || produto.descricao || 'Produto');
         setTxt('view-produto-codigo', produto.codigo || '-');
         setTxt('view-produto-sku', produto.sku || '-');
         setTxt('view-produto-unidade', unidadeAbrev);
-        
+
         // Status badge
         const statusBadge = document.getElementById('view-produto-status');
         if (statusBadge) {
@@ -206,40 +206,40 @@ async function verProduto(produtoId) {
                 statusBadge.style.color = 'white';
             }
         }
-        
+
         // Estoque cards com unidade
         setTxt('view-estoque-atual', fmtUn(estoque));
         setTxt('view-estoque-minimo', fmtUn(minimo));
         setTxt('view-estoque-maximo', fmtUn(produto.estoque_maximo || 1000));
         setTxt('view-estoque-reservado', fmtUn(produto.estoque_reservado || 0));
-        
+
         // Informações Gerais
         setTxt('view-categoria', produto.categoria || produto.familia || '-');
         setTxt('view-unidade', unidadeAbrev);
         setTxt('view-ncm', produto.ncm || '-');
         setTxt('view-peso', (produto.peso || 0) + ' kg');
         setTxt('view-marca', produto.marca || 'Aluforce');
-        
+
         // Localização
         setTxt('view-almoxarifado', produto.almoxarifado || 'Principal');
         setTxt('view-corredor', produto.corredor || '-');
         setTxt('view-prateleira', produto.prateleira || '-');
         setTxt('view-posicao', produto.posicao || '-');
-        
+
         // Preços
         const preco = produto.preco_venda || produto.preco || 0;
         const custoMedio = produto.custo_medio || produto.custo_unitario || produto.preco_custo || preco * 0.7 || 0;
         const valorEstoque = custoMedio * estoque;
         const margem = preco > 0 ? ((preco - custoMedio) / preco * 100) : 0;
-        
+
         const fmtBRL = (v) => parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-        
+
         setTxt('view-preco', fmtBRL(preco));
         setTxt('view-preco-resumo', fmtBRL(preco));
         setTxt('view-custo-medio', fmtBRL(custoMedio));
         setTxt('view-margem', margem.toFixed(1) + '%');
         setTxt('view-valor-estoque', fmtBRL(valorEstoque));
-        
+
         // Aba Custos
         setTxt('view-custo-preco-venda', fmtBRL(preco));
         setTxt('view-custo-cmc', fmtBRL(custoMedio));
@@ -247,7 +247,7 @@ async function verProduto(produtoId) {
         setTxt('view-custo-margem', margem.toFixed(1) + '%');
         setTxt('view-custo-valor-total', fmtBRL(valorEstoque));
         setTxt('view-custo-qtd-total', fmtUn(estoque));
-        
+
         // Aba Informações
         setTxt('view-info-codigo', produto.codigo || '-');
         setTxt('view-info-sku', produto.sku || '-');
@@ -260,7 +260,7 @@ async function verProduto(produtoId) {
         setTxt('view-info-origem', produto.origem || '-');
         setTxt('view-info-peso-bruto', (produto.peso_bruto || produto.peso || 0) + ' kg');
         setTxt('view-info-peso-liq', (produto.peso_liquido || 0) + ' kg');
-        
+
         // Aba Estoque - tabela
         const tabelaBody = document.getElementById('view-tabela-estoque-body');
         if (tabelaBody) {
@@ -271,23 +271,23 @@ async function verProduto(produtoId) {
             const maxEl = document.getElementById('view-estoque-max-principal');
             if (maxEl) maxEl.textContent = fmtUn(produto.estoque_maximo || 1000);
         }
-        
+
         // Observações
         const obsEl = document.getElementById('view-observacoes');
         if (obsEl) {
             obsEl.textContent = (produto.observacoes && produto.observacoes.trim()) ? produto.observacoes : 'Nenhuma observação registrada.';
         }
-        
+
         // Footer
         setTxt('view-criado-em', produto.created_at ? new Date(produto.created_at).toLocaleDateString('pt-BR') : '-');
         setTxt('view-atualizado-em', produto.updated_at ? new Date(produto.updated_at).toLocaleDateString('pt-BR') : '-');
-        
+
         // Abrir modal de visualização - resetar para aba Resumo
         const modalView = document.getElementById('modal-visualizar-produto');
         if (modalView) {
             // Mostrar aba resumo por padrão
             mudarAbaFichaProduto('resumo', document.querySelector('.ficha-tab'));
-            
+
             modalView.classList.add('active');
             // Carregar histórico de movimentações
             carregarHistoricoProdutoView(produtoId);
@@ -296,7 +296,7 @@ async function verProduto(produtoId) {
             // Fallback para modal antigo
             editarProdutoForm(produtoId);
         }
-        
+
     } catch (error) {
         console.error('Erro ao carregar produto:', error);
         showNotification('Erro ao carregar dados do produto', 'error');
@@ -311,7 +311,7 @@ function toggleHistorico() {
     historicoExpandidoPCP = !historicoExpandidoPCP;
     const content = document.getElementById('view-history-content');
     const btn = document.querySelector('.view-history-toggle');
-    
+
     if (content) {
         if (historicoExpandidoPCP) {
             content.classList.remove('collapsed');
@@ -327,30 +327,30 @@ async function carregarHistoricoProdutoView(produtoId) {
     const container = document.getElementById('view-historico-lista');
     const loading = document.getElementById('history-loading');
     const empty = document.getElementById('history-empty');
-    
+
     if (!container || !loading || !empty) return;
-    
+
     loading.style.display = 'flex';
     empty.style.display = 'none';
     container.innerHTML = '';
-    
+
     try {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/estoque/movimentacoes?produto_id=${produtoId}&limit=20`, {
             credentials: 'include'
         });
-        
+
         loading.style.display = 'none';
-        
+
         if (response.ok) {
             const data = await response.json();
             const movs = data.rows || data.movimentacoes || data || [];
-            
+
             if (movs.length === 0) {
                 empty.style.display = 'flex';
                 return;
             }
-            
+
             container.innerHTML = movs.map(m => {
                 const tipo = (m.tipo || 'ajuste').toLowerCase();
                 const isEntrada = tipo === 'entrada';
@@ -360,11 +360,11 @@ async function carregarHistoricoProdutoView(produtoId) {
                 const qtyClass = isEntrada ? 'positive' : isSaida ? 'negative' : 'neutral';
                 const qtyPrefix = isEntrada ? '+' : isSaida ? '-' : '';
                 const dataVal = m.data_movimentacao || m.created_at || m.criado_em;
-                const dataFormatada = dataVal ? new Date(dataVal).toLocaleDateString('pt-BR', { 
+                const dataFormatada = dataVal ? new Date(dataVal).toLocaleDateString('pt-BR', {
                     day: '2-digit', month: '2-digit', year: '2-digit',
                     hour: '2-digit', minute: '2-digit'
                 }) : '-';
-                
+
                 return `
                     <div class="history-item">
                         <div class="history-icon ${tipoClass}">
@@ -427,7 +427,7 @@ async function salvarEdicaoProduto() {
         showNotification('ID do produto não encontrado', 'error');
         return;
     }
-    
+
     const dados = {
         categoria: document.getElementById('edit-prod-categoria')?.value,
         nome: document.getElementById('edit-prod-nome')?.value,
@@ -445,7 +445,7 @@ async function salvarEdicaoProduto() {
         posicao: document.getElementById('edit-prod-posicao')?.value,
         observacoes: document.getElementById('edit-prod-observacoes')?.value
     };
-    
+
     try {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/produtos/${id}`, {
@@ -454,7 +454,7 @@ async function salvarEdicaoProduto() {
             credentials: 'include',
             body: JSON.stringify(dados)
         });
-        
+
         if (response.ok) {
             showNotification('Produto atualizado com sucesso!', 'success');
             fecharModalEdicao();
@@ -490,7 +490,7 @@ function imprimirEtiquetaView() {
         showNotification('Nenhum produto selecionado', 'warning');
         return;
     }
-    
+
     const p = produtoAtualPCP;
     const codigo = p.codigo || p.sku || '-';
     const nome = p.nome || p.descricao || 'Produto';
@@ -525,7 +525,7 @@ function imprimirEtiquetaView() {
     if (prateleira !== '-') locParts.push('P' + prateleira);
     if (posicao !== '-') locParts.push(posicao);
     const locStr = locParts.join(' › ');
-    
+
     const etiquetaHTML = `
         <!DOCTYPE html>
         <html lang="pt-BR">
@@ -682,7 +682,7 @@ function imprimirEtiquetaView() {
         </body>
         </html>
     `;
-    
+
     const printWin = window.open('', '_blank', 'width=500,height=450');
     if (printWin) {
         printWin.document.write(etiquetaHTML);
@@ -699,20 +699,20 @@ function mudarAbaFichaProduto(aba, btnEl) {
     document.querySelectorAll('.ficha-tab-content').forEach(el => {
         el.style.display = 'none';
     });
-    
+
     // Desativar todos os botões
     document.querySelectorAll('.ficha-tab').forEach(el => {
         el.style.color = '#64748b';
         el.style.borderBottomColor = 'transparent';
         el.classList.remove('active');
     });
-    
+
     // Mostrar aba selecionada
     const tabContent = document.getElementById('ficha-tab-' + aba);
     if (tabContent) {
         tabContent.style.display = 'block';
     }
-    
+
     // Ativar botão
     if (btnEl) {
         btnEl.style.color = '#6366f1';
@@ -903,45 +903,45 @@ function _ensureEditModalExists() {
 async function editarProdutoForm(produtoId) {
     try {
         console.log('[EDIT] ===== INICIO editarProdutoForm =====', produtoId);
-        
+
         // 1) Buscar dados do produto via API
         const API_BASE = getAPIBase();
         console.log('[EDIT] API_BASE:', API_BASE);
-        
+
         const response = await fetch(`${API_BASE}/api/pcp/produtos/${produtoId}`, { credentials: 'include' });
         console.log('[EDIT] Response status:', response.status);
-        
+
         if (!response.ok) {
             const errText = await response.text();
             console.error('[EDIT] API Error:', response.status, errText);
             showNotification('Erro ao buscar produto: ' + response.status, 'error');
             return;
         }
-        
+
         const produto = await response.json();
         console.log('[EDIT] Produto recebido:', JSON.stringify({id: produto.id, codigo: produto.codigo, nome: produto.nome, estoque_atual: produto.estoque_atual}));
-        
+
         if (!produto || !produto.id) {
             showNotification('Produto não encontrado ou dados inválidos', 'error');
             return;
         }
-        
+
         // 2) Salvar referência global
         produtoAtualPCP = produto;
-        
+
         // 3) Garantir que o modal existe
         _ensureEditModalExists();
-        
+
         // 4) Abrir o modal PRIMEIRO (para que os elementos fiquem visíveis no DOM)
         showModal('modal-novo-produto');
-        
+
         // 5) Pequeno delay para garantir que o modal renderizou
         await new Promise(r => setTimeout(r, 100));
-        
+
         // 6) Agora preencher os dados
         const tituloEl = document.getElementById('modal-novo-produto-titulo');
         if (tituloEl) tituloEl.textContent = 'Editar Produto';
-        
+
         // Helper para setar valor com log
         const setVal = (id, val) => {
             const el = document.getElementById(id);
@@ -953,7 +953,7 @@ async function editarProdutoForm(produtoId) {
                 console.warn('[EDIT] Campo não encontrado:', id);
             }
         };
-        
+
         // Helper para selects
         const setSelect = (id, val) => {
             const sel = document.getElementById(id);
@@ -967,27 +967,27 @@ async function editarProdutoForm(produtoId) {
                 }
             }
         };
-        
+
         // Dados básicos
         setVal('pcp-produto-id', produto.id);
         setVal('pcp-produto-codigo', produto.codigo);
         setVal('pcp-produto-descricao', produto.nome || produto.descricao || '');
         setVal('pcp-produto-ean', produto.gtin || produto.ean || '');
         setVal('pcp-produto-ncm', produto.ncm || '');
-        
+
         const precoVenda = parseFloat(produto.preco_venda || produto.preco || 0);
         setVal('pcp-produto-preco', precoVenda.toFixed(6).replace('.', ','));
-        
+
         const unidade = produto.unidade_medida || produto.unidade || 'UN';
         setSelect('pcp-produto-unidade', unidade);
         setSelect('pcp-produto-categoria', produto.categoria || produto.familia || '');
-        
+
         // Verificar se os valores foram realmente setados
         const descEl = document.getElementById('pcp-produto-descricao');
         const codEl = document.getElementById('pcp-produto-codigo');
         console.log('[EDIT] Verificação - descricao.value:', descEl?.value, '| codigo.value:', codEl?.value);
         console.log('[EDIT] Verificação - descricao count:', document.querySelectorAll('[id="pcp-produto-descricao"]').length);
-        
+
         // Se os valores não foram setados, forçar via setAttribute
         if (descEl && !descEl.value && produto.nome) {
             console.warn('[EDIT] Forçando via setAttribute');
@@ -998,14 +998,14 @@ async function editarProdutoForm(produtoId) {
             codEl.setAttribute('value', produto.codigo);
             codEl.value = produto.codigo;
         }
-        
+
         // Aba Estoque - Calcular valores
         const estoqueAtual = parseFloat(produto.estoque_atual || 0);
         const estoqueMin = parseFloat(produto.estoque_minimo || 5);
         const precoCusto = parseFloat(produto.preco_custo || produto.custo_unitario || 0);
         const cmcTotal = precoCusto * estoqueAtual;
         const unAbrev = unidade.toUpperCase();
-        
+
         // Preencher tabela de estoque (template: pcp-estoque-tbody / injetado: pcp-tabela-estoque-body)
         const estoqueTbody = document.getElementById('pcp-estoque-tbody') || document.getElementById('pcp-tabela-estoque-body');
         console.log('[EDIT] estoqueTbody found:', !!estoqueTbody, estoqueTbody?.id);
@@ -1022,7 +1022,7 @@ async function editarProdutoForm(produtoId) {
                 </tr>
             `;
         }
-        
+
         // Cards de estoque (modal injetado)
         const estDisp = document.getElementById('pcp-estoque-disponivel');
         if (estDisp) estDisp.textContent = estoqueAtual.toLocaleString('pt-BR');
@@ -1031,7 +1031,7 @@ async function editarProdutoForm(produtoId) {
         const estValor = document.getElementById('pcp-estoque-valor');
         if (estValor) estValor.textContent = cmcTotal.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         setVal('pcp-estoque-minimo-padrao', estoqueMin);
-        
+
         // Aba Custo
         setVal('pcp-produto-preco-custo', precoCusto.toFixed(2).replace('.', ','));
         setVal('pcp-produto-cmc', parseFloat(produto.custo_unitario || precoCusto || 0).toFixed(2).replace('.', ','));
@@ -1042,7 +1042,7 @@ async function editarProdutoForm(produtoId) {
         } else if (precoCusto > 0 && margem > 0) {
             setVal('pcp-produto-preco-venda-final', (precoCusto * (1 + margem / 100)).toFixed(2).replace('.', ','));
         }
-        
+
         // Aba Info Adicionais
         setVal('pcp-produto-sku', produto.sku || '');
         setVal('pcp-produto-marca', produto.marca || 'Aluforce');
@@ -1050,20 +1050,20 @@ async function editarProdutoForm(produtoId) {
         setVal('pcp-produto-cor', produto.cor || '');
         setVal('pcp-produto-peso-bruto', produto.peso_bruto || '');
         setVal('pcp-produto-peso-liquido', produto.peso_liquido || '');
-        
+
         // Aba Características
         setVal('pcp-produto-observacoes', produto.observacoes || produto.obs_tecnicas || '');
-        
+
         // Aba Fiscal
         setVal('pcp-produto-ncm-fiscal', produto.ncm || '');
         setVal('pcp-produto-cest', produto.cest || '');
         setVal('pcp-produto-cfop', produto.cfop_saida_interna || '5102');
         setSelect('pcp-produto-origem', produto.origem || '0');
-        
+
         // Aba Observações
         setVal('pcp-produto-obs-interna', produto.obs_internas || '');
         setVal('pcp-produto-obs-nf', produto.info_adicional_produto || '');
-        
+
         // Controle de lote
         const controleLote = document.getElementById('pcp-controle-lote');
         if (controleLote) {
@@ -1071,7 +1071,7 @@ async function editarProdutoForm(produtoId) {
             const span = controleLote.parentElement?.querySelector('span');
             if (span) span.style.backgroundColor = controleLote.checked ? '#f97316' : '#ccc';
         }
-        
+
         // Definição do produto (toggles)
         try {
             const tipo = produto.tipo_produto || 'produto';
@@ -1079,7 +1079,7 @@ async function editarProdutoForm(produtoId) {
             else if (tipo === 'variacao') toggleDefinicaoProdutoPCP('variacoes');
             else toggleDefinicaoProdutoPCP('simples');
         } catch(e) { console.warn('[EDIT] toggleDefinicao error:', e); }
-        
+
         // Imagem
         if (produto.imagem_url) {
             const imgPreview = document.getElementById('pcp-produto-imagem-preview');
@@ -1087,16 +1087,16 @@ async function editarProdutoForm(produtoId) {
             if (imgPreview) { imgPreview.src = produto.imagem_url; imgPreview.style.display = 'block'; }
             if (imgIcon) imgIcon.style.display = 'none';
         }
-        
+
         // Mostrar aba estoque
         mudarAbaProdutoPCP('estoque', document.querySelector('#modal-novo-produto .pcp-produto-tab'));
-        
+
         console.log('[EDIT] ===== PREENCHIMENTO COMPLETO =====');
         console.log('[EDIT] Desc final:', document.getElementById('pcp-produto-descricao')?.value);
         console.log('[EDIT] Cod final:', document.getElementById('pcp-produto-codigo')?.value);
-        
+
         showNotification('Produto carregado: ' + (produto.codigo || '') + ' - ' + (produto.nome || ''), 'success');
-        
+
     } catch (error) {
         console.error('[EDIT] ERRO FATAL:', error);
         showNotification('Erro ao carregar produto: ' + error.message, 'error');
@@ -1109,16 +1109,16 @@ async function excluirProduto(produtoId) {
         'Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita.',
         'danger'
     );
-    
+
     if (!confirmado) return;
-    
+
     try {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/produtos/${produtoId}`, {
             method: 'DELETE',
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             showNotification('Produto excluído com sucesso!', 'success');
             if (typeof buscarProdutos === 'function') buscarProdutos();
@@ -1137,21 +1137,21 @@ async function salvarProdutoPCP() {
     const produtoId = document.getElementById('pcp-produto-id')?.value;
     const codigo = document.getElementById('pcp-produto-codigo')?.value?.trim();
     const descricao = document.getElementById('pcp-produto-descricao')?.value?.trim();
-    
+
     if (!codigo || !descricao) {
         showNotification('Código e descrição são obrigatórios!', 'warning');
         return;
     }
-    
+
     const getVal = (id) => document.getElementById(id)?.value || '';
     const getNumVal = (id) => parseFloat(document.getElementById(id)?.value?.replace(',', '.')) || 0;
     const getChecked = (id) => document.getElementById(id)?.checked ? 1 : 0;
-    
+
     // Determinar tipo_produto baseado nos toggles de definição
     let tipoProduto = 'produto';
     if (getChecked('pcp-def-kit')) tipoProduto = 'kit';
     else if (getChecked('pcp-def-variacoes')) tipoProduto = 'variacao';
-    
+
     const dados = {
         // Campos básicos (header)
         codigo: codigo,
@@ -1163,15 +1163,15 @@ async function salvarProdutoPCP() {
         ncm: getVal('pcp-produto-ncm') || getVal('pcp-produto-ncm-fiscal'),
         categoria: getVal('pcp-produto-categoria') || 'GERAL',
         tipo_produto: tipoProduto,
-        
+
         // Aba Estoque
         controle_lote: getChecked('pcp-controle-lote'),
-        
+
         // Aba Custo do Estoque
         preco_custo: getNumVal('pcp-produto-preco-custo'),
         custo_unitario: getNumVal('pcp-produto-preco-custo'),
         margem: getNumVal('pcp-produto-margem'),
-        
+
         // Aba Informações Adicionais
         sku: getVal('pcp-produto-sku') || null,
         marca: getVal('pcp-produto-marca') || null,
@@ -1179,36 +1179,36 @@ async function salvarProdutoPCP() {
         cor: getVal('pcp-produto-cor'),
         peso_bruto: getNumVal('pcp-produto-peso-bruto'),
         peso_liquido: getNumVal('pcp-produto-peso-liquido'),
-        
+
         // Aba Características
         observacoes: getVal('pcp-produto-observacoes'),
-        
+
         // Aba Fiscal
         cest: getVal('pcp-produto-cest'),
         cfop_saida_interna: getVal('pcp-produto-cfop') || '5102',
         origem: getVal('pcp-produto-origem') || '0',
-        
+
         // Aba Observações
         obs_internas: getVal('pcp-produto-obs-interna'),
         info_adicional_produto: getVal('pcp-produto-obs-nf'),
-        
+
         // Status
         status: 'ativo',
         ativo: 1
     };
-    
+
     try {
         const API_BASE = getAPIBase();
         const url = produtoId ? `${API_BASE}/api/pcp/produtos/${produtoId}` : `${API_BASE}/api/pcp/produtos`;
         const method = produtoId ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados),
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             showNotification(produtoId ? 'Produto atualizado com sucesso!' : 'Produto cadastrado com sucesso!', 'success');
             fecharModalProdutoPCP();
@@ -1232,7 +1232,7 @@ function limparFormProdutoPCP(semConfirmacao = false) {
     if (!semConfirmacao) {
         if (!confirm('Limpar todos os campos?')) return;
     }
-    
+
     const campos = [
         'pcp-produto-id', 'pcp-produto-codigo', 'pcp-produto-descricao', 'pcp-produto-sku',
         'pcp-produto-ean', 'pcp-produto-ncm', 'pcp-produto-preco', 'pcp-produto-estoque',
@@ -1242,15 +1242,15 @@ function limparFormProdutoPCP(semConfirmacao = false) {
         'pcp-produto-peso-bruto', 'pcp-produto-peso-liquido', 'pcp-produto-ncm-fiscal',
         'pcp-produto-cest', 'pcp-produto-cfop', 'pcp-produto-obs-interna', 'pcp-produto-obs-nf'
     ];
-    
+
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
-    
+
     const precoEl = document.getElementById('pcp-produto-preco');
     if (precoEl) precoEl.value = '0,00';
-    
+
     // Reset definição toggles
     const defSimples = document.getElementById('pcp-def-simples');
     if (defSimples) { defSimples.checked = true; if (defSimples.nextElementSibling) defSimples.nextElementSibling.style.backgroundColor = '#f97316'; }
@@ -1258,11 +1258,11 @@ function limparFormProdutoPCP(semConfirmacao = false) {
     if (defKit) { defKit.checked = false; if (defKit.nextElementSibling) defKit.nextElementSibling.style.backgroundColor = '#ccc'; }
     const defVar = document.getElementById('pcp-def-variacoes');
     if (defVar) { defVar.checked = false; if (defVar.nextElementSibling) defVar.nextElementSibling.style.backgroundColor = '#ccc'; }
-    
+
     // Reset controle de lote
     const controleLote = document.getElementById('pcp-controle-lote');
     if (controleLote) { controleLote.checked = false; const s = controleLote.parentElement?.querySelector('span'); if (s) s.style.backgroundColor = '#ccc'; }
-    
+
     // Reset selects
     const unidadeSel = document.getElementById('pcp-produto-unidade');
     if (unidadeSel) unidadeSel.selectedIndex = 0;
@@ -1270,13 +1270,13 @@ function limparFormProdutoPCP(semConfirmacao = false) {
     if (categSel) categSel.selectedIndex = 0;
     const origemSel = document.getElementById('pcp-produto-origem');
     if (origemSel) origemSel.selectedIndex = 0;
-    
+
     // Reset imagem
     const imgPreview = document.getElementById('pcp-produto-imagem-preview');
     const imgIcon = document.getElementById('pcp-produto-imagem-icon');
     if (imgPreview) { imgPreview.style.display = 'none'; imgPreview.src = ''; }
     if (imgIcon) imgIcon.style.display = 'block';
-    
+
     // Voltar para aba Estoque
     const primeiraAba = document.querySelector('.pcp-produto-tab');
     if (primeiraAba) mudarAbaProdutoPCP('estoque', primeiraAba);
@@ -1289,18 +1289,18 @@ function mudarAbaProdutoPCP(aba, btnClicado) {
         btn.style.color = '#666';
         btn.style.fontWeight = '400';
     });
-    
+
     document.querySelectorAll('.pcp-produto-tab-panel').forEach(panel => {
         panel.style.display = 'none';
     });
-    
+
     if (btnClicado) {
         btnClicado.classList.add('active');
         btnClicado.style.borderBottomColor = '#333';
         btnClicado.style.color = '#333';
         btnClicado.style.fontWeight = '500';
     }
-    
+
     const painelAtivo = document.getElementById(`pcp-tab-${aba}`);
     if (painelAtivo) painelAtivo.style.display = 'block';
 }
@@ -1323,11 +1323,11 @@ function toggleSidebarProdutoPCP() {
     const items = document.getElementById('pcp-sidebar-items');
     const toggleBtn = document.getElementById('pcp-sidebar-toggle');
     const labels = document.querySelectorAll('.pcp-sidebar-label');
-    
+
     if (!sidebar) return;
-    
+
     const isExpanded = sidebar.style.width === '200px';
-    
+
     if (isExpanded) {
         // Colapsar
         sidebar.style.width = '60px';
@@ -1409,21 +1409,21 @@ function abrirNovoMaterial() {
 async function editarMaterial(materialId) {
     try {
         showNotification('Carregando dados do material...', 'info');
-        
+
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/materiais/${materialId}`, { credentials: 'include' });
         if (!response.ok) throw new Error('Material não encontrado');
-        
+
         const material = await response.json();
         console.log('Dados do material carregados:', material);
-        
+
         limparFormMaterial();
-        
+
         const titulo = document.getElementById('modal-material-titulo');
         if (titulo) titulo.innerHTML = '<i class="fas fa-edit" style="color: #9333ea;"></i> Editar Material';
-        
+
         const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-        
+
         setVal('material-id', material.id);
         setVal('material-codigo', material.codigo_material || material.codigo);
         setVal('material-descricao', material.descricao || material.nome);
@@ -1432,16 +1432,16 @@ async function editarMaterial(materialId) {
         setVal('material-cor', material.cor);
         setVal('material-bitola', material.bitola || material.espessura);
         setVal('material-observacoes', material.observacoes);
-        
+
         const custo = parseFloat(material.custo_unitario || material.custo || 0);
         setVal('material-custo', custo.toFixed(2).replace('.', ','));
-        
+
         const preco = parseFloat(material.preco_venda || material.preco || 0);
         setVal('material-preco', preco.toFixed(2).replace('.', ','));
-        
+
         setVal('material-estoque', material.quantidade_estoque || material.estoque || 0);
         setVal('material-estoque-minimo', material.estoque_minimo || 0);
-        
+
         // Selects
         const setSelect = (id, val) => {
             const sel = document.getElementById(id);
@@ -1454,13 +1454,13 @@ async function editarMaterial(materialId) {
                 }
             }
         };
-        
+
         setSelect('material-tipo', material.tipo);
         setSelect('material-unidade', material.unidade_medida || material.unidade || 'UN');
-        
+
         mudarAbaMaterialPCP('definicao');
         showModal('modal-novo-material');
-        
+
     } catch (error) {
         console.error('Erro ao carregar material:', error);
         showNotification('Erro ao carregar dados do material', 'error');
@@ -1477,12 +1477,12 @@ async function excluirMaterial(id) {
         'Tem certeza que deseja excluir este material? Esta ação não pode ser desfeita.',
         'danger'
     );
-    
+
     if (!confirmado) return;
-    
+
     try {
         const API_BASE = getAPIBase();
-        const response = await fetch(`${API_BASE}/api/pcp/materiais/${id}`, { 
+        const response = await fetch(`${API_BASE}/api/pcp/materiais/${id}`, {
             method: 'DELETE',
             credentials: 'include'
         });
@@ -1504,15 +1504,15 @@ async function salvarMaterial() {
     const codigo = document.getElementById('material-codigo')?.value?.trim();
     const descricao = document.getElementById('material-descricao')?.value?.trim();
     const tipo = document.getElementById('material-tipo')?.value;
-    
+
     if (!codigo || !descricao || !tipo) {
         showNotification('Preencha os campos obrigatórios: Código, Descrição e Tipo', 'error');
         return;
     }
-    
+
     const getVal = (id) => document.getElementById(id)?.value || '';
     const getNumVal = (id) => parseFloat(document.getElementById(id)?.value?.replace(',', '.')) || 0;
-    
+
     const materialData = {
         codigo_material: codigo,
         descricao: descricao,
@@ -1528,19 +1528,19 @@ async function salvarMaterial() {
         preco_venda: getNumVal('material-preco'),
         observacoes: getVal('material-observacoes')
     };
-    
+
     try {
         const API_BASE = getAPIBase();
         const url = materialId ? `${API_BASE}/api/pcp/materiais/${materialId}` : `${API_BASE}/api/pcp/materiais`;
         const method = materialId ? 'PUT' : 'POST';
-        
+
         const response = await fetch(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(materialData),
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             showNotification(materialId ? 'Material atualizado com sucesso!' : 'Material cadastrado com sucesso!', 'success');
             fecharModalMaterial();
@@ -1568,12 +1568,12 @@ function limparFormMaterial() {
         'material-fornecedor-padrao', 'material-peso-bruto', 'material-peso-liquido',
         'material-altura', 'material-largura', 'material-comprimento'
     ];
-    
+
     campos.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
     });
-    
+
     const custoEl = document.getElementById('material-custo');
     if (custoEl) custoEl.value = '0,00';
     const precoEl = document.getElementById('material-preco');
@@ -1586,18 +1586,18 @@ function mudarAbaMaterialPCP(aba, btnClicado) {
         btn.style.borderBottomColor = 'transparent';
         btn.style.color = '#666';
     });
-    
+
     document.querySelectorAll('.pcp-material-tab-panel').forEach(panel => {
         panel.style.display = 'none';
     });
-    
+
     const btnAtivo = btnClicado || document.querySelector(`.pcp-material-tab-btn[data-tab="${aba}"]`);
     if (btnAtivo) {
         btnAtivo.classList.add('active');
         btnAtivo.style.borderBottomColor = '#f97316';
         btnAtivo.style.color = '#f97316';
     }
-    
+
     const painelAtivo = document.getElementById(`pcp-material-tab-${aba}`);
     if (painelAtivo) painelAtivo.style.display = 'block';
 }
@@ -1662,16 +1662,16 @@ function abrirModalVisualizarOC(oc) {
         recebido: { bg: '#d1fae5', color: '#065f46', icon: 'fa-box-open' },
         cancelada: { bg: '#fee2e2', color: '#991b1b', icon: 'fa-times' }
     };
-    
+
     const statusConfig = statusColors[oc.status?.toLowerCase()] || statusColors.pendente;
     const previsao = oc.previsao_entrega ? new Date(oc.previsao_entrega).toLocaleDateString('pt-BR') : '-';
     const criacao = oc.created_at ? new Date(oc.created_at).toLocaleDateString('pt-BR') : '-';
-    
+
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.id = 'modal-visualizar-oc';
     modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px);';
-    
+
     modal.innerHTML = `
         <div style="background: white; border-radius: 20px; width: 95%; max-width: 800px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.3); animation: modalSlideIn 0.3s ease;">
             <div style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); padding: 24px; position: relative; overflow: hidden;">
@@ -1688,7 +1688,7 @@ function abrirModalVisualizarOC(oc) {
                     <i class="fas fa-times" style="color: white; font-size: 16px;"></i>
                 </button>
             </div>
-            
+
             <div style="padding: 24px; max-height: calc(90vh - 200px); overflow-y: auto;">
                 <div style="display: flex; align-items: center; gap: 12px; padding: 16px; background: ${statusConfig.bg}; border-radius: 12px; margin-bottom: 24px;">
                     <i class="fas ${statusConfig.icon}" style="font-size: 20px; color: ${statusConfig.color};"></i>
@@ -1697,7 +1697,7 @@ function abrirModalVisualizarOC(oc) {
                         <div style="font-size: 16px; font-weight: 600; color: ${statusConfig.color}; text-transform: capitalize;">${oc.status || 'Pendente'}</div>
                     </div>
                 </div>
-                
+
                 <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px;">
                     <div style="background: #f8fafc; border-radius: 12px; padding: 16px;">
                         <div style="font-size: 12px; color: #64748b; margin-bottom: 4px;"><i class="fas fa-cube" style="margin-right: 6px;"></i>Material</div>
@@ -1716,7 +1716,7 @@ function abrirModalVisualizarOC(oc) {
                         <div style="font-size: 15px; font-weight: 600; color: #1e293b;">${criacao}</div>
                     </div>
                 </div>
-                
+
                 ${oc.observacoes ? `
                 <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; padding: 16px;">
                     <div style="font-size: 12px; color: #92400e; margin-bottom: 8px;"><i class="fas fa-sticky-note" style="margin-right: 6px;"></i>Observações</div>
@@ -1724,13 +1724,13 @@ function abrirModalVisualizarOC(oc) {
                 </div>
                 ` : ''}
             </div>
-            
+
             <div style="padding: 16px 24px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
                 <button onclick="fecharModalVisualizarOC()" style="padding: 12px 24px; background: #f1f5f9; border: none; border-radius: 10px; cursor: pointer; font-weight: 600; color: #64748b;">Fechar</button>
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.onclick = (e) => { if (e.target === modal) fecharModalVisualizarOC(); };
 }
@@ -1746,23 +1746,23 @@ function editarOC(id) {
         showNotification('Ordem de compra não encontrada', 'error');
         return;
     }
-    
+
     if (oc.status?.toLowerCase() !== 'pendente') {
         showNotification('Apenas OCs pendentes podem ser editadas', 'warning');
         return;
     }
-    
+
     abrirModalEditarOC(oc);
 }
 
 function abrirModalEditarOC(oc) {
     const previsaoDate = oc.previsao_entrega ? new Date(oc.previsao_entrega).toISOString().split('T')[0] : '';
-    
+
     const modal = document.createElement('div');
     modal.className = 'modal-overlay';
     modal.id = 'modal-editar-oc';
     modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px);';
-    
+
     modal.innerHTML = `
         <div style="background: white; border-radius: 20px; width: 95%; max-width: 600px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
             <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;">
@@ -1779,36 +1779,36 @@ function abrirModalEditarOC(oc) {
                     <i class="fas fa-times" style="color: white;"></i>
                 </button>
             </div>
-            
+
             <div style="padding: 24px;">
                 <form id="form-editar-oc">
                     <input type="hidden" id="edit-oc-id" value="${oc.id}">
-                    
+
                     <div style="margin-bottom: 20px;">
                         <label style="font-weight: 600; color: #374151; margin-bottom: 6px; display: block;">
                             <i class="fas fa-cube" style="color:#f59e0b;margin-right:6px;"></i>Material
                         </label>
-                        <input type="text" value="${oc.descricao || oc.codigo_material || ''}" readonly 
+                        <input type="text" value="${oc.descricao || oc.codigo_material || ''}" readonly
                             style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: #f9fafb; color: #6b7280; box-sizing: border-box;">
                     </div>
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                         <div>
                             <label style="font-weight: 600; color: #374151; margin-bottom: 6px; display: block;">
                                 <i class="fas fa-hashtag" style="color:#f59e0b;margin-right:6px;"></i>Quantidade *
                             </label>
-                            <input type="number" id="edit-oc-quantidade" required min="1" value="${oc.quantidade || ''}" 
+                            <input type="number" id="edit-oc-quantidade" required min="1" value="${oc.quantidade || ''}"
                                 style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
                         </div>
                         <div>
                             <label style="font-weight: 600; color: #374151; margin-bottom: 6px; display: block;">
                                 <i class="fas fa-calendar" style="color:#f59e0b;margin-right:6px;"></i>Previsão Entrega *
                             </label>
-                            <input type="date" id="edit-oc-previsao" required value="${previsaoDate}" 
+                            <input type="date" id="edit-oc-previsao" required value="${previsaoDate}"
                                 style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
                         </div>
                     </div>
-                    
+
                     <div style="margin-bottom: 20px;">
                         <label style="font-weight: 600; color: #374151; margin-bottom: 6px; display: block;">
                             <i class="fas fa-comment" style="color:#f59e0b;margin-right:6px;"></i>Observações
@@ -1818,7 +1818,7 @@ function abrirModalEditarOC(oc) {
                     </div>
                 </form>
             </div>
-            
+
             <div style="padding: 16px 24px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
                 <button onclick="fecharModalEditarOC()" style="padding: 12px 24px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; color: #374151;">
                     Cancelar
@@ -1829,7 +1829,7 @@ function abrirModalEditarOC(oc) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
     modal.onclick = (e) => { if (e.target === modal) fecharModalEditarOC(); };
 }
@@ -1844,12 +1844,12 @@ async function salvarEdicaoOC() {
     const quantidade = document.getElementById('edit-oc-quantidade')?.value;
     const previsao = document.getElementById('edit-oc-previsao')?.value;
     const observacoes = document.getElementById('edit-oc-observacoes')?.value;
-    
+
     if (!quantidade || !previsao) {
         showNotification('Preencha quantidade e previsão de entrega', 'warning');
         return;
     }
-    
+
     try {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/ordens-compra/${id}`, {
@@ -1858,7 +1858,7 @@ async function salvarEdicaoOC() {
             body: JSON.stringify({ quantidade: parseFloat(quantidade), previsao_entrega: previsao, observacoes }),
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             showNotification('Ordem de compra atualizada!', 'success');
             fecharModalEditarOC();
@@ -1879,16 +1879,16 @@ async function excluirOC(id) {
         'Tem certeza que deseja excluir esta ordem de compra?',
         'danger'
     );
-    
+
     if (!confirmado) return;
-    
+
     try {
         const API_BASE = getAPIBase();
         const response = await fetch(`${API_BASE}/api/pcp/ordens-compra/${id}`, {
             method: 'DELETE',
             credentials: 'include'
         });
-        
+
         if (response.ok) {
             showNotification('Ordem de compra excluída!', 'success');
             if (typeof carregarOrdensCompra === 'function') carregarOrdensCompra();
@@ -1912,13 +1912,13 @@ let _movBuscaTimeout = null;
 function abrirModalMovimentacao(tipo, produto) {
     currentMovimentacaoTipo = tipo;
     currentMovimentacaoItem = produto || null;
-    
+
     const header = document.getElementById('modal-mov-header');
     const icon = document.getElementById('modal-mov-icon');
     const titulo = document.getElementById('modal-mov-titulo');
     const subtitulo = document.getElementById('modal-mov-subtitulo');
     const btnConfirmar = document.getElementById('modal-mov-btn-confirmar');
-    
+
     const configs = {
         entrada: {
             bg: 'linear-gradient(135deg, #22c55e, #16a34a)',
@@ -1942,9 +1942,9 @@ function abrirModalMovimentacao(tipo, produto) {
             btnText: 'Confirmar Ajuste'
         }
     };
-    
+
     const config = configs[tipo] || configs.entrada;
-    
+
     if (header) header.style.background = config.bg;
     if (icon) icon.className = `fas ${config.icon}`;
     if (titulo) titulo.textContent = config.titulo;
@@ -1953,7 +1953,7 @@ function abrirModalMovimentacao(tipo, produto) {
         btnConfirmar.style.background = config.bg;
         btnConfirmar.innerHTML = `<i class="fas fa-check"></i> ${config.btnText}`;
     }
-    
+
     // Reset form
     document.getElementById('modal-mov-quantidade').value = '';
     document.getElementById('modal-mov-observacao').value = '';
@@ -1969,13 +1969,13 @@ function abrirModalMovimentacao(tipo, produto) {
     if (corList) corList.innerHTML = '';
     // Load global color suggestions
     _carregarCoresGlobais();
-    
+
     // Product search area
     const buscaInput = document.getElementById('modal-mov-produto-busca');
     const buscaResults = document.getElementById('modal-mov-produto-resultados');
     const infoCard = document.getElementById('modal-mov-produto-info');
     const buscaContainer = document.getElementById('modal-mov-produto-search-container');
-    
+
     if (produto && produto.id) {
         // Product pre-selected — show info card, hide search
         currentMovimentacaoItem = produto;
@@ -1996,7 +1996,7 @@ function abrirModalMovimentacao(tipo, produto) {
         if (buscaResults) { buscaResults.innerHTML = ''; buscaResults.style.display = 'none'; }
         if (infoCard) infoCard.style.display = 'none';
     }
-    
+
     showModal('modal-movimentacao-estoque');
     // Focus on search or quantity
     setTimeout(() => {
@@ -2012,50 +2012,30 @@ function buscarProdutoMovimentacao(termo) {
     clearTimeout(_movBuscaTimeout);
     const resultados = document.getElementById('modal-mov-produto-resultados');
     if (!resultados) return;
-    
+
     if (!termo || termo.length < 2) {
         resultados.style.display = 'none';
         resultados.innerHTML = '';
         return;
     }
-    
+
     _movBuscaTimeout = setTimeout(() => {
-        // Search from produtosData (estoque.html) or fetch from API
-        const termoLower = termo.toLowerCase();
-        const dados = window.produtosData || [];
-        
-        if (dados.length > 0) {
-            // Client-side search
-            const encontrados = dados.filter(p => 
-                (p.codigo && p.codigo.toLowerCase().includes(termoLower)) ||
-                (p.nome && p.nome.toLowerCase().includes(termoLower)) ||
-                (p.descricao && p.descricao.toLowerCase().includes(termoLower))
-            ).slice(0, 8);
-            _renderResultadosBuscaMov(encontrados, resultados);
-        } else {
-            // Server-side search - buscar apenas produtos com entrada no estoque PCP
-            const API_BASE = getAPIBase();
-            fetch(`${API_BASE}/api/pcp/produtos/com-entrada?limit=1000`, { credentials: 'include' })
-                .then(r => r.json())
-                .then(data => {
-                    const produtos = Array.isArray(data) ? data : (data.rows || data.produtos || []);
-                    // Filtrar pelo termo de busca
-                    const termoL = termo.toLowerCase();
-                    const filtrados = produtos.filter(p =>
-                        (p.codigo && p.codigo.toLowerCase().includes(termoL)) ||
-                        (p.nome && p.nome.toLowerCase().includes(termoL)) ||
-                        (p.descricao && p.descricao.toLowerCase().includes(termoL))
-                    ).slice(0, 8);
-                    // Cache para buscas futuras
-                    window.produtosData = produtos;
-                    _renderResultadosBuscaMov(filtrados, resultados);
-                })
-                .catch(() => {
-                    resultados.innerHTML = '<div style="padding:12px;color:#94a3b8;font-size:13px;text-align:center;">Erro ao buscar</div>';
-                    resultados.style.display = 'block';
-                });
-        }
-    }, 200);
+        // Sempre buscar na API para trazer TODOS os produtos (não apenas com entrada)
+        const API_BASE = getAPIBase();
+        fetch(`${API_BASE}/api/pcp/produtos?q=${encodeURIComponent(termo)}&limit=8`, { credentials: 'include' })
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(data => {
+                const produtos = Array.isArray(data) ? data : (data.rows || data.produtos || []);
+                _renderResultadosBuscaMov(produtos, resultados);
+            })
+            .catch(() => {
+                resultados.innerHTML = '<div style="padding:12px;color:#94a3b8;font-size:13px;text-align:center;">Erro ao buscar</div>';
+                resultados.style.display = 'block';
+            });
+    }, 250);
 }
 
 function _renderResultadosBuscaMov(lista, container) {
@@ -2086,7 +2066,7 @@ function selecionarProdutoMovimentacao(produto) {
     const buscaContainer = document.getElementById('modal-mov-produto-search-container');
     const infoCard = document.getElementById('modal-mov-produto-info');
     const buscaResults = document.getElementById('modal-mov-produto-resultados');
-    
+
     if (buscaContainer) buscaContainer.style.display = 'none';
     if (buscaResults) buscaResults.style.display = 'none';
     if (infoCard) {
@@ -2105,7 +2085,7 @@ function limparProdutoMovimentacao() {
     const buscaContainer = document.getElementById('modal-mov-produto-search-container');
     const infoCard = document.getElementById('modal-mov-produto-info');
     const buscaInput = document.getElementById('modal-mov-produto-busca');
-    
+
     if (buscaContainer) buscaContainer.style.display = 'block';
     if (infoCard) infoCard.style.display = 'none';
     if (buscaInput) { buscaInput.value = ''; buscaInput.focus(); }
@@ -2235,39 +2215,39 @@ async function confirmarMovimentacao() {
         showNotification('Selecione um produto', 'warning');
         return;
     }
-    
+
     const quantidade = parseFloat(document.getElementById('modal-mov-quantidade')?.value);
     const observacao = document.getElementById('modal-mov-observacao')?.value?.trim();
     const documento = document.getElementById('modal-mov-documento')?.value?.trim();
     const local = document.getElementById('modal-mov-local')?.value || 'PRINCIPAL';
     const cor = document.getElementById('modal-mov-cor')?.value?.trim() || null;
-    
+
     if (!quantidade || quantidade <= 0) {
         showNotification('Informe uma quantidade válida', 'warning');
         return;
     }
-    
+
     if (!observacao) {
         showNotification('Informe o motivo da movimentação', 'warning');
         return;
     }
-    
+
     // Check stock for exits
     const estoqueAtual = currentMovimentacaoItem.estoque_atual ?? currentMovimentacaoItem.estoque ?? 0;
     if (currentMovimentacaoTipo === 'saida' && quantidade > estoqueAtual) {
         if (!confirm(`Atenção: a saída de ${quantidade} é maior que o estoque atual (${parseFloat(estoqueAtual).toFixed(2)}). Deseja continuar?`)) return;
     }
-    
+
     const btn = document.getElementById('modal-mov-btn-confirmar');
     if (btn) {
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
     }
-    
+
     try {
         const API_BASE = getAPIBase();
         const tipoAPI = currentMovimentacaoTipo.toUpperCase();
-        
+
         const response = await fetch(`${API_BASE}/api/pcp/estoque/movimentacao`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -2282,14 +2262,14 @@ async function confirmarMovimentacao() {
                 cor: cor
             })
         });
-        
+
         const data = await response.json();
         if (!response.ok) throw new Error(data.message || 'Erro ao registrar movimentação');
-        
+
         const nomeItem = currentMovimentacaoItem.nome || currentMovimentacaoItem.codigo || 'Produto';
         const tipoLabel = currentMovimentacaoTipo === 'entrada' ? 'Entrada' : currentMovimentacaoTipo === 'saida' ? 'Saída' : 'Ajuste';
         showNotification(`✅ ${tipoLabel} registrada! ${nomeItem}: ${data.quantidade_anterior?.toFixed(2)} → ${data.quantidade_atual?.toFixed(2)}`, 'success');
-        
+
         fecharModalMovimentacao();
         if (typeof carregarProdutos === 'function') carregarProdutos();
     } catch (err) {

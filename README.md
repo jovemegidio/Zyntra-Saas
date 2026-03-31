@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/versão-2.3.0-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/versão-2.4.0-blue?style=for-the-badge" />
   <img src="https://img.shields.io/badge/status-Produção-brightgreen?style=for-the-badge" />
   <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
@@ -32,6 +32,39 @@ O **Zyntra ERP** é uma plataforma ERP completa para gestão industrial e empres
 - 🔒 **Segurança enterprise** — JWT, ACL, CSRF, rate limiting, LGPD
 - 📊 **85+ páginas** — Cobertura total de processos empresariais
 - 🤖 **Assistente IA** — BOB I.A. integrado em todas as telas
+
+---
+
+## 🌐 Landing Page & Onboarding
+
+Landing page institucional com 7 páginas estáticas servidas via `/lp/`:
+
+- **index.html** — Home com funcionalidades, planos, depoimentos e CTA
+- **cadastro.html** — Fluxo de cadastro multi-step (dados → empresa → plano)
+- **planos-e-precos.html** — Comparativo de planos (valores sob consulta)
+- **segmentos.html** — Segmentos atendidos com ícones SVG
+- **quem-somos.html** — Institucional com timeline e valores
+- **funcionalidades.html** — Detalhamento de todos os módulos
+- **politica-de-privacidade.html** — LGPD e termos de uso
+
+### Fluxo de Trial
+
+1. Usuário preenche o cadastro na LP → `POST /api/onboarding`
+2. Backend cria `empresas_tenant` + `usuarios` + `usuarios_empresas` em transação
+3. Trial de **14 dias** ativado automaticamente (`trial_ate`)
+4. Redirect para `/login.html?welcome=1` com toast de boas-vindas
+5. No login, o sistema valida `trial_ate` — se expirado, exibe modal com CTA
+
+---
+
+## 🏢 Multi-Tenant (SaaS)
+
+Arquitetura multi-empresas com isolamento por tenant:
+
+- **empresas_tenant** — Cadastro de empresas com plano, trial e status
+- **usuarios_empresas** — Vínculo N:N entre usuários e empresas
+- **empresa_default_id** — Empresa padrão do usuário (JWT)
+- **middleware/empresa.js** — Contexto de tenant extraído do JWT em cada requisição
 
 ---
 
@@ -258,6 +291,17 @@ npm run lint
 ---
 
 ## 📊 Changelog Recente
+
+### v2.4.0 — Junho 2026
+- ✅ **Landing Page Profissional** — Reescrita completa (index, cadastro, segmentos, quem-somos, funcionalidades, planos-e-precos, 404, política de privacidade)
+- ✅ **Onboarding Self-Service** — Formulário de cadastro multi-step com criação automática de empresa, usuário admin e vínculo multi-tenant
+- ✅ **Trial de 14 dias** — Teste grátis sem cartão de crédito com validação de expiração no login
+- ✅ **Modal Trial Expirado** — Bloqueio de acesso com CTA para planos e comercial ao expirar o período de teste
+- ✅ **Welcome Banner** — Toast de boas-vindas no primeiro login após cadastro
+- ✅ **Pricing Sob Consulta** — Planos customizáveis sem valores fixos (Starter, Profissional, Enterprise)
+- ✅ **Fix empresa_default_id** — Correção crítica no onboarding para vincular usuário à empresa correta
+- ✅ **Emoji → SVG Icons** — Substituição de emojis por ícones SVG profissionais nas sub-páginas da LP
+- ✅ **Multi-Empresas (SaaS)** — Arquitetura multi-tenant com `empresas_tenant`, `usuarios_empresas`, planos e trial
 
 ### v2.3.0 — 27/03/2026
 - ✅ **Contas a Receber — Módulo Completo** — Status dropdown (pendente/liquidada/parcial/vencida/protestada/cartório), pago_no_dia, aceita_troca_factory, comprovante de pagamento (upload), aba de rastreamento, simulador PM, aba FUNDOS, workbook switching, 7 novas colunas DB

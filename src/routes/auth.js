@@ -454,6 +454,49 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         }
         // ========================================
 
+        // ========================================
+        // VALIDAÇÃO: TRIAL EXPIRADO
+        // Verifica se o usuário pertence a uma empresa em trial e se o período expirou.
+        // Empresas com plano ativo (sem trial_ate) passam direto.
+        // ========================================
+        try {
+            const [empresaRows] = await safeQuery(
+                `SELECT et.trial_ate, et.plano, et.ativo
+                 FROM usuarios_empresas ue
+                 JOIN empresas_tenant et ON et.id = ue.empresa_id
+                 WHERE ue.usuario_id = ? AND ue.is_default = 1
+                 LIMIT 1`,
+                [user.id]
+            );
+            if (empresaRows.length > 0) {
+                const empresa = empresaRows[0];
+                if (empresa.trial_ate) {
+                    const trialEnd = new Date(empresa.trial_ate);
+                    const now = new Date();
+                    if (now > trialEnd) {
+                        await auditLog('login_blocked_trial_expired', user.id, `Trial expirado em ${empresa.trial_ate}: ${user.email}`, req);
+                        console.log(`🚫 Login bloqueado - Trial expirado (${empresa.trial_ate}): ${user.email}`);
+                        return res.status(403).json({
+                            message: 'Seu período de teste expirou. Escolha um plano para continuar usando o Zyntra.',
+                            trialExpired: true,
+                            upgradeUrl: '/lp/pages/planos-e-precos.html'
+                        });
+                    }
+                }
+                if (empresa.ativo === 0) {
+                    await auditLog('login_blocked_empresa_inactive', user.id, `Empresa inativa: ${user.email}`, req);
+                    console.log(`🚫 Login bloqueado - Empresa inativa: ${user.email}`);
+                    return res.status(403).json({
+                        message: 'A conta da sua empresa está suspensa. Entre em contato com o suporte.'
+                    });
+                }
+            }
+        } catch (trialErr) {
+            // Non-blocking: se a query falhar (ex: tabela não existe em ambientes antigos), permite login
+            console.error('[AUTH/LOGIN] ⚠️ Trial check failed (non-blocking):', trialErr.message);
+        }
+        // ========================================
+
         // Possíveis nomes comuns de campos de senha
         const possibleNames = ['senha_hash', 'senha', 'password', 'senha_plain', 'pass', 'passwd', 'password_hash'];
         let hashField = null;
@@ -817,17 +860,18 @@ router.post('/login', validate(schemas.login), async (req, res) => {
 
         // Gera PAR de tokens: access (15m) + refresh (7d) com rotação
         const tokenPair = await refreshTokenModule.generateTokenPair(
-            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: user.empresa_id, area: user.area },
+            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: user.empresa_default_id || user.empresa_id || null, area: user.area },
             pool,
             deviceId
         );
-        // Adicionar campos extras ao access token (deviceId, setor, email)
+        // Adicionar campos extras ao access token (deviceId, setor, email, empresa_id)
         const accessToken = jwt.sign({
             id: user.id,
             nome: user.nome,
             email: user.email,
             role: user.role,
             setor: user.setor || null,
+            empresa_id: user.empresa_default_id || user.empresa_id || null,
             deviceId: deviceId,
             type: 'access'
         }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
@@ -1504,7 +1548,7 @@ router.post('/auth/validate-remember-token', async (req, res) => {
 
         // Gerar PAR de tokens (access 15m + refresh 7d) igual ao login normal
         const tokenPair = await refreshTokenModule.generateTokenPair(
-            { id: user.id, username: user.email, nome: user.nome, role: user.role },
+            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: user.empresa_default_id || user.empresa_id || null },
             pool,
             deviceId
         );
@@ -1516,6 +1560,7 @@ router.post('/auth/validate-remember-token', async (req, res) => {
             email: user.email,
             role: user.role,
             setor: user.setor || null,
+            empresa_id: user.empresa_default_id || user.empresa_id || null,
             deviceId: deviceId,
             type: 'access'
         }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });

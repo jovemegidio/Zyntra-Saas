@@ -275,11 +275,12 @@ function validateSqlColumn(column) {
 
 /**
  * Configura helmet com headers de segurança
+ * Inclui headers explícitos para garantir presença em todas as respostas (inclusive redirects)
  */
 function securityHeaders() {
     const isDevelopment = process.env.NODE_ENV !== 'production';
 
-    return helmet({
+    const helmetMiddleware = helmet({
         contentSecurityPolicy: isDevelopment ? false : {
             directives: {
                 defaultSrc: ["'self'"],
@@ -306,6 +307,20 @@ function securityHeaders() {
         crossOriginOpenerPolicy: false,
         crossOriginResourcePolicy: { policy: "cross-origin" }
     });
+
+    // Middleware explícito para headers que devem estar em TODAS as respostas
+    // (incluindo redirects 301/302 que podem sair antes do helmet processar)
+    const explicitHeaders = (req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+        res.setHeader('X-XSS-Protection', '0');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        next();
+    };
+
+    // Retorna array: headers explícitos primeiro, depois helmet
+    return [explicitHeaders, helmetMiddleware];
 }
 
 // ============================================
@@ -330,7 +345,7 @@ function generateCsrfToken() {
  */
 function csrfProtection(req, res, next) {
     // Rotas isentas de CSRF (APIs que usam Bearer token já são protegidas)
-    const exemptPaths = ['/api/login', '/api/logout', '/api/refresh-token', '/api/health', '/api/webhook', '/api/auth', '/api/discord', '/api/verify-2fa', '/api/resend-2fa'];
+    const exemptPaths = ['/api/login', '/api/logout', '/api/refresh-token', '/api/health', '/api/webhook', '/api/auth', '/api/discord', '/api/verify-2fa', '/api/resend-2fa', '/api/onboarding'];
     if (exemptPaths.some(p => req.path.startsWith(p))) {
         return next();
     }

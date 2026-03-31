@@ -175,6 +175,7 @@ module.exports = function createAuthSectionRoutes(deps) {
                 email: user.email,
                 role: user.role || 'user',
                 is_admin: user.is_admin || 0,
+                empresa_id: user.empresa_default_id || null,
                 deviceId: deviceId // CRITICAL: Identificador único do dispositivo
             };
     
@@ -193,6 +194,13 @@ module.exports = function createAuthSectionRoutes(deps) {
     
             console.log(`✅ Login bem-sucedido: ${user.email} | Secure Cookie: ${isSecure}`);
     
+            // 🏢 MULTI-EMPRESAS: Carregar empresas do usuário
+            let empresas = [];
+            try {
+                const { getEmpresasDoUsuario } = require('../config/empresa');
+                empresas = await getEmpresasDoUsuario(pool, user.id);
+            } catch (e) { /* tabela pode não existir ainda */ }
+
             // Resposta de sucesso - inclui token e deviceId para multi-dispositivo
             res.json({
                 message: 'Login realizado com sucesso',
@@ -203,8 +211,10 @@ module.exports = function createAuthSectionRoutes(deps) {
                     nome: user.nome,
                     email: user.email,
                     role: user.role,
-                    is_admin: user.is_admin
+                    is_admin: user.is_admin,
+                    empresa_id: user.empresa_default_id || null
                 },
+                empresas: empresas, // 🏢 Lista de empresas acessíveis
                 redirectTo: '/dashboard'
             });
     
