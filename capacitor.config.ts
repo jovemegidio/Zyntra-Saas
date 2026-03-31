@@ -6,12 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'public',
   
   server: {
-    // Em produção, usa os arquivos locais empacotados no app
-    // Para desenvolvimento, descomente a linha abaixo com seu IP local:
-    // url: 'http://192.168.1.100:3000',
+    // App Android aponta para o servidor de produção
+    url: 'https://aluforce.api.br',
     androidScheme: 'https',
     iosScheme: 'https',
     allowNavigation: [
+      'aluforce.api.br',
+      '*.aluforce.api.br',
       'zyntra.com.br',
       '*.zyntra.com.br',
       'aluforce.com.br',
