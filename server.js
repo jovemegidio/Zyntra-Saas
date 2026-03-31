@@ -1497,6 +1497,18 @@ try {
 }
 
 // =================================================================
+// 🏦 ITAÚ BAAS — Rotas Open Finance / PIX
+// Portal: https://devportal.itau.com.br/baas/#/
+// =================================================================
+try {
+    const itauRoutes = require('./src/routes/itau');
+    app.use('/api/itau', itauRoutes);
+    console.log('✅ Rotas Itaú BaaS carregadas: /api/itau/*');
+} catch (e) {
+    console.warn('⚠️  Rotas Itaú BaaS não disponíveis:', e.message);
+}
+
+// =================================================================
 // 🚀 Zyntra SGE — Rotas de Teste Grátis / Trials
 // =================================================================
 try {
