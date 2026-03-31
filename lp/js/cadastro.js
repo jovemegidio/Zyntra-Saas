@@ -265,6 +265,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('successPlan').textContent = planNames[formData.plano] || formData.plano;
                 successOverlay.classList.add('visible');
 
+                // Build LP login URL with email pre-fill (LGPD: keeps user in Zyntra LP, not Aluforce system)
+                const loginUrl = `/lp/login.html?welcome=1&email=${encodeURIComponent(formData.email)}`;
+                const goToLoginBtn = document.getElementById('goToLoginBtn');
+                if (goToLoginBtn) goToLoginBtn.href = loginUrl;
+
                 // Auto-redirect countdown
                 let secs = 5;
                 const countdownEl = document.getElementById('countdown');
@@ -273,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (countdownEl) countdownEl.textContent = secs;
                     if (secs <= 0) {
                         clearInterval(countdownInterval);
-                        window.location.href = '/login.html?welcome=1';
+                        window.location.href = loginUrl;
                     }
                 }, 1000);
             } else {

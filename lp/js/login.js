@@ -142,6 +142,19 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[LOGIN/SSO] 🔄 ReturnTo detectado:', decodeURIComponent(returnTo));
   }
 
+  // ==================== WELCOME: PRÉ-PREENCHIMENTO PÓS-CADASTRO ====================
+  // Quando vindo do cadastro LP, pre-fill do email e exibe mensagem de boas-vindas
+  const welcomeParam = urlParams.get('welcome');
+  const emailParam = urlParams.get('email');
+  if (welcomeParam === '1') {
+    if (emailParam && emailInput) {
+      emailInput.value = decodeURIComponent(emailParam);
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (greetingEl) greetingEl.textContent = 'Conta criada com sucesso!';
+    if (subtitleEl) subtitleEl.textContent = 'Entre com o e-mail e senha cadastrados para acessar o sistema.';
+  }
+
   // Limpeza preventiva ao abrir a tela de login
   // No modo estático, preservar zyntra_user para o "lembrar-me" funcionar
   if (isStaticEnv) {
