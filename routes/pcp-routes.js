@@ -133,25 +133,27 @@ module.exports = function createPCPRoutes(deps) {
     });
 
     // DASHBOARD / STATS DO PCP
-    router.get('/dashboard', async (req, res, next) => {
+    router.get('/dashboard', authenticateToken, async (req, res, next) => {
         try {
-            // Total de produtos (ativos ou sem flag de status)
-            // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
+            // Total de produtos ativos (exclui categoria GERAL - suprimentos, escritório)
             const [[produtosResult]] = await pool.query(
-                `SELECT COUNT(*) as total FROM produtos WHERE (ativo = 1 OR ativo IS NULL) AND (categoria IS NULL OR categoria != 'GERAL')`
+                `SELECT COUNT(*) as total FROM produtos
+                 WHERE (ativo = 1 OR ativo IS NULL)
+                 AND (categoria IS NULL OR categoria != 'GERAL')`
             );
 
-            // Ordens em produção (status ativa ou em_producao)
+            // Ordens em produção (todos os status ativos)
             const [[ordensResult]] = await pool.query(
                 `SELECT COUNT(*) as total FROM ordens_producao
-                 WHERE status IN ('ativa', 'em_producao', 'Em Produção', 'em_andamento', 'A Fazer', 'pendente')`
+                 WHERE status IN ('ativa', 'em_producao', 'Em Produção', 'em_andamento',
+                                  'a_produzir', 'iniciado', 'pendente', 'A Fazer')`
             );
 
             // Produtos COM estoque (estoque_atual > 0)
-            // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
+            // Exclui categoria GERAL
             const [[produtosComEstoqueResult]] = await pool.query(
                 `SELECT COUNT(*) as total FROM produtos
-                 WHERE estoque_atual > 0
+                 WHERE COALESCE(estoque_atual, 0) > 0
                  AND (ativo = 1 OR ativo IS NULL)
                  AND (categoria IS NULL OR categoria != 'GERAL')`
             );
@@ -161,25 +163,28 @@ module.exports = function createPCPRoutes(deps) {
                 'SELECT COUNT(*) as total FROM materiais'
             );
 
-            // Entregas pendentes (ordens com data de previsão de entrega esta semana)
+            // Entregas pendentes nos próximos 7 dias
             const [[entregasResult]] = await pool.query(
                 `SELECT COUNT(*) as total FROM ordens_producao
-                 WHERE status NOT IN ('concluida', 'cancelada', 'finalizada')
+                 WHERE status NOT IN ('concluida', 'Concluída', 'cancelada', 'Cancelada',
+                                      'entregue', 'finalizada', 'concluido', 'cancelado')
                  AND data_prevista IS NOT NULL
                  AND data_prevista >= CURDATE()
                  AND data_prevista <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)`
             );
 
-            res.json({
-                totalProdutos: produtosResult?.total || 0,
-                ordensEmProducao: ordensResult?.total || 0,
-                produtosComEstoque: produtosComEstoqueResult?.total || 0,
-                totalMateriais: materiaisResult?.total || 0,
-                entregasPendentes: entregasResult?.total || 0
-            });
+            const result = {
+                totalProdutos:       produtosResult?.total || 0,
+                ordensEmProducao:    ordensResult?.total || 0,
+                produtosComEstoque:  produtosComEstoqueResult?.total || 0,
+                totalMateriais:      materiaisResult?.total || 0,
+                entregasPendentes:   entregasResult?.total || 0
+            };
+
+            console.log('📊 Dashboard PCP:', result);
+            res.json(result);
         } catch (error) {
             console.error('[PCP/DASHBOARD] Erro:', error);
-            // Retornar valores padrão em caso de erro
             res.json({
                 totalProdutos: 0,
                 ordensEmProducao: 0,
@@ -193,17 +198,19 @@ module.exports = function createPCPRoutes(deps) {
     // ============================================
     // ALERTAS DO SISTEMA PCP
     // ============================================
-    router.get('/alertas', async (req, res) => {
+    router.get('/alertas', authenticateToken, async (req, res) => {
         try {
             const alertas = [];
 
             // 1. Produtos com estoque CRÍTICO (zerado)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
             const [produtosCriticos] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
+                SELECT codigo, nome, COALESCE(estoque_atual, 0) as estoque_atual,
+                       COALESCE(estoque_minimo, 0) as estoque_minimo,
+                       unidade_medida as unidade, categoria
                 FROM produtos
-                WHERE (estoque_atual <= 0 OR quantidade_estoque <= 0)
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                WHERE COALESCE(estoque_atual, 0) <= 0
+                AND (ativo = 1 OR ativo IS NULL)
                 AND (categoria IS NULL OR categoria != 'GERAL')
                 ORDER BY nome ASC
                 LIMIT 50
@@ -232,12 +239,14 @@ module.exports = function createPCPRoutes(deps) {
             // 2. Produtos com estoque BAIXO (abaixo do mínimo)
             // Exclui categoria 'GERAL' (suprimentos, limpeza, escritório) — não são itens de produção PCP
             const [produtosBaixo] = await pool.query(`
-                SELECT codigo, nome, estoque_atual, estoque_minimo, unidade_medida as unidade, categoria
+                SELECT codigo, nome, COALESCE(estoque_atual, 0) as estoque_atual,
+                       COALESCE(estoque_minimo, 10) as estoque_minimo,
+                       unidade_medida as unidade, categoria
                 FROM produtos
-                WHERE estoque_atual > 0
-                AND estoque_atual < COALESCE(estoque_minimo, 10)
+                WHERE COALESCE(estoque_atual, 0) > 0
+                AND COALESCE(estoque_atual, 0) < COALESCE(estoque_minimo, 10)
                 AND COALESCE(estoque_minimo, 10) > 0
-                AND (ativo = 1 OR ativo IS NULL OR status = 'ativo')
+                AND (ativo = 1 OR ativo IS NULL)
                 AND (categoria IS NULL OR categoria != 'GERAL')
                 ORDER BY estoque_atual ASC
                 LIMIT 50
@@ -1776,64 +1785,7 @@ module.exports = function createPCPRoutes(deps) {
         }
     });
 
-    // API para dashboard do PCP - Contadores
-    // SECURITY: Requer autenticação
-    router.get('/dashboard', authenticateToken, async (req, res) => {
-        try {
-            console.log('📊 Carregando dashboard PCP...');
-
-            // Total de produtos ALUFORCE (marca = 'Aluforce')
-            const [produtosResult] = await pool.query("SELECT COUNT(*) as total FROM produtos WHERE marca = 'Aluforce'");
-            const totalProdutos = produtosResult[0]?.total || 0;
-
-            // Ordens em produção
-            const [ordensResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status IN ('em_producao', 'a_produzir', 'em_andamento', 'iniciado')
-            `);
-            const ordensEmProducao = ordensResult[0]?.total || 0;
-
-            // Estoque baixo (produtos com estoque abaixo do mínimo)
-            const [estoqueBaixoResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM produtos
-                WHERE quantidade_estoque < COALESCE(estoque_minimo, 10)
-                AND quantidade_estoque >= 0
-                AND marca = 'Aluforce'
-            `);
-            const estoqueBaixo = estoqueBaixoResult[0]?.total || 0;
-
-            // Entregas pendentes (esta semana) - usando data_prevista que existe na tabela
-            const [entregasResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status NOT IN ('entregue', 'concluido', 'cancelado', 'finalizado')
-                AND data_prevista BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
-            `);
-            const entregasPendentes = entregasResult[0]?.total || 0;
-
-            // Total de materiais
-            const [materiaisResult] = await pool.query('SELECT COUNT(*) as total FROM materiais');
-            const totalMateriais = materiaisResult[0]?.total || 0;
-
-            console.log(`📊 Dashboard PCP: Produtos=${totalProdutos}, Ordens=${ordensEmProducao}, Estoque Baixo=${estoqueBaixo}, Entregas=${entregasPendentes}, Materiais=${totalMateriais}`);
-
-            res.json({
-                totalProdutos,
-                ordensEmProducao,
-                estoqueBaixo,
-                entregasPendentes,
-                totalMateriais
-            });
-        } catch (error) {
-            console.error('❌ Erro ao carregar dashboard PCP:', error);
-            res.json({
-                totalProdutos: 0,
-                ordensEmProducao: 0,
-                estoqueBaixo: 0,
-                entregasPendentes: 0,
-                totalMateriais: 0
-            });
-        }
-    });
+    // [REMOVIDO] Rota /dashboard duplicada removida — rota correta está na linha ~136 acima
 
     // [REFACTORED] Diario de Producao (registro diario, CRUD)
     require('./pcp/diario-producao-routes')(router, deps);
