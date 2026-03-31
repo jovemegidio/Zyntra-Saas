@@ -8,6 +8,8 @@ const jwt = require('jsonwebtoken');
 
 function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool }) {
     const io = new Server(httpServer, {
+        transports: ['websocket'],
+        allowUpgrades: false,
         cors: {
             origin: function(origin, callback) {
                 if (!origin) {

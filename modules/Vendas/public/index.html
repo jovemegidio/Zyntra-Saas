@@ -501,7 +501,7 @@
 
         .notification-icon.payment {
             background: #d1fae5;
-            color: #10b981;
+            color: #225cfa;
         }
 
         .notification-content {
@@ -689,6 +689,122 @@
         }
 
         /* ========================================
+           CAMPOS OCULTOS PARA VENDEDORES
+           ======================================== */
+        body.role-vendedor .campo-vendedor-oculto {
+            display: none !important;
+        }
+
+        /* ========================================
+           BADGE ESTOQUE no card
+           ======================================== */
+        .badge-estoque {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        .badge-estoque.estoque-sim {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #93c5fd;
+        }
+        .badge-estoque.estoque-nao {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        /* ========================================
+           LIST VIEW - Substituição do Kanban
+           ======================================== */
+        .pedidos-list-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            background: var(--bg-gray);
+        }
+        .pedidos-list-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .pedidos-list-table thead th {
+            padding: 12px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            text-align: left;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .pedidos-list-table tbody tr {
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .pedidos-list-table tbody tr:hover {
+            background: #f0f7ff;
+        }
+        .pedidos-list-table tbody td {
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .pedidos-list-table .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .pedidos-list-table .status-badge.st-orcamento { background: #e0e7ff; color: #3730a3; }
+        .pedidos-list-table .status-badge.st-analise { background: #fef3c7; color: #92400e; }
+        .pedidos-list-table .status-badge.st-aprovado { background: #d1fae5; color: #065f46; }
+        .pedidos-list-table .status-badge.st-faturar { background: #dbeafe; color: #1e40af; }
+        .pedidos-list-table .status-badge.st-faturado { background: #f0fdf4; color: #166534; }
+        .pedidos-list-table .status-badge.st-recibo { background: #fce7f3; color: #9d174d; }
+        .pedidos-list-table .btn-status-move {
+            padding: 4px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            color: #475569;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .pedidos-list-table .btn-status-move:hover {
+            background: #f0f7ff;
+            border-color: #225cfa;
+            color: #225cfa;
+        }
+        .pedidos-list-table .td-valor {
+            font-weight: 600;
+            color: #0f172a;
+            white-space: nowrap;
+        }
+
+        /* ========================================
            KANBAN BOARD
            ======================================== */
         .kanban-container {
@@ -753,7 +869,7 @@
         }
 
         .column-indicator.aprovado {
-            background: #10b981;
+            background: #225cfa;
         }
 
         .column-indicator.faturar {
@@ -928,12 +1044,12 @@
 
         /* Cards Faturado - VERDE */
         .kanban-card.card-faturado {
-            border-left: 4px solid #059669;
+            border-left: 4px solid #1a4fd4;
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
 
         .card-badge.locked-faturado {
-            background: #059669;
+            background: #1a4fd4;
             color: white;
             font-size: 10px;
             padding: 2px 6px;
@@ -1184,9 +1300,9 @@
         }
 
         .badge-pagamento.avista {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
             color: white;
-            box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 1px 3px rgba(34, 92, 250, 0.3);
         }
 
         .badge-pagamento.parcelado {
@@ -2075,7 +2191,7 @@
 
         /* Botão Faturar Agora - Destaque Premium */
         .sidebar-action-btn.btn-faturar {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #1a4fd4 0%, #1340b0 100%);
             color: white;
             border: none;
             font-weight: 700;
@@ -2097,7 +2213,7 @@
         }
 
         .sidebar-action-btn.btn-faturar:hover {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(5, 150, 105, 0.5);
         }
@@ -2112,7 +2228,7 @@
 
         /* Botão Ver DANFE - Verde */
         .sidebar-action-btn.btn-danfe {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #1a4fd4 0%, #1340b0 100%);
             color: white;
             border: none;
             font-weight: 600;
@@ -2133,7 +2249,7 @@
         }
 
         .sidebar-action-btn.btn-danfe:hover {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
             transform: translateY(-2px);
             box-shadow: 0 6px 16px rgba(5, 150, 105, 0.45);
         }
@@ -2277,11 +2393,11 @@
         }
 
         .historico-item-pro.tipo-faturamento {
-            border-left-color: #10b981;
+            border-left-color: #225cfa;
         }
 
         .historico-item-pro.tipo-faturamento::before {
-            background: #10b981;
+            background: #225cfa;
         }
 
         .historico-item-pro.tipo-status {
@@ -2337,7 +2453,7 @@
 
         .historico-badge.badge-faturamento {
             background: #d1fae5;
-            color: #059669;
+            color: #1a4fd4;
         }
 
         .historico-badge.badge-status {
@@ -2584,8 +2700,8 @@
 
         .valor-input.highlight {
             background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-            border-color: #10b981;
-            color: #059669;
+            border-color: #225cfa;
+            color: #1a4fd4;
             font-weight: 700;
             font-size: 15px;
         }
@@ -2732,14 +2848,14 @@
         }
 
         .btn-table-action.success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
             color: white;
         }
 
         .btn-table-action.success:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #1a4fd4 0%, #1340b0 100%);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 4px 12px rgba(34, 92, 250, 0.4);
         }
 
         .btn-table-action.warning {
@@ -4038,11 +4154,11 @@
 
         .input-tarefa:focus {
             outline: none;
-            border-color: #10b981;
+            border-color: #225cfa;
         }
 
         .btn-add-tarefa {
-            background: #10b981;
+            background: #225cfa;
             color: white;
             border: none;
             width: 44px;
@@ -4053,7 +4169,7 @@
         }
 
         .btn-add-tarefa:hover {
-            background: #059669;
+            background: #1a4fd4;
         }
 
         .tarefa-item {
@@ -4068,7 +4184,7 @@
         }
 
         .tarefa-item:hover {
-            border-color: #10b981;
+            border-color: #225cfa;
         }
 
         .tarefa-item.concluida {
@@ -4085,7 +4201,7 @@
             width: 20px;
             height: 20px;
             cursor: pointer;
-            accent-color: #10b981;
+            accent-color: #225cfa;
         }
 
         .tarefa-texto {
@@ -4959,7 +5075,7 @@
             align-items: center;
             gap: 8px;
             padding: 12px 32px;
-            background: #10b981;
+            background: #225cfa;
             color: white;
             border: none;
             border-radius: 6px;
@@ -4970,7 +5086,7 @@
         }
 
         .btn-atualizar-filtro:hover {
-            background: #059669;
+            background: #1a4fd4;
         }
 
         /* Modal Selecionar Vendedor */
@@ -5846,7 +5962,7 @@
             <div class="quick-actions-bar"
                 style="display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                 <button class="btn-action-primary" onclick="abrirModalNovoPedido()"
-                    style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3); transition: all 0.2s;">
+                    style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #225cfa, #1a4fd4); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(34, 92, 250, 0.3); transition: all 0.2s;">
                     <i class="fas fa-plus"></i>
                     <span>Novo Pedido</span>
                 </button>
@@ -5872,8 +5988,62 @@
                 <a class="filter-link" id="filter-toggle">Exibindo tudo</a>
             </div>
 
-            <!-- Kanban Board -->
-            <div class="kanban-container">
+            <!-- Status Filter Tabs -->
+            <div style="display: flex; gap: 8px; padding: 0 20px 12px; flex-wrap: wrap;">
+                <button class="status-filter-btn active" data-filter="todos" onclick="filtrarListaPorStatus('todos', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #225cfa; color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+                    Todos <span id="count-todos" style="margin-left: 4px; opacity: 0.8;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="orcamento" onclick="filtrarListaPorStatus('orcamento', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #e0e7ff; background: white; color: #3730a3; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Orçamento <span id="count-orcamento" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="analise" onclick="filtrarListaPorStatus('analise', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #fef3c7; background: white; color: #92400e; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Análise <span id="count-analise" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="aprovado" onclick="filtrarListaPorStatus('aprovado', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #d1fae5; background: white; color: #065f46; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Aprovado <span id="count-aprovado" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="faturar" onclick="filtrarListaPorStatus('faturar', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #dbeafe; background: white; color: #1e40af; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Faturar <span id="count-faturar" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="faturado" onclick="filtrarListaPorStatus('faturado', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #f0fdf4; background: white; color: #166534; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Faturado <span id="count-faturado" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+                <button class="status-filter-btn" data-filter="recibo" onclick="filtrarListaPorStatus('recibo', this)"
+                    style="padding: 6px 14px; border-radius: 20px; border: 1px solid #fce7f3; background: white; color: #9d174d; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
+                    Recibo <span id="count-recibo" style="margin-left: 4px; opacity: 0.7;"></span>
+                </button>
+            </div>
+
+            <!-- List View -->
+            <div class="pedidos-list-view">
+                <table class="pedidos-list-table">
+                    <thead>
+                        <tr>
+                            <th>Nº Pedido</th>
+                            <th>Cliente</th>
+                            <th>Status</th>
+                            <th>Valor</th>
+                            <th>Pagamento</th>
+                            <th>Estoque</th>
+                            <th>Vendedor</th>
+                            <th>Data</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pedidos-list-tbody">
+                        <!-- Rows will be generated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Kanban Board (hidden - mantido para compatibilidade com JS existente) -->
+            <div class="kanban-container" style="display: none;">
                 <div class="kanban-board" id="kanban-board">
 
                     <!-- Coluna: Orçamento -->
@@ -5881,12 +6051,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Orçamento</div>
-                                <div class="column-count" id="count-orcamento">Carregando...</div>
                             </div>
                             <div class="column-indicator orcamento"></div>
                         </div>
                         <div class="kanban-column-content" id="col-orcamento">
-                            <!-- Cards serão inseridos aqui -->
                         </div>
                     </div>
 
@@ -5895,12 +6063,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Análise de Crédito</div>
-                                <div class="column-count" id="count-analise">12 registros</div>
                             </div>
                             <div class="column-indicator analise"></div>
                         </div>
                         <div class="kanban-column-content" id="col-analise">
-                            <!-- Cards -->
                         </div>
                     </div>
 
@@ -5909,12 +6075,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Pedido Aprovado</div>
-                                <div class="column-count" id="count-aprovado">5 registros</div>
                             </div>
                             <div class="column-indicator aprovado"></div>
                         </div>
                         <div class="kanban-column-content" id="col-aprovado">
-                            <!-- Cards -->
                         </div>
                     </div>
 
@@ -5923,12 +6087,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Faturar</div>
-                                <div class="column-count" id="count-faturar">23 registros</div>
                             </div>
                             <div class="column-indicator faturar"></div>
                         </div>
                         <div class="kanban-column-content" id="col-faturar">
-                            <!-- Cards -->
                         </div>
                         <div class="kanban-column-footer">
                             <button class="btn-action-card" id="btn-faturar-todos" onclick="faturarTodos()"
@@ -5943,12 +6105,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Faturado</div>
-                                <div class="column-count" id="count-faturado">52 registros</div>
                             </div>
                             <div class="column-indicator faturado"></div>
                         </div>
                         <div class="kanban-column-content" id="col-faturado">
-                            <!-- Cards -->
                         </div>
                         <div class="kanban-column-footer">
                             <button class="btn-action-card green" id="btn-comunicar-sefaz" onclick="comunicarSefaz()"
@@ -5963,15 +6123,10 @@
                         <div class="kanban-column-header">
                             <div>
                                 <div class="column-title">Recibo</div>
-                                <div class="column-count" id="count-recibo">Nenhum registro</div>
                             </div>
                             <div class="column-indicator recibo"></div>
                         </div>
                         <div class="kanban-column-content" id="col-recibo">
-                            <div class="empty-column">
-                                <i class="fas fa-receipt"></i>
-                                <p>Nenhum recibo pendente</p>
-                            </div>
                         </div>
                     </div>
 
@@ -6061,7 +6216,7 @@
                         </div>
                     </div>
 
-                    <!-- Linha de Vendedor, Parcelas, Cenário -->
+                    <!-- Linha de Vendedor -->
                     <div class="info-row">
                         <div class="info-field">
                             <label>Vendedor</label>
@@ -6069,34 +6224,42 @@
                                 style="background: #f9fafb; cursor: default;">
                         </div>
                         <div class="info-field">
-                            <label>Número de Parcelas</label>
-                            <input type="text" id="edit-parcelas" placeholder="Ex: 30" maxlength="3"
-                                oninput="validarParcelas(this)">
+                            <label>Tipo de Cliente</label>
+                            <select id="edit-tipo-cliente" onchange="aplicarTipoClienteEdit()">
+                                <option value="revenda">Revenda</option>
+                                <option value="consumidor_final">Consumidor Final</option>
+                            </select>
                         </div>
                         <div class="info-field" style="min-width: 0;">
-                            <label>Cenário Fiscal</label>
-                            <select id="edit-cenario-fiscal"
-                                style="width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                                <option value="monitoramento_automatico">Monitoramento Automático de Impostos -
-                                    Indústria, Comércio (Varejista), Comércio (Atacadista), Presta...</option>
-                                <option value="padrao">Padrão - Indústria, Comércio (Varejista), Comércio (Atacadista),
-                                    Prestador de Serviço, Construção Civil</option>
+                            <label>Estado de Destino</label>
+                            <select id="edit-estado-destino" onchange="aplicarEstadoDestinoEdit()">
+                                <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                <option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
                             </select>
                         </div>
                         <button type="button" class="btn-atualizar-impostos" style="white-space: nowrap;"
                             onclick="atualizarImpostosDosItens()">
-                            <i class="fas fa-sync-alt"></i> Atualizar os impostos dos itens
+                            <i class="fas fa-sync-alt"></i> Atualizar impostos
                         </button>
                     </div>
+                    <!-- Hidden fields for backward compat -->
+                    <input type="hidden" id="edit-parcelas" value="">
+                    <select id="edit-cenario-fiscal" style="display:none;"><option value="monitoramento_automatico" selected>Auto</option></select>
 
-                    <!-- Tabs -->
+                    <!-- Tabs - Frete first, then Itens -->
                     <div class="modal-tabs">
+                        <button class="modal-tab" data-tab="frete" onclick="switchModalTab('frete')">Frete e Transporte</button>
                         <button class="modal-tab active" data-tab="itens" onclick="switchModalTab('itens')">Itens da
                             Venda</button>
                         <button class="modal-tab" data-tab="departamentos"
                             onclick="switchModalTab('departamentos')">Departamentos</button>
-                        <button class="modal-tab" data-tab="frete" onclick="switchModalTab('frete')">Frete e Outras
-                            Despesas</button>
                         <button class="modal-tab" data-tab="informações"
                             onclick="switchModalTab('informações')">Informações Adicionais</button>
                         <button class="modal-tab" data-tab="parcelas"
@@ -6199,12 +6362,12 @@
                                     <option value="9">9 - Sem Ocorrência de Transporte</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group campo-vendedor-oculto">
                                 <label>Placa do Veículo</label>
                                 <input type="text" id="edit-placa-veiculo" placeholder="ABC-1234" maxlength="8"
                                     style="text-transform: uppercase;">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group campo-vendedor-oculto">
                                 <label>UF</label>
                                 <select id="edit-veiculo-uf" style="min-width: 70px;">
                                     <option value=""></option>
@@ -6237,14 +6400,14 @@
                                     <option value="TO">TO</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group campo-vendedor-oculto">
                                 <label>RNTRC (ANTT)</label>
                                 <input type="text" id="edit-rntrc" placeholder="Registro ANTT" maxlength="20">
                             </div>
                         </div>
 
-                        <!-- Linha 2: Volumes -->
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
+                        <!-- Linha 2: Volumes (oculto para vendedor) -->
+                        <div class="form-row campo-vendedor-oculto" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
                             <div class="form-group">
                                 <label>Quantidade de Volumes</label>
                                 <input type="number" id="edit-qtd-volumes" min="0" placeholder="0">
@@ -6263,8 +6426,8 @@
                             </div>
                         </div>
 
-                        <!-- Linha 3: Pesos e Valores -->
-                        <div class="form-row"
+                        <!-- Linha 3: Pesos e Valores (oculto para vendedor) -->
+                        <div class="form-row campo-vendedor-oculto"
                             style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 12px;">
                             <div class="form-group">
                                 <label>Peso Líquido (Kg)</label>
@@ -6295,8 +6458,8 @@
                             </div>
                         </div>
 
-                        <!-- Linha 4: Lacre, Despesas, Previsão, Rastreio -->
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
+                        <!-- Linha 4: Lacre, Despesas, Previsão, Rastreio (oculto para vendedor) -->
+                        <div class="form-row campo-vendedor-oculto" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
                             <div class="form-group">
                                 <label>Número do Lacre</label>
                                 <input type="text" id="edit-número-lacre" placeholder="Lacre">
@@ -6679,7 +6842,7 @@
                     <input type="text" id="input-nova-tarefa" placeholder="Adicionar nova tarefa..."
                         class="input-tarefa"
                         style="flex: 1; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 14px; transition: all 0.2s;"
-                        onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16,185,129,0.1)'"
+                        onfocus="this.style.borderColor='#225cfa'; this.style.boxShadow='0 0 0 3px rgba(34, 92, 250,0.1)'"
                         onblur="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none'">
                     <button type="button" class="btn-add-tarefa" onclick="adicionarTarefa()"
                         style="background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; border: none; width: 48px; height: 48px; border-radius: 12px; cursor: pointer; font-size: 18px; transition: all 0.2s;"
@@ -6739,7 +6902,7 @@
                                     <i class="fas fa-file-alt"></i> Documento Fiscal
                                 </span>
                                 <span
-                                    style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #047857; background: #d1fae5; padding: 4px 10px; border-radius: 6px; font-weight: 500;">
+                                    style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #1340b0; background: #d1fae5; padding: 4px 10px; border-radius: 6px; font-weight: 500;">
                                     <i class="fas fa-check-circle"></i> Completo
                                 </span>
                             </div>
@@ -6766,7 +6929,7 @@
                         </div>
                         <div
                             style="display: flex; align-items: center; gap: 10px; padding: 12px; background: #fff; border-radius: 10px; border: 1px solid #e2e8f0;">
-                            <i class="fas fa-calculator" style="color: #10b981; font-size: 14px;"></i>
+                            <i class="fas fa-calculator" style="color: #225cfa; font-size: 14px;"></i>
                             <span style="font-size: 13px; color: #475569;">Valores e Totais</span>
                         </div>
                         <div
@@ -7008,7 +7171,7 @@
             style="max-width: 1100px; height: 95vh; display: flex; flex-direction: column; position: relative;">
             <!-- Header -->
             <div class="modal-header-omie" style="flex-shrink: 0;">
-                <h2><i class="fas fa-file-invoice" style="color: #f97316;"></i> Incluir Orçamento</h2>
+                <h2><i class="fas fa-file-invoice" style="color: #f97316;"></i> Novo Orçamento de Venda</h2>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button class="close-btn" onclick="fecharModalNovoOrcamento()">
                         Fechar <i class="fas fa-times"></i>
@@ -7098,7 +7261,7 @@
                         </div>
                     </div>
 
-                    <!-- Linha Vendedor e Parcelas -->
+                    <!-- Linha Vendedor e Tipo Cliente -->
                     <div class="orcamento-info-row">
                         <div class="orcamento-field-group" style="position: relative;">
                             <label>Vendedor</label>
@@ -7109,42 +7272,43 @@
                             </div>
                         </div>
                         <div class="orcamento-field-group">
-                            <label>Número de Parcelas</label>
+                            <label>Tipo de Cliente</label>
                             <div class="input-with-btn">
-                                <select id="novo-parcelas" class="orcamento-input" onchange="sincronizarParcelasAba()">
-                                    <option value="a_vista">À Vista</option>
-                                    <option value="30">30 dias</option>
-                                    <option value="30_60">30/60 dias</option>
-                                    <option value="30_60_90">30/60/90 dias</option>
-                                    <option value="personalizado">Personalizado</option>
+                                <select id="novo-tipo-cliente" class="orcamento-input" onchange="aplicarTipoClienteNovo()">
+                                    <option value="revenda">Revenda</option>
+                                    <option value="consumidor_final">Consumidor Final</option>
                                 </select>
-                                <button type="button" class="btn-input-action"
-                                    onclick="ativarAbaOrcamento('parcelas')"><i class="fas fa-cog"></i></button>
                             </div>
                         </div>
                         <div class="orcamento-field-group" style="flex: 1; min-width: 0;">
-                            <label>Cenário Fiscal</label>
+                            <label>Estado de Destino</label>
                             <div class="input-with-btn">
-                                <select id="novo-cenario-fiscal" class="orcamento-input"
-                                    onchange="aplicarCenarioFiscal()" style="text-overflow: ellipsis;">
-                                    <option value="monitoramento_automatico">Monitoramento Automático de Impostos -
-                                        Indústria, Comércio (Varejista), Comércio (Atacadista), Prestador de Serviço,
-                                        Construção Civil</option>
-                                    <option value="padrao">Padrão - Indústria, Comércio (Varejista), Comércio
-                                        (Atacadista), Prestador de Serviço, Construção Civil</option>
+                                <select id="novo-estado-destino" class="orcamento-input" onchange="aplicarEstadoDestinoNovo()">
+                                    <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                    <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                    <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                    <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                    <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                    <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                    <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                    <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                    <option value="SP" selected>SP</option><option value="SE">SE</option><option value="TO">TO</option>
                                 </select>
                                 <button type="button" class="btn-input-action" onclick="ativarAbaOrcamento('impostos')"
                                     title="Configurar Impostos"><i class="fas fa-cog"></i></button>
                             </div>
                         </div>
                     </div>
+                    <!-- Hidden fields for backward compat -->
+                    <select id="novo-parcelas" class="orcamento-input" style="display:none;"><option value="a_vista">À Vista</option></select>
+                    <select id="novo-cenario-fiscal" class="orcamento-input" style="display:none;"><option value="monitoramento_automatico" selected>Auto</option></select>
 
-                    <!-- Abas -->
+                    <!-- Abas - Frete first -->
                     <div class="orcamento-tabs">
+                        <button class="orcamento-tab" data-tab="frete">Frete e Transporte</button>
                         <button class="orcamento-tab active" data-tab="itens">Itens da Venda</button>
                         <button class="orcamento-tab" data-tab="impostos">Impostos</button>
                         <button class="orcamento-tab" data-tab="departamentos">Departamentos</button>
-                        <button class="orcamento-tab" data-tab="frete">Frete e Outras Despesas</button>
                         <button class="orcamento-tab" data-tab="info">Informações Adicionais</button>
                         <button class="orcamento-tab" data-tab="parcelas">Parcelas</button>
                         <button class="orcamento-tab" data-tab="obs">Observações</button>
@@ -7362,8 +7526,8 @@
                                     style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px;">
                                     <div
                                         style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0;">
-                                        <i class="fas fa-industry" style="color: #059669; font-size: 18px;"></i>
-                                        <h4 style="margin: 0; color: #047857; font-weight: 600;">IPI</h4>
+                                        <i class="fas fa-industry" style="color: #1a4fd4; font-size: 18px;"></i>
+                                        <h4 style="margin: 0; color: #1340b0; font-weight: 600;">IPI</h4>
                                         <label class="toggle-mini" style="margin-left: auto;">
                                             <input type="checkbox" id="impostos-ipi-ativo" onchange="toggleIPI()">
                                             <span class="toggle-slider-mini"></span>
@@ -7400,7 +7564,7 @@
                                                 IPI</label>
                                             <input type="text" id="impostos-ipi-valor"
                                                 class="imposto-input valor destaque" value="0,00" readonly
-                                                style="background: #d1fae5; color: #047857; font-weight: 600;">
+                                                style="background: #d1fae5; color: #1340b0; font-weight: 600;">
                                         </div>
                                     </div>
                                 </div>
@@ -8144,38 +8308,26 @@
                     </div>
                 </div>
 
-                <!-- Seção Impostos e Informações da NF-e -->
-                <div class="section-row-split">
+                <!-- Seção Impostos e Informações da NF-e (ocultos - monitoramento automático) -->
+                <div class="section-row-split" style="display: none;">
                     <div class="section-omie" style="flex: 1;">
                         <h3 class="section-title-omie">Impostos</h3>
                         <div class="field-group">
                             <label>Cenário Fiscal</label>
                             <div class="input-with-clear">
-                                <select id="item-pedido-cenario">
-                                    <option value="" disabled>Selecione o cenário fiscal...</option>
+                                <select id="item-pedido-cenario" style="display:none;">
                                     <option value="monitoramento_automatico" selected>Monitoramento Automático de
                                         Impostos</option>
-                                    <option value="padrao">Padrão</option>
-                                    <option value="industria">Indústria</option>
-                                    <option value="comercio_varejo">Comércio (Varejista)</option>
-                                    <option value="comercio_atacado">Comércio (Atacadista)</option>
-                                    <option value="prestador_servico">Prestador de Serviço</option>
-                                    <option value="construcao_civil">Construção Civil</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="section-omie" style="flex: 1;">
-                        <h3 class="section-title-omie">Informações da NF-e</h3>
                         <div class="section-row">
                             <div class="field-group" style="flex: 1;">
-                                <label>Número do Pedido de Compra</label>
-                                <input type="text" id="item-pedido-npc" placeholder="Nº do pedido">
+                                <input type="hidden" id="item-pedido-npc" value="">
                             </div>
-                            <div class="field-group" style="flex: 0 0 120px;">
-                                <label>Item do Pedido de Compra</label>
-                                <input type="number" id="item-pedido-item-npc" value="0" class="input-number">
-                            </div>
+                            <input type="hidden" id="item-pedido-item-npc" value="0">
                         </div>
                     </div>
                 </div>
@@ -8321,13 +8473,13 @@
                     style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); padding: 20px 24px; border-bottom: 1px solid #a7f3d0;">
                     <div style="display: flex; align-items: center; gap: 16px;">
                         <div
-                            style="width: 56px; height: 56px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
-                            <i class="fas fa-file-invoice-dollar" style="font-size: 26px; color: #059669;"></i>
+                            style="width: 56px; height: 56px; background: white; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(34, 92, 250, 0.2);">
+                            <i class="fas fa-file-invoice-dollar" style="font-size: 26px; color: #1a4fd4;"></i>
                         </div>
                         <div>
                             <h3 style="margin: 0 0 4px 0; font-size: 16px; color: #065f46; font-weight: 600;">Confirmar
                                 Faturamento</h3>
-                            <p id="faturar-info" style="margin: 0; color: #047857; font-size: 14px;">Você está prestes a
+                            <p id="faturar-info" style="margin: 0; color: #1340b0; font-size: 14px;">Você está prestes a
                                 faturar X pedidos.</p>
                         </div>
                     </div>
@@ -8340,7 +8492,7 @@
                         <span
                             style="font-size: 13px; font-weight: 600; color: #374151; text-transform: uppercase; letter-spacing: 0.5px;">Pedidos
                             Selecionados</span>
-                        <span id="faturar-total" style="font-size: 13px; color: #059669; font-weight: 600;"></span>
+                        <span id="faturar-total" style="font-size: 13px; color: #1a4fd4; font-weight: 600;"></span>
                     </div>
                     <div id="faturar-lista"
                         style="max-height: 220px; overflow-y: auto; border-radius: 12px; border: 1px solid #e5e7eb; background: #fafafa;">
@@ -8369,7 +8521,7 @@
                     <i class="fas fa-times"></i> Cancelar
                 </button>
                 <button type="button" onclick="confirmarFaturarTodos()"
-                    style="padding: 10px 24px; border: none; background: linear-gradient(135deg, #059669, #10b981); color: white; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                    style="padding: 10px 24px; border: none; background: linear-gradient(135deg, #1a4fd4, #225cfa); color: white; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3);">
                     <i class="fas fa-check-circle"></i> Confirmar Faturamento
                 </button>
             </div>
@@ -8625,7 +8777,7 @@
                 <button onclick="fecharModalInfoFisco()"
                     style="background: white; color: #475569; border: 1px solid #e2e8f0; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Cancelar</button>
                 <button onclick="salvarInfoFisco()"
-                    style="background: #059669; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Salvar</button>
+                    style="background: #1a4fd4; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;">Salvar</button>
             </div>
         </div>
     </div>
@@ -10233,6 +10385,60 @@
         // showToast: definição real em seção "MODAL CONFIRMAÇÃO ALTERAÇÕES NÃO SALVAS" (redireciona para showNotification)
 
         // ========================================
+        // CONSUMIDOR FINAL / REVENDA — PRICING BY STATE
+        // ========================================
+        function aplicarTipoClienteEdit() {
+            const tipo = document.getElementById('edit-tipo-cliente')?.value || 'revenda';
+            console.log('[TIPO_CLIENTE] Edit modal tipo:', tipo);
+            // Auto-update impostos based on tipo
+            atualizarImpostosPorEstadoTipo('edit');
+        }
+        function aplicarTipoClienteNovo() {
+            const tipo = document.getElementById('novo-tipo-cliente')?.value || 'revenda';
+            console.log('[TIPO_CLIENTE] Novo modal tipo:', tipo);
+            atualizarImpostosPorEstadoTipo('novo');
+        }
+        function aplicarEstadoDestinoEdit() {
+            const uf = document.getElementById('edit-estado-destino')?.value || 'SP';
+            console.log('[ESTADO] Edit modal UF:', uf);
+            atualizarImpostosPorEstadoTipo('edit');
+        }
+        function aplicarEstadoDestinoNovo() {
+            const uf = document.getElementById('novo-estado-destino')?.value || 'SP';
+            console.log('[ESTADO] Novo modal UF:', uf);
+            atualizarImpostosPorEstadoTipo('novo');
+        }
+        function atualizarImpostosPorEstadoTipo(modal) {
+            const prefix = modal === 'edit' ? 'edit' : 'novo';
+            const tipo = document.getElementById(prefix + '-tipo-cliente')?.value || 'revenda';
+            const uf = document.getElementById(prefix + '-estado-destino')?.value || 'SP';
+            // Basic ICMS table (same as PCP module)
+            const icmsTable = {
+                'AC': {icms:17, difal:10, st:3}, 'AL': {icms:18, difal:6, st:3}, 'AP': {icms:18, difal:6, st:3},
+                'AM': {icms:20, difal:8, st:3}, 'BA': {icms:20.5, difal:8.5, st:3}, 'CE': {icms:20, difal:8, st:3},
+                'DF': {icms:20, difal:8, st:3}, 'ES': {icms:17, difal:5, st:3}, 'GO': {icms:19, difal:7, st:3},
+                'MA': {icms:22, difal:10, st:3}, 'MT': {icms:17, difal:5, st:3}, 'MS': {icms:17, difal:5, st:3},
+                'MG': {icms:18, difal:6, st:11.66}, 'PA': {icms:19, difal:7, st:3}, 'PB': {icms:20, difal:8, st:3},
+                'PR': {icms:19.5, difal:7.5, st:3}, 'PE': {icms:20.5, difal:8.5, st:3}, 'PI': {icms:21, difal:9, st:3},
+                'RJ': {icms:22, difal:10, st:3}, 'RN': {icms:20, difal:8, st:3}, 'RS': {icms:17, difal:5, st:3},
+                'RO': {icms:17.5, difal:5.5, st:3}, 'RR': {icms:20, difal:8, st:3}, 'SC': {icms:17, difal:5, st:3},
+                'SP': {icms:18, difal:0, st:3}, 'SE': {icms:19, difal:7, st:3}, 'TO': {icms:20, difal:8, st:3}
+            };
+            const data = icmsTable[uf] || {icms:18, difal:0, st:3};
+            // Revenda: paga ST (sem DIFAL); Consumidor Final: paga DIFAL (sem ST)
+            const icms = data.icms;
+            const difal = tipo === 'consumidor_final' ? data.difal : 0;
+            const st = tipo === 'revenda' ? data.st : 0;
+            console.log(`[IMPOSTOS] ${uf} ${tipo} → ICMS:${icms}% DIFAL:${difal}% ST:${st}%`);
+            showToast(`Impostos atualizados: ${uf} · ${tipo === 'revenda' ? 'Revenda' : 'Cons. Final'} — ICMS ${icms}% | DIFAL ${difal}% | ST ${st}%`, 'info');
+        }
+
+        // ========================================
+        // VIEW MODE: LIST vs KANBAN
+        // ========================================
+        let _viewMode = 'list'; // Default to list view
+
+        // ========================================
         // DADOS DO KANBAN (Carregados da API)
         // ========================================
         // Dados iniciais vazios - serão carregados da API
@@ -10558,6 +10764,12 @@
             // Criar badge de condição de pagamento
             const badgePagamento = criarBadgePagamento(parcelas);
 
+            // Badge de estoque
+            const temEstoque = item.estoque_baixado === 1 || item.estoque_baixado === true;
+            const estoqueBadge = temEstoque
+                ? '<span class="badge-estoque estoque-sim"><i class="fas fa-box"></i> Estoque</span>'
+                : (coluna === 'aprovado' || coluna === 'faturar' ? '<span class="badge-estoque estoque-nao"><i class="fas fa-exclamation-triangle"></i> Sem Baixa</span>' : '');
+
             return `
                 <div class="kanban-card ${cardBloqueadoClass}" draggable="${draggableAttr}" data-id="${item.id}" data-vendedor-id="${item.vendedor_id || ''}" data-coluna="${coluna}" data-percentual="${item.percentual_faturado || 0}" ondblclick="abrirModalEditar(${item.id})">
                     ${lockBadge}
@@ -10571,7 +10783,7 @@
                     </div>
                     <div class="card-title">${escaparHTML(item.cliente || 'Cliente não informado')}</div>
                     <span class="card-status ${statusClass}">${escaparHTML(item.status || 'Aguardando')}</span>
-                    <div class="card-value">R$ ${valorFormatado} ${badgePagamento}</div>
+                    <div class="card-value">R$ ${valorFormatado} ${badgePagamento} ${estoqueBadge}</div>
                     ${parcialIndicator}
                     <div class="card-origin">
                         <i class="fas fa-check-circle"></i>
@@ -10631,6 +10843,138 @@
 
             // Atualizar contadores
             updateCounters();
+
+            // Renderizar a lista
+            renderListView();
+        }
+
+        // ========================================
+        // LIST VIEW RENDERING
+        // ========================================
+        let filtroStatusAtual = 'todos';
+
+        function filtrarListaPorStatus(status, btn) {
+            filtroStatusAtual = status;
+            // Atualizar botões ativos
+            document.querySelectorAll('.status-filter-btn').forEach(b => {
+                b.style.background = 'white';
+                b.style.color = b.dataset.filter === 'orcamento' ? '#3730a3' : b.dataset.filter === 'analise' ? '#92400e' : b.dataset.filter === 'aprovado' ? '#065f46' : b.dataset.filter === 'faturar' ? '#1e40af' : b.dataset.filter === 'faturado' ? '#166534' : b.dataset.filter === 'recibo' ? '#9d174d' : '#475569';
+                b.style.fontWeight = '500';
+            });
+            if (btn) {
+                btn.style.background = '#225cfa';
+                btn.style.color = 'white';
+                btn.style.fontWeight = '600';
+            }
+            renderListView();
+        }
+
+        function renderListView() {
+            const tbody = document.getElementById('pedidos-list-tbody');
+            if (!tbody) return;
+
+            const statusMap = {
+                'orcamento': { label: 'Orçamento', cls: 'st-orcamento' },
+                'analise': { label: 'Análise de Crédito', cls: 'st-analise' },
+                'aprovado': { label: 'Aprovado', cls: 'st-aprovado' },
+                'faturar': { label: 'Faturar', cls: 'st-faturar' },
+                'faturado': { label: 'Faturado', cls: 'st-faturado' },
+                'recibo': { label: 'Recibo', cls: 'st-recibo' }
+            };
+
+            // Colunas a exibir
+            const colunas = filtroStatusAtual === 'todos'
+                ? ['orcamento', 'analise', 'aprovado', 'faturar', 'faturado', 'recibo']
+                : [filtroStatusAtual];
+
+            let allItems = [];
+            colunas.forEach(col => {
+                (dadosVendas[col] || []).forEach(item => {
+                    allItems.push({ ...item, _coluna: col });
+                });
+            });
+
+            // Atualizar contadores
+            const totalEl = document.getElementById('count-todos');
+            if (totalEl) {
+                const total = Object.values(dadosVendas).reduce((s, arr) => s + (arr ? arr.length : 0), 0);
+                totalEl.textContent = `(${total})`;
+            }
+
+            if (allItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #94a3b8;"><i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 8px; display: block;"></i>Nenhum pedido encontrado</td></tr>';
+                return;
+            }
+
+            // Ordenar por ID desc (mais recentes primeiro)
+            allItems.sort((a, b) => (b.id || 0) - (a.id || 0));
+
+            tbody.innerHTML = allItems.map(item => {
+                const st = statusMap[item._coluna] || { label: item._coluna, cls: '' };
+                const valor = (item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                const pagamento = item.parcelas || item.tipo || item.condicao_pagamento || 'À Vista';
+                const temEstoque = item.estoque_baixado === 1 || item.estoque_baixado === true;
+                const estoqueBadge = temEstoque
+                    ? '<span class="badge-estoque estoque-sim"><i class="fas fa-box"></i> Baixado</span>'
+                    : (['aprovado', 'faturar'].includes(item._coluna)
+                        ? '<span class="badge-estoque estoque-nao"><i class="fas fa-exclamation-triangle"></i> Pendente</span>'
+                        : '<span style="color:#94a3b8;font-size:11px;">—</span>');
+                const vendedor = item.vendedor_nome || item.vendedor || '—';
+                const data = item.data_criacao ? new Date(item.data_criacao).toLocaleDateString('pt-BR') : '—';
+
+                // Botões de ação baseados no status
+                let acoes = `<button class="btn-status-move" onclick="event.stopPropagation(); abrirModalEditar(${item.id})" title="Editar"><i class="fas fa-edit"></i></button>`;
+
+                if (item._coluna === 'orcamento') {
+                    acoes += ` <button class="btn-status-move" onclick="event.stopPropagation(); moverPedidoLista(${item.id}, 'orcamento', 'analise')" title="Enviar p/ Análise"><i class="fas fa-arrow-right"></i></button>`;
+                } else if (item._coluna === 'analise') {
+                    acoes += ` <button class="btn-status-move" onclick="event.stopPropagation(); abrirModalAprovacaoCredito(${item.id}, 'analise')" title="Aprovar Crédito"><i class="fas fa-check"></i></button>`;
+                } else if (item._coluna === 'aprovado') {
+                    acoes += ` <button class="btn-status-move" onclick="event.stopPropagation(); moverPedidoLista(${item.id}, 'aprovado', 'faturar')" title="Mover p/ Faturar"><i class="fas fa-arrow-right"></i></button>`;
+                } else if (item._coluna === 'faturar') {
+                    acoes += ` <button class="btn-status-move" onclick="event.stopPropagation(); abrirModalEscolhaFaturamentoKanban(${item.id}, 'faturar')" title="Faturar"><i class="fas fa-file-invoice"></i></button>`;
+                }
+
+                return `<tr ondblclick="abrirModalEditar(${item.id})" data-coluna="${item._coluna}" data-id="${item.id}">
+                    <td style="font-weight: 600; color: #0f172a;">Nº ${item.numero_pedido || item.id}</td>
+                    <td>${escaparHTML(item.cliente || '—')}</td>
+                    <td><span class="status-badge ${st.cls}">${st.label}</span></td>
+                    <td class="td-valor">R$ ${valor}</td>
+                    <td style="font-size: 12px;">${escaparHTML(pagamento)}</td>
+                    <td>${estoqueBadge}</td>
+                    <td style="font-size: 12px; color: #64748b;">${escaparHTML(vendedor)}</td>
+                    <td style="font-size: 12px; color: #64748b;">${data}</td>
+                    <td style="white-space: nowrap;">${acoes}</td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function moverPedidoLista(pedidoId, colunaOrigem, colunaDestino) {
+            try {
+                const statusAPI = colunaParaStatus[colunaDestino] || colunaDestino;
+                const resp = await fetch(`/api/vendas/pedidos/${pedidoId}/status`, {
+                    method: 'PUT',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: statusAPI })
+                });
+                if (!resp.ok) throw new Error('Erro ao mover pedido');
+                showToast(`Pedido #${pedidoId} movido para ${colunaDestino}`, 'success');
+                await carregarDadosKanban();
+            } catch (err) {
+                showToast('Erro: ' + err.message, 'error');
+            }
+        }
+
+        // ========================================
+        // OCULTAR CAMPOS DO VENDEDOR
+        // ========================================
+        function aplicarVisibilidadeVendedor() {
+            if (usuarioLogado && usuarioLogado.role === 'vendedor') {
+                document.body.classList.add('role-vendedor');
+            } else {
+                document.body.classList.remove('role-vendedor');
+            }
         }
 
         // Função para atualizar apenas um card específico no Kanban
@@ -12240,7 +12584,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 .totais-row .lbl { color: #475569; font-weight: 600; }
 .totais-row .val { color: #0f172a; font-weight: 600; }
 .totais-row.neg .val { color: #dc2626; }
-.totais-row.total-final { background: #059669; border-bottom: none; padding: 10px 14px; }
+.totais-row.total-final { background: #1a4fd4; border-bottom: none; padding: 10px 14px; }
 .totais-row.total-final .lbl { color: #fff; font-size: 12px; font-weight: 800; }
 .totais-row.total-final .val { color: #fff; font-size: 14px; font-weight: 900; }
 
@@ -12575,6 +12919,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             // Fechar modal anterior se existir
             fecharModalEscolhaFaturamento();
 
+            // Chamado da lista (sem pedidoAtual definido) — buscar pelo ID
+            if (!pedidoAtual || pedidoAtual.id != pedidoId) {
+                const found = (window.dadosVendas || []).find(p => p.id == pedidoId);
+                if (found) pedidoAtual = found;
+            }
+            if (!pedidoAtual) return;
+
             const valorFormatado = formatarMoeda(pedidoAtual.valor);
             const percentualAtual = parseFloat(pedidoAtual.percentual_faturado) || 0;
 
@@ -12663,6 +13014,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         function abrirModalAprovacaoCredito(pedidoId, colunaOrigem) {
             fecharModalAprovacaoCredito();
 
+            // Se pedidoAtual não foi definido (ex: chamada via botão na lista),
+            // busca o pedido nos dadosVendas pelo id
+            if (!pedidoAtual) {
+                const coluna = colunaOrigem || 'analise';
+                const dados = window.dadosVendas || {};
+                let found = (dados[coluna] || []).find(p => p.id == pedidoId);
+                if (!found) {
+                    found = Object.values(dados).flat().find(p => p.id == pedidoId);
+                }
+                if (!found) {
+                    alert('Não foi possível carregar os dados do pedido. Atualize a página e tente novamente.');
+                    return;
+                }
+                pedidoAtual = { ...found, _coluna: coluna };
+            }
+
             const valorFormatado = formatarMoeda(pedidoAtual.valor);
             const clienteNome = pedidoAtual.cliente || pedidoAtual.cliente_nome || 'N/A';
 
@@ -12670,7 +13037,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             <div id="modal-aprovacao-credito-kanban" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); z-index: 10000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease-out;" onclick="if(event.target===this) fecharModalAprovacaoCredito()">
                 <div style="background: #ffffff; border-radius: 16px; width: 95%; max-width: 560px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto;">
                     <!-- Header -->
-                    <div style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); padding: 24px; text-align: center;">
+                    <div style="background: linear-gradient(135deg, #1a4fd4 0%, #225cfa 100%); padding: 24px; text-align: center;">
                         <div style="width: 56px; height: 56px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px;">
                             <i class="fas fa-clipboard-check" style="color: white; font-size: 28px;"></i>
                         </div>
@@ -12684,69 +13051,46 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         <!-- Crédito Liberado -->
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
-                                <i class="fas fa-dollar-sign" style="color: #059669; margin-right: 6px;"></i>Crédito Liberado (R$) <span style="color: #ef4444;">*</span>
+                                <i class="fas fa-dollar-sign" style="color: #1a4fd4; margin-right: 6px;"></i>Crédito Liberado (R$) <span style="color: #ef4444;">*</span>
                             </label>
                             <input type="text" id="aprov-credito-liberado" placeholder="Ex: 50.000,00"
                                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; transition: border-color 0.2s; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'"
+                                onfocus="this.style.borderColor='#1a4fd4'" onblur="this.style.borderColor='#d1d5db'"
                                 oninput="mascaraMoedaAprov(this)">
+                            <div style="font-size: 11px; color: #6b7280; margin-top: 4px;">
+                                <i class="fas fa-info-circle" style="margin-right: 4px;"></i>Valor disponível conforme análise de CNPJ do cliente
+                            </div>
                         </div>
 
-                        <!-- Condição de Pagamento -->
+                        <!-- Condição de Pagamento (mesma do modal principal) -->
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
                                 <i class="fas fa-credit-card" style="color: #3b82f6; margin-right: 6px;"></i>Condição de Pagamento <span style="color: #ef4444;">*</span>
                             </label>
                             <select id="aprov-condicao-pagamento"
                                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; background: white; cursor: pointer; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                                onfocus="this.style.borderColor='#1a4fd4'" onblur="this.style.borderColor='#d1d5db'">
                                 <option value="">Selecione...</option>
-                                <option value="a_vista">À Vista</option>
-                                <option value="30dd">30 DD</option>
-                                <option value="30_60dd">30/60 DD</option>
-                                <option value="30_60_90dd">30/60/90 DD</option>
-                                <option value="28dd">28 DD</option>
-                                <option value="28_56dd">28/56 DD</option>
-                                <option value="28_56_84dd">28/56/84 DD</option>
-                                <option value="boleto_30">Boleto 30 dias</option>
-                                <option value="boleto_60">Boleto 60 dias</option>
-                                <option value="cartao">Cartão</option>
-                                <option value="cheque">Cheque</option>
-                                <option value="outro">Outro (especificar)</option>
+                                <option value="a vista">À Vista</option>
+                                <option value="28/35/42/49">28/35/42/49 dias</option>
+                                <option value="30/60">30/60 dias</option>
+                                <option value="30/60/90">30/60/90 dias</option>
+                                <option value="30/60/90/120">30/60/90/120 dias</option>
                             </select>
-                        </div>
-
-                        <!-- Condição personalizada (oculto por padrão) -->
-                        <div id="aprov-condicao-custom-wrapper" style="margin-bottom: 16px; display: none;">
-                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
-                                <i class="fas fa-edit" style="color: #8b5cf6; margin-right: 6px;"></i>Especificar Condição
-                            </label>
-                            <input type="text" id="aprov-condicao-custom" placeholder="Descreva a condição de pagamento..."
-                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
-                        </div>
-
-                        <!-- Prazo de Entrega -->
-                        <div style="margin-bottom: 16px;">
-                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
-                                <i class="fas fa-truck" style="color: #f59e0b; margin-right: 6px;"></i>Prazo de Entrega
-                            </label>
-                            <input type="text" id="aprov-prazo-entrega" placeholder="Ex: 15 dias úteis, Imediato..."
-                                style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
                         </div>
 
                         <!-- Parecer -->
                         <div style="margin-bottom: 16px;">
                             <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
-                                <i class="fas fa-gavel" style="color: #059669; margin-right: 6px;"></i>Parecer <span style="color: #ef4444;">*</span>
+                                <i class="fas fa-gavel" style="color: #1a4fd4; margin-right: 6px;"></i>Parecer <span style="color: #ef4444;">*</span>
                             </label>
                             <select id="aprov-parecer"
                                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; background: white; cursor: pointer; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'">
+                                onfocus="this.style.borderColor='#1a4fd4'" onblur="this.style.borderColor='#d1d5db'">
                                 <option value="">Selecione...</option>
+                                <option value="reprovado">Reprovado</option>
+                                <option value="aprovado_a_vista">Aprovado à Vista</option>
                                 <option value="aprovado">Aprovado</option>
-                                <option value="aprovado_condicional">Aprovado com Restrição</option>
                             </select>
                         </div>
 
@@ -12757,15 +13101,24 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             </label>
                             <textarea id="aprov-observacoes" rows="3" placeholder="Observações sobre a análise de crédito..."
                                 style="width: 100%; padding: 10px 14px; border: 1.5px solid #d1d5db; border-radius: 10px; font-size: 14px; resize: vertical; font-family: inherit; box-sizing: border-box;"
-                                onfocus="this.style.borderColor='#059669'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+                                onfocus="this.style.borderColor='#1a4fd4'" onblur="this.style.borderColor='#d1d5db'"></textarea>
+                        </div>
+
+                        <!-- Histórico de Análises -->
+                        <div id="aprov-historico-container" style="margin-bottom: 16px; display: none;">
+                            <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                                <i class="fas fa-history" style="color: #8b5cf6; margin-right: 6px;"></i>Histórico de Análises
+                            </label>
+                            <div id="aprov-historico-list" style="max-height: 120px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 8px; background: #f9fafb;">
+                            </div>
                         </div>
 
                         <!-- Info -->
-                        <div style="padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 3px solid #059669;">
+                        <div style="padding: 12px; background: #eff6ff; border-radius: 8px; border-left: 3px solid #1a4fd4;">
                             <div style="display: flex; align-items: flex-start; gap: 10px;">
-                                <i class="fas fa-info-circle" style="color: #059669; margin-top: 1px;"></i>
-                                <div style="font-size: 11px; color: #166534; line-height: 1.5;">
-                                    <strong>Importante:</strong> Estes dados serão registrados no histórico do pedido para conferência futura. O preenchimento do crédito liberado, condição de pagamento e parecer é obrigatório.
+                                <i class="fas fa-info-circle" style="color: #1a4fd4; margin-top: 1px;"></i>
+                                <div style="font-size: 11px; color: #1e40af; line-height: 1.5;">
+                                    <strong>Importante:</strong> O histórico de análises de crédito fica registrado no pedido (aba Informações Adicionais). O crédito liberado é o valor disponível conforme análise do CNPJ.
                                 </div>
                             </div>
                         </div>
@@ -12776,8 +13129,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         <button onclick="fecharModalAprovacaoCredito()" style="padding: 10px 24px; background: #64748b; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.background='#475569'" onmouseout="this.style.background='#64748b'">
                             <i class="fas fa-times"></i> Cancelar
                         </button>
-                        <button onclick="confirmarAprovacaoCredito()" id="btn-confirmar-aprovacao" style="padding: 10px 24px; background: linear-gradient(135deg, #059669, #10b981); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
-                            <i class="fas fa-check-circle"></i> Aprovar Pedido
+                        <button onclick="confirmarAprovacaoCredito()" id="btn-confirmar-aprovacao" style="padding: 10px 24px; background: linear-gradient(135deg, #1a4fd4, #225cfa); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 8px;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            <i class="fas fa-check-circle"></i> Confirmar Análise
                         </button>
                     </div>
                 </div>
@@ -12785,16 +13138,36 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             document.body.insertAdjacentHTML('beforeend', modalHtml);
 
-            // Listener para mostrar/ocultar campo personalizado
-            document.getElementById('aprov-condicao-pagamento').addEventListener('change', function() {
-                const wrapper = document.getElementById('aprov-condicao-custom-wrapper');
-                wrapper.style.display = this.value === 'outro' ? 'block' : 'none';
-            });
+            // Carregar histórico de análises anteriores
+            carregarHistoricoAnaliseCredito(pedidoId);
         }
 
         function fecharModalAprovacaoCredito() {
             const modal = document.getElementById('modal-aprovacao-credito-kanban');
             if (modal) modal.remove();
+        }
+
+        async function carregarHistoricoAnaliseCredito(pedidoId) {
+            try {
+                const resp = await fetch(`/api/vendas/pedidos/${pedidoId}/historico`, { credentials: 'include' });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const raw = Array.isArray(data.historico) ? data.historico : Array.isArray(data) ? data : [];
+                const historico = raw.filter(h => h.action === 'aprovacao_credito');
+                if (historico.length === 0) return;
+                const container = document.getElementById('aprov-historico-container');
+                const list = document.getElementById('aprov-historico-list');
+                if (!container || !list) return;
+                container.style.display = 'block';
+                list.innerHTML = historico.map(h => {
+                    const meta = typeof h.meta === 'string' ? JSON.parse(h.meta) : (h.meta || {});
+                    const data = h.created_at ? new Date(h.created_at).toLocaleDateString('pt-BR') : '';
+                    return `<div style="padding:6px 8px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#374151;">
+                        <strong>${data}</strong> — ${meta.parecer || 'N/A'} — R$ ${Number(meta.credito_liberado||0).toLocaleString('pt-BR',{minimumFractionDigits:2})} — ${meta.analista || h.user_name || 'Sistema'}
+                        ${meta.observacoes ? '<br><i style="color:#6b7280;">' + meta.observacoes + '</i>' : ''}
+                    </div>`;
+                }).join('');
+            } catch (e) { console.warn('Erro ao carregar histórico:', e); }
         }
 
         function mascaraMoedaAprov(input) {
@@ -12808,8 +13181,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         async function confirmarAprovacaoCredito() {
             const creditoLiberadoStr = document.getElementById('aprov-credito-liberado')?.value?.trim();
             const condicaoPagamento = document.getElementById('aprov-condicao-pagamento')?.value;
-            const condicaoCustom = document.getElementById('aprov-condicao-custom')?.value?.trim();
-            const prazoEntrega = document.getElementById('aprov-prazo-entrega')?.value?.trim();
             const parecer = document.getElementById('aprov-parecer')?.value;
             const observacoes = document.getElementById('aprov-observacoes')?.value?.trim();
 
@@ -12824,14 +13195,37 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 document.getElementById('aprov-condicao-pagamento')?.focus();
                 return;
             }
-            if (condicaoPagamento === 'outro' && !condicaoCustom) {
-                showToast('Especifique a condição de pagamento.', 'warning');
-                document.getElementById('aprov-condicao-custom')?.focus();
-                return;
-            }
             if (!parecer) {
                 showToast('Selecione o parecer da análise.', 'warning');
                 document.getElementById('aprov-parecer')?.focus();
+                return;
+            }
+
+            // Se reprovado, manter em análise (não move para aprovado)
+            if (parecer === 'reprovado') {
+                const creditoLiberado = parseFloat(creditoLiberadoStr.replace(/\./g, '').replace(',', '.')) || 0;
+                // Registrar reprovação no histórico
+                try {
+                    const pedidoId = pedidoAtual.id;
+                    await fetch(`/api/vendas/pedidos/${pedidoId}/status`, {
+                        method: 'PUT',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            status: pedidoAtual._coluna === 'analise' ? 'analise-credito' : pedidoAtual._statusOriginal || 'analise-credito',
+                            aprovacao_credito: {
+                                credito_liberado: creditoLiberado,
+                                condicao_pagamento: condicaoPagamento,
+                                parecer: 'reprovado',
+                                observacoes: observacoes || null
+                            }
+                        })
+                    });
+                    fecharModalAprovacaoCredito();
+                    showToast(`Pedido #${pedidoId} — Crédito reprovado. Permanece em Análise.`, 'warning');
+                } catch (err) {
+                    showToast('Erro ao registrar reprovação: ' + err.message, 'error');
+                }
                 return;
             }
 
@@ -12842,7 +13236,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 return;
             }
 
-            const condicaoFinal = condicaoPagamento === 'outro' ? condicaoCustom : condicaoPagamento;
+            const condicaoFinal = condicaoPagamento;
 
             // Desabilitar botão durante o processamento
             const btn = document.getElementById('btn-confirmar-aprovacao');
@@ -12866,7 +13260,6 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         aprovacao_credito: {
                             credito_liberado: creditoLiberado,
                             condicao_pagamento: condicaoFinal,
-                            prazo_entrega: prazoEntrega || null,
                             parecer: parecer,
                             observacoes: observacoes || null
                         }
@@ -12905,7 +13298,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 updateCounters();
                 fecharModalAprovacaoCredito();
 
-                const parecerLabel = parecer === 'aprovado_condicional' ? 'Aprovado com Restrição' : 'Aprovado';
+                const parecerLabel = parecer === 'aprovado_a_vista' ? 'Aprovado à Vista' : 'Aprovado';
                 showToast(`Pedido #${pedidoId} aprovado com sucesso!\nParecer: ${parecerLabel} | Crédito: R$ ${creditoLiberadoStr}`, 'success');
 
             } catch (err) {
@@ -13093,7 +13486,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
                                 <div>
                                     <div style="font-size: 11px; color: #6b7280;">Valor Total</div>
-                                    <div style="font-size: 16px; font-weight: 700; color: #059669;">R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                    <div style="font-size: 16px; font-weight: 700; color: #1a4fd4;">R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                                 </div>
                                 <div>
                                     <div style="font-size: 11px; color: #6b7280;">Faturado</div>
@@ -13449,7 +13842,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 };
 
                 // Atualizar título do modal
-                document.getElementById('modal-título-pedido').textContent = 'Novo Pedido de Venda';
+                document.getElementById('modal-título-pedido').textContent = 'Novo Orçamento de Venda';
 
                 // Limpar avatar do cliente
                 document.getElementById('modal-cliente-avatar').textContent = 'NC';
@@ -14151,7 +14544,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         const coresKanban = [
             '#94a3b8', // cinza
             '#f59e0b', // amarelo
-            '#10b981', // verde claro
+            '#225cfa', // verde claro
             '#f97316', // laranja
             '#22c55e', // verde
             '#06b6d4', // ciano
@@ -15200,7 +15593,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 const preco = parseFloat(p.preco_venda || p.preco_custo || 0);
                 const semEstoque = estoque <= 0;
                 const estoqueLabel = !semEstoque
-                    ? `<span style="color:#059669"><i class="fas fa-box"></i> Estoque: ${formatarQuantidade(estoque)} ${escaparHTML(p.unidade || 'M')}</span>`
+                    ? `<span style="color:#1a4fd4"><i class="fas fa-box"></i> Estoque: ${formatarQuantidade(estoque)} ${escaparHTML(p.unidade || 'M')}</span>`
                     : `<span style="color:#fff;background:#dc2626;padding:2px 8px;border-radius:4px;font-weight:600;font-size:11px"><i class="fas fa-industry"></i> SOB ENCOMENDA</span>`;
                 const rowStyle = semEstoque
                     ? 'border-left:4px solid #dc2626;background:linear-gradient(90deg,#fef2f2 0%,#fff 40%)'
@@ -16440,7 +16833,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             <div style="font-size: 11px; color: #64748b; font-weight: 600;">PEDIDOS</div>
                         </div>
                         <div style="text-align: center; padding: 8px 16px; background: white; border-radius: 10px; border: 1px solid #e2e8f0; min-width: 140px;">
-                            <div style="font-size: 22px; font-weight: 800; color: #059669;" id="hist-total-valor">-</div>
+                            <div style="font-size: 22px; font-weight: 800; color: #1a4fd4;" id="hist-total-valor">-</div>
                             <div style="font-size: 11px; color: #64748b; font-weight: 600;">VALOR TOTAL</div>
                         </div>
                         <div id="hist-status-badges" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;"></div>
@@ -16477,7 +16870,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 const badgesDiv = document.getElementById('hist-status-badges');
                 const statusColors = {
                     'Orçamento': '#6366f1', 'Análise': '#f59e0b', 'Aprovado': '#3b82f6',
-                    'Faturar': '#8b5cf6', 'Faturado': '#22c55e', 'Recibo': '#059669',
+                    'Faturar': '#8b5cf6', 'Faturado': '#22c55e', 'Recibo': '#1a4fd4',
                     'Cancelado': '#ef4444', 'Novo': '#94a3b8'
                 };
                 if (data.statusCount) {
@@ -16525,7 +16918,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9;">
                                 <span style="background: ${color}15; color: ${color}; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;">${p.status || '-'}</span>
                             </td>
-                            <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 600; color: #059669;">R$ ${valor}</td>
+                            <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 600; color: #1a4fd4;">R$ ${valor}</td>
                             <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; text-align: center; color: #64748b;">${p.total_itens || 0}</td>
                             <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #475569;">${p.vendedor || '-'}</td>
                             <td style="padding: 10px 12px; border-bottom: 1px solid #f1f5f9; color: #475569;">${p.nf || '-'}</td>
@@ -16884,7 +17277,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                     <div style="font-weight: 500; color: #333;"><i class="fas fa-truck" style="color: #3b82f6; margin-right: 8px;"></i>${escaparHTML(transp.nome || transp.razao_social || 'Sem nome')}</div>
                                     ${transp.cidade ? `<div style="font-size: 11px; color: #888;">${escaparHTML(transp.cidade)}/${escaparHTML(transp.estado || '')}</div>` : ''}
                                 </div>
-                                <span style="font-size: 11px; color: #059669; background: #ecfdf5; padding: 3px 8px; border-radius: 4px;">${transp.cnpj || transp.telefone || ''}</span>
+                                <span style="font-size: 11px; color: #1a4fd4; background: #ecfdf5; padding: 3px 8px; border-radius: 4px;">${transp.cnpj || transp.telefone || ''}</span>
                             </div>
                         </div>
                     `).join('');
@@ -18751,7 +19144,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             </div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="font-weight: 700; color: #059669; font-size: 14px;">R$ ${p.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            <div style="font-weight: 700; color: #1a4fd4; font-size: 14px;">R$ ${p.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                         </div>
                     </div>
                 `;
@@ -19639,6 +20032,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     // APLICAR RESTRIÇÕES DE VENDEDOR
                     // ========================================
                     aplicarRestricoesVendedor();
+                    aplicarVisibilidadeVendedor();
 
                     // Aplicar permissões granulares de página (ocultar sidebar itens sem acesso)
                     aplicarPermissoesPaginas();
@@ -20023,7 +20417,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             const fromAPI = clientes.some(c => c._dadosBrasilAPI);
 
             resultadosDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, ${fromAPI ? '#0f766e 0%, #059669' : '#10b981 0%, #059669'} 100%); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="background: linear-gradient(135deg, ${fromAPI ? '#0f766e 0%, #1a4fd4' : '#225cfa 0%, #1a4fd4'} 100%); color: white; padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <i class="fas fa-${fromAPI ? 'building' : 'check-circle'}" style="font-size: 18px;"></i>
                         <span style="font-weight: 600;">${fromAPI ? 'Receita Federal' : 'Sistema interno'} — ${clientes.length} resultado(s)</span>
@@ -20780,8 +21174,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         ? window.AluforceAuth.getTabToken()
                         : sessionStorage.getItem('tabAuthToken');
                     socket = io({
-                        transports: ['polling', 'websocket'],
-                        upgrade: true,
+                        transports: ['websocket'],
+                        upgrade: false,
                         reconnection: true,
                         reconnectionAttempts: 10,
                         reconnectionDelay: 2000,
@@ -20874,9 +21268,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     const statusCores = {
                         'orcamento': '#6366f1', 'orçamento': '#6366f1',
                         'analise': '#f59e0b', 'analise-credito': '#f59e0b',
-                        'aprovado': '#10b981', 'pedido-aprovado': '#10b981',
+                        'aprovado': '#225cfa', 'pedido-aprovado': '#225cfa',
                         'faturar': '#3b82f6', 'faturado': '#8b5cf6',
-                        'entregue': '#059669', 'cancelado': '#ef4444', 'recibo': '#06b6d4'
+                        'entregue': '#1a4fd4', 'cancelado': '#ef4444', 'recibo': '#06b6d4'
                     };
                     const cor = statusCores[notif.data.status] || '#64748b';
                     statusBadge = `<span style="display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;color:white;background:${cor};margin-left:6px;">${notif.data.status_label || notif.data.status}</span>`;
@@ -21528,12 +21922,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         // Obter cor por tipo de notificação
         function getCorPorTipo(tipo) {
             const cores = {
-                'success': '#10b981',
+                'success': '#225cfa',
                 'warning': '#f59e0b',
                 'error': '#ef4444',
                 'info': '#3b82f6',
                 'order': '#8b5cf6',
-                'payment': '#10b981',
+                'payment': '#225cfa',
                 'stock': '#f97316'
             };
             return cores[tipo] || '#6b7280';
@@ -21737,7 +22131,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         c.style.borderColor = '#e5e5e5';
                         c.style.background = 'white';
                     });
-                    this.parentElement.querySelector('.opcao-export-content').style.borderColor = '#10b981';
+                    this.parentElement.querySelector('.opcao-export-content').style.borderColor = '#225cfa';
                     this.parentElement.querySelector('.opcao-export-content').style.background = '#f0fdf4';
                 });
             });

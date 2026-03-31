@@ -5,7 +5,7 @@
  * Atualizado: 01/03/2026
  */
 
-const CACHE_VERSION = 'v4.1.0';
+const CACHE_VERSION = 'v4.2.0';
 const STATIC_CACHE = `aluforce-static-${CACHE_VERSION}`;
 const DATA_CACHE = `aluforce-data-${CACHE_VERSION}`;
 
@@ -127,6 +127,9 @@ self.addEventListener('activate', (event) => {
 // FETCH - Intercepta requisicoes
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
+
+    // Nunca interceptar socket.io - deve ir direto para o servidor
+    if (event.request.url.includes('/socket.io/')) return;
 
     const allowedOrigins = [self.location.origin, 'https://fonts.googleapis.com', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'];
     if (!allowedOrigins.some(origin => event.request.url.startsWith(origin))) return;
