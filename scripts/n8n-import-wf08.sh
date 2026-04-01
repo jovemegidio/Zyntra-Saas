@@ -10,7 +10,7 @@ echo "=== Importing Workflow 08 ==="
 # Login
 curl -s -c "$COOKIE" --noproxy '*' -X POST "$N8N_URL/rest/login" \
   -H "Content-Type: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null
 
 echo "Logged in."
 
@@ -70,7 +70,7 @@ docker ps --filter name=aluforce-n8n --format "{{.Status}}"
 COOKIE2="/tmp/n8n-check08.txt"
 curl -s -c "$COOKIE2" --noproxy '*' -X POST "$N8N_URL/rest/login" \
   -H "Content-Type: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null
 
 curl -s -b "$COOKIE2" --noproxy '*' "$N8N_URL/rest/workflows" | python3 -c "
 import json, sys

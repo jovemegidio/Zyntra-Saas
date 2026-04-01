@@ -5,7 +5,7 @@
 # USA PUTTY (PSCP/PLINK) - SEM PEDIR SENHA
 # Caminho atualizado para Google Drive
 
-$servidor = "31.97.64.102"
+$servidor = "YOUR_VPS_IP"
 $usuario = "root"
 $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $caminhoRemoto = "/var/www/aluforce"
@@ -183,7 +183,7 @@ foreach ($pasta in $pastasMonitorar) {
          $path = $Event.SourceEventArgs.FullPath
          $changeType = $Event.SourceEventArgs.ChangeType
          $caminhoLocal = "G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Sistema - ALUFORCE - V.2"
-         $servidor = "31.97.64.102"
+         $servidor = "YOUR_VPS_IP"
          $usuario = "root"
          $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { "" }
          $caminhoRemoto = "/var/www/aluforce"
@@ -265,7 +265,7 @@ $actionRaiz = {
    $path = $Event.SourceEventArgs.FullPath
    $changeType = $Event.SourceEventArgs.ChangeType
    $nome = Split-Path $path -Leaf
-   $servidor = "31.97.64.102"
+   $servidor = "YOUR_VPS_IP"
    $usuario = "root"
    $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { "" }
    $caminhoRemoto = "/var/www/aluforce"

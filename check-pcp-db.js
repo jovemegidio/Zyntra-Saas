@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 (async () => {
-    const p = await mysql.createPool({host:'localhost',user:'aluforce',password:'Aluforce2026VpsDB',database:'aluforce_vendas'});
+    const p = await mysql.createPool({host:'localhost',user:'aluforce',password:'CHANGE_ME_DB_PASSWORD',database:'aluforce_vendas'});
     
     console.log('=== ordens_producao columns ===');
     const [r1] = await p.query('DESCRIBE ordens_producao');

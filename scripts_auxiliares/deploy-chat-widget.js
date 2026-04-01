@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const base = 'g:/.shortcut-targets-by-id/1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN/Sistema - ALUFORCE - V.2';
-const vps = 'root@31.97.64.102';
+const vps = 'root@YOUR_VPS_IP';
 const vpsBase = '/var/www/aluforce';
 const outFile = path.join(base, 'scripts_auxiliares', 'deploy-chat-result.txt');
 const lines = [];

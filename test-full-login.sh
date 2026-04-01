@@ -4,9 +4,9 @@ timeout 10 bash -c 'echo "QUIT" | openssl s_client -connect mail.aluforce.ind.br
 
 echo ""
 echo "=== 2. Testing login with valid user (reset password first) ==="
-# Set a known test password for ti@aluforce.ind.br
-HASH=$(node -e "const b=require('bcryptjs');b.hash('Aluforce2026',12).then(h=>console.log(h))")
-mysql -u aluforce -pAluforce2026VpsDB aluforce_vendas -e "UPDATE usuarios SET senha_hash='$HASH', password_hash='$HASH' WHERE email='ti@aluforce.ind.br'"
+# Set a known test password for user@example.com
+HASH=$(node -e "const b=require('bcryptjs');b.hash('CHANGE_ME_PASSWORD',12).then(h=>console.log(h))")
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "UPDATE usuarios SET senha_hash='$HASH', password_hash='$HASH' WHERE email='user@example.com'"
 
 echo ""
 echo "=== 3. Flushing PM2 logs ==="
@@ -17,7 +17,7 @@ echo "=== 4. Attempting login (with timeout 60s) ==="
 time timeout 60 curl -s -w '\nHTTP: %{http_code}\nTIME: %{time_total}s' \
   -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"ti@aluforce.ind.br","password":"Aluforce2026"}'
+  -d '{"email":"user@example.com","password":"CHANGE_ME_PASSWORD"}'
 
 echo ""
 echo "=== 5. PM2 Logs ==="

@@ -1,4 +1,4 @@
-﻿// Script idempotente para atribuir/atualizar foto_perfil_url de funcionários por nome
+// Script idempotente para atribuir/atualizar foto_perfil_url de funcionários por nome
 // Usage: node scripts/set_photos.js
 // Observação: exige que as credenciais DB no projeto (env) estejam corretas.
 
@@ -14,7 +14,7 @@ const placeholder = '/Interativo-Aluforce.jpg'
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '@dminalu',
+  password: process.env.DB_PASS || process.env.DB_PASSWORD || 'CHANGE_ME',
   database: process.env.DB_NAME || 'aluforce_vendas',
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306
 })

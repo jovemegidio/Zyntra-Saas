@@ -5,7 +5,7 @@
 **Commit Principal**: `5a0a279` — security+perf: auditoria completa  
 **Commit Hotfix**: `25555bc` — fix: checkFinanceiroPermission  
 **Domínio**: aluforce.api.br  
-**VPS**: 31.97.64.102  
+**VPS**: YOUR_VPS_IP  
 
 ---
 
@@ -118,7 +118,7 @@
 .\deploy.ps1 -Rollback
 
 # Opção 2: Manual via SSH
-ssh root@31.97.64.102
+ssh root@YOUR_VPS_IP
 cd /var/www/aluforce
 tar xzf /var/www/backups/aluforce-20260324-deploy.tar.gz -C /var/www/aluforce/
 pm2 restart 10 11

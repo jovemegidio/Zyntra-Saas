@@ -1,7 +1,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 
-const VPS = 'root@31.97.64.102';
+const VPS = 'root@YOUR_VPS_IP';
 const REMOTE_BASE = '/var/www/aluforce';
 const LOCAL_BASE = process.cwd();
 

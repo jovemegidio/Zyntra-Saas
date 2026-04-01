@@ -6,7 +6,7 @@ set -e
 
 SOURCE_DB="aluforce_vendas"
 DEMO_DB="zyntra_demo"
-MYSQL_CRED="-u aluforce -pAluforce2026VpsDB"
+MYSQL_CRED="-u aluforce -pCHANGE_ME_DB_PASSWORD"
 
 echo "📋 Clonando estrutura de tabelas de $SOURCE_DB para $DEMO_DB..."
 

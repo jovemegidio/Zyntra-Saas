@@ -3,7 +3,7 @@ const http = require('http');
 const https = require('https');
 
 const TEST_EMAIL = ['ti', 'aluforce.ind.br'].join('@');
-const TEST_PASS = 'alu0103';
+const TEST_PASS = 'CHANGE_ME_USER_PASSWORD';
 
 function testLogin() {
     return new Promise((resolve, reject) => {

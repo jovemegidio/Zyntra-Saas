@@ -31,7 +31,7 @@ echo "=== Via API ==="
 COOKIE=/tmp/n8n-check.txt
 curl -s -c "$COOKIE" --noproxy '*' -X POST http://127.0.0.1:5678/rest/login \
   -H "Content-Type: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null
 
 curl -s -b "$COOKIE" --noproxy '*' http://127.0.0.1:5678/rest/workflows | python3 -c "
 import json, sys

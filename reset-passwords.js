@@ -1,4 +1,4 @@
-// Reset ALL passwords to alu0103
+// Reset ALL passwords to CHANGE_ME_USER_PASSWORD
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
         database: process.env.DB_NAME
     });
 
-    const newPassword = 'alu0103';
+    const newPassword = 'CHANGE_ME_USER_PASSWORD';
     const hash = await bcrypt.hash(newPassword, 12);
     
     console.log('Nova senha:', newPassword);

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Configure phone numbers for WhatsApp alerts
 
-MYSQL="mysql -u aluforce -p'Aluforce2026VpsDB' aluforce_vendas"
+MYSQL="mysql -u aluforce -p'CHANGE_ME_DB_PASSWORD' aluforce_vendas"
 
 echo "=== 1. Configurando DESTINATARIOS_TESTE ==="
 $MYSQL -e "UPDATE whatsapp_config SET valor = '[\"5511995896003\",\"5511932569921\"]' WHERE chave = 'DESTINATARIOS_TESTE';"

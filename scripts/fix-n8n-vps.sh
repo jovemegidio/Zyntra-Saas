@@ -10,7 +10,7 @@ fi
 
 echo ""
 echo "=== 2. Verify n8n database ==="
-mysql -u aluforce -pAluforce2026VpsDB -e "SHOW DATABASES LIKE 'n8n';" 2>&1
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -e "SHOW DATABASES LIKE 'n8n';" 2>&1
 
 echo ""
 echo "=== 3. Create standalone n8n docker-compose ==="
@@ -37,7 +37,7 @@ services:
       DB_MYSQLDB_PORT: 3306
       DB_MYSQLDB_DATABASE: n8n
       DB_MYSQLDB_USER: aluforce
-      DB_MYSQLDB_PASSWORD: Aluforce2026VpsDB
+      DB_MYSQLDB_PASSWORD: CHANGE_ME_DB_PASSWORD
       # Security
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: admin

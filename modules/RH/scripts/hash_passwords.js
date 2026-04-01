@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env node
+#!/usr/bin/env node
 require('dotenv').config()
 const mysql = require('mysql2/promise')
 const bcrypt = require('bcrypt')
@@ -7,7 +7,7 @@ const bcrypt = require('bcrypt')
 const DB_CONFIG = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '@dminalu',
+  password: process.env.DB_PASS || process.env.DB_PASSWORD || 'CHANGE_ME',
   database: process.env.DB_NAME || 'aluforce_vendas',
   port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306
 }

@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Continue"
 $base = "G:\Outros computadores\Meu laptop (2)\Sistema - ALUFORCE - V.2"
 $pw = $env:VPS_PASSWORD  # Defina: $env:VPS_PASSWORD = 'sua_senha' no perfil PowerShell
-$vps = "root@31.97.64.102"
+$vps = "root@YOUR_VPS_IP"
 
 # Carregar helper Discord
 . "$base\scripts\Notificar-Discord.ps1"

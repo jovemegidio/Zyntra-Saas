@@ -12,7 +12,7 @@ const dbConfig = {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 3306,
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '@dminalu',
+    password: process.env.DB_PASSWORD || process.env.DB_PASSWORD || 'CHANGE_ME',
     database: process.env.DB_NAME || 'aluforce_vendas'
 };
 
@@ -20,10 +20,10 @@ async function atualizarSenhas() {
     const connection = await mysql.createConnection(dbConfig);
     
     try {
-        console.log('🔐 Atualizando senhas de todos os usuários para: alu0103\n');
+        console.log('🔐 Atualizando senhas de todos os usuários para: CHANGE_ME_USER_PASSWORD\n');
         
         // Hash da senha padrão
-        const senhaPadrao = 'alu0103';
+        const senhaPadrao = 'CHANGE_ME_USER_PASSWORD';
         const senhaHash = await bcrypt.hash(senhaPadrao, 10);
         
         console.log('📝 Hash gerado:', senhaHash.substring(0, 20) + '...');
@@ -54,7 +54,7 @@ async function atualizarSenhas() {
         });
         
         console.log('─'.repeat(60));
-        console.log(`\n🔑 Nova senha para todos: alu0103`);
+        console.log(`\n🔑 Nova senha para todos: CHANGE_ME_USER_PASSWORD`);
         console.log('✅ Atualização concluída!');
         
     } catch (error) {

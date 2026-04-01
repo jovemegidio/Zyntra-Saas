@@ -3,8 +3,8 @@
 # Upload, import, and activate
 
 N8N_URL="http://localhost:5678"
-LOGIN_EMAIL="admin@aluforce.api.br"
-LOGIN_PASS="Aluforce2026n8n"
+LOGIN_EMAIL="admin@your-domain.com"
+LOGIN_PASS="CHANGE_ME_N8N_PASSWORD"
 WORKFLOW_FILE="/var/www/aluforce/n8n/workflows/10-whatsapp-alertas-automaticos-v2.json"
 COOKIE_FILE="/tmp/n8n-cookies-wf10.txt"
 

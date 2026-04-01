@@ -28,7 +28,7 @@ import fnmatch
 import argparse
 
 # ── VPS credentials ────────────────────────────────────────────────────────────
-VPS_HOST = '31.97.64.102'
+VPS_HOST = 'YOUR_VPS_IP'
 VPS_USER = 'root'
 VPS_PASS = 'Aluforce@2026#Vps'
 LOCAL_BASE = r'g:\Outros computadores\Meu laptop (2)\Zyntra'

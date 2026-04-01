@@ -1,7 +1,7 @@
 # Deploy Sidebar Animation to VPS
 # Uploads CSS, JS, and all modified HTML files
 
-$VPS = "root@31.97.64.102"
+$VPS = "root@YOUR_VPS_IP"
 $PASS = "Aluforce@2026#Vps"
 $REMOTE = "/var/www/aluforce"
 $LOCAL = "g:\Outros computadores\Meu laptop (2)\Sistema - ALUFORCE - V.2"

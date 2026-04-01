@@ -10,7 +10,7 @@ echo ""
 echo "[1/6] Fazendo login no n8n..."
 LOGIN=$(curl -s -c /tmp/n8n-cookie.txt -X POST http://localhost:5678/rest/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@aluforce.api.br","password":"Aluforce2026n8n"}')
+  -d '{"email":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}')
 
 echo "Login: $(echo $LOGIN | grep -o '"firstName":"[^"]*"')"
 
@@ -73,7 +73,7 @@ echo ""
 echo "[5/6] Verificando workflows..."
 LOGIN2=$(curl -s -c /tmp/n8n-cookie2.txt -X POST http://localhost:5678/rest/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@aluforce.api.br","password":"Aluforce2026n8n"}')
+  -d '{"email":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}')
 
 sleep 2
 ALL=$(curl -s -b /tmp/n8n-cookie2.txt http://localhost:5678/rest/workflows)

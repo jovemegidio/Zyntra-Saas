@@ -1,4 +1,4 @@
-﻿const mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise');
 
 (async () => {
   const names = [
@@ -38,7 +38,7 @@
   const db = await mysql.createConnection({
     host: process.env.DB_HOST || 'localhost',
     user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASS || '@dminalu',
+    password: process.env.DB_PASS || process.env.DB_PASSWORD || 'CHANGE_ME',
     database: process.env.DB_NAME || 'aluforce_vendas',
     port: process.env.DB_PORT ? Number(process.env.DB_PORT) : 3306
   })

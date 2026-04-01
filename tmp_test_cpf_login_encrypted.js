@@ -12,7 +12,7 @@ function maskCpf(cpf) {
     host: 'localhost',
     port: 3306,
     user: 'aluforce',
-    password: 'Aluforce2026VpsDB',
+    password: 'CHANGE_ME_DB_PASSWORD',
     database: 'aluforce_vendas'
   });
 

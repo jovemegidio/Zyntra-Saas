@@ -1,4 +1,4 @@
-﻿// Script para definir senha padrão "admin123" para todos os usuários
+// Script para definir senha padrão "admin123" para todos os usuários
 const bcrypt = require('bcrypt');
 const mysql = require('mysql2');
 
@@ -6,7 +6,7 @@ const mysql = require('mysql2');
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '@dminalu',
+  password: process.env.DB_PASS || process.env.DB_PASSWORD || 'CHANGE_ME',
   database: process.env.DB_NAME || 'aluforce_vendas'
 });
 

@@ -2,7 +2,7 @@
 
 **Arquiteto / QA:** GitHub Copilot (Claude Sonnet 4.6)  
 **Commit:** `0b2aa0d`  
-**Deploy:** VPS `31.97.64.102` — 4 arquivos — PM2 online  
+**Deploy:** VPS `YOUR_VPS_IP` — 4 arquivos — PM2 online  
 
 ---
 

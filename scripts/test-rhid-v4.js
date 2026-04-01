@@ -7,7 +7,7 @@ const mysql = require('mysql2/promise');
 
 async function main() {
     const pool = mysql.createPool({
-        host: 'localhost', user: 'aluforce', password: 'Aluforce2026VpsDB', database: 'aluforce_vendas'
+        host: 'localhost', user: 'aluforce', password: 'CHANGE_ME_DB_PASSWORD', database: 'aluforce_vendas'
     });
 
     const [rows] = await pool.query('SELECT rhid_email, rhid_password FROM controlid_config WHERE ativo = TRUE AND rhid_enabled = TRUE LIMIT 1');

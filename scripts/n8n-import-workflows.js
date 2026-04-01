@@ -4,8 +4,8 @@ const path = require("path");
 
 const N8N_HOST = "localhost";
 const N8N_PORT = 5678;
-const LOGIN_EMAIL = "admin@aluforce.api.br";
-const LOGIN_PASS = "Aluforce2026n8n";
+const LOGIN_EMAIL = "admin@your-domain.com";
+const LOGIN_PASS = "CHANGE_ME_N8N_PASSWORD";
 const WORKFLOWS_DIR = "/home/node/.n8n/workflows";
 
 function request(opts, body) {

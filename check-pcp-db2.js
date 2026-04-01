@@ -3,7 +3,7 @@ const mysql = require('mysql2/promise');
 (async () => {
     const pool = await mysql.createPool({
         host: 'localhost', user: 'aluforce', 
-        password: 'Aluforce2026VpsDB', database: 'aluforce_vendas'
+        password: 'CHANGE_ME_DB_PASSWORD', database: 'aluforce_vendas'
     });
     
     // Check funcionarios table

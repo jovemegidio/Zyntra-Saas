@@ -6,7 +6,7 @@ echo ""
 echo "--- 1. Login Hellen ---"
 RESP=$(curl -s -c /tmp/cookies_hellen.txt -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"hellen.nascimento@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"hellen.nascimento@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 
 # Extrair dados
 TOKEN=$(echo "$RESP" | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
@@ -31,7 +31,7 @@ echo ""
 echo "--- 3. Login Tatiane ---"
 RESP2=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"tatiane.sousa@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"tatiane.sousa@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 TOKEN2=$(echo "$RESP2" | python3 -c "import sys,json; print(json.load(sys.stdin).get('token',''))" 2>/dev/null)
 AREAS2=$(echo "$RESP2" | python3 -c "import sys,json; print(json.load(sys.stdin).get('user',{}).get('areas',[]))" 2>/dev/null)
 echo "Login areas: $AREAS2"
@@ -48,7 +48,7 @@ echo ""
 echo "--- 5. Login Admin (Douglas) - deve ter todas as areas ---"
 RESP3=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"douglas@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"douglas@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 AREAS3=$(echo "$RESP3" | python3 -c "import sys,json; print(json.load(sys.stdin).get('user',{}).get('areas',[]))" 2>/dev/null)
 IS_ADMIN3=$(echo "$RESP3" | python3 -c "import sys,json; print(json.load(sys.stdin).get('user',{}).get('is_admin',0))" 2>/dev/null)
 echo "Login areas: $AREAS3"

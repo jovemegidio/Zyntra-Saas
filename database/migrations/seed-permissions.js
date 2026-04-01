@@ -124,7 +124,7 @@ async function seedPermissions(pool) {
 if (require.main === module) {
     const mysql = require('mysql2/promise');
     const DB_CONFIG = {
-        host: process.env.DB_HOST || '31.97.64.102',
+        host: process.env.DB_HOST || 'YOUR_VPS_IP',
         user: process.env.DB_USER || 'root',
         password: process.env.DB_PASSWORD,
         database: process.env.DB_NAME || 'aluforce_vendas',

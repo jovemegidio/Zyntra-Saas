@@ -9,7 +9,7 @@ COOKIE=/tmp/n8n-direct.txt
 LOGIN=$(curl -s -c "$COOKIE" --noproxy '*' -X POST http://127.0.0.1:5678/rest/login \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' \
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' \
   -w "\n%{http_code}")
 
 CODE=$(echo "$LOGIN" | tail -1)

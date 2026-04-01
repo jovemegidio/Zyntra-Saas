@@ -1,5 +1,5 @@
 #!/bin/bash
-MYSQL_CRED="-u aluforce -pAluforce2026VpsDB"
+MYSQL_CRED="-u aluforce -pCHANGE_ME_DB_PASSWORD"
 DB="zyntra_demo"
 
 echo "=== PEDIDOS ==="

@@ -3,7 +3,7 @@
 echo "=== Testando CDR Deploy ==="
 
 # Login
-LOGIN_JSON='{"email":"douglas@aluforce.ind.br","password":"alu0103"}'
+LOGIN_JSON='{"email":"douglas@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}'
 LOGIN_RESP=$(curl -s -X POST http://localhost:3000/api/login -H 'Content-Type: application/json' -d "$LOGIN_JSON")
 TOKEN=$(echo "$LOGIN_RESP" | python3 -c 'import sys,json;print(json.load(sys.stdin).get("token","ERRO"))' 2>/dev/null)
 

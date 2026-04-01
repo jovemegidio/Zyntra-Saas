@@ -21,7 +21,7 @@ curl -s -X POST 'http://localhost:3003/api/login' \
 
 echo ""
 echo "=== Check user exists ==="
-mysql -u aluforce -pAluforce2026VpsDB zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios WHERE email LIKE '%zyntra%' LIMIT 5;" 2>/dev/null
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios WHERE email LIKE '%zyntra%' LIMIT 5;" 2>/dev/null
 
 echo ""
 echo "=== Check auth route fields ==="

@@ -22,7 +22,7 @@ async function main() {
   // 1. Login to get token
   console.log("=== Login to get session ===");
   const loginRes = await request("/rest/login", "POST", JSON.stringify({
-    emailOrLdapLoginId: "admin@aluforce.api.br",
+    emailOrLdapLoginId: "admin@your-domain.com",
     password: "Aluforce_n8n_2026!"
   }));
   console.log("Login:", loginRes.status);

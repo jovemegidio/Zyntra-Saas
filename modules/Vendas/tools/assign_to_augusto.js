@@ -1,10 +1,10 @@
-﻿const mysql = require('mysql2/promise');
+const mysql = require('mysql2/promise');
 
 (async () => {
   const DB_CONFIG = {
     host: 'localhost',
     user: 'root',
-    password: '@dminalu',
+    password: process.env.DB_PASSWORD || 'CHANGE_ME',
     database: 'aluforce_vendas'
   };
   const pool = await mysql.createPool(DB_CONFIG);

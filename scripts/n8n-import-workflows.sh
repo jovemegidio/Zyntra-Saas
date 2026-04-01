@@ -3,8 +3,8 @@
 # Uses curl to interact with n8n API on localhost:5678
 
 N8N_URL="http://localhost:5678"
-LOGIN_EMAIL="admin@aluforce.api.br"
-LOGIN_PASS="Aluforce2026n8n"
+LOGIN_EMAIL="admin@your-domain.com"
+LOGIN_PASS="CHANGE_ME_N8N_PASSWORD"
 WORKFLOWS_DIR="/var/www/aluforce/n8n/workflows"
 COOKIE_FILE="/tmp/n8n-cookies.txt"
 

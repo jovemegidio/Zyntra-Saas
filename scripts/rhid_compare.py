@@ -72,7 +72,7 @@ print(f"\nTotal marcacoes RHiD hoje: {total_marc}")
 
 # Check local DB marcacoes
 result = subprocess.run([
-    'mysql', '-u', 'aluforce', '-pAluforce2026VpsDB', 'aluforce_vendas', '-N', '-e',
+    'mysql', '-u', 'aluforce', '-pCHANGE_ME_DB_PASSWORD', 'aluforce_vendas', '-N', '-e',
     "SELECT pm.id, f.nome_completo, pm.pis, pm.data, pm.hora, pm.tipo, pm.origem FROM ponto_marcacoes pm LEFT JOIN funcionarios f ON pm.funcionario_id = f.id WHERE pm.data = '2026-03-06' ORDER BY pm.hora;"
 ], capture_output=True, text=True)
 print("\n\n" + "="*120)
@@ -85,7 +85,7 @@ for line in lines:
 
 # Check local employees count
 result2 = subprocess.run([
-    'mysql', '-u', 'aluforce', '-pAluforce2026VpsDB', 'aluforce_vendas', '-N', '-e',
+    'mysql', '-u', 'aluforce', '-pCHANGE_ME_DB_PASSWORD', 'aluforce_vendas', '-N', '-e',
     "SELECT COUNT(*) as total, SUM(CASE WHEN ativo=1 AND (status='Ativo' OR status='ativo') THEN 1 ELSE 0 END) as ativos FROM funcionarios;"
 ], capture_output=True, text=True)
 print("\n\n" + "="*120)
@@ -94,7 +94,7 @@ print("="*120)
 print(f"  {result2.stdout.strip()}")
 
 result3 = subprocess.run([
-    'mysql', '-u', 'aluforce', '-pAluforce2026VpsDB', 'aluforce_vendas', '-N', '-e',
+    'mysql', '-u', 'aluforce', '-pCHANGE_ME_DB_PASSWORD', 'aluforce_vendas', '-N', '-e',
     "SELECT id, nome_completo, pis_pasep, status, ativo FROM funcionarios WHERE ativo=1 ORDER BY nome_completo;"
 ], capture_output=True, text=True)
 local_lines = result3.stdout.strip().split('\n') if result3.stdout.strip() else []

@@ -551,7 +551,7 @@ Se o módulo de auth falhar ao carregar, QUALQUER usuário pode mover pedidos.
 
 ## ✅ SPRINT 1 — EXECUÇÃO CONCLUÍDA (2026-03-20)
 
-**Commit:** `258116a` — Deploy: VPS 31.97.64.102
+**Commit:** `258116a` — Deploy: VPS YOUR_VPS_IP
 
 | # | Ação | Status | Observação |
 |---|------|--------|------------|

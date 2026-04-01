@@ -1,6 +1,6 @@
 const https = require("https");
 const data = JSON.stringify({
-  emailOrLdapLoginId: "admin@aluforce.api.br",
+  emailOrLdapLoginId: "admin@your-domain.com",
   password: "Aluforce_n8n_2026!"
 });
 

@@ -19,7 +19,7 @@ const railwayConfig = {
 const localConfig = {
     host: 'localhost',
     user: 'root',
-    password: '@dminalu',
+    password: process.env.DB_PASSWORD || 'CHANGE_ME',
     database: 'aluforce_vendas',
     charset: 'utf8mb4'
 };

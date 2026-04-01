@@ -1,4 +1,4 @@
-﻿// Dry-run: listar funcionários sem foto e sugerir arquivos candidatos por correspondência de nome
+// Dry-run: listar funcionários sem foto e sugerir arquivos candidatos por correspondência de nome
 // Usage: node scripts/find_missing_photos.js
 const mysql = require('mysql2')
 const fs = require('fs')
@@ -11,7 +11,7 @@ const placeholder = '/Interativo-Aluforce.jpg'
 const db = mysql.createConnection({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASS || '@dminalu',
+  password: process.env.DB_PASS || process.env.DB_PASSWORD || 'CHANGE_ME',
   database: process.env.DB_NAME || 'aluforce_vendas',
   port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : 3306
 })

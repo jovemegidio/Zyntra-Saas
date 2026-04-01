@@ -1,11 +1,11 @@
-﻿// Script para listar usuários do módulo de vendas
+// Script para listar usuários do módulo de vendas
 const mysql = require('mysql2/promise');
 
 async function listarUsuarios() {
     const pool = mysql.createPool({
         host: 'localhost',
         user: 'root',
-        password: '@dminalu',
+        password: process.env.DB_PASSWORD || 'CHANGE_ME',
         database: 'aluforce_vendas'
     });
 

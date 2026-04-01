@@ -11,11 +11,11 @@ Testar TODOS os botões em cada página HTML do módulo Financeiro (exceto requi
 |---|---|
 | App | ALUFORCE ERP v2.1.7 |
 | Stack | Node.js/Express + MySQL + vanilla JS frontend |
-| VPS IP | `31.97.64.102` |
+| VPS IP | `YOUR_VPS_IP` |
 | SSH User | `root` (chave: `C:\Users\Tavera\.ssh\id_rsa`) |
 | App Path VPS | `/var/www/aluforce/` |
 | PM2 Process | `aluforce-dashboard` (restart #225, PID 1017100) |
-| DB | `aluforce_vendas`, user=`aluforce`, pass=`Aluforce2026VpsDB` |
+| DB | `aluforce_vendas`, user=`aluforce`, pass=`CHANGE_ME_DB_PASSWORD` |
 | Login QA | `qafinanceiro@aluforce.ind.br` / `Teste@123` (user id=57 na tabela `usuarios`) |
 
 ---
@@ -406,13 +406,13 @@ Cópia local NÃO existe (foi criada via terminal PowerShell). Precisa ser recri
 ## Deploy Commands
 ```powershell
 # Upload backend
-scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-core.js root@31.97.64.102:/var/www/aluforce/routes/
-scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-extended.js root@31.97.64.102:/var/www/aluforce/routes/
-scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-routes.js root@31.97.64.102:/var/www/aluforce/routes/
+scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-core.js root@YOUR_VPS_IP:/var/www/aluforce/routes/
+scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-extended.js root@YOUR_VPS_IP:/var/www/aluforce/routes/
+scp -i C:\Users\Tavera\.ssh\id_rsa routes/financeiro-routes.js root@YOUR_VPS_IP:/var/www/aluforce/routes/
 
 # Restart
-ssh -i C:\Users\Tavera\.ssh\id_rsa root@31.97.64.102 "pm2 restart aluforce-dashboard --update-env"
+ssh -i C:\Users\Tavera\.ssh\id_rsa root@YOUR_VPS_IP "pm2 restart aluforce-dashboard --update-env"
 
 # Run test
-ssh -i C:\Users\Tavera\.ssh\id_rsa root@31.97.64.102 "cd /var/www/aluforce && node /tmp/test-financeiro-v2.js 2>&1"
+ssh -i C:\Users\Tavera\.ssh\id_rsa root@YOUR_VPS_IP "cd /var/www/aluforce && node /tmp/test-financeiro-v2.js 2>&1"
 ```

@@ -10,7 +10,7 @@ set -euo pipefail
 # ── Configuração ──────────────────────────────
 BACKUP_DIR="/var/backups/aluforce/mysql"
 DB_USER="aluforce"
-DB_PASS="Aluforce2026VpsDB"
+DB_PASS="CHANGE_ME_DB_PASSWORD"
 DB_HOST="127.0.0.1"
 DATABASES="aluforce_vendas zyntra_demo"
 RETENTION_DAILY=7    # manter últimos 7 backups diários

@@ -7,7 +7,7 @@ echo "=== Debug activation ==="
 COOKIE=/tmp/n8n-dbg.txt
 curl -s -c "$COOKIE" --noproxy '*' -X POST http://127.0.0.1:5678/rest/login \
   -H "Content-Type: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null
 
 # Clear logs
 docker logs --since 1s aluforce-n8n > /dev/null 2>&1

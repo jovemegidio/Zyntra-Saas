@@ -88,8 +88,8 @@ const CORS_ALLOWED_ORIGINS = [
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://31.97.64.102:3000',
-    'http://31.97.64.102',
+    'http://YOUR_VPS_IP:3000',
+    'http://YOUR_VPS_IP',
     process.env.CORS_ORIGIN
 ].filter(Boolean);
 

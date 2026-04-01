@@ -8,7 +8,7 @@ async function main() {
     const pool = mysql.createPool({
         host: 'localhost',
         user: 'aluforce',
-        password: 'Aluforce2026VpsDB',
+        password: 'CHANGE_ME_DB_PASSWORD',
         database: 'aluforce_vendas'
     });
 

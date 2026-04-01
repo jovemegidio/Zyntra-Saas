@@ -2,7 +2,7 @@
 # Check nomeOperador in CDR records - v3
 TOKEN=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"douglas@aluforce.ind.br","password":"alu0103"}' \
+  -d '{"email":"douglas@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}' \
   | python3 -c 'import sys,json;print(json.load(sys.stdin).get("token","ERRO"))' 2>/dev/null)
 
 echo "Token: ${TOKEN:0:20}..."

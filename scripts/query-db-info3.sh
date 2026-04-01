@@ -1,5 +1,5 @@
 #!/bin/bash
-MYSQL="mysql -u aluforce -pAluforce2026VpsDB -h 31.97.64.102 aluforce_vendas"
+MYSQL="mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -h YOUR_VPS_IP aluforce_vendas"
 
 echo "=== CLEMERSON E FERNANDO - TELEFONES ==="
 $MYSQL -e "SELECT id, nome_completo, email, telefone, data_nascimento, cargo, departamento, status FROM funcionarios WHERE id IN (29, 37);" 2>/dev/null

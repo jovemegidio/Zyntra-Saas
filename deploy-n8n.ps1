@@ -18,7 +18,7 @@ param(
 )
 
 # ── Configuração ──────────────────────────────
-$servidor = "31.97.64.102"
+$servidor = "YOUR_VPS_IP"
 $usuario = "root"
 $senha = if ($env:VPS_PASSWORD) { $env:VPS_PASSWORD } else { Read-Host "Senha VPS" }
 $n8nPassword = if ($env:N8N_PASSWORD) { $env:N8N_PASSWORD } else { Read-Host "Senha n8n" }
@@ -419,7 +419,7 @@ if ($dnsCheck -match "31\.97\.64\.102") {
     Write-Host "     3. Adicione registro tipo A:" -ForegroundColor White
     Write-Host "        Nome: n8n" -ForegroundColor Cyan
     Write-Host "        Tipo: A" -ForegroundColor Cyan
-    Write-Host "        Valor: 31.97.64.102" -ForegroundColor Cyan
+    Write-Host "        Valor: YOUR_VPS_IP" -ForegroundColor Cyan
     Write-Host "        TTL: 14400" -ForegroundColor Cyan
     Write-Host "     4. Aguarde 5-30 min para propagação DNS" -ForegroundColor White
     Write-Host ""
@@ -459,7 +459,7 @@ if (-not $skipSSL) {
         Write-Host "  🔐 Gerando certificado SSL com Let's Encrypt..." -ForegroundColor Yellow
         Write-Host "  ⏳ Isso pode levar 30-60 segundos..." -ForegroundColor DarkGray
         
-        $certResult = SSH-Executar "certbot --nginx -d n8n.aluforce.api.br --non-interactive --agree-tos --email admin@aluforce.api.br --redirect $ERR"
+        $certResult = SSH-Executar "certbot --nginx -d n8n.aluforce.api.br --non-interactive --agree-tos --email admin@your-domain.com --redirect $ERR"
         
         if ($certResult -match "Successfully|Congratulations") {
             Write-Host "  ✅ Certificado SSL gerado com sucesso!" -ForegroundColor Green

@@ -4,7 +4,7 @@ const path = require('path');
 
 const CONFIG = {
     server: {
-        host: '31.97.64.102',
+        host: 'YOUR_VPS_IP',
         user: 'root',
         password: process.env.VPS_PASSWORD || '',  // Defina VPS_PASSWORD no ambiente
         remotePath: '/var/www/aluforce'

@@ -7,11 +7,11 @@ const fs = require('fs');
 async function main() {
   const conn = await mysql.createConnection({
     host: 'localhost', user: 'aluforce',
-    password: 'Aluforce2026VpsDB', database: 'aluforce_vendas'
+    password: 'CHANGE_ME_DB_PASSWORD', database: 'aluforce_vendas'
   });
 
   // 1. Gerar hash
-  const hash = await bcrypt.hash('alu0103', 10);
+  const hash = await bcrypt.hash('CHANGE_ME_USER_PASSWORD', 10);
   console.log('Hash gerado:', hash);
 
   // 2. Verificar se ja existe
@@ -39,7 +39,7 @@ async function main() {
   const envContent = fs.readFileSync('/var/www/aluforce/.env', 'utf8');
   const JWT_SECRET = envContent.match(/JWT_SECRET=(.+)/)[1].trim();
   
-  const okBcrypt = await bcrypt.compare('alu0103', hash);
+  const okBcrypt = await bcrypt.compare('CHANGE_ME_USER_PASSWORD', hash);
   console.log('Bcrypt verify:', okBcrypt);
   
   const token = jwt.sign(

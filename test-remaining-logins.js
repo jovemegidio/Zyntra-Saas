@@ -29,7 +29,7 @@ const REMAINING_USERS = [
   { id: 54, email: 'ronaldo.silva@aluforce.ind.br' },
 ];
 
-const PASSWORD = 'alu0103';
+const PASSWORD = 'CHANGE_ME_USER_PASSWORD';
 const BASE = 'http://localhost:3000';
 
 function httpPost(path, body) {

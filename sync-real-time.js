@@ -7,7 +7,7 @@ const fs = require('fs');
 // CONFIGURAÇÕES DO SERVIDOR
 // ============================================
 const CONFIG = {
-    server: '31.97.64.102',
+    server: 'YOUR_VPS_IP',
     usuario: 'root',
     senha: process.env.VPS_PASSWORD || '',  // Defina VPS_PASSWORD no ambiente
     remoteDir: '/var/www/aluforce',

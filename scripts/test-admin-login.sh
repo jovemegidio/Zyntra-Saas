@@ -3,7 +3,7 @@
 echo "=== Testing Admin (douglas) ==="
 RESP=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"douglas@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"douglas@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 echo "$RESP" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
@@ -18,7 +18,7 @@ echo ""
 echo "=== Testing Comercial (augusto) ==="
 RESP2=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"augusto.ladeira@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"augusto.ladeira@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 echo "$RESP2" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)

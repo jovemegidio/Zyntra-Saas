@@ -11,7 +11,7 @@ const mysql = require('mysql2/promise');
 const dbConfig = {
     host: 'localhost',
     user: 'root',
-    password: '@dminalu',
+    password: process.env.DB_PASSWORD || 'CHANGE_ME',
     database: 'aluforce_vendas',
     charset: 'utf8mb4'
 };

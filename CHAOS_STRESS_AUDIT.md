@@ -784,7 +784,7 @@ io.use((socket, next) => {
 2. isDev = process.env.NODE_ENV !== 'production' → true
 3. Socket.IO auth bypassada
 4. CORS também bypassada (development mode)
-5. Atacante conecta: const socket = io('http://31.97.64.102:3000')
+5. Atacante conecta: const socket = io('http://YOUR_VPS_IP:3000')
 6. Emite eventos ilimitados: chat-message, notification, transfer-to-human
 7. Broadcast para todos os users logados
 ```
@@ -839,10 +839,10 @@ Se blacklist TTL = JWT exp = 15 minutos:
 **SEVERIDADE: ALTA (P1)**
 
 **Cenário de Estresse:**
-> Atacante na mesma rede local da VPS (31.97.64.102) → acessa `http://31.97.64.102:3000` (IP hardcoded na whitelist CORS) → CORS permitido → com credenciais → se tem cookie válido de sessão anterior → acesso total via cross-origin requests
+> Atacante na mesma rede local da VPS (YOUR_VPS_IP) → acessa `http://YOUR_VPS_IP:3000` (IP hardcoded na whitelist CORS) → CORS permitido → com credenciais → se tem cookie válido de sessão anterior → acesso total via cross-origin requests
 
 **Onde:**
-- `server.js` linhas 648-695 — lista `allowedOrigins` contém `http://31.97.64.102:3000` e `http://31.97.64.102`
+- `server.js` linhas 648-695 — lista `allowedOrigins` contém `http://YOUR_VPS_IP:3000` e `http://YOUR_VPS_IP`
 
 **Combos de Bypass:**
 ```
@@ -1096,7 +1096,7 @@ LC-003 (START TRANSACTION no pool)
 | P1-3 | RT-005 | Vendas POST /pedidos: `connection.release()` movido de try+catch para `finally` | `modules/Vendas/server.js` | ✅ CORRIGIDO |
 | P1-4 | LC-005 | `uncaughtException` e `unhandledRejection`: SEMPRE fazem `stopServer() + exit(1)` | `server.js` | ✅ CORRIGIDO |
 | P1-5 | NET-002 | CircuitBreaker: `setRedis()` + `_loadState()`/`_saveState()` para persistência cluster-wide | `services/resilience.js` | ✅ CORRIGIDO |
-| P1-6 | RT-004 | CORS: removidos `http://31.97.64.102:3000` e `http://31.97.64.102` da whitelist | `server.js` | ✅ CORRIGIDO |
+| P1-6 | RT-004 | CORS: removidos `http://YOUR_VPS_IP:3000` e `http://YOUR_VPS_IP` da whitelist | `server.js` | ✅ CORRIGIDO |
 | P2-1 | NET-001 | `withRetry()` com exponential backoff + jitter para queries transientes | `services/resilience.js` | ✅ CORRIGIDO |
 | P2-2 | NET-003 | Hierarquia: kill_timeout (40s) > requestTimeout (30s) > DB query (15s) | `ecosystem.production.config.js`, `services/resilience.js` | ✅ CORRIGIDO |
 | P2-3 | LC-006 | Cache Map fallback: TTLs reduzidos a 20% quando Redis indisponível em cluster | `services/cache.js` | ✅ CORRIGIDO |

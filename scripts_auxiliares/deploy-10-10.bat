@@ -1,6 +1,6 @@
 @echo off
 REM === Deploy Enterprise Performance Files to VPS ===
-set VPS=31.97.64.102
+set VPS=YOUR_VPS_IP
 set USER=root
 set PASS=Aluforce@2026#Vps
 set REMOTE=/var/www/aluforce

@@ -3,14 +3,14 @@
 echo "=== Testing Hellen ==="
 RESP=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"hellen.nascimento@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"hellen.nascimento@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 echo "$RESP" | python3 -m json.tool 2>/dev/null || echo "$RESP"
 
 echo ""
 echo "=== Testing Tatiane ==="
 RESP2=$(curl -s -X POST http://localhost:3000/api/login \
   -H 'Content-Type: application/json' \
-  -d '{"email":"tatiane.sousa@aluforce.ind.br","password":"alu0103"}')
+  -d '{"email":"tatiane.sousa@aluforce.ind.br","password":"CHANGE_ME_USER_PASSWORD"}')
 echo "$RESP2" | python3 -m json.tool 2>/dev/null || echo "$RESP2"
 
 echo ""

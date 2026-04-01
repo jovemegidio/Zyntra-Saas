@@ -13,7 +13,7 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: '@dminalu'
+          MYSQL_ROOT_PASSWORD: process.env.DB_PASSWORD || 'CHANGE_ME'
           MYSQL_DATABASE: aluforce_vendas
         ports:
           - 3306:3306
@@ -32,14 +32,14 @@ jobs:
           sudo apt-get install -y default-mysql-client
           echo "Waiting for MySQL..."
           for i in {1..30}; do
-            mysqladmin ping -h127.0.0.1 -P3306 -u root -p"@dminalu" &>/dev/null && break
+            mysqladmin ping -h127.0.0.1 -P3306 -u root -pprocess.env.DB_PASSWORD || 'CHANGE_ME' &>/dev/null && break
             echo "MySQL not ready yet... ($i)"; sleep 2
           done
 
       - name: Import schema
         run: |
           if [ -f RHH.sql ]; then
-            mysql -h127.0.0.1 -P3306 -u root -p"@dminalu" aluforce_vendas < RHH.sql || true
+            mysql -h127.0.0.1 -P3306 -u root -pprocess.env.DB_PASSWORD || 'CHANGE_ME' aluforce_vendas < RHH.sql || true
           else
             echo "RHH.sql not found; skipping import"
           fi

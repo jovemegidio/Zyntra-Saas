@@ -17,7 +17,7 @@ router.use((req, res, next) => {
         'https://aluforce.api.br',
         'http://localhost:3000',
         'http://localhost:4173',
-        'http://31.97.64.102'
+        'http://YOUR_VPS_IP'
     ];
     const origin = req.headers.origin;
     if (allowedOrigins.includes(origin)) {

@@ -27,10 +27,10 @@ if [ -z "$TOKEN" ]; then
   # Try MySQL direct to see if products exist
   echo ""
   echo "=== MySQL: count produtos with estoque > 0 ==="
-  mysql -u aluforce -pAluforce2026VpsDB aluforce_vendas -e "SELECT COUNT(*) as total FROM produtos WHERE (estoque_atual > 0 OR quantidade_estoque > 0) AND (status = 'ativo' OR status IS NULL);" 2>/dev/null
+  mysql -u aluforce -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT COUNT(*) as total FROM produtos WHERE (estoque_atual > 0 OR quantidade_estoque > 0) AND (status = 'ativo' OR status IS NULL);" 2>/dev/null
   echo ""
   echo "=== MySQL: sample produtos ==="
-  mysql -u aluforce -pAluforce2026VpsDB aluforce_vendas -e "SELECT id, codigo, LEFT(descricao,40) as descricao, estoque_atual, quantidade_estoque, status FROM produtos WHERE (estoque_atual > 0 OR quantidade_estoque > 0) LIMIT 5;" 2>/dev/null
+  mysql -u aluforce -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT id, codigo, LEFT(descricao,40) as descricao, estoque_atual, quantidade_estoque, status FROM produtos WHERE (estoque_atual > 0 OR quantidade_estoque > 0) LIMIT 5;" 2>/dev/null
 else
   echo ""
   echo "=== Testing API with token ==="

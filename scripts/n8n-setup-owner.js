@@ -1,8 +1,8 @@
 const data = JSON.stringify({
-  email: "admin@aluforce.api.br",
+  email: "admin@your-domain.com",
   firstName: "Admin",
   lastName: "Aluforce",
-  password: "Aluforce2026n8n"
+  password: "CHANGE_ME_N8N_PASSWORD"
 });
 const http = require("http");
 const req = http.request({

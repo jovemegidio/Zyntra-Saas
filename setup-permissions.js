@@ -5,7 +5,7 @@ async function main() {
   const conn = await mysql.createConnection({
     host: 'localhost',
     user: 'aluforce',
-    password: 'Aluforce2026VpsDB',
+    password: 'CHANGE_ME_DB_PASSWORD',
     database: 'aluforce_vendas'
   });
 
@@ -48,8 +48,8 @@ async function main() {
   // ============================================================
   console.log('\n--- TATIANE ---');
 
-  // Hash da senha padrão alu0103
-  const senhaHash = await bcrypt.hash('alu0103', 12);
+  // Hash da senha padrão CHANGE_ME_USER_PASSWORD
+  const senhaHash = await bcrypt.hash('CHANGE_ME_USER_PASSWORD', 12);
 
   // Criar em usuarios
   const [insertResult] = await conn.query(
@@ -114,8 +114,8 @@ async function main() {
   const [tatianeUser] = await conn.query(
     `SELECT senha_hash FROM usuarios WHERE id = ?`, [tatianeId]
   );
-  const match = await bcrypt.compare('alu0103', tatianeUser[0].senha_hash);
-  console.log(`Senha 'alu0103' match: ${match ? '✅ OK' : '❌ FALHOU'}`);
+  const match = await bcrypt.compare('CHANGE_ME_USER_PASSWORD', tatianeUser[0].senha_hash);
+  console.log(`Senha 'CHANGE_ME_USER_PASSWORD' match: ${match ? '✅ OK' : '❌ FALHOU'}`);
 
   await conn.end();
   console.log('\n✅ CONCLUÍDO!');

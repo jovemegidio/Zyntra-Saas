@@ -13,7 +13,7 @@ async function migrate() {
     const pool = mysql.createPool({
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'aluforce',
-        password: process.env.DB_PASSWORD || 'Aluforce2026VpsDB',
+        password: process.env.DB_PASSWORD || 'CHANGE_ME_DB_PASSWORD',
         database: process.env.DB_NAME || 'aluforce_vendas',
         waitForConnections: true,
         connectionLimit: 2

@@ -10,7 +10,7 @@ param(
    [string[]]$Arquivos
 )
 
-$servidor = "31.97.64.102"
+$servidor = "YOUR_VPS_IP"
 $usuario = "root"
 $caminhoRemoto = "/var/www/aluforce"
 $caminhoLocal = $PSScriptRoot

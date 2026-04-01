@@ -1,4 +1,4 @@
-﻿Write-Host "`n============================================" -ForegroundColor Cyan
+Write-Host "`n============================================" -ForegroundColor Cyan
 Write-Host "  TESTES DE SEGURANCA - ALUFORCE V2.0" -ForegroundColor Green
 Write-Host "============================================`n" -ForegroundColor Cyan
 
@@ -54,7 +54,7 @@ const mysql = require('mysql2/promise');
 require('dotenv').config();
 (async () => {
     const db = await mysql.createConnection({
-        host: 'localhost', user: 'root', password: '@dminalu',
+        host: 'localhost', user: 'root', password: process.env.DB_PASSWORD || 'CHANGE_ME',
         database: 'aluforce_vendas', port: 3306
     });
     const [r1] = await db.query('SELECT COUNT(*) as t FROM usuarios_pcp WHERE senha LIKE ''$2%''');

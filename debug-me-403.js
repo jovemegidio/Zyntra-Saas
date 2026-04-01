@@ -2,7 +2,7 @@
 require('dotenv').config();
 const http = require('http');
 
-const TEST_PASS = 'alu0103';
+const TEST_PASS = 'CHANGE_ME_USER_PASSWORD';
 
 // Usuarios que falharam: augusto, bruno, christian, clayton, junior, fabiano, fabiola, hellen, marcia, marcos
 // Usuarios que passaram: ana, andreia, ti, clemerson, douglas, guilherme, rh(isabela), leonardo(lucas)

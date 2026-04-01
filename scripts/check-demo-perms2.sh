@@ -1,7 +1,7 @@
 #!/bin/bash
 # Check and fix demo user permissions for all modules
 
-mysql -u aluforce -pAluforce2026VpsDB zyntra_demo << 'SQL'
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD zyntra_demo << 'SQL'
 -- Check user columns
 DESCRIBE usuarios;
 

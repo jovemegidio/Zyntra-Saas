@@ -36,7 +36,7 @@ async function testUser(email) {
   console.log(`\n--- Testando: ${email} ---`);
   
   // 1. Login
-  const login = await httpPost('/api/login', { email, password: 'alu0103' });
+  const login = await httpPost('/api/login', { email, password: 'CHANGE_ME_USER_PASSWORD' });
   console.log(`Login: ${login.status}`);
   
   if (login.status !== 200) {

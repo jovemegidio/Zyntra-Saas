@@ -9,7 +9,7 @@ async function main() {
     const conn = await mysql.createConnection({
         host: process.env.DB_HOST || 'localhost',
         user: process.env.DB_USER || 'aluforce',
-        password: process.env.DB_PASS || 'Aluforce2026VpsDB',
+        password: process.env.DB_PASS || 'CHANGE_ME_DB_PASSWORD',
         database: process.env.DB_NAME || 'aluforce_vendas'
     });
 

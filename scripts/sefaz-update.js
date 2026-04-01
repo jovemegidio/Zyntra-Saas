@@ -19,7 +19,7 @@ const path = require('path');
 const DB_CONFIG = {
     host: 'localhost',
     user: 'aluforce',
-    password: 'Aluforce2026VpsDB',
+    password: 'CHANGE_ME_DB_PASSWORD',
     database: 'aluforce_vendas',
     waitForConnections: true,
     connectionLimit: 2

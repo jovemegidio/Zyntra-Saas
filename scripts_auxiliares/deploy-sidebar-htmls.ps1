@@ -1,5 +1,5 @@
 $base = "g:\Outros computadores\Meu laptop (2)\Sistema - ALUFORCE - V.2"
-$vps = "root@31.97.64.102"
+$vps = "root@YOUR_VPS_IP"
 $vpsBase = "/var/www/aluforce"
 $pw = "Aluforce@2026#Vps"
 $pscp = "C:\Program Files\PuTTY\pscp.exe"

@@ -3,7 +3,7 @@ require('dotenv').config();
 const http = require('http');
 const mysql = require('mysql2/promise');
 
-const TEST_PASS = 'alu0103';
+const TEST_PASS = 'CHANGE_ME_USER_PASSWORD';
 const results = { ok: [], fail: [], blocked: [], error: [] };
 
 function loginTest(email) {

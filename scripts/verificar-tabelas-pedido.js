@@ -4,7 +4,7 @@ async function main() {
     const conn = await mysql.createConnection({
         host: 'localhost',
         user: 'root',
-        password: '@dminalu',
+        password: process.env.DB_PASSWORD || 'CHANGE_ME',
         database: 'aluforce_vendas'
     });
 

@@ -32,7 +32,7 @@ async function main() {
   // 2. Try login
   console.log("\n=== 2. Login Test ===");
   const loginData = JSON.stringify({
-    emailOrLdapLoginId: "admin@aluforce.api.br",
+    emailOrLdapLoginId: "admin@your-domain.com",
     password: "Aluforce_n8n_2026!"
   });
   const login = await request("/rest/login", "POST", loginData);

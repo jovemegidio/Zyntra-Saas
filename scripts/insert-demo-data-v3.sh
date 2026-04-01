@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script corrigido com as colunas REAIS do banco
-MYSQL_CRED="-u aluforce -pAluforce2026VpsDB"
+MYSQL_CRED="-u aluforce -pCHANGE_ME_DB_PASSWORD"
 DB="zyntra_demo"
 
 echo "=== Inserindo dados demo (v3) ==="
@@ -203,7 +203,7 @@ SQLEOF
 
 echo ""
 echo "=== Resumo ==="
-mysql -u aluforce -pAluforce2026VpsDB zyntra_demo -e "
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD zyntra_demo -e "
 SELECT 'Usuarios' as item, COUNT(*) as total FROM usuarios
 UNION ALL SELECT 'Clientes', COUNT(*) FROM clientes
 UNION ALL SELECT 'Produtos', COUNT(*) FROM produtos

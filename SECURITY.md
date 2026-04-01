@@ -22,7 +22,7 @@ O `JWT_SECRET` é usado para assinar todos os tokens de autenticação.
 node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
 
 # 2. Conectar na VPS
-ssh root@31.97.64.102
+ssh root@YOUR_VPS_IP
 
 # 3. Editar .env
 nano /var/www/aluforce/.env

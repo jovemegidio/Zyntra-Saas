@@ -1,5 +1,5 @@
 # Deploy Enterprise 10/10 files to VPS
-$VPS = "31.97.64.102"
+$VPS = "YOUR_VPS_IP"
 $USER = "root"
 $PASS = "Aluforce@2026#Vps"
 $REMOTE = "/var/www/aluforce"

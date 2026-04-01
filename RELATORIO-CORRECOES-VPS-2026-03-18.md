@@ -1,6 +1,6 @@
 # RELATÓRIO DE CORREÇÕES E TESTES — VPS ALUFORCE
 **Data:** 2026-03-18 00:25 UTC  
-**VPS:** 31.97.64.102 — Ubuntu 22.04.5 LTS  
+**VPS:** YOUR_VPS_IP — Ubuntu 22.04.5 LTS  
 **App:** ALUFORCE ERP v2.1.7  
 
 ---

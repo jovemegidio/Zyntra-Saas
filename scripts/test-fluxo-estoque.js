@@ -6,7 +6,7 @@ const mysql = require('mysql2/promise');
 const jwt = require('jsonwebtoken');
 const http = require('http');
 
-const DB = { host:'localhost', user:'aluforce', password:'Aluforce2026VpsDB', database:'aluforce_vendas' };
+const DB = { host:'localhost', user:'aluforce', password:'CHANGE_ME_DB_PASSWORD', database:'aluforce_vendas' };
 const JWT_SECRET = process.env.JWT_SECRET || 'e1c084f3afad7116058bba8444655d9b328145b8ae72385da0499bf8b71c3324';
 
 // Gerar token JWT admin valido

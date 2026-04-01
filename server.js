@@ -653,8 +653,8 @@ const allowedOrigins = [
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://31.97.64.102:3000',     // VPS IP (HTTP — only for internal/dev access)
-    'http://31.97.64.102',            // VPS IP (HTTP — only for internal/dev access)
+    'http://YOUR_VPS_IP:3000',     // VPS IP (HTTP — only for internal/dev access)
+    'http://YOUR_VPS_IP',            // VPS IP (HTTP — only for internal/dev access)
     'http://tauri.localhost',        // App Desktop Tauri (ALUFORCE ERP Desktop)
     'https://tauri.localhost',       // App Desktop Tauri (HTTPS variant)
     'tauri://localhost',             // App Desktop Tauri (custom scheme)

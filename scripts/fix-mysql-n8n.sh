@@ -29,7 +29,7 @@ systemctl start mysql
 sleep 5
 
 echo "=== Testing aluforce access to n8n DB ==="
-mysql -u aluforce -pAluforce2026VpsDB n8n -e "SELECT 'N8N_ACCESS_OK' AS status" 2>&1
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD n8n -e "SELECT 'N8N_ACCESS_OK' AS status" 2>&1
 
 echo "=== Restarting n8n container ==="
 cd /var/www/aluforce

@@ -1,4 +1,4 @@
-﻿// Arquivo: resetar_todas_senhas.js
+// Arquivo: resetar_todas_senhas.js
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
@@ -17,7 +17,7 @@ const newStandardPassword = args[0];
 const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: '@dminalu', // Sua senha do MySQL
+    password: process.env.DB_PASSWORD || 'CHANGE_ME', // Sua senha do MySQL
     database: 'aluforce_vendas'
 });
 

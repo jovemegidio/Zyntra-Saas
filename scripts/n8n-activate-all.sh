@@ -10,7 +10,7 @@ echo ""
 # Login
 curl -s -c "$COOKIE" -X POST "$N8N_URL/rest/login" \
   -H "Content-Type: application/json" \
-  -d '{"emailOrLdapLoginId":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null
+  -d '{"emailOrLdapLoginId":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null
 
 echo "Logged in."
 echo ""

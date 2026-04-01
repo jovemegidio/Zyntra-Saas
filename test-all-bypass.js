@@ -8,11 +8,11 @@ const http = require('http');
 const DB_CONFIG = {
   host: 'localhost',
   user: 'aluforce',
-  password: 'Aluforce2026VpsDB',
+  password: 'CHANGE_ME_DB_PASSWORD',
   database: 'aluforce_vendas'
 };
 
-const PASSWORD = 'alu0103';
+const PASSWORD = 'CHANGE_ME_USER_PASSWORD';
 
 function httpGet(path, token) {
   return new Promise((resolve, reject) => {

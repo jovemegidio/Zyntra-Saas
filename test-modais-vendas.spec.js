@@ -1,11 +1,11 @@
 /**
  * E2E Test: Modais "Incluir Cliente" e "Novo Pedido de Venda"
  * Testa abertura, conteúdo, botão fechar e fechamento de cada modal.
- * Roda contra a VPS de produção (https://31.97.64.102).
+ * Roda contra a VPS de produção (https://YOUR_VPS_IP).
  */
 const { test, expect } = require('@playwright/test');
 
-const BASE = 'https://31.97.64.102';
+const BASE = 'https://YOUR_VPS_IP';
 const LOGIN_EMAIL = 'contato@aluforce.com.br';
 const LOGIN_PASS = 'Aluforce@2026#Admin';
 

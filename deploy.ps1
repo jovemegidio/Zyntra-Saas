@@ -20,7 +20,7 @@ param(
 )
 
 # ── Configuração ──────────────────────────────
-$servidor = "31.97.64.102"
+$servidor = "YOUR_VPS_IP"
 $usuario = "root"
 # SECURITY: nunca hardcode credenciais — use a variável de ambiente VPS_PASSWORD
 # Para definir: $env:VPS_PASSWORD = "sua_senha" (no perfil PowerShell ou pipeline CI/CD)

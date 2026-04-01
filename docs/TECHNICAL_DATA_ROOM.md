@@ -222,7 +222,7 @@ Estrutura de Camadas:
                              ▼
                     ┌──────────────────┐
                     │   VPS Linux       │
-                    │ 31.97.64.102      │
+                    │ YOUR_VPS_IP      │
                     │                   │
                     │  ┌─────────────┐  │
                     │  │   PM2       │  │

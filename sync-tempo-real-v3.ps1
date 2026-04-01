@@ -14,7 +14,7 @@ $ErrorActionPreference = "Continue"
 $env:PATH += ";C:\Program Files\PuTTY"
 $serverPassword = $env:VPS_PASSWORD  # Defina: $env:VPS_PASSWORD = 'sua_senha' no perfil PowerShell
 $serverUser = "root"
-$serverIP = "31.97.64.102"
+$serverIP = "YOUR_VPS_IP"
 $serverPath = "/var/www/aluforce-v2"
 $localPath = $PSScriptRoot
 

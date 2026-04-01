@@ -5,7 +5,7 @@ sleep 5
 # Login
 curl -s -c /tmp/n8n-ck.txt -X POST http://localhost:5678/rest/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null 2>&1
+  -d '{"email":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null 2>&1
 
 # Importar
 RESULT=$(curl -s -b /tmp/n8n-ck.txt -X POST http://localhost:5678/rest/workflows \
@@ -31,7 +31,7 @@ if [ "$WF_ID" != "ERRO" ] && [ ! -z "$WF_ID" ]; then
   # Verificar
   curl -s -c /tmp/n8n-ck2.txt -X POST http://localhost:5678/rest/login \
     -H "Content-Type: application/json" \
-    -d '{"email":"admin@aluforce.api.br","password":"Aluforce2026n8n"}' > /dev/null 2>&1
+    -d '{"email":"admin@your-domain.com","password":"CHANGE_ME_N8N_PASSWORD"}' > /dev/null 2>&1
   
   curl -s -b /tmp/n8n-ck2.txt http://localhost:5678/rest/workflows | python3 -c "
 import sys,json

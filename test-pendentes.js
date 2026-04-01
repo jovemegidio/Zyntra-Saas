@@ -9,14 +9,14 @@ async function main() {
   const conn = await mysql.createConnection({
     host: 'localhost',
     user: 'aluforce',
-    password: 'Aluforce2026VpsDB',
+    password: 'CHANGE_ME_DB_PASSWORD',
     database: 'aluforce_vendas'
   });
 
   const envContent = fs.readFileSync('/var/www/aluforce/.env', 'utf8');
   const jwtSecretMatch = envContent.match(/JWT_SECRET=(.+)/);
   const JWT_SECRET = jwtSecretMatch ? jwtSecretMatch[1].trim() : null;
-  const PASSWORD = 'alu0103';
+  const PASSWORD = 'CHANGE_ME_USER_PASSWORD';
 
   // Buscar usuarios pendentes por nome/email parcial
   const pendentes = [

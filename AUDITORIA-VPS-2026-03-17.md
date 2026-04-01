@@ -1,6 +1,6 @@
 # AUDITORIA VPS — ZYNTRA/ALUFORCE ERP
 **Data:** 17 de março de 2026  
-**VPS:** 31.97.64.102  
+**VPS:** YOUR_VPS_IP  
 **OS:** Ubuntu 22.04.5 LTS (Jammy Jellyfish)  
 **Hardware:** 1 vCPU / 3.8 GB RAM / 49 GB Disco  
 

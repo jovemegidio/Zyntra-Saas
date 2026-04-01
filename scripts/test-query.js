@@ -1,6 +1,6 @@
 const mysql = require('mysql2/promise');
 (async () => {
-    const c = await mysql.createConnection({host:'localhost',user:'aluforce',password:'Aluforce2026VpsDB',database:'aluforce_vendas'});
+    const c = await mysql.createConnection({host:'localhost',user:'aluforce',password:'CHANGE_ME_DB_PASSWORD',database:'aluforce_vendas'});
     
     // Buscar vendedores específicos
     const [vendedores] = await c.query("SELECT id, nome, email, role, departamento FROM usuarios WHERE nome LIKE '%Vitor%' OR nome LIKE '%Ronaldo%' OR nome LIKE '%Torres%'");

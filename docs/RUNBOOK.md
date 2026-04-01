@@ -1,7 +1,7 @@
 # Zyntra SGE — Runbook de Produção
 
 > Guia operacional para deploy, monitoramento, rollback e emergências.
-> VPS: `31.97.64.102` · App: `/var/www/aluforce` · PM2: `aluforce-dashboard`
+> VPS: `YOUR_VPS_IP` · App: `/var/www/aluforce` · PM2: `aluforce-dashboard`
 
 ---
 
@@ -35,13 +35,13 @@
 ### 2.2 Deploy Manual (SCP + SSH)
 ```bash
 # 1. Upload de arquivos
-scp -i ~/.ssh/id_rsa arquivo.js root@31.97.64.102:/var/www/aluforce/
+scp -i ~/.ssh/id_rsa arquivo.js root@YOUR_VPS_IP:/var/www/aluforce/
 
 # 2. Restart
-ssh root@31.97.64.102 "cd /var/www/aluforce && pm2 restart aluforce-dashboard"
+ssh root@YOUR_VPS_IP "cd /var/www/aluforce && pm2 restart aluforce-dashboard"
 
 # 3. Validar
-ssh root@31.97.64.102 "curl -s http://localhost:3000/status"
+ssh root@YOUR_VPS_IP "curl -s http://localhost:3000/status"
 ```
 
 ### 2.3 Checklist Pré-Deploy

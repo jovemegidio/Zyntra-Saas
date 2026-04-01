@@ -1,7 +1,7 @@
 # 📋 RELATÓRIO DE TESTES DE LOGIN — ALUFORCE ERP
 
 > **Data de Execução:** 23/02/2026, 08:43 (atualizado)  
-> **Ambiente:** VPS Produção (`31.97.64.102` / `https://aluforce.api.br`)  
+> **Ambiente:** VPS Produção (`YOUR_VPS_IP` / `https://aluforce.api.br`)  
 > **Framework:** Node.js scripts + Playwright Test  
 > **Arquivos de Teste:** `tests/e2e/login-usuarios.spec.js`, `test-all-bypass.js`, `test-pendentes.js`  
 > **Modo do Servidor:** Produção (MySQL local na VPS)
@@ -315,8 +315,8 @@ INSERT INTO usuarios (email, nome, senha_hash, ativo, status, role, setor)
 VALUES ('angelica@aluforce.ind.br', 'Angélica [Sobrenome]', 
         '$2a$10$[HASH_DA_SENHA]', 1, 'ativo', 'user', 'conservacao');
 
--- Para gerar o hash da senha padrão (alu0103):
--- node -e "const b=require('bcryptjs'); b.hash('alu0103',10).then(h=>console.log(h))"
+-- Para gerar o hash da senha padrão (CHANGE_ME_USER_PASSWORD):
+-- node -e "const b=require('bcryptjs'); b.hash('CHANGE_ME_USER_PASSWORD',10).then(h=>console.log(h))"
 ```
 
 ---

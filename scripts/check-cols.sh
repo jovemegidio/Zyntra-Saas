@@ -1,5 +1,5 @@
 #!/bin/bash
-MYSQL="mysql -u aluforce -pAluforce2026VpsDB -h 31.97.64.102 aluforce_vendas -N"
+MYSQL="mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -h YOUR_VPS_IP aluforce_vendas -N"
 
 echo "=== COLUNAS ESTOQUE ==="
 $MYSQL -e "DESCRIBE estoque;" 2>/dev/null | head -20

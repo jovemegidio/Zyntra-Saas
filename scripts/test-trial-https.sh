@@ -7,4 +7,4 @@ curl -s -X POST https://aluforce.api.br/api/zyntra/trial \
 echo ""
 echo ""
 echo "=== VERIFICAR NO BANCO ==="
-mysql -u aluforce -pAluforce2026VpsDB aluforce_vendas -e "SELECT id, nome, email, plano, status, created_at FROM zyntra_trials ORDER BY id DESC LIMIT 5;"
+mysql -u aluforce -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT id, nome, email, plano, status, created_at FROM zyntra_trials ORDER BY id DESC LIMIT 5;"

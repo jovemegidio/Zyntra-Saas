@@ -10,7 +10,7 @@ cp $ENV_FILE ${ENV_FILE}.backup-railway
 sed -i 's/DB_HOST=.*/DB_HOST=localhost/' $ENV_FILE
 sed -i 's/DB_PORT=.*/DB_PORT=3306/' $ENV_FILE
 sed -i 's/DB_USER=.*/DB_USER=aluforce/' $ENV_FILE
-sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=Aluforce2026VpsDB/' $ENV_FILE
+sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=CHANGE_ME_DB_PASSWORD/' $ENV_FILE
 sed -i 's/DB_NAME=.*/DB_NAME=aluforce_vendas/' $ENV_FILE
 
 echo "=== Configurações atualizadas ==="

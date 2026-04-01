@@ -5,7 +5,7 @@
 # ============================================
 set -e
 
-MYSQL="mysql -u aluforce -pAluforce2026VpsDB"
+MYSQL="mysql -u aluforce -pCHANGE_ME_DB_PASSWORD"
 SOURCE_DB="aluforce_vendas"
 DEMO_DB="zyntra_demo"
 
@@ -23,19 +23,19 @@ echo "✅ Banco $DEMO_DB criado"
 echo ""
 echo "📋 2/6 - Clonando estrutura de tabelas..."
 # Exportar apenas estrutura (sem dados, sem views)
-mysqldump -u aluforce -pAluforce2026VpsDB --no-data --skip-triggers --routines=false \
+mysqldump -u aluforce -pCHANGE_ME_DB_PASSWORD --no-data --skip-triggers --routines=false \
   --skip-lock-tables --single-transaction \
   $SOURCE_DB \
-  $(mysql -u aluforce -pAluforce2026VpsDB -N -e "SELECT GROUP_CONCAT(table_name SEPARATOR ' ') FROM information_schema.tables WHERE table_schema='$SOURCE_DB' AND table_type='BASE TABLE';" 2>/dev/null) \
+  $(mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -N -e "SELECT GROUP_CONCAT(table_name SEPARATOR ' ') FROM information_schema.tables WHERE table_schema='$SOURCE_DB' AND table_type='BASE TABLE';" 2>/dev/null) \
   2>/dev/null | $MYSQL $DEMO_DB 2>/dev/null || true
 echo "✅ Estrutura clonada"
 
 # 3. Clonar as VIEWs
 echo ""
 echo "📋 3/6 - Clonando views..."
-for view in $(mysql -u aluforce -pAluforce2026VpsDB -N -e "SELECT table_name FROM information_schema.tables WHERE table_schema='$SOURCE_DB' AND table_type='VIEW';" 2>/dev/null); do
+for view in $(mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -N -e "SELECT table_name FROM information_schema.tables WHERE table_schema='$SOURCE_DB' AND table_type='VIEW';" 2>/dev/null); do
   # Pegar a definição da view e trocar o banco
-  CREATE_VIEW=$(mysql -u aluforce -pAluforce2026VpsDB -N -e "SHOW CREATE VIEW $SOURCE_DB.$view\G" 2>/dev/null | grep "Create View" | sed "s/Create View: //" | sed "s/\`$SOURCE_DB\`\.//g" | sed "s/DEFINER=[^ ]* //g")
+  CREATE_VIEW=$(mysql -u aluforce -pCHANGE_ME_DB_PASSWORD -N -e "SHOW CREATE VIEW $SOURCE_DB.$view\G" 2>/dev/null | grep "Create View" | sed "s/Create View: //" | sed "s/\`$SOURCE_DB\`\.//g" | sed "s/DEFINER=[^ ]* //g")
   if [ -n "$CREATE_VIEW" ]; then
     $MYSQL $DEMO_DB -e "DROP VIEW IF EXISTS $view; $CREATE_VIEW" 2>/dev/null || echo "  ⚠️ View $view ignorada"
   fi

@@ -1,8 +1,8 @@
 #!/bin/bash
 # Configure phone numbers for WhatsApp alerts
-# Using -h 31.97.64.102 because user is configured for remote access
+# Using -h YOUR_VPS_IP because user is configured for remote access
 
-MYSQL="mysql -u aluforce -p'Aluforce2026VpsDB' -h 31.97.64.102 aluforce_vendas"
+MYSQL="mysql -u aluforce -p'CHANGE_ME_DB_PASSWORD' -h YOUR_VPS_IP aluforce_vendas"
 
 echo "=== 1. Configurando DESTINATARIOS_TESTE ==="
 $MYSQL -e "UPDATE whatsapp_config SET valor = '[\"5511995896003\",\"5511932569921\"]' WHERE chave = 'DESTINATARIOS_TESTE';"

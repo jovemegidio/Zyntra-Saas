@@ -20,9 +20,9 @@ fi
 
 if [ -z "$TOKEN" ]; then
   echo "FAILED: Still no token. Checking DB user..."
-  mysql -u aluforce -pAluforce2026VpsDB zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios WHERE email='admin@zyntra.com.br';"
+  mysql -u aluforce -pCHANGE_ME_DB_PASSWORD zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios WHERE email='admin@zyntra.com.br';"
   echo "Checking all users..."
-  mysql -u aluforce -pAluforce2026VpsDB zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios LIMIT 10;"
+  mysql -u aluforce -pCHANGE_ME_DB_PASSWORD zyntra_demo -e "SELECT id, nome, email, ativo FROM usuarios LIMIT 10;"
   exit 1
 fi
 

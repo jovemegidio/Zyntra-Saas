@@ -17,11 +17,11 @@ module.exports = {
       DB_NAME: 'aluforce_vendas',
       DB_HOST: 'localhost',
       DB_USER: 'aluforce',
-      DB_PASSWORD: 'Aluforce2026VpsDB',
+      DB_PASSWORD: 'CHANGE_ME_DB_PASSWORD',
       DB_CONN_LIMIT: '20',
       DB_QUERY_TIMEOUT: '15000',
       // ===== AUTH =====
-      JWT_SECRET: 'zyntra-demo-secret-2026-not-for-production-use',
+      JWT_SECRET: 'CHANGE_ME_JWT_SECRET',
       SKIP_2FA: 'true',
       // ===== SKIP FEATURES =====
       SKIP_MIGRATIONS: '0',           // Rodar migrations para criar tabelas faltantes
