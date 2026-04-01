@@ -1,1 +1,424 @@
-# 🏢 Sistema de Configurações da Empresa - ALUFORCE## 📋 Visão GeralSistema completo de gerenciamento de configurações da empresa implementado com modais profissionais, banco de dados estruturado e APIs RESTful.---## 🎯 Funcionalidades Implementadas### 1. **Dados da Minha Empresa**Gerenciamento completo das informações corporativas:- ✅ **Informações Básicas**  - Razão Social (obrigatório)  - Nome Fantasia  - CNPJ  - Inscrição Estadual  - Inscrição Municipal- ✅ **Contato**  - Telefone  - E-mail  - Website- ✅ **Endereço Completo**  - CEP  - Estado e Cidade  - Bairro  - Endereço e Número  - Complemento- ✅ **Mídias**  - Upload de Logotipo  - Favicon (já configurado: `/Favicon Aluforce.png`)### 2. **Categorias**Sistema de classificação com:- Nome e descrição- Cor personalizada- Ícone FontAwesome- Status ativo/inativo- Ordenação customizável- 5 categorias padrão pré-cadastradas:  - Administrativo (azul)  - Financeiro (verde)  - Vendas (laranja)  - Produção (vermelho)  - Logística (roxo)### 3. **Departamentos**Estrutura organizacional:- Nome e sigla- Descrição- Responsável (funcionário vinculado)- Cor e ícone personalizados- 6 departamentos padrão:  - RH, TI, Comercial, Produção, Financeiro, Qualidade### 4. **Projetos**Gerenciamento de iniciativas:- Nome e código do projeto- Descrição detalhada- Departamento vinculado- Responsável designado- Status (planejamento, em andamento, pausado, concluído, cancelado)- Datas (início, previsão, fim real)- Orçamento- Cor de identificação### 5. **Certificado Digital (A1)**Configuração para NF-e:- Upload de arquivo .PFX/.P12- Senha do certificado- Data de validade- Indicador visual de status### 6. **Importação NF-e**Agente de importação automática:- Toggle on/off- Data de ativação registrada- Status visual---## 🗄️ Estrutura do Banco de Dados### Tabelas Criadas#### `empresa_config````sqlCampos principais:- razao_social, nome_fantasia, cnpj- inscricao_estadual, inscricao_municipal- telefone, email, site- endereco, numero, complemento, bairro, cidade, estado, cep- logo_path, favicon_path- certificado_a1_path, certificado_senha, certificado_validade- nfe_agente_ativo, nfe_agente_data_ativacao- timestamps e updated_by```#### `categorias````sqlCampos:- nome, descricao, cor, icone- ativo, ordem- created_at, created_by```#### `departamentos````sqlCampos:- nome, sigla, descricao- responsavel_id (FK -> funcionarios)- cor, icone, ativo, ordem```#### `projetos````sqlCampos:- nome, codigo, descricao- departamento_id, responsavel_id- status, data_inicio, data_previsao_fim, data_fim_real- orcamento, cor, ativo```---## 🔌 APIs REST Implementadas### Empresa Config#### `GET /api/empresa-config`Retorna dados da empresa.**Resposta:**```json{  "id": 1,  "razao_social": "ALUFORCE INDÚSTRIA E COMÉRCIO LTDA",  "nome_fantasia": "ALUFORCE",  "cnpj": "...",  "telefone": "...",  ...}```#### `PUT /api/empresa-config`Atualiza dados da empresa (somente admin).**Body:**```json{  "razao_social": "Nova Razão Social",  "nome_fantasia": "ALUFORCE",  ...}```#### `PUT /api/empresa-config/certificado`Atualiza certificado digital (somente admin).#### `PUT /api/empresa-config/nfe`Atualiza configuração NF-e (somente admin).### Categorias- `GET /api/categorias` - Lista todas- `POST /api/categorias` - Cria nova (admin)- `PUT /api/categorias/:id` - Atualiza (admin)- `DELETE /api/categorias/:id` - Remove (admin)### Departamentos- `GET /api/departamentos` - Lista todos- `POST /api/departamentos` - Cria novo (admin)- `PUT /api/departamentos/:id` - Atualiza (admin)- `DELETE /api/departamentos/:id` - Remove (admin)### Projetos- `GET /api/projetos` - Lista todos- `POST /api/projetos` - Cria novo (admin)- `PUT /api/projetos/:id` - Atualiza (admin)- `DELETE /api/projetos/:id` - Remove (admin)---## 🎨 Design e UX### Modais Profissionais- **Design inspirado no Omie**: Cards limpos e modernos- **Animações suaves**: Fade in, slide up- **Responsivo**: Adaptado para mobile e desktop- **Acessibilidade**: Foco em usabilidade### Paleta de Cores- **Empresa**: Azul (#3B82F6)- **Categorias**: Laranja (#F59E0B)- **Departamentos**: Verde (#10B981)- **Projetos**: Roxo (#8B5CF6)- **Certificado**: Vermelho (#EF4444)- **NF-e**: Ciano (#06B6D4)### Componentes- ✅ Toggle switches animados- ✅ Color pickers- ✅ Icon pickers (FontAwesome)- ✅ File uploads customizados- ✅ Cards de listagem com ações (editar/excluir)- ✅ Empty states ilustrados- ✅ Mensagens de sucesso/erro---## 📁 Arquivos Criados/Modificados### Banco de Dados- ✅ `scripts/db/migrate_company_config.js` - Script de migração completo### Backend- ✅ `routes/companySettings.js` - Rotas REST (548 linhas)- ✅ `middleware/auth.js` - Autenticação e autorização (81 linhas)- ✅ `server.js` - Inclusão das novas rotas### Frontend - CSS- ✅ `public/css/config-modals.css` - Estilos completos dos modais (700+ linhas)### Frontend - HTML- ✅ `public/config-modals.html` - Estrutura dos 6 modais (550+ linhas)### Frontend - JavaScript- ✅ `public/js/company-settings.js` - Gerenciamento completo (550+ linhas)### Páginas- ✅ `public/index.html` - Importações e carregamento de modais- ✅ `public/login.html` - Favicon atualizado### Documentação- ✅ `docs/CONFIGURACOES_EMPRESA.md` - Este arquivo---## 🔐 Permissões### AdministradoresOs seguintes usuários têm acesso total:- andreia.lopes@aluforce.ind.br- douglas.moreira@aluforce.ind.br- ti@aluforce.ind.br- Qualquer usuário com `role: 'admin'`### Usuários Comuns- Podem **visualizar** algumas configurações- **Não podem editar** configurações da empresa- **Não têm acesso** ao modal de configurações via ícone ⚙️---## 🚀 Como Usar### 1. Acessar Configurações- Clique no **ícone de engrenagem** (⚙️) no dropdown do usuário- Somente administradores visualizam este ícone### 2. Navegar pelos Cards- Clique em qualquer card para abrir o modal correspondente- Cada modal tem funcionalidades específicas### 3. Editar Dados da Empresa1. Abra "1. Dados da Minha Empresa"2. Preencha/edite os campos desejados3. Clique em "Salvar Alterações"4. Confirmação de sucesso aparecerá### 4. Gerenciar Categorias/Departamentos/Projetos1. Abra o modal correspondente2. Clique em "Nova Categoria/Departamento/Projeto"3. Preencha o formulário4. Salve5. Use os botões de editar/excluir nos cards### 5. Configurar Certificado Digital1. Abra "5. Certificado Digital (Modelo A1)"2. Faça upload do arquivo .PFX3. Digite a senha4. Informe a data de validade5. Salve### 6. Ativar Agente NF-e1. Abra "6. Importação da NF-e do Fornecedor"2. Ative o toggle3. Salve4. Data de ativação será registrada---## 🧪 Testando o Sistema### Verificar Banco de Dados```bash# Executar migraçãonode scripts/db/migrate_company_config.js# Verificar tabelas criadasmysql -u root -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SHOW TABLES;"# Ver dados iniciaismysql -u root -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT * FROM empresa_config;"mysql -u root -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT * FROM categorias;"mysql -u root -pCHANGE_ME_DB_PASSWORD aluforce_vendas -e "SELECT * FROM departamentos;"```### Testar APIs```bash# Login como admincurl -X POST http://localhost:3000/api/login \  -H "Content-Type: application/json" \  -d '{"email":"andreia.lopes@aluforce.ind.br","password":"senha"}'# Buscar dados da empresacurl http://localhost:3000/api/empresa-config \  -H "Cookie: token=<seu-token>"# Listar categoriascurl http://localhost:3000/api/categorias \  -H "Cookie: token=<seu-token>"```---## 📊 Estatísticas da Implementação- **4 Tabelas** criadas no banco de dados- **17 Endpoints** REST implementados- **6 Modais** completos e funcionais- **700+ linhas** de CSS profissional- **550+ linhas** de JavaScript- **550+ linhas** de HTML estruturado- **5 Categorias** padrão pré-cadastradas- **6 Departamentos** padrão pré-cadastrados---## 🔄 Próximos Passos (Opcionais)### Melhorias Futuras1. **Upload de Imagens**   - Implementar upload real de logo e favicon   - Processamento e resize de imagens   - Armazenamento em servidor/cloud2. **Formulários de Criação**   - Modais para criar novas categorias   - Modais para criar novos departamentos   - Modais para criar novos projetos3. **Validações Avançadas**   - Validação de CNPJ   - Validação de CEP com busca automática   - Validação de certificado digital4. **Relatórios**   - Dashboard com estatísticas   - Exportação de configurações   - Histórico de alterações5. **Integrações**   - Integração com Receita Federal   - Integração com APIs de CEP   - Sincronização com Omie---## 🐛 Troubleshooting### Modal não abre- Verifique se você é admin- Limpe o cache do navegador- Verifique o console para erros JavaScript### Erro ao salvar- Verifique conexão com banco de dados- Confirme que o usuário tem permissão de admin- Veja logs do servidor### Campos não aparecem- Aguarde carregamento completo dos dados- Verifique se `/api/empresa-config` retorna dados- Veja erros no Network do DevTools---## ✅ Checklist de Implementação- [x] Migração do banco de dados- [x] Tabelas: empresa_config, categorias, departamentos, projetos- [x] Dados iniciais inseridos- [x] Rotas REST completas- [x] Middleware de autenticação e admin- [x] Modais HTML estruturados- [x] CSS profissional e responsivo- [x] JavaScript funcional- [x] Integração com index.html- [x] Favicon configurado- [x] Documentação completa---## 📞 SuportePara dúvidas ou problemas:1. Verifique esta documentação2. Veja os logs do servidor3. Inspecione erros no console do navegador4. Consulte o código-fonte comentado---**Desenvolvido para ALUFORCE** 🏢  Sistema de Gestão Empresarial v2.0  Data de implementação: 28 de Outubro de 2025
+# 🏢 Sistema de Configurações da Empresa - ALUFORCE
+
+## 📋 Visão Geral
+
+Sistema completo de gerenciamento de configurações da empresa implementado com modais profissionais, banco de dados estruturado e APIs RESTful.
+
+---
+
+## 🎯 Funcionalidades Implementadas
+
+### 1. **Dados da Minha Empresa**
+Gerenciamento completo das informações corporativas:
+
+- ✅ **Informações Básicas**
+  - Razão Social (obrigatório)
+  - Nome Fantasia
+  - CNPJ
+  - Inscrição Estadual
+  - Inscrição Municipal
+
+- ✅ **Contato**
+  - Telefone
+  - E-mail
+  - Website
+
+- ✅ **Endereço Completo**
+  - CEP
+  - Estado e Cidade
+  - Bairro
+  - Endereço e Número
+  - Complemento
+
+- ✅ **Mídias**
+  - Upload de Logotipo
+  - Favicon (já configurado: `/Favicon Aluforce.png`)
+
+### 2. **Categorias**
+Sistema de classificação com:
+- Nome e descrição
+- Cor personalizada
+- Ícone FontAwesome
+- Status ativo/inativo
+- Ordenação customizável
+- 5 categorias padrão pré-cadastradas:
+  - Administrativo (azul)
+  - Financeiro (verde)
+  - Vendas (laranja)
+  - Produção (vermelho)
+  - Logística (roxo)
+
+### 3. **Departamentos**
+Estrutura organizacional:
+- Nome e sigla
+- Descrição
+- Responsável (funcionário vinculado)
+- Cor e ícone personalizados
+- 6 departamentos padrão:
+  - RH, TI, Comercial, Produção, Financeiro, Qualidade
+
+### 4. **Projetos**
+Gerenciamento de iniciativas:
+- Nome e código do projeto
+- Descrição detalhada
+- Departamento vinculado
+- Responsável designado
+- Status (planejamento, em andamento, pausado, concluído, cancelado)
+- Datas (início, previsão, fim real)
+- Orçamento
+- Cor de identificação
+
+### 5. **Certificado Digital (A1)**
+Configuração para NF-e:
+- Upload de arquivo .PFX/.P12
+- Senha do certificado
+- Data de validade
+- Indicador visual de status
+
+### 6. **Importação NF-e**
+Agente de importação automática:
+- Toggle on/off
+- Data de ativação registrada
+- Status visual
+
+---
+
+## 🗄️ Estrutura do Banco de Dados
+
+### Tabelas Criadas
+
+#### `empresa_config`
+```sql
+Campos principais:
+- razao_social, nome_fantasia, cnpj
+- inscricao_estadual, inscricao_municipal
+- telefone, email, site
+- endereco, numero, complemento, bairro, cidade, estado, cep
+- logo_path, favicon_path
+- certificado_a1_path, certificado_senha, certificado_validade
+- nfe_agente_ativo, nfe_agente_data_ativacao
+- timestamps e updated_by
+```
+
+#### `categorias`
+```sql
+Campos:
+- nome, descricao, cor, icone
+- ativo, ordem
+- created_at, created_by
+```
+
+#### `departamentos`
+```sql
+Campos:
+- nome, sigla, descricao
+- responsavel_id (FK -> funcionarios)
+- cor, icone, ativo, ordem
+```
+
+#### `projetos`
+```sql
+Campos:
+- nome, codigo, descricao
+- departamento_id, responsavel_id
+- status, data_inicio, data_previsao_fim, data_fim_real
+- orcamento, cor, ativo
+```
+
+---
+
+## 🔌 APIs REST Implementadas
+
+### Empresa Config
+
+#### `GET /api/empresa-config`
+Retorna dados da empresa.
+
+**Resposta:**
+```json
+{
+  "id": 1,
+  "razao_social": "ALUFORCE INDÚSTRIA E COMÉRCIO LTDA",
+  "nome_fantasia": "ALUFORCE",
+  "cnpj": "...",
+  "telefone": "...",
+  ...
+}
+```
+
+#### `PUT /api/empresa-config`
+Atualiza dados da empresa (somente admin).
+
+**Body:**
+```json
+{
+  "razao_social": "Nova Razão Social",
+  "nome_fantasia": "ALUFORCE",
+  ...
+}
+```
+
+#### `PUT /api/empresa-config/certificado`
+Atualiza certificado digital (somente admin).
+
+#### `PUT /api/empresa-config/nfe`
+Atualiza configuração NF-e (somente admin).
+
+### Categorias
+
+- `GET /api/categorias` - Lista todas
+- `POST /api/categorias` - Cria nova (admin)
+- `PUT /api/categorias/:id` - Atualiza (admin)
+- `DELETE /api/categorias/:id` - Remove (admin)
+
+### Departamentos
+
+- `GET /api/departamentos` - Lista todos
+- `POST /api/departamentos` - Cria novo (admin)
+- `PUT /api/departamentos/:id` - Atualiza (admin)
+- `DELETE /api/departamentos/:id` - Remove (admin)
+
+### Projetos
+
+- `GET /api/projetos` - Lista todos
+- `POST /api/projetos` - Cria novo (admin)
+- `PUT /api/projetos/:id` - Atualiza (admin)
+- `DELETE /api/projetos/:id` - Remove (admin)
+
+---
+
+## 🎨 Design e UX
+
+### Modais Profissionais
+- **Design inspirado no Omie**: Cards limpos e modernos
+- **Animações suaves**: Fade in, slide up
+- **Responsivo**: Adaptado para mobile e desktop
+- **Acessibilidade**: Foco em usabilidade
+
+### Paleta de Cores
+- **Empresa**: Azul (#3B82F6)
+- **Categorias**: Laranja (#F59E0B)
+- **Departamentos**: Verde (#10B981)
+- **Projetos**: Roxo (#8B5CF6)
+- **Certificado**: Vermelho (#EF4444)
+- **NF-e**: Ciano (#06B6D4)
+
+### Componentes
+- ✅ Toggle switches animados
+- ✅ Color pickers
+- ✅ Icon pickers (FontAwesome)
+- ✅ File uploads customizados
+- ✅ Cards de listagem com ações (editar/excluir)
+- ✅ Empty states ilustrados
+- ✅ Mensagens de sucesso/erro
+
+---
+
+## 📁 Arquivos Criados/Modificados
+
+### Banco de Dados
+- ✅ `scripts/db/migrate_company_config.js` - Script de migração completo
+
+### Backend
+- ✅ `routes/companySettings.js` - Rotas REST (548 linhas)
+- ✅ `middleware/auth.js` - Autenticação e autorização (81 linhas)
+- ✅ `server.js` - Inclusão das novas rotas
+
+### Frontend - CSS
+- ✅ `public/css/config-modals.css` - Estilos completos dos modais (700+ linhas)
+
+### Frontend - HTML
+- ✅ `public/config-modals.html` - Estrutura dos 6 modais (550+ linhas)
+
+### Frontend - JavaScript
+- ✅ `public/js/company-settings.js` - Gerenciamento completo (550+ linhas)
+
+### Páginas
+- ✅ `public/index.html` - Importações e carregamento de modais
+- ✅ `public/login.html` - Favicon atualizado
+
+### Documentação
+- ✅ `docs/CONFIGURACOES_EMPRESA.md` - Este arquivo
+
+---
+
+## 🔐 Permissões
+
+### Administradores
+Os seguintes usuários têm acesso total:
+- andreia.lopes@aluforce.ind.br
+- douglas.moreira@aluforce.ind.br
+- ti@aluforce.ind.br
+- Qualquer usuário com `role: 'admin'`
+
+### Usuários Comuns
+- Podem **visualizar** algumas configurações
+- **Não podem editar** configurações da empresa
+- **Não têm acesso** ao modal de configurações via ícone ⚙️
+
+---
+
+## 🚀 Como Usar
+
+### 1. Acessar Configurações
+- Clique no **ícone de engrenagem** (⚙️) no dropdown do usuário
+- Somente administradores visualizam este ícone
+
+### 2. Navegar pelos Cards
+- Clique em qualquer card para abrir o modal correspondente
+- Cada modal tem funcionalidades específicas
+
+### 3. Editar Dados da Empresa
+1. Abra "1. Dados da Minha Empresa"
+2. Preencha/edite os campos desejados
+3. Clique em "Salvar Alterações"
+4. Confirmação de sucesso aparecerá
+
+### 4. Gerenciar Categorias/Departamentos/Projetos
+1. Abra o modal correspondente
+2. Clique em "Nova Categoria/Departamento/Projeto"
+3. Preencha o formulário
+4. Salve
+5. Use os botões de editar/excluir nos cards
+
+### 5. Configurar Certificado Digital
+1. Abra "5. Certificado Digital (Modelo A1)"
+2. Faça upload do arquivo .PFX
+3. Digite a senha
+4. Informe a data de validade
+5. Salve
+
+### 6. Ativar Agente NF-e
+1. Abra "6. Importação da NF-e do Fornecedor"
+2. Ative o toggle
+3. Salve
+4. Data de ativação será registrada
+
+---
+
+## 🧪 Testando o Sistema
+
+### Verificar Banco de Dados
+```bash
+# Executar migração
+node scripts/db/migrate_company_config.js
+
+# Verificar tabelas criadas
+mysql -u root -pDEFINA_SUA_SENHA_NO_ENV aluforce_vendas -e "SHOW TABLES;"
+
+# Ver dados iniciais
+mysql -u root -pDEFINA_SUA_SENHA_NO_ENV aluforce_vendas -e "SELECT * FROM empresa_config;"
+mysql -u root -pDEFINA_SUA_SENHA_NO_ENV aluforce_vendas -e "SELECT * FROM categorias;"
+mysql -u root -pDEFINA_SUA_SENHA_NO_ENV aluforce_vendas -e "SELECT * FROM departamentos;"
+```
+
+### Testar APIs
+```bash
+# Login como admin
+curl -X POST http://localhost:3000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"andreia.lopes@aluforce.ind.br","password":"senha"}'
+
+# Buscar dados da empresa
+curl http://localhost:3000/api/empresa-config \
+  -H "Cookie: token=<seu-token>"
+
+# Listar categorias
+curl http://localhost:3000/api/categorias \
+  -H "Cookie: token=<seu-token>"
+```
+
+---
+
+## 📊 Estatísticas da Implementação
+
+- **4 Tabelas** criadas no banco de dados
+- **17 Endpoints** REST implementados
+- **6 Modais** completos e funcionais
+- **700+ linhas** de CSS profissional
+- **550+ linhas** de JavaScript
+- **550+ linhas** de HTML estruturado
+- **5 Categorias** padrão pré-cadastradas
+- **6 Departamentos** padrão pré-cadastrados
+
+---
+
+## 🔄 Próximos Passos (Opcionais)
+
+### Melhorias Futuras
+
+1. **Upload de Imagens**
+   - Implementar upload real de logo e favicon
+   - Processamento e resize de imagens
+   - Armazenamento em servidor/cloud
+
+2. **Formulários de Criação**
+   - Modais para criar novas categorias
+   - Modais para criar novos departamentos
+   - Modais para criar novos projetos
+
+3. **Validações Avançadas**
+   - Validação de CNPJ
+   - Validação de CEP com busca automática
+   - Validação de certificado digital
+
+4. **Relatórios**
+   - Dashboard com estatísticas
+   - Exportação de configurações
+   - Histórico de alterações
+
+5. **Integrações**
+   - Integração com Receita Federal
+   - Integração com APIs de CEP
+   - Sincronização com Omie
+
+---
+
+## 🐛 Troubleshooting
+
+### Modal não abre
+- Verifique se você é admin
+- Limpe o cache do navegador
+- Verifique o console para erros JavaScript
+
+### Erro ao salvar
+- Verifique conexão com banco de dados
+- Confirme que o usuário tem permissão de admin
+- Veja logs do servidor
+
+### Campos não aparecem
+- Aguarde carregamento completo dos dados
+- Verifique se `/api/empresa-config` retorna dados
+- Veja erros no Network do DevTools
+
+---
+
+## ✅ Checklist de Implementação
+
+- [x] Migração do banco de dados
+- [x] Tabelas: empresa_config, categorias, departamentos, projetos
+- [x] Dados iniciais inseridos
+- [x] Rotas REST completas
+- [x] Middleware de autenticação e admin
+- [x] Modais HTML estruturados
+- [x] CSS profissional e responsivo
+- [x] JavaScript funcional
+- [x] Integração com index.html
+- [x] Favicon configurado
+- [x] Documentação completa
+
+---
+
+## 📞 Suporte
+
+Para dúvidas ou problemas:
+1. Verifique esta documentação
+2. Veja os logs do servidor
+3. Inspecione erros no console do navegador
+4. Consulte o código-fonte comentado
+
+---
+
+**Desenvolvido para ALUFORCE** 🏢  
+Sistema de Gestão Empresarial v2.0  
+Data de implementação: 28 de Outubro de 2025

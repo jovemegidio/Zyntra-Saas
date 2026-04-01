@@ -1,1 +1,238 @@
-# 🔒 INSTRUÇÕES DE SEGURANÇA - ALUFORCE v2.0## ⚠️ ATENÇÍO: ARQUIVOS COM CREDENCIAIS DETECTADOSEste projeto contém **mais de 100 arquivos de teste** com credenciais hardcoded que **NÍO DEVEM** ser versionados no Git.---## 🚨 AÇÍO URGENTE NECESSÁRIA### 1️⃣ **Executar Script de Limpeza**```powershell# Execute este comando no PowerShell:.\MOVER_ARQUIVOS_TESTE.ps1```Este script irá:- ✅ Mover todos os arquivos de teste para `_ARQUIVOS_DESENVOLVIMENTO_NAO_VERSIONAR/`- ✅ Organizar arquivos em subpastas categorizadas- ✅ Preservar backups fora do controle do Git- ✅ Evitar commit acidental de credenciais### 2️⃣ **Verificar .gitignore Atualizado**O arquivo `.gitignore` foi atualizado para incluir:```gitignore# Scripts de teste com credenciaistestar_*.jstest_*.jsverificar_*.jsdebug_*.jscredenciais_*.txtcredenciais_*.csv# ... e muitos outros padrões```### 3️⃣ **Verificar Histórico do Git**Se você já commitou credenciais no Git, **URGENTE**:```bash# Verificar se há credenciais commitadasgit log --all --full-history -- "*credenciais*"git log --all --full-history -- "*senha*"# Se encontrar, considere usar git-filter-repo para limpar:# https://github.com/newren/git-filter-repo```---## 🔐 CREDENCIAIS ENCONTRADAS NOS ARQUIVOS### ⚠️ **Senhas Hardcoded Detectadas:**- `CHANGE_ME_DB_PASSWORD` - Senha de administrador- `admin123` - Senha de teste- `aluvendas01` - Senha de sistema- `teste123` - Senha de teste### 📁 **Tipos de Arquivos com Credenciais:**1. **Scripts de teste** (150+ arquivos):   - `testar_*.js`, `test_*.js`, `teste_*.js`   - Contêm conexões MySQL com senhas   - Contêm testes de login com credenciais2. **Arquivos de credenciais exportadas** (15+ arquivos):   - `credenciais_funcionarios_*.txt`   - `credenciais_funcionarios_*.csv`   - Contêm emails e senhas de funcionários3. **Scripts de setup** (20+ arquivos):   - `setup_*.js`, `criar_usuarios_*.js`   - Contêm senhas para criação de usuários4. **Dumps de banco** (5+ arquivos):   - `*.sql` com backups contendo hashes de senhas   - Podem expor estrutura do banco---## ✅ BOAS PRÁTICAS IMPLEMENTADAS### 1. **Uso de Variáveis de Ambiente**O projeto já tem suporte para `.env`:```env# .env (NÍO COMMITADO)DB_HOST=localhostDB_USER=rootDB_PASSWORD=sua_senha_aquiDB_NAME=aluforce_vendasJWT_SECRET=seu_secret_aqui```Use sempre `.env.example` como template **SEM credenciais reais**.### 2. **Estrutura de Arquivos Segura**```projeto/├── .env                          # ❌ NÍO versionar├── .env.example                  # ✅ Versionar (sem credenciais)├── .gitignore                    # ✅ Versionar (atualizado)├── server.js                     # ✅ Versionar (usa process.env)├── _ARQUIVOS_DESENVOLVIMENTO_NAO_VERSIONAR/  # ❌ NÍO versionar│   ├── testes/│   ├── credenciais/│   ├── scripts_debug/│   └── ...└── ...```### 3. **Conexão Segura com Banco****❌ ERRADO (hardcoded):**```javascriptconst connection = mysql.createConnection({    host: 'localhost',    user: 'root',    password: process.env.DB_PASSWORD || 'CHANGE_ME',  // ❌ NUNCA FAÇA ISSO!    database: 'aluforce_vendas'});```**✅ CORRETO (variáveis de ambiente):**```javascriptconst connection = mysql.createConnection({    host: process.env.DB_HOST,    user: process.env.DB_USER,    password: process.env.DB_PASSWORD,    database: process.env.DB_NAME});```---## 🎯 CHECKLIST DE SEGURANÇAAntes de fazer **qualquer commit**:- [ ] ✅ Executei `MOVER_ARQUIVOS_TESTE.ps1`- [ ] ✅ Verifiquei que `.gitignore` está atualizado- [ ] ✅ Removi todas as credenciais hardcoded do código- [ ] ✅ Criei `.env` com minhas credenciais locais- [ ] ✅ Verifiquei que `.env` está no `.gitignore`- [ ] ✅ Atualizei `.env.example` sem credenciais reais- [ ] ✅ Revisei o histórico do Git para credenciais antigas- [ ] ✅ Executei `git status` para verificar arquivos staged---## 🔄 MIGRAÇÍO DE CÓDIGO EXISTENTEPara remover credenciais hardcoded de scripts:### Antes:```javascript// testar_login.jsconst testUser = {    email: 'ti@aluforce.ind.br',    password: process.env.DB_PASSWORD || 'CHANGE_ME'  // ❌ Credencial hardcoded};```### Depois:```javascript// testar_login.jsrequire('dotenv').config();const testUser = {    email: process.env.TEST_USER_EMAIL,    password: process.env.TEST_USER_PASSWORD};``````env# .envTEST_USER_EMAIL=ti@aluforce.ind.brTEST_USER_PASSWORD=CHANGE_ME_DB_PASSWORD```---## 📞 EM CASO DE VAZAMENTOSe credenciais foram expostas publicamente:1. **🚨 AÇÍO IMEDIATA:**   - Altere TODAS as senhas expostas   - Revogue tokens JWT antigos   - Gere novos secrets2. **🔍 INVESTIGAÇÍO:**   - Verifique logs de acesso   - Identifique acessos não autorizados   - Documente o incidente3. **🛡️ PREVENÇÍO:**   - Implemente rotação automática de senhas   - Adicione 2FA para contas administrativas   - Configure alertas de segurança---## 📚 RECURSOS ADICIONAIS- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)- [GitHub: Removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)- [git-filter-repo](https://github.com/newren/git-filter-repo) - Limpar histórico do Git---## ✅ STATUS ATUAL**Data:** 04/12/2025**Ações Concluídas:**- ✅ `.gitignore` atualizado com 50+ padrões de exclusão- ✅ Script `MOVER_ARQUIVOS_TESTE.ps1` criado- ✅ Documentação de segurança criada- ⚠️ **PENDENTE: Executar script de limpeza**- ⚠️ **PENDENTE: Verificar histórico do Git****Próximos Passos:**1. Executar `MOVER_ARQUIVOS_TESTE.ps1`2. Fazer commit das alterações no `.gitignore`3. Verificar que nenhum arquivo sensível está sendo tracked4. Considerar limpar histórico do Git se necessário---**⚠️ LEMBRE-SE:** Segurança é responsabilidade de TODOS. Nunca commite credenciais!
+# 🔒 INSTRUÇÕES DE SEGURANÇA - ALUFORCE v2.0
+
+## ⚠️ ATENÇÍO: ARQUIVOS COM CREDENCIAIS DETECTADOS
+
+Este projeto contém **mais de 100 arquivos de teste** com credenciais hardcoded que **NÍO DEVEM** ser versionados no Git.
+
+---
+
+## 🚨 AÇÍO URGENTE NECESSÁRIA
+
+### 1️⃣ **Executar Script de Limpeza**
+
+```powershell
+# Execute este comando no PowerShell:
+.\MOVER_ARQUIVOS_TESTE.ps1
+```
+
+Este script irá:
+- ✅ Mover todos os arquivos de teste para `_ARQUIVOS_DESENVOLVIMENTO_NAO_VERSIONAR/`
+- ✅ Organizar arquivos em subpastas categorizadas
+- ✅ Preservar backups fora do controle do Git
+- ✅ Evitar commit acidental de credenciais
+
+### 2️⃣ **Verificar .gitignore Atualizado**
+
+O arquivo `.gitignore` foi atualizado para incluir:
+
+```gitignore
+# Scripts de teste com credenciais
+testar_*.js
+test_*.js
+verificar_*.js
+debug_*.js
+credenciais_*.txt
+credenciais_*.csv
+
+# ... e muitos outros padrões
+```
+
+### 3️⃣ **Verificar Histórico do Git**
+
+Se você já commitou credenciais no Git, **URGENTE**:
+
+```bash
+# Verificar se há credenciais commitadas
+git log --all --full-history -- "*credenciais*"
+git log --all --full-history -- "*senha*"
+
+# Se encontrar, considere usar git-filter-repo para limpar:
+# https://github.com/newren/git-filter-repo
+```
+
+---
+
+## 🔐 CREDENCIAIS ENCONTRADAS NOS ARQUIVOS
+
+### ⚠️ **Senhas Hardcoded Detectadas:**
+
+- `DEFINA_SUA_SENHA_NO_ENV` - Senha de administrador
+- `admin123` - Senha de teste
+- `aluvendas01` - Senha de sistema
+- `teste123` - Senha de teste
+
+### 📁 **Tipos de Arquivos com Credenciais:**
+
+1. **Scripts de teste** (150+ arquivos):
+   - `testar_*.js`, `test_*.js`, `teste_*.js`
+   - Contêm conexões MySQL com senhas
+   - Contêm testes de login com credenciais
+
+2. **Arquivos de credenciais exportadas** (15+ arquivos):
+   - `credenciais_funcionarios_*.txt`
+   - `credenciais_funcionarios_*.csv`
+   - Contêm emails e senhas de funcionários
+
+3. **Scripts de setup** (20+ arquivos):
+   - `setup_*.js`, `criar_usuarios_*.js`
+   - Contêm senhas para criação de usuários
+
+4. **Dumps de banco** (5+ arquivos):
+   - `*.sql` com backups contendo hashes de senhas
+   - Podem expor estrutura do banco
+
+---
+
+## ✅ BOAS PRÁTICAS IMPLEMENTADAS
+
+### 1. **Uso de Variáveis de Ambiente**
+
+O projeto já tem suporte para `.env`:
+
+```env
+# .env (NÍO COMMITADO)
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=sua_senha_aqui
+DB_NAME=aluforce_vendas
+JWT_SECRET=seu_secret_aqui
+```
+
+Use sempre `.env.example` como template **SEM credenciais reais**.
+
+### 2. **Estrutura de Arquivos Segura**
+
+```
+projeto/
+├── .env                          # ❌ NÍO versionar
+├── .env.example                  # ✅ Versionar (sem credenciais)
+├── .gitignore                    # ✅ Versionar (atualizado)
+├── server.js                     # ✅ Versionar (usa process.env)
+├── _ARQUIVOS_DESENVOLVIMENTO_NAO_VERSIONAR/  # ❌ NÍO versionar
+│   ├── testes/
+│   ├── credenciais/
+│   ├── scripts_debug/
+│   └── ...
+└── ...
+```
+
+### 3. **Conexão Segura com Banco**
+
+**❌ ERRADO (hardcoded):**
+```javascript
+const connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: process.env.DB_PASSWORD || 'CHANGE_ME',  // ❌ NUNCA FAÇA ISSO!
+    database: 'aluforce_vendas'
+});
+```
+
+**✅ CORRETO (variáveis de ambiente):**
+```javascript
+const connection = mysql.createConnection({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME
+});
+```
+
+---
+
+## 🎯 CHECKLIST DE SEGURANÇA
+
+Antes de fazer **qualquer commit**:
+
+- [ ] ✅ Executei `MOVER_ARQUIVOS_TESTE.ps1`
+- [ ] ✅ Verifiquei que `.gitignore` está atualizado
+- [ ] ✅ Removi todas as credenciais hardcoded do código
+- [ ] ✅ Criei `.env` com minhas credenciais locais
+- [ ] ✅ Verifiquei que `.env` está no `.gitignore`
+- [ ] ✅ Atualizei `.env.example` sem credenciais reais
+- [ ] ✅ Revisei o histórico do Git para credenciais antigas
+- [ ] ✅ Executei `git status` para verificar arquivos staged
+
+---
+
+## 🔄 MIGRAÇÍO DE CÓDIGO EXISTENTE
+
+Para remover credenciais hardcoded de scripts:
+
+### Antes:
+```javascript
+// testar_login.js
+const testUser = {
+    email: 'ti@aluforce.ind.br',
+    password: process.env.DB_PASSWORD || 'CHANGE_ME'  // ❌ Credencial hardcoded
+};
+```
+
+### Depois:
+```javascript
+// testar_login.js
+require('dotenv').config();
+
+const testUser = {
+    email: process.env.TEST_USER_EMAIL,
+    password: process.env.TEST_USER_PASSWORD
+};
+```
+
+```env
+# .env
+TEST_USER_EMAIL=ti@aluforce.ind.br
+TEST_USER_PASSWORD=DEFINA_SUA_SENHA_NO_ENV
+```
+
+---
+
+## 📞 EM CASO DE VAZAMENTO
+
+Se credenciais foram expostas publicamente:
+
+1. **🚨 AÇÍO IMEDIATA:**
+   - Altere TODAS as senhas expostas
+   - Revogue tokens JWT antigos
+   - Gere novos secrets
+
+2. **🔍 INVESTIGAÇÍO:**
+   - Verifique logs de acesso
+   - Identifique acessos não autorizados
+   - Documente o incidente
+
+3. **🛡️ PREVENÇÍO:**
+   - Implemente rotação automática de senhas
+   - Adicione 2FA para contas administrativas
+   - Configure alertas de segurança
+
+---
+
+## 📚 RECURSOS ADICIONAIS
+
+- [OWASP Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)
+- [GitHub: Removing sensitive data](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository)
+- [git-filter-repo](https://github.com/newren/git-filter-repo) - Limpar histórico do Git
+
+---
+
+## ✅ STATUS ATUAL
+
+**Data:** 04/12/2025
+
+**Ações Concluídas:**
+- ✅ `.gitignore` atualizado com 50+ padrões de exclusão
+- ✅ Script `MOVER_ARQUIVOS_TESTE.ps1` criado
+- ✅ Documentação de segurança criada
+- ⚠️ **PENDENTE: Executar script de limpeza**
+- ⚠️ **PENDENTE: Verificar histórico do Git**
+
+**Próximos Passos:**
+1. Executar `MOVER_ARQUIVOS_TESTE.ps1`
+2. Fazer commit das alterações no `.gitignore`
+3. Verificar que nenhum arquivo sensível está sendo tracked
+4. Considerar limpar histórico do Git se necessário
+
+---
+
+**⚠️ LEMBRE-SE:** Segurança é responsabilidade de TODOS. Nunca commite credenciais!

@@ -45,7 +45,7 @@ async function run() {
 
     // FASE 0: Login
     console.log('\nFASE 0: Login');
-    const login = await req('POST', LOGIN_URL, { email: 'qafinanceiro@aluforce.ind.br', password: 'Teste@123' });
+    const login = await req('POST', LOGIN_URL, { email: 'qafinanceiro@aluforce.ind.br', password: 'CHANGE_ME_TEST_PASSWORD' });
     TOKEN = login.data && login.data.token ? login.data.token : '';
     ok('T00', 'POST /api/login', login.status === 200 && TOKEN, 'status=' + login.status);
     if (!TOKEN) { console.log('SEM TOKEN, ABORTANDO'); return; }

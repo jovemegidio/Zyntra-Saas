@@ -52,7 +52,7 @@ async function run() {
 
     // ====== 1. LOGIN ======
     console.log('── 1. Login ──');
-    const login = await req('POST', '/api/login', { email: 'qafinanceiro@aluforce.ind.br', password: 'Teste@123' });
+    const login = await req('POST', '/api/login', { email: 'qafinanceiro@aluforce.ind.br', password: 'CHANGE_ME_TEST_PASSWORD' });
     test('Login QA', login.status === 200 && login.data?.token, `status=${login.status}`);
     if (login.data?.token) TOKEN = login.data.token;
     else { console.log('FATAL: Sem token, abortando'); return; }

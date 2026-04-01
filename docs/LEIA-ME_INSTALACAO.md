@@ -1,1 +1,173 @@
-# 🚀 ALUFORCE ERP - Guia de Instalação## Sistema de Gestão Empresarial - Versão 2.0 BETA---## 📋 Pré-requisitosAntes de executar o instalador, certifique-se de ter instalado:### 1. Node.js (v18 ou superior)- Download: https://nodejs.org- Recomendado: Versão LTS### 2. MySQL Server (v8.0 ou superior)- Download: https://dev.mysql.com/downloads/mysql/- **IMPORTANTE**: Durante a instalação do MySQL, defina a senha do root como: `CHANGE_ME_DB_PASSWORD`- Ou altere a senha no arquivo `.env` após a instalação---## 🔧 Instalação### Método 1: Instalador Automático (Recomendado)1. **Execute o arquivo `INSTALAR.bat`** como Administrador   - Clique com botão direito → "Executar como administrador"2. O instalador gráfico será aberto e irá:   - ✅ Verificar Node.js   - ✅ Localizar MySQL automaticamente   - ✅ Testar conexão com as credenciais do `.env`   - ✅ Criar e importar o banco de dados   - ✅ Instalar todas as dependências NPM   - ✅ Criar atalhos na área de trabalho### Método 2: Instalação Manual```powershell# 1. Abrir PowerShell como Administrador# 2. Navegar até a pasta do sistemacd "C:\Caminho\Para\Sistema - Aluforce v.2 - BETA"# 3. Instalar dependênciasnpm install# 4. Criar banco de dados no MySQLmysql -u root -pCREATE DATABASE aluforce_vendas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;USE aluforce_vendas;SOURCE database/aluforce_vendas_dump_2025-12-18.sql;EXIT;# 5. Iniciar o servidornode server.js```---## ⚙️ ConfiguraçãoO arquivo `.env` contém todas as configurações do sistema:```env# Banco de DadosDB_HOST=localhostDB_USER=rootDB_PASS=CHANGE_ME_DB_PASSWORDDB_NAME=aluforce_vendasDB_PORT=3306# ServidorPORT=3000HOST=localhost```**Modifique conforme sua necessidade** antes de executar o instalador.---## 🖥️ Executando o Sistema### Após a instalação:1. **Via Atalho**: Clique em "Iniciar Aluforce Server" na área de trabalho2. **Via Terminal**:```powershellcd "C:\Caminho\Para\Sistema - Aluforce v.2 - BETA"node server.js```3. **Acessar**: Abra o navegador em `http://localhost:3000`---## 📁 Estrutura de Arquivos```Sistema - Aluforce v.2 - BETA/├── 📄 INSTALAR.bat              # Launcher do instalador├── 📄 Instalador-Aluforce.ps1   # Instalador PowerShell com GUI├── 📄 server.js                 # Servidor Node.js principal├── 📄 package.json              # Dependências NPM├── 📄 .env                      # Configurações do ambiente├── 📁 database/│   └── 📄 aluforce_vendas_dump_2025-12-18.sql  # Dump do banco├── 📁 modules/                  # Módulos do sistema│   ├── 📁 Vendas/│   ├── 📁 PCP/│   ├── 📁 Financeiro/│   ├── 📁 Compras/│   └── ...└── 📁 public/                   # Arquivos estáticos```---## 🔒 Credenciais Padrão| Campo    | Valor           ||----------|-----------------|| Usuário  | admin           || Senha    | admin123        || Banco    | aluforce_vendas || DB User  | root            || DB Pass  | CHANGE_ME_DB_PASSWORD        |**⚠️ IMPORTANTE**: Altere as senhas padrão após a primeira instalação!---## 🐛 Solução de Problemas### Erro: "Node.js não encontrado"- Instale o Node.js: https://nodejs.org- Reinicie o computador após a instalação### Erro: "MySQL não encontrado"- Verifique se o MySQL está instalado- Verifique se o serviço MySQL está rodando- O instalador procura em vários caminhos padrão### Erro: "Falha na conexão MySQL"- Verifique se o serviço MySQL está rodando: `services.msc`- Confirme as credenciais no arquivo `.env`- Teste a conexão manualmente: `mysql -u root -p`### Erro: "Porta 3000 em uso"- Outro processo está usando a porta- Execute: `netstat -ano | findstr :3000`- Encerre o processo ou altere a porta no `.env`---## 📞 SuportePara suporte técnico, entre em contato:- **Email**: ti@aluforce.ind.br- **Documentação**: Consulte os arquivos .md na pasta do projeto---## 📜 Licença© 2025 Aluforce Industria - Todos os direitos reservados.Sistema desenvolvido para uso interno.---**Versão**: 2.0 BETA  **Última atualização**: 18/12/2025
+# 🚀 ALUFORCE ERP - Guia de Instalação
+
+## Sistema de Gestão Empresarial - Versão 2.0 BETA
+
+---
+
+## 📋 Pré-requisitos
+
+Antes de executar o instalador, certifique-se de ter instalado:
+
+### 1. Node.js (v18 ou superior)
+- Download: https://nodejs.org
+- Recomendado: Versão LTS
+
+### 2. MySQL Server (v8.0 ou superior)
+- Download: https://dev.mysql.com/downloads/mysql/
+- **IMPORTANTE**: Durante a instalação do MySQL, defina a senha do root como: `DEFINA_SUA_SENHA_NO_ENV`
+- Ou altere a senha no arquivo `.env` após a instalação
+
+---
+
+## 🔧 Instalação
+
+### Método 1: Instalador Automático (Recomendado)
+
+1. **Execute o arquivo `INSTALAR.bat`** como Administrador
+   - Clique com botão direito → "Executar como administrador"
+
+2. O instalador gráfico será aberto e irá:
+   - ✅ Verificar Node.js
+   - ✅ Localizar MySQL automaticamente
+   - ✅ Testar conexão com as credenciais do `.env`
+   - ✅ Criar e importar o banco de dados
+   - ✅ Instalar todas as dependências NPM
+   - ✅ Criar atalhos na área de trabalho
+
+### Método 2: Instalação Manual
+
+```powershell
+# 1. Abrir PowerShell como Administrador
+
+# 2. Navegar até a pasta do sistema
+cd "C:\Caminho\Para\Sistema - Aluforce v.2 - BETA"
+
+# 3. Instalar dependências
+npm install
+
+# 4. Criar banco de dados no MySQL
+mysql -u root -p
+CREATE DATABASE aluforce_vendas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE aluforce_vendas;
+SOURCE database/aluforce_vendas_dump_2025-12-18.sql;
+EXIT;
+
+# 5. Iniciar o servidor
+node server.js
+```
+
+---
+
+## ⚙️ Configuração
+
+O arquivo `.env` contém todas as configurações do sistema:
+
+```env
+# Banco de Dados
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=DEFINA_SUA_SENHA_NO_ENV
+DB_NAME=aluforce_vendas
+DB_PORT=3306
+
+# Servidor
+PORT=3000
+HOST=localhost
+```
+
+**Modifique conforme sua necessidade** antes de executar o instalador.
+
+---
+
+## 🖥️ Executando o Sistema
+
+### Após a instalação:
+
+1. **Via Atalho**: Clique em "Iniciar Aluforce Server" na área de trabalho
+
+2. **Via Terminal**:
+```powershell
+cd "C:\Caminho\Para\Sistema - Aluforce v.2 - BETA"
+node server.js
+```
+
+3. **Acessar**: Abra o navegador em `http://localhost:3000`
+
+---
+
+## 📁 Estrutura de Arquivos
+
+```
+Sistema - Aluforce v.2 - BETA/
+├── 📄 INSTALAR.bat              # Launcher do instalador
+├── 📄 Instalador-Aluforce.ps1   # Instalador PowerShell com GUI
+├── 📄 server.js                 # Servidor Node.js principal
+├── 📄 package.json              # Dependências NPM
+├── 📄 .env                      # Configurações do ambiente
+├── 📁 database/
+│   └── 📄 aluforce_vendas_dump_2025-12-18.sql  # Dump do banco
+├── 📁 modules/                  # Módulos do sistema
+│   ├── 📁 Vendas/
+│   ├── 📁 PCP/
+│   ├── 📁 Financeiro/
+│   ├── 📁 Compras/
+│   └── ...
+└── 📁 public/                   # Arquivos estáticos
+```
+
+---
+
+## 🔒 Credenciais Padrão
+
+| Campo    | Valor           |
+|----------|-----------------|
+| Usuário  | admin           |
+| Senha    | admin123        |
+| Banco    | aluforce_vendas |
+| DB User  | root            |
+| DB Pass  | DEFINA_SUA_SENHA_NO_ENV        |
+
+**⚠️ IMPORTANTE**: Altere as senhas padrão após a primeira instalação!
+
+---
+
+## 🐛 Solução de Problemas
+
+### Erro: "Node.js não encontrado"
+- Instale o Node.js: https://nodejs.org
+- Reinicie o computador após a instalação
+
+### Erro: "MySQL não encontrado"
+- Verifique se o MySQL está instalado
+- Verifique se o serviço MySQL está rodando
+- O instalador procura em vários caminhos padrão
+
+### Erro: "Falha na conexão MySQL"
+- Verifique se o serviço MySQL está rodando: `services.msc`
+- Confirme as credenciais no arquivo `.env`
+- Teste a conexão manualmente: `mysql -u root -p`
+
+### Erro: "Porta 3000 em uso"
+- Outro processo está usando a porta
+- Execute: `netstat -ano | findstr :3000`
+- Encerre o processo ou altere a porta no `.env`
+
+---
+
+## 📞 Suporte
+
+Para suporte técnico, entre em contato:
+- **Email**: ti@aluforce.ind.br
+- **Documentação**: Consulte os arquivos .md na pasta do projeto
+
+---
+
+## 📜 Licença
+
+© 2025 Aluforce Industria - Todos os direitos reservados.
+Sistema desenvolvido para uso interno.
+
+---
+
+**Versão**: 2.0 BETA  
+**Última atualização**: 18/12/2025

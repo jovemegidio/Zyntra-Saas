@@ -30,7 +30,7 @@ async function run() {
 
     // 1. LOGIN
     console.log('-- 1. Login --');
-    var login = await req('POST', '/api/login', {email:'qafinanceiro@aluforce.ind.br', password:'Teste@123'});
+    var login = await req('POST', '/api/login', {email:'qafinanceiro@aluforce.ind.br', password:'CHANGE_ME_TEST_PASSWORD'});
     test('Login QA', login.status === 200 && login.data && login.data.token, 'status=' + login.status);
     if (login.data && login.data.token) TOKEN = login.data.token;
     else { console.log('FATAL: sem token'); return; }

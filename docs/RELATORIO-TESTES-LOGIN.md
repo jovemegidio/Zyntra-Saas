@@ -315,8 +315,8 @@ INSERT INTO usuarios (email, nome, senha_hash, ativo, status, role, setor)
 VALUES ('angelica@aluforce.ind.br', 'Angélica [Sobrenome]', 
         '$2a$10$[HASH_DA_SENHA]', 1, 'ativo', 'user', 'conservacao');
 
--- Para gerar o hash da senha padrão (CHANGE_ME_USER_PASSWORD):
--- node -e "const b=require('bcryptjs'); b.hash('CHANGE_ME_USER_PASSWORD',10).then(h=>console.log(h))"
+-- Para gerar o hash da senha padrão:
+-- node -e "const b=require('bcryptjs'); b.hash('SUA_SENHA_AQUI',10).then(h=>console.log(h))"
 ```
 
 ---

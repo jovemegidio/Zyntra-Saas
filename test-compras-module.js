@@ -11,7 +11,7 @@ const https = require('https');
 
 const BASE = 'http://localhost:3000';
 const LOGIN_EMAIL = 'qafinanceiro@aluforce.ind.br';
-const LOGIN_PASS = 'Teste@123';
+const LOGIN_PASS = 'CHANGE_ME_TEST_PASSWORD';
 
 let TOKEN = '';
 let totalTests = 0;

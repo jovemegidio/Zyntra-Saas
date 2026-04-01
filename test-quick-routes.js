@@ -1,5 +1,5 @@
 const http = require('http');
-const d = JSON.stringify({email:'qafinanceiro@aluforce.ind.br', password:'Teste@123'});
+const d = JSON.stringify({email:'qafinanceiro@aluforce.ind.br', password:'CHANGE_ME_TEST_PASSWORD'});
 const r = http.request({hostname:'localhost',port:3000,path:'/api/login',method:'POST',
   headers:{'Content-Type':'application/json','Content-Length':d.length}
 }, res => {
