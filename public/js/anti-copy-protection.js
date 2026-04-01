@@ -11,14 +11,14 @@
     // CONFIGURAÇÕES
     // ============================================
     const CONFIG = {
-        disableRightClick: false,        // DESABILITADO PARA DESENVOLVIMENTO
-        disableKeyShortcuts: false,      // DESABILITADO PARA DESENVOLVIMENTO  
-        disableTextSelection: false,     // Deixar false para não atrapalhar uso normal
-        disableDevTools: false,          // DESABILITADO PARA DESENVOLVIMENTO
-        disableDrag: false,              // DESABILITADO PARA DESENVOLVIMENTO
-        showWarnings: false,             // DESABILITADO PARA DESENVOLVIMENTO
+        disableRightClick: true,
+        disableKeyShortcuts: true,
+        disableTextSelection: false,     // Não interferir com inputs
+        disableDevTools: false,
+        disableDrag: true,
+        showWarnings: false,
         redirectOnDevTools: false,
-        blurOnDevTools: false            // DESABILITADO PARA DESENVOLVIMENTO
+        blurOnDevTools: false
     };
     
     // Mensagem de aviso
@@ -31,11 +31,7 @@
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (CONFIG.showWarnings) {
-                console.clear();
-                console.log('%c⛔ ACESSO BLOQUEADO', 'color: red; font-size: 30px; font-weight: bold;');
-                console.log('%cEste sistema é protegido. A cópia não autorizada é proibida.', 'color: orange; font-size: 14px;');
-            }
+            console.error('[ALUFORCE] ⛔ Menu de contexto bloqueado');
             return false;
         }, true);
     }
@@ -120,6 +116,7 @@
             if (e.key === 'F12' || 
                 (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c', 'K', 'k'].includes(e.key)) ||
                 (e.ctrlKey && ['U', 'u', 'S', 's'].includes(e.key))) {
+                console.error('[ALUFORCE] ⛔ Tecla bloqueada: ' + e.key);
                 e.preventDefault();
                 e.stopPropagation();
                 return false;
@@ -165,6 +162,7 @@
     if (CONFIG.disableDrag) {
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
+            console.error('[ALUFORCE] ⛔ Arraste bloqueado');
             return false;
         });
     }
@@ -331,15 +329,10 @@
     // ============================================
     document.addEventListener('copy', function(e) {
         e.preventDefault();
-        e.clipboardData.setData('text/plain', 'Conteúdo protegido - ALUFORCE © 2026');
+        console.error('[ALUFORCE] ⛔ Cópia bloqueada');
         return false;
     });
     
-    // ============================================
-    // LOG DE INICIALIZAÇÍO
-    // ============================================
-    console.clear();
-    console.log('%c🔒 ALUFORCE', 'color: #3b82f6; font-size: 24px; font-weight: bold;');
-    console.log('%cSistema protegido por direitos autorais', 'color: #9ca3af; font-size: 12px;');
+    // Proteção ativa — erros de tentativa aparecem no console
     
 })();

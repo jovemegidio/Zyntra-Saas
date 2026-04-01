@@ -12084,7 +12084,8 @@
 
             // Verificar se o pedido está faturado
             const statusFaturados = ['faturado', 'entregue', 'recibo'];
-            if (!statusFaturados.includes(pedidoAtual._statusOriginal)) {
+            const statusAtual = (pedidoAtual._statusOriginal || pedidoAtual._coluna || pedidoAtual.status || '').toLowerCase();
+            if (!statusFaturados.includes(statusAtual)) {
                 showNotification('DANFE disponível apenas para pedidos faturados', 'warning');
                 return;
             }
@@ -13432,6 +13433,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     pedidoAtual.nfe_chave = result.nfe_data?.chave;
                     pedidoAtual.nfe_protocolo = result.nfe_data?.protocolo;
                     pedidoAtual._coluna = 'faturado';
+                    pedidoAtual._statusOriginal = 'faturado';
 
                     if (!dadosVendas.faturado) dadosVendas.faturado = [];
                     dadosVendas.faturado.push(pedidoAtual);
@@ -13493,6 +13495,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     pedidoAtual.nfe_chave = result.nfe_data?.chave;
                     pedidoAtual.nfe_protocolo = result.nfe_data?.protocolo;
                     pedidoAtual._coluna = 'faturado';
+                    pedidoAtual._statusOriginal = 'faturado';
 
                     if (!dadosVendas.faturado) dadosVendas.faturado = [];
                     dadosVendas.faturado.push(pedidoAtual);
@@ -16778,108 +16781,29 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             if (alertaAnterior) alertaAnterior.remove();
 
             // ====================================================
-            // VALIDAÇÃO DE MARGEM BRUTA
-            // O desconto geral NÃO pode ultrapassar a margem bruta
-            // Margem bruta = (receita_venda - custo) / receita_venda * 100
+            // VALIDAÇÃO: DESCONTO MÁXIMO 33,88%
+            // Acima deste limite requer autorização de admin
             // ====================================================
-            if (descontoPct > 0 && itensPedidoAtual && itensPedidoAtual.length > 0) {
-                // Calcular custo total e receita total dos itens
-                let custoTotal = 0;
-                let receitaTotal = 0;
-                let temCusto = false;
-
-                for (const item of itensPedidoAtual) {
-                    const qtd = parseFloat(item.quantidade) || 0;
-                    const preco = parseFloat(item.preco_unitario) || 0;
-                    const descontoItem = parseFloat(item.desconto) || 0;
-                    const custo = parseFloat(item.preco_custo) || 0;
-
-                    receitaTotal += (qtd * preco) - descontoItem;
-                    if (custo > 0) {
-                        custoTotal += qtd * custo;
-                        temCusto = true;
-                    }
-                }
-
-                if (temCusto && receitaTotal > 0) {
-                    // Margem bruta máxima em % = ((receita - custo) / receita) * 100
-                    const margemBrutaPct = ((receitaTotal - custoTotal) / receitaTotal) * 100;
-
-                    // Verificar se o desconto ultrapassa a margem bruta
-                    if (descontoPct > margemBrutaPct) {
-                        // BLOQUEAR — desconto ultrapassa a margem bruta
-                        const margemFormatada = margemBrutaPct.toFixed(2).replace('.', ',');
-                        const custoFormatado = custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                        const receitaFormatada = receitaTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-                        // Criar alerta visual
-                        const valoresGrid = input.closest('.valores-grid') || input.parentElement?.parentElement;
-                        if (valoresGrid) {
-                            const alerta = document.createElement('div');
-                            alerta.id = 'alerta-margem-desconto';
-                            alerta.style.cssText = `
-                                grid-column: 1 / -1;
-                                background: linear-gradient(135deg, #fef2f2, #fee2e2);
-                                border: 2px solid #ef4444;
-                                border-radius: 10px;
-                                padding: 16px 20px;
-                                margin-top: 8px;
-                                display: flex;
-                                align-items: flex-start;
-                                gap: 12px;
-                                animation: fadeInDown 0.3s ease;
-                            `;
-                            alerta.innerHTML = `
-                                <div style="flex-shrink:0; width:40px; height:40px; background:#ef4444; border-radius:50%; display:flex; align-items:center; justify-content:center;">
-                                    <i class="fas fa-exclamation-triangle" style="color:white; font-size:18px;"></i>
-                                </div>
-                                <div style="flex:1;">
-                                    <div style="font-weight:700; color:#dc2626; font-size:14px; margin-bottom:4px;">
-                                        ⚠️ Desconto Inválido — Ultrapassa a Margem Bruta
-                                    </div>
-                                    <div style="color:#991b1b; font-size:12px; line-height:1.5;">
-                                        O desconto de <strong>${descontoPct.toFixed(1).replace('.', ',')}%</strong> ultrapassa a margem bruta de <strong>${margemFormatada}%</strong>.<br>
-                                        <span style="color:#6b7280;">Receita: R$ ${receitaFormatada} | Custo: R$ ${custoFormatado}</span><br><br>
-                                        <strong style="color:#b91c1c;">Esta operação requer autorização de Andreia ou Guilherme.</strong>
-                                    </div>
-                                </div>
-                            `;
-                            valoresGrid.appendChild(alerta);
-                        }
-
-                        // Marcar o input como inválido visualmente
-                        input.style.border = '2px solid #ef4444';
-                        input.style.background = '#fef2f2';
-                        input.style.color = '#dc2626';
-                        input.style.fontWeight = '700';
-
-                        // Mostrar notificação
-                        showNotification(`Desconto de ${descontoPct.toFixed(1)}% ultrapassa a margem bruta de ${margemFormatada}%. Necessita autorização de Andreia ou Guilherme.`, 'error');
-
-                        console.warn('[Vendas] ⚠️ Desconto bloqueado:', {
-                            descontoPct: descontoPct + '%',
-                            margemBruta: margemBrutaPct.toFixed(2) + '%',
-                            receitaTotal,
-                            custoTotal,
-                            diferenca: (descontoPct - margemBrutaPct).toFixed(2) + '% acima da margem'
-                        });
-
-                        // Marcar pedido como desconto irregular (para referência no salvar)
-                        if (pedidoAtual) pedidoAtual._descontoIrregular = true;
-
-                        // Continuar calculando mas sinalizado
-                        atualizarTotalModalEditar();
-                        return;
-                    }
+            const LIMITE_DESCONTO = 33.88;
+            if (descontoPct > LIMITE_DESCONTO) {
+                const isAdmin = (typeof verificarSeAdmin === 'function' && verificarSeAdmin(usuarioLogado))
+                             || (typeof verificarPermissaoDesconto === 'function' && verificarPermissaoDesconto());
+                if (!isAdmin) {
+                    console.error('[Vendas] ⛔ Desconto bloqueado: ' + descontoPct + '% > limite de ' + LIMITE_DESCONTO + '%');
+                    input.value = LIMITE_DESCONTO.toFixed(2);
+                    descontoPct = LIMITE_DESCONTO;
+                    showNotification('Desconto máximo: 33,88%. Acima disso requer autorização de admin.', 'warning');
+                } else {
+                    console.warn('[Vendas] ⚠️ Admin autorizou desconto acima do limite: ' + descontoPct + '%');
                 }
             }
 
-            // Desconto dentro da margem — limpar alertas
+            // Limpar marcação visual
             input.style.border = '';
             input.style.background = '';
             input.style.color = '';
             input.style.fontWeight = '';
-            if (pedidoAtual) pedidoAtual._descontoIrregular = false;
+            if (pedidoAtual) pedidoAtual._descontoIrregular = (descontoPct > LIMITE_DESCONTO);
 
             atualizarTotalModalEditar();
         }
