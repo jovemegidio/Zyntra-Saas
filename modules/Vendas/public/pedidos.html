@@ -3183,99 +3183,211 @@
         }
 
         // Imprimir pedido - Gera PDF ou abre janela de impressão
-        function imprimirPedido(id) {
-            const pedido = todosPedidos.find(p => p.id === id);
+        async function imprimirPedido(id) {
+            // Buscar dados completos do pedido (com itens, cliente, etc.)
+            let pedido;
+            try {
+                const resp = await fetch(`/api/vendas/pedidos/${id}`, { credentials: 'include', headers: getAuthHeaders() });
+                if (!resp.ok) throw new Error('Erro ' + resp.status);
+                pedido = await resp.json();
+            } catch (e) {
+                // Fallback: usar dados do cache local
+                pedido = todosPedidos.find(p => p.id === id);
+            }
             if (!pedido) {
                 showToast('Pedido não encontrado', 'error');
                 return;
             }
 
-            // Abrir janela de impressão com os dados do pedido
+            // Helpers locais
+            function fv(v) { return `R$ ${(parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`; }
+            function fd(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '-'; }
+            function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+            const statusLabel = { orcamento:'Orçamento', aprovado:'Aprovado', faturado:'Faturado', entregue:'Entregue', pendente:'Pendente', cancelado:'Cancelado', 'pedido-aprovado':'Pedido Aprovado', 'em-producao':'Em Produção', 'em-analise':'Em Análise', 'analise-credito':'Análise de Crédito', 'negociacao':'Negociação', recibo:'Recibo' };
+            const statusText = statusLabel[(pedido.status || '').toLowerCase()] || pedido.status || '-';
+
+            // Itens do pedido
+            const itens = pedido.itens || pedido.produtos || [];
+            let subtotalCalc = 0, descontoCalc = 0;
+            const itensHTML = itens.length > 0 ? itens.map((item, idx) => {
+                const qty = parseFloat(item.quantidade) || 0;
+                const preco = parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0;
+                const desc = parseFloat(item.desconto) || 0;
+                const tot = (qty * preco) - desc;
+                subtotalCalc += (qty * preco);
+                descontoCalc += desc;
+                return `<tr>
+                    <td class="center">${String(idx + 1).padStart(2, '0')}</td>
+                    <td>${esc(item.codigo || '-')}</td>
+                    <td class="desc-cell"><strong>${esc(item.descricao || item.nome || '-')}</strong></td>
+                    <td class="center">${qty.toLocaleString('pt-BR')}</td>
+                    <td class="center">${esc(item.unidade || 'UN')}</td>
+                    <td class="money">${fv(preco)}</td>
+                    <td class="money">${desc > 0 ? fv(desc) : '—'}</td>
+                    <td class="money"><strong>${fv(tot)}</strong></td>
+                </tr>`;
+            }).join('') : '<tr><td colspan="8" class="empty">Nenhum item adicionado</td></tr>';
+
+            const freteVal = parseFloat(pedido.frete) || 0;
+            const totalGeral = subtotalCalc > 0 ? (subtotalCalc - descontoCalc + freteVal) : (parseFloat(pedido.valor_total || pedido.valor) || 0);
+            const obsTexto = pedido.observacoes || pedido.observacao || pedido.descricao || '';
+            const nomeCliente = pedido.cliente_nome || pedido.cliente || 'Não informado';
+
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html lang="pt-BR">
                 <head>
-                    <title>Pedido #${pedido.numero || pedido.id} - Zyntra</title>
+                    <title>${statusText} #${pedido.id} - ${esc(nomeCliente)} - Zyntra</title>
                     <style>
-                        @page { margin: 12mm 15mm; size: A4; }
+                        @page { margin: 10mm 12mm; size: A4; }
                         @media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }
                         * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; padding: 30px 40px; max-width: 800px; margin: 0 auto; color: #1e293b; font-size: 11px; line-height: 1.5; }
-                        .print-bar { position: sticky; top: 0; z-index: 100; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; }
-                        .print-bar button { border: none; padding: 10px 28px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
+                        body { font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; padding: 24px 32px; max-width: 800px; margin: 0 auto; color: #1e293b; font-size: 10px; line-height: 1.5; }
+                        .print-bar { position: sticky; top: 0; z-index: 100; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 12px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+                        .print-bar button { border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }
                         .print-bar .btn-print { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }
+                        .print-bar .btn-print:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
                         .print-bar .btn-close { background: #f1f5f9; color: #475569; }
-                        .rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }
-                        .brand-name { height: 40px; }
+
+                        .rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 14px; border-bottom: 3px solid #0b2842; margin-bottom: 18px; }
+                        .brand-name { height: 38px; }
                         .brand-name img { height: 100%; width: auto; }
-                        .brand-sub { font-size: 11px; color: #64748b; font-weight: 400; margin-top: 3px; }
+                        .brand-sub { font-size: 9px; color: #64748b; margin-top: 2px; }
                         .rpt-meta { text-align: right; }
-                        .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }
-                        .meta-line { font-size: 10px; color: #64748b; margin-top: 3px; }
-                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-                        .info-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; }
-                        .info-section h3 { margin: 0 0 10px 0; color: #1e293b; font-size: 12px; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-                        .info-section h3::before { content: ''; width: 4px; height: 14px; background: #2563eb; border-radius: 2px; }
-                        .info-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 11px; }
-                        .info-row .label { color: #64748b; }
-                        .info-row .value { font-weight: 600; color: #1e293b; }
-                        .valor-destaque { font-size: 20px; font-weight: 700; color: #1a4fd4; }
-                        .status { padding: 4px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; }
-                        .status.orcamento { background: #dbeafe; color: #1e40af; }
-                        .status.aprovado { background: #dcfce7; color: #166534; }
-                        .status.faturado { background: #f3e8ff; color: #7e22ce; }
-                        .rpt-footer { margin-top: 28px; padding-top: 14px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-                        .rpt-footer span { font-size: 9px; color: #94a3b8; }
-                        .confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }
+                        .doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #0b2842, #103758); padding: 5px 14px; border-radius: 6px; display: inline-block; margin-bottom: 6px; letter-spacing: 1px; text-transform: uppercase; }
+                        .meta-line { font-size: 9px; color: #64748b; margin-top: 2px; }
+
+                        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+                        .info-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+                        .info-section h3 { margin: 0 0 8px; color: #0b2842; font-size: 10px; font-weight: 700; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+                        .info-section h3::before { content: ''; width: 3px; height: 12px; background: #0b2842; border-radius: 2px; flex-shrink: 0; }
+                        .info-row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 10px; gap: 8px; }
+                        .info-row .label { color: #64748b; white-space: nowrap; }
+                        .info-row .value { font-weight: 600; color: #1e293b; text-align: right; word-break: break-word; }
+                        .full-width { grid-column: 1 / -1; }
+
+                        /* Tabela de itens */
+                        .items-section { margin-bottom: 14px; }
+                        .items-section h3 { margin: 0 0 8px; color: #0b2842; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+                        .items-section h3::before { content: ''; width: 3px; height: 12px; background: #0b2842; border-radius: 2px; }
+                        .items-section h3 span { color: #64748b; font-weight: 500; font-size: 9px; }
+                        table { width: 100%; border-collapse: collapse; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; font-size: 9px; }
+                        thead th { background: #0b2842; color: #fff; font-size: 7.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 6px; text-align: left; }
+                        tbody td { padding: 6px 6px; border-bottom: 1px solid #f1f5f9; color: #334155; vertical-align: top; }
+                        tbody tr:nth-child(even) { background: #f8fafc; }
+                        tbody tr:last-child td { border-bottom: none; }
+                        .center { text-align: center; }
+                        .money { text-align: right; font-variant-numeric: tabular-nums; }
+                        .desc-cell strong { display: block; color: #1e293b; font-size: 9px; }
+                        .empty { text-align: center; color: #94a3b8; padding: 16px !important; font-style: italic; }
+
+                        /* Resumo financeiro */
+                        .summary-grid { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 12px; margin-bottom: 14px; }
+                        .totals-card { background: linear-gradient(135deg, #f8fafc, #f0f7ff); border: 1px solid #dbeafe; border-radius: 8px; padding: 12px 14px; }
+                        .total-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; font-size: 10px; color: #475569; border-bottom: 1px dashed #e2e8f0; }
+                        .total-row:last-of-type { border-bottom: none; }
+                        .total-row strong { color: #1e293b; }
+                        .grand-total { margin-top: 8px; background: linear-gradient(135deg, #0b2842, #103758); border-radius: 8px; padding: 10px 14px; display: flex; justify-content: space-between; align-items: center; }
+                        .grand-total .gt-label { color: rgba(255,255,255,0.8); font-size: 8px; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
+                        .grand-total .gt-value { color: #fff; font-size: 18px; font-weight: 800; }
+
+                        /* Obs */
+                        .obs-box { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 10px; color: #78350f; line-height: 1.6; margin-bottom: 14px; }
+
+                        .rpt-footer { margin-top: 20px; padding-top: 10px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+                        .rpt-footer span { font-size: 8px; color: #94a3b8; }
                     </style>
-</head>
+                </head>
                 <body>
                     <div class="print-bar">
                         <button class="btn-print" onclick="window.print()"><i class="fas fa-print"></i> Imprimir / Salvar PDF</button>
                         <button class="btn-close" onclick="window.close()"><i class="fas fa-times"></i> Fechar</button>
                     </div>
+
                     <div class="rpt-header">
                         <div>
-                            <div class="brand-name"><img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=\'font-size:24px;font-weight:800;color:#1e293b\'>ALUFORCE</div>'"></div>
+                            <div class="brand-name"><img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=\\'font-size:22px;font-weight:900;color:#0b2842\\'>ALUFORCE</div>'"></div>
                             <div class="brand-sub">Zyntra — Módulo de Vendas</div>
                         </div>
                         <div class="rpt-meta">
-                            <div class="doc-tag">Pedido</div>
-                            <div class="meta-line">Pedido #${pedido.numero || pedido.id}</div>
+                            <div class="doc-tag">${esc(statusText)}</div>
+                            <div class="meta-line"><strong>#${pedido.id}</strong></div>
                             <div class="meta-line">Emitido em: ${new Date().toLocaleString('pt-BR')}</div>
                         </div>
                     </div>
 
+                    <!-- Info Grid: Pedido + Cliente -->
                     <div class="info-grid">
                         <div class="info-section">
                             <h3>INFORMAÇÕES DO PEDIDO</h3>
-                            <div class="info-row"><span class="label">Número:</span><span class="value">#${pedido.numero || pedido.id}</span></div>
-                            <div class="info-row"><span class="label">Data:</span><span class="value">${formatarData(pedido.data_pedido || pedido.created_at)}</span></div>
-                            <div class="info-row"><span class="label">Status:</span><span class="value"><span class="status ${getStatusClass(pedido.status)}">${getStatusLabel(pedido.status)}</span></span></div>
-                            <div class="info-row"><span class="label">Vendedor:</span><span class="value">${pedido.vendedor_nome || '-'}</span></div>
+                            <div class="info-row"><span class="label">Número:</span><span class="value">#${pedido.id}</span></div>
+                            <div class="info-row"><span class="label">Data:</span><span class="value">${fd(pedido.data_pedido || pedido.created_at)}</span></div>
+                            <div class="info-row"><span class="label">Status:</span><span class="value">${esc(statusText)}</span></div>
+                            <div class="info-row"><span class="label">Vendedor:</span><span class="value">${esc(pedido.vendedor_nome || pedido.vendedor || '-')}</span></div>
+                            ${pedido.condicao_pagamento ? `<div class="info-row"><span class="label">Pagamento:</span><span class="value">${esc(pedido.condicao_pagamento)}</span></div>` : ''}
+                            ${pedido.prazo_entrega ? `<div class="info-row"><span class="label">Prazo:</span><span class="value">${esc(pedido.prazo_entrega)}</span></div>` : ''}
                         </div>
                         <div class="info-section">
                             <h3>CLIENTE</h3>
-                            <div class="info-row"><span class="label">Nome:</span><span class="value">${pedido.cliente_nome || 'Não informado'}</span></div>
-                            <div class="info-row"><span class="label">Empresa:</span><span class="value">${pedido.empresa_nome || '-'}</span></div>
+                            <div class="info-row"><span class="label">Nome:</span><span class="value">${esc(nomeCliente)}</span></div>
+                            ${pedido.cliente_cnpj ? `<div class="info-row"><span class="label">CNPJ/CPF:</span><span class="value">${esc(pedido.cliente_cnpj)}</span></div>` : ''}
+                            ${pedido.cliente_telefone ? `<div class="info-row"><span class="label">Telefone:</span><span class="value">${esc(pedido.cliente_telefone)}</span></div>` : ''}
+                            ${pedido.cliente_email ? `<div class="info-row"><span class="label">E-mail:</span><span class="value">${esc(pedido.cliente_email)}</span></div>` : ''}
+                            ${pedido.cliente_endereco ? `<div class="info-row"><span class="label">Endereço:</span><span class="value">${esc(pedido.cliente_endereco)}${pedido.cliente_bairro ? ', ' + esc(pedido.cliente_bairro) : ''}</span></div>` : ''}
+                            ${pedido.cliente_cidade ? `<div class="info-row"><span class="label">Cidade/UF:</span><span class="value">${esc(pedido.cliente_cidade)}${pedido.cliente_estado ? '/' + esc(pedido.cliente_estado) : ''}</span></div>` : ''}
                         </div>
                     </div>
 
-                    <div class="info-section">
-                        <h3>VALORES</h3>
-                        <div class="info-row"><span class="label">Valor Total:</span><span class="value valor-destaque">${formatarValor(pedido.valor_total)}</span></div>
-                        <div class="info-row"><span class="label">Frete:</span><span class="value">${pedido.frete ? formatarValor(pedido.frete) : 'R$ 0,00'}</span></div>
+                    ${pedido.transportadora_nome || pedido.transp_razao_social || pedido.tipo_frete ? `
+                    <div class="info-grid" style="margin-bottom:14px;">
+                        <div class="info-section full-width">
+                            <h3>TRANSPORTE / FRETE</h3>
+                            ${pedido.tipo_frete ? `<div class="info-row"><span class="label">Tipo Frete:</span><span class="value">${esc(pedido.tipo_frete)}</span></div>` : ''}
+                            ${pedido.transportadora_nome || pedido.transp_razao_social ? `<div class="info-row"><span class="label">Transportadora:</span><span class="value">${esc(pedido.transportadora_nome || pedido.transp_razao_social)}</span></div>` : ''}
+                        </div>
+                    </div>` : ''}
+
+                    <!-- Tabela de Itens -->
+                    <div class="items-section">
+                        <h3><span style="display:flex;align-items:center;gap:6px;"><span style="width:3px;height:12px;background:#0b2842;border-radius:2px;display:inline-block"></span> ITENS DO PEDIDO</span> <span>${itens.length} ${itens.length === 1 ? 'item' : 'itens'}</span></h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:5%">#</th>
+                                    <th style="width:10%">Código</th>
+                                    <th style="width:34%">Descrição</th>
+                                    <th style="width:8%" class="center">Qtd</th>
+                                    <th style="width:6%" class="center">Un</th>
+                                    <th style="width:12%" class="money">Vlr. Unit.</th>
+                                    <th style="width:10%" class="money">Desc.</th>
+                                    <th style="width:12%" class="money">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>${itensHTML}</tbody>
+                        </table>
                     </div>
 
-                    ${pedido.observação ? `<div class="info-section" style="margin-top: 16px;"><h3>OBSERVAÇÕES</h3><p style="font-size: 11px; color: #64748b;">${pedido.observacao}</p></div>` : ''}
+                    <!-- Resumo Financeiro -->
+                    <div class="summary-grid">
+                        ${obsTexto.trim() ? `<div class="info-section"><h3>OBSERVAÇÕES</h3><div class="obs-box">${esc(obsTexto)}</div></div>` : '<div></div>'}
+                        <div class="totals-card">
+                            <div class="total-row"><span>Subtotal</span><strong>${fv(subtotalCalc)}</strong></div>
+                            ${descontoCalc > 0 ? `<div class="total-row"><span>Descontos</span><strong style="color:#dc2626">- ${fv(descontoCalc)}</strong></div>` : ''}
+                            <div class="total-row"><span>Frete</span><strong>${fv(freteVal)}</strong></div>
+                            <div class="grand-total">
+                                <div class="gt-label">Valor Total</div>
+                                <div class="gt-value">${fv(totalGeral)}</div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="rpt-footer">
                         <span>Zyntra ERP — Sistema Integrado de Gestão Empresarial</span>
                         <span>Documento gerado automaticamente pelo Zyntra ERP</span>
                     </div>
-                    <div class="confidential">Documento Confidencial — Uso Interno</div>
-</body>
+                </body>
                 </html>
             `);
             printWindow.document.close();
