@@ -124,7 +124,7 @@ async function refreshTokens(refreshToken, pool) {
         
         // Buscar dados atualizados do usuário
         const [users] = await pool.query(`
-            SELECT id, username, nome, role, empresa_id, area, status
+            SELECT id, email, login, nome, role, empresa_id, area, status
             FROM usuarios WHERE id = ? AND status = 'ativo'
         `, [decoded.userId]);
         
@@ -149,7 +149,8 @@ async function refreshTokens(refreshToken, pool) {
             ...newTokens,
             user: {
                 id: users[0].id,
-                username: users[0].username,
+                username: users[0].email || users[0].login,
+                email: users[0].email,
                 nome: users[0].nome,
                 role: users[0].role
             }

@@ -1,5 +1,5 @@
 // auth-unified.js - Sistema de autenticação unificado para todos os módulos ALUFORCE
-// VERSÃO 7.5 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
+// VERSÃO 7.6 - ISOLAMENTO POR ABA + VALIDAÇÃO VIA SERVIDOR + RESILIÊNCIA
 // FIX v7.0: Resolve o problema de "espelhamento" onde o login de outro usuário em outra aba
 //      sobrescreve a sessão da aba atual via localStorage/cookie compartilhados.
 // FIX v7.1: NÃO copia mais token/userData de localStorage para sessionStorage em novas abas.
@@ -9,6 +9,8 @@
 //      exige 3 falhas consecutivas no check periódico antes de redirecionar.
 // FIX v7.5: AUTH_INACTIVE retorna Response sintética (evita 401 no caller), 503 retry
 //      sem signal abortado, proactive refresh usa config centralizada.
+// FIX v7.6: Refresh com retry (1x), 504 retry, skip /api/me no interceptor,
+//      background check com tolerância, periódico exige 5 falhas + tenta refresh.
 
 // =============================================================================
 // 🔒 STORAGE ISOLATOR - Deve rodar ANTES de qualquer outro código
@@ -66,7 +68,7 @@
 (function () {
     'use strict';
 
-    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
+    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.6 (Tab-Isolated + Server Validation + Token Refresh + Resilient)');
 
     // Configurações
     const AUTH_CONFIG = {
@@ -103,33 +105,51 @@
         }
         _isRefreshing = true;
         try {
-            const refreshController = new AbortController();
-            const refreshTimeout = setTimeout(() => refreshController.abort(), 10000); // 10s timeout
-            const resp = await _originalFetch(AUTH_CONFIG.refreshEndpoint, {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                signal: refreshController.signal
-            });
-            clearTimeout(refreshTimeout);
-            if (resp.ok) {
-                const data = await resp.json();
-                if (data.user) {
-                    setTabUserData(data.user);
+            // v7.6 FIX: Retry 1x em caso de falha transiente (PM2 restart, network blip)
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const refreshController = new AbortController();
+                    const refreshTimeout = setTimeout(() => refreshController.abort(), 10000);
+                    const resp = await _originalFetch(AUTH_CONFIG.refreshEndpoint, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        signal: refreshController.signal
+                    });
+                    clearTimeout(refreshTimeout);
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        if (data.user) {
+                            setTabUserData(data.user);
+                        }
+                        _scheduleProactiveRefresh();
+                        _refreshQueue.forEach(p => p.resolve(true));
+                        _refreshQueue = [];
+                        debugLog('🔄 Token refresh realizado com sucesso' + (attempt > 0 ? ' (retry)' : ''));
+                        return true;
+                    }
+                    // Falha permanente (token realmente inválido) — não tentar retry
+                    const respBody = await resp.json().catch(() => ({}));
+                    if (respBody.code === 'TOKEN_REUSE_DETECTED' || respBody.code === 'INVALID_REFRESH_TOKEN' || respBody.code === 'NO_REFRESH_TOKEN') {
+                        debugLog('❌ Refresh falhou permanentemente: ' + (respBody.code || resp.status));
+                        break;
+                    }
+                    // Falha possivelmente transiente — retry após delay
+                    if (attempt === 0) {
+                        debugLog('⚠️ Refresh falhou (tentativa 1/2), retrying em 1.5s...');
+                        await new Promise(r => setTimeout(r, 1500));
+                        continue;
+                    }
+                } catch (fetchErr) {
+                    // Erro de rede/timeout — retry
+                    if (attempt === 0) {
+                        debugLog('⚠️ Refresh erro de rede (tentativa 1/2), retrying em 1.5s...');
+                        await new Promise(r => setTimeout(r, 1500));
+                        continue;
+                    }
                 }
-                // Reset proactive timer
-                _scheduleProactiveRefresh();
-                // Resolver requests da fila
-                _refreshQueue.forEach(p => p.resolve(true));
-                _refreshQueue = [];
-                debugLog('🔄 Token refresh realizado com sucesso');
-                return true;
             }
             _refreshQueue.forEach(p => p.resolve(false));
-            _refreshQueue = [];
-            return false;
-        } catch (err) {
-            _refreshQueue.forEach(p => p.reject(err));
             _refreshQueue = [];
             return false;
         } finally {
@@ -189,22 +209,29 @@
         }
         if (timeoutId) clearTimeout(timeoutId);
 
-        // v7.4 FIX: Tratar 503 (cache/serviço indisponível) — retry automático com limite
-        if (response.status === 503) {
+        // v7.6 FIX: Tratar 503/504 (serviço indisponível/timeout) — retry automático com limite
+        if (response.status === 503 || response.status === 504) {
             const retryCount = (init._retryCount || 0);
             if (retryCount < 2) {
                 const delay = 2000 * (retryCount + 1); // backoff: 2s, 4s
-                debugLog(`⚠️ 503 retry ${retryCount + 1}/2 em ${delay}ms...`);
+                debugLog(`⚠️ ${response.status} retry ${retryCount + 1}/2 em ${delay}ms...`);
                 await new Promise(r => setTimeout(r, delay));
                 var retryInit = Object.assign({}, init);
                 delete retryInit.signal;
                 retryInit._retryCount = retryCount + 1;
                 return window.fetch(input, retryInit);
             }
-            debugLog('❌ 503 após 2 retries — retornando resposta original');
+            debugLog(`❌ ${response.status} após 2 retries — retornando resposta original`);
         }
 
         if (response.status === 401) {
+            // v7.6 FIX: Não interceptar 401 do /api/me — checkAuthentication() tem sua própria lógica
+            // Isso evita que o interceptor faça clearAuthData()+redirect durante background checks,
+            // causando logout aleatório quando o access token expira durante verificação em segundo plano
+            if (url.includes('/api/me')) {
+                return response;
+            }
+
             // Clonar antes de consumir o body
             const cloned = response.clone();
             try {
@@ -521,6 +548,40 @@
                 }));
 
                 return userData;
+            } else if (response.status === 401) {
+                // v7.6 FIX: /api/me now bypasses the interceptor's 401 handler,
+                // so we handle token refresh here directly
+                debugLog('🔄 /api/me retornou 401 — tentando refresh...');
+                const refreshed = await _doRefresh();
+                if (refreshed) {
+                    // Retry with new cookies
+                    try {
+                        const retryController = new AbortController();
+                        const retryTimeout = setTimeout(() => retryController.abort(), AUTH_CONFIG.timeout);
+                        const retryResp = await _originalFetch(AUTH_CONFIG.apiMeEndpoint, {
+                            method: 'GET',
+                            credentials: 'include',
+                            headers: headers,
+                            signal: retryController.signal
+                        });
+                        clearTimeout(retryTimeout);
+                        if (retryResp.ok) {
+                            const userData = await retryResp.json();
+                            debugLog('✅ Usuário autenticado após refresh:', userData.nome || userData.email);
+                            _scheduleProactiveRefresh();
+                            if (userData.deviceId) {
+                                sessionStorage.setItem('deviceId', userData.deviceId);
+                            }
+                            setTabUserData(userData);
+                            window.dispatchEvent(new CustomEvent('authSuccess', { detail: { user: userData } }));
+                            return userData;
+                        }
+                    } catch (retryErr) {
+                        debugLog('🚨 Retry após refresh falhou:', retryErr.message);
+                    }
+                }
+                debugLog('❌ Refresh falhou para /api/me');
+                return null;
             } else {
                 debugLog(`❌ Falha na autenticação: ${response.status}`);
                 return null;
@@ -568,15 +629,45 @@
             // Mostrar a página
             document.body?.classList?.remove('auth-loading');
 
-            // Verificar servidor em background (usando token DESTA aba)
+            // v7.6 FIX: Verificar servidor em background COM tolerância a falhas.
+            // Antes: 1 falha = logout imediato. Agora: retry 1x antes de desistir.
+            // Isso evita logout quando PM2 reinicia workers ou há blip de rede.
             checkAuthentication().then(serverUser => {
                 if (serverUser) {
                     setTabUserData(serverUser);
                     debugLog('🔄 Dados atualizados do servidor');
                 } else {
-                    debugLog('⚠️ Sessão expirada no servidor - redirecionando para login');
-                    clearAuthData();
-                    redirectToLogin('Sessão expirada no servidor');
+                    // Primeira falha — tentar refresh + retry uma vez antes de desistir
+                    debugLog('⚠️ Background check falhou — tentando refresh + retry...');
+                    _doRefresh().then(refreshed => {
+                        if (!refreshed) {
+                            // Retry após 2s (pode ter sido PM2 restart)
+                            setTimeout(() => {
+                                checkAuthentication().then(retryUser => {
+                                    if (retryUser) {
+                                        setTabUserData(retryUser);
+                                        debugLog('🔄 Dados atualizados do servidor (retry)');
+                                    } else {
+                                        debugLog('❌ Sessão expirada no servidor após retry');
+                                        clearAuthData();
+                                        redirectToLogin('Sessão expirada no servidor');
+                                    }
+                                }).catch(() => {
+                                    debugLog('⚠️ Retry falhou (offline?) — mantendo sessão local');
+                                });
+                            }, 2000);
+                            return;
+                        }
+                        // Refresh ok — re-verificar
+                        checkAuthentication().then(retryUser => {
+                            if (retryUser) {
+                                setTabUserData(retryUser);
+                                debugLog('🔄 Dados atualizados do servidor (pós-refresh)');
+                            }
+                        }).catch(() => {});
+                    }).catch(() => {
+                        debugLog('⚠️ Refresh falhou (offline?) — mantendo sessão local');
+                    });
                 }
             }).catch(() => {
                 debugLog('⚠️ Não foi possível verificar servidor (offline?)');
@@ -620,7 +711,7 @@
 
     // Função para inicializar sistema de auth
     function initAuth() {
-        debugLog('🔧 Inicializando sistema de autenticação v7.5 (Tab-Isolated + Server Validation)...');
+        debugLog('🔧 Inicializando sistema de autenticação v7.6 (Tab-Isolated + Server Validation + Resilient)...');
 
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', verifyAuth);
@@ -628,15 +719,23 @@
             verifyAuth();
         }
 
-        // v7.4 FIX: Verificação periódica com tolerância a falhas
-        // Exige 3 falhas consecutivas antes de redirecionar (evita logout por blip de rede)
+        // v7.6 FIX: Verificação periódica com tolerância alta a falhas
+        // Exige 5 falhas consecutivas antes de redirecionar (evita logout por blip de rede)
+        // Antes eram 3 falhas a cada 15 min = 45 min. Agora 5 falhas = 75 min de falhas contínuas.
         let _periodicFailCount = 0;
-        const MAX_PERIODIC_FAILURES = 3;
+        const MAX_PERIODIC_FAILURES = 5;
         setInterval(async () => {
             if (!shouldSkipAuth() && !isRedirecting) {
                 debugLog('🔄 Verificação periódica (passive — não reseta inatividade)...');
                 const serverUser = await checkAuthentication({ passive: true });
                 if (!serverUser) {
+                    // Tentar refresh antes de incrementar o contador de falhas
+                    const refreshed = await _doRefresh().catch(() => false);
+                    if (refreshed) {
+                        debugLog('🔄 Refresh periódico resolveu a falha');
+                        _periodicFailCount = 0;
+                        return;
+                    }
                     _periodicFailCount++;
                     debugLog(`⚠️ Check periódico falhou (${_periodicFailCount}/${MAX_PERIODIC_FAILURES})`);
                     if (_periodicFailCount >= MAX_PERIODIC_FAILURES) {
@@ -683,6 +782,6 @@
     // Inicializar
     initAuth();
 
-    debugLog('✅ Sistema de autenticação v7.5 (Tab-Isolated + Server Validation + Token Refresh) inicializado');
+    debugLog('✅ Sistema de autenticação v7.6 (Tab-Isolated + Server Validation + Token Refresh + Resilient) inicializado');
 
 })();

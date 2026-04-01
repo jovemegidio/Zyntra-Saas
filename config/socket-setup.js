@@ -55,12 +55,21 @@ function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool })
         const token = socket.handshake.auth?.token || 
                       socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
                       socket.handshake.query?.token;
-        if (!token) {
+        // v7.6 FIX: Also extract token from httpOnly cookie in handshake headers
+        // Since auth moved to httpOnly cookies, the JS-side token may be unavailable
+        let cookieToken = null;
+        if (!token && socket.handshake.headers?.cookie) {
+            const cookieStr = socket.handshake.headers.cookie;
+            const match = cookieStr.match(/(?:^|;\s*)authToken=([^;]+)/);
+            if (match) cookieToken = match[1];
+        }
+        const finalToken = token || cookieToken;
+        if (!finalToken) {
             if (process.env.NODE_ENV === 'development') return next();
             return next(new Error('Autenticação necessária'));
         }
         try {
-            const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+            const decoded = jwt.verify(finalToken, JWT_SECRET, { algorithms: ['HS256'] });
             socket.user = decoded;
             next();
         } catch (err) {
@@ -86,12 +95,20 @@ function setupSocketIO(httpServer, { Server, allowedOrigins, JWT_SECRET, pool })
             const token = socket.handshake.auth?.token || 
                           socket.handshake.headers?.authorization?.replace('Bearer ', '') ||
                           socket.handshake.query?.token;
-            if (!token) {
+            // v7.6 FIX: Also extract token from httpOnly cookie
+            let cookieToken = null;
+            if (!token && socket.handshake.headers?.cookie) {
+                const cookieStr = socket.handshake.headers.cookie;
+                const match = cookieStr.match(/(?:^|;\s*)authToken=([^;]+)/);
+                if (match) cookieToken = match[1];
+            }
+            const finalToken = token || cookieToken;
+            if (!finalToken) {
                 if (process.env.NODE_ENV === 'development') return next();
                 return next(new Error('Autenticação necessária'));
             }
             try {
-                const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
+                const decoded = jwt.verify(finalToken, JWT_SECRET, { algorithms: ['HS256'] });
                 socket.user = decoded;
                 next();
             } catch (err) {
