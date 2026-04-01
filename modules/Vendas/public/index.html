@@ -10402,14 +10402,59 @@
         function aplicarTipoClienteEdit() {
             const tipo = document.getElementById('edit-tipo-cliente')?.value || 'revenda';
             console.log('[TIPO_CLIENTE] Edit modal tipo:', tipo);
-            // Auto-update impostos based on tipo
             atualizarImpostosPorEstadoTipo('edit');
+            if (itensPedidoAtual.length > 0) atualizarPrecosPorTipoCliente(tipo);
         }
         function aplicarTipoClienteNovo() {
             const tipo = document.getElementById('novo-tipo-cliente')?.value || 'revenda';
             console.log('[TIPO_CLIENTE] Novo modal tipo:', tipo);
             atualizarImpostosPorEstadoTipo('novo');
+            if (itensPedidoAtual.length > 0) atualizarPrecosPorTipoCliente(tipo);
         }
+        // Atualizar preços de todos os itens com base no tipo de cliente
+        async function atualizarPrecosPorTipoCliente(tipo) {
+            const produtoIds = [...new Set(itensPedidoAtual.filter(i => i.produto_id).map(i => i.produto_id))];
+            if (produtoIds.length === 0) return;
+            showToast(`Atualizando preços para ${tipo === 'consumidor_final' ? 'Consumidor Final' : 'Revenda'}...`, 'info');
+            try {
+                const priceMap = {};
+                await Promise.all(produtoIds.map(async id => {
+                    const res = await fetch(`/api/vendas/produtos/${id}`, { credentials: 'include', headers: getAuthHeaders() });
+                    if (res.ok) {
+                        const p = await res.json();
+                        priceMap[id] = { preco_venda: parseFloat(p.preco_venda) || 0, preco_revenda: parseFloat(p.preco_revenda) || 0 };
+                    }
+                }));
+                let changed = 0;
+                itensPedidoAtual.forEach(item => {
+                    if (!item.produto_id || !priceMap[item.produto_id]) return;
+                    const prices = priceMap[item.produto_id];
+                    let novoPreco;
+                    if (tipo === 'consumidor_final') {
+                        novoPreco = prices.preco_venda || 0;
+                    } else {
+                        novoPreco = (prices.preco_revenda > 0 ? prices.preco_revenda : prices.preco_venda) || 0;
+                    }
+                    if (novoPreco > 0 && Math.abs(novoPreco - parseFloat(item.preco_unitario)) > 0.001) {
+                        const qtd = parseFloat(item.quantidade) || 1;
+                        const descValor = parseFloat(item.desconto) || 0;
+                        item.preco_unitario = novoPreco;
+                        item.preco_total = (qtd * novoPreco) - descValor;
+                        item.subtotal = item.preco_total;
+                        changed++;
+                    }
+                });
+                if (changed > 0) {
+                    renderizarItensLocais();
+                    showToast(`${changed} item(s) com preço atualizado para ${tipo === 'consumidor_final' ? 'Consumidor Final' : 'Revenda'}.`, 'success');
+                } else {
+                    showToast('Preços já estão corretos para o tipo de cliente selecionado.', 'info');
+                }
+            } catch (e) {
+                console.error('[TIPO_CLIENTE] Erro ao atualizar preços:', e);
+            }
+        }
+
         function aplicarEstadoDestinoEdit() {
             const uf = document.getElementById('edit-estado-destino')?.value || 'SP';
             console.log('[ESTADO] Edit modal UF:', uf);
@@ -12336,7 +12381,7 @@
                                 <div class="cliente-grid">
                                     <div class="cliente-item"><label>CNPJ:</label><span>${escaparHTML(pedidoAtual.cliente_cnpj || '-')}</span></div>
                                     <div class="cliente-item"><label>IE:</label><span>${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
-                                    <div class="cliente-item"><label>Endereço:</label><span>${escaparHTML(pedidoAtual.cliente_endereco || '-')}</span></div>
+                                    <div class="cliente-item"><label>Endereço:</label><span>${escaparHTML([pedidoAtual.cliente_endereco, pedidoAtual.cliente_numero].filter(Boolean).join(', ') || '-')}</span></div>
                                     <div class="cliente-item"><label>Bairro:</label><span>${escaparHTML(pedidoAtual.cliente_bairro || '-')}</span></div>
                                     <div class="cliente-item"><label>Cidade/UF:</label><span>${escaparHTML(pedidoAtual.cliente_cidade || '-')}/${escaparHTML(pedidoAtual.cliente_uf || '-')}</span></div>
                                     <div class="cliente-item"><label>CEP:</label><span>${escaparHTML(pedidoAtual.cliente_cep || '-')}</span></div>
@@ -12646,7 +12691,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
     <!-- HEADER -->
     <div class="header">
         <div class="header-left">
-            <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" style="height:52px;" onerror="this.outerHTML='<div style=\\'font-size:28px;font-weight:900;color:#1e293b;letter-spacing:-1px\\'>ALUFORCE</div>'">
+            <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" style="height:52px;" onerror="this.outerHTML='<div style=\\'font-size:28px;font-weight:900;color:#1e293b;letter-spacing:-1px\\'>ALUFORCE</div>'">
             <div class="header-info">
                 <div class="brand">Cabos de Alumínio</div>
                 <div class="empresa-dados">
