@@ -1231,8 +1231,7 @@ apiVendasRouter.post('/metas/lote', async (req, res, next) => {
         // Buscar vendedores do Comercial
         const [vendedores] = await pool.query(`
             SELECT u.id, u.nome FROM usuarios u
-            LEFT JOIN departamentos d ON u.departamento_id = d.id
-            WHERE d.nome = 'Comercial' AND u.status = 'ativo'
+            WHERE u.departamento IN ('Comercial', 'Vendas') AND u.status = 'ativo'
         `);
 
         let criadas = 0;
@@ -1334,23 +1333,25 @@ apiVendasRouter.get('/metas/ranking', async (req, res, next) => {
                 u.avatar,
                 COALESCE(m.valor_meta, 0) as valor_meta,
                 COALESCE(agg.valor_realizado, 0) as valor_realizado,
-                COALESCE(agg.qtd_vendas, 0) as qtd_vendas
+                COALESCE(agg.qtd_vendas, 0) as qtd_vendas,
+                COALESCE(agg.qtd_pedidos_total, 0) as qtd_pedidos_total,
+                COALESCE(agg.valor_pipeline, 0) as valor_pipeline
             FROM usuarios u
-            LEFT JOIN departamentos d ON u.departamento_id = d.id
             LEFT JOIN funcionarios f ON f.email = u.email
             LEFT JOIN metas_vendas m ON u.id = m.vendedor_id AND m.periodo = ?
             LEFT JOIN (
                 SELECT vendedor_id,
-                       SUM(valor) as valor_realizado,
-                       COUNT(*) as qtd_vendas
+                       SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_realizado,
+                       SUM(CASE WHEN status IN ('faturado', 'recibo') THEN 1 ELSE 0 END) as qtd_vendas,
+                       COUNT(*) as qtd_pedidos_total,
+                       SUM(valor) as valor_pipeline
                 FROM pedidos
-                WHERE status IN ('faturado', 'recibo')
-                  AND created_at >= CONCAT(?, '-01')
+                WHERE created_at >= CONCAT(?, '-01')
                   AND created_at < DATE_ADD(CONCAT(?, '-01'), INTERVAL 1 MONTH)
                 GROUP BY vendedor_id
             ) agg ON u.id = agg.vendedor_id
-            WHERE d.nome = 'Comercial' AND u.status = 'ativo'
-            ORDER BY valor_realizado DESC
+            WHERE u.departamento IN ('Comercial', 'Vendas') AND u.status = 'ativo'
+            ORDER BY valor_realizado DESC, valor_pipeline DESC
         `, [periodo, periodo, periodo]);
 
         const ranking = rows.map((r, index) => ({
@@ -1358,7 +1359,9 @@ apiVendasRouter.get('/metas/ranking', async (req, res, next) => {
             posicao: index + 1,
             percentual_atingido: r.valor_meta > 0 ? ((r.valor_realizado / r.valor_meta) * 100).toFixed(2) : 0,
             status_meta: r.valor_realizado >= r.valor_meta && r.valor_meta > 0 ? 'atingida' :
-                         r.valor_realizado >= r.valor_meta * 0.8 && r.valor_meta > 0 ? 'proxima' : 'pendente'
+                         r.valor_realizado >= r.valor_meta * 0.8 && r.valor_meta > 0 ? 'proxima' : 'pendente',
+            valor_pipeline: Number(r.valor_pipeline || 0),
+            qtd_pedidos_total: Number(r.qtd_pedidos_total || 0)
         }));
 
         res.json({ periodo, ranking });
@@ -1379,8 +1382,7 @@ apiVendasRouter.get('/comissoes/configuracao', async (req, res, next) => {
                 COALESCE(u.comissao_percentual, 1.0) as comissao_percentual,
                 COALESCE(u.comissao_tipo, 'percentual') as comissao_tipo
             FROM usuarios u
-            LEFT JOIN departamentos d ON u.departamento_id = d.id
-            WHERE d.nome = 'Comercial' AND u.status = 'ativo'
+            WHERE u.departamento IN ('Comercial', 'Vendas') AND u.status = 'ativo'
             ORDER BY u.nome
         `);
 
@@ -1506,9 +1508,8 @@ apiVendasRouter.get('/comissoes/resumo', async (req, res, next) => {
                 COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_pendente,
                 COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao_pendente
             FROM usuarios u
-            LEFT JOIN departamentos d ON u.departamento_id = d.id
             LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
-            WHERE d.nome = 'Comercial' AND u.status = 'ativo'${whereExtra}
+            WHERE u.departamento IN ('Comercial', 'Vendas') AND u.status = 'ativo'${whereExtra}
             GROUP BY u.id, u.nome, u.email, u.comissao_percentual
             ORDER BY comissao_faturada DESC
         `, params);
@@ -1586,9 +1587,8 @@ apiVendasRouter.get('/comissoes/exportar', async (req, res, next) => {
                 COALESCE(u.comissao_percentual, 1.0) as 'Percentual (%)',
                 SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END) as 'Comissão (R$)'
             FROM usuarios u
-            LEFT JOIN departamentos d ON u.departamento_id = d.id
             LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
-            WHERE d.nome = 'Comercial' AND u.status = 'ativo'
+            WHERE u.departamento IN ('Comercial', 'Vendas') AND u.status = 'ativo'
             GROUP BY u.id, u.nome, u.email, u.comissao_percentual
             ORDER BY u.nome
         `, [periodoAtual]);
@@ -2642,6 +2642,53 @@ apiVendasRouter.put('/pedidos/:id/status', async (req, res, next) => {
             await connection.rollback();
             connection.release();
             return res.status(404).json({ message: "Pedido não encontrado." });
+        }
+
+        // ========================================
+        // BAIXA DE ESTOQUE AO MOVER PARA APROVADO
+        // Só baixar do estoque quando mover o pedido para aprovado
+        // ========================================
+        if (['aprovado', 'pedido-aprovado'].includes(status) && !['aprovado', 'pedido-aprovado'].includes(statusAtual)) {
+            try {
+                const [itens] = await connection.query('SELECT codigo, descricao, quantidade, unidade FROM pedido_itens WHERE pedido_id = ?', [id]);
+                if (itens.length > 0) {
+                    for (const item of itens) {
+                        const codigoMaterial = item.codigo;
+                        if (!codigoMaterial) continue;
+                        const [produtos] = await connection.query(
+                            'SELECT id, codigo, descricao, estoque_atual FROM produtos WHERE codigo = ? OR sku = ? LIMIT 1',
+                            [codigoMaterial, codigoMaterial]
+                        );
+                        if (produtos.length > 0) {
+                            const produto = produtos[0];
+                            const quantidade = parseFloat(item.quantidade || 0);
+                            if (quantidade <= 0) continue;
+                            // Atômico: decrementa estoque diretamente no DB
+                            await connection.query('UPDATE produtos SET estoque_atual = estoque_atual - ? WHERE id = ?', [quantidade, produto.id]);
+                            const [updated] = await connection.query('SELECT estoque_atual FROM produtos WHERE id = ?', [produto.id]);
+                            const novoEstoque = parseFloat(updated[0]?.estoque_atual || 0);
+                            const estoqueAnterior = novoEstoque + quantidade;
+                            await connection.query(`
+                                INSERT INTO estoque_movimentacoes
+                                (codigo_material, tipo_movimento, origem, quantidade, quantidade_anterior, quantidade_atual,
+                                 documento_tipo, documento_id, usuario_id, observacao, data_movimento)
+                                VALUES (?, 'saida', 'aprovacao_pedido', ?, ?, ?, 'pedido', ?, ?, ?, NOW())
+                            `, [
+                                produto.codigo, quantidade, estoqueAnterior, novoEstoque,
+                                id, user.id || null,
+                                `Baixa automática - Aprovação do Pedido #${id} - ${quantidade}${item.unidade || 'UN'} de ${produto.descricao || produto.codigo}`
+                            ]);
+                            if (DEBUG) console.log(`[BAIXA_ESTOQUE_APROVADO] ✅ ${produto.codigo} — baixou ${quantidade} (${estoqueAnterior} → ${novoEstoque})`);
+                        }
+                    }
+                    if (DEBUG) console.log(`[BAIXA_ESTOQUE_APROVADO] ✅ Baixa de estoque concluída para pedido #${id}`);
+                }
+            } catch (baixaErr) {
+                console.error(`[BAIXA_ESTOQUE_APROVADO] ❌ Erro ao baixar estoque do pedido #${id}:`, baixaErr.message);
+                await connection.rollback();
+                connection.release();
+                return res.status(500).json({ message: 'Erro ao baixar estoque. Aprovação abortada.' });
+            }
         }
 
         // ========================================
@@ -3849,7 +3896,6 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
         // Verificar se pedido existe
         const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ?', [id]);
         if (pedidoRows.length === 0) {
-            connection.release();
             return res.status(404).json({ message: 'Pedido não encontrado.' });
         }
 
@@ -3857,14 +3903,12 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
 
         // F2-08: Pre-faturamento validation
         if (pedido.status !== 'faturar') {
-            connection.release();
             return res.status(400).json({
                 message: `Pedido não pode ser faturado no status atual "${pedido.status}". Status necessário: "faturar".`
             });
         }
 
         if (!pedido.cliente_id) {
-            connection.release();
             return res.status(400).json({ message: 'Pedido não possui cliente vinculado. Vincule um cliente antes de faturar.' });
         }
 
@@ -3872,12 +3916,10 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
         const [itensRows] = await connection.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
 
         if (itensRows.length === 0) {
-            connection.release();
             return res.status(400).json({ message: 'Pedido não possui itens. Adicione itens antes de faturar.' });
         }
 
         if (parseFloat(pedido.valor) <= 0) {
-            connection.release();
             return res.status(400).json({ message: 'Pedido com valor zero ou negativo não pode ser faturado.' });
         }
 
@@ -3894,11 +3936,11 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
                     pedido_id: id,
                     cliente: {
                         nome: cliente.nome || pedido.cliente,
-                        cpf_cnpj: cliente.cpf_cnpj || cliente.cnpj,
+                        cpf_cnpj: cliente.cnpj_cpf || cliente.cnpj || cliente.cpf_cnpj,
                         email: cliente.email, telefone: cliente.telefone,
                         endereco: cliente.endereco, numero: cliente.numero,
                         complemento: cliente.complemento, bairro: cliente.bairro,
-                        cidade: cliente.cidade, uf: cliente.uf, cep: cliente.cep
+                        cidade: cliente.cidade, uf: cliente.estado || cliente.uf, cep: cliente.cep
                     },
                     produtos: itensRows.map(item => ({
                         codigo: item.codigo_produto,
@@ -5167,6 +5209,7 @@ async function ensureProdutosTable() {
                 peso_liquido DECIMAL(10,3) DEFAULT 0,
                 preco_custo DECIMAL(15,2) DEFAULT 0,
                 preco_venda DECIMAL(15,4) DEFAULT 0,
+                preco_revenda DECIMAL(15,4) DEFAULT NULL,
                 estoque_atual INT DEFAULT 0,
                 estoque_minimo INT DEFAULT 0,
                 local_estoque VARCHAR(100) DEFAULT 'principal',
@@ -5179,6 +5222,8 @@ async function ensureProdutosTable() {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
         `);
     } catch (e) { /* tabela já existe */ }
+    // Migração incremental: adicionar preco_revenda se não existir
+    try { await pool.query('ALTER TABLE produtos ADD COLUMN preco_revenda DECIMAL(15,4) DEFAULT NULL AFTER preco_venda'); } catch (_) {}
 }
 
 // Listar produtos
@@ -5239,6 +5284,7 @@ async function _autocompleteHandler(req, res, next) {
                 `SELECT id, codigo, descricao, nome, unidade,
                         COALESCE(preco_venda, 0) as preco_venda,
                         COALESCE(preco_custo, 0) as preco_custo,
+                        COALESCE(preco_revenda, preco_venda, 0) as preco_revenda,
                         COALESCE(estoque_atual, 0) as estoque_atual,
                         local_estoque, categoria
                  FROM produtos
@@ -5253,6 +5299,7 @@ async function _autocompleteHandler(req, res, next) {
                 `SELECT id, codigo, descricao, nome, unidade,
                         COALESCE(preco_venda, 0) as preco_venda,
                         COALESCE(preco_custo, 0) as preco_custo,
+                        COALESCE(preco_revenda, preco_venda, 0) as preco_revenda,
                         COALESCE(estoque_atual, 0) as estoque_atual,
                         local_estoque, categoria
                  FROM produtos
@@ -6172,6 +6219,13 @@ apiVendasRouter.get('/dashboard/top-produtos', async (req, res, next) => {
 
 // Importar serviço de CDR Scraping
 const cdrScraper = require('../../services/cdr-scraper');
+
+// Estender timeout para rotas CDR (scraping demora > 30s default)
+apiVendasRouter.use('/ligacoes', (req, res, next) => {
+    req.setTimeout(120000);
+    res.setTimeout(120000);
+    next();
+});
 
 // GET /api/vendas/ligacoes/dispositivos - Listar ramais/devices
 apiVendasRouter.get('/ligacoes/dispositivos', async (req, res, next) => {

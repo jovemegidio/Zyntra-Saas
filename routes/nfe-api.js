@@ -289,6 +289,24 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 return res.status(404).send('<html><body style="font-family:sans-serif;padding:40px;"><h2 style="color:#ef4444;">NF-e não encontrada</h2><p>ID/Chave: ' + escapeXml(nfeId) + '</p></body></html>');
             }
 
+            // Enriquecer dados do destinatário via tabela clientes (campos não armazenados em nfes)
+            if (row.cliente_id) {
+                try {
+                    const [cliRows] = await pool.query('SELECT * FROM clientes WHERE id = ? LIMIT 1', [row.cliente_id]);
+                    if (cliRows && cliRows[0]) {
+                        const cli = cliRows[0];
+                        row._cli_cnpj     = cli.cnpj_cpf || cli.cnpj || cli.cpf || '';
+                        row._cli_ie       = cli.inscricao_estadual || '';
+                        row._cli_endereco = [cli.endereco, cli.numero].filter(Boolean).join(', ');
+                        row._cli_bairro   = cli.bairro || '';
+                        row._cli_cidade   = cli.cidade || '';
+                        row._cli_uf       = cli.estado || '';
+                        row._cli_cep      = cli.cep || '';
+                        row._cli_email    = cli.email_nfe || cli.email || '';
+                    }
+                } catch (_) {}
+            }
+
             // Normaliza campos entre tabelas nfes e nfe
             const nfe = {
                 id: row.id,
@@ -297,18 +315,18 @@ module.exports = function createNfeApiRouter({ authenticateToken, pool }) {
                 chave_acesso: row.chave_acesso || '',
                 status: row.status || 'pendente',
                 data_emissao: row.data_emissao,
-                protocolo: row.protocolo_nfe || row.numero_protocolo || '',
+                protocolo: row.protocolo_nfe || row.protocolo_autorizacao || row.numero_protocolo || '',
                 natureza_operacao: row.natureza_operacao || 'Venda de Produtos',
                 tipo_operacao: row.tipo_operacao || row.tpNF || '1',
                 modalidade_frete: row.modalidade_frete,
                 destinatario_nome: row.destinatario_nome || row.destinatario || '',
-                destinatario_cnpj: row.destinatario_cnpj || row.cli_cnpj || '',
-                destinatario_ie: row.destinatario_ie || row.cli_ie || '',
-                destinatario_end: (row.destinatario_logradouro || row.cli_endereco || '') + (row.destinatario_bairro || row.cli_bairro ? ', ' + (row.destinatario_bairro || row.cli_bairro) : ''),
-                destinatario_cidade: row.destinatario_municipio || row.destinatario_cidade || row.cli_cidade || '',
-                destinatario_uf: row.destinatario_uf || row.cli_uf || '',
-                destinatario_cep: row.destinatario_cep || row.cli_cep || '',
-                destinatario_email: row.destinatario_email || row.cli_email || '',
+                destinatario_cnpj: row.destinatario_cnpj_cpf || row.destinatario_cnpj || row.cli_cnpj || row._cli_cnpj || '',
+                destinatario_ie: row.destinatario_ie || row.cli_ie || row._cli_ie || '',
+                destinatario_end: (row.destinatario_logradouro || row.cli_endereco || row._cli_endereco || '') + ((row.destinatario_bairro || row.cli_bairro || row._cli_bairro) ? ', ' + (row.destinatario_bairro || row.cli_bairro || row._cli_bairro) : ''),
+                destinatario_cidade: row.destinatario_municipio || row.destinatario_cidade || row.cli_cidade || row._cli_cidade || '',
+                destinatario_uf: row.destinatario_uf || row.cli_uf || row._cli_uf || '',
+                destinatario_cep: row.destinatario_cep || row.cli_cep || row._cli_cep || '',
+                destinatario_email: row.destinatario_email || row.cli_email || row._cli_email || '',
                 valor_total: row.valor_total || row.valor || 0
             };
 

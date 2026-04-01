@@ -12312,7 +12312,7 @@
                     <div class="container">
                         <div class="header">
                             <div class="logo-area">
-                                <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:22px;font-weight:700;color:#0284c7>ALUFORCE</div>'">
+                                <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:22px;font-weight:700;color:#0284c7>ALUFORCE</div>'">
                             </div>
                             <div class="empresa-info">
                                 <div class="razao">${getEmpresaRazao()}</div>
@@ -12377,7 +12377,7 @@
 
                         <div class="footer">
                             <div>Documento gerado em ${dataAtual} às ${horaAtual}</div>
-                            <div style="margin-top: 3px;">Zyntra ERP — Sistema de Gestão Empresarial | Este recibo comprova a entrega das mercadorias descritas acima.</div>
+                            <div style="margin-top: 3px;">Aluforce — Sistema de Gestão Empresarial | Este recibo comprova a entrega das mercadorias descritas acima.</div>
                         </div>
                     </div>
 
@@ -15675,10 +15675,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             produtoSelecionadoAutoComplete = produto;
             input.value = `${produto.codigo} - ${produto.descricao}`;
 
-            // Preencher preço (preco_venda já inclui fallback para preco_custo do backend)
+            // Preencher preço conforme tipo de cliente (consumidor final usa preco_venda; revenda usa preco_revenda)
             const precoInput = document.getElementById('item-pedido-preco');
             if (precoInput) {
-                precoInput.value = formatarDecimal(produto.preco_venda || produto.preco_custo || 0);
+                const tipoCliente = document.getElementById('edit-tipo-cliente')?.value ||
+                                   document.getElementById('novo-tipo-cliente')?.value || 'revenda';
+                const precoRevenda = parseFloat(produto.preco_revenda) > 0 ? produto.preco_revenda : produto.preco_venda;
+                const precoUsar = tipoCliente === 'consumidor_final'
+                    ? (produto.preco_venda || produto.preco_custo || 0)
+                    : (precoRevenda || produto.preco_venda || produto.preco_custo || 0);
+                precoInput.value = formatarDecimal(precoUsar);
             }
 
             // Atualizar cálculos
