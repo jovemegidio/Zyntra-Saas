@@ -777,6 +777,24 @@
             color: #2563eb;
         }
 
+        .module-card.logistica {
+            --glow-color: rgba(14, 165, 233, 0.08);
+            --glow-shadow: rgba(14, 165, 233, 0.15);
+            --card-gradient: linear-gradient(135deg, #0ea5e9, #38bdf8);
+            --icon-shadow: rgba(14, 165, 233, 0.25);
+            --arrow-bg: rgba(14, 165, 233, 0.08);
+            --card-accent: #0ea5e9;
+        }
+
+        .module-card.logistica .module-icon {
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            color: #0284c7;
+        }
+
+        .module-card.logistica .module-arrow {
+            color: #0ea5e9;
+        }
+
         .module-card.pcp {
             --glow-color: rgba(71, 85, 105, 0.08);
             --glow-shadow: rgba(71, 85, 105, 0.15);
@@ -1686,6 +1704,11 @@
             color: #93c5fd !important;
         }
 
+        body.dark-mode .module-card.logistica .module-icon {
+            background: rgba(14, 165, 233, 0.15) !important;
+            color: #7dd3fc !important;
+        }
+
         body.dark-mode .module-card.pcp .module-icon {
             background: rgba(100, 116, 139, 0.2) !important;
             color: #94a3b8 !important;
@@ -1960,8 +1983,17 @@
                 <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="module-icon"><i class="fas fa-file-invoice"></i></div>
                 <div class="module-info">
-                    <div class="module-title">Faturamento & Logística</div>
-                    <div class="module-desc">Emissão de notas e rastreio</div>
+                    <div class="module-title">Faturamento</div>
+                    <div class="module-desc">Emissão de notas fiscais</div>
+                </div>
+            </a>
+
+            <a href="/Logistica/index.html" class="module-card logistica" data-area="logistica">
+                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="module-icon"><i class="fas fa-truck"></i></div>
+                <div class="module-info">
+                    <div class="module-title">Logística</div>
+                    <div class="module-desc">Expedição e rastreio de entregas</div>
                 </div>
             </a>
 
@@ -2134,14 +2166,14 @@
         // Permissões por email
         const emailPermissions = {
             // Administração / TI - Acesso total
-            'ti@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'douglas@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'andreia@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'antonio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'egidio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'rh@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'fernando@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'fernando.kofugi@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
+            'ti@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'douglas@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'andreia@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'antonio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'egidio@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'rh@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'fernando@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'fernando.kofugi@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
             // Financeiro - Apenas Financeiro + RH (funcionário)
             'financeiro2@aluforce.ind.br': ['financeiro', 'rh'],
             'financeiro3@aluforce.ind.br': ['financeiro', 'rh'],
@@ -2150,25 +2182,25 @@
             // ADM (Junior) - RH + Financeiro
             'adm@aluforce.ind.br': ['rh', 'financeiro'],
             // Douglas (email atualizado)
-            'aluforce@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
+            'aluforce@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
             // Jamesson - Apenas PCP (somente visualização + relatórios)
             'jamesson@aluforce.ind.br': ['pcp'],
             // Teste
-            'teste@aluforce.ind.br': ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras'],
+            'teste@aluforce.ind.br': ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'logistica'],
             // Contas QA (Gerentes - Full Admin por Módulo)
             'qafinanceiro@aluforce.ind.br': ['financeiro', 'vendas', 'compras', 'nfe', 'rh'],
             'qavendas@aluforce.ind.br': ['vendas', 'rh'],
             'qapcp@aluforce.ind.br': ['pcp', 'rh'],
             'qarh@aluforce.ind.br': ['rh'],
             'qacompras@aluforce.ind.br': ['vendas', 'compras', 'pcp', 'financeiro'],
-            'qanfe@aluforce.ind.br': ['nfe', 'faturamento', 'rh'],
-            'qapainel@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'faturamento'],
-            // Logística - Faturamento & Logística + Vendas
-            'logistica@aluforce.ind.br': ['nfe', 'vendas', 'rh'],
+            'qanfe@aluforce.ind.br': ['nfe', 'faturamento', 'logistica', 'rh'],
+            'qapainel@aluforce.ind.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'faturamento', 'logistica'],
+            // Logística
+            'logistica@aluforce.ind.br': ['nfe', 'logistica', 'vendas', 'rh'],
             // Consultoria Lumière - acesso a módulos operacionais (sem admin/config)
-            'jamerson.ribeiro@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'diego.lucena@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'],
-            'mauricio.torrolho@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh']
+            'jamerson.ribeiro@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'diego.lucena@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'],
+            'mauricio.torrolho@lumiereassessoria.com.br': ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica']
         };
 
         // Aplicar permissões aos módulos
@@ -2192,7 +2224,7 @@
                     card.style.opacity = '1';
                 });
                 // Salvar áreas para filtrar modal de configurações
-                window._userAllowedAreas = ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh'];
+                window._userAllowedAreas = ['compras', 'vendas', 'nfe', 'pcp', 'financeiro', 'rh', 'logistica'];
                 return;
             }
 
@@ -2206,7 +2238,7 @@
                 'compras': ['compras', 'rh'],
                 'pcp': ['pcp', 'rh'],
                 'rh': ['rh'],
-                'logistica': ['nfe', 'rh'],
+                'logistica': ['nfe', 'logistica', 'rh'],
                 'user': ['rh']
             };
 
@@ -3612,6 +3644,7 @@
                         <option value="compras">Compras</option>
                         <option value="rh">RH</option>
                         <option value="faturamento">Faturamento</option>
+                        <option value="logistica">Logística</option>
                         <option value="nfe">NF-e</option>
                         <option value="sistema">Sistema</option>
                     </select>
@@ -3741,7 +3774,7 @@
             var moduleColors = {
                 financeiro: '#10b981', vendas: '#3b82f6', pcp: '#f59e0b',
                 compras: '#8b5cf6', rh: '#ec4899', faturamento: '#06b6d4',
-                nfe: '#6366f1', sistema: '#ef4444'
+                nfe: '#6366f1', sistema: '#ef4444', logistica: '#0ea5e9'
             };
 
             var actionIcons = {
