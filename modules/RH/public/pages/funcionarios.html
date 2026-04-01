@@ -4583,59 +4583,60 @@
         }
 
         async function salvarEdicao() {
-            const id = document.getElementById('editId').value;
+            const id = document.getElementById('editId')?.value;
             const fotoInput = document.getElementById('editFoto');
-            const status = document.getElementById('editStatus').value;
+            const status = document.getElementById('editStatus')?.value;
 
             // Dados do funcionário
+            const _v = (id) => document.getElementById(id)?.value || '';
             const dados = {
-                nome_completo: document.getElementById('editNome').value,
-                cpf: document.getElementById('editCpf').value,
-                rg: document.getElementById('editRg').value,
-                data_nascimento: document.getElementById('editDataNascimento').value || null,
-                telefone: document.getElementById('editTelefone').value,
-                estado_civil: document.getElementById('editEstadoCivil').value,
-                nacionalidade: document.getElementById('editNacionalidade').value,
-                naturalidade: document.getElementById('editNaturalidade').value,
-                filiacao_mae: document.getElementById('editFiliacaoMae').value,
-                filiacao_pai: document.getElementById('editFiliacaoPai').value,
-                email: document.getElementById('editEmail').value,
-                cargo: document.getElementById('editCargo').value,
-                departamento: document.getElementById('editDepartamento').value,
-                data_admissao: document.getElementById('editDataAdmissao').value || null,
+                nome_completo: _v('editNome'),
+                cpf: _v('editCpf'),
+                rg: _v('editRg'),
+                data_nascimento: _v('editDataNascimento') || null,
+                telefone: _v('editTelefone'),
+                estado_civil: _v('editEstadoCivil'),
+                nacionalidade: _v('editNacionalidade'),
+                naturalidade: _v('editNaturalidade'),
+                filiacao_mae: _v('editFiliacaoMae'),
+                filiacao_pai: _v('editFiliacaoPai'),
+                email: _v('editEmail'),
+                cargo: _v('editCargo'),
+                departamento: _v('editDepartamento'),
+                data_admissao: _v('editDataAdmissao') || null,
                 status: status,
-                dependentes: parseInt(document.getElementById('editDependentes').value) || 0,
+                dependentes: parseInt(_v('editDependentes')) || 0,
                 // Campos de demissão
-                data_demissao: status === 'Demitido' ? (document.getElementById('editDataDemissao').value || null) : null,
-                motivo_demissao: status === 'Demitido' ? document.getElementById('editMotivoDemissao').value : '',
-                pis_pasep: document.getElementById('editPisPasep').value,
-                ctps_número: document.getElementById('editCtpsNumero').value,
-                ctps_serie: document.getElementById('editCtpsSerie').value,
-                titulo_eleitor: document.getElementById('editTituloEleitor').value,
-                cnh: document.getElementById('editCnh').value,
-                certificado_reservista: document.getElementById('editCertificadoReservista').value,
-                endereco: [document.getElementById('editEndereco').value, document.getElementById('editNumero').value].filter(Boolean).join(', ') + (document.getElementById('editComplemento').value ? ', ' + document.getElementById('editComplemento').value : ''),
-                bairro: document.getElementById('editBairro').value,
-                cidade: document.getElementById('editCidade').value,
-                estado: document.getElementById('editEstado').value,
-                cep: document.getElementById('editCep').value.replace(/\D/g, ''),
-                banco: document.getElementById('editBanco').value,
-                tipo_chave_pix: document.getElementById('editTipoChavePix').value,
-                chave_pix: document.getElementById('editChavePix').value,
+                data_demissao: status === 'Demitido' ? (_v('editDataDemissao') || null) : null,
+                motivo_demissao: status === 'Demitido' ? _v('editMotivoDemissao') : '',
+                pis_pasep: _v('editPisPasep'),
+                ctps_número: _v('editCtpsNumero'),
+                ctps_serie: _v('editCtpsSerie'),
+                titulo_eleitor: _v('editTituloEleitor'),
+                cnh: _v('editCnh'),
+                certificado_reservista: _v('editCertificadoReservista'),
+                endereco: [_v('editEndereco'), _v('editNumero')].filter(Boolean).join(', ') + (_v('editComplemento') ? ', ' + _v('editComplemento') : ''),
+                bairro: _v('editBairro'),
+                cidade: _v('editCidade'),
+                estado: _v('editEstado'),
+                cep: (_v('editCep')).replace(/\D/g, ''),
+                banco: _v('editBanco'),
+                tipo_chave_pix: _v('editTipoChavePix'),
+                chave_pix: _v('editChavePix'),
                 // Campos de Salrio
-                salario: parseMoedaToFloat(document.getElementById('editSalario').value),
-                data_reajuste: document.getElementById('editDataReajuste').value || null,
-                ultimo_reajuste: document.getElementById('editUltimoReajuste').value,
+                salario: parseMoedaToFloat(_v('editSalario')),
+                data_reajuste: _v('editDataReajuste') || null,
+                ultimo_reajuste: _v('editUltimoReajuste'),
                 // Campos de Vale-Transporte
-                vt_ativo: document.getElementById('editVtAtivo').checked,
-                vt_tipo_transporte: document.getElementById('editVtTipoTransporte').value,
-                vt_valor_diario: parseMoedaToFloat(document.getElementById('editVtValorDiario').value),
-                vt_qtd_passagens: parseInt(document.getElementById('editVtQtdPassagens').value) || 2,
-                vt_linhas: document.getElementById('editVtLinhas').value,
+                vt_ativo: document.getElementById('editVtAtivo')?.checked || false,
+                vt_tipo_transporte: _v('editVtTipoTransporte'),
+                vt_valor_diario: parseMoedaToFloat(_v('editVtValorDiario')),
+                vt_qtd_passagens: parseInt(_v('editVtQtdPassagens')) || 2,
+                vt_linhas: _v('editVtLinhas'),
                 // Contato de Emergncia
-                contato_emergencia_nome: document.getElementById('editContatoEmergNome').value,
-                contato_emergencia_telefone: document.getElementById('editContatoEmergTelefone').value,
-                contato_emergencia_parentesco: document.getElementById('editContatoEmergParentesco').value
+                contato_emergencia_nome: _v('editContatoEmergNome'),
+                contato_emergencia_telefone: _v('editContatoEmergTelefone'),
+                contato_emergencia_parentesco: _v('editContatoEmergParentesco')
             };
 
             // Adicionar senha apenas se foi alterada (campo no vazio)

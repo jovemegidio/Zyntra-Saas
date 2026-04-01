@@ -2478,6 +2478,242 @@ app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) 
 
 console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 
+// ─── PENSÃO ALIMENTÍCIA (RH) ──────────────────────────────────────
+// GET - Listar pensões de um funcionário
+app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC',
+            [req.params.id]
+        );
+        res.json(rows);
+    } catch (error) {
+        logger.error('Erro ao listar pensões:', error);
+        res.status(500).json({ error: 'Erro ao listar pensões' });
+    }
+});
+
+// POST - Criar pensão
+app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [req.params.id, valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao criar pensão:', error);
+        res.status(500).json({ error: 'Erro ao criar pensão' });
+    }
+});
+
+// PUT - Atualizar pensão
+app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
+    try {
+        await pool.query(
+            `UPDATE rh_pensao_alimenticia SET valor=?, nome_recebedor=?, cpf_recebedor=?, banco_recebedor=?, agencia_recebedor=?, conta_recebedor=?, observacoes=?
+             WHERE id=? AND funcionario_id=?`,
+            [valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null, req.params.pensaoId, req.params.id]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao atualizar pensão:', error);
+        res.status(500).json({ error: 'Erro ao atualizar pensão' });
+    }
+});
+
+// DELETE - Remover pensão
+app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover pensão:', error);
+        res.status(500).json({ error: 'Erro ao remover pensão' });
+    }
+});
+
+// ─── SALÁRIO FAMÍLIA (RH) ─────────────────────────────────────────
+// GET - Dados de salário família do funcionário
+app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, async (req, res) => {
+    try {
+        const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
+        const [depRows] = await pool.query('SELECT * FROM rh_salario_familia_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        const sf = sfRows[0] || { recebe: 0, observacoes: '' };
+        res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
+    } catch (error) {
+        logger.error('Erro ao carregar salário família:', error);
+        res.status(500).json({ error: 'Erro ao carregar salário família' });
+    }
+});
+
+// PUT - Atualizar dados de salário família
+app.put('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { recebe, quantidade_dependentes, observacoes } = req.body;
+    try {
+        await pool.query(
+            `INSERT INTO rh_salario_familia (funcionario_id, recebe, quantidade_dependentes, observacoes)
+             VALUES (?, ?, ?, ?)
+             ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), quantidade_dependentes=VALUES(quantidade_dependentes), observacoes=VALUES(observacoes)`,
+            [req.params.id, recebe ? 1 : 0, quantidade_dependentes || 0, observacoes || null]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao salvar salário família:', error);
+        res.status(500).json({ error: 'Erro ao salvar salário família' });
+    }
+});
+
+// POST - Adicionar dependente SF
+app.post('/api/rh/funcionarios/:id/salario-familia/dependente', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { nome, parentesco, data_nascimento, cpf } = req.body;
+    if (!nome) return res.status(400).json({ error: 'Nome é obrigatório' });
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO rh_salario_familia_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+            [req.params.id, nome, parentesco || null, data_nascimento || null, cpf || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao adicionar dependente SF:', error);
+        res.status(500).json({ error: 'Erro ao adicionar dependente' });
+    }
+});
+
+// DELETE - Remover dependente SF
+app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_salario_familia_dependentes WHERE id=? AND funcionario_id=?', [req.params.depId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover dependente SF:', error);
+        res.status(500).json({ error: 'Erro ao remover dependente' });
+    }
+});
+
+// ─── AVALIAÇÕES DE DESEMPENHO (RH) ───────────────────────────────
+// GET - Avaliações do funcionário
+app.get('/api/rh/avaliacoes/funcionario/:id', authenticateToken, async (req, res) => {
+    try {
+        const userFuncId = Number(req.user?.funcionario_id || req.user?.id);
+        if (Number(req.params.id) !== userFuncId && !isAdminRHUser(req.user)) {
+            return res.status(403).json({ message: 'Acesso negado.' });
+        }
+        const [avaliacoes] = await pool.query(`
+            SELECT a.*, p.nome AS periodo_nome, av.nome_completo AS avaliador_nome
+            FROM rh_avaliacoes_desempenho a
+            LEFT JOIN rh_periodos_avaliacao p ON a.periodo_id = p.id
+            LEFT JOIN funcionarios av ON a.avaliador_id = av.id
+            WHERE a.funcionario_id = ?
+            ORDER BY a.data_avaliacao DESC
+        `, [req.params.id]);
+        res.json(avaliacoes);
+    } catch (error) {
+        logger.error('Erro ao buscar avaliações:', error);
+        res.status(500).json({ error: 'Erro ao buscar avaliações' });
+    }
+});
+
+// GET - Dashboard de avaliações
+app.get('/api/rh/avaliacoes/dashboard', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        const [stats] = await pool.query(`
+            SELECT
+                (SELECT COUNT(*) FROM rh_avaliacoes_desempenho WHERE status = 'CONCLUIDA') AS avaliacoes_concluidas,
+                (SELECT COUNT(DISTINCT funcionario_id) FROM rh_avaliacoes_desempenho) AS funcionarios_avaliados,
+                (SELECT ROUND(AVG(nota_final), 2) FROM rh_avaliacoes_desempenho WHERE nota_final IS NOT NULL) AS nota_media,
+                (SELECT COUNT(*) FROM rh_metas WHERE status = 'ATINGIDA') AS metas_atingidas,
+                (SELECT COUNT(*) FROM rh_metas) AS total_metas
+        `);
+        const [classificacoes] = await pool.query(`
+            SELECT classificacao, COUNT(*) AS total
+            FROM rh_avaliacoes_desempenho
+            WHERE classificacao IS NOT NULL
+            GROUP BY classificacao
+        `);
+        res.json({ resumo: stats[0], classificacoes });
+    } catch (error) {
+        logger.error('Erro ao gerar dashboard avaliações:', error);
+        res.status(500).json({ error: 'Erro ao gerar dashboard de avaliações' });
+    }
+});
+
+// GET - Solicitações (todas, para gestão)
+app.get('/api/rh/solicitacoes/todas', authenticateToken, authorizeAdmin, async (req, res) => {
+    try {
+        const { status, tipo, page = 1, limit = 50 } = req.query;
+        let where = '1=1';
+        const params = [];
+        if (status) { where += ' AND s.status = ?'; params.push(status); }
+        if (tipo) { where += ' AND s.tipo = ?'; params.push(tipo); }
+        params.push(Number(limit), (Number(page) - 1) * Number(limit));
+        const [rows] = await pool.query(`
+            SELECT s.*, f.nome_completo AS funcionario_nome, f.cargo, f.departamento
+            FROM rh_solicitacoes s
+            LEFT JOIN funcionarios f ON s.funcionario_id = f.id
+            WHERE ${where}
+            ORDER BY s.criado_em DESC
+            LIMIT ? OFFSET ?
+        `, params);
+        const [[{ total }]] = await pool.query(`SELECT COUNT(*) AS total FROM rh_solicitacoes s WHERE ${where}`, params.slice(0, -2));
+        res.json({ data: rows, total, page: Number(page), limit: Number(limit) });
+    } catch (error) {
+        logger.error('Erro ao listar solicitações:', error);
+        res.status(500).json({ error: 'Erro ao listar solicitações' });
+    }
+});
+
+// POST - Criar solicitação
+app.post('/api/rh/solicitacoes', authenticateToken, async (req, res) => {
+    const funcId = getUserFuncionarioId(req.user);
+    if (!funcId) return res.status(400).json({ error: 'Funcionário não identificado' });
+    const { tipo, descricao, data_inicio, data_fim } = req.body;
+    try {
+        const [result] = await pool.query(
+            'INSERT INTO rh_solicitacoes (funcionario_id, tipo, descricao, data_inicio, data_fim) VALUES (?, ?, ?, ?, ?)',
+            [funcId, tipo, descricao || null, data_inicio || null, data_fim || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao criar solicitação:', error);
+        res.status(500).json({ error: 'Erro ao criar solicitação' });
+    }
+});
+
+// PUT - Atualizar status da solicitação
+app.put('/api/rh/solicitacoes/:id/status', authenticateToken, authorizeAdmin, async (req, res) => {
+    const { status, observacao_admin } = req.body;
+    try {
+        await pool.query(
+            'UPDATE rh_solicitacoes SET status = ?, observacao_admin = ?, atualizado_em = NOW() WHERE id = ?',
+            [status, observacao_admin || null, req.params.id]
+        );
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao atualizar solicitação:', error);
+        res.status(500).json({ error: 'Erro ao atualizar solicitação' });
+    }
+});
+
+// GET - Solicitações do funcionário logado
+app.get('/api/rh/funcionarios/:id/solicitacoes', authenticateToken, async (req, res) => {
+    try {
+        const [rows] = await pool.query(
+            'SELECT * FROM rh_solicitacoes WHERE funcionario_id = ? ORDER BY criado_em DESC',
+            [req.params.id]
+        );
+        res.json(rows);
+    } catch (error) {
+        logger.error('Erro ao listar solicitações:', error);
+        res.status(500).json({ error: 'Erro ao listar solicitações' });
+    }
+});
+
+console.log('✅ Rotas Pensão, Salário Família, Avaliações e Solicitações (RH) carregadas');
+
 // 7. TRATAMENTO DE ERROS E INICIALIZAÇÁO DO SERVIDOR
 // =================================================================
 
