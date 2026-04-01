@@ -12,7 +12,7 @@
     // ============================================
     const CONFIG = {
         disableRightClick: true,
-        disableKeyShortcuts: true,
+        disableKeyShortcuts: false,      // Console (F12/DevTools) deve abrir normalmente
         disableTextSelection: false,     // Não interferir com inputs
         disableDevTools: false,
         disableDrag: true,

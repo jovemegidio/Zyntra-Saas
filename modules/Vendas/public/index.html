@@ -700,6 +700,9 @@
         body.role-vendedor .campo-vendedor-oculto {
             display: none !important;
         }
+        body.role-vendedor #btn-view-pipeline {
+            display: none !important;
+        }
 
         /* ========================================
            BADGE ESTOQUE no card
@@ -808,6 +811,50 @@
             font-weight: 600;
             color: #0f172a;
             white-space: nowrap;
+        }
+
+        /* ========================================
+           PIPELINE VIEW
+           ======================================== */
+        .pipeline-container { display: none; padding: 20px 24px; overflow-y: auto; flex: 1; }
+        .pipeline-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .pipeline-kpi { background: white; border-radius: 14px; padding: 20px 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; position: relative; overflow: hidden; }
+        .pipeline-kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+        .pipeline-kpi.kpi-total::before { background: linear-gradient(90deg, #225cfa, #6366f1); }
+        .pipeline-kpi.kpi-media::before { background: linear-gradient(90deg, #10b981, #34d399); }
+        .pipeline-kpi.kpi-conversao::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .pipeline-kpi.kpi-ciclo::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .pipeline-kpi-label { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+        .pipeline-kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; line-height: 1.1; }
+        .pipeline-kpi-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
+        .pipeline-funnel { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 24px; }
+        .pipeline-funnel-title { font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .pipeline-stage { display: grid; grid-template-columns: 160px 1fr 120px 100px 50px; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; transition: background 0.15s; cursor: pointer; }
+        .pipeline-stage:hover { background: #f8fafc; border-radius: 8px; }
+        .pipeline-stage:last-child { border-bottom: none; }
+        .pipeline-stage-name { display: flex; align-items: center; gap: 10px; }
+        .pipeline-stage-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .pipeline-stage-label { font-weight: 600; font-size: 14px; color: #1e293b; }
+        .pipeline-stage-count { font-size: 12px; color: #94a3b8; margin-left: 2px; }
+        .pipeline-bar-wrap { height: 32px; background: #f1f5f9; border-radius: 8px; overflow: hidden; position: relative; }
+        .pipeline-bar { height: 100%; border-radius: 8px; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; min-width: 0; }
+        .pipeline-bar span { font-size: 11px; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.2); white-space: nowrap; }
+        .pipeline-stage-valor { font-weight: 700; font-size: 14px; color: #0f172a; text-align: right; white-space: nowrap; }
+        .pipeline-stage-conv { font-size: 12px; color: #64748b; text-align: center; }
+        .pipeline-conv-arrow { color: #cbd5e1; font-size: 14px; }
+        .pipeline-top-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 0; }
+        .pipeline-top-clients { background: white; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; }
+        .pipeline-top-clients-title { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .pipeline-client-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f8fafc; }
+        .pipeline-client-row:last-child { border-bottom: none; }
+        .pipeline-client-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; color: white; flex-shrink: 0; }
+        .pipeline-client-name { font-size: 13px; font-weight: 500; color: #334155; flex: 1; margin-left: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .pipeline-client-val { font-size: 13px; font-weight: 700; color: #0f172a; white-space: nowrap; }
+        @media (max-width: 900px) {
+            .pipeline-kpis { grid-template-columns: repeat(2, 1fr); }
+            .pipeline-stage { grid-template-columns: 120px 1fr 100px; }
+            .pipeline-stage-conv, .pipeline-conv-arrow { display: none; }
+            .pipeline-top-section { grid-template-columns: 1fr; }
         }
 
         /* ========================================
@@ -5997,6 +6044,10 @@
                         style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #f8fafc; color: #64748b; border: none; border-left: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;">
                         <i class="fas fa-columns" style="font-size: 13px;"></i>
                     </button>
+                    <button id="btn-view-pipeline" onclick="alternarVisao('pipeline')" title="Visualização Pipeline"
+                        style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #f8fafc; color: #64748b; border: none; border-left: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;">
+                        <i class="fas fa-chart-bar" style="font-size: 13px;"></i>
+                    </button>
                 </div>
             </div>
 
@@ -6144,6 +6195,10 @@
 
                 </div>
             </div>
+
+            <!-- Pipeline View -->
+            <div class="pipeline-container" id="pipeline-container"></div>
+
         </main>
     </div>
 
@@ -6354,7 +6409,9 @@
                         <div class="form-row"
                             style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.5fr 1fr; gap: 12px;">
                             <div class="form-group" style="position: relative;">
-                                <label><i class="fas fa-truck" style="color: #f97316;"></i> Transportadora</label>
+                                <label><i class="fas fa-truck" style="color: #f97316;"></i> Transportadora
+                                    <button type="button" onclick="abrirModalCadastrarTransportadora()" style="float:right;background:none;border:none;color:#2563eb;cursor:pointer;font-size:12px;padding:0;" title="Cadastrar nova transportadora"><i class="fas fa-plus-circle"></i> Nova</button>
+                                </label>
                                 <input type="text" id="edit-transportadora"
                                     placeholder="Digite para buscar transportadora..." autocomplete="off">
                                 <input type="hidden" id="edit-transportadora-id">
@@ -6450,7 +6507,9 @@
                                 <input type="number" id="edit-peso-bruto" step="0.001" min="0" placeholder="0,000">
                             </div>
                             <div class="form-group">
-                                <label>Valor do Frete</label>
+                                <label>Valor do Frete
+                                    <button type="button" onclick="calcularFreteAutomatico()" style="float:right;background:none;border:none;color:#10b981;cursor:pointer;font-size:11px;padding:0;" title="Calcular frete automático"><i class="fas fa-calculator"></i> Auto</button>
+                                </label>
                                 <input type="number" id="edit-valor-frete" step="0.01" min="0" placeholder="0,00"
                                     oninput="if(typeof atualizarTotalModalEditar==='function') atualizarTotalModalEditar()">
                             </div>
@@ -10496,29 +10555,43 @@
         let _viewMode = localStorage.getItem('vendas_viewMode') || 'list'; // Default to list view
 
         function alternarVisao(modo) {
+            // Pipeline é exclusivo para admins
+            if (modo === 'pipeline' && usuarioLogado && usuarioLogado.role === 'vendedor') {
+                modo = 'list';
+            }
             _viewMode = modo;
             localStorage.setItem('vendas_viewMode', modo);
             const listView = document.querySelector('.pedidos-list-view');
             const kanbanView = document.querySelector('.kanban-container');
-            const statusFilters = listView ? listView.previousElementSibling : null;
+            const pipelineView = document.getElementById('pipeline-container');
             const btnList = document.getElementById('btn-view-list');
             const btnKanban = document.getElementById('btn-view-kanban');
+            const btnPipeline = document.getElementById('btn-view-pipeline');
+
+            // Reset all
+            if (listView) listView.style.display = 'none';
+            if (kanbanView) kanbanView.style.display = 'none';
+            if (pipelineView) pipelineView.style.display = 'none';
+            [btnList, btnKanban, btnPipeline].forEach(btn => {
+                if (btn) { btn.style.background = '#f8fafc'; btn.style.color = '#64748b'; }
+            });
+
             if (modo === 'kanban') {
-                if (listView) listView.style.display = 'none';
                 if (kanbanView) kanbanView.style.display = '';
-                if (btnList) { btnList.style.background = '#f8fafc'; btnList.style.color = '#64748b'; }
                 if (btnKanban) { btnKanban.style.background = '#225cfa'; btnKanban.style.color = 'white'; }
+            } else if (modo === 'pipeline') {
+                if (pipelineView) pipelineView.style.display = 'block';
+                if (btnPipeline) { btnPipeline.style.background = '#225cfa'; btnPipeline.style.color = 'white'; }
+                renderPipelineView();
             } else {
                 if (listView) listView.style.display = '';
-                if (kanbanView) kanbanView.style.display = 'none';
                 if (btnList) { btnList.style.background = '#225cfa'; btnList.style.color = 'white'; }
-                if (btnKanban) { btnKanban.style.background = '#f8fafc'; btnKanban.style.color = '#64748b'; }
             }
         }
 
         // Aplicar visão salva ao carregar
-        if (_viewMode === 'kanban') {
-            document.addEventListener('DOMContentLoaded', function() { alternarVisao('kanban'); });
+        if (_viewMode === 'kanban' || _viewMode === 'pipeline') {
+            document.addEventListener('DOMContentLoaded', function() { alternarVisao(_viewMode); });
         }
 
         // ========================================
@@ -10929,6 +11002,9 @@
 
             // Renderizar a lista
             renderListView();
+
+            // Atualizar pipeline se visível
+            if (_viewMode === 'pipeline') renderPipelineView();
         }
 
         // ========================================
@@ -11030,6 +11106,177 @@
                     <td style="white-space: nowrap;">${acoes}</td>
                 </tr>`;
             }).join('');
+        }
+
+        // ========================================
+        // PIPELINE VIEW — FUNIL DE VENDAS PROFISSIONAL
+        // ========================================
+        function renderPipelineView() {
+            const container = document.getElementById('pipeline-container');
+            if (!container) return;
+
+            const stages = [
+                { key: 'orcamento', label: 'Orçamento', color: '#6366f1', icon: 'fa-file-alt' },
+                { key: 'analise', label: 'Análise de Crédito', color: '#f59e0b', icon: 'fa-search-dollar' },
+                { key: 'aprovado', label: 'Pedido Aprovado', color: '#10b981', icon: 'fa-check-circle' },
+                { key: 'faturar', label: 'Faturar', color: '#3b82f6', icon: 'fa-file-invoice-dollar' },
+                { key: 'faturado', label: 'Faturado', color: '#059669', icon: 'fa-receipt' },
+                { key: 'recibo', label: 'Recibo / Entregue', color: '#8b5cf6', icon: 'fa-truck' }
+            ];
+
+            // Calcular dados por estágio
+            let totalPedidos = 0;
+            let totalValor = 0;
+            const stageData = stages.map(s => {
+                const items = dadosVendas[s.key] || [];
+                const count = items.length;
+                const valor = items.reduce((sum, i) => sum + (parseFloat(i.valor) || 0), 0);
+                totalPedidos += count;
+                totalValor += valor;
+                return { ...s, count, valor, items };
+            });
+
+            const maxCount = Math.max(...stageData.map(s => s.count), 1);
+
+            // KPIs
+            const ticketMedio = totalPedidos > 0 ? totalValor / totalPedidos : 0;
+            const faturados = (stageData.find(s => s.key === 'faturado')?.count || 0) + (stageData.find(s => s.key === 'recibo')?.count || 0);
+            const conversao = totalPedidos > 0 ? ((faturados / totalPedidos) * 100) : 0;
+
+            // Calcular ciclo médio (dias entre criação e faturamento)
+            let cicloDias = 0;
+            let cicloCount = 0;
+            ['faturado', 'recibo'].forEach(key => {
+                (dadosVendas[key] || []).forEach(item => {
+                    if (item.data_criacao && item.data_faturamento) {
+                        const d1 = new Date(item.data_criacao);
+                        const d2 = new Date(item.data_faturamento);
+                        const diff = Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24));
+                        if (diff > 0) { cicloDias += diff; cicloCount++; }
+                    }
+                });
+            });
+            const cicloMedio = cicloCount > 0 ? Math.round(cicloDias / cicloCount) : '—';
+
+            // Top clientes por valor
+            const clienteMap = {};
+            Object.values(dadosVendas).forEach(arr => {
+                (arr || []).forEach(item => {
+                    const nome = item.cliente || 'Sem cliente';
+                    if (!clienteMap[nome]) clienteMap[nome] = { valor: 0, count: 0 };
+                    clienteMap[nome].valor += parseFloat(item.valor) || 0;
+                    clienteMap[nome].count++;
+                });
+            });
+            const topClientes = Object.entries(clienteMap)
+                .map(([nome, d]) => ({ nome, ...d }))
+                .sort((a, b) => b.valor - a.valor)
+                .slice(0, 6);
+
+            // Top vendedores
+            const vendedorMap = {};
+            Object.values(dadosVendas).forEach(arr => {
+                (arr || []).forEach(item => {
+                    const nome = item.vendedor_nome || item.vendedor || 'Sem vendedor';
+                    if (!vendedorMap[nome]) vendedorMap[nome] = { valor: 0, count: 0 };
+                    vendedorMap[nome].valor += parseFloat(item.valor) || 0;
+                    vendedorMap[nome].count++;
+                });
+            });
+            const topVendedores = Object.entries(vendedorMap)
+                .map(([nome, d]) => ({ nome, ...d }))
+                .sort((a, b) => b.valor - a.valor)
+                .slice(0, 6);
+
+            const fmtR = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const avatarColors = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
+
+            container.innerHTML = `
+                <!-- KPIs -->
+                <div class="pipeline-kpis">
+                    <div class="pipeline-kpi kpi-total">
+                        <div class="pipeline-kpi-label">Valor Total no Pipeline</div>
+                        <div class="pipeline-kpi-value">R$ ${fmtR(totalValor)}</div>
+                        <div class="pipeline-kpi-sub">${totalPedidos} pedidos em andamento</div>
+                    </div>
+                    <div class="pipeline-kpi kpi-media">
+                        <div class="pipeline-kpi-label">Ticket Médio</div>
+                        <div class="pipeline-kpi-value">R$ ${fmtR(ticketMedio)}</div>
+                        <div class="pipeline-kpi-sub">Valor médio por pedido</div>
+                    </div>
+                    <div class="pipeline-kpi kpi-conversao">
+                        <div class="pipeline-kpi-label">Taxa de Conversão</div>
+                        <div class="pipeline-kpi-value">${conversao.toFixed(1)}%</div>
+                        <div class="pipeline-kpi-sub">${faturados} de ${totalPedidos} convertidos</div>
+                    </div>
+                    <div class="pipeline-kpi kpi-ciclo">
+                        <div class="pipeline-kpi-label">Ciclo Médio</div>
+                        <div class="pipeline-kpi-value">${cicloMedio}${typeof cicloMedio === 'number' ? ' dias' : ''}</div>
+                        <div class="pipeline-kpi-sub">Orçamento → Faturamento</div>
+                    </div>
+                </div>
+
+                <!-- Funil -->
+                <div class="pipeline-funnel">
+                    <div class="pipeline-funnel-title"><i class="fas fa-filter" style="color: #6366f1;"></i> Funil de Vendas</div>
+                    ${stageData.map((s, i) => {
+                        const pct = maxCount > 0 ? ((s.count / maxCount) * 100) : 0;
+                        const convRate = i > 0 && stageData[i - 1].count > 0
+                            ? ((s.count / stageData[i - 1].count) * 100).toFixed(0) + '%'
+                            : (i === 0 ? '—' : '0%');
+                        return `
+                            <div class="pipeline-stage" onclick="filtrarListaPorStatus('${s.key === 'analise' ? 'analise' : s.key}', document.querySelector('[data-filter=${s.key === 'analise' ? 'analise' : s.key}]')); alternarVisao('list');">
+                                <div class="pipeline-stage-name">
+                                    <div class="pipeline-stage-dot" style="background: ${s.color};"></div>
+                                    <div>
+                                        <div class="pipeline-stage-label">${s.label}</div>
+                                        <div class="pipeline-stage-count">${s.count} pedido${s.count !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>
+                                <div class="pipeline-bar-wrap">
+                                    <div class="pipeline-bar" style="width: ${Math.max(pct, s.count > 0 ? 8 : 0)}%; background: linear-gradient(90deg, ${s.color}, ${s.color}cc);">
+                                        ${pct > 15 ? `<span>R$ ${fmtR(s.valor)}</span>` : ''}
+                                    </div>
+                                </div>
+                                <div class="pipeline-stage-valor">${pct <= 15 ? 'R$ ' + fmtR(s.valor) : ''}</div>
+                                <div class="pipeline-stage-conv">${convRate}</div>
+                                <div class="pipeline-conv-arrow">${i < stageData.length - 1 ? '<i class="fas fa-arrow-down"></i>' : '<i class="fas fa-flag-checkered" style="color:#10b981;"></i>'}</div>
+                            </div>`;
+                    }).join('')}
+                </div>
+
+                <!-- Top Clientes e Vendedores -->
+                <div class="pipeline-top-section">
+                    <div class="pipeline-top-clients">
+                        <div class="pipeline-top-clients-title"><i class="fas fa-users" style="color: #3b82f6;"></i> Top Clientes</div>
+                        ${topClientes.length === 0 ? '<div style="color:#94a3b8;text-align:center;padding:20px;font-size:13px;">Nenhum cliente com pedidos</div>' :
+                            topClientes.map((c, i) => `
+                                <div class="pipeline-client-row">
+                                    <div class="pipeline-client-avatar" style="background: ${avatarColors[i % avatarColors.length]};">${(c.nome || '?').substring(0, 2).toUpperCase()}</div>
+                                    <div class="pipeline-client-name">${escaparHTML(c.nome)}</div>
+                                    <div>
+                                        <div class="pipeline-client-val">R$ ${fmtR(c.valor)}</div>
+                                        <div style="font-size:11px;color:#94a3b8;">${c.count} pedido${c.count !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>`).join('')
+                        }
+                    </div>
+                    <div class="pipeline-top-clients">
+                        <div class="pipeline-top-clients-title"><i class="fas fa-user-tie" style="color: #f59e0b;"></i> Top Vendedores</div>
+                        ${topVendedores.length === 0 ? '<div style="color:#94a3b8;text-align:center;padding:20px;font-size:13px;">Nenhum vendedor com pedidos</div>' :
+                            topVendedores.map((v, i) => `
+                                <div class="pipeline-client-row">
+                                    <div class="pipeline-client-avatar" style="background: ${avatarColors[(i + 3) % avatarColors.length]};">${(v.nome || '?').substring(0, 2).toUpperCase()}</div>
+                                    <div class="pipeline-client-name">${escaparHTML(v.nome)}</div>
+                                    <div>
+                                        <div class="pipeline-client-val">R$ ${fmtR(v.valor)}</div>
+                                        <div style="font-size:11px;color:#94a3b8;">${v.count} pedido${v.count !== 1 ? 's' : ''}</div>
+                                    </div>
+                                </div>`).join('')
+                        }
+                    </div>
+                </div>
+            `;
         }
 
         async function moverPedidoLista(pedidoId, colunaOrigem, colunaDestino) {
@@ -12145,7 +12392,8 @@
 
             // Recibo disponível para pedidos faturados, entregues e recibo
             const statusRecibo = ['faturado', 'entregue', 'recibo'];
-            if (!statusRecibo.includes(pedidoAtual._statusOriginal)) {
+            const statusAtualRecibo = (pedidoAtual._statusOriginal || pedidoAtual._coluna || pedidoAtual.status || '').toLowerCase();
+            if (!statusRecibo.includes(statusAtualRecibo)) {
                 showNotification('Recibo disponível apenas para pedidos faturados/entregues', 'warning');
                 return;
             }
@@ -12243,7 +12491,7 @@
             pedidoAtual.cliente_contato = dados.contato || dados.responsavel || pedidoAtual.cliente_contato;
         }
 
-        // Gerar recibo HTML com dados reais - Suporta Meia Nota (F9)
+        // Gerar recibo HTML com dados reais - Suporta Meia Nota (F9 Brand)
         function gerarReciboHTML() {
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -12263,176 +12511,192 @@
                 const precoUnit = parseFloat(item.preco_unitario || 0);
                 const total = parseFloat(item.preco_total) || (qtd * precoUnit);
                 totalItens += total;
-                const bgColor = idx % 2 === 0 ? '#ffffff' : '#f7fafc';
-                return `<tr style="background: ${bgColor};">
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px;">${item.código || '-'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px;">${item.descrição || '-'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px; text-align: center;">${qtd.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ${item.unidade || 'M'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px; text-align: right;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                </tr>`;
-            }).join('') : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #888;">Nenhum item</td></tr>';
+                return \`<tr>
+                    <td>\${escaparHTML(item.código || '-')}</td>
+                    <td class="desc"><strong>\${escaparHTML(item.descrição || '-')}</strong></td>
+                    <td class="center">\${qtd.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} \${item.unidade || 'M'}</td>
+                    <td class="money">R$ \${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                </tr>\`;
+            }).join('') : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #6d8092;">Nenhum item</td></tr>';
 
             if (totalItens === 0) totalItens = valorTotal;
 
-            // Título e badge para meia nota
-            const títuloRecibo = isMeiaNota ? 'RECIBO DE ENTREGA - MEIA NOTA' : 'RECIBO DE ENTREGA';
-            const badgeMeiaNota = isMeiaNota ? `<div style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 600; display: inline-block; margin-top: 8px;">⚡ FATURAMENTO ${percentualFaturado}%</div>` : '';
+            const títuloRecibo = isMeiaNota ? 'Recibo de Entrega — Meia Nota' : 'Recibo de Entrega / Recebimento';
+            const badgeMeiaNota = isMeiaNota
+                ? \`<div class="status-pill" style="background:#fff6df;border-color:#f3d377;color:#7b5b00;">FATURAMENTO \${percentualFaturado}%</div>\`
+                : '';
+            const nfExibir = pedidoAtual.nf || pedidoAtual.numero_nf || '-';
+            const numPedido = String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(5, '0');
+            const valorEntregaExibir = isMeiaNota ? valorFaturado : totalItens;
 
             // Box de valores para meia nota
-            const valorEntregaExibir = isMeiaNota ? valorFaturado : totalItens;
-            const boxValores = isMeiaNota ? `
-                <div class="totais-box" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: center;">
-                        <div>
-                            <div class="label">Valor Total Pedido</div>
-                            <div class="valor" style="color: #64748b; font-size: 18px;">R$ ${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
-                        <div style="border-left: 2px solid #f59e0b; border-right: 2px solid #f59e0b; padding: 0 20px;">
-                            <div class="label" style="color: #92400e;">Valor Faturado (${percentualFaturado}%)</div>
-                            <div class="valor" style="color: #d97706; font-size: 22px;">R$ ${valorFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
-                        <div>
-                            <div class="label" style="color: #dc2626;">Valor Pendente</div>
-                            <div class="valor" style="color: #ef4444; font-size: 18px;">R$ ${valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
+            const boxMeiaNota = isMeiaNota ? \`
+                <div class="section-card" style="margin-top:7px;">
+                    <div class="section-head" style="background:linear-gradient(180deg,#fffdf5,#fef9e7);border-color:#f3d377;">
+                        <strong style="color:#7b5b00;">Detalhamento faturamento parcial</strong>
+                        <span style="color:#7b5b00;">\${percentualFaturado}%</span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;padding:8px 10px 10px;">
+                        <div class="field tight"><span class="field-label">Valor total pedido</span><span class="field-value">R$ \${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                        <div class="field tight" style="border-color:#f3d377;"><span class="field-label" style="color:#7b5b00;">Valor faturado (\${percentualFaturado}%)</span><span class="field-value" style="color:#92400e;">R$ \${valorFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                        <div class="field tight"><span class="field-label" style="color:#dc2626;">Valor pendente</span><span class="field-value" style="color:#ef4444;">R$ \${valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                     </div>
                 </div>
-            ` : `
-                <div class="totais-box">
-                    <div class="label">Valor Total da Entrega</div>
-                    <div class="valor">R$ ${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                </div>
-            `;
+            \` : '';
 
-            // Observação para meia nota
-            const obsMeiaNota = isMeiaNota ? `
-                <div style="margin-top: 15px; padding: 12px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; font-size: 9px;">
-                    <strong style="color: #92400e;">⚠️ ATENÇÃO - FATURAMENTO PARCIAL:</strong>
-                    <br>Este recibo refere-se à entrega de mercadorias com faturamento parcial (${percentualFaturado}%).
-                    <br>NF emitida: R$ ${valorFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} | Pendente de faturamento: R$ ${valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-            ` : '';
+            const enderecoCliente = [pedidoAtual.cliente_endereco, pedidoAtual.cliente_numero].filter(Boolean).join(', ') || '-';
+            const cidadeUfCep = \`\${escaparHTML(pedidoAtual.cliente_cidade || '-')} / \${escaparHTML(pedidoAtual.cliente_uf || '-')} · \${escaparHTML(pedidoAtual.cliente_cep || '-')}\`;
 
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Recibo - Pedido ${pedidoAtual.numero_pedido || pedidoAtual.id}</title>
-                    <style>
-                        @page { margin: 10mm; size: A4; }
-                        @media print {
-                            @page { margin: 10mm; }
-                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        }
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: Arial, Helvetica, sans-serif; color: #2d3748; background: #fff; font-size: 11px; }
-                        .container { padding: 20px; max-width: 100%; }
-                        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 15px; border-bottom: 3px solid #0284c7; }
-                        .logo-area img { height: 45px; }
-                        .empresa-info { text-align: right; font-size: 8px; color: #718096; line-height: 1.4; }
-                        .empresa-info .razao { font-size: 9px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
-                        .doc-title { background: linear-gradient(135deg, ${isMeiaNota ? '#f59e0b 0%, #d97706' : '#0284c7 0%, #0369a1'} 100%); color: #fff; padding: 12px 20px; margin-top: 15px; text-align: center; border-radius: 8px; }
-                        .doc-title h1 { font-size: 16px; font-weight: 700; letter-spacing: 1px; margin: 0; }
-                        .doc-title .número { font-size: 12px; color: ${isMeiaNota ? '#fef3c7' : '#bae6fd'}; margin-top: 3px; }
-                        .section { margin-top: 15px; }
-                        .section-header { background: #0284c7; color: #fff; padding: 6px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px 4px 0 0; }
-                        .section-content { border: 1px solid #e2e8f0; border-top: none; padding: 12px; background: #fff; border-radius: 0 0 4px 4px; }
-                        .cliente-nome { font-size: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; }
-                        .cliente-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 20px; font-size: 9px; }
-                        .cliente-item { display: flex; gap: 6px; }
-                        .cliente-item label { color: #64748b; font-weight: 700; min-width: 60px; }
-                        .cliente-item span { color: #1e293b; }
-                        .items-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-                        .items-table th { background: #0284c7; color: #fff; padding: 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; text-align: left; }
-                        .totais-box { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #0284c7; padding: 15px 20px; margin-top: 15px; border-radius: 8px; text-align: center; }
-                        .totais-box .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-                        .totais-box .valor { font-size: 24px; font-weight: 700; color: #0284c7; margin-top: 5px; }
-                        .assinatura-area { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-                        .assinatura { text-align: center; }
-                        .assinatura-linha { border-top: 1px solid #1e293b; padding-top: 8px; font-size: 10px; color: #64748b; }
-                        .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #0284c7; font-size: 8px; color: #64748b; text-align: center; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <div class="logo-area">
-                                <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:22px;font-weight:700;color:#0284c7>ALUFORCE</div>'">
-                            </div>
-                            <div class="empresa-info">
-                                <div class="razao">${getEmpresaRazao()}</div>
-                                <div>CNPJ: ${getEmpresaCnpj()} | IE: ${getEmpresaIe()}</div>
-                                <div>${getEmpresaEndereco()}</div>
-                                <div>${getEmpresaCidade()}</div>
-                                <div>Tel: ${getEmpresaTel()}</div>
-                            </div>
-                        </div>
+            printWindow.document.write(\`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Recibo - Pedido \${numPedido}</title>
+<style>
+:root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--line-soft:#edf4f8;--surface:#fff;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd;}
+*{box-sizing:border-box;}
+@page{size:A4;margin:0;}
+html,body{margin:0;padding:0;background:#eef4f8;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+body{display:flex;justify-content:center;}
+.a4-stage{width:210mm;min-height:297mm;background:#eef4f8;padding:11mm 0;}
+.page-frame{width:184mm;margin:0 auto;}
+.page-shell{background:#fff;border:1px solid #dbe8f1;border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm;}
+.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:10px;}
+.receipt{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;}
+.receipt-head{padding:11px 13px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%);}
+.head-grid{display:grid;grid-template-columns:1.22fr .88fr;gap:12px;align-items:start;}
+.brand-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.logo-img{height:46px;width:auto;display:block;flex:0 0 auto;}
+.brand-name{margin:0 0 3px;color:var(--brand);font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;}
+.brand-sub{color:var(--muted);font-size:8px;line-height:1.5;letter-spacing:.12em;text-transform:uppercase;}
+.headline{margin:0;color:var(--ink);font-size:16px;font-weight:900;line-height:1.08;}
+.subtitle{margin:5px 0 0;color:var(--muted);font-size:9.5px;line-height:1.5;}
+.doc-card{border:1px solid rgba(24,182,200,.34);background:linear-gradient(180deg,#fff 0%,#f4fcfd 100%);border-radius:16px;padding:10px 11px;}
+.doc-card-title{margin:0 0 8px;color:var(--brand);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;}
+.doc-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px;}
+.meta-item{padding:7px 8px;border-radius:12px;background:#fff;border:1px solid var(--line-soft);}
+.meta-label{display:block;font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px;font-weight:700;}
+.meta-value{display:block;color:var(--ink);font-size:10px;line-height:1.2;font-weight:800;word-break:break-word;}
+.status-pill{padding:6px 10px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(24,182,200,.35);color:var(--brand);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;display:inline-block;}
+.body{padding:10px 13px 11px;}
+.statement{padding:9px 11px;border-radius:14px;background:var(--soft);border:1px solid var(--line-soft);font-size:10px;line-height:1.55;color:var(--text);margin-bottom:9px;}
+.statement strong{color:var(--ink);}
+.section-card{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;margin-bottom:8px;}
+.section-head{padding:8px 10px;background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.section-head strong{color:var(--brand);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;}
+.section-head span{color:var(--muted);font-size:8px;font-weight:700;}
+.grid-4,.grid-3,.grid-2{display:grid;gap:7px;margin-bottom:7px;}
+.grid-4{grid-template-columns:1.3fr .95fr .75fr .7fr;}
+.grid-3{grid-template-columns:1.26fr .94fr .8fr;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.field{min-height:51px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:7px 9px 8px;}
+.field.tight{min-height:44px;}
+.field-label{display:block;color:var(--muted);font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px;}
+.field-value{display:block;color:var(--ink);font-size:10px;line-height:1.35;font-weight:700;word-break:break-word;}
+.field-help{display:block;color:var(--muted);font-size:8px;line-height:1.35;margin-top:3px;}
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:9px;}
+thead th{background:#f2f7fb;color:var(--brand);font-weight:900;font-size:7.3px;letter-spacing:.12em;text-transform:uppercase;padding:8px;border-bottom:1px solid var(--line);text-align:left;}
+tbody td{padding:8px;border-bottom:1px solid var(--line-soft);color:var(--text);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+.center{text-align:center;}.money{text-align:right;font-variant-numeric:tabular-nums;}
+.desc strong{display:block;color:var(--ink);font-size:9.2px;margin-bottom:2px;}
+.signature-grid{display:grid;grid-template-columns:.9fr .86fr 1.24fr;gap:7px;margin-top:4px;}
+.signature-card{min-height:70px;border:1px solid var(--line);border-radius:13px;padding:8px 9px 9px;background:#fff;}
+.signature-line{border-top:1px solid #9db0c2;margin-top:20px;padding-top:5px;color:var(--muted);font-size:7px;text-transform:uppercase;letter-spacing:.12em;font-weight:700;}
+.grand-total{margin-top:7px;border-radius:12px;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 74%,var(--accent) 100%);color:#fff;padding:10px 11px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.grand-total .gt-label{font-size:8px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;opacity:.9;}
+.grand-total .gt-value{font-size:18px;line-height:1;font-weight:900;}
+.footer-note{margin-top:8px;font-size:8px;color:var(--muted);line-height:1.5;text-align:center;}
+@media print{body,.a4-stage{background:#fff;}.page-shell{box-shadow:none;border-color:transparent;}}
+</style>
+</head>
+<body>
+<main class="a4-stage">
+<div class="page-frame">
+<section class="page-shell">
+<div class="top-rule"></div>
+<section class="receipt">
+  <header class="receipt-head">
+    <div class="head-grid">
+      <div>
+        <div class="brand-wrap">
+          <img class="logo-img" src="\${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" onerror="this.onerror=null;this.style.cssText='font-size:22px;font-weight:900;color:#0b2842'">
+          <div>
+            <p class="brand-name">ALUFORCE</p>
+            <div class="brand-sub">Cabos de Alumínio • Recibo de Entrega</div>
+          </div>
+        </div>
+        <h2 class="headline">\${títuloRecibo}</h2>
+        <p class="subtitle">\${getEmpresaRazao()}<br>CNPJ \${getEmpresaCnpj()} · IE \${getEmpresaIe()}<br>\${getEmpresaEndereco()} — \${getEmpresaCidade()} · Tel \${getEmpresaTel()}</p>
+      </div>
+      <aside class="doc-card">
+        <p class="doc-card-title">Referência fiscal</p>
+        <div class="doc-meta">
+          <div class="meta-item"><span class="meta-label">NF</span><span class="meta-value">\${escaparHTML(nfExibir)}</span></div>
+          <div class="meta-item"><span class="meta-label">Pedido</span><span class="meta-value">\${numPedido}</span></div>
+          <div class="meta-item"><span class="meta-label">Emissão</span><span class="meta-value">\${dataAtual}</span></div>
+          <div class="meta-item"><span class="meta-label">Valor total</span><span class="meta-value">R$ \${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+        </div>
+        \${badgeMeiaNota ? '<div style="margin-top:8px;text-align:center;">' + badgeMeiaNota + '</div>' : ''}
+      </aside>
+    </div>
+  </header>
+  <div class="body">
+    <div class="statement">
+      Recebi(emos) de <strong>\${escaparHTML(getEmpresaRazao())}</strong> os produtos e/ou serviços constantes da NF
+      <strong>\${escaparHTML(nfExibir)}</strong>, relacionados ao pedido <strong>\${numPedido}</strong> e conferidos no ato da entrega.
+    </div>
 
-                        <div class="doc-title">
-                            <h1>${títuloRecibo}</h1>
-                            <div class="número">Pedido Nº ${String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(5, '0')} | NF: ${pedidoAtual.nf || pedidoAtual.numero_nf || '-'}</div>
-                            ${badgeMeiaNota}
-                        </div>
+    <div class="grid-4">
+      <div class="field"><span class="field-label">Destinatário / Recebedor</span><span class="field-value">\${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</span></div>
+      <div class="field"><span class="field-label">CNPJ / CPF</span><span class="field-value">\${escaparHTML(pedidoAtual.cliente_cnpj || '-')}</span></div>
+      <div class="field"><span class="field-label">IE</span><span class="field-value">\${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
+      <div class="field"><span class="field-label">Pedido / OS</span><span class="field-value">\${numPedido}</span></div>
+    </div>
 
-                        <div class="section">
-                            <div class="section-header">Dados do Cliente</div>
-                            <div class="section-content">
-                                <div class="cliente-nome">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</div>
-                                <div class="cliente-grid">
-                                    <div class="cliente-item"><label>CNPJ:</label><span>${escaparHTML(pedidoAtual.cliente_cnpj || '-')}</span></div>
-                                    <div class="cliente-item"><label>IE:</label><span>${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
-                                    <div class="cliente-item"><label>Endereço:</label><span>${escaparHTML([pedidoAtual.cliente_endereco, pedidoAtual.cliente_numero].filter(Boolean).join(', ') || '-')}</span></div>
-                                    <div class="cliente-item"><label>Bairro:</label><span>${escaparHTML(pedidoAtual.cliente_bairro || '-')}</span></div>
-                                    <div class="cliente-item"><label>Cidade/UF:</label><span>${escaparHTML(pedidoAtual.cliente_cidade || '-')}/${escaparHTML(pedidoAtual.cliente_uf || '-')}</span></div>
-                                    <div class="cliente-item"><label>CEP:</label><span>${escaparHTML(pedidoAtual.cliente_cep || '-')}</span></div>
-                                </div>
-                            </div>
-                        </div>
+    <div class="grid-3">
+      <div class="field"><span class="field-label">Endereço de entrega</span><span class="field-value">\${escaparHTML(enderecoCliente)}</span><span class="field-help">\${cidadeUfCep}</span></div>
+      <div class="field"><span class="field-label">Transportadora</span><span class="field-value">\${escaparHTML(pedidoAtual.transportadora || '-')}</span></div>
+      <div class="field"><span class="field-label">Telefone / Contato</span><span class="field-value">\${escaparHTML(pedidoAtual.cliente_telefone || '-')}</span></div>
+    </div>
 
-                        <div class="section">
-                            <div class="section-header">Itens Entregues</div>
-                            <table class="items-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px;">CÓDIGO</th>
-                                        <th>DESCRIÇÃO</th>
-                                        <th style="width: 80px; text-align: center;">QTD</th>
-                                        <th style="width: 100px; text-align: right;">VALOR</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${itensHTML}</tbody>
-                            </table>
-                        </div>
+    <div class="section-card">
+      <div class="section-head"><strong>Itens entregues</strong><span>\${itensPedidoAtual.length} item(ns)</span></div>
+      <div style="padding:0 10px 10px;">
+        <table>
+          <thead><tr>
+            <th style="width:14%;">Código</th>
+            <th style="width:46%;">Descrição</th>
+            <th style="width:18%;" class="center">Qtd</th>
+            <th style="width:22%;" class="money">Valor</th>
+          </tr></thead>
+          <tbody>\${itensHTML}</tbody>
+        </table>
+      </div>
+    </div>
 
-                        ${boxValores}
-                        ${obsMeiaNota}
+    \${boxMeiaNota}
 
-                        <div class="assinatura-area">
-                            <div class="assinatura">
-                                <div class="assinatura-linha">Assinatura do Entregador</div>
-                            </div>
-                            <div class="assinatura">
-                                <div class="assinatura-linha">Assinatura do Recebedor</div>
-                            </div>
-                        </div>
+    <div class="grand-total">
+      <div><div class="gt-label">Valor total da entrega</div></div>
+      <div class="gt-value">R$ \${valorEntregaExibir.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+    </div>
 
-                        <div style="margin-top: 20px; padding: 10px; background: #f8fafc; border-radius: 6px; font-size: 9px;">
-                            <strong>Data de Entrega:</strong> ____/____/________ &nbsp;&nbsp;&nbsp; <strong>Hora:</strong> ____:____ &nbsp;&nbsp;&nbsp; <strong>Nome do Recebedor:</strong> ___________________________________
-                        </div>
-
-                        <div class="footer">
-                            <div>Documento gerado em ${dataAtual} às ${horaAtual}</div>
-                            <div style="margin-top: 3px;">Aluforce — Sistema de Gestão Empresarial | Este recibo comprova a entrega das mercadorias descritas acima.</div>
-                        </div>
-                    </div>
-
-                    <scr` + `ipt>
-                        setTimeout(function() { window.print(); }, 500);
-                    <\/scr` + `ipt>
-                </body>
-                </html>
-            `);
+    <div class="signature-grid">
+      <div class="signature-card"><span class="field-label">Data e hora do recebimento</span><span class="field-value">____/____/________ · ____:____</span><div class="signature-line">Data / hora</div></div>
+      <div class="signature-card"><span class="field-label">Documento do recebedor</span><span class="field-value">&nbsp;</span><div class="signature-line">CPF / RG</div></div>
+      <div class="signature-card"><span class="field-label">Nome legível e assinatura</span><span class="field-value">&nbsp;</span><div class="signature-line">Assinatura / carimbo</div></div>
+    </div>
+  </div>
+</section>
+<div class="footer-note">Documento gerado em \${dataAtual} às \${horaAtual} · Aluforce — Sistema de Gestão Empresarial · Este recibo comprova a entrega das mercadorias descritas.</div>
+</section>
+</div>
+</main>
+<scr\` + \`ipt>setTimeout(function(){window.print();},500);</\` + \`script>
+</body>
+</html>\`);
             printWindow.document.close();
         }
 
@@ -12610,211 +12874,183 @@
 <meta charset="UTF-8">
 <title>${d.nomeArquivo}</title>
 <style>
-@page { margin: 10mm 12mm; size: A4; }
-@media print {
-    @page { margin: 10mm 12mm; }
-    html, body { margin: 0; padding: 0; }
-    body::before, body::after { display: none !important; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; background: #fff; font-size: 10px; line-height: 1.35; }
-.page { padding: 0; }
-
-/* === HEADER === */
-.header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 3px solid #1e293b; }
-.header-left { display: flex; align-items: center; gap: 14px; }
-.header-left img { height: 52px; }
-.header-info { }
-.header-info .brand { font-size: 10px; color: #64748b; margin-top: 6px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
-.header-info .empresa-dados { font-size: 8.5px; color: #475569; line-height: 1.5; margin-top: 4px; }
-.header-right { text-align: right; }
-.doc-badge { background: #1e293b; color: #fff; padding: 14px 22px; text-align: center; min-width: 160px; }
-.doc-badge .tipo { font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-.doc-badge .número { font-size: 20px; font-weight: 800; margin-top: 2px; letter-spacing: 1px; }
-
-/* === INFO BAR === */
-.info-bar { display: flex; border: 1.5px solid #cbd5e1; margin-top: 12px; }
-.info-bar .cell { flex: 1; padding: 8px 12px; border-right: 1.5px solid #cbd5e1; }
-.info-bar .cell:last-child { border-right: none; }
-.info-bar .cell-label { font-size: 7.5px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-.info-bar .cell-value { font-size: 10px; color: #0f172a; font-weight: 600; }
-
-/* === SECTIONS === */
-.section { margin-top: 14px; }
-.section-title { background: #1e293b; color: #fff; padding: 6px 14px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center; }
-.section-title .badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 3px; font-size: 8px; font-weight: 600; }
-.section-body { border: 1.5px solid #cbd5e1; border-top: none; padding: 12px 14px; }
-
-/* === CLIENTE === */
-.cliente-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; }
-.cliente-field { display: flex; font-size: 9.5px; }
-.cliente-field .lbl { color: #64748b; font-weight: 700; min-width: 68px; text-transform: uppercase; font-size: 8.5px; }
-.cliente-field .val { color: #0f172a; font-weight: 500; }
-.cliente-nome-row { font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
-
-/* === ITENS TABLE === */
-.items-table { width: 100%; border-collapse: collapse; }
-.items-table th { background: #1e293b; color: #fff; padding: 7px 8px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; text-align: left; border: 1px solid #1e293b; }
-.items-table td { padding: 6px 8px; font-size: 9px; border-bottom: 1px solid #e5e7eb; }
-.items-table .tc { text-align: center; }
-.items-table .tr { text-align: right; }
-
-/* === TOTAIS === */
-.totais-area { display: flex; justify-content: flex-end; margin-top: 0; }
-.totais-box { min-width: 260px; border: 1.5px solid #cbd5e1; border-top: none; }
-.totais-row { display: flex; justify-content: space-between; padding: 5px 14px; font-size: 9.5px; border-bottom: 1px solid #e5e7eb; }
-.totais-row .lbl { color: #475569; font-weight: 600; }
-.totais-row .val { color: #0f172a; font-weight: 600; }
-.totais-row.neg .val { color: #dc2626; }
-.totais-row.total-final { background: #1a4fd4; border-bottom: none; padding: 10px 14px; }
-.totais-row.total-final .lbl { color: #fff; font-size: 12px; font-weight: 800; }
-.totais-row.total-final .val { color: #fff; font-size: 14px; font-weight: 900; }
-
-/* === CONDIÇÕES === */
-.cond-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0; }
-.cond-item { padding: 8px 12px; border-right: 1px solid #e2e8f0; }
-.cond-item:last-child { border-right: none; }
-.cond-item .lbl { font-size: 7.5px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-.cond-item .val { font-size: 10px; color: #0f172a; font-weight: 600; }
-
-/* === OBSERVAÇÕES === */
-.obs-content { padding: 10px 14px; font-size: 9.5px; color: #374151; line-height: 1.5; background: #fefce8; border: 1.5px solid #cbd5e1; border-top: none; }
-
-/* === FOOTER === */
-.footer-bar { margin-top: 16px; padding-top: 8px; border-top: 2px solid #1e293b; font-size: 7.5px; color: #64748b; text-align: center; line-height: 1.6; }
-.footer-bar .sep { margin: 0 6px; color: #cbd5e1; }
+:root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--line-soft:#edf4f8;--surface:#fff;--soft:#f6fafc;--soft-2:#f2f7fb;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd;}
+*{box-sizing:border-box;}
+@page{size:A4;margin:0;}
+html,body{margin:0;padding:0;background:#eef4f8;font-family:Inter,Arial,Helvetica,sans-serif;color:var(--text);-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+body{display:flex;justify-content:center;}
+.a4-stage{width:210mm;min-height:297mm;background:#eef4f8;padding:11mm 0;}
+.page-frame{width:184mm;margin:0 auto;}
+.page-shell{background:#fff;border:1px solid #dbe8f1;border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm;}
+.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:10px;}
+.quote{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;}
+.quote-head{padding:11px 13px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%);}
+.head-grid{display:grid;grid-template-columns:1.25fr .78fr;gap:12px;align-items:start;}
+.brand-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.logo-img{height:46px;width:auto;display:block;flex:0 0 auto;}
+.brand-name{margin:0 0 3px;color:var(--brand);font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;}
+.brand-sub{color:var(--muted);font-size:8px;line-height:1.5;letter-spacing:.12em;text-transform:uppercase;}
+.headline{margin:0;color:var(--ink);font-size:16px;font-weight:900;line-height:1.08;}
+.subtitle{margin:5px 0 0;color:var(--muted);font-size:9.5px;line-height:1.5;}
+.intro-card{padding:9px 11px;border-radius:14px;background:var(--soft);border:1px solid var(--line-soft);font-size:10px;line-height:1.55;color:var(--text);}
+.intro-card strong{color:var(--ink);}
+.doc-card{border:1px solid rgba(24,182,200,.34);background:linear-gradient(180deg,#fff 0%,#f4fcfd 100%);border-radius:16px;padding:10px 11px;}
+.doc-card-title{margin:0 0 8px;color:var(--brand);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;}
+.doc-no{display:flex;align-items:end;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.doc-no .main{font-size:25px;line-height:1;color:var(--brand);font-weight:900;letter-spacing:-.03em;}
+.status-pill{padding:6px 10px;border-radius:999px;background:var(--accent-soft);border:1px solid rgba(24,182,200,.35);color:var(--brand);font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
+.doc-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px;}
+.meta-item{padding:7px 8px;border-radius:12px;background:#fff;border:1px solid var(--line-soft);}
+.meta-label{display:block;font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px;font-weight:700;}
+.meta-value{display:block;color:var(--ink);font-size:10px;line-height:1.2;font-weight:800;word-break:break-word;overflow-wrap:anywhere;}
+.body{padding:10px 13px 12px;}
+.section-card{border:1px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;margin-bottom:8px;}
+.section-head{padding:8px 10px;background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%);border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.section-head strong{color:var(--brand);font-size:9px;font-weight:900;text-transform:uppercase;letter-spacing:.14em;}
+.section-head span{color:var(--muted);font-size:8px;font-weight:700;}
+.client-grid{display:grid;grid-template-columns:1.34fr .95fr .72fr .99fr;gap:7px;padding:8px 10px 10px;}
+.field{min-height:51px;border:1px solid var(--line);border-radius:13px;background:#fff;padding:7px 9px 8px;}
+.field.tight{min-height:44px;}
+.field-label{display:block;color:var(--muted);font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px;}
+.field-value{display:block;color:var(--ink);font-size:10px;line-height:1.35;font-weight:700;word-break:break-word;overflow-wrap:anywhere;}
+.field-help{display:block;color:var(--muted);font-size:8px;line-height:1.35;margin-top:3px;}
+.table-wrap{padding:0 10px 10px;}
+table{width:100%;border-collapse:separate;border-spacing:0;table-layout:fixed;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:9px;}
+thead th{background:var(--soft-2);color:var(--brand);font-weight:900;font-size:7.3px;letter-spacing:.12em;text-transform:uppercase;padding:8px;border-bottom:1px solid var(--line);text-align:left;}
+tbody td{padding:8px;border-bottom:1px solid var(--line-soft);color:var(--text);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+.tc,.center{text-align:center;}.tr,.money{text-align:right;font-variant-numeric:tabular-nums;}
+.desc strong{display:block;color:var(--ink);font-size:9.2px;margin-bottom:2px;}
+.muted-text{color:var(--muted);}
+.two-col{display:grid;grid-template-columns:1.16fr .84fr;gap:8px;margin-bottom:8px;}
+.stack{display:grid;gap:7px;}
+.terms-grid{display:grid;grid-template-columns:1.12fr .92fr .76fr 1.2fr;gap:7px;padding:8px 10px 10px;}
+.terms-grid .field-value{font-size:9.2px;}
+.obs-card{padding:8px 10px 10px;min-height:70px;}
+.note-box{padding:9px 11px;border-radius:12px;background:var(--soft);border:1px solid var(--line-soft);font-size:9.4px;color:var(--text);line-height:1.55;min-height:50px;}
+.totals-card{border:1px solid rgba(24,182,200,.34);background:linear-gradient(180deg,#fff 0%,#f4fcfd 100%);border-radius:16px;padding:10px 11px;min-height:100%;}
+.total-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0;font-size:10px;color:var(--text);border-bottom:1px dashed #d7e6ef;}
+.total-row:last-of-type{border-bottom:none;}
+.total-row strong{color:var(--ink);}
+.grand-total{margin-top:7px;border-radius:12px;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 74%,var(--accent) 100%);color:#fff;padding:10px 11px;display:flex;justify-content:space-between;align-items:center;gap:10px;}
+.grand-total .gt-label{font-size:8px;text-transform:uppercase;letter-spacing:.14em;font-weight:800;opacity:.9;}
+.grand-total .gt-value{font-size:18px;line-height:1;font-weight:900;}
+.footer-band{margin-top:8px;padding:7px 10px;border-radius:12px;background:var(--soft);border:1px solid var(--line-soft);color:var(--muted);font-size:7.6px;line-height:1.45;text-align:center;}
+@media print{body,.a4-stage{background:#fff;}.page-shell{box-shadow:none;border-color:transparent;}}
 </style>
 </head>
 <body>
-<div class="page">
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-left">
-            <img src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" style="height:52px;" onerror="this.outerHTML='<div style=\\'font-size:28px;font-weight:900;color:#1e293b;letter-spacing:-1px\\'>ALUFORCE</div>'">
-            <div class="header-info">
-                <div class="brand">Cabos de Alumínio</div>
-                <div class="empresa-dados">
-                    ${getEmpresaRazao()}<br>
-                    CNPJ: ${getEmpresaCnpj()} &nbsp;|&nbsp; IE: ${getEmpresaIe()}<br>
-                    ${getEmpresaEndereco()} - ${getEmpresaCidade()}<br>
-                    ${getEmpresaTel()} &nbsp;|&nbsp; contato@aluforce.ind.br
-                </div>
-            </div>
+<div class="a4-stage">
+<div class="page-frame">
+<div class="top-rule"></div>
+<div class="page-shell">
+<section class="quote">
+  <div class="quote-head">
+    <div class="head-grid">
+      <div>
+        <div class="brand-wrap">
+          <img class="logo-img" src="${window.location.origin}/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" onerror="this.onerror=null;this.style.cssText='font-size:22px;font-weight:900;color:#0b2842'">
+          <div>
+            <p class="brand-name">ALUFORCE</p>
+            <div class="brand-sub">Cabos de Alumínio • Orçamento Comercial</div>
+          </div>
         </div>
-        <div class="header-right">
-            <div class="doc-badge">
-                <div class="tipo">${d.tipoDocumento}</div>
-                <div class="número">N. ${pedidoAtual.id}</div>
-            </div>
+        <h1 class="headline">${d.tipoDocumento}</h1>
+        <p class="subtitle">Proposta comercial gerada pelo Sistema de Gestão Empresarial Aluforce.<br>Válida pelo prazo indicado. Não possui valor fiscal.</p>
+        <div class="intro-card" style="margin-top:8px;margin-bottom:0;">
+          <strong>${getEmpresaRazao()}</strong><br>
+          CNPJ ${getEmpresaCnpj()} · IE ${getEmpresaIe()}<br>
+          ${getEmpresaEndereco()} — ${getEmpresaCidade()}<br>
+          Tel ${getEmpresaTel()}
         </div>
+      </div>
+      <aside class="doc-card">
+        <p class="doc-card-title">Identificação do orçamento</p>
+        <div class="doc-no">
+          <div class="main">N. ${pedidoAtual.id}</div>
+          <div class="status-pill">${statusLabel}</div>
+        </div>
+        <div class="doc-meta">
+          <div class="meta-item"><span class="meta-label">Emissão</span><span class="meta-value">${d.dataEmissao}</span></div>
+          <div class="meta-item"><span class="meta-label">Validade</span><span class="meta-value">${d.dataValidadeStr}</span></div>
+          <div class="meta-item"><span class="meta-label">Vendedor</span><span class="meta-value">${escaparHTML(pedidoAtual.vendedor || '--')}</span></div>
+          <div class="meta-item"><span class="meta-label">Referência</span><span class="meta-value">${escaparHTML(pedidoAtual.referencia || '-')}</span></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="section-card">
+      <div class="section-head"><strong>Dados do cliente</strong><span>Cadastro e contato</span></div>
+      <div class="client-grid">
+        <div class="field"><span class="field-label">Cliente</span><span class="field-value">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</span></div>
+        <div class="field"><span class="field-label">CNPJ / CPF</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_cnpj || pedidoAtual.cliente_cpf || '--')}</span></div>
+        <div class="field"><span class="field-label">IE</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
+        <div class="field"><span class="field-label">Telefone</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_telefone || '--')}</span></div>
+        <div class="field"><span class="field-label">Endereço</span><span class="field-value">${escaparHTML(d.endCliente)}</span></div>
+        <div class="field"><span class="field-label">Cidade / UF</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_cidade || '--')}/${escaparHTML(pedidoAtual.cliente_uf || '--')}</span></div>
+        <div class="field"><span class="field-label">CEP</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_cep || '--')}</span></div>
+        <div class="field"><span class="field-label">Contato / E-mail</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_contato || pedidoAtual.cliente_email || '--')}</span></div>
+      </div>
     </div>
 
-    <!-- INFO BAR -->
-    <div class="info-bar">
-        <div class="cell">
-            <div class="cell-label">Emissão</div>
-            <div class="cell-value">${d.dataEmissao}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Vendedor</div>
-            <div class="cell-value">${pedidoAtual.vendedor || '--'}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Validade</div>
-            <div class="cell-value">${d.dataValidadeStr}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Status</div>
-            <div class="cell-value">${statusLabel}</div>
-        </div>
-    </div>
-
-    <!-- DADOS DO CLIENTE -->
-    <div class="section">
-        <div class="section-title">Dados do Cliente</div>
-        <div class="section-body">
-            <div class="cliente-nome-row">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</div>
-            <div class="cliente-row">
-                <div class="cliente-field"><span class="lbl">CNPJ/CPF:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cnpj || pedidoAtual.cliente_cpf || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">IE:</span><span class="val">${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
-                <div class="cliente-field"><span class="lbl">Endereço:</span><span class="val">${escaparHTML(d.endCliente)}</span></div>
-                <div class="cliente-field"><span class="lbl">CEP:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cep || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">Telefone:</span><span class="val">${escaparHTML(pedidoAtual.cliente_telefone || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">Contato:</span><span class="val">${escaparHTML(pedidoAtual.cliente_contato || '--')}</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ITENS -->
-    <div class="section">
-        <div class="section-title">Itens do ${d.tipoDocumento}<span class="badge">${totalItens} Itens</span></div>
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th style="width:30px;" class="tc">#</th>
-                    <th style="width:75px;">Código</th>
-                    <th>Descrição</th>
-                    <th style="width:50px;" class="tr">Qtd</th>
-                    <th style="width:30px;" class="tc">Un</th>
-                    <th style="width:70px;" class="tr">Vlr. Unit.</th>
-                    <th style="width:50px;" class="tr">Desc.</th>
-                    <th style="width:75px;" class="tr">Total</th>
-                </tr>
-            </thead>
-            <tbody>${d.itensRows}</tbody>
+    <div class="section-card">
+      <div class="section-head"><strong>Itens do ${d.tipoDocumento.toLowerCase()}</strong><span>${totalItens} item(ns)</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:6%;" class="tc">#</th>
+            <th style="width:10%;">Código</th>
+            <th style="width:39%;">Descrição</th>
+            <th style="width:8%;" class="tc">Qtd.</th>
+            <th style="width:7%;" class="tc">Un.</th>
+            <th style="width:10%;" class="tr">Vlr. Unit.</th>
+            <th style="width:9%;" class="tr">Desc.</th>
+            <th style="width:11%;" class="tr">Total</th>
+          </tr></thead>
+          <tbody>${d.itensRows}</tbody>
         </table>
+      </div>
     </div>
 
-    <!-- TOTAIS -->
-    <div class="totais-area">
-        <div class="totais-box">
-            <div class="totais-row"><span class="lbl">Subtotal:</span><span class="val">R$ ${d.subtotalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-            ${d.totalDescontos > 0 ? `<div class="totais-row neg"><span class="lbl">Descontos:</span><span class="val">- R$ ${d.totalDescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.frete > 0 ? `<div class="totais-row"><span class="lbl">Frete:</span><span class="val">R$ ${d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.ipi > 0 ? `<div class="totais-row"><span class="lbl">IPI:</span><span class="val">R$ ${d.ipi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.icmsST > 0 ? `<div class="totais-row"><span class="lbl">ICMS ST:</span><span class="val">R$ ${d.icmsST.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            <div class="totais-row total-final"><span class="lbl">TOTAL:</span><span class="val">R$ ${d.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+    <div class="two-col">
+      <div class="stack">
+        <div class="section-card">
+          <div class="section-head"><strong>Condições comerciais</strong><span>Pagamento e logística</span></div>
+          <div class="terms-grid">
+            <div class="field tight"><span class="field-label">Pagamento</span><span class="field-value">${d.condicao} dias</span></div>
+            <div class="field tight"><span class="field-label">Prazo</span><span class="field-value">${escaparHTML(pedidoAtual.prazo_entrega || 'A combinar')}</span></div>
+            <div class="field tight"><span class="field-label">Frete</span><span class="field-value">${d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'}</span></div>
+            <div class="field tight"><span class="field-label">Transportadora</span><span class="field-value">${escaparHTML(pedidoAtual.transportadora || '--')}</span></div>
+          </div>
         </div>
-    </div>
+        ${pedidoAtual.observacoes ? `
+        <div class="section-card">
+          <div class="section-head"><strong>Observações</strong><span>Informações adicionais</span></div>
+          <div class="obs-card"><div class="note-box">${escaparHTML(pedidoAtual.observacoes)}</div></div>
+        </div>` : ''}
+      </div>
 
-    <!-- CONDIÇÕES COMERCIAIS -->
-    <div class="section">
-        <div class="section-title">Condições Comerciais</div>
-        <div class="section-body" style="padding: 0;">
-            <div class="cond-grid">
-                <div class="cond-item">
-                    <div class="lbl">Pagamento</div>
-                    <div class="val">${d.condicao} dias</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Transportadora</div>
-                    <div class="val">${pedidoAtual.transportadora || '--'}</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Frete</div>
-                    <div class="val">${d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'}</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Prazo</div>
-                    <div class="val">${pedidoAtual.prazo_entrega || 'A combinar'}</div>
-                </div>
-            </div>
+      <aside class="totals-card">
+        <p class="doc-card-title">Resumo financeiro</p>
+        <div class="total-row"><span>Subtotal</span><strong>R$ ${d.subtotalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>
+        ${d.totalDescontos > 0 ? `<div class="total-row"><span>Descontos</span><strong style="color:#dc2626;">- R$ ${d.totalDescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>` : ''}
+        ${d.frete > 0 ? `<div class="total-row"><span>Frete</span><strong>R$ ${d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>` : ''}
+        ${d.ipi > 0 ? `<div class="total-row"><span>IPI</span><strong>R$ ${d.ipi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>` : ''}
+        ${d.icmsST > 0 ? `<div class="total-row"><span>ICMS ST</span><strong>R$ ${d.icmsST.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong></div>` : ''}
+        <div class="grand-total">
+          <div><div class="gt-label">Valor total</div></div>
+          <div class="gt-value">R$ ${d.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
         </div>
+      </aside>
     </div>
 
-    <!-- OBSERVAÇÕES -->
-    ${pedidoAtual.observacoes ? `
-    <div class="section">
-        <div class="section-title">Observações</div>
-        <div class="obs-content">${pedidoAtual.observacoes}</div>
-    </div>` : ''}
-
-    <!-- FOOTER -->
-    <div class="footer-bar">
-        Orçamento válido por 15 dias<span class="sep">|</span>Preços sujeitos a alteração após a validade<span class="sep">|</span>Prazo de entrega após confirmação do pedido<span class="sep">|</span>Documento sem valor fiscal
-    </div>
+    <div class="footer-band">Orçamento válido por 15 dias · Preços sujeitos a alteração após a validade · Prazo de entrega após confirmação do pedido · Documento sem valor fiscal</div>
+  </div>
+</section>
+</div>
+</div>
 </div>
 </body>
 </html>`;
@@ -17276,7 +17512,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
         async function buscarTransportadorasEditAPI(query) {
             try {
-                const resp = await fetch(`/api/transportadoras?termo=${encodeURIComponent(query)}`, { credentials: 'include' });
+                const resp = await fetch(`/api/vendas/transportadoras?termo=${encodeURIComponent(query)}`, { credentials: 'include' });
                 if (!resp.ok) throw new Error('Erro na busca');
 
                 const transportadoras = await resp.json();
@@ -17285,7 +17521,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 if (!dropdown) return;
 
                 if (!transportadoras || transportadoras.length === 0) {
-                    dropdown.innerHTML = '<div style="padding: 15px; color: #999; text-align: center; font-size: 13px;"><i class="fas fa-truck" style="margin-right: 8px;"></i>Nenhuma transportadora encontrada</div>';
+                    dropdown.innerHTML = `<div style="padding: 15px; color: #999; text-align: center; font-size: 13px;">
+                        <i class="fas fa-truck" style="margin-right: 8px;"></i>Nenhuma transportadora encontrada
+                    </div>
+                    <div onclick="abrirModalCadastrarTransportadora()" style="padding: 12px 15px; cursor: pointer; background: #f0f9ff; border-top: 1px solid #e2e8f0; text-align: center; color: #2563eb; font-weight: 600; font-size: 13px; transition: all 0.2s;">
+                        <i class="fas fa-plus-circle" style="margin-right: 6px;"></i> Cadastrar Nova Transportadora
+                    </div>`;
                 } else {
                     dropdown.innerHTML = transportadoras.map(transp => `
                         <div class="dropdown-item-transp" onclick="selecionarTransportadoraEdit(${transp.id}, '${(transp.nome || transp.razao_social || '').replace(/'/g, "\\'")}', '${transp.cnpj || ''}')"
@@ -17298,7 +17539,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 <span style="font-size: 11px; color: #1a4fd4; background: #ecfdf5; padding: 3px 8px; border-radius: 4px;">${transp.cnpj || transp.telefone || ''}</span>
                             </div>
                         </div>
-                    `).join('');
+                    `).join('') + `
+                    <div onclick="abrirModalCadastrarTransportadora()" style="padding: 10px 15px; cursor: pointer; background: #f0f9ff; border-top: 1px solid #e2e8f0; text-align: center; color: #2563eb; font-weight: 500; font-size: 12px; transition: all 0.2s;">
+                        <i class="fas fa-plus-circle" style="margin-right: 6px;"></i> Cadastrar Nova Transportadora
+                    </div>`;
                 }
 
                 dropdown.style.display = 'block';
@@ -17341,6 +17585,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             document.getElementById('dropdown-edit-transportadoras').style.display = 'none';
 
             showNotification('Transportadora selecionada: ' + nome, 'success');
+
+            // Auto-calcular frete ao selecionar transportadora
+            calcularFreteAutomatico();
         }
 
         // Função de consulta de crédito para modal de edição
@@ -23096,6 +23343,355 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         }
                     }, 300);
                 }, 500);
+            }
+        });
+
+        // ========================================
+        // MODAL CADASTRAR TRANSPORTADORA
+        // ========================================
+        function abrirModalCadastrarTransportadora() {
+            // Fechar dropdown
+            const dd = document.getElementById('dropdown-edit-transportadoras');
+            if (dd) dd.style.display = 'none';
+
+            let modal = document.getElementById('modal-cadastrar-transportadora');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modal-cadastrar-transportadora';
+                modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:100000;display:flex;align-items:center;justify-content:center;';
+                modal.innerHTML = `
+                <div style="background:white;border-radius:16px;width:620px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 25px 60px rgba(0,0,0,0.3);animation:modalFadeIn 0.3s ease;">
+                    <div style="padding:20px 24px;border-bottom:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+                        <h3 style="margin:0;font-size:18px;color:#1e293b;"><i class="fas fa-truck" style="color:#f97316;margin-right:10px;"></i>Cadastrar Transportadora</h3>
+                        <button onclick="fecharModalCadastrarTransportadora()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;padding:4px 8px;">&times;</button>
+                    </div>
+                    <div style="padding:24px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Razão Social / Nome *</label>
+                                <input type="text" id="cad-transp-nome" placeholder="Nome da transportadora" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">CNPJ</label>
+                                <input type="text" id="cad-transp-cnpj" placeholder="00.000.000/0000-00" maxlength="18" oninput="formatarCNPJInput(this)" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Inscrição Estadual</label>
+                                <input type="text" id="cad-transp-ie" placeholder="IE" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Telefone</label>
+                                <input type="text" id="cad-transp-telefone" placeholder="(00) 00000-0000" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Email</label>
+                                <input type="email" id="cad-transp-email" placeholder="email@transportadora.com" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Contato</label>
+                                <input type="text" id="cad-transp-contato" placeholder="Nome do contato" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Endereço</label>
+                            <input type="text" id="cad-transp-endereco" placeholder="Rua, número, bairro" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                        </div>
+                        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">Cidade</label>
+                                <input type="text" id="cad-transp-cidade" placeholder="Cidade" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">UF</label>
+                                <select id="cad-transp-uf" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                                    <option value="">--</option>
+                                    <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                    <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                    <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                    <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                    <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                    <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                    <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                    <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                    <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:4px;">CEP</label>
+                                <input type="text" id="cad-transp-cep" placeholder="00000-000" maxlength="9" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                            </div>
+                        </div>
+
+                        <!-- Seção Tabela de Frete -->
+                        <div style="margin-top:8px;padding-top:16px;border-top:2px solid #e2e8f0;">
+                            <h4 style="margin:0 0 12px;font-size:14px;color:#1e293b;"><i class="fas fa-shipping-fast" style="color:#10b981;margin-right:8px;"></i>Tabela de Frete (opcional)</h4>
+                            <p style="font-size:12px;color:#6b7280;margin:0 0 12px;">Configure o valor do frete por estado. Será usado para calcular automaticamente o frete no pedido.</p>
+                            <div style="display:grid;grid-template-columns:100px 1fr 1fr 1fr 80px auto;gap:8px;margin-bottom:8px;align-items:end;">
+                                <div>
+                                    <label style="font-size:11px;font-weight:600;color:#6b7280;">Estado</label>
+                                    <select id="cad-frete-estado" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                        <option value="">UF</option>
+                                        <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option>
+                                        <option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option>
+                                        <option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option>
+                                        <option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option>
+                                        <option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option>
+                                        <option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option>
+                                        <option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option>
+                                        <option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option>
+                                        <option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;font-weight:600;color:#6b7280;">Frete Fixo (R$)</label>
+                                    <input type="number" id="cad-frete-valor" step="0.01" min="0" placeholder="0,00" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;font-weight:600;color:#6b7280;">R$/Kg</label>
+                                    <input type="number" id="cad-frete-kg" step="0.0001" min="0" placeholder="0,0000" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;font-weight:600;color:#6b7280;">% sobre NF</label>
+                                    <input type="number" id="cad-frete-pct" step="0.01" min="0" placeholder="0,00" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                </div>
+                                <div>
+                                    <label style="font-size:11px;font-weight:600;color:#6b7280;">Prazo</label>
+                                    <input type="number" id="cad-frete-prazo" min="0" placeholder="5" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                </div>
+                                <div>
+                                    <button onclick="adicionarFreteTabela()" style="padding:8px 12px;background:#10b981;color:white;border:none;border-radius:6px;cursor:pointer;font-size:13px;white-space:nowrap;"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                            <div id="cad-frete-lista" style="max-height:150px;overflow-y:auto;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb;"></div>
+                        </div>
+
+                        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:20px;">
+                            <button onclick="fecharModalCadastrarTransportadora()" style="padding:10px 20px;border:1px solid #d1d5db;border-radius:8px;background:white;color:#374151;cursor:pointer;font-size:14px;">Cancelar</button>
+                            <button onclick="salvarTransportadoraCadastro()" style="padding:10px 24px;border:none;border-radius:8px;background:#2563eb;color:white;cursor:pointer;font-size:14px;font-weight:600;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Transportadora</button>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.appendChild(modal);
+            }
+            modal.style.display = 'flex';
+            // Limpar campos
+            ['cad-transp-nome','cad-transp-cnpj','cad-transp-ie','cad-transp-telefone','cad-transp-email','cad-transp-contato','cad-transp-endereco','cad-transp-cidade','cad-transp-cep'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            const ufEl = document.getElementById('cad-transp-uf');
+            if (ufEl) ufEl.value = '';
+            _cadFreteItens = [];
+            renderizarFreteTabela();
+            document.getElementById('cad-transp-nome')?.focus();
+        }
+
+        function fecharModalCadastrarTransportadora() {
+            const modal = document.getElementById('modal-cadastrar-transportadora');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // Formatação CNPJ
+        function formatarCNPJInput(input) {
+            let v = input.value.replace(/\D/g, '').substring(0, 14);
+            if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+            else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+            else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,3})/, '$1.$2');
+            input.value = v;
+        }
+
+        // Tabela de frete temporária (antes de salvar)
+        let _cadFreteItens = [];
+
+        function adicionarFreteTabela() {
+            const estado = document.getElementById('cad-frete-estado')?.value;
+            const valor = parseFloat(document.getElementById('cad-frete-valor')?.value) || 0;
+            const kg = parseFloat(document.getElementById('cad-frete-kg')?.value) || 0;
+            const pct = parseFloat(document.getElementById('cad-frete-pct')?.value) || 0;
+            const prazo = parseInt(document.getElementById('cad-frete-prazo')?.value) || 5;
+
+            if (!estado) { showNotification('Selecione o estado de destino.', 'warning'); return; }
+            if (valor <= 0 && kg <= 0 && pct <= 0) { showNotification('Informe pelo menos um valor de frete.', 'warning'); return; }
+
+            // Substituir se estado já existe
+            _cadFreteItens = _cadFreteItens.filter(f => f.estado !== estado);
+            _cadFreteItens.push({ estado, valor_frete: valor, valor_kg: kg, percentual_nf: pct, prazo_dias: prazo });
+            _cadFreteItens.sort((a, b) => a.estado.localeCompare(b.estado));
+
+            renderizarFreteTabela();
+
+            // Limpar inputs
+            document.getElementById('cad-frete-estado').value = '';
+            document.getElementById('cad-frete-valor').value = '';
+            document.getElementById('cad-frete-kg').value = '';
+            document.getElementById('cad-frete-pct').value = '';
+            document.getElementById('cad-frete-prazo').value = '';
+        }
+
+        function renderizarFreteTabela() {
+            const container = document.getElementById('cad-frete-lista');
+            if (!container) return;
+            if (_cadFreteItens.length === 0) {
+                container.innerHTML = '<div style="padding:16px;text-align:center;color:#9ca3af;font-size:12px;">Nenhuma tabela de frete adicionada</div>';
+                return;
+            }
+            container.innerHTML = `<table style="width:100%;border-collapse:collapse;font-size:12px;">
+                <tr style="background:#e5e7eb;">
+                    <th style="padding:6px 10px;text-align:left;">UF</th>
+                    <th style="padding:6px 10px;text-align:right;">Fixo (R$)</th>
+                    <th style="padding:6px 10px;text-align:right;">R$/Kg</th>
+                    <th style="padding:6px 10px;text-align:right;">% NF</th>
+                    <th style="padding:6px 10px;text-align:center;">Prazo</th>
+                    <th style="padding:6px 10px;text-align:center;"></th>
+                </tr>
+                ${_cadFreteItens.map((f, i) => `
+                    <tr style="border-bottom:1px solid #e5e7eb;">
+                        <td style="padding:6px 10px;font-weight:600;">${f.estado}</td>
+                        <td style="padding:6px 10px;text-align:right;">${f.valor_frete > 0 ? f.valor_frete.toFixed(2) : '-'}</td>
+                        <td style="padding:6px 10px;text-align:right;">${f.valor_kg > 0 ? f.valor_kg.toFixed(4) : '-'}</td>
+                        <td style="padding:6px 10px;text-align:right;">${f.percentual_nf > 0 ? f.percentual_nf.toFixed(2) + '%' : '-'}</td>
+                        <td style="padding:6px 10px;text-align:center;">${f.prazo_dias}d</td>
+                        <td style="padding:6px 10px;text-align:center;"><button onclick="_cadFreteItens.splice(${i},1);renderizarFreteTabela();" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:14px;"><i class="fas fa-times"></i></button></td>
+                    </tr>
+                `).join('')}
+            </table>`;
+        }
+
+        async function salvarTransportadoraCadastro() {
+            const nome = document.getElementById('cad-transp-nome')?.value?.trim();
+            const cnpj = document.getElementById('cad-transp-cnpj')?.value?.trim();
+
+            if (!nome) { showNotification('Nome da transportadora é obrigatório.', 'error'); return; }
+
+            try {
+                const resp = await fetch('/api/vendas/transportadoras', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    body: JSON.stringify({
+                        nome: nome,
+                        razao_social: nome,
+                        cnpj: cnpj,
+                        ie: document.getElementById('cad-transp-ie')?.value?.trim() || '',
+                        telefone: document.getElementById('cad-transp-telefone')?.value?.trim() || '',
+                        email: document.getElementById('cad-transp-email')?.value?.trim() || '',
+                        contato: document.getElementById('cad-transp-contato')?.value?.trim() || '',
+                        endereco: document.getElementById('cad-transp-endereco')?.value?.trim() || '',
+                        cidade: document.getElementById('cad-transp-cidade')?.value?.trim() || '',
+                        uf: document.getElementById('cad-transp-uf')?.value || '',
+                        cep: document.getElementById('cad-transp-cep')?.value?.trim() || ''
+                    })
+                });
+
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.message || 'Erro ao salvar');
+                }
+
+                const data = await resp.json();
+                const transpId = data.id;
+
+                // Salvar tabelas de frete
+                if (_cadFreteItens.length > 0) {
+                    await Promise.all(_cadFreteItens.map(frete =>
+                        fetch('/api/vendas/frete-tabelas', {
+                            method: 'POST',
+                            credentials: 'include',
+                            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                            body: JSON.stringify({
+                                transportadora_id: transpId,
+                                estado_destino: frete.estado,
+                                valor_frete: frete.valor_frete,
+                                valor_kg: frete.valor_kg,
+                                percentual_nf: frete.percentual_nf,
+                                prazo_dias: frete.prazo_dias
+                            })
+                        })
+                    ));
+                }
+
+                // Auto-selecionar a transportadora recém-criada
+                selecionarTransportadoraEdit(transpId, nome, cnpj);
+                fecharModalCadastrarTransportadora();
+                showNotification(`Transportadora "${nome}" cadastrada com sucesso!${_cadFreteItens.length > 0 ? ` (${_cadFreteItens.length} tabelas de frete salvas)` : ''}`, 'success');
+
+            } catch (error) {
+                console.error('Erro ao cadastrar transportadora:', error);
+                showNotification('Erro ao cadastrar transportadora: ' + error.message, 'error');
+            }
+        }
+
+        // ========================================
+        // CÁLCULO AUTOMÁTICO DE FRETE (Estado + Transportadora + Impostos)
+        // ========================================
+        async function calcularFreteAutomatico() {
+            const transpId = document.getElementById('edit-transportadora-id')?.value || editTransportadoraSelecionadaId;
+            const estadoDestino = document.getElementById('edit-estado-destino')?.value || '';
+            const tipoCliente = document.getElementById('edit-tipo-cliente')?.value || 'revenda';
+
+            if (!transpId || !estadoDestino) return;
+
+            // Calcular peso bruto total e valor total dos itens
+            let pesoBruto = 0;
+            let valorNF = 0;
+            if (itensPedidoAtual && itensPedidoAtual.length > 0) {
+                valorNF = itensPedidoAtual.reduce((sum, item) => sum + (parseFloat(item.total) || parseFloat(item.preco_total) || 0), 0);
+            }
+            pesoBruto = parseFloat(document.getElementById('edit-peso-bruto')?.value) || 0;
+
+            try {
+                const params = new URLSearchParams({
+                    transportadora_id: transpId,
+                    estado: estadoDestino,
+                    peso_bruto: pesoBruto,
+                    valor_nf: valorNF
+                });
+
+                const resp = await fetch(`/api/vendas/frete-calcular?${params}`, {
+                    credentials: 'include',
+                    headers: getAuthHeaders()
+                });
+
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                if (data.encontrado) {
+                    // Preencher campo de frete
+                    const campoFrete = document.getElementById('edit-valor-frete');
+                    if (campoFrete) {
+                        campoFrete.value = data.valor_frete.toFixed(2);
+                        // Trigger update
+                        if (typeof atualizarTotalModalEditar === 'function') atualizarTotalModalEditar();
+                    }
+
+                    // Montar detalhamento para toast
+                    const det = data.detalhamento;
+                    const imp = data.impostos;
+                    let msg = `Frete calculado: R$ ${data.valor_frete.toFixed(2)}`;
+                    if (det.prazo_dias) msg += ` | Prazo: ${det.prazo_dias} dias`;
+                    msg += `\nImpostos ${estadoDestino}: ICMS ${imp.icms}%`;
+                    if (tipoCliente === 'consumidor_final' && imp.difal > 0) msg += ` | DIFAL ${imp.difal}%`;
+                    if (tipoCliente === 'revenda' && imp.icms_st > 0) msg += ` | ST ${imp.icms_st}%`;
+
+                    showNotification(msg, 'success');
+                } else {
+                    showNotification(data.mensagem || 'Sem tabela de frete para este estado/transportadora.', 'info');
+                }
+            } catch (error) {
+                console.error('Erro ao calcular frete:', error);
+            }
+        }
+
+        // Recalcular frete quando estado destino muda (se transportadora já selecionada)
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.id === 'edit-estado-destino') {
+                // Após atualizar impostos, calcular frete
+                setTimeout(() => calcularFreteAutomatico(), 300);
             }
         });
     </script>

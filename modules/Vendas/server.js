@@ -4588,6 +4588,261 @@ apiVendasRouter.get('/pedidos/:id/faturamento-status', async (req, res, next) =>
     }
 });
 
+// =====================================================
+// GERAR DANFE HTML para pedido faturado
+// =====================================================
+apiVendasRouter.get('/pedidos/:id/danfe', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        // Buscar pedido com dados da empresa e cliente
+        const [pedidoRows] = await pool.query(`
+            SELECT p.*,
+                   e.razao_social as emp_razao, e.nome_fantasia as emp_fantasia,
+                   e.cnpj as emp_cnpj, e.inscricao_estadual as emp_ie,
+                   e.endereco as emp_endereco, e.numero as emp_numero,
+                   e.complemento as emp_complemento, e.bairro as emp_bairro,
+                   e.cidade as emp_cidade, e.uf as emp_uf, e.cep as emp_cep,
+                   e.telefone as emp_telefone, e.email as emp_email,
+                   c.nome as cli_nome, c.cnpj_cpf as cli_cnpj,
+                   c.inscricao_estadual as cli_ie,
+                   c.endereco as cli_endereco, c.numero as cli_numero,
+                   c.complemento as cli_complemento, c.bairro as cli_bairro,
+                   c.cidade as cli_cidade, c.estado as cli_uf, c.cep as cli_cep,
+                   c.telefone as cli_telefone, c.email as cli_email
+            FROM pedidos p
+            LEFT JOIN empresas e ON p.empresa_id = e.id
+            LEFT JOIN clientes c ON p.cliente_id = c.id
+            WHERE p.id = ?
+        `, [id]);
+
+        if (pedidoRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+        }
+
+        const pedido = pedidoRows[0];
+
+        // Verificar se está faturado
+        const statusLower = (pedido.status || '').toLowerCase();
+        if (!['faturado', 'entregue', 'recibo'].includes(statusLower)) {
+            return res.status(400).json({ success: false, message: 'DANFE disponível apenas para pedidos faturados.' });
+        }
+
+        // Buscar itens do pedido
+        const [itens] = await pool.query('SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]);
+
+        // Dados do emitente
+        const emit = {
+            xNome: pedido.emp_razao || 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
+            xFant: pedido.emp_fantasia || 'ALUFORCE',
+            CNPJ: pedido.emp_cnpj || '88.192.475/0001-60',
+            IE: pedido.emp_ie || '103.385.861-110',
+            CRT: '3',
+            enderEmit: {
+                xLgr: pedido.emp_endereco || 'RUA ERNESTINA',
+                nro: pedido.emp_numero || 'S/N',
+                xCpl: pedido.emp_complemento || '',
+                xBairro: pedido.emp_bairro || 'FERRAZ DE VASCONCELOS',
+                xMun: pedido.emp_cidade || 'FERRAZ DE VASCONCELOS',
+                UF: pedido.emp_uf || 'SP',
+                CEP: pedido.emp_cep || '08537-400',
+                fone: pedido.emp_telefone || '(11) 91793-9089'
+            },
+            email: pedido.emp_email || 'sistema@aluforce.ind.br'
+        };
+
+        // Dados do destinatário
+        const dest = {
+            xNome: pedido.cli_nome || pedido.cliente || '-',
+            CNPJ: pedido.cli_cnpj || '',
+            IE: pedido.cli_ie || 'ISENTO',
+            indIEDest: pedido.cli_ie ? '1' : '9',
+            enderDest: {
+                xLgr: pedido.cli_endereco || '-',
+                nro: pedido.cli_numero || '-',
+                xCpl: pedido.cli_complemento || '',
+                xBairro: pedido.cli_bairro || '-',
+                xMun: pedido.cli_cidade || '-',
+                UF: pedido.cli_uf || '-',
+                CEP: pedido.cli_cep || '-',
+                fone: pedido.cli_telefone || ''
+            }
+        };
+
+        const nfNumero = pedido.nf_numero || pedido.nfe_faturamento_numero || '-';
+        const nfeChave = pedido.nfe_chave || '';
+        const nfeProtocolo = pedido.nfe_protocolo || '';
+        const dataFat = pedido.data_faturamento ? new Date(pedido.data_faturamento).toLocaleDateString('pt-BR') : '-';
+        const dataFatISO = pedido.data_faturamento ? new Date(pedido.data_faturamento).toISOString() : '';
+
+        // Calcular totais
+        let vProd = 0;
+        let vDesc = 0;
+        const itensHTML = itens.map((item, idx) => {
+            const qtd = parseFloat(item.quantidade) || 0;
+            const vUnit = parseFloat(item.preco_unitario || item.valor_unitario) || 0;
+            const vTotal = parseFloat(item.preco_total) || (qtd * vUnit);
+            const descValor = parseFloat(item.desconto) || 0;
+            vProd += qtd * vUnit;
+            vDesc += descValor;
+            return `<tr>
+                <td>${item.codigo_produto || String(idx + 1).padStart(4, '0')}</td>
+                <td>${esc(item.descricao || item.produto || '-')}</td>
+                <td>${item.ncm || '00000000'}</td>
+                <td class="center">-</td>
+                <td class="center">${(pedido.emp_uf || 'SP') === (pedido.cli_uf || '') ? '5102' : '6102'}</td>
+                <td class="center">${item.unidade || 'M'}</td>
+                <td class="right">${qtd.toLocaleString('pt-BR', { minimumFractionDigits: 4 })}</td>
+                <td class="right">${vUnit.toLocaleString('pt-BR', { minimumFractionDigits: 4 })}</td>
+                <td class="right">${vTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                <td class="right">-</td>
+                <td class="right">-</td>
+                <td class="right">-</td>
+                <td class="right">-</td>
+                <td class="right">-</td>
+            </tr>`;
+        }).join('');
+
+        const vFrete = parseFloat(pedido.frete) || 0;
+        const vNF = vProd - vDesc + vFrete;
+
+        function esc(s) {
+            return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        // Ler template DANFE
+        const templatePath = path.join(__dirname, '..', '..', 'Templates - Sistema', 'Espelho Danfe', 'danfe.html');
+        let html;
+        try {
+            html = fs.readFileSync(templatePath, 'utf8');
+        } catch (readErr) {
+            console.error('[DANFE] Template não encontrado:', readErr.message);
+            return res.status(500).json({ success: false, message: 'Template DANFE não encontrado no servidor.' });
+        }
+
+        // Substituir placeholders do template
+        const replacements = {
+            '{{marcaAguaClasse}}': '',
+            '{{marcaAguaTexto}}': '',
+            '{{avisoTopo}}': '',
+            '{{emitenteLogoUrl}}': '/images/Logo Monocromatico - Azul - Aluforce.webp',
+            '{{NFe.infNFe.emit.xFant}}': esc(emit.xFant),
+            '{{NFe.infNFe.emit.xNome}}': esc(emit.xNome),
+            '{{NFe.infNFe.emit.CNPJ}}': esc(emit.CNPJ),
+            '{{NFe.infNFe.emit.CPF}}': '',
+            '{{NFe.infNFe.emit.IE}}': esc(emit.IE),
+            '{{NFe.infNFe.emit.IEST}}': '',
+            '{{NFe.infNFe.emit.CRT}}': emit.CRT,
+            '{{NFe.infNFe.emit.IM}}': '',
+            '{{NFe.infNFe.emit.enderEmit.xLgr}}': esc(emit.enderEmit.xLgr),
+            '{{NFe.infNFe.emit.enderEmit.nro}}': esc(emit.enderEmit.nro),
+            '{{NFe.infNFe.emit.enderEmit.xCpl}}': esc(emit.enderEmit.xCpl),
+            '{{NFe.infNFe.emit.enderEmit.xBairro}}': esc(emit.enderEmit.xBairro),
+            '{{NFe.infNFe.emit.enderEmit.xMun}}': esc(emit.enderEmit.xMun),
+            '{{NFe.infNFe.emit.enderEmit.UF}}': esc(emit.enderEmit.UF),
+            '{{NFe.infNFe.emit.enderEmit.CEP}}': esc(emit.enderEmit.CEP),
+            '{{NFe.infNFe.emit.enderEmit.fone}}': esc(emit.enderEmit.fone),
+            '{{NFe.infNFe.emit.email}}': esc(emit.email),
+            '{{NFe.infNFe.ide.natOp}}': 'VENDA DE MERCADORIA',
+            '{{NFe.infNFe.ide.nNF}}': esc(nfNumero),
+            '{{NFe.infNFe.ide.serie}}': '1',
+            '{{NFe.infNFe.ide.tpNF}}': '1',
+            '{{NFe.infNFe.ide.dhEmi}}': esc(dataFat),
+            '{{NFe.infNFe.ide.dhSaiEnt}}': esc(dataFat),
+            '{{NFe.infNFe.ide._danfeHoraSaida}}': '',
+            '{{paginaAtual}}': '1',
+            '{{paginaTotal}}': '1',
+            '{{portalConsultaUrl}}': 'www.nfe.fazenda.gov.br/portal',
+            '{{codigoBarrasUrl}}': '',
+            '{{protNFe.infProt.chNFe}}': esc(nfeChave),
+            '{{protNFe.infProt.nProt}}': esc(nfeProtocolo),
+            '{{protNFe.infProt.dhRecbto}}': esc(dataFatISO),
+            '{{NFe.infNFe.dest.xNome}}': esc(dest.xNome),
+            '{{NFe.infNFe.dest.CNPJ}}': esc(dest.CNPJ),
+            '{{NFe.infNFe.dest.CPF}}': '',
+            '{{NFe.infNFe.dest.IE}}': esc(dest.IE),
+            '{{NFe.infNFe.dest.indIEDest}}': dest.indIEDest,
+            '{{NFe.infNFe.dest.enderDest.xLgr}}': esc(dest.enderDest.xLgr),
+            '{{NFe.infNFe.dest.enderDest.nro}}': esc(dest.enderDest.nro),
+            '{{NFe.infNFe.dest.enderDest.xCpl}}': esc(dest.enderDest.xCpl),
+            '{{NFe.infNFe.dest.enderDest.xBairro}}': esc(dest.enderDest.xBairro),
+            '{{NFe.infNFe.dest.enderDest.xMun}}': esc(dest.enderDest.xMun),
+            '{{NFe.infNFe.dest.enderDest.UF}}': esc(dest.enderDest.UF),
+            '{{NFe.infNFe.dest.enderDest.CEP}}': esc(dest.enderDest.CEP),
+            '{{NFe.infNFe.dest.enderDest.fone}}': esc(dest.enderDest.fone),
+            // Totais
+            '{{NFe.infNFe.total.ICMSTot.vBC}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vICMS}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vBCST}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vST}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vTotTrib}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vProd}}': vProd.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            '{{NFe.infNFe.total.ICMSTot.vFCPSTRet}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vFrete}}': vFrete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            '{{NFe.infNFe.total.ICMSTot.vSeg}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vDesc}}': vDesc.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            '{{NFe.infNFe.total.ICMSTot.vOutro}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vIPI}}': '0,00',
+            '{{NFe.infNFe.total.ICMSTot.vNF}}': vNF.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            '{{NFe.infNFe.total.ICMSTot.vII}}': '0,00',
+            // Transporte
+            '{{NFe.infNFe.transp.transporta.xNome}}': esc(pedido.transportadora || '-'),
+            '{{NFe.infNFe.transp.modFrete}}': pedido.tipo_frete === 'CIF' ? '0 - CIF' : '1 - FOB',
+            '{{NFe.infNFe.transp.veicTransp.RNTC}}': '',
+            '{{NFe.infNFe.transp.veicTransp.placa}}': '',
+            '{{NFe.infNFe.transp.veicTransp.UF}}': '',
+            '{{NFe.infNFe.transp.transporta.CNPJ}}': '',
+            '{{NFe.infNFe.transp.transporta.CPF}}': '',
+            '{{NFe.infNFe.transp.transporta.xEnder}}': '',
+            '{{NFe.infNFe.transp.transporta.xMun}}': '',
+            '{{NFe.infNFe.transp.transporta.UF}}': '',
+            '{{NFe.infNFe.transp.transporta.IE}}': '',
+            '{{NFe.infNFe.transp._danfeQVol}}': String(itens.length || 1),
+            '{{NFe.infNFe.transp._danfeEsp}}': 'VOLUME',
+            '{{NFe.infNFe.transp._danfeMarca}}': '',
+            '{{NFe.infNFe.transp._danfeNVol}}': '',
+            '{{NFe.infNFe.transp._danfePesoB}}': '',
+            '{{NFe.infNFe.transp._danfePesoL}}': '',
+            // Fatura
+            '{{NFe.infNFe.cobr.fat.nFat}}': esc(nfNumero),
+            '{{NFe.infNFe.cobr.fat.vOrig}}': vNF.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            '{{NFe.infNFe.cobr.fat.vLiq}}': vNF.toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+            // ISSQN
+            '{{NFe.infNFe.total.ISSQNtot.vServ}}': '',
+            '{{NFe.infNFe.total.ISSQNtot.vBC}}': '',
+            '{{NFe.infNFe.total.ISSQNtot.vISS}}': '',
+            '{{NFe.infNFe.total.ISSQNtot.cMunFG}}': '',
+            // Info adicional
+            '{{NFe.infNFe.infAdProd}}': '',
+            '{{NFe.infNFe.infAdic.infCpl}}': esc(pedido.observacoes || ''),
+            '{{NFe.infNFe.infAdic.infAdFisco}}': ''
+        };
+
+        // Replace simple placeholders
+        for (const [key, value] of Object.entries(replacements)) {
+            html = html.split(key).join(value);
+        }
+
+        // Replace items block {{#NFe.infNFe.det}}...{{/NFe.infNFe.det}}
+        html = html.replace(/{{#NFe\.infNFe\.det}}[\s\S]*?{{\/NFe\.infNFe\.det}}/g, itensHTML);
+
+        // Replace duplicatas block {{#NFe.infNFe.cobr.dup}}...{{/NFe.infNFe.cobr.dup}} including inverse
+        html = html.replace(/{{#NFe\.infNFe\.cobr\.dup}}[\s\S]*?{{\/NFe\.infNFe\.cobr\.dup}}/g, '');
+        html = html.replace(/\{{\^NFe\.infNFe\.cobr\.dup}}[\s\S]*?{{\/NFe\.infNFe\.cobr\.dup}}/g, `<tr>
+            <td>${esc(nfNumero)}</td>
+            <td>${esc(dataFat)}</td>
+            <td class="right">${vNF.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+        </tr>`);
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(html);
+
+    } catch (error) {
+        console.error('[DANFE] Erro ao gerar DANFE:', error);
+        next(error);
+    }
+});
+
 // Listar pedidos com faturamento parcial pendente
 apiVendasRouter.get('/faturamento/parciais-pendentes', async (req, res, next) => {
     try {
@@ -5710,7 +5965,7 @@ apiVendasRouter.get('/cargos', authenticateToken, async (req, res, next) => {
 apiVendasRouter.get('/transportadoras', authenticateToken, async (req, res, next) => {
     try {
         const _dec = lgpdCrypto ? lgpdCrypto.decryptPII : (v => v);
-        const search = req.query.search || req.query.q || '';
+        const search = req.query.search || req.query.q || req.query.termo || '';
         // Buscar apenas por nome (cnpj está criptografado)
         let query = 'SELECT id, razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, cidade, estado, cep FROM transportadoras WHERE 1=1';
         const params = [];
@@ -5767,22 +6022,203 @@ apiVendasRouter.get('/transportadoras', authenticateToken, async (req, res, next
 // POST /transportadoras - Criar transportadora
 apiVendasRouter.post('/transportadoras', authenticateToken, async (req, res, next) => {
     try {
-        const { nome, razao_social, cnpj, ie, telefone, email, endereco, cidade, uf, cep } = req.body;
+        const { nome, razao_social, cnpj, ie, telefone, email, endereco, bairro, cidade, uf, cep, contato } = req.body;
 
-        if (!nome) {
-            return res.status(400).json({ message: 'Nome da transportadora é obrigatório.' });
+        if (!nome && !razao_social) {
+            return res.status(400).json({ message: 'Nome ou Razão Social da transportadora é obrigatório.' });
         }
 
+        // Garantir que a tabela existe com estrutura correta
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS transportadoras (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                razao_social VARCHAR(255),
+                nome_fantasia VARCHAR(255),
+                cnpj_cpf VARCHAR(255),
+                inscricao_estadual VARCHAR(50),
+                telefone VARCHAR(50),
+                email VARCHAR(255),
+                endereco TEXT,
+                bairro VARCHAR(100),
+                cidade VARCHAR(100),
+                estado CHAR(2),
+                cep VARCHAR(10),
+                contato VARCHAR(100),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        const _enc = lgpdCrypto ? lgpdCrypto.encryptPII : (v => v);
+
         const [result] = await pool.query(
-            `INSERT INTO transportadoras (nome, razao_social, cnpj, ie, telefone, email, endereco, cidade, uf, cep)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [nome, razao_social || null, cnpj || null, ie || null, telefone || null,
-             email || null, endereco || null, cidade || null, uf || null, cep || null]
+            `INSERT INTO transportadoras (razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, endereco, bairro, cidade, estado, cep, contato)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [razao_social || nome || null, nome || razao_social || null,
+             cnpj ? _enc(cnpj) : null, ie ? _enc(ie) : null,
+             telefone || null, email || null, endereco || null, bairro || null,
+             cidade || null, uf || null, cep || null, contato || null]
         );
 
         res.status(201).json({
             message: 'Transportadora criada com sucesso!',
-            id: result.insertId
+            id: result.insertId,
+            nome: nome || razao_social
+        });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// ========================================
+// TABELA DE FRETES POR TRANSPORTADORA + ESTADO
+// ========================================
+
+// GET /frete-tabelas - Listar tabelas de frete (opcionalmente filtrar por transportadora_id)
+apiVendasRouter.get('/frete-tabelas', authenticateToken, async (req, res, next) => {
+    try {
+        // Garantir tabela
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS frete_tabelas (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                transportadora_id INT NOT NULL,
+                estado_destino CHAR(2) NOT NULL,
+                valor_frete DECIMAL(15,2) DEFAULT 0,
+                valor_kg DECIMAL(10,4) DEFAULT 0,
+                percentual_nf DECIMAL(5,2) DEFAULT 0,
+                prazo_dias INT DEFAULT 5,
+                observacao TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uk_transp_estado (transportadora_id, estado_destino)
+            )
+        `);
+
+        let query = `SELECT ft.*, t.razao_social, t.nome_fantasia
+                     FROM frete_tabelas ft
+                     LEFT JOIN transportadoras t ON t.id = ft.transportadora_id
+                     WHERE 1=1`;
+        const params = [];
+
+        if (req.query.transportadora_id) {
+            query += ' AND ft.transportadora_id = ?';
+            params.push(parseInt(req.query.transportadora_id));
+        }
+        if (req.query.estado) {
+            query += ' AND ft.estado_destino = ?';
+            params.push(req.query.estado);
+        }
+
+        query += ' ORDER BY ft.transportadora_id, ft.estado_destino';
+
+        const [rows] = await pool.query(query, params);
+        res.json(rows);
+    } catch (error) {
+        next(error);
+    }
+});
+
+// POST /frete-tabelas - Criar/atualizar entrada de frete
+apiVendasRouter.post('/frete-tabelas', authenticateToken, async (req, res, next) => {
+    try {
+        const { transportadora_id, estado_destino, valor_frete, valor_kg, percentual_nf, prazo_dias, observacao } = req.body;
+
+        if (!transportadora_id || !estado_destino) {
+            return res.status(400).json({ message: 'Transportadora e Estado de destino são obrigatórios.' });
+        }
+
+        // UPSERT
+        const [result] = await pool.query(`
+            INSERT INTO frete_tabelas (transportadora_id, estado_destino, valor_frete, valor_kg, percentual_nf, prazo_dias, observacao)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+                valor_frete = VALUES(valor_frete),
+                valor_kg = VALUES(valor_kg),
+                percentual_nf = VALUES(percentual_nf),
+                prazo_dias = VALUES(prazo_dias),
+                observacao = VALUES(observacao)
+        `, [
+            parseInt(transportadora_id),
+            estado_destino.toUpperCase(),
+            parseFloat(valor_frete) || 0,
+            parseFloat(valor_kg) || 0,
+            parseFloat(percentual_nf) || 0,
+            parseInt(prazo_dias) || 5,
+            observacao || null
+        ]);
+
+        res.status(201).json({ message: 'Tabela de frete salva com sucesso!', id: result.insertId || null });
+    } catch (error) {
+        next(error);
+    }
+});
+
+// GET /frete-calcular - Calcular frete com base em transportadora + estado + peso + valor NF
+apiVendasRouter.get('/frete-calcular', authenticateToken, async (req, res, next) => {
+    try {
+        const { transportadora_id, estado, peso_bruto, valor_nf } = req.query;
+
+        if (!transportadora_id || !estado) {
+            return res.status(400).json({ message: 'transportadora_id e estado são obrigatórios.' });
+        }
+
+        // Buscar tabela de frete
+        const [rows] = await pool.query(
+            `SELECT * FROM frete_tabelas WHERE transportadora_id = ? AND estado_destino = ?`,
+            [parseInt(transportadora_id), estado.toUpperCase()]
+        );
+
+        if (!rows || rows.length === 0) {
+            return res.json({
+                encontrado: false,
+                valor_frete: 0,
+                mensagem: 'Nenhuma tabela de frete cadastrada para esta transportadora/estado.'
+            });
+        }
+
+        const tabela = rows[0];
+        const peso = parseFloat(peso_bruto) || 0;
+        const valorNF = parseFloat(valor_nf) || 0;
+
+        // Cálculo: max(valor_fixo, peso × valor_kg) + percentual sobre NF
+        let fretePeso = peso > 0 && tabela.valor_kg > 0 ? peso * parseFloat(tabela.valor_kg) : 0;
+        let freteFixo = parseFloat(tabela.valor_frete) || 0;
+        let fretePercentual = valorNF > 0 && tabela.percentual_nf > 0 ? valorNF * (parseFloat(tabela.percentual_nf) / 100) : 0;
+
+        // Base é o maior entre frete fixo e frete por peso
+        let freteBase = Math.max(freteFixo, fretePeso);
+        // Adiciona percentual sobre NF (GRIS/Ad Valorem)
+        let freteTotal = freteBase + fretePercentual;
+
+        // Tabela de impostos por estado (mesma do frontend)
+        const icmsTable = {
+            'AC': {icms:17, difal:10, st:3}, 'AL': {icms:18, difal:6, st:3}, 'AP': {icms:18, difal:6, st:3},
+            'AM': {icms:20, difal:8, st:3}, 'BA': {icms:20.5, difal:8.5, st:3}, 'CE': {icms:20, difal:8, st:3},
+            'DF': {icms:20, difal:8, st:3}, 'ES': {icms:17, difal:5, st:3}, 'GO': {icms:19, difal:7, st:3},
+            'MA': {icms:22, difal:10, st:3}, 'MT': {icms:17, difal:5, st:3}, 'MS': {icms:17, difal:5, st:3},
+            'MG': {icms:18, difal:6, st:11.66}, 'PA': {icms:19, difal:7, st:3}, 'PB': {icms:20, difal:8, st:3},
+            'PR': {icms:19.5, difal:7.5, st:3}, 'PE': {icms:20.5, difal:8.5, st:3}, 'PI': {icms:21, difal:9, st:3},
+            'RJ': {icms:22, difal:10, st:3}, 'RN': {icms:20, difal:8, st:3}, 'RS': {icms:17, difal:5, st:3},
+            'RO': {icms:17.5, difal:5.5, st:3}, 'RR': {icms:20, difal:8, st:3}, 'SC': {icms:17, difal:5, st:3},
+            'SP': {icms:18, difal:0, st:3}, 'SE': {icms:19, difal:7, st:3}, 'TO': {icms:20, difal:8, st:3}
+        };
+        const impostos = icmsTable[estado.toUpperCase()] || {icms:18, difal:0, st:3};
+
+        res.json({
+            encontrado: true,
+            valor_frete: Math.round(freteTotal * 100) / 100,
+            detalhamento: {
+                frete_fixo: freteFixo,
+                frete_peso: fretePeso,
+                frete_percentual_nf: fretePercentual,
+                peso_bruto: peso,
+                valor_nf: valorNF,
+                prazo_dias: tabela.prazo_dias
+            },
+            impostos: {
+                icms: impostos.icms,
+                difal: impostos.difal,
+                icms_st: impostos.st
+            }
         });
     } catch (error) {
         next(error);
