@@ -791,7 +791,8 @@ module.exports = function createVendasExtendedRoutes(deps) {
 
             const condicaoPag = pedido.condicao_pagamento || pedido.condicoes_pagamento || '--';
             const transportadora = pedido.transportadora_nome || pedido.transp_razao_social || pedido.cliente_transportadora || '--';
-            const tipoFrete = pedido.tipo_frete === 'CIF' ? 'CIF (Remetente)' : pedido.tipo_frete === 'FOB' ? 'FOB (Destinatario)' : pedido.tipo_frete || '--';
+            const freteMapPdf = { '0': 'CIF (Remetente)', '1': 'FOB (Destinatario)', 'CIF': 'CIF (Remetente)', 'FOB': 'FOB (Destinatario)' };
+            const tipoFrete = freteMapPdf[String(pedido.tipo_frete)] || pedido.tipo_frete || '--';
 
             const condH = 24;
             doc.rect(ML, y, MW, condH).fillColor(C.white).fill();
@@ -892,8 +893,18 @@ module.exports = function createVendasExtendedRoutes(deps) {
                        p.created_at as data_criacao,
                        p.transportadora_id,
                        p.transportadora_nome,
-                       c.nome as cliente_nome, c.email as cliente_email, c.telefone as cliente_telefone,
-                       c.cnpj as cliente_cnpj, c.endereco as cliente_endereco,
+                       c.nome as cliente_nome,
+                       c.razao_social as cliente_razao_social,
+                       c.nome_fantasia as cliente_nome_fantasia,
+                       COALESCE(c.cnpj, c.cnpj_cpf) as cliente_cnpj,
+                       c.inscricao_estadual as cliente_ie,
+                       c.email as cliente_email,
+                       c.telefone as cliente_telefone,
+                       c.endereco as cliente_endereco,
+                       c.bairro as cliente_bairro,
+                       c.cidade as cliente_cidade,
+                       c.estado as cliente_estado,
+                       c.cep as cliente_cep,
                        e.nome_fantasia as empresa_nome, e.cnpj as empresa_cnpj,
                        u.nome as vendedor_nome,
                        t.razao_social as transp_razao_social,

@@ -3231,8 +3231,9 @@
 
             const freteVal = parseFloat(pedido.frete) || 0;
             const totalGeral = subtotalCalc > 0 ? (subtotalCalc - descontoCalc + freteVal) : (parseFloat(pedido.valor_total || pedido.valor) || 0);
+            const freteMap = { '0': 'CIF (Remetente)', '1': 'FOB (Destinatário)', 'CIF': 'CIF (Remetente)', 'FOB': 'FOB (Destinatário)' };
             const obsTexto = pedido.observacoes || pedido.observacao || pedido.descricao || '';
-            const nomeCliente = pedido.cliente_nome || pedido.cliente || 'Não informado';
+            const nomeCliente = pedido.cliente_razao_social || pedido.cliente_nome_fantasia || pedido.cliente_nome || pedido.cliente || 'Não informado';
 
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
@@ -3332,11 +3333,14 @@
                         <div class="info-section">
                             <h3>CLIENTE</h3>
                             <div class="info-row"><span class="label">Nome:</span><span class="value">${esc(nomeCliente)}</span></div>
+                            ${pedido.empresa_nome ? `<div class="info-row"><span class="label">Empresa:</span><span class="value">${esc(pedido.empresa_nome)}</span></div>` : ''}
                             ${pedido.cliente_cnpj ? `<div class="info-row"><span class="label">CNPJ/CPF:</span><span class="value">${esc(pedido.cliente_cnpj)}</span></div>` : ''}
+                            ${pedido.cliente_ie ? `<div class="info-row"><span class="label">IE:</span><span class="value">${esc(pedido.cliente_ie)}</span></div>` : ''}
                             ${pedido.cliente_telefone ? `<div class="info-row"><span class="label">Telefone:</span><span class="value">${esc(pedido.cliente_telefone)}</span></div>` : ''}
                             ${pedido.cliente_email ? `<div class="info-row"><span class="label">E-mail:</span><span class="value">${esc(pedido.cliente_email)}</span></div>` : ''}
                             ${pedido.cliente_endereco ? `<div class="info-row"><span class="label">Endereço:</span><span class="value">${esc(pedido.cliente_endereco)}${pedido.cliente_bairro ? ', ' + esc(pedido.cliente_bairro) : ''}</span></div>` : ''}
-                            ${pedido.cliente_cidade ? `<div class="info-row"><span class="label">Cidade/UF:</span><span class="value">${esc(pedido.cliente_cidade)}${pedido.cliente_estado ? '/' + esc(pedido.cliente_estado) : ''}</span></div>` : ''}
+                            ${pedido.cliente_cidade || pedido.cliente_estado ? `<div class="info-row"><span class="label">Cidade/UF:</span><span class="value">${esc(pedido.cliente_cidade || '')}${pedido.cliente_estado ? '/' + esc(pedido.cliente_estado) : ''}</span></div>` : ''}
+                            ${pedido.cliente_cep ? `<div class="info-row"><span class="label">CEP:</span><span class="value">${esc(pedido.cliente_cep)}</span></div>` : ''}
                         </div>
                     </div>
 
@@ -3344,7 +3348,7 @@
                     <div class="info-grid" style="margin-bottom:14px;">
                         <div class="info-section full-width">
                             <h3>TRANSPORTE / FRETE</h3>
-                            ${pedido.tipo_frete ? `<div class="info-row"><span class="label">Tipo Frete:</span><span class="value">${esc(pedido.tipo_frete)}</span></div>` : ''}
+                            ${pedido.tipo_frete != null && pedido.tipo_frete !== '' ? `<div class="info-row"><span class="label">Tipo Frete:</span><span class="value">${esc(freteMap[String(pedido.tipo_frete)] || pedido.tipo_frete)}</span></div>` : ''}
                             ${pedido.transportadora_nome || pedido.transp_razao_social ? `<div class="info-row"><span class="label">Transportadora:</span><span class="value">${esc(pedido.transportadora_nome || pedido.transp_razao_social)}</span></div>` : ''}
                         </div>
                     </div>` : ''}
