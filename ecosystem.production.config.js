@@ -3,8 +3,9 @@ module.exports = {
     {
       name: 'aluforce-v2-production',
       script: 'server.js',
-      instances: 4, // Cluster mode - aumentado para 4 instâncias
+      instances: 4, // Cluster mode - 4 instâncias
       exec_mode: 'cluster',
+      restart_delay: 3000, // Stagger startup: 3s between instances to avoid DB pool exhaustion
       node_args: '--max-old-space-size=2048', // 2GB de memória por instância
       env: {
         NODE_ENV: 'development',

@@ -37,7 +37,8 @@ if (!process.env.REFRESH_SECRET) {
  * @returns {Promise<Object>}
  */
 async function generateTokenPair(user, pool, deviceId = 'default') {
-    const { id, username, nome, role, empresa_id, area } = user;
+    const { id, nome, role, empresa_id, area } = user;
+    const username = user.username || user.email || user.login;
     
     // Payload mínimo para access token (curto, vai no header de cada request)
     const accessPayload = {
@@ -124,7 +125,7 @@ async function refreshTokens(refreshToken, pool) {
         
         // Buscar dados atualizados do usuário
         const [users] = await pool.query(`
-            SELECT id, email, login, nome, role, empresa_id, area, status
+            SELECT id, email, login, nome, role, empresa_default_id AS empresa_id, areas AS area, status
             FROM usuarios WHERE id = ? AND status = 'ativo'
         `, [decoded.userId]);
         

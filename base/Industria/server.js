@@ -191,7 +191,7 @@ const HOST = process.env.HOST || '0.0.0.0';
 
 // reference to the running http.Server (set when app.listen is called)
 let serverInstance = null;
-let DB_AVAILABLE = true;
+let DB_AVAILABLE = false; // Starts false — flipped to true after DB connection test in startServer()
 
 // AUDIT-FIX: JWT secret MUST come from env. Dev gets ephemeral random secret (tokens won't survive restart).
 const JWT_SECRET = process.env.JWT_SECRET || (() => {
@@ -373,13 +373,13 @@ const DB_CONFIG = {
     database: process.env.DB_NAME || 'aluforce_vendas',
     port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : 3306,
     waitForConnections: true,
-    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 200, // ENTERPRISE: 200 conexões para suportar 10K+ usuários
-    queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 500, // ENTERPRISE: Fila ampla para picos
+    connectionLimit: parseInt(process.env.DB_CONN_LIMIT) || 20, // Per-instance limit (×4 cluster = 80 total)
+    queueLimit: parseInt(process.env.DB_QUEUE_LIMIT) || 100,
     // ⚡ ENTERPRISE: Otimizações de performance
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
-    connectTimeout: 10000,
-    maxIdle: 50, // Manter 50 conexões idle para resposta rápida
+    connectTimeout: 15000,
+    maxIdle: Math.min(parseInt(process.env.DB_CONN_LIMIT) || 20, 10), // Must be <= connectionLimit
     idleTimeout: 60000, // Liberar conexões idle após 60s
     timezone: '+00:00',
     multipleStatements: false,
@@ -423,8 +423,16 @@ try {
     });
 
     // Testar conexão imediatamente
+    const instanceId = parseInt(process.env.NODE_APP_INSTANCE || process.env.pm_id || '0', 10);
     pool.query('SELECT 1').then(async () => {
         console.log('✅ Pool de conexões MySQL criado e testado com sucesso');
+        DB_AVAILABLE = true; // DB is reachable — enable API routes
+
+        // Only run DDL migrations on cluster instance 0 to avoid 4× concurrent DDLs
+        if (instanceId !== 0) {
+            console.log(`⚡ Worker #${instanceId}: pulando migrações (só worker 0 executa)`);
+            return;
+        }
         // AUDIT-FIX R-13: Executar migrações de estrutura na inicialização
         try {
             const { runMigrations } = require('./database/migrations/startup-tables');
@@ -2735,7 +2743,10 @@ app.use((req, res, next) => {
 // AUDIT-FIX ARCH-003: Centralized error handler with structured logging
 app.use((err, req, res, next) => {
     // Determine error type and severity
-    const statusCode = err.statusCode || err.status || 500;
+    // Circuit breaker / DB unavailable / connection errors → 503
+    const isCircuitBreaker = err.message?.includes('circuit breaker') || err.message?.includes('temporariamente indisponível');
+    const isDbConnError = err.code === 'ETIMEDOUT' || err.code === 'ECONNREFUSED' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ER_CON_COUNT_ERROR';
+    const statusCode = (isCircuitBreaker || isDbConnError) ? 503 : (err.statusCode || err.status || 500);
     const isServerError = statusCode >= 500;
 
     // Structured error logging via logger
@@ -2809,13 +2820,19 @@ const startServer = async () => {
         } else {
             try {
                 await pool.query('SELECT 1');
+                DB_AVAILABLE = true; // DB confirmed reachable
                 console.log('✅ Conexão com o banco de dados estabelecida com sucesso.');
                 console.log(`⚡ Conexão DB em ${Date.now() - startupTime}ms`);
 
-                // ⚡ OTIMIZAÇÃO: Pular migrações se SKIP_MIGRATIONS=1
-                if (SKIP_MIGRATIONS) {
-                    console.log('⚡ SKIP_MIGRATIONS ativo - pulando verificações de schema');
-                    console.log('💡 Use "npm run db:migrate" para executar migrações quando necessário\n');
+                // Only run DDL migrations on cluster instance 0
+                const _inst = parseInt(process.env.NODE_APP_INSTANCE || process.env.pm_id || '0', 10);
+                // ⚡ OTIMIZAÇÃO: Pular migrações se SKIP_MIGRATIONS=1 ou worker != 0
+                if (SKIP_MIGRATIONS || _inst !== 0) {
+                    if (_inst !== 0) console.log(`⚡ Worker #${_inst}: pulando migrações startServer()`);
+                    else {
+                        console.log('⚡ SKIP_MIGRATIONS ativo - pulando verificações de schema');
+                        console.log('💡 Use "npm run db:migrate" para executar migrações quando necessário\n');
+                    }
                 } else {
                     console.log('🔄 Executando verificações de schema...');
                     console.log('💡 Defina SKIP_MIGRATIONS=1 no .env para inicialização mais rápida\n');
