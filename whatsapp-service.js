@@ -1,6 +1,7 @@
 // ============================================
-// ALUFORCE - Serviço WhatsApp Bot
+// ALUFORCE - Serviço WhatsApp Bot v2.0
 // Envia notificações em tempo real para colaboradores
+// Com proteção contra crash loop e memory leak
 // ============================================
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
@@ -18,7 +19,7 @@ const io = new Server(server, {
     cors: { origin: '*' }
 });
 
-const PORT = 3002;
+const PORT = process.env.PORT || 3002;
 
 // Estado do WhatsApp
 let whatsappClient = null;
@@ -26,28 +27,80 @@ let whatsappStatus = 'disconnected';
 let qrCodeData = null;
 let connectedNumber = null;
 
+// Controle de reconexão com backoff exponencial
+let reconnectAttempts = 0;
+const MAX_RECONNECT_ATTEMPTS = 10;
+const BASE_RECONNECT_DELAY = 5000;   // 5s
+const MAX_RECONNECT_DELAY = 300000;  // 5 minutos
+let reconnectTimer = null;
+let isShuttingDown = false;
+
+// Proteção global contra crashes não-tratados
+process.on('uncaughtException', (err) => {
+    console.error('🔴 [WhatsApp] uncaughtException:', err.message);
+    // NÃO mata o processo — apenas loga
+});
+process.on('unhandledRejection', (reason) => {
+    console.error('🔴 [WhatsApp] unhandledRejection:', reason);
+});
+
 // ============================================
-// CLIENTE WHATSAPP
+// CLIENTE WHATSAPP (com proteção anti-crash)
 // ============================================
-function initializeWhatsApp() {
-    console.log('🟡 Iniciando cliente WhatsApp...');
+async function destroyClient() {
+    if (!whatsappClient) return;
+    try {
+        await whatsappClient.destroy();
+    } catch (e) {
+        console.error('⚠️ Erro ao destruir cliente antigo:', e.message);
+    }
+    whatsappClient = null;
+}
+
+function scheduleReconnect() {
+    if (isShuttingDown) return;
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        console.error(`🔴 Limite de ${MAX_RECONNECT_ATTEMPTS} tentativas atingido. Aguardando reconexão manual.`);
+        whatsappStatus = 'max_retries';
+        io.emit('whatsapp_status', { status: whatsappStatus, error: `${MAX_RECONNECT_ATTEMPTS} tentativas falharam. Use /api/whatsapp/reconectar` });
+        return;
+    }
+    // Backoff exponencial: 5s, 10s, 20s, 40s... max 5min
+    const delay = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, reconnectAttempts), MAX_RECONNECT_DELAY);
+    reconnectAttempts++;
+    console.log(`🔄 Reconectando em ${delay / 1000}s (tentativa ${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})...`);
+    
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(() => {
+        initializeWhatsApp();
+    }, delay);
+}
+
+async function initializeWhatsApp() {
+    if (isShuttingDown) return;
+    
+    // Destruir cliente anterior para evitar memory leak
+    await destroyClient();
+    
+    console.log(`🟡 Iniciando cliente WhatsApp... (tentativa ${reconnectAttempts + 1})`);
     
     whatsappClient = new Client({
         authStrategy: new LocalAuth({
             dataPath: '/var/www/aluforce/.wwebjs_auth'
         }),
         puppeteer: {
-            headless: true,
+            headless: 'new',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--disable-dev-shm-usage',
                 '--disable-accelerated-2d-canvas',
                 '--no-first-run',
-                '--no-zygote',
                 '--disable-gpu'
-            ]
-        }
+            ],
+            timeout: 90000
+        },
+        qrMaxRetries: 3
     });
 
     // Evento: QR Code gerado
@@ -55,8 +108,11 @@ function initializeWhatsApp() {
         console.log('📱 QR Code gerado! Escaneie com o WhatsApp:');
         qrcode.generate(qr, { small: true });
         
-        // Gerar QR Code em base64 para a interface web
-        qrCodeData = await QRCode.toDataURL(qr);
+        try {
+            qrCodeData = await QRCode.toDataURL(qr);
+        } catch (e) {
+            console.error('Erro ao gerar QR base64:', e.message);
+        }
         whatsappStatus = 'qr_ready';
         io.emit('whatsapp_status', { status: whatsappStatus, qrCode: qrCodeData });
     });
@@ -66,6 +122,7 @@ function initializeWhatsApp() {
         console.log('✅ WhatsApp autenticado!');
         whatsappStatus = 'authenticated';
         qrCodeData = null;
+        reconnectAttempts = 0; // Reset no sucesso
         io.emit('whatsapp_status', { status: whatsappStatus });
     });
 
@@ -73,11 +130,15 @@ function initializeWhatsApp() {
     whatsappClient.on('ready', async () => {
         console.log('🟢 WhatsApp Bot PRONTO!');
         whatsappStatus = 'ready';
+        reconnectAttempts = 0; // Reset no sucesso
         
-        // Obter número conectado
-        const info = whatsappClient.info;
-        connectedNumber = info.wid.user;
-        console.log(`📱 Conectado como: ${connectedNumber}`);
+        try {
+            const info = whatsappClient.info;
+            connectedNumber = info.wid.user;
+            console.log(`📱 Conectado como: ${connectedNumber}`);
+        } catch (e) {
+            console.error('⚠️ Não foi possível obter número:', e.message);
+        }
         
         io.emit('whatsapp_status', { 
             status: whatsappStatus, 
@@ -92,23 +153,24 @@ function initializeWhatsApp() {
         connectedNumber = null;
         io.emit('whatsapp_status', { status: whatsappStatus, reason });
         
-        // Tentar reconectar após 5 segundos
-        setTimeout(() => {
-            initializeWhatsApp();
-        }, 5000);
+        scheduleReconnect();
     });
 
-    // Evento: Erro de autenticação
+    // Evento: Erro de autenticação (não tenta reconectar — precisa de ação manual)
     whatsappClient.on('auth_failure', (msg) => {
         console.error('❌ Falha na autenticação:', msg);
         whatsappStatus = 'auth_failure';
         io.emit('whatsapp_status', { status: whatsappStatus, error: msg });
+        // NÃO reconecta — precisa escanear QR novamente manualmente
     });
 
     // Inicializar cliente
-    whatsappClient.initialize().catch(err => {
-        console.error('Erro ao inicializar WhatsApp:', err);
-    });
+    try {
+        await whatsappClient.initialize();
+    } catch (err) {
+        console.error('❌ Erro ao inicializar WhatsApp:', err.message);
+        scheduleReconnect();
+    }
 }
 
 // ============================================
@@ -247,10 +309,10 @@ app.post('/api/whatsapp/desconectar', async (req, res) => {
 });
 
 // Reconectar WhatsApp
-app.post('/api/whatsapp/reconectar', (req, res) => {
-    if (whatsappClient) {
-        whatsappClient.destroy();
-    }
+app.post('/api/whatsapp/reconectar', async (req, res) => {
+    reconnectAttempts = 0; // Reset tentativas
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    await destroyClient();
     initializeWhatsApp();
     res.json({ success: true, message: 'Reconectando...' });
 });
@@ -483,11 +545,47 @@ module.exports = {
 server.listen(PORT, () => {
     console.log(`
 ╔═══════════════════════════════════════════════════════╗
-║     🤖 ALUFORCE WhatsApp Bot - Porta ${PORT}            ║
+║     🤖 ALUFORCE WhatsApp Bot v2.0 - Porta ${PORT}       ║
 ║     📱 Acesse: http://localhost:${PORT}/whatsapp         ║
 ╚═══════════════════════════════════════════════════════╝
     `);
     
+    // Sinalizar PM2 que o processo está pronto
+    if (process.send) process.send('ready');
+    
     // Inicializar WhatsApp
     initializeWhatsApp();
 });
+
+// ============================================
+// GRACEFUL SHUTDOWN (evita corrupção de sessão)
+// ============================================
+async function gracefulShutdown(signal) {
+    console.log(`\n⚠️ Recebido ${signal}. Encerrando gracefully...`);
+    isShuttingDown = true;
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    
+    try {
+        if (whatsappClient) {
+            console.log('🔌 Desconectando WhatsApp...');
+            await whatsappClient.destroy();
+            whatsappClient = null;
+        }
+    } catch (e) {
+        console.error('Erro ao desconectar:', e.message);
+    }
+    
+    server.close(() => {
+        console.log('✅ Servidor encerrado.');
+        process.exit(0);
+    });
+    
+    // Forçar saída após 10s
+    setTimeout(() => {
+        console.error('⏰ Timeout — forçando saída.');
+        process.exit(1);
+    }, 10000);
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
