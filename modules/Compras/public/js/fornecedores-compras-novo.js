@@ -1,4 +1,4 @@
-﻿/**
+/**
  * FORNECEDORES - Módulo Compras
  */
 
@@ -43,7 +43,7 @@
         container.innerHTML = `
             <div class="stats-cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #225cfa, #1a4fd4);">
                         <i class="fas fa-truck"></i>
                     </div>
                     <div class="stat-content">

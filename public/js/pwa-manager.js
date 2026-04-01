@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // ALUFORCE PWA - Gerenciamento do Progressive Web App
 // Versão: 3.0.0 - ATIVADO
 // Atualizado: 01/03/2026
@@ -468,7 +468,7 @@
                 gravity: "bottom",
                 position: "center",
                 style: {
-                    background: type === 'success' ? '#10b981' : '#3b82f6'
+                    background: type === 'success' ? '#225cfa' : '#3b82f6'
                 }
             }).showToast();
         } else {

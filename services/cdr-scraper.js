@@ -34,6 +34,9 @@ let isLoggedIn = false;
 let lastLoginTime = 0;
 const LOGIN_TTL = 30 * 60 * 1000; // 30 min session TTL
 
+// Mutex para evitar scraping concorrente (apenas 1 browser por vez)
+let scrapeLock = null;
+
 /**
  * Obtém ou reutiliza instância do browser
  */
@@ -92,7 +95,7 @@ async function getLoggedInPage() {
     
     // Fazer login
     console.log('[CDR-Scraper] Fazendo login em', CDR_CONFIG.url);
-    await pageInstance.goto(CDR_CONFIG.url, { waitUntil: 'networkidle2', timeout: 30000 });
+    await pageInstance.goto(CDR_CONFIG.url, { waitUntil: 'networkidle2', timeout: 60000 });
     
     // Preencher formulário
     await pageInstance.type('#username', CDR_CONFIG.username, { delay: 20 });
@@ -100,7 +103,7 @@ async function getLoggedInPage() {
     
     // Submit
     await Promise.all([
-        pageInstance.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 }).catch(() => {}),
+        pageInstance.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }).catch(() => {}),
         pageInstance.click('button[type="submit"]')
     ]);
     
@@ -170,21 +173,54 @@ async function fetchCDRData(dataInicio, dataFim, tipo = '0', filtro = '') {
     const dataF = formatDate(dataFim);
     const cacheKey = `${dataI}_${dataF}_${tipo}_${filtro}`;
     
-    // Verificar cache
+    // Verificar cache ANTES do lock (evita espera desnecessária)
     const now = Date.now();
     if (cdrDataCache.data && cdrDataCache.dateKey === cacheKey && (now - cdrDataCache.timestamp) < cdrDataCache.ttl) {
         console.log('[CDR-Scraper] Usando cache (', cdrDataCache.data.length, 'registros)');
         return cdrDataCache.data;
     }
     
-    const page = await getLoggedInPage();
+    // Mutex: se já tem scraping em andamento, aguardar e usar cache
+    if (scrapeLock) {
+        console.log('[CDR-Scraper] Aguardando scraping em andamento...');
+        try {
+            await scrapeLock;
+        } catch (e) { /* ignore lock error */ }
+        // Após espera, verificar cache novamente
+        if (cdrDataCache.data && cdrDataCache.dateKey === cacheKey && (Date.now() - cdrDataCache.timestamp) < cdrDataCache.ttl) {
+            console.log('[CDR-Scraper] Usando cache após espera (', cdrDataCache.data.length, 'registros)');
+            return cdrDataCache.data;
+        }
+    }
+    
+    // Adquirir lock
+    let releaseLock;
+    scrapeLock = new Promise(resolve => { releaseLock = resolve; });
+    
+    try {
+        return await _doScrape(dataI, dataF, tipo, filtro, cacheKey);
+    } finally {
+        scrapeLock = null;
+        releaseLock();
+    }
+}
+
+async function _doScrape(dataI, dataF, tipo, filtro, cacheKey) {
+    let page;
+    try {
+        page = await getLoggedInPage();
+    } catch (browserErr) {
+        console.error('[CDR-Scraper] Falha ao obter browser/login, resetando:', browserErr.message);
+        await closeBrowser();
+        throw browserErr;
+    }
     
     console.log(`[CDR-Scraper] Buscando CDR de ${dataI} a ${dataF}...`);
     
     // Navegar para o relatório de ligações via menu
     // Primeiro, garantir que estamos no dashboard
     if (!page.url().includes('dashboard')) {
-        await page.goto(CDR_CONFIG.url + '/dashboard/customer/index', { waitUntil: 'networkidle2', timeout: 15000 });
+        await page.goto(CDR_CONFIG.url + '/dashboard/customer/index', { waitUntil: 'networkidle2', timeout: 60000 });
         await new Promise(r => setTimeout(r, 1000));
     }
     
@@ -320,7 +356,7 @@ async function fetchCDRData(dataInicio, dataFim, tipo = '0', filtro = '') {
     });
     
     // Atualizar cache
-    cdrDataCache = { data: processedRecords, timestamp: now, dateKey: cacheKey, ttl: 5 * 60 * 1000 };
+    cdrDataCache = { data: processedRecords, timestamp: Date.now(), dateKey: cacheKey, ttl: 5 * 60 * 1000 };
     
     console.log(`[CDR-Scraper] ${processedRecords.length} registros obtidos`);
     return processedRecords;

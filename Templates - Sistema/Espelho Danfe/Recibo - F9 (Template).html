@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recibo meia nota vinculado à DANFE - centralizado</title>
+  <style>
+    :root {
+      --ink: #0c1726;
+      --text: #385062;
+      --muted: #6d8092;
+      --line: #d8e4ed;
+      --line-soft: #edf4f8;
+      --surface: #ffffff;
+      --soft: #f6fafc;
+      --brand: #0b2842;
+      --brand-2: #103758;
+      --accent: #18b6c8;
+      --accent-soft: #e7fbfd;
+    }
+    * { box-sizing: border-box; }
+    @page { size: A4; margin: 0; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #eef4f8;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--text);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+    }
+    .a4-stage {
+      width: 210mm;
+      min-height: 297mm;
+      background: #eef4f8;
+      padding: 11mm 0;
+    }
+    .page-frame {
+      width: 184mm;
+      margin: 0 auto;
+    }
+    .page-shell {
+      background: white;
+      border: 1px solid #dbe8f1;
+      border-radius: 20px;
+      box-shadow: 0 18px 42px rgba(11, 40, 66, 0.08);
+      padding: 7mm;
+    }
+    .top-rule {
+      height: 5px;
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 62%, var(--accent) 100%);
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+    .receipt {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: white;
+    }
+    .receipt-head {
+      padding: 11px 13px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fcfe 100%);
+    }
+    .head-grid {
+      display: grid;
+      grid-template-columns: 1.22fr 0.88fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .logo-box {
+      width: 42px;
+      height: 42px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 72%, var(--accent) 100%);
+      color: white;
+      box-shadow: 0 10px 18px rgba(11, 40, 66, 0.14);
+      flex: 0 0 42px;
+    }
+    .logo-box svg { width: 24px; height: 24px; display: block; }
+    .brand-name {
+      margin: 0 0 3px;
+      color: var(--brand);
+      font-size: 17px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      color: var(--muted);
+      font-size: 8px;
+      line-height: 1.5;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .headline {
+      margin: 0;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.08;
+    }
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+    .doc-card {
+      border: 1px solid rgba(24, 182, 200, 0.34);
+      background: linear-gradient(180deg, #ffffff 0%, #f4fcfd 100%);
+      border-radius: 16px;
+      padding: 10px 11px;
+    }
+    .doc-card-title {
+      margin: 0 0 8px;
+      color: var(--brand);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .doc-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px 9px;
+    }
+    .meta-item {
+      padding: 7px 8px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid var(--line-soft);
+    }
+    .meta-label {
+      display: block;
+      font-size: 7px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+    .meta-value {
+      display: block;
+      color: var(--ink);
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 800;
+      word-break: break-word;
+    }
+    .body {
+      padding: 10px 13px 11px;
+    }
+    .statement {
+      padding: 9px 11px;
+      border-radius: 14px;
+      background: var(--soft);
+      border: 1px solid var(--line-soft);
+      font-size: 10px;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 9px;
+    }
+    .statement strong { color: var(--ink); }
+    .grid-4, .grid-3, .grid-2 {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 7px;
+    }
+    .grid-4 { grid-template-columns: 1.3fr 0.95fr 0.75fr 0.7fr; }
+    .grid-3 { grid-template-columns: 1.26fr 0.94fr 0.8fr; }
+    .grid-2 { grid-template-columns: 1fr 1fr; }
+    .field {
+      min-height: 51px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+      padding: 7px 9px 8px;
+    }
+    .field.tight { min-height: 44px; }
+    .field-label {
+      display: block;
+      color: var(--muted);
+      font-size: 7px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+    }
+    .field-value {
+      display: block;
+      color: var(--ink);
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 700;
+      word-break: break-word;
+    }
+    .field-help {
+      display: block;
+      color: var(--muted);
+      font-size: 8px;
+      line-height: 1.35;
+      margin-top: 3px;
+    }
+    .signature-grid {
+      display: grid;
+      grid-template-columns: 0.9fr 0.86fr 1.24fr;
+      gap: 7px;
+      margin-top: 4px;
+    }
+    .signature-card {
+      min-height: 70px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      padding: 8px 9px 9px;
+      background: white;
+    }
+    .signature-line {
+      border-top: 1px solid #9db0c2;
+      margin-top: 20px;
+      padding-top: 5px;
+      color: var(--muted);
+      font-size: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+    .tear-line {
+      position: relative;
+      margin: 10px 0 11px;
+      border-top: 2px dashed #9fb5c7;
+      height: 0;
+    }
+    .tear-line span {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: white;
+      padding: 0 10px;
+      color: var(--muted);
+      font-size: 7px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .danfe-placeholder {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fbfe 100%);
+      padding: 11px 13px 12px;
+    }
+    .placeholder-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line-soft);
+      margin-bottom: 10px;
+    }
+    .placeholder-title {
+      margin: 0;
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 0.02em;
+    }
+    .placeholder-badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--brand);
+      border: 1px solid rgba(24, 182, 200, 0.28);
+      font-size: 8px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .ghost-blocks {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 9px;
+      margin-bottom: 9px;
+    }
+    .ghost-card, .ghost-line, .ghost-table th, .ghost-table td {
+      border-color: #dfeaf2;
+    }
+    .ghost-card {
+      min-height: 42px;
+      border: 1px solid;
+      border-radius: 12px;
+      background: white;
+    }
+    .ghost-line {
+      height: 9px;
+      border: 1px solid;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #eff5f9, #fafcfe);
+      margin-bottom: 6px;
+    }
+    .ghost-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    .ghost-table th, .ghost-table td {
+      border: 1px solid;
+      padding: 6px 7px;
+      text-align: left;
+      color: var(--muted);
+    }
+    .ghost-table th {
+      background: #f4f8fb;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-size: 7px;
+    }
+    .footer-note {
+      margin-top: 8px;
+      font-size: 8px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .95em;
+    }
+    @media print {
+      body, .a4-stage { background: white; }
+      .page-shell {
+        box-shadow: none;
+        border-color: transparent;
+      }
+      .tear-line span { background: white; }
+    }
+  </style>
+</head>
+<body>
+  <main class="a4-stage">
+    <div class="page-frame">
+      <section class="page-shell">
+        <div class="top-rule"></div>
+
+        <section class="receipt">
+          <header class="receipt-head">
+            <div class="head-grid">
+              <div>
+                <div class="brand-wrap">
+                  <div class="logo-box">
+                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <path d="M14 16H30L22 28L14 16Z" fill="white" fill-opacity=".95"/>
+                      <path d="M34 16H50L24 48H8L34 16Z" fill="white"/>
+                      <path d="M40 30H56L42 48H26L40 30Z" fill="white" fill-opacity=".82"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <h1 class="brand-name">Zyntra</h1>
+                    <div class="brand-sub">Recibo integrado à DANFE · layout centralizado A4</div>
+                  </div>
+                </div>
+                <h2 class="headline">Recibo de Entrega / Recebimento</h2>
+                <p class="subtitle">
+                  Canhoto compacto para impressão junto da DANFE, com recibo centralizado na folha A4 e campos
+                  alinhados à estrutura do XML da NF-e e ao backend de entrega/recebimento.
+                </p>
+              </div>
+
+              <aside class="doc-card">
+                <p class="doc-card-title">Referência fiscal</p>
+                <div class="doc-meta">
+                  <div class="meta-item">
+                    <span class="meta-label">NF-e</span>
+                    <span class="meta-value">{{infNFe.ide.nNF}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Série</span>
+                    <span class="meta-value">{{infNFe.ide.serie}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Emissão</span>
+                    <span class="meta-value">{{infNFe.ide.dhEmi}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Valor total</span>
+                    <span class="meta-value">{{infNFe.total.ICMSTot.vNF}}</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </header>
+
+          <div class="body">
+            <div class="statement">
+              Recebi(emos) de <strong>{{infNFe.emit.xNome}}</strong> os produtos e/ou serviços constantes da DANFE
+              vinculada à NF-e <strong>{{infNFe.ide.nNF}}</strong>, série <strong>{{infNFe.ide.serie}}</strong>,
+              relacionados ao pedido <strong>{{backend.pedido.numero}}</strong> e conferidos no ato da entrega.
+            </div>
+
+            <div class="grid-4">
+              <div class="field">
+                <span class="field-label">Destinatário / Recebedor</span>
+                <span class="field-value">{{infNFe.dest.xNome}}</span>
+              </div>
+              <div class="field">
+                <span class="field-label">CNPJ / CPF</span>
+                <span class="field-value">{{infNFe.dest.CNPJ}}{{infNFe.dest.CPF}}</span>
+              </div>
+              <div class="field">
+                <span class="field-label">Pedido / OS</span>
+                <span class="field-value">{{backend.pedido.numero}}</span>
+              </div>
+              <div class="field">
+                <span class="field-label">Chave da NF-e</span>
+                <span class="field-value">{{protNFe.infProt.chNFe}}</span>
+              </div>
+            </div>
+
+            <div class="grid-3">
+              <div class="field">
+                <span class="field-label">Endereço de entrega</span>
+                <span class="field-value">{{infNFe.dest.enderDest.xLgr}}, {{infNFe.dest.enderDest.nro}} {{infNFe.dest.enderDest.xBairro}}</span>
+                <span class="field-help">{{infNFe.dest.enderDest.xMun}} / {{infNFe.dest.enderDest.UF}} · {{infNFe.dest.enderDest.CEP}}</span>
+              </div>
+              <div class="field">
+                <span class="field-label">Transportadora / Motorista</span>
+                <span class="field-value">{{infNFe.transp.transporta.xNome}}</span>
+                <span class="field-help">{{backend.logistica.motorista}}</span>
+              </div>
+              <div class="field">
+                <span class="field-label">Volumes / Romaneio</span>
+                <span class="field-value">{{infNFe.transp.vol.qVol}} volumes</span>
+                <span class="field-help">Romaneio {{backend.logistica.romaneio}}</span>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="field tight">
+                <span class="field-label">Observações da entrega</span>
+                <span class="field-value">{{backend.recibo.observacoes}}</span>
+              </div>
+              <div class="field tight">
+                <span class="field-label">Conferência / status</span>
+                <span class="field-value">{{backend.recibo.status_recebimento}}</span>
+              </div>
+            </div>
+
+            <div class="signature-grid">
+              <div class="signature-card">
+                <span class="field-label">Data e hora do recebimento</span>
+                <span class="field-value">{{backend.recibo.data_recebimento}} · {{backend.recibo.hora_recebimento}}</span>
+                <div class="signature-line">Data / hora</div>
+              </div>
+
+              <div class="signature-card">
+                <span class="field-label">Documento do recebedor</span>
+                <span class="field-value">{{backend.recibo.documento_recebedor}}</span>
+                <div class="signature-line">CPF / RG</div>
+              </div>
+
+              <div class="signature-card">
+                <span class="field-label">Nome legível e assinatura</span>
+                <span class="field-value">{{backend.recibo.nome_recebedor}}</span>
+                <div class="signature-line">Assinatura / carimbo</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div class="tear-line"><span>destacar e arquivar com a danfe</span></div>
+
+        <section class="danfe-placeholder">
+          <div class="placeholder-head">
+            <div>
+              <h3 class="placeholder-title">Área reservada para o corpo principal da DANFE</h3>
+              <div class="subtitle" style="margin-top:4px">
+                Bloco ilustrativo já alinhado ao mesmo enquadramento da folha A4. O recibo permanece centralizado
+                acima, sem encostar nas bordas de impressão.
+              </div>
+            </div>
+            <div class="placeholder-badge">continuação da danfe</div>
+          </div>
+
+          <div class="ghost-blocks">
+            <div>
+              <div class="ghost-card" style="padding:10px">
+                <div class="ghost-line" style="width:56%"></div>
+                <div class="ghost-line" style="width:91%"></div>
+                <div class="ghost-line" style="width:74%; margin-bottom:0"></div>
+              </div>
+            </div>
+            <div>
+              <div class="ghost-card" style="padding:10px">
+                <div class="ghost-line" style="width:44%"></div>
+                <div class="ghost-line" style="width:82%"></div>
+                <div class="ghost-line" style="width:65%; margin-bottom:0"></div>
+              </div>
+            </div>
+          </div>
+
+          <table class="ghost-table">
+            <thead>
+              <tr>
+                <th style="width:10%">Cód.</th>
+                <th style="width:38%">Descrição</th>
+                <th style="width:12%">NCM</th>
+                <th style="width:10%">Qtd.</th>
+                <th style="width:14%">Vlr. Unit.</th>
+                <th style="width:16%">Vlr. Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>0001</td>
+                <td>Área de itens da DANFE</td>
+                <td>0000.00.00</td>
+                <td>00</td>
+                <td>0,00</td>
+                <td>0,00</td>
+              </tr>
+              <tr>
+                <td>0002</td>
+                <td>Espaço reservado para integração do template principal</td>
+                <td>0000.00.00</td>
+                <td>00</td>
+                <td>0,00</td>
+                <td>0,00</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="footer-note">
+            Mapeamento base: <code>infNFe.ide.*</code>, <code>infNFe.emit.*</code>, <code>infNFe.dest.*</code>,
+            <code>infNFe.transp.*</code>, <code>infNFe.total.ICMSTot.*</code>, <code>protNFe.infProt.*</code> e
+            <code>backend.recibo.*</code>/<code>backend.logistica.*</code>.
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

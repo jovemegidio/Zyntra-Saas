@@ -154,7 +154,7 @@
 
         /* Botão Importar */
         .btn-importar {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            background: linear-gradient(135deg, #1a4fd4 0%, #1340b0 100%);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -168,7 +168,7 @@
             transition: all 0.3s ease;
         }
         .btn-importar:hover {
-            background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+            background: linear-gradient(135deg, #1340b0 0%, #065f46 100%);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
@@ -878,7 +878,7 @@
             <div class="extrato-resumo" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
                 <div style="text-align: center;">
                     <div style="font-size: 12px; color: #6b7280;">Total Entradas</div>
-                    <div id="extrato-total-entradas" style="font-size: 18px; font-weight: 700; color: #10b981;">R$ 0,00</div>
+                    <div id="extrato-total-entradas" style="font-size: 18px; font-weight: 700; color: #225cfa;">R$ 0,00</div>
                 </div>
                 <div style="text-align: center;">
                     <div style="font-size: 12px; color: #6b7280;">Total Saídas</div>
@@ -891,7 +891,7 @@
             </div>
 
             <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px;">
-                <button class="btn-primary" onclick="exportarExtratoPDF()" style="background: #059669;">
+                <button class="btn-primary" onclick="exportarExtratoPDF()" style="background: #1a4fd4;">
                     <i class="fas fa-file-pdf"></i> Exportar PDF
                 </button>
                 <button type="button" class="btn-danger" onclick="fecharModalExtrato()">Fechar</button>
@@ -916,7 +916,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label><i class="fas fa-arrow-down" style="color: #10b981; margin-right: 6px;"></i> Conta de Destino *</label>
+                    <label><i class="fas fa-arrow-down" style="color: #225cfa; margin-right: 6px;"></i> Conta de Destino *</label>
                     <select class="form-select" id="transf-conta-destino" required>
                         <option value="">Selecione a conta de destino...</option>
                     </select>
@@ -1004,7 +1004,7 @@
                 <button class="btn-primary" onclick="abrirExtratoDeVisualizacao()" style="padding: 12px;">
                     <i class="fas fa-file-invoice-dollar"></i> Ver Extrato
                 </button>
-                <button class="btn-primary" onclick="abrirMovimentacaoDeVisualizacao()" style="background: #059669; padding: 12px;">
+                <button class="btn-primary" onclick="abrirMovimentacaoDeVisualizacao()" style="background: #1a4fd4; padding: 12px;">
                     <i class="fas fa-plus-circle"></i> Nova Movimentação
                 </button>
                 <button class="btn-primary" onclick="editarContaDeVisualizacao()" style="background: #f59e0b; padding: 12px;">
@@ -1369,7 +1369,7 @@
                             else totalSaidas += valor;
 
                             const tipoLabel = {
-                                'entrada': { text: 'Entrada', color: '#10b981', bg: '#d1fae5' },
+                                'entrada': { text: 'Entrada', color: '#225cfa', bg: '#d1fae5' },
                                 'saida': { text: 'Saída', color: '#ef4444', bg: '#fee2e2' },
                                 'transferencia': { text: 'Transf.', color: '#f59e0b', bg: '#fef3c7' }
                             }[mov.tipo] || { text: mov.tipo, color: '#6b7280', bg: '#f3f4f6' };
@@ -1381,7 +1381,7 @@
                                     <td style="padding: 14px 12px; text-align: center;">
                                         <span style="background: ${tipoLabel.bg}; color: ${tipoLabel.color}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;">${tipoLabel.text}</span>
                                     </td>
-                                    <td style="padding: 14px 12px; text-align: right; font-size: 14px; font-weight: 600; color: ${isEntrada ? '#10b981' : '#ef4444'};">
+                                    <td style="padding: 14px 12px; text-align: right; font-size: 14px; font-weight: 600; color: ${isEntrada ? '#225cfa' : '#ef4444'};">
                                         ${isEntrada ? '+' : '-'} R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                                     </td>
                                 </tr>
@@ -1565,7 +1565,7 @@
 
             const statusEl = document.getElementById('visualizar-status');
             if (visualizarContaAtual.ativo !== false) {
-                statusEl.innerHTML = '<span style="color: #10b981;"><i class="fas fa-check-circle"></i> Ativa</span>';
+                statusEl.innerHTML = '<span style="color: #225cfa;"><i class="fas fa-check-circle"></i> Ativa</span>';
             } else {
                 statusEl.innerHTML = '<span style="color: #ef4444;"><i class="fas fa-times-circle"></i> Inativa</span>';
             }
@@ -1693,7 +1693,7 @@
             if (notificacoes.length === 0) {
                 lista.innerHTML = `
                     <div style="padding: 30px; text-align: center; color: #6b7280;">
-                        <i class="fas fa-check-circle" style="font-size: 32px; margin-bottom: 10px; display: block; color: #10b981;"></i>
+                        <i class="fas fa-check-circle" style="font-size: 32px; margin-bottom: 10px; display: block; color: #225cfa;"></i>
                         Nenhuma notificação pendente
                     </div>
                 `;
@@ -1701,7 +1701,7 @@
             }
 
             const tipoIcons = {
-                'success': { icon: 'fa-check-circle', color: '#10b981' },
+                'success': { icon: 'fa-check-circle', color: '#225cfa' },
                 'warning': { icon: 'fa-exclamation-triangle', color: '#f59e0b' },
                 'alert': { icon: 'fa-exclamation-circle', color: '#ef4444' },
                 'info': { icon: 'fa-info-circle', color: '#3b82f6' }
@@ -1778,7 +1778,7 @@
 
                 // Feedback visual de sucesso
                 btn.innerHTML = '<i class="fas fa-check"></i> Atualizado!';
-                btn.style.background = '#059669';
+                btn.style.background = '#1a4fd4';
 
                 setTimeout(() => {
                     btn.innerHTML = originalContent;

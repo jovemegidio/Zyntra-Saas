@@ -1,4 +1,4 @@
-﻿// ===== FLUXO DE CAIXA - ALUFORCE =====
+// ===== FLUXO DE CAIXA - ALUFORCE =====
 let períodoSelecionado = '7dias';
 let dataInicio = null;
 let dataFim = null;
@@ -126,8 +126,8 @@ function renderizarGrafico() {
                 {
                     label: 'Entradas',
                     data: entradas,
-                    borderColor: '#10b981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#225cfa',
+                    backgroundColor: 'rgba(34, 92, 250, 0.1)',
                     borderWidth: 2,
                     fill: true,
                     tension: 0.4
@@ -416,7 +416,7 @@ function mostrarAlerta(mensagem, tipo = 'info') {
         top: 20px;
         right: 20px;
         padding: 16px 24px;
-        background: ${tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#3b82f6'};
+        background: ${tipo === 'success' ? '#225cfa' : tipo === 'error' ? '#ef4444' : '#3b82f6'};
         color: white;
         border-radius: 12px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);

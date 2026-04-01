@@ -1,4 +1,4 @@
-﻿// ===== SISTEMA DE NOTIFICAÇÕES - ALUFORCE FINANCEIRO =====
+// ===== SISTEMA DE NOTIFICAÇÕES - ALUFORCE FINANCEIRO =====
 
 class SistemaNotificacoes {
     constructor() {
@@ -484,7 +484,7 @@ class SistemaNotificacoes {
 
             .notificação-icon.success {
                 background: #d1fae5;
-                color: #059669;
+                color: #1a4fd4;
             }
 
             .notificação-icon.info {
@@ -568,7 +568,7 @@ class SistemaNotificacoes {
             }
 
             .notificação-toast.success {
-                border-left-color: #10b981;
+                border-left-color: #225cfa;
             }
 
             .notificação-toast.info {
@@ -597,7 +597,7 @@ class SistemaNotificacoes {
 
             .notificação-toast.success .toast-icon {
                 background: #d1fae5;
-                color: #059669;
+                color: #1a4fd4;
             }
 
             .notificação-toast.info .toast-icon {

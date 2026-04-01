@@ -1,4 +1,4 @@
-﻿/**
+/**
  * VENDAS COMPLETO - ALUFORCE
  * Gestão completa de Pedidos, Orçamentos e Clientes
  */
@@ -692,7 +692,7 @@ const VendasCompleto = {
             'em_producao': '#3b82f6',
             'faturado': '#8b5cf6',
             'enviado': '#06b6d4',
-            'entregue': '#10b981',
+            'entregue': '#225cfa',
             'cancelado': '#ef4444'
         };
         return colorMap[status] || '#64748b';

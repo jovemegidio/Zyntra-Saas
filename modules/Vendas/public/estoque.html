@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -38,7 +38,7 @@
             --warning-yellow: #eab308;
             --danger-red: #ef4444;
             /* Status colors - alinhado com PCP */
-            --status-success: #10b981;
+            --status-success: #225cfa;
             --status-warning: #f59e0b;
             --status-danger: #ef4444;
         }
@@ -482,11 +482,11 @@
         .mdp-card-icon.estoque { background: #dbeafe; color: #1d4ed8; }
         .mdp-card-icon.bobina  { background: #e0e7ff; color: #4338ca; }
         .mdp-card-icon.rolo    { background: #f3e8ff; color: #7c3aed; }
-        .mdp-card-icon.preco   { background: #d1fae5; color: #059669; }
+        .mdp-card-icon.preco   { background: #d1fae5; color: #1a4fd4; }
         .mdp-card-val {
             font-size: 22px; font-weight: 800; color: #0f172a; line-height: 1;
         }
-        .mdp-card-val.preco { color: #059669; font-size: 18px; }
+        .mdp-card-val.preco { color: #1a4fd4; font-size: 18px; }
         .mdp-card-val small {
             font-size: 11px; font-weight: 500; color: #64748b; margin-left: 2px;
         }
@@ -1035,11 +1035,13 @@
                         }
                         
                         // Nome do usuário
-                        document.getElementById('user-name').textContent = primeiroNome;
+                        const userNameEl = document.getElementById('user-name');
+                        if (userNameEl) userNameEl.textContent = primeiroNome;
                         
                         // Iniciais
                         const initials = (user.nome || userName).split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
-                        document.getElementById('user-initials').textContent = initials;
+                        const userInitialsEl = document.getElementById('user-initials');
+                        if (userInitialsEl) userInitialsEl.textContent = initials;
                         
                         // Foto do usuário - verificar múltiplos campos
                         let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
@@ -1050,9 +1052,11 @@
                         
                         if (userAvatar) {
                             const photoEl = document.getElementById('user-photo');
-                            photoEl.src = userAvatar;
-                            photoEl.classList.add('visible');
-                            document.getElementById('user-initials').style.display = 'none';
+                            if (photoEl) {
+                                photoEl.src = userAvatar;
+                                photoEl.classList.add('visible');
+                            }
+                            if (userInitialsEl) userInitialsEl.style.display = 'none';
                         }
                     }
                 }
@@ -1597,7 +1601,7 @@
                             <div>
                                 <div class="mdp-header-title">${escapeHtml(nome)}</div>
                                 <div class="mdp-header-sub">
-                                    <span style="font-family:monospace;font-weight:600;">${escapeHtml(código)}</span>
+                                    <span style="font-family:monospace;font-weight:600;">${escapeHtml(codigo)}</span>
                                     &nbsp;·&nbsp; ${escapeHtml(categoria)}
                                     ${sku !== '-' ? ' &nbsp;·&nbsp; SKU: '+escapeHtml(sku) : ''}
                                 </div>

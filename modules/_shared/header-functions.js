@@ -1,4 +1,4 @@
-﻿// JavaScript compartilhado para cabeçalho padronizado - ALUFORCE
+// JavaScript compartilhado para cabeçalho padronizado - ALUFORCE
 
 // Função para carregar informações do usuário
 async function loadUserInfo() {
@@ -160,7 +160,7 @@ function showNotification(message, type = 'info') {
         position: fixed;
         top: 80px;
         right: 20px;
-        background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#3b82f6'};
+        background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#225cfa' : '#3b82f6'};
         color: white;
         padding: 12px 20px;
         border-radius: 6px;

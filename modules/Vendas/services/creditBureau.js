@@ -395,7 +395,7 @@ function classificarScore(score, bureau = 'serasa') {
     if (score >= 800) {
         return { faixa: 'Excelente', cor: '#22c55e', risco: 'muito baixo' };
     } else if (score >= 600) {
-        return { faixa: 'Bom', cor: '#84cc16', risco: 'baixo' };
+        return { faixa: 'Bom', cor: '#225cfa', risco: 'baixo' };
     } else if (score >= 400) {
         return { faixa: 'Regular', cor: '#eab308', risco: 'médio' };
     } else if (score >= 200) {

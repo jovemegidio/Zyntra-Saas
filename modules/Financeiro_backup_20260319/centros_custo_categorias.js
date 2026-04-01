@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // GESTÃO DE CENTROS DE CUSTO E CATEGORIAS - Sistema Financeiro Aluforce
 // ============================================================================
 
@@ -123,12 +123,12 @@ function criarCardCentroCusto(centro) {
 
                 <div class="info-row">
                     <span class="info-label">Total Receitas:</span>
-                    <span class="info-value" style="color: #10b981;">R$ ${formatarMoeda(centro.total_receitas)}</span>
+                    <span class="info-value" style="color: #225cfa;">R$ ${formatarMoeda(centro.total_receitas)}</span>
                 </div>
 
                 <div class="info-row">
                     <span class="info-label">Saldo Líquido:</span>
-                    <span class="info-value" style="color: ${saldoLiquido >= 0 ? '#10b981' : '#ef4444'};">R$ ${formatarMoeda(Math.abs(saldoLiquido))}</span>
+                    <span class="info-value" style="color: ${saldoLiquido >= 0 ? '#225cfa' : '#ef4444'};">R$ ${formatarMoeda(Math.abs(saldoLiquido))}</span>
                 </div>
 
                 ${centro.centro_pai_id ? `
@@ -334,7 +334,7 @@ function criarCardCategoria(cat) {
 
                 <div class="info-row">
                     <span class="info-label">Valor Total:</span>
-                    <span class="info-value" style="color: ${cat.tipo === 'receita' ? '#10b981' : '#ef4444'};">R$ ${formatarMoeda(cat.valor_total)}</span>
+                    <span class="info-value" style="color: ${cat.tipo === 'receita' ? '#225cfa' : '#ef4444'};">R$ ${formatarMoeda(cat.valor_total)}</span>
                 </div>
 
                 ${cat.categoria_pai_id ? `

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -40,8 +40,8 @@
         .btn-action.primary:hover { opacity: 0.9; }
         .btn-action.secondary { background: white; border: 1px solid var(--gray-200); color: var(--gray-600); }
         .btn-action.secondary:hover { background: var(--gray-50); }
-        .btn-action.success { background: #059669; color: white; }
-        .btn-action.success:hover { background: #047857; }
+        .btn-action.success { background: #1a4fd4; color: white; }
+        .btn-action.success:hover { background: #1340b0; }
 
         /* Bank Cards */
         .bank-cards-grid {
@@ -77,7 +77,7 @@
         .bank-card-body { padding: 16px 20px; }
         .bank-saldo-label { font-size: 11px; color: var(--gray-500); font-weight: 600; margin-bottom: 4px; }
         .bank-saldo-value { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
-        .bank-saldo-value.positivo { color: #059669; }
+        .bank-saldo-value.positivo { color: #1a4fd4; }
         .bank-saldo-value.negativo { color: #ef4444; }
 
         .bank-details {
@@ -161,7 +161,7 @@
         .extrato-item-desc { font-size: 13px; font-weight: 600; color: var(--gray-800); }
         .extrato-item-data { font-size: 11px; color: var(--gray-500); }
         .extrato-item-valor { font-size: 14px; font-weight: 700; }
-        .extrato-item-valor.entrada { color: #059669; }
+        .extrato-item-valor.entrada { color: #1a4fd4; }
         .extrato-item-valor.saida { color: #ef4444; }
         .extrato-resumo {
             padding: 16px 24px; border-top: 1px solid var(--gray-100); background: var(--gray-50);
@@ -251,7 +251,7 @@
                 <!-- Resumo -->
                 <div class="summary-cards">
                     <div class="summary-card"><div class="summary-value" style="color:#2563eb;" id="total-contas">0</div><div class="summary-label">Total de Contas</div></div>
-                    <div class="summary-card"><div class="summary-value" style="color:#059669;" id="saldo-total">R$ 0,00</div><div class="summary-label">Saldo Total</div></div>
+                    <div class="summary-card"><div class="summary-value" style="color:#1a4fd4;" id="saldo-total">R$ 0,00</div><div class="summary-label">Saldo Total</div></div>
                     <div class="summary-card"><div class="summary-value" style="color:#16a34a;" id="contas-ativas">0</div><div class="summary-label">Contas Ativas</div></div>
                 </div>
 
@@ -356,7 +356,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" onclick="fecharModalMovimentacao()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-check"></i> Registrar</button>
+                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#1a4fd4,#225cfa);"><i class="fas fa-check"></i> Registrar</button>
                 </div>
             </form>
         </div>
@@ -384,7 +384,7 @@
             </div>
             <div class="extrato-body" id="extrato-lista"><p style="text-align:center;color:var(--gray-400);padding:40px;">Carregando...</p></div>
             <div class="extrato-resumo">
-                <div class="extrato-resumo-item"><div class="extrato-resumo-label">Entradas</div><div class="extrato-resumo-value" id="extrato-entradas" style="color:#059669;">R$ 0,00</div></div>
+                <div class="extrato-resumo-item"><div class="extrato-resumo-label">Entradas</div><div class="extrato-resumo-value" id="extrato-entradas" style="color:#1a4fd4;">R$ 0,00</div></div>
                 <div class="extrato-resumo-item"><div class="extrato-resumo-label">Saídas</div><div class="extrato-resumo-value" id="extrato-saidas" style="color:#ef4444;">R$ 0,00</div></div>
                 <div class="extrato-resumo-item"><div class="extrato-resumo-label">Saldo Período</div><div class="extrato-resumo-value" id="extrato-saldo" style="color:#1e40af;">R$ 0,00</div></div>
             </div>
@@ -651,7 +651,7 @@
             const nome = contaVisualizando?.nome || 'Conta';
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
-            w.document.write(`<html><head><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${extratoMovimentacoes.map(m=>`<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${m.descricao||'-'}</td><td>${m.tipo}</td><td class="${m.tipo}">${m.tipo==='entrada'?'+':'-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table>
+            w.document.write(`<html><head><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#1a4fd4;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${extratoMovimentacoes.map(m=>`<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${m.descricao||'-'}</td><td>${m.tipo}</td><td class="${m.tipo}">${m.tipo==='entrada'?'+':'-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table>
 <!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260319"></script>
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260319" defer></script>

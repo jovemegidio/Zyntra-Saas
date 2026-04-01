@@ -329,7 +329,7 @@
             };
 
             const colors = {
-                success: { bg: '#10b981', icon: '#065f46' },
+                success: { bg: '#225cfa', icon: '#065f46' },
                 error: { bg: '#ef4444', icon: '#7f1d1d' },
                 warning: { bg: '#f59e0b', icon: '#78350f' },
                 info: { bg: '#3b82f6', icon: '#1e3a8a' }

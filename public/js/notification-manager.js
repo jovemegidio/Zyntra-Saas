@@ -194,7 +194,7 @@ var NotificationManager = {
                 gap: 8px;
                 color: #fff;
             }
-            
+
             .notif-panel-header h3 i {
                 color: rgba(255,255,255,0.85);
             }
@@ -315,8 +315,8 @@ var NotificationManager = {
                 color: #3b82f6;
             }
             .notif-item-icon.success {
-                background: rgba(16, 185, 129, 0.1);
-                color: #10b981;
+                background: rgba(34, 92, 250, 0.1);
+                color: #225cfa;
             }
             .notif-item-icon.warning {
                 background: rgba(245, 158, 11, 0.1);
@@ -331,8 +331,8 @@ var NotificationManager = {
                 color: #3b82f6;
             }
             .notif-item-icon.payment {
-                background: rgba(16, 185, 129, 0.1);
-                color: #10b981;
+                background: rgba(34, 92, 250, 0.1);
+                color: #225cfa;
             }
             .notif-item-icon.stock {
                 background: rgba(139, 92, 246, 0.1);
@@ -913,7 +913,7 @@ var NotificationManager = {
             bottom: 20px;
             right: 20px;
             padding: 12px 20px;
-            background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+            background: ${type === 'success' ? '#225cfa' : type === 'error' ? '#ef4444' : '#3b82f6'};
             color: white;
             border-radius: 8px;
             font-size: 14px;
@@ -954,7 +954,11 @@ var NotificationManager = {
                     this.socket = window._aluforceSocket;
                     console.log('[NotificationManager] ✅ Usando socket compartilhado existente');
                 } else {
-                    // Criar nova conexão — autenticação via httpOnly cookie (enviado automaticamente pelo browser)
+                    // Obter token JWT da aba para autenticação Socket.IO
+                    const authToken = (window.AluforceAuth && window.AluforceAuth.getTabToken)
+                        ? window.AluforceAuth.getTabToken()
+                        : sessionStorage.getItem('tabAuthToken') || null;
+
                     const socket = io({
                         path: '/socket.io',
                         transports: ['websocket'],
@@ -966,7 +970,8 @@ var NotificationManager = {
                         timeout: 30000,
                         forceNew: false,
                         autoConnect: true,
-                        withCredentials: true
+                        withCredentials: true,
+                        auth: authToken ? { token: authToken } : {}
                     });
 
                     // Compartilhar globalmente
@@ -981,8 +986,25 @@ var NotificationManager = {
                         console.log('[NotificationManager] Socket desconectado:', reason);
                     });
 
-                    socket.on('connect_error', (error) => {
+                    socket.on('connect_error', async (error) => {
                         console.warn('[NotificationManager] Erro de conexão Socket:', error.message);
+                        // Se token expirou ou auth falhou, tentar refresh e reconectar
+                        if (error.message === 'Token inválido ou expirado' || error.message === 'Autenticação necessária') {
+                            try {
+                                if (window.AluforceAuth && window.AluforceAuth.refreshToken) {
+                                    await window.AluforceAuth.refreshToken();
+                                }
+                                const freshToken = (window.AluforceAuth && window.AluforceAuth.getTabToken)
+                                    ? window.AluforceAuth.getTabToken()
+                                    : sessionStorage.getItem('tabAuthToken') || null;
+                                if (freshToken) {
+                                    socket.auth = { token: freshToken };
+                                    socket.connect();
+                                }
+                            } catch (e) {
+                                console.warn('[NotificationManager] Falha ao renovar token para Socket:', e.message);
+                            }
+                        }
                     });
                 }
 

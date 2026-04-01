@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Controles do Header - Dark Mode, Search, Notifications
  */
 
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Configuração dos módulos disponíveis para busca (dinâmico)
         function getModulosDisponiveis() {
             return [
-                { id: 'vendas', nome: 'Vendas', icone: 'fa-chart-line', cor: '#10b981', corRgb: '16,185,129', url: '/modules/Vendas/public/index.html' },
+                { id: 'vendas', nome: 'Vendas', icone: 'fa-chart-line', cor: '#225cfa', corRgb: '16,185,129', url: '/modules/Vendas/public/index.html' },
                 { id: 'compras', nome: 'Compras', icone: 'fa-cart-shopping', cor: '#6366f1', corRgb: '99,102,241', url: '/modules/Compras/index.html' },
                 { id: 'financeiro', nome: 'Financeiro', icone: 'fa-wallet', cor: '#a855f7', corRgb: '168,85,247', url: '/modules/Financeiro/index.html' },
                 { id: 'nfe', nome: 'Faturamento', icone: 'fa-file-invoice', cor: '#f97316', corRgb: '249,115,22', url: '/modules/NFe/index.html' },
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Ícones e cores por tipo
             const tipoConfig = {
-                cliente: { icone: 'fa-building', cor: '#10b981', label: 'Clientes' },
+                cliente: { icone: 'fa-building', cor: '#225cfa', label: 'Clientes' },
                 pedido: { icone: 'fa-file-alt', cor: '#3b82f6', label: 'Pedidos' },
                 nfe: { icone: 'fa-file-invoice', cor: '#f59e0b', label: 'Notas Fiscais' },
                 funcionario: { icone: 'fa-user-tie', cor: '#ec4899', label: 'Funcionários' },

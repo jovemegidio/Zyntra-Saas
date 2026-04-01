@@ -16,6 +16,44 @@ const { authenticateToken } = require('../../middleware/auth-central');
 const { corsOptions } = require('../../config/cors');
 const { errorHandler } = require('../../middleware/error-handler');
 
+// =============================================================================
+// ALÍQUOTAS FISCAIS VIGENTES — BRASIL 2026
+// Fonte: RFB, Banco Central, CFC (NBC TG 26 / CPC 26)
+// =============================================================================
+const ALIQUOTAS_2026 = {
+    // PIS/COFINS — Regime Cumulativo (Lei 9.718/98)
+    PIS_CUMULATIVO:    0.0065, // 0,65%
+    COFINS_CUMULATIVO: 0.0300, // 3,00%
+    // PIS/COFINS — Regime Não-Cumulativo (Lei 10.637/02 e 10.833/03)
+    PIS_NAO_CUMULATIVO:    0.0165, // 1,65%
+    COFINS_NAO_CUMULATIVO: 0.0760, // 7,60%
+    // CSLL — 9% (empresa em geral) / 15% (instituições financeiras e assemelhadas)
+    CSLL_GERAL:      0.09,
+    CSLL_FINANCEIRO: 0.15,
+    // IRPJ — Lucro Presumido / Lucro Real
+    IRPJ:            0.15,  // 15% sobre lucro tributável
+    IRPJ_ADICIONAL:  0.10,  // +10% sobre parcela do lucro acima de R$ 20.000/mês
+    // ISS — LC 116/2003: min 2%, max 5% (definido pelo município)
+    ISS_MIN: 0.02,
+    ISS_MAX: 0.05,
+    // INSS — Prestador de serviços autônomo (retido pelo tomador)
+    INSS_RETENCAO: 0.11,    // 11% s/ salário de contribuição (teto: R$ 908,86/2026)
+    // Tabela IRRF Pessoa Física 2026 (Lei 14.663/2023 — vigência jan/2024, mantida 2026)
+    IRRF_TABELA: [
+        { limite: 2259.20, aliquota: 0,      deducao: 0      },
+        { limite: 2826.65, aliquota: 0.075,  deducao: 169.44 },
+        { limite: 3751.05, aliquota: 0.15,   deducao: 381.44 },
+        { limite: 4664.68, aliquota: 0.225,  deducao: 662.77 },
+        { limite: Infinity,aliquota: 0.275,  deducao: 896.00 }
+    ],
+    // Juros de mora — teto CDC (art. 52 §1°) para B2C: 2% de multa + 1% a.m. de mora
+    MULTA_MORA_MAX_CDC: 0.02,   // 2%
+    JUROS_MORA_MAX_CDC: 0.01,   // 1% a.m.
+    // Juros de mora para créditos fiscais (Lei 9.430/96 art. 61): SELIC + 1% (variável)
+    SELIC_REF_MAR2026: 0.1325,  // 13,25% a.a. — referência março/2026
+};
+Object.freeze(ALIQUOTAS_2026);
+
 // Configurar multer para upload de anexos
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {
@@ -133,8 +171,15 @@ app.use(cookieParser());
 app.use('/api/financeiro', corteTemporalMiddleware);
 
 // Servir arquivos estáticos (HTML sem cache para deploy imediato)
-app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
-app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
+// H-006 FIX: Restrito ao subdiretório public/ — evita exposição de server.js, database_schema.sql, etc.
+const staticOpts = { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } };
+app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), staticOpts));
+// Servir apenas HTMLs do root do módulo (sem expor .js, .sql, etc.)
+app.use('/modules/Financeiro', (req, res, next) => {
+    const ext = path.extname(req.path).toLowerCase();
+    if (!['.html', '.htm'].includes(ext)) return res.status(404).end();
+    next();
+}, express.static(__dirname, staticOpts));
 
 // ============================================
 // ROTAS - CONTAS A PAGAR
@@ -294,14 +339,31 @@ app.put('/api/financeiro/contas-pagar/:id', authenticateToken, async (req, res) 
     }
 });
 
-// Baixar conta a pagar (pagamento) - Suporta /baixar e /pagar
+// Baixar conta a pagar (pagamento) - C-003 FIX: validação de ID adicionada
 app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
         
         const { id } = req.params;
+        // C-003 FIX: Validar ID antes de qualquer operação no banco
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            connection.release();
+            return res.status(400).json({ error: 'ID inválido' });
+        }
         const { data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes } = req.body;
+        
+        // Verificar se conta existe antes de tentar baixar
+        const [contaExiste] = await connection.execute('SELECT status FROM contas_pagar WHERE id = ?', [idParsed]);
+        if (contaExiste.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ error: 'Conta não encontrada' });
+        }
+        if (contaExiste[0].status === 'pago') {
+            await connection.rollback();
+            return res.status(400).json({ error: 'Esta conta já foi paga' });
+        }
         
         // Atualizar conta a pagar
         await connection.execute(
@@ -309,7 +371,7 @@ app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (re
              SET status = 'pago', data_pagamento = ?, valor_pago = ?, 
                  conta_bancaria_id = ?, forma_pagamento = ?, observacoes_pagamento = ?
              WHERE id = ?`,
-            [data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes, id]
+            [data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes, idParsed]
         );
         
         // Registrar pagamento
@@ -317,7 +379,7 @@ app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (re
             `INSERT INTO financeiro_pagamentos 
              (conta_pagar_id, data_pagamento, valor, conta_bancaria_id, forma_pagamento, usuario_id)
              VALUES (?, ?, ?, ?, ?, ?)`,
-            [id, data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, req.user.id]
+            [idParsed, data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, req.user.id]
         );
         
         await connection.commit();
@@ -331,19 +393,54 @@ app.post('/api/financeiro/contas-pagar/:id/baixar', authenticateToken, async (re
     }
 });
 
-// Alias para /pagar (compatibilidade com frontend)
-app.post('/api/financeiro/contas-pagar/:id/pagar', authenticateToken, async (req, res, next) => {
-    req.url = req.url.replace('/pagar', '/baixar');
-    next();
+// Alias para /pagar (compatibilidade com frontend) — C-006 FIX: re-dispatch real
+app.post('/api/financeiro/contas-pagar/:id/pagar', authenticateToken, async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const { id } = req.params;
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            connection.release();
+            return res.status(400).json({ error: 'ID inválido' });
+        }
+        const { data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes } = req.body;
+        await connection.execute(
+            `UPDATE contas_pagar 
+             SET status = 'pago', data_pagamento = ?, valor_pago = ?, 
+                 conta_bancaria_id = ?, forma_pagamento = ?, observacoes_pagamento = ?
+             WHERE id = ?`,
+            [data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, observacoes, idParsed]
+        );
+        await connection.execute(
+            `INSERT INTO financeiro_pagamentos 
+             (conta_pagar_id, data_pagamento, valor, conta_bancaria_id, forma_pagamento, usuario_id)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [idParsed, data_pagamento, valor_pago, conta_bancaria_id, forma_pagamento, req.user.id]
+        );
+        await connection.commit();
+        res.json({ success: true, message: 'Pagamento registrado com sucesso' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('❌ Erro ao baixar conta a pagar (alias /pagar):', error);
+        res.status(500).json({ error: 'Erro ao baixar conta a pagar', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    } finally {
+        connection.release();
+    }
 });
 
 // DELETE - Excluir conta a pagar
 app.delete('/api/financeiro/contas-pagar/:id', authenticateToken, requireFinancePermission('excluir'), async (req, res) => {
     try {
         const { id } = req.params;
+        // M-006 FIX: Validar ID
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            return res.status(400).json({ error: 'ID inválido' });
+        }
         
         // Verificar se a conta existe e não está paga
-        const [conta] = await pool.execute('SELECT status FROM contas_pagar WHERE id = ?', [id]);
+        const [conta] = await pool.execute('SELECT status FROM contas_pagar WHERE id = ?', [idParsed]);
         if (conta.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
@@ -351,7 +448,7 @@ app.delete('/api/financeiro/contas-pagar/:id', authenticateToken, requireFinance
             return res.status(400).json({ error: 'Não é possível excluir uma conta já paga' });
         }
         
-        await pool.execute('DELETE FROM contas_pagar WHERE id = ?', [id]);
+        await pool.execute('DELETE FROM contas_pagar WHERE id = ?', [idParsed]);
         res.json({ success: true, message: 'Conta excluída com sucesso' });
     } catch (error) {
         console.error('❌ Erro ao excluir conta a pagar:', error);
@@ -463,7 +560,8 @@ app.get('/api/financeiro/contas-receber/estatisticas', authenticateToken, async 
                 COALESCE(SUM(CASE WHEN status NOT IN ('recebido','pago','liquidado','cancelada') AND data_vencimento < CURDATE() THEN COALESCE(a_receber, valor - COALESCE(valor_recebido,0)) ELSE 0 END), 0) as vencidas,
                 COALESCE(SUM(CASE WHEN status IN ('recebido','pago','liquidado') THEN COALESCE(valor_recebido, valor) ELSE 0 END), 0) as recebidas_mes
             FROM contas_receber
-            WHERE YEAR(data_emissao) >= YEAR(CURDATE()) OR data_vencimento >= CURDATE()
+            -- H-005 FIX: usar CORTE_DATE fixo em vez de YEAR(CURDATE()) dinâmico
+            WHERE data_emissao >= '${CORTE_DATE}' OR data_vencimento >= CURDATE()
         `);
         res.json(totais[0] || { total_receber: 0, vencendo: 0, vencidas: 0, recebidas_mes: 0 });
     } catch (error) {
@@ -472,10 +570,44 @@ app.get('/api/financeiro/contas-receber/estatisticas', authenticateToken, async 
     }
 });
 
-// Dev Spec 1.3: Receber conta (alias para baixar)
-app.post('/api/financeiro/contas-receber/:id/receber', authenticateToken, async (req, res, next) => {
-    req.url = req.url.replace('/receber', '/baixar');
-    next();
+// Dev Spec 1.3: Receber conta (alias para baixar) — C-006 FIX: re-dispatch real
+app.post('/api/financeiro/contas-receber/:id/receber', authenticateToken, async (req, res) => {
+    const connection = await pool.getConnection();
+    try {
+        await connection.beginTransaction();
+        const { id } = req.params;
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            connection.release();
+            return res.status(400).json({ error: 'ID inválido' });
+        }
+        const { data_recebimento, valor_recebido, conta_bancaria_id, forma_recebimento } = req.body;
+        const valorParsed = parseFloat(valor_recebido);
+        if (isNaN(valorParsed) || valorParsed <= 0 || valorParsed > 999999999.99) {
+            connection.release();
+            return res.status(400).json({ error: 'Valor recebido inválido' });
+        }
+        const valorSanitizado = Math.round(valorParsed * 100) / 100;
+        const [conta] = await connection.execute('SELECT status FROM contas_receber WHERE id = ?', [idParsed]);
+        if (conta.length === 0) { await connection.rollback(); return res.status(404).json({ error: 'Conta não encontrada' }); }
+        if (conta[0].status === 'recebido') { await connection.rollback(); return res.status(400).json({ error: 'Esta conta já foi recebida' }); }
+        await connection.execute(
+            `UPDATE contas_receber SET status = 'recebido', data_recebimento = ?, valor_recebido = ?, banco_id = ?, forma_recebimento = ? WHERE id = ?`,
+            [data_recebimento, valorSanitizado, conta_bancaria_id, forma_recebimento, idParsed]
+        );
+        await connection.execute(
+            `INSERT INTO financeiro_recebimentos (conta_receber_id, data_recebimento, valor, conta_bancaria_id, forma_recebimento, usuario_id) VALUES (?, ?, ?, ?, ?, ?)`,
+            [idParsed, data_recebimento, valorSanitizado, conta_bancaria_id, forma_recebimento, req.user.id]
+        );
+        await connection.commit();
+        res.json({ success: true, message: 'Recebimento registrado com sucesso' });
+    } catch (error) {
+        await connection.rollback();
+        console.error('❌ Erro ao receber conta (alias /receber):', error);
+        res.status(500).json({ error: 'Erro ao receber conta', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    } finally {
+        connection.release();
+    }
 });
 
 // Criar conta a receber
@@ -549,7 +681,8 @@ app.post('/api/financeiro/contas-receber', authenticateToken, async (req, res) =
 });
 
 // Dev Spec 1.3: Importar Excel de contas a receber
-app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, upload.single('arquivo'), async (req, res) => {
+// C-004 FIX: Requer permissão financeira de edição (não apenas token válido)
+app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, requireFinancePermission('editar'), upload.single('arquivo'), async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ error: 'Nenhum arquivo enviado' });
@@ -843,8 +976,11 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
             `UPDATE contas_receber SET
                 descricao = COALESCE(?, descricao),
                 valor = COALESCE(?, valor),
+                -- H-004 FIX: Recalcular a_receber quando valor é atualizado
+                a_receber = CASE WHEN ? IS NOT NULL THEN (? - COALESCE(valor_recebido, 0)) ELSE a_receber END,
                 data_vencimento = COALESCE(?, data_vencimento),
                 forma_recebimento = COALESCE(?, forma_recebimento),
+                -- H-003 FIX: observacoes recebe o campo real, não concatenação de outros campos
                 observacoes = COALESCE(?, observacoes),
                 status = COALESCE(?, status),
                 pago_no_dia = COALESCE(?, pago_no_dia),
@@ -854,11 +990,13 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
                 data_para_cartorio = COALESCE(?, data_para_cartorio),
                 data_protestado = COALESCE(?, data_protestado)
              WHERE id = ?`,
-            [descricao, valor_total, data_vencimento, forma_recebimento, 
-             `${cliente_nome || ''} | ${categoria || ''} | ${conta_bancaria || ''}`, 
+            [descricao, valorSanitizado,
+             valorSanitizado, valorSanitizado,
+             data_vencimento, forma_recebimento,
+             observacoes || null,
              status, pago_no_dia,
              aceita_troca_factory !== undefined ? (aceita_troca_factory ? 1 : 0) : null,
-             comprovante_url, dia_recomprado, data_para_cartorio, data_protestado, id]
+             comprovante_url, dia_recomprado, data_para_cartorio, data_protestado, idParsed]
         );
         
         res.json({ success: true, message: 'Conta atualizada com sucesso' });
@@ -872,9 +1010,14 @@ app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res
 app.delete('/api/financeiro/contas-receber/:id', authenticateToken, requireFinancePermission('excluir'), async (req, res) => {
     try {
         const { id } = req.params;
+        // M-006 FIX: Validar ID
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            return res.status(400).json({ error: 'ID inválido' });
+        }
         
         // Verificar se a conta existe e não está recebida
-        const [conta] = await pool.execute('SELECT status FROM contas_receber WHERE id = ?', [id]);
+        const [conta] = await pool.execute('SELECT status FROM contas_receber WHERE id = ?', [idParsed]);
         if (conta.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
@@ -882,7 +1025,7 @@ app.delete('/api/financeiro/contas-receber/:id', authenticateToken, requireFinan
             return res.status(400).json({ error: 'Não é possível excluir uma conta já recebida' });
         }
         
-        await pool.execute('DELETE FROM contas_receber WHERE id = ?', [id]);
+        await pool.execute('DELETE FROM contas_receber WHERE id = ?', [idParsed]);
         res.json({ success: true, message: 'Conta excluída com sucesso' });
     } catch (error) {
         console.error('❌ Erro ao excluir conta a receber:', error);
@@ -1136,35 +1279,80 @@ app.get('/api/financeiro/dashboard', authenticateToken, async (req, res) => {
 // Relatório DRE
 app.get('/api/financeiro/relatorios/dre', authenticateToken, async (req, res) => {
     try {
-        const { inicio, fim, periodo } = req.query;
-        
-        const [receitas] = await pool.execute(
-            `SELECT SUM(valor_recebido) as total 
+        let { inicio, fim, periodo } = req.query;
+
+        // DRE-001 FIX: derivar inicio/fim do parâmetro periodo (YYYY-MM) enviado pelo frontend
+        if (!inicio || !fim) {
+            const mes = periodo || new Date().toISOString().slice(0, 7);
+            const [ano, m] = mes.split('-').map(Number);
+            inicio = `${ano}-${String(m).padStart(2, '0')}-01`;
+            const ultimoDia = new Date(ano, m, 0).getDate();
+            fim = `${ano}-${String(m).padStart(2, '0')}-${ultimoDia}`;
+        }
+
+        // DRE-002 FIX: retornar breakdown por categoria e campos no formato esperado pelo frontend
+        const [receitasPorCat] = await pool.execute(
+            `SELECT COALESCE(cr.categoria_nome, 'Sem Categoria') as categoria,
+                    SUM(cr.valor_recebido) as total
              FROM contas_receber cr
-             WHERE cr.status = 'recebido' AND cr.data_recebimento BETWEEN ? AND ?
-             AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`,
+             WHERE cr.status IN ('recebido','pago','liquidado')
+               AND cr.data_recebimento BETWEEN ? AND ?
+               AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}
+             GROUP BY COALESCE(cr.categoria_nome, 'Sem Categoria')
+             ORDER BY total DESC`,
             [inicio, fim]
         );
-        
-        const [despesas] = await pool.execute(
-            `SELECT SUM(valor_pago) as total 
+
+        const [despesasPorCat] = await pool.execute(
+            `SELECT COALESCE(cp.categoria, 'Sem Categoria') as categoria,
+                    SUM(cp.valor_pago) as total
              FROM contas_pagar cp
-             WHERE cp.status = 'pago' AND cp.data_pagamento BETWEEN ? AND ?
-             AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}`,
+             WHERE cp.status = 'pago'
+               AND cp.data_pagamento BETWEEN ? AND ?
+               AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}
+             GROUP BY COALESCE(cp.categoria, 'Sem Categoria')
+             ORDER BY total DESC`,
             [inicio, fim]
         );
-        
-        const receita = parseFloat(receitas[0]?.total || 0);
-        const despesa = parseFloat(despesas[0]?.total || 0);
-        
+
+        // Impostos retidos no período (campos vindos das contas a receber: PIS, COFINS, ISS, CSLL, IR, INSS)
+        const [impostosPeriodo] = await pool.execute(
+            `SELECT
+                COALESCE(SUM(cr.valor_pis), 0)   as total_pis,
+                COALESCE(SUM(cr.valor_cofins), 0) as total_cofins,
+                COALESCE(SUM(cr.valor_iss), 0)   as total_iss,
+                COALESCE(SUM(cr.valor_csll), 0)  as total_csll,
+                COALESCE(SUM(cr.valor_ir), 0)    as total_ir,
+                COALESCE(SUM(cr.valor_inss), 0)  as total_inss
+             FROM contas_receber cr
+             WHERE cr.data_recebimento BETWEEN ? AND ?
+               AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}`,
+            [inicio, fim]
+        );
+
+        const totalReceitas = receitasPorCat.reduce((s, r) => s + parseFloat(r.total || 0), 0);
+        const totalDespesas = despesasPorCat.reduce((s, d) => s + parseFloat(d.total || 0), 0);
+        const resultado = totalReceitas - totalDespesas;
+        const margemLucro = totalReceitas > 0 ? (resultado / totalReceitas) * 100 : 0;
+        const imp = impostosPeriodo[0] || {};
+
         res.json({
-            success: true,
-            data: {
-                receitas: receita,
-                despesas: despesa,
-                lucro_liquido: receita - despesa,
-                margem_liquida: receita > 0 ? ((receita - despesa) / receita * 100).toFixed(2) : 0
-            }
+            total_receitas: totalReceitas,
+            total_despesas: totalDespesas,
+            resultado,
+            margem_lucro: parseFloat(margemLucro.toFixed(2)),
+            receitas: receitasPorCat.map(r => ({ categoria: r.categoria, total: parseFloat(r.total || 0) })),
+            despesas: despesasPorCat.map(d => ({ categoria: d.categoria, total: parseFloat(d.total || 0) })),
+            impostos: {
+                pis:   parseFloat(imp.total_pis   || 0),
+                cofins:parseFloat(imp.total_cofins || 0),
+                iss:   parseFloat(imp.total_iss    || 0),
+                csll:  parseFloat(imp.total_csll   || 0),
+                ir:    parseFloat(imp.total_ir     || 0),
+                inss:  parseFloat(imp.total_inss   || 0),
+                total: parseFloat(((imp.total_pis||0)+(imp.total_cofins||0)+(imp.total_iss||0)+(imp.total_csll||0)+(imp.total_ir||0)+(imp.total_inss||0)).toFixed(2))
+            },
+            periodo: { inicio, fim }
         });
     } catch (error) {
         console.error('❌ Erro ao gerar DRE:', error);
@@ -1224,19 +1412,20 @@ app.get(['/api/financeiro/fluxo-caixa-resumo', '/api/financeiro/fluxo-caixa/resu
         );
         const saldoInicial = bancos[0]?.saldo || 0;
 
+        // H-002 FIX: Status corrigidos para os valores reais usados no sistema
         const [entradas] = await pool.execute(
             `SELECT DATE(data_vencimento) as data, SUM(valor) as entradas
              FROM contas_receber cr
-             WHERE cr.status IN ('aberto','parcial') AND cr.data_vencimento BETWEEN ? AND ?
+             WHERE cr.status IN ('pendente','a_vencer','vencida') AND cr.data_vencimento BETWEEN ? AND ?
              AND ${buildCorteClause('cr', { incluirParcelasFuturas: true })}
              GROUP BY DATE(data_vencimento) ORDER BY data`,
             [inicioStr, fimStr]
         );
 
         const [saidas] = await pool.execute(
-            `SELECT DATE(data_vencimento) as data, SUM(valor) as saidas
+            `SELECT DATE(data_vencimento) as data, SUM(valor_total) as saidas
              FROM contas_pagar cp
-             WHERE cp.status IN ('aberto','parcial') AND cp.data_vencimento BETWEEN ? AND ?
+             WHERE cp.status IN ('pendente','vencida') AND cp.data_vencimento BETWEEN ? AND ?
              AND ${buildCorteClause('cp', { incluirParcelasFuturas: true })}
              GROUP BY DATE(data_vencimento) ORDER BY data`,
             [inicioStr, fimStr]
@@ -1330,11 +1519,13 @@ app.get('/api/financeiro/bancos/:id', authenticateToken, async (req, res) => {
 
 // Criar banco
 app.post('/api/financeiro/bancos', authenticateToken, async (req, res) => {
+    const connection = await pool.getConnection();
     try {
         const { codigo, nome, tipo, agencia, conta, apelido, saldo_inicial, observacoes } = req.body;
         
         // AUDITORIA ENTERPRISE: Validar campos obrigatórios
         if (!nome || nome.trim().length === 0) {
+            connection.release();
             return res.status(400).json({ error: 'Nome do banco é obrigatório' });
         }
         
@@ -1343,6 +1534,7 @@ app.post('/api/financeiro/bancos', authenticateToken, async (req, res) => {
         if (saldo_inicial !== undefined && saldo_inicial !== null && saldo_inicial !== '') {
             const saldoParsed = parseFloat(saldo_inicial);
             if (isNaN(saldoParsed) || saldoParsed < -999999999.99 || saldoParsed > 999999999.99) {
+                connection.release();
                 return res.status(400).json({ error: 'Saldo inicial inválido' });
             }
             saldoSanitizado = Math.round(saldoParsed * 100) / 100;
@@ -1351,17 +1543,30 @@ app.post('/api/financeiro/bancos', authenticateToken, async (req, res) => {
         // AUDITORIA ENTERPRISE: Sanitizar agência e conta (apenas números)
         const agenciaSanitizada = agencia ? String(agencia).replace(/[^0-9-]/g, '') : null;
         const contaSanitizada = conta ? String(conta).replace(/[^0-9-]/g, '') : null;
-        
-        const [result] = await pool.execute(
+
+        await connection.beginTransaction();
+
+        const [result] = await connection.execute(
             `INSERT INTO bancos (nome, instituicao, tipo_conta, agencia, conta_corrente, saldo_inicial, saldo_atual, status, considera_fluxo)
              VALUES (?, ?, ?, ?, ?, ?, ?, 'ativo', 1)`,
             [apelido || nome, codigo, tipo, agenciaSanitizada, contaSanitizada, saldoSanitizado, saldoSanitizado]
         );
-        
+
+        // M-003 FIX: Sincroniza com contas_bancarias para manter as tabelas em sincronia
+        await connection.execute(
+            `INSERT INTO contas_bancarias (nome, banco, tipo, agencia, conta, saldo_inicial, saldo_atual, ativo, observacoes)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?)`,
+            [apelido || nome, codigo, tipo || 'corrente', agenciaSanitizada, contaSanitizada, saldoSanitizado, saldoSanitizado, observacoes || '']
+        );
+
+        await connection.commit();
         res.json({ success: true, id: result.insertId, message: 'Banco cadastrado com sucesso' });
     } catch (error) {
+        await connection.rollback();
         console.error('❌ Erro ao criar banco:', error);
         res.status(500).json({ error: 'Erro ao criar banco', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    } finally {
+        connection.release();
     }
 });
 
@@ -1391,13 +1596,19 @@ app.put('/api/financeiro/bancos/:id', authenticateToken, async (req, res) => {
         // AUDITORIA ENTERPRISE: Sanitizar agência e conta
         const agenciaSanitizada = agencia ? String(agencia).replace(/[^0-9-]/g, '') : null;
         const contaSanitizada = conta ? String(conta).replace(/[^0-9-]/g, '') : null;
-        
+
+        // B-005 FIX: calcular delta de saldo_inicial para ajustar saldo_atual proporcionalmente
+        const [currentBanco] = await pool.execute('SELECT saldo_inicial, saldo_atual FROM bancos WHERE id = ?', [idParsed]);
+        if (!currentBanco.length) return res.status(404).json({ error: 'Banco não encontrado' });
+        const deltaSaldo = saldoSanitizado - (parseFloat(currentBanco[0].saldo_inicial) || 0);
+        const novoSaldoAtual = Math.round(((parseFloat(currentBanco[0].saldo_atual) || 0) + deltaSaldo) * 100) / 100;
+
         await pool.execute(
             `UPDATE bancos SET 
              nome = ?, instituicao = ?, tipo_conta = ?, agencia = ?, conta_corrente = ?, 
-             saldo_inicial = ?, status = ?, updated_at = NOW()
+             saldo_inicial = ?, saldo_atual = ?, status = ?, updated_at = NOW()
              WHERE id = ?`,
-            [apelido || nome, codigo, tipo, agenciaSanitizada, contaSanitizada, saldoSanitizado, ativo ? 'ativo' : 'inativo', idParsed]
+            [apelido || nome, codigo, tipo, agenciaSanitizada, contaSanitizada, saldoSanitizado, novoSaldoAtual, ativo ? 'ativo' : 'inativo', idParsed]
         );
         
         res.json({ success: true, message: 'Banco atualizado com sucesso' });
@@ -1411,7 +1622,12 @@ app.put('/api/financeiro/bancos/:id', authenticateToken, async (req, res) => {
 app.delete('/api/financeiro/bancos/:id', authenticateToken, requireFinancePermission('excluir'), async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.execute("UPDATE bancos SET status = 'inativo' WHERE id = ?", [id]);
+        // ID-001 FIX: validar ID antes de usar na query
+        const idParsed = parseInt(id, 10);
+        if (!Number.isInteger(idParsed) || idParsed <= 0) {
+            return res.status(400).json({ error: 'ID inválido' });
+        }
+        await pool.execute("UPDATE bancos SET status = 'inativo' WHERE id = ?", [idParsed]);
         res.json({ success: true, message: 'Banco desativado com sucesso' });
     } catch (error) {
         console.error('❌ Erro ao excluir banco:', error);
@@ -1915,8 +2131,14 @@ app.use((req, res) => {
 // INICIALIZAÇÃO
 // ============================================
 
+// C-005 FIX: flag para evitar re-registro de rotas em múltiplas chamadas de startServer (PM2 cluster)
+let _routesInitialized = false;
+
 async function startServer() {
     try {
+        if (!_routesInitialized) {
+            _routesInitialized = true;
+
         // ============================================
         // ROTAS ADICIONAIS - PARCELAMENTO
         // ============================================
@@ -2046,8 +2268,12 @@ async function startServer() {
         app.delete('/api/financeiro/anexos/:id', authenticateToken, requireFinancePermission('excluir'), async (req, res) => {
             try {
                 const { id } = req.params;
-                
-                await pool.execute('DELETE FROM financeiro_anexos WHERE id = ?', [id]);
+                // ID-002 FIX: validar ID antes de usar na query
+                const idParsed = parseInt(id, 10);
+                if (!Number.isInteger(idParsed) || idParsed <= 0) {
+                    return res.status(400).json({ error: 'ID inválido' });
+                }
+                await pool.execute('DELETE FROM financeiro_anexos WHERE id = ?', [idParsed]);
                 
                 res.json({ success: true });
             } catch (error) {
@@ -2055,6 +2281,8 @@ async function startServer() {
                 res.status(500).json({ error: 'Erro ao excluir anexo', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
             }
         });
+
+        } // fim: if (!_routesInitialized)
 
         // Testar conexão
         const connection = await pool.getConnection();

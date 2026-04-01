@@ -1,0 +1,452 @@
+/* ========================================
+   Zyntra - Gerenciar Usuários
+   Estilos da página de gestão de usuários
+   ======================================== */
+
+/* ========== PAGE HEADER ========== */
+.gu-header {
+    background: var(--dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    padding: 0;
+}
+
+.gu-header__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.gu-header__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.gu-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: lowercase;
+}
+
+.gu-back-btn:hover {
+    background: var(--primary-dark);
+    transform: translateX(-2px);
+}
+
+.gu-header__title-wrap h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+    margin: 0;
+}
+
+.gu-header__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.gu-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: lowercase;
+}
+
+.gu-action-btn.primary {
+    background: var(--primary);
+    color: var(--white);
+}
+
+.gu-action-btn.primary:hover {
+    background: var(--primary-dark);
+}
+
+.gu-action-btn.secondary {
+    background: var(--dark-3);
+    color: var(--white);
+}
+
+.gu-action-btn.secondary:hover {
+    background: var(--dark-2);
+}
+
+/* ========== MAIN ========== */
+.gu-main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px;
+}
+
+/* ========== COMPANY INFO ========== */
+.gu-company-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.gu-company-info__left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.gu-company-name {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gray-800);
+    letter-spacing: -0.3px;
+}
+
+.gu-company-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray-500);
+}
+
+.gu-company-status.active::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--secondary);
+}
+
+.gu-company-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid var(--gray-200);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.gu-company-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* ========== TOOLBAR ========== */
+.gu-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.gu-search {
+    position: relative;
+    flex: 1;
+    max-width: 400px;
+}
+
+.gu-search__icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gray-400);
+    pointer-events: none;
+}
+
+.gu-search__input {
+    width: 100%;
+    padding: 10px 12px 10px 38px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--gray-700);
+    background: var(--white);
+    transition: var(--transition);
+}
+
+.gu-search__input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.gu-search__input::placeholder {
+    color: var(--gray-400);
+}
+
+.gu-toolbar__count {
+    font-size: 13px;
+    color: var(--gray-500);
+    white-space: nowrap;
+}
+
+.gu-toolbar__count strong {
+    color: var(--gray-700);
+}
+
+/* ========== USERS TABLE ========== */
+.gu-table-wrap {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.gu-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.gu-table__th {
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.gu-table__th:last-child {
+    text-align: center;
+    width: 100px;
+}
+
+.gu-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--gray-100);
+    vertical-align: middle;
+}
+
+.gu-table tr:last-child td {
+    border-bottom: none;
+}
+
+.gu-table tr:hover {
+    background: var(--gray-50);
+}
+
+/* User cell */
+.gu-user-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.gu-user-cell__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.gu-user-cell__email {
+    font-size: 12.5px;
+    color: var(--primary);
+    font-weight: 400;
+}
+
+/* Status badge */
+.gu-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.gu-status-badge.aceito {
+    background: var(--secondary);
+    color: var(--white);
+}
+
+.gu-status-badge.pendente {
+    background: #FDCB6E;
+    color: #856404;
+}
+
+.gu-status-badge.recusado {
+    background: #E74C3C;
+    color: var(--white);
+}
+
+/* Group dropdown */
+.gu-group-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    background: #0984e3;
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--font);
+    cursor: pointer;
+    transition: var(--transition);
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 26px;
+}
+
+.gu-group-select:hover {
+    background: #0773c5;
+}
+
+.gu-group-select:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.2);
+}
+
+/* Actions cell */
+.gu-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.gu-action-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: none;
+    border-radius: 6px;
+    color: var(--gray-400);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.gu-action-icon:hover {
+    background: var(--gray-100);
+    color: var(--gray-600);
+}
+
+.gu-action-icon.danger:hover {
+    background: rgba(231, 76, 60, 0.08);
+    color: #E74C3C;
+}
+
+/* ========== EMPTY STATE ========== */
+.gu-empty {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.gu-empty__icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: var(--gray-100);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gray-400);
+}
+
+.gu-empty__title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 6px;
+}
+
+.gu-empty__desc {
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .gu-header__inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .gu-header__actions {
+        width: 100%;
+    }
+
+    .gu-action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .gu-company-info {
+        flex-direction: column-reverse;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .gu-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .gu-search {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .gu-table-wrap {
+        overflow-x: auto;
+    }
+
+    .gu-table {
+        min-width: 600px;
+    }
+}
+
+@media (max-width: 480px) {
+    .gu-main {
+        padding: 16px;
+    }
+
+    .gu-header__left {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}

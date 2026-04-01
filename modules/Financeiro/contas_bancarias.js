@@ -1,4 +1,4 @@
-﻿// ===== CONTAS BANCÁRIAS - ALUFORCE =====
+// ===== CONTAS BANCÁRIAS - ALUFORCE =====
 let contasBancarias = [];
 let contaSelecionada = null;
 
@@ -74,7 +74,7 @@ function renderizarContas() {
                 
                 <div class="conta-saldo">
                     <div class="conta-saldo-label">Saldo Atual</div>
-                    <div class="conta-saldo-valor" style="color: ${conta.saldo_atual >= 0 ? '#10b981' : '#ef4444'}">
+                    <div class="conta-saldo-valor" style="color: ${conta.saldo_atual >= 0 ? '#225cfa' : '#ef4444'}">
                         ${formatarMoeda(Math.abs(conta.saldo_atual))}
                     </div>
                 </div>
@@ -94,7 +94,7 @@ function renderizarContas() {
                     </div>
                     <div class="conta-detalhe-item">
                         <div class="conta-detalhe-label">Disponível</div>
-                        <div class="conta-detalhe-valor" style="color: #10b981; font-weight: 700;">
+                        <div class="conta-detalhe-valor" style="color: #225cfa; font-weight: 700;">
                             R$ ${formatarMoeda(saldoDisponivel)}
                         </div>
                     </div>
@@ -325,7 +325,7 @@ function mostrarAlerta(mensagem, tipo = 'info') {
         top: 20px;
         right: 20px;
         padding: 16px 24px;
-        background: ${tipo === 'success' ? '#10b981' : tipo === 'error' ? '#ef4444' : '#3b82f6'};
+        background: ${tipo === 'success' ? '#225cfa' : tipo === 'error' ? '#ef4444' : '#3b82f6'};
         color: white;
         border-radius: 12px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.15);

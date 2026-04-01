@@ -1,0 +1,369 @@
+{
+    "root_group": {
+        "groups": {
+            "VOLUME: Ataque da OP Colossal (5.000 itens)": {
+                "name": "VOLUME: Ataque da OP Colossal (5.000 itens)",
+                "path": "::VOLUME: Ataque da OP Colossal (5.000 itens)",
+                "id": "1af96724b890c0c4b1050d8e6b775157",
+                "groups": {},
+                "checks": {
+                        "V1 respondeu (201/400/413/422)": {
+                            "fails": 1,
+                            "name": "V1 respondeu (201/400/413/422)",
+                            "path": "::VOLUME: Ataque da OP Colossal (5.000 itens)::V1 respondeu (201/400/413/422)",
+                            "id": "02fe16bc79fde7d98bd9d91970da398b",
+                            "passes": 0
+                        },
+                        "V1 sem timeout de socket": {
+                            "name": "V1 sem timeout de socket",
+                            "path": "::VOLUME: Ataque da OP Colossal (5.000 itens)::V1 sem timeout de socket",
+                            "id": "7cfd494e86f41a1bff8af9e62a79328b",
+                            "passes": 1,
+                            "fails": 0
+                        }
+                    }
+            },
+            "VOLUME: Estresse do Gerador de PDF (50 simultâneos)": {
+                "name": "VOLUME: Estresse do Gerador de PDF (50 simultâneos)",
+                "path": "::VOLUME: Estresse do Gerador de PDF (50 simultâneos)",
+                "id": "6c3fe535287eaff1b037479b7a83ae6a",
+                "groups": {},
+                "checks": {
+                        "V2 pelo menos 1 PDF respondeu": {
+                            "name": "V2 pelo menos 1 PDF respondeu",
+                            "path": "::VOLUME: Estresse do Gerador de PDF (50 simultâneos)::V2 pelo menos 1 PDF respondeu",
+                            "id": "b36a14071b582ef3e05b4481d2867cb1",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "V2 lote processado sem colapso total": {
+                            "name": "V2 lote processado sem colapso total",
+                            "path": "::VOLUME: Estresse do Gerador de PDF (50 simultâneos)::V2 lote processado sem colapso total",
+                            "id": "8ececb36b7ce62dc75c4176ed3201c97",
+                            "passes": 1,
+                            "fails": 0
+                        }
+                    }
+            },
+            "VOLUME: Tsunami de Listagem (5 anos)": {
+                "path": "::VOLUME: Tsunami de Listagem (5 anos)",
+                "id": "35fc00e485f7f8d589b66fee0775002d",
+                "groups": {},
+                "checks": {
+                        "V3 sem paginação retorna 400": {
+                            "name": "V3 sem paginação retorna 400",
+                            "path": "::VOLUME: Tsunami de Listagem (5 anos)::V3 sem paginação retorna 400",
+                            "id": "28cf22ce1063618925fba608254518e9",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "V3 limit=100000 retorna 400": {
+                            "name": "V3 limit=100000 retorna 400",
+                            "path": "::VOLUME: Tsunami de Listagem (5 anos)::V3 limit=100000 retorna 400",
+                            "id": "716868496221caab4de4d3f656d61580",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "V3 page/limit válidos não quebram": {
+                            "name": "V3 page/limit válidos não quebram",
+                            "path": "::VOLUME: Tsunami de Listagem (5 anos)::V3 page/limit válidos não quebram",
+                            "id": "f285ecfd6bc5cdc8d0cc2ef41e95a8b9",
+                            "passes": 0,
+                            "fails": 1
+                        }
+                    },
+                "name": "VOLUME: Tsunami de Listagem (5 anos)"
+            },
+            "CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)": {
+                "name": "CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)",
+                "path": "::CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)",
+                "id": "070776f2fb7e7d27da78defc87e65b5e",
+                "groups": {},
+                "checks": {
+                        "C1 pelo menos 1 sucesso": {
+                            "passes": 0,
+                            "fails": 1,
+                            "name": "C1 pelo menos 1 sucesso",
+                            "path": "::CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)::C1 pelo menos 1 sucesso",
+                            "id": "7f61ed98d0e509742f5b01d19e023c75"
+                        },
+                        "C1 bloqueia excedente (espera-se >=1 conflito)": {
+                            "name": "C1 bloqueia excedente (espera-se >=1 conflito)",
+                            "path": "::CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)::C1 bloqueia excedente (espera-se >=1 conflito)",
+                            "id": "67e1c15a6c49c6400ec6ccd5eae5d55b",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "C1 não aceita todas as 5": {
+                            "name": "C1 não aceita todas as 5",
+                            "path": "::CONCORRÊNCIA: Choque de Apontamentos (5 x 30 peças)::C1 não aceita todas as 5",
+                            "id": "59e0626bb1b81e01a4a7e9dd99eb711e",
+                            "passes": 1,
+                            "fails": 0
+                        }
+                    }
+            },
+            "CONCORRÊNCIA: Mudança de Status vs Apontamento": {
+                "name": "CONCORRÊNCIA: Mudança de Status vs Apontamento",
+                "path": "::CONCORRÊNCIA: Mudança de Status vs Apontamento",
+                "id": "c17bbb4bcd647695020be38ffcd240c5",
+                "groups": {},
+                "checks": {
+                        "C2 status responde sem timeout": {
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "C2 status responde sem timeout",
+                            "path": "::CONCORRÊNCIA: Mudança de Status vs Apontamento::C2 status responde sem timeout",
+                            "id": "2bfe81918230f3d1fdafd3d536f61468"
+                        },
+                        "C2 apontamento responde sem timeout": {
+                            "fails": 0,
+                            "name": "C2 apontamento responde sem timeout",
+                            "path": "::CONCORRÊNCIA: Mudança de Status vs Apontamento::C2 apontamento responde sem timeout",
+                            "id": "7566599419766e21abdc53dcdbff4357",
+                            "passes": 1
+                        },
+                        "C2 ao menos um resultado válido (200/409)": {
+                            "name": "C2 ao menos um resultado válido (200/409)",
+                            "path": "::CONCORRÊNCIA: Mudança de Status vs Apontamento::C2 ao menos um resultado válido (200/409)",
+                            "id": "2a02a182161b26be74209ca46206d02d",
+                            "passes": 0,
+                            "fails": 1
+                        }
+                    }
+            },
+            "CONCORRÊNCIA: Teste do Duplo Clique (10 POST em 1s)": {
+                "groups": {},
+                "checks": {
+                        "C3 ideal: no máximo 1 criação": {
+                            "id": "4b620a3a659ac64c31d8b4b25008de91",
+                            "passes": 1,
+                            "fails": 0,
+                            "name": "C3 ideal: no máximo 1 criação",
+                            "path": "::CONCORRÊNCIA: Teste do Duplo Clique (10 POST em 1s)::C3 ideal: no máximo 1 criação"
+                        }
+                    },
+                "name": "CONCORRÊNCIA: Teste do Duplo Clique (10 POST em 1s)",
+                "path": "::CONCORRÊNCIA: Teste do Duplo Clique (10 POST em 1s)",
+                "id": "748cc3ead1785477f64d9b5bc8d27118"
+            },
+            "CHAOS: Transações Zumbis (timeout no meio da resposta)": {
+                "name": "CHAOS: Transações Zumbis (timeout no meio da resposta)",
+                "path": "::CHAOS: Transações Zumbis (timeout no meio da resposta)",
+                "id": "d4f772289d1219ab96c65fe35b9f9439",
+                "groups": {},
+                "checks": {
+                        "CH1 request terminou (status ou timeout tratado)": {
+                            "fails": 0,
+                            "name": "CH1 request terminou (status ou timeout tratado)",
+                            "path": "::CHAOS: Transações Zumbis (timeout no meio da resposta)::CH1 request terminou (status ou timeout tratado)",
+                            "id": "e8e53d9115de8b269d44bb593575dfd3",
+                            "passes": 1
+                        }
+                    }
+            },
+            "CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)": {
+                "name": "CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)",
+                "path": "::CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)",
+                "id": "d2154657bbf56ea169a48e5b23f9e47d",
+                "groups": {},
+                "checks": {
+                        "CH2 primeira tentativa respondeu": {
+                            "name": "CH2 primeira tentativa respondeu",
+                            "path": "::CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)::CH2 primeira tentativa respondeu",
+                            "id": "1c5f0eeb4fc58c9f1c67f6a638ce0bfd",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "CH2 segunda tentativa respondeu": {
+                            "name": "CH2 segunda tentativa respondeu",
+                            "path": "::CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)::CH2 segunda tentativa respondeu",
+                            "id": "8e38f59d347de6b8a7e0a726ae25a078",
+                            "passes": 0,
+                            "fails": 1
+                        },
+                        "CH2 ideal: segunda rejeitada como duplicata (409)": {
+                            "name": "CH2 ideal: segunda rejeitada como duplicata (409)",
+                            "path": "::CHAOS: Re-hidratação Offline->Online (mesmo payload reenviado)::CH2 ideal: segunda rejeitada como duplicata (409)",
+                            "id": "931f92f8992071faca9e0f8b1b56a674",
+                            "passes": 0,
+                            "fails": 1
+                        }
+                    }
+            }
+        },
+        "checks": {},
+        "name": "",
+        "path": "",
+        "id": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    "metrics": {
+        "pcp_report_tsunami_duration_ms": {
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "thresholds": {
+                "p(95)<10000": false
+            }
+        },
+        "http_req_connecting": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "group_duration": {
+            "p(90)": 645.0004899999997,
+            "p(95)": 1326.647994999999,
+            "avg": 271.6676625,
+            "min": 4.0024,
+            "med": 13.27645,
+            "max": 2008.2955
+        },
+        "pcp_findings_total": {
+            "count": 4,
+            "rate": 0.10807636432731547
+        },
+        "iterations": {
+            "count": 8,
+            "rate": 0.21615272865463095
+        },
+        "pcp_big_payload_duration_ms": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "thresholds": {
+                "p(95)<30000": false
+            }
+        },
+        "http_req_blocked": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "iteration_duration": {
+            "max": 2008.2955,
+            "p(90)": 645.0004899999997,
+            "p(95)": 1326.647994999999,
+            "avg": 271.8553,
+            "min": 4.0024,
+            "med": 13.27645
+        },
+        "http_req_receiving": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "checks": {
+            "passes": 7,
+            "fails": 11,
+            "value": 0.3888888888888889
+        },
+        "pcp_pdf_batch_duration_ms": {
+            "avg": 59,
+            "min": 59,
+            "med": 59,
+            "max": 59,
+            "p(90)": 59,
+            "p(95)": 59,
+            "thresholds": {
+                "p(95)<30000": false
+            }
+        },
+        "http_req_waiting": {
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0
+        },
+        "pcp_step_ok_rate": {
+            "passes": 2,
+            "fails": 6,
+            "thresholds": {
+                "rate>0.70": true
+            },
+            "value": 0.25
+        },
+        "data_sent": {
+            "count": 0,
+            "rate": 0
+        },
+        "http_reqs": {
+            "count": 74,
+            "rate": 1.9994127400553363
+        },
+        "http_req_tls_handshaking": {
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0
+        },
+        "http_req_sending": {
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0,
+            "avg": 0,
+            "min": 0
+        },
+        "vus": {
+            "value": 1,
+            "min": 0,
+            "max": 1
+        },
+        "http_req_duration": {
+            "avg": 0,
+            "min": 0,
+            "med": 0,
+            "max": 0,
+            "p(90)": 0,
+            "p(95)": 0
+        },
+        "vus_max": {
+            "value": 8,
+            "min": 8,
+            "max": 8
+        },
+        "data_received": {
+            "count": 0,
+            "rate": 0
+        },
+        "http_req_failed": {
+            "passes": 74,
+            "fails": 0,
+            "thresholds": {
+                "rate<0.40": true
+            },
+            "value": 1
+        },
+        "pcp_race_apontamento_duration_ms": {
+            "max": 9,
+            "p(90)": 9,
+            "p(95)": 9,
+            "avg": 9,
+            "min": 9,
+            "med": 9,
+            "thresholds": {
+                "p(95)<10000": false
+            }
+        }
+    }
+}

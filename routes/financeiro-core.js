@@ -187,14 +187,7 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
             };
             permissoes = Object.assign({}, defaults, permissoes);
 
-            // Restrições específicas por usuário
-            const email = (user.email || userData?.email || '').toLowerCase();
-            if (email.includes('hellen')) {
-                permissoes.contas_receber = false;
-            }
-            if (email.includes('tatiane')) {
-                permissoes.contas_pagar = false;
-            }
+            // NEW-001 FIX: removidas restrições hardcoded por email (discriminatórias e inconsistentes com RBAC)
 
             res.json({
                 success: true,

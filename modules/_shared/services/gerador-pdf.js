@@ -1,4 +1,4 @@
-﻿/**
+/**
  * SERVIÇO DE GERAÇÍO DE PDF
  * Gera PDFs para pedidos, orçamentos, relatórios e documentos diversos
  * 
@@ -41,7 +41,7 @@ class GeradorPDF {
     <title>${titulo} #${numero}</title>
     <style>
         ${this.getEstilosBase()}
-        .titulo-doc { color: ${tipo === 'orcamento' ? '#2563eb' : '#059669'}; }
+        .titulo-doc { color: ${tipo === 'orcamento' ? '#2563eb' : '#1a4fd4'}; }
     </style>
 </head>
 <body>

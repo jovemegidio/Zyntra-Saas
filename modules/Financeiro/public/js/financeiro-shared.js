@@ -123,7 +123,7 @@
         const toast = document.createElement('div');
         toast.className = 'financeiro-toast-shared';
         const colors = {
-            success: { bg: '#10b981', icon: 'fa-check-circle' },
+            success: { bg: '#225cfa', icon: 'fa-check-circle' },
             error: { bg: '#ef4444', icon: 'fa-times-circle' },
             warning: { bg: '#f59e0b', icon: 'fa-exclamation-triangle' },
             info: { bg: '#3b82f6', icon: 'fa-info-circle' }

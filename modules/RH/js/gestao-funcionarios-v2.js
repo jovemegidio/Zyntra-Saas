@@ -1,4 +1,4 @@
-﻿// Módulo de Gestão de Funcionários - RH Admin v2.0
+// Módulo de Gestão de Funcionários - RH Admin v2.0
 // Sistema completo de CRUD e gerenciamento
 
 function _escRH(str) { if (str == null) return ''; var d = document.createElement('div'); d.textContent = String(str); return d.innerHTML; }
@@ -9,11 +9,11 @@ class GestãoFuncionarios {
         this.departamentos = [
             { id: 1, nome: 'Produção', cor: '#3b82f6' },
             { id: 2, nome: 'Administração', cor: '#8b5cf6' },
-            { id: 3, nome: 'Vendas', cor: '#10b981' },
+            { id: 3, nome: 'Vendas', cor: '#225cfa' },
             { id: 4, nome: 'TI', cor: '#f59e0b' },
             { id: 5, nome: 'RH', cor: '#ef4444' },
             { id: 6, nome: 'Financeiro', cor: '#06b6d4' },
-            { id: 7, nome: 'Compras', cor: '#84cc16' },
+            { id: 7, nome: 'Compras', cor: '#225cfa' },
             { id: 8, nome: 'Qualidade', cor: '#f97316' }
         ];
         this.init();

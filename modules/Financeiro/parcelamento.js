@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SISTEMA DE PARCELAMENTO AUTOMÁTICO - Sistema Financeiro Aluforce
 // ============================================================================
 
@@ -362,8 +362,8 @@ class SistemaParcelamento {
                 .form-group select:focus,
                 .form-group textarea:focus {
                     outline: none;
-                    border-color: #10b981;
-                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+                    border-color: #225cfa;
+                    box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.1);
                 }
 
                 .resumo-parcelamento {
@@ -377,7 +377,7 @@ class SistemaParcelamento {
                     background: white;
                     padding: 16px;
                     border-radius: 8px;
-                    border-left: 4px solid #10b981;
+                    border-left: 4px solid #225cfa;
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
@@ -449,13 +449,13 @@ class SistemaParcelamento {
                 }
 
                 .btn-primary {
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
                     color: white;
                 }
 
                 .btn-primary:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                    box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3);
                 }
 
                 .btn-secondary {
@@ -558,30 +558,58 @@ class SistemaParcelamento {
             });
         }
 
-        // Calcular juros
+        // JUROS-001 FIX: substituir cálculo "bullet" por métodos corretos (Res. BC 4.196/2013 / Circ. BC 2.957/2000)
+        // Juros Simples → SAC (Sistema de Amortização Constante): amortização fixa, juros sobre saldo devedor
+        // Juros Compostos → Tabela Price: PMT fixo, juros sobre saldo devedor remanescente
+        const pv = incluirEntrada ? (valorTotal - valorEntrada) : valorTotal;
+
         if (tipoJuros === 'simples') {
-            valorComJuros = valorTotal * (1 + (taxaJuros * numParcelas));
+            // SAC: amortizacao = pv/n (constante); juros_i = saldo_devedor_i × taxa
+            const amortizacao = pv / numParcelas;
+            for (let i = 1; i <= numParcelas; i++) {
+                const saldoDevedor = pv - (i - 1) * amortizacao;
+                const juros = saldoDevedor * taxaJuros;
+                this.parcelas.push({
+                    número: i,
+                    vencimento: new Date(data),
+                    valorPrincipal: amortizacao,
+                    juros: juros,
+                    valorTotal: amortizacao + juros
+                });
+                data = this.avancarData(data, periodicidade);
+            }
         } else if (tipoJuros === 'composto') {
-            valorComJuros = valorTotal * Math.pow(1 + taxaJuros, numParcelas);
-        }
-
-        const valorParcela = valorComJuros / numParcelas;
-
-        // Gerar parcelas
-        for (let i = 1; i <= numParcelas; i++) {
-            const valorPrincipal = valorTotal / numParcelas;
-            const juros = valorParcela - valorPrincipal;
-
-            this.parcelas.push({
-                número: i,
-                vencimento: new Date(data),
-                valorPrincipal: valorPrincipal,
-                juros: juros,
-                valorTotal: valorParcela
-            });
-
-            // Avançar data conforme periodicidade
-            data = this.avancarData(data, periodicidade);
+            // Tabela Price: PMT = pv × i(1+i)^n / ((1+i)^n − 1)
+            const pmt = taxaJuros > 0
+                ? pv * (taxaJuros * Math.pow(1 + taxaJuros, numParcelas)) / (Math.pow(1 + taxaJuros, numParcelas) - 1)
+                : pv / numParcelas;
+            let saldo = pv;
+            for (let i = 1; i <= numParcelas; i++) {
+                const juros = saldo * taxaJuros;
+                const amortizacao = pmt - juros;
+                saldo = Math.max(0, saldo - amortizacao);
+                this.parcelas.push({
+                    número: i,
+                    vencimento: new Date(data),
+                    valorPrincipal: amortizacao,
+                    juros: juros,
+                    valorTotal: pmt
+                });
+                data = this.avancarData(data, periodicidade);
+            }
+        } else {
+            // Sem juros: parcelas iguais
+            const valorParcela = pv / numParcelas;
+            for (let i = 1; i <= numParcelas; i++) {
+                this.parcelas.push({
+                    número: i,
+                    vencimento: new Date(data),
+                    valorPrincipal: valorParcela,
+                    juros: 0,
+                    valorTotal: valorParcela
+                });
+                data = this.avancarData(data, periodicidade);
+            }
         }
 
         this.renderizarPreview();

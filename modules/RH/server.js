@@ -1,4 +1,4 @@
-﻿const express = require('express')
+const express = require('express')
 const cors = require('cors')
 const path = require('path')
 const mysql = require('mysql2')
@@ -1689,7 +1689,7 @@ app.get('/api/rh/atividades', authMiddleware, requireRHAdmin, async (req, res) =
         nome_completo,
         data_admissao as created_at,
         'fa-user-plus' as icone,
-        '#10b981' as cor,
+        '#225cfa' as cor,
         'admissao' as tipo
       FROM funcionarios 
       WHERE data_admissao >= DATE_SUB(CURDATE(), INTERVAL 60 DAY)

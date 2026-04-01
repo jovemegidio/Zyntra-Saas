@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -322,7 +322,7 @@
         .status-badge.pendente { background: #fef3c7; color: #92400e; }
         .status-badge.cancelado { background: #fee2e2; color: #991b1b; }
 
-        .valor-cell { font-weight: 600; color: #059669; }
+        .valor-cell { font-weight: 600; color: #1a4fd4; }
 
         .action-btn {
             width: 32px; height: 32px;
@@ -1830,8 +1830,8 @@
                 <!-- Valores Grid (estilo Omie) -->
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
                     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;text-align:center;">
-                        <div style="font-size:11px;font-weight:600;color:#059669;text-transform:uppercase;margin-bottom:4px;">Mercadorias</div>
-                        <div style="font-size:18px;font-weight:700;color:#059669;">${formatarValor(totalMercadorias || pedido.valor_total)}</div>
+                        <div style="font-size:11px;font-weight:600;color:#1a4fd4;text-transform:uppercase;margin-bottom:4px;">Mercadorias</div>
+                        <div style="font-size:18px;font-weight:700;color:#1a4fd4;">${formatarValor(totalMercadorias || pedido.valor_total)}</div>
                     </div>
                     <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:14px;text-align:center;">
                         <div style="font-size:11px;font-weight:600;color:#ca8a04;text-transform:uppercase;margin-bottom:4px;">Frete</div>
@@ -1889,7 +1889,7 @@
                                     <td style="font-weight:500;">${item.descrição || item.produto_nome || '-'}</td>
                                     <td style="text-align:center;">${item.quantidade || 0} ${item.unidade || 'UN'}</td>
                                     <td style="text-align:right;">R$ ${(parseFloat(item.preco_unitario || item.valor_unitario) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                                    <td style="text-align:right;font-weight:600;color:#059669;">R$ ${(parseFloat(item.valor_total || item.total || item.subtotal) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                    <td style="text-align:right;font-weight:600;color:#1a4fd4;">R$ ${(parseFloat(item.valor_total || item.total || item.subtotal) || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                                 </tr>
                             `).join('')}
                         </tbody>
@@ -3220,7 +3220,7 @@
                         .info-row { display: flex; justify-content: space-between; padding: 5px 0; font-size: 11px; }
                         .info-row .label { color: #64748b; }
                         .info-row .value { font-weight: 600; color: #1e293b; }
-                        .valor-destaque { font-size: 20px; font-weight: 700; color: #059669; }
+                        .valor-destaque { font-size: 20px; font-weight: 700; color: #1a4fd4; }
                         .status { padding: 4px 12px; border-radius: 10px; font-size: 9px; font-weight: 600; }
                         .status.orcamento { background: #dbeafe; color: #1e40af; }
                         .status.aprovado { background: #dcfce7; color: #166534; }
@@ -3508,7 +3508,7 @@
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; text-align: center;">
                                 <div>
                                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Pedido</div>
-                                    <div style="font-size: 18px; font-weight: 700; color: #059669;">#${pedido.numero || pedido.id}</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: #1a4fd4;">#${pedido.numero || pedido.id}</div>
                                 </div>
                                 <div>
                                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Valor Total</div>
@@ -3516,7 +3516,7 @@
                                 </div>
                                 <div>
                                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">% Faturado</div>
-                                    <div style="font-size: 18px; font-weight: 700; color: ${percentualFaturado >= 100 ? '#059669' : '#f59e0b'};">${percentualFaturado}%</div>
+                                    <div style="font-size: 18px; font-weight: 700; color: ${percentualFaturado >= 100 ? '#1a4fd4' : '#f59e0b'};">${percentualFaturado}%</div>
                                 </div>
                             </div>
                         </div>
@@ -3524,15 +3524,15 @@
                         <!-- Fluxo Visual -->
                         <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 24px; padding: 16px; background: #f9fafb; border-radius: 12px;">
                             <div style="text-align: center; flex: 1;">
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: ${percentualFaturado >= 50 ? '#059669' : '#e5e7eb'}; color: ${percentualFaturado >= 50 ? 'white' : '#6b7280'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: ${percentualFaturado >= 50 ? '#1a4fd4' : '#e5e7eb'}; color: ${percentualFaturado >= 50 ? 'white' : '#6b7280'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px;">
                                     ${percentualFaturado >= 50 ? '<i class="fas fa-check"></i>' : '1'}
                                 </div>
                                 <div style="font-size: 12px; font-weight: 600; color: #374151;">Faturamento</div>
                                 <div style="font-size: 11px; color: #6b7280;">CFOP 5922/6922</div>
                             </div>
-                            <div style="flex: 0 0 60px; height: 3px; background: ${percentualFaturado >= 50 ? '#059669' : '#e5e7eb'};"></div>
+                            <div style="flex: 0 0 60px; height: 3px; background: ${percentualFaturado >= 50 ? '#1a4fd4' : '#e5e7eb'};"></div>
                             <div style="text-align: center; flex: 1;">
-                                <div style="width: 48px; height: 48px; border-radius: 50%; background: ${estoqueBaixado ? '#059669' : '#e5e7eb'}; color: ${estoqueBaixado ? 'white' : '#6b7280'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px;">
+                                <div style="width: 48px; height: 48px; border-radius: 50%; background: ${estoqueBaixado ? '#1a4fd4' : '#e5e7eb'}; color: ${estoqueBaixado ? 'white' : '#6b7280'}; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 20px;">
                                     ${estoqueBaixado ? '<i class="fas fa-check"></i>' : '2'}
                                 </div>
                                 <div style="font-size: 12px; font-weight: 600; color: #374151;">Remessa</div>
@@ -3636,7 +3636,7 @@
                             <i class="fas fa-truck"></i> Emitir Remessa
                         </button>
                         <button onclick="executarFaturamentoParcial(${pedido.id})" class="btn-primary" ${btnFaturamentoDisabled}
-                            style="padding: 12px 24px; background: linear-gradient(135deg, #059669, #047857);">
+                            style="padding: 12px 24px; background: linear-gradient(135deg, #1a4fd4, #1340b0);">
                             <i class="fas fa-file-invoice-dollar"></i> Faturar ${percentualFaturado > 0 ? 'Restante' : '50%'}
                         </button>
                     </div>
@@ -3831,7 +3831,7 @@
                 message: `Como deseja faturar o pedido <strong>#${pedidoAtualModal.número || pedidoAtualModal.id}</strong>?<br><br>` +
                     `<button onclick="window._opcaoFaturamento='normal'; document.querySelector('.confirm-modal-confirm').click();" style="width:100%; padding:12px; margin-bottom:8px; background:#3b82f6; color:white; border:none; border-radius:8px; cursor:pointer;">` +
                     `<i class="fas fa-file-invoice"></i> Faturamento Normal (100%)</button>` +
-                    `<button onclick="window._opcaoFaturamento='parcial'; document.querySelector('.confirm-modal-confirm').click();" style="width:100%; padding:12px; background:#059669; color:white; border:none; border-radius:8px; cursor:pointer;">` +
+                    `<button onclick="window._opcaoFaturamento='parcial'; document.querySelector('.confirm-modal-confirm').click();" style="width:100%; padding:12px; background:#1a4fd4; color:white; border:none; border-radius:8px; cursor:pointer;">` +
                     `<i class="fas fa-percentage"></i> Faturamento Parcial (50% F9)</button>`,
                 confirmText: 'Continuar',
                 cancelText: 'Cancelar',

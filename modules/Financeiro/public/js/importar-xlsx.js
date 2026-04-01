@@ -372,7 +372,7 @@ function abrirModalImportar(tipo) {
                 <div class="modal-body" style="padding: 24px;">
                     <div style="text-align: center; padding: 20px;">
                         <div style="margin-bottom: 20px;">
-                            <i class="fas fa-file-upload" style="font-size: 48px; color: #10b981;"></i>
+                            <i class="fas fa-file-upload" style="font-size: 48px; color: #225cfa;"></i>
                         </div>
                         
                         <h3 style="margin-bottom: 16px; color: #1f2937;">Importar via planilha Excel</h3>
@@ -420,7 +420,7 @@ function abrirModalImportar(tipo) {
         if (dropZone) {
             dropZone.addEventListener('dragover', (e) => {
                 e.preventDefault();
-                dropZone.style.borderColor = '#10b981';
+                dropZone.style.borderColor = '#225cfa';
                 dropZone.style.background = '#ecfdf5';
             });
             dropZone.addEventListener('dragleave', () => {
@@ -620,8 +620,8 @@ async function processarArquivoXLSX(file, tipo) {
         
         if (result.success) {
             resultEl.innerHTML = `
-                <div style="background: #ecfdf5; border: 1px solid #10b981; border-radius: 8px; padding: 16px;">
-                    <div style="display: flex; align-items: center; gap: 12px; color: #059669;">
+                <div style="background: #ecfdf5; border: 1px solid #225cfa; border-radius: 8px; padding: 16px;">
+                    <div style="display: flex; align-items: center; gap: 12px; color: #1a4fd4;">
                         <i class="fas fa-check-circle" style="font-size: 24px;"></i>
                         <div>
                             <strong>Importação concluída!</strong>
@@ -710,7 +710,7 @@ importStyles.textContent = `
         gap: 10px;
     }
     .modal-header h2 i {
-        color: #10b981;
+        color: #225cfa;
     }
     .modal-close {
         background: none;

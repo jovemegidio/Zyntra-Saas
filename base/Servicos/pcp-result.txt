@@ -1,0 +1,360 @@
+TAP version 13
+# Subtest: BUG-01: State machine para controle-pcp status
+    # Subtest: VALID_TRANSITIONS_CTRL existe
+    ok 1 - VALID_TRANSITIONS_CTRL existe
+      ---
+      duration_ms: 1.4818
+      ...
+    # Subtest: Transições válidas definidas
+    ok 2 - Transições válidas definidas
+      ---
+      duration_ms: 0.3945
+      ...
+    # Subtest: Bloqueia transição inválida
+    ok 3 - Bloqueia transição inválida
+      ---
+      duration_ms: 0.5604
+      ...
+    # Subtest: NFD normalization no status
+    ok 4 - NFD normalization no status
+      ---
+      duration_ms: 0.3055
+      ...
+    1..4
+ok 1 - BUG-01: State machine para controle-pcp status
+  ---
+  duration_ms: 5.0104
+  type: 'suite'
+  ...
+# Subtest: BUG-02: Estoque negativo em produtos
+    # Subtest: Guard estoque < 0
+    ok 1 - Guard estoque < 0
+      ---
+      duration_ms: 0.5043
+      ...
+    # Subtest: Retorna 400 para estoque negativo
+    ok 2 - Retorna 400 para estoque negativo
+      ---
+      duration_ms: 0.426
+      ...
+    1..2
+ok 2 - BUG-02: Estoque negativo em produtos
+  ---
+  duration_ms: 1.3196
+  type: 'suite'
+  ...
+# Subtest: BUG-03: Cancelamento sem reversão de estoque
+    # Subtest: Busca movimentações SAIDA ao cancelar
+    ok 1 - Busca movimentações SAIDA ao cancelar
+      ---
+      duration_ms: 0.6585
+      ...
+    # Subtest: Insere ENTRADA para reverter
+    ok 2 - Insere ENTRADA para reverter
+      ---
+      duration_ms: 0.652
+      ...
+    # Subtest: Usa transaction no cancelamento
+    ok 3 - Usa transaction no cancelamento
+      ---
+      duration_ms: 0.8586
+      ...
+    # Subtest: Tem rollback
+    ok 4 - Tem rollback
+      ---
+      duration_ms: 0.9803
+      ...
+    1..4
+ok 3 - BUG-03: Cancelamento sem reversão de estoque
+  ---
+  duration_ms: 4.2533
+  type: 'suite'
+  ...
+# Subtest: BUG-04: RBAC em POST /ordens
+    # Subtest: requireProductionRole antes de criar ordem
+    not ok 1 - requireProductionRole antes de criar ordem
+      ---
+      duration_ms: 2.2884
+      location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:65:3'
+      failureType: 'testCodeFailure'
+      error: 'POST /ordens deve ter requireProductionRole'
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: true
+      actual: false
+      operator: '=='
+      stack: |-
+        TestContext.<anonymous> (G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Zyntra\pcp-static-test.js:68:12)
+        Test.runInAsyncScope (node:async_hooks:211:14)
+        Test.run (node:internal/test_runner/test:934:25)
+        Test.start (node:internal/test_runner/test:833:17)
+        node:internal/test_runner/test:1318:71
+        node:internal/per_context/primordials:483:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:451:29)
+        node:internal/per_context/primordials:483:9
+        Array.map (<anonymous>)
+      ...
+    1..1
+not ok 4 - BUG-04: RBAC em POST /ordens
+  ---
+  duration_ms: 2.659
+  type: 'suite'
+  location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:64:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: BUG-05: RBAC em entrada/saída de matérias-primas
+    # Subtest: Saída tem RBAC
+    not ok 1 - Saída tem RBAC
+      ---
+      duration_ms: 2.7643
+      location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:73:3'
+      failureType: 'testCodeFailure'
+      error: 'POST /materias-primas/:id/saida deve ter RBAC'
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: true
+      actual: false
+      operator: '=='
+      stack: |-
+        TestContext.<anonymous> (G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Zyntra\pcp-static-test.js:75:12)
+        Test.runInAsyncScope (node:async_hooks:211:14)
+        Test.run (node:internal/test_runner/test:934:25)
+        Test.start (node:internal/test_runner/test:833:17)
+        node:internal/test_runner/test:1318:71
+        node:internal/per_context/primordials:483:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:451:29)
+        node:internal/per_context/primordials:483:9
+        Array.map (<anonymous>)
+      ...
+    # Subtest: Entrada tem RBAC
+    not ok 2 - Entrada tem RBAC
+      ---
+      duration_ms: 0.943
+      location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:77:3'
+      failureType: 'testCodeFailure'
+      error: 'POST /materias-primas/:id/entrada deve ter RBAC'
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: true
+      actual: false
+      operator: '=='
+      stack: |-
+        TestContext.<anonymous> (G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Zyntra\pcp-static-test.js:79:12)
+        Test.runInAsyncScope (node:async_hooks:211:14)
+        Test.run (node:internal/test_runner/test:934:25)
+        Suite.processPendingSubtests (node:internal/test_runner/test:633:18)
+        Test.postRun (node:internal/test_runner/test:1045:19)
+        Test.run (node:internal/test_runner/test:973:12)
+        async Promise.all (index 0)
+        async Suite.run (node:internal/test_runner/test:1320:7)
+        async Test.processPendingSubtests (node:internal/test_runner/test:633:7)
+      ...
+    1..2
+not ok 5 - BUG-05: RBAC em entrada/saída de matérias-primas
+  ---
+  duration_ms: 4.1895
+  type: 'suite'
+  location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:72:1'
+  failureType: 'subtestsFailed'
+  error: '2 subtests failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: BUG-06: Race condition em stock_movements
+    # Subtest: Usa FOR UPDATE no select de estoque
+    ok 1 - Usa FOR UPDATE no select de estoque
+      ---
+      duration_ms: 0.5877
+      ...
+    # Subtest: getConnection para transação
+    ok 2 - getConnection para transação
+      ---
+      duration_ms: 0.2778
+      ...
+    # Subtest: connection.release() no finally
+    ok 3 - connection.release() no finally
+      ---
+      duration_ms: 0.3567
+      ...
+    1..3
+ok 6 - BUG-06: Race condition em stock_movements
+  ---
+  duration_ms: 1.5358
+  type: 'suite'
+  ...
+# Subtest: BUG-07: Overwrite materiais sem RBAC/auditoria
+    # Subtest: PUT /materiais tem RBAC
+    not ok 1 - PUT /materiais tem RBAC
+      ---
+      duration_ms: 0.9267
+      location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:96:3'
+      failureType: 'testCodeFailure'
+      error: 'PUT /materiais/:id deve ter RBAC'
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: true
+      actual: false
+      operator: '=='
+      stack: |-
+        TestContext.<anonymous> (G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Zyntra\pcp-static-test.js:98:12)
+        Test.runInAsyncScope (node:async_hooks:211:14)
+        Test.run (node:internal/test_runner/test:934:25)
+        Test.start (node:internal/test_runner/test:833:17)
+        node:internal/test_runner/test:1318:71
+        node:internal/per_context/primordials:483:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:451:29)
+        node:internal/per_context/primordials:483:9
+        Array.map (<anonymous>)
+      ...
+    # Subtest: Registra movimentação AJUSTE
+    ok 2 - Registra movimentação AJUSTE
+      ---
+      duration_ms: 0.303
+      ...
+    1..2
+not ok 7 - BUG-07: Overwrite materiais sem RBAC/auditoria
+  ---
+  duration_ms: 1.5284
+  type: 'suite'
+  location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:95:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: BUG-08/09: Validações de quantidade e preço
+    # Subtest: Quantidade <= 0 bloqueada
+    ok 1 - Quantidade <= 0 bloqueada
+      ---
+      duration_ms: 0.3843
+      ...
+    # Subtest: Preço negativo bloqueado
+    ok 2 - Preço negativo bloqueado
+      ---
+      duration_ms: 0.3911
+      ...
+    1..2
+ok 8 - BUG-08/09: Validações de quantidade e preço
+  ---
+  duration_ms: 1.0301
+  type: 'suite'
+  ...
+# Subtest: BUG-10: RBAC em DELETE ordens-kanban
+    # Subtest: Tem RBAC no delete kanban
+    not ok 1 - Tem RBAC no delete kanban
+      ---
+      duration_ms: 0.9676
+      location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:121:3'
+      failureType: 'testCodeFailure'
+      error: 'DELETE /ordens-kanban/:id deve ter RBAC'
+      code: 'ERR_ASSERTION'
+      name: 'AssertionError'
+      expected: true
+      actual: false
+      operator: '=='
+      stack: |-
+        TestContext.<anonymous> (G:\.shortcut-targets-by-id\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\Zyntra\pcp-static-test.js:123:12)
+        Test.runInAsyncScope (node:async_hooks:211:14)
+        Test.run (node:internal/test_runner/test:934:25)
+        Test.start (node:internal/test_runner/test:833:17)
+        node:internal/test_runner/test:1318:71
+        node:internal/per_context/primordials:483:82
+        new Promise (<anonymous>)
+        new SafePromise (node:internal/per_context/primordials:451:29)
+        node:internal/per_context/primordials:483:9
+        Array.map (<anonymous>)
+      ...
+    1..1
+not ok 9 - BUG-10: RBAC em DELETE ordens-kanban
+  ---
+  duration_ms: 1.1745
+  type: 'suite'
+  location: 'G:\\.shortcut-targets-by-id\\1cwjbEHD82YI8KNdhYtxmMhyZezb1IsFN\\Zyntra\\pcp-static-test.js:120:1'
+  failureType: 'subtestsFailed'
+  error: '1 subtest failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: BUG-11/12: Etapas status whitelist + NFD
+    # Subtest: VALID_ETAPA_STATUS existe
+    ok 1 - VALID_ETAPA_STATUS existe
+      ---
+      duration_ms: 0.552
+      ...
+    # Subtest: NFD normalização aplicada
+    ok 2 - NFD normalização aplicada
+      ---
+      duration_ms: 0.6104
+      ...
+    1..2
+ok 10 - BUG-11/12: Etapas status whitelist + NFD
+  ---
+  duration_ms: 1.5072
+  type: 'suite'
+  ...
+# Subtest: BUG-13: Soft delete bloqueia mais status
+    # Subtest: Bloqueia em_producao
+    ok 1 - Bloqueia em_producao
+      ---
+      duration_ms: 0.3608
+      ...
+    # Subtest: Bloqueia finalizada
+    ok 2 - Bloqueia finalizada
+      ---
+      duration_ms: 0.214
+      ...
+    # Subtest: Bloqueia qualidade
+    ok 3 - Bloqueia qualidade
+      ---
+      duration_ms: 0.1892
+      ...
+    # Subtest: Bloqueia conferido
+    ok 4 - Bloqueia conferido
+      ---
+      duration_ms: 0.2026
+      ...
+    # Subtest: Bloqueia armazenado
+    ok 5 - Bloqueia armazenado
+      ---
+      duration_ms: 0.1812
+      ...
+    1..5
+ok 11 - BUG-13: Soft delete bloqueia mais status
+  ---
+  duration_ms: 1.4114
+  type: 'suite'
+  ...
+# Subtest: BUG-14: Data previsão no passado
+    # Subtest: Valida data_previsao_entrega
+    ok 1 - Valida data_previsao_entrega
+      ---
+      duration_ms: 0.2124
+      ...
+    # Subtest: Compara com data atual
+    ok 2 - Compara com data atual
+      ---
+      duration_ms: 0.255
+      ...
+    # Subtest: Rejeita data no passado
+    ok 3 - Rejeita data no passado
+      ---
+      duration_ms: 0.7019
+      ...
+    1..3
+ok 12 - BUG-14: Data previsão no passado
+  ---
+  duration_ms: 1.3536
+  type: 'suite'
+  ...
+# === PCP Static Analysis Complete ===
+1..12
+# tests 31
+# suites 12
+# pass 26
+# fail 5
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 284866.8637

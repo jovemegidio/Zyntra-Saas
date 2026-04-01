@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -138,7 +138,7 @@
         .multi-select-bar .sel-total { font-size:13px; color:#374151; margin-left:auto; }
         .btn-cnab { padding:8px 16px; background:linear-gradient(135deg,#7c3aed,#a78bfa); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
         .btn-cnab:hover { opacity:0.9; }
-        .btn-pagar-lote { padding:8px 16px; background:linear-gradient(135deg,#10b981,#059669); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
+        .btn-pagar-lote { padding:8px 16px; background:linear-gradient(135deg,#225cfa,#1a4fd4); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; }
         .btn-pagar-lote:hover { opacity:0.9; }
         .btn-deselect { padding:6px 12px; background:var(--gray-100); border:1px solid var(--gray-300); border-radius:6px; font-size:11px; cursor:pointer; color:var(--gray-600); }
         /* CNAB Modal */
@@ -228,7 +228,7 @@
 
         .btn-success {
             padding: 8px 16px;
-            background: #059669;
+            background: #1a4fd4;
             color: white;
             border: none;
             border-radius: 8px;
@@ -239,7 +239,7 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-success:hover { background: #047857; }
+        .btn-success:hover { background: #1340b0; }
 
         .highlight { background: #fef9c3; padding: 0 2px; border-radius: 2px; }
 
@@ -599,8 +599,8 @@
         }
         .btn-view-secondary { background: var(--gray-100); color: var(--gray-700); }
         .btn-view-secondary:hover { background: var(--gray-200); }
-        .btn-view-primary { background: #059669; color: white; }
-        .btn-view-primary:hover { background: #047857; }
+        .btn-view-primary { background: #1a4fd4; color: white; }
+        .btn-view-primary:hover { background: #1340b0; }
 
         /* Modal Pagar */
         .modal-pagar { max-width: 480px; }
@@ -609,7 +609,7 @@
             align-items: center;
             gap: 14px;
             padding: 20px 24px;
-            background: linear-gradient(135deg, #059669, #10b981);
+            background: linear-gradient(135deg, #1a4fd4, #225cfa);
             border-radius: 16px 16px 0 0;
             color: white;
         }
@@ -895,7 +895,7 @@
     <!-- Modal Importar Retorno CNAB -->
     <div id="modal-retorno-cnab" class="modal">
         <div class="modal-content modal-institucional" style="max-width:640px;">
-            <div class="modal-header-institucional" style="background:linear-gradient(135deg,#059669,#34d399);">
+            <div class="modal-header-institucional" style="background:linear-gradient(135deg,#1a4fd4,#60a5fa);">
                 <div class="modal-header-icon"><i class="fas fa-file-import"></i></div>
                 <div class="modal-header-info">
                     <h3 class="modal-title">Importar Retorno CNAB</h3>
@@ -910,13 +910,13 @@
                     <input type="file" id="cnab-retorno-file" accept=".ret,.crt,.txt" style="display:none;" onchange="processarRetornoCNAB(this)">
                 </div>
                 <div id="retorno-resultado" style="display:none;">
-                    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;"><i class="fas fa-list-check" style="color:#059669;margin-right:6px;"></i> Resultado do Processamento</h4>
+                    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;"><i class="fas fa-list-check" style="color:#1a4fd4;margin-right:6px;"></i> Resultado do Processamento</h4>
                     <div id="retorno-resumo" style="margin-bottom:12px;"></div>
                     <div style="max-height:200px;overflow-y:auto;" id="retorno-detalhes"></div>
                 </div>
                 <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px;">
                     <button type="button" class="btn-cancel" onclick="fecharModalRetornoCNAB()"><i class="fas fa-times"></i> Fechar</button>
-                    <button type="button" class="btn-save" id="btn-aplicar-retorno" style="display:none;background:linear-gradient(135deg,#059669,#34d399);" onclick="aplicarRetornoCNAB()"><i class="fas fa-check"></i> Aplicar Baixas</button>
+                    <button type="button" class="btn-save" id="btn-aplicar-retorno" style="display:none;background:linear-gradient(135deg,#1a4fd4,#60a5fa);" onclick="aplicarRetornoCNAB()"><i class="fas fa-check"></i> Aplicar Baixas</button>
                 </div>
             </div>
         </div>
@@ -1099,7 +1099,7 @@
                 </div>
                 <div class="modal-pagar-footer">
                     <button type="button" class="btn-cancel" onclick="fecharModalPagar()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-check"></i> Confirmar Pagamento</button>
+                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#225cfa,#1a4fd4);"><i class="fas fa-check"></i> Confirmar Pagamento</button>
                 </div>
             </form>
         </div>

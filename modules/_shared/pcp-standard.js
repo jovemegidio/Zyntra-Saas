@@ -1,4 +1,4 @@
-﻿/* PCP Standard JavaScript - Funcionalidades Comuns para Todos os Módulos */
+/* PCP Standard JavaScript - Funcionalidades Comuns para Todos os Módulos */
 
 // ===== GERENCIAMENTO DE MODO ESCURO =====
 function initDarkMode() {
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initTabs();
     initGlobalSearch();
     
-    console.log('%c✅ PCP Standard JS inicializado com sucesso!', 'color: #10b981; font-weight: bold; font-size: 14px;');
+    console.log('%c✅ PCP Standard JS inicializado com sucesso!', 'color: #225cfa; font-weight: bold; font-size: 14px;');
 });
 
 // ===== EXPORTAR FUNÇÕES =====

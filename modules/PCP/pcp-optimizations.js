@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ============================================
  * PCP MODULE - PERFORMANCE OPTIMIZATIONS
  * ============================================
@@ -574,7 +574,7 @@ class NotificationManager {
 
     getBackgroundColor(type) {
         const colors = {
-            success: 'linear-gradient(135deg, #10b981, #059669)',
+            success: 'linear-gradient(135deg, #225cfa, #1a4fd4)',
             error: 'linear-gradient(135deg, #ef4444, #dc2626)',
             warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
             info: 'linear-gradient(135deg, #3b82f6, #2563eb)'

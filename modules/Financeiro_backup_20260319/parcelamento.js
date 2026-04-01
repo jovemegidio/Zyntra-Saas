@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SISTEMA DE PARCELAMENTO AUTOMÁTICO - Sistema Financeiro Aluforce
 // ============================================================================
 
@@ -362,8 +362,8 @@ class SistemaParcelamento {
                 .form-group select:focus,
                 .form-group textarea:focus {
                     outline: none;
-                    border-color: #10b981;
-                    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+                    border-color: #225cfa;
+                    box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.1);
                 }
 
                 .resumo-parcelamento {
@@ -377,7 +377,7 @@ class SistemaParcelamento {
                     background: white;
                     padding: 16px;
                     border-radius: 8px;
-                    border-left: 4px solid #10b981;
+                    border-left: 4px solid #225cfa;
                     display: flex;
                     flex-direction: column;
                     gap: 8px;
@@ -449,13 +449,13 @@ class SistemaParcelamento {
                 }
 
                 .btn-primary {
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
                     color: white;
                 }
 
                 .btn-primary:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                    box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3);
                 }
 
                 .btn-secondary {

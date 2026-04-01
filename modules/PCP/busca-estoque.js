@@ -1,4 +1,4 @@
-﻿// =====================================================
+// =====================================================
 // BUSCA AVANÇADA DE PRODUTOS E ALERTAS DE ESTOQUE
 // =====================================================
 
@@ -177,7 +177,7 @@
                             <tr data-id="${p.id}">
                                 <td><strong>${p.codigo || ''}</strong></td>
                                 <td>${p.nome || p.descricao || ''}</td>
-                                <td><span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">${p.sku || '-'}</span></td>
+                                <td><span style="background: #225cfa; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">${p.sku || '-'}</span></td>
                                 <td>${p.gtin || '-'}</td>
                                 <td style="text-align: center;"><strong>${qtd.toFixed(2)}</strong> ${p.unidade || 'UN'}</td>
                                 <td style="text-align: center;">
@@ -213,7 +213,7 @@
                 .status-normal {
                     background: #d1fae5 !important;
                     color: #065f46 !important;
-                    border: 1px solid #10b981 !important;
+                    border: 1px solid #225cfa !important;
                 }
                 .status-alto {
                     background: #dbeafe !important;
@@ -595,7 +595,7 @@
         const badges = {
             'critico': { icon: '🚨', label: 'CRÍTICO', bg: '#fee2e2', color: '#991b1b', border: '#ef4444' },
             'baixo': { icon: '⚠️', label: 'Baixo', bg: '#fef3c7', color: '#92400e', border: '#fbbf24' },
-            'normal': { icon: '✅', label: 'Normal', bg: '#d1fae5', color: '#065f46', border: '#10b981' },
+            'normal': { icon: '✅', label: 'Normal', bg: '#d1fae5', color: '#065f46', border: '#225cfa' },
             'alto': { icon: '📦', label: 'Alto', bg: '#dbeafe', color: '#1e40af', border: '#3b82f6' }
         };
         return badges[status] || badges.normal;

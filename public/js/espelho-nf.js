@@ -76,7 +76,7 @@ function renderNFesEspelho(nfes) {
             digitacao: '#6366f1;background:#e0e7ff',
             pendente: '#d97706;background:#fef3c7',
             emitida: '#0284c7;background:#e0f2fe',
-            autorizada: '#059669;background:#d1fae5',
+            autorizada: '#1a4fd4;background:#d1fae5',
             cancelada: '#dc2626;background:#fee2e2',
             rejeitada: '#dc2626;background:#fee2e2'
         };

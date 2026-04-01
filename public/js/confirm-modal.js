@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Sistema de Modal de Confirmação Profissional
  * ALUFORCE v2.0
  * 
@@ -88,7 +88,7 @@
 
             .confirm-modal-icon.success {
                 background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-                color: #059669;
+                color: #1a4fd4;
             }
 
             .confirm-modal-icon i {
@@ -177,14 +177,14 @@
             }
 
             .confirm-modal-btn-success {
-                background: linear-gradient(135deg, #10b981, #059669);
+                background: linear-gradient(135deg, #225cfa, #1a4fd4);
                 color: white;
-                box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+                box-shadow: 0 4px 14px rgba(34, 92, 250, 0.4);
             }
 
             .confirm-modal-btn-success:hover {
                 transform: translateY(-1px);
-                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+                box-shadow: 0 6px 20px rgba(34, 92, 250, 0.5);
             }
         `;
         document.head.appendChild(style);

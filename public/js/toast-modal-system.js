@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ALUFORCE - Sistema de Toasts e Modais Profissionais
  * Substitui alerts nativos por componentes modernos
  * @version 2.0
@@ -51,9 +51,9 @@
 
         const themes = {
             success: { 
-                bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
-                shadow: 'rgba(16, 185, 129, 0.4)',
-                glow: '#10b981'
+                bg: 'linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%)', 
+                shadow: 'rgba(34, 92, 250, 0.4)',
+                glow: '#225cfa'
             },
             error: { 
                 bg: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', 
@@ -204,9 +204,9 @@
             
             const themes = {
                 success: {
-                    gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    gradient: 'linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%)',
                     bgLight: '#ecfdf5',
-                    color: '#059669',
+                    color: '#1a4fd4',
                     icon: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
                     title: 'Sucesso!'
                 },
@@ -418,7 +418,7 @@
             const { confirmText = 'Confirmar', cancelText = 'Cancelar', type = 'warning' } = options;
             
             const colors = {
-                success: '#10b981',
+                success: '#225cfa',
                 error: '#ef4444',
                 warning: '#f59e0b',
                 info: '#3b82f6',
@@ -633,7 +633,7 @@
                         ">Cancelar</button>
                         <button class="modal-btn-confirm" style="
                             padding: 10px 24px;
-                            background: #10b981;
+                            background: #225cfa;
                             color: white;
                             border: none;
                             border-radius: 8px;
@@ -673,7 +673,7 @@
             });
 
             input.addEventListener('focus', () => {
-                input.style.borderColor = '#10b981';
+                input.style.borderColor = '#225cfa';
             });
             input.addEventListener('blur', () => {
                 input.style.borderColor = '#e2e8f0';
@@ -693,7 +693,7 @@
                 { value: 'em_separacao', label: 'Em Separação', icon: '📦', color: '#3b82f6' },
                 { value: 'em_expedicao', label: 'Em Expedição', icon: '🚛', color: '#8b5cf6' },
                 { value: 'em_transporte', label: 'Em Transporte', icon: '🚚', color: '#ec4899' },
-                { value: 'entregue', label: 'Entregue', icon: '✅', color: '#10b981' }
+                { value: 'entregue', label: 'Entregue', icon: '✅', color: '#225cfa' }
             ];
 
             const modal = document.createElement('div');
@@ -801,7 +801,7 @@
                 });
                 btn.addEventListener('mouseenter', () => {
                     if (btn.dataset.value !== currentStatus) {
-                        btn.style.borderColor = '#10b981';
+                        btn.style.borderColor = '#225cfa';
                         btn.style.background = '#f0fdf4';
                     }
                 });

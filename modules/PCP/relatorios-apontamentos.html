@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -624,7 +624,7 @@
             'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mecânica' },
             'PCM': { bg: '#fee2e2', color: '#b91c1c', icon: 'fa-times-circle', nome: 'Parada Corretiva' },
             'TT': { bg: '#e0e7ff', color: '#4f46e5', icon: 'fa-exchange-alt', nome: 'Troca de Turno' },
-            'MP': { bg: '#d1fae5', color: '#059669', icon: 'fa-clipboard-check', nome: 'Manut. Preventiva' },
+            'MP': { bg: '#d1fae5', color: '#1a4fd4', icon: 'fa-clipboard-check', nome: 'Manut. Preventiva' },
             'MC': { bg: '#ffe4e6', color: '#e11d48', icon: 'fa-wrench', nome: 'Manut. Corretiva' },
             'TB': { bg: '#ccfbf1', color: '#0d9488', icon: 'fa-circle-notch', nome: 'Troca Bobina' },
             'TM': { bg: '#f3e8ff', color: '#9333ea', icon: 'fa-sync-alt', nome: 'Troca Material' },
@@ -756,7 +756,7 @@
 
         function mostrarIniciaisAvatar(nome, el) {
             const inicial = nome ? nome[0].toUpperCase() : 'U';
-            const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+            const cores = ['#3b82f6', '#225cfa', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
             const cor = cores[nome ? nome.charCodeAt(0) % cores.length : 0];
             el.innerHTML = `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:${cor};color:white;font-weight:600;border-radius:50%;">${inicial}</span>`;
         }
@@ -937,7 +937,7 @@
             const img = new Image();
             img.onload = () => { avatarEl.innerHTML = `<img src="/avatars/${nome}.webp" alt="${nome}">`; };
             img.onerror = () => {
-                const cores = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
+                const cores = ['#3b82f6', '#225cfa', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4'];
                 avatarEl.style.background = cores[nome ? nome.charCodeAt(0) % cores.length : 0];
                 avatarEl.textContent = inicial;
             };

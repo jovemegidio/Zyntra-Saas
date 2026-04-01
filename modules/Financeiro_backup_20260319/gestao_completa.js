@@ -1,4 +1,4 @@
-﻿// Gestão Financeira Completa - JavaScript
+// Gestão Financeira Completa - JavaScript
 const API_BASE = '/api/financeiro';
 let abaAtual = 'pagar';
 let dadosTabela = [];
@@ -355,7 +355,7 @@ function renderizarTabela(dados) {
                     </button>
                 `;
             } else {
-                html += `<span style="color: #10b981; font-weight: 600;">✅ ${item.status === 'pago' ? 'Pago' : 'Recebido'}</span>`;
+                html += `<span style="color: #225cfa; font-weight: 600;">✅ ${item.status === 'pago' ? 'Pago' : 'Recebido'}</span>`;
             }
             
             html += `</td>`;

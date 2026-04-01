@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    PEDIDOS DE COMPRA
    ======================================== */
 
@@ -94,7 +94,7 @@ class PedidosCompras {
             },
             'aprovado': { 
                 label: 'Aprovado', 
-                color: '#10b981', 
+                color: '#225cfa', 
                 bg: '#d1fae5', 
                 icon: 'check-circle' 
             },
@@ -106,7 +106,7 @@ class PedidosCompras {
             },
             'recebido': { 
                 label: 'Recebido', 
-                color: '#059669', 
+                color: '#1a4fd4', 
                 bg: '#a7f3d0', 
                 icon: 'check-double' 
             },
@@ -156,7 +156,7 @@ class PedidosCompras {
                     </button>
                 </div>
                 
-                <button id="btn-novo-pedido" style="padding: 12px 24px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s;">
+                <button id="btn-novo-pedido" style="padding: 12px 24px; background: linear-gradient(135deg, #225cfa, #1a4fd4); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3); transition: all 0.2s;">
                     <i class="fas fa-plus-circle"></i> Novo Pedido
                 </button>
             </div>
@@ -167,8 +167,8 @@ class PedidosCompras {
                     <div style="font-size: 13px; color: #1e40af; font-weight: 600; margin-bottom: 8px;">TOTAL DE PEDIDOS</div>
                     <div style="font-size: 32px; font-weight: 800; color: #1e3a8a;">${totalPedidos}</div>
                 </div>
-                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
-                    <div style="font-size: 13px; color: #047857; font-weight: 600; margin-bottom: 8px;">VALOR TOTAL</div>
+                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #225cfa;">
+                    <div style="font-size: 13px; color: #1340b0; font-weight: 600; margin-bottom: 8px;">VALOR TOTAL</div>
                     <div style="font-size: 32px; font-weight: 800; color: #065f46;">R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </div>
             </div>
@@ -209,7 +209,7 @@ class PedidosCompras {
                                             </div>
                                         </td>
                                         <td style="padding: 16px;">
-                                            <div style="font-weight: 700; color: #10b981; font-size: 15px;">R$ ${pedido.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                                            <div style="font-weight: 700; color: #225cfa; font-size: 15px;">R$ ${pedido.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                                         </td>
                                         <td style="padding: 16px;">
                                             <div style="font-size: 13px; color: #64748b;">${new Date(pedido.data).toLocaleDateString('pt-BR')}</div>
@@ -265,8 +265,8 @@ class PedidosCompras {
                 }
 
                 .filtro-btn.active {
-                    background: linear-gradient(135deg, #10b981, #059669);
-                    border-color: #10b981;
+                    background: linear-gradient(135deg, #225cfa, #1a4fd4);
+                    border-color: #225cfa;
                     color: white;
                 }
 
@@ -311,7 +311,7 @@ class PedidosCompras {
 
                 #btn-novo-pedido:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+                    box-shadow: 0 6px 20px rgba(34, 92, 250, 0.4);
                 }
             </style>
         `;

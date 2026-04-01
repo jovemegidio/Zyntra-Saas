@@ -1,4 +1,4 @@
-﻿/**
+/**
  * COMPRAS COMPLETO - ALUFORCE
  * Gestão completa de Pedidos de Compra e Fornecedores
  */
@@ -737,7 +737,7 @@ const ComprasCompleto = {
             'pendente': '#f59e0b',
             'aprovado': '#22c55e',
             'enviado': '#3b82f6',
-            'recebido': '#10b981',
+            'recebido': '#225cfa',
             'cancelado': '#ef4444'
         };
         return colorMap[status] || '#64748b';

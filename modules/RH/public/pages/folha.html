@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -52,7 +52,7 @@
             font-size: 1rem;
         }
         .kpi-icon.indigo { background: #eef2ff; color: #6366f1; }
-        .kpi-icon.green { background: #ecfdf5; color: #059669; }
+        .kpi-icon.green { background: #ecfdf5; color: #1a4fd4; }
         .kpi-icon.amber { background: #fffbeb; color: #d97706; }
         .kpi-icon.red { background: #fef2f2; color: #dc2626; }
 
@@ -105,7 +105,7 @@
         }
         .folha-table tbody tr:hover { background: #f8fafc; }
         .folha-table tbody tr.total-row {
-            background: #f0fdf4; font-weight: 700; border-top: 2px solid #059669;
+            background: #f0fdf4; font-weight: 700; border-top: 2px solid #1a4fd4;
         }
         .folha-table tbody tr.total-row td { padding: 12px 8px; font-size: 0.9rem; color: #065f46; }
 
@@ -119,7 +119,7 @@
         .cell-input:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 2px rgba(99,102,241,0.12); outline: none; }
         .cell-input.text-left { text-align: left; }
         .cell-input.empresa { text-transform: uppercase; font-weight: 600; font-size: 0.78rem; color: #6366f1; }
-        .cell-total { text-align: right; font-weight: 700; color: #059669; padding: 6px 8px; font-size: 0.85rem; }
+        .cell-total { text-align: right; font-weight: 700; color: #1a4fd4; padding: 6px 8px; font-size: 0.85rem; }
 
         /* Botão remover linha */
         .btn-remove-row {
@@ -137,8 +137,8 @@
         }
         .btn-primary { background: #6366f1; color: #fff; }
         .btn-primary:hover { background: #4f46e5; }
-        .btn-success { background: #059669; color: #fff; }
-        .btn-success:hover { background: #047857; }
+        .btn-success { background: #1a4fd4; color: #fff; }
+        .btn-success:hover { background: #1340b0; }
         .btn-outline { background: transparent; color: #475569; border: 1px solid #cbd5e1; }
         .btn-outline:hover { background: #f1f5f9; }
         .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
@@ -155,7 +155,7 @@
             font-size: 1.1rem; font-weight: 800; color: #1e293b;
             display: flex; align-items: center; gap: 8px; margin-right: auto;
         }
-        .actions-footer .total-display .valor { color: #059669; }
+        .actions-footer .total-display .valor { color: #1a4fd4; }
         .badge-status {
             padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
             text-transform: uppercase; letter-spacing: 0.5px;
@@ -228,7 +228,7 @@
             border-radius: 10px; margin-bottom: 8px;
         }
         .hist-item .hist-label { font-weight: 600; color: #334155; }
-        .hist-item .hist-valor { font-weight: 800; color: #059669; }
+        .hist-item .hist-valor { font-weight: 800; color: #1a4fd4; }
         .hist-item .hist-status { font-size: 0.75rem; }
 
         /* Responsive */
@@ -535,7 +535,7 @@
         const t = document.createElement('div');
         t.style.cssText = 'position:fixed;top:20px;right:20px;padding:14px 22px;border-radius:10px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:420px;font-weight:500;';
         const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
-        const colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#4338ca' };
+        const colors = { success: '#1a4fd4', error: '#dc2626', warning: '#d97706', info: '#4338ca' };
         t.style.background = colors[type] || colors.info;
         t.innerHTML = `<i class="fas ${icons[type]||icons.info}"></i><span>${msg}</span>`;
         document.body.appendChild(t);
@@ -644,7 +644,7 @@
             html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.salario_por_fora), 0))}</td>`;
             html += `<td style="text-align:right;color:#dc2626;">${fmt(itens.reduce((s,i) => s + parseNum(i.desconto_emprestimo), 0))}</td>`;
         }
-        html += `<td style="text-align:right;font-size:1rem;font-weight:900;color:#059669;">${fmt(totalGeral)}</td><td></td></tr>`;
+        html += `<td style="text-align:right;font-size:1rem;font-weight:900;color:#1a4fd4;">${fmt(totalGeral)}</td><td></td></tr>`;
 
         tbody.innerHTML = html;
         atualizarTotais();

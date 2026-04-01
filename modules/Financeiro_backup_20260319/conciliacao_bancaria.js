@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // CONCILIAÇÃO BANCÁRIA - Sistema Financeiro Aluforce
 // ============================================================================
 
@@ -229,7 +229,7 @@ function criarItemMovimentacao(mov, origem, conciliada) {
     const checkbox = !conciliada ? `
         <input type="checkbox" class="mov-checkbox" 
                onchange="toggleSelecao('${mov.id}', '${origem}', this.checked)">
-    ` : '<i class="fas fa-check-circle" style="color: #10b981; margin-right: 10px;"></i>';
+    ` : '<i class="fas fa-check-circle" style="color: #225cfa; margin-right: 10px;"></i>';
 
     div.innerHTML = `
         ${checkbox}
@@ -240,7 +240,7 @@ function criarItemMovimentacao(mov, origem, conciliada) {
             </div>
             <div class="mov-descrição">${mov.descrição}</div>
             ${mov.categoria ? `<span class="mov-categoria">${mov.categoria}</span>` : ''}
-            ${conciliada ? '<span class="mov-categoria" style="background: #10b981; color: white;">✓ Conciliada</span>' : ''}
+            ${conciliada ? '<span class="mov-categoria" style="background: #225cfa; color: white;">✓ Conciliada</span>' : ''}
         </div>
     `;
 
@@ -357,7 +357,7 @@ function conciliarSelecionadas() {
     document.getElementById('conciliar-valor-sistema').textContent = formatarMoeda(totalSistema);
     document.getElementById('conciliar-valor-extrato').textContent = formatarMoeda(totalExtrato);
     document.getElementById('conciliar-diferenca').textContent = formatarMoeda(diferenca);
-    document.getElementById('conciliar-diferenca').style.color = Math.abs(diferenca) < 0.01 ? '#10b981' : '#ef4444';
+    document.getElementById('conciliar-diferenca').style.color = Math.abs(diferenca) < 0.01 ? '#225cfa' : '#ef4444';
 
     // Mostrar modal
     mostrarModal('modal-conciliar');
@@ -613,7 +613,7 @@ function atualizarEstatisticas() {
     document.getElementById('count-pendentes').textContent = pendentes;
     document.getElementById('count-divergentes').textContent = divergentes;
     document.getElementById('diferenca-total').textContent = formatarMoeda(diferenca);
-    document.getElementById('diferenca-total').style.color = Math.abs(diferenca) < 0.01 ? '#10b981' : '#ef4444';
+    document.getElementById('diferenca-total').style.color = Math.abs(diferenca) < 0.01 ? '#225cfa' : '#ef4444';
 }
 
 // ============================================================================
@@ -659,7 +659,7 @@ function mostrarMensagem(mensagem, tipo) {
         window.mostrarToastFinanceiro(mensagem, tipo);
     } else {
         // Fallback toast
-        const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
+        const colors = { success: '#225cfa', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
         const icons = { success: 'fa-check-circle', error: 'fa-times-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
         const existing = document.querySelector('.toast-conciliacao');
         if (existing) existing.remove();

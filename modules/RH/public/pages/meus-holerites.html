@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
@@ -228,8 +228,8 @@
         }
 
         .holerite-status.disponivel {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+            background: rgba(34, 92, 250, 0.1);
+            color: #225cfa;
         }
 
         .holerite-status.pendente {
@@ -712,7 +712,7 @@
         }
 
         .demonstrativo-table .provento {
-            color: #10b981;
+            color: #225cfa;
             font-weight: 600;
         }
 
@@ -756,7 +756,7 @@
         }
 
         .total-value.provento {
-            color: #10b981;
+            color: #225cfa;
         }
 
         .total-value.desconto {
@@ -1138,7 +1138,7 @@
             
             grid.innerHTML = data.map((h, i) => {
                 const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salário';
-                const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
+                const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#225cfa';
                 const tipoIcon = h.tipo === 'adiantamento' ? 'fa-hand-holding-usd' : 'fa-money-bill-wave';
                 return `
                 <div class="holerite-card">
@@ -1183,7 +1183,7 @@
                     const modal = document.getElementById('holerite-modal');
                     const content = document.getElementById('viewer-content');
                     const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALÁRIO';
-                    const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
+                    const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#225cfa';
                     
                     content.innerHTML = `
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -1214,7 +1214,7 @@
                         </div>
                         
                         <div class="section-title">
-                            <div class="bar" style="background:#10b981;"></div>
+                            <div class="bar" style="background:#225cfa;"></div>
                             <h4>Proventos</h4>
                         </div>
                         <table class="demonstrativo-table">
@@ -1281,7 +1281,7 @@
                         
                         <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
                             ${!h.confirmado_recebimento ? `
-                                <button class="btn btn-primary" style="flex:1;background:#10b981;border-radius:12px;padding:14px;" onclick="confirmarRecebimento(${h.id})">
+                                <button class="btn btn-primary" style="flex:1;background:#225cfa;border-radius:12px;padding:14px;" onclick="confirmarRecebimento(${h.id})">
                                     <i class="fas fa-check-double"></i> Confirmar Recebimento
                                 </button>
                             ` : `
@@ -1429,7 +1429,7 @@
             type = type || 'info';
             var toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:400px;';
-            toast.style.background = type==='success'?'#10b981':type==='error'?'#ef4444':type==='warning'?'#f59e0b':'#3b82f6';
+            toast.style.background = type==='success'?'#225cfa':type==='error'?'#ef4444':type==='warning'?'#f59e0b':'#3b82f6';
             var span = document.createElement('span');
             span.textContent = message;
             toast.appendChild(span);

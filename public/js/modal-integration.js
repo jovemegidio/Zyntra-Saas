@@ -114,7 +114,7 @@
                 width: 50px;
                 height: 50px;
                 border-radius: 50%;
-                background: linear-gradient(135deg, #10b981, #059669);
+                background: linear-gradient(135deg, #225cfa, #1a4fd4);
                 color: white;
                 border: none;
                 cursor: pointer;
@@ -122,14 +122,14 @@
                 align-items: center;
                 justify-content: center;
                 font-size: 20px;
-                box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+                box-shadow: 0 4px 15px rgba(34, 92, 250, 0.4);
                 transition: all 0.3s ease;
                 z-index: 9999;
             }
 
             .quick-export-btn:hover {
                 transform: scale(1.1);
-                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+                box-shadow: 0 6px 20px rgba(34, 92, 250, 0.5);
             }
 
             .quick-export-menu {
@@ -174,7 +174,7 @@
             }
 
             .quick-export-item.pdf i { color: #ef4444; }
-            .quick-export-item.excel i { color: #10b981; }
+            .quick-export-item.excel i { color: #225cfa; }
             .quick-export-item.csv i { color: #3b82f6; }
         `;
         document.head.appendChild(style);

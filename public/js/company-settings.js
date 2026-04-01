@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Company Settings Manager
  * Gerenciamento de configurações da empresa
  */
@@ -299,7 +299,7 @@ const CompanySettings = {
         empty.style.display = 'none';
 
         // Cores para departamentos
-        const cores = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899'];
+        const cores = ['#225cfa', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899'];
 
         list.innerHTML = this.departamentos.map((dept, index) => {
             const cor = dept.cor || cores[index % cores.length];
@@ -369,7 +369,7 @@ const CompanySettings = {
             'em_andamento': { texto: 'Em Andamento', cor: '#3b82f6' },
             'ativo': { texto: 'Ativo', cor: '#8b5cf6' },
             'pausado': { texto: 'Pausado', cor: '#f59e0b' },
-            'concluido': { texto: 'Concluído', cor: '#10b981' },
+            'concluido': { texto: 'Concluído', cor: '#225cfa' },
             'cancelado': { texto: 'Cancelado', cor: '#ef4444' }
         };
 

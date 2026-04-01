@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ALUFORCE v2.0 - Auto Layout Injector
  * 
  * Este script injeta automaticamente o layout unificado em qualquer página
@@ -70,7 +70,7 @@
         financeiro: {
             name: 'Financeiro',
             icon: 'fa-wallet',
-            color: '#10b981',
+            color: '#225cfa',
             theme: 'theme-financeiro.css',
             navItems: [
                 { id: 'dashboard', icon: 'fa-th-large', tooltip: 'Dashboard', href: '/financeiro' },

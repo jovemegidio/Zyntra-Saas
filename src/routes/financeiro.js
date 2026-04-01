@@ -26,42 +26,22 @@ const { corteTemporalMiddleware } = require('../middleware/financeiro-corte-temp
 
 /**
  * Middleware para controle de acesso ao módulo financeiro
- * Helen, Junior (Eldir) têm acesso TOTAL ao Financeiro
- * Atualizado: 2025-01-10
+ * C-002 FIX: Removida whitelist de e-mails hardcoded.
+ * Acesso via RBAC: role admin/financeiro ou coluna 'areas' contendo 'financeiro'.
  */
 function authorizeFinanceiro(section) {
     return async (req, res, next) => {
         try {
             const userEmail = req.user?.email?.toLowerCase();
             const userRole = req.user?.role;
-            
+
             if (!userEmail) {
                 return res.status(401).json({ error: 'Usuário não identificado' });
             }
 
-            // Lista de usuários com acesso total ao Financeiro
-            const financeiroEmails = [
-                // Admins
-                'andreia@aluforce.ind.br',
-                'andreia.lopes@aluforce.ind.br',
-                'douglas@aluforce.ind.br',
-                'douglas.moreira@aluforce.ind.br',
-                'ti@aluforce.ind.br',
-                // Equipe Financeiro - ACESSO TOTAL
-                'hellen@aluforce.ind.br',
-                'hellen.nascimento@aluforce.ind.br',
-                'helen@aluforce.ind.br',
-                'helen.nascimento@aluforce.ind.br',
-                'junior@aluforce.ind.br',
-                'adm@aluforce.ind.br',
-                'eldir@aluforce.ind.br',
-                'eldir.junior@aluforce.ind.br'
-            ];
-
-            const isAdmin = userRole === 'admin';
-            const hasFinanceiroAccess = financeiroEmails.includes(userEmail);
-
-            if (isAdmin || hasFinanceiroAccess) {
+            // Admins e financeiro têm acesso total via role
+            const adminRoles = ['admin', 'administrador', 'financeiro', 'financeiro_admin', 'gerente'];
+            if (adminRoles.includes(userRole)) {
                 req.userAccess = 'admin';
                 return next();
             }
@@ -95,8 +75,30 @@ function authorizeFinanceiro(section) {
                 console.error('[FINANCEIRO-AUTH] Erro ao consultar areas:', dbErr.message);
             }
 
-            // Outros usuários não autorizados
-            // Mensagens específicas por seção
+            // Verificar tabela funcionarios — permissoes_financeiro
+            try {
+                const [rows] = await pool.query(
+                    'SELECT permissoes_financeiro FROM funcionarios WHERE email = ? LIMIT 1',
+                    [userEmail]
+                );
+                if (rows.length > 0 && rows[0].permissoes_financeiro) {
+                    let perms = rows[0].permissoes_financeiro;
+                    if (typeof perms === 'string') {
+                        try { perms = JSON.parse(perms); } catch(e) { perms = {}; }
+                    }
+                    if (perms && (perms.acesso === 'total' || perms.visualizar === true)) {
+                        req.userAccess = 'funcionario';
+                        req.canEdit = !!(perms.editar);
+                        req.canCreate = !!(perms.criar);
+                        req.canDelete = !!(perms.excluir);
+                        return next();
+                    }
+                }
+            } catch (dbErr) {
+                console.error('[FINANCEIRO-AUTH] Erro ao consultar funcionarios:', dbErr.message);
+            }
+
+            // Usuário sem permissão
             const sectionMessages = {
                 'pagar': 'Contas a Pagar',
                 'receber': 'Contas a Receber',
@@ -105,9 +107,9 @@ function authorizeFinanceiro(section) {
                 'dashboard': 'o Dashboard Financeiro'
             };
             const sectionName = sectionMessages[section] || 'o módulo financeiro';
-            
-            return res.status(403).json({ 
-                error: `Acesso negado. Você não tem permissão para acessar ${sectionName}.` 
+
+            return res.status(403).json({
+                error: `Acesso negado. Você não tem permissão para acessar ${sectionName}.`
             });
         } catch (error) {
             console.error('[Financeiro] Erro no middleware de autorização:', error);

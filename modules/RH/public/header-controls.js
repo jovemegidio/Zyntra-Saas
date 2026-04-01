@@ -1,4 +1,4 @@
-﻿/* ============================================= */
+/* ============================================= */
 /* FUNCIONALIDADES DOS BOTÕES DO CABEÇALHO     */
 /* ============================================= */
 
@@ -438,7 +438,7 @@ class HeaderControls {
 
         // Definir ícones e cores por tipo
         const config = {
-            success: { icon: 'fas fa-check-circle', color: '#10b981' },
+            success: { icon: 'fas fa-check-circle', color: '#225cfa' },
             info: { icon: 'fas fa-info-circle', color: '#3b82f6' },
             warning: { icon: 'fas fa-exclamation-triangle', color: '#f59e0b' },
             error: { icon: 'fas fa-times-circle', color: '#ef4444' }
@@ -495,7 +495,7 @@ class HeaderControls {
 
         // Definir cores por tipo
         const colors = {
-            success: '#10b981',
+            success: '#225cfa',
             info: '#3b82f6',
             warning: '#f59e0b',
             error: '#ef4444'

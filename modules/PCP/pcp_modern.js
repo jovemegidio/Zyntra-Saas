@@ -1,4 +1,4 @@
-﻿// Busca avançada e filtros para Gestão de Produtos
+// Busca avançada e filtros para Gestão de Produtos
 async function buscarProdutosGestao(page = 1, limit = 20) {
     // Coleta valores dos campos de busca/filtro
     const searchInput = document.getElementById('search-produtos-gestao');
@@ -2307,8 +2307,8 @@ window.gerarCatalogoProdutos = async function() {
         .actions { margin: 20px 0; text-align: center; }
         .btn-acao { display: inline-block; margin: 0 10px; padding: 12px 24px; background: #3b82f6; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; }
         .btn-acao:hover { background: #1e40af; }
-        .btn-csv { background: #059669; }
-        .btn-csv:hover { background: #047857; }
+        .btn-csv { background: #1a4fd4; }
+        .btn-csv:hover { background: #1340b0; }
         @media print { .actions { display: none; } body { -webkit-print-color-adjust: exact; } }
     </style>
 </head>
@@ -3191,7 +3191,7 @@ function showStatusNotification(message, type = 'info') {
         position: fixed;
         top: 20px;
         right: 20px;
-        background: ${type === 'success' ? 'linear-gradient(135deg, #10b981, #059669)' : 
+        background: ${type === 'success' ? 'linear-gradient(135deg, #225cfa, #1a4fd4)' : 
                     type === 'error' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 
                     'linear-gradient(135deg, #3b82f6, #1d4ed8)'};
         color: white;

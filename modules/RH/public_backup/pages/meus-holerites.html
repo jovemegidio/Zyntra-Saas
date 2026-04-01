@@ -401,8 +401,8 @@
         }
 
         .holerite-status.disponivel {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
+            background: rgba(34, 92, 250, 0.1);
+            color: #225cfa;
         }
 
         .holerite-status.pendente {
@@ -1100,11 +1100,11 @@
                         
                         <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
                             ${!h.confirmado_recebimento ? `
-                                <button class="btn btn-primary" style="flex:1;background:#10b981;" onclick="confirmarRecebimento(${h.id})">
+                                <button class="btn btn-primary" style="flex:1;background:#225cfa;" onclick="confirmarRecebimento(${h.id})">
                                     <i class="fas fa-check-double"></i> Confirmar Recebimento
                                 </button>
                             ` : `
-                                <div style="flex:1;padding:12px;background:rgba(16,185,129,0.1);border-radius:10px;text-align:center;color:#10b981;">
+                                <div style="flex:1;padding:12px;background:rgba(34, 92, 250,0.1);border-radius:10px;text-align:center;color:#225cfa;">
                                     <i class="fas fa-check-double"></i> Recebimento confirmado em ${new Date(h.data_confirmacao).toLocaleDateString('pt-BR')}
                                 </div>
                             `}

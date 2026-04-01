@@ -1,4 +1,4 @@
-﻿// ================================================= 
+// ================================================= 
 // DASHBOARD VISUAL MODERNO - APLICAÇÁO DINMICA
 // ================================================= 
 
@@ -501,7 +501,7 @@ class ModernDashboardVisuals {
         // Define cor baseado no tipo
         switch(type) {
             case 'success':
-                notification.style.background = 'linear-gradient(135deg, #10b981 0%, #34d399 100%)';
+                notification.style.background = 'linear-gradient(135deg, #225cfa 0%, #60a5fa 100%)';
                 break;
             case 'error':
                 notification.style.background = 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)';

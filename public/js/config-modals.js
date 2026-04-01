@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ============================================================
  * CONFIGURAÇÕES DO SISTEMA - JAVASCRIPT
  * Gerenciamento de todos os modais de configuração
@@ -1381,7 +1381,7 @@ function displayDepartamentos(departamentos) {
     if (empty) empty.style.display = 'none';
 
     // Cores para departamentos
-    const cores = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899'];
+    const cores = ['#225cfa', '#3b82f6', '#8b5cf6', '#f59e0b', '#06b6d4', '#ec4899'];
 
     list.innerHTML = departamentos.map((dept, index) => {
         const cor = cores[index % cores.length];
@@ -1564,7 +1564,7 @@ function displayProjetos(projetos) {
             'ativo': '#8b5cf6',
             'em_andamento': '#3b82f6',
             'pausado': '#f59e0b',
-            'concluido': '#10b981',
+            'concluido': '#225cfa',
             'cancelado': '#ef4444'
         };
         const cor = statusCores[proj.status] || '#8b5cf6';
@@ -2021,7 +2021,7 @@ function showConfigNotification(message, type = 'info') {
     toast.style.cssText = `
         position: fixed; top: 20px; right: 20px; z-index: 10000;
         padding: 12px 20px; border-radius: 8px; color: white;
-        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        background: ${type === 'success' ? '#225cfa' : type === 'error' ? '#ef4444' : '#3b82f6'};
         box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-family: sans-serif;
     `;
     toast.textContent = message;
@@ -3148,7 +3148,7 @@ function displayCompradores(compradores) {
 
     container.innerHTML = compradores.map(c => {
         const isAtivo = c.situacao === 'ativo';
-        const statusColor = isAtivo ? '#10b981' : '#ef4444';
+        const statusColor = isAtivo ? '#225cfa' : '#ef4444';
         const statusBg = isAtivo ? '#ecfdf5' : '#fef2f2';
         const statusText = isAtivo ? 'Ativo' : 'Inativo';
         const statusIcon = isAtivo ? 'fa-check-circle' : 'fa-times-circle';
@@ -3196,7 +3196,7 @@ function displayCompradores(compradores) {
                     <button onclick="editarComprador(${c.id})" title="Editar" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s ease;" onmouseover="this.style.borderColor='#0984e3';this.style.color='#0984e3';this.style.background='#eff6ff'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
                         <i class="fas fa-pen"></i>
                     </button>
-                    <button onclick="toggleSituacaoComprador(${c.id}, '${c.situacao}')" title="${isAtivo ? 'Inativar' : 'Ativar'}" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s ease;" onmouseover="this.style.borderColor='${isAtivo ? '#f59e0b' : '#10b981'}';this.style.color='${isAtivo ? '#f59e0b' : '#10b981'}';this.style.background='${isAtivo ? '#fffbeb' : '#ecfdf5'}'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
+                    <button onclick="toggleSituacaoComprador(${c.id}, '${c.situacao}')" title="${isAtivo ? 'Inativar' : 'Ativar'}" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s ease;" onmouseover="this.style.borderColor='${isAtivo ? '#f59e0b' : '#225cfa'}';this.style.color='${isAtivo ? '#f59e0b' : '#225cfa'}';this.style.background='${isAtivo ? '#fffbeb' : '#ecfdf5'}'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
                         <i class="fas ${isAtivo ? 'fa-toggle-off' : 'fa-toggle-on'}"></i>
                     </button>
                     <button onclick="excluirComprador(${c.id})" title="Excluir" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; transition: all 0.15s ease;" onmouseover="this.style.borderColor='#ef4444';this.style.color='#ef4444';this.style.background='#fef2f2'" onmouseout="this.style.borderColor='#e2e8f0';this.style.color='#64748b';this.style.background='#fff'">
@@ -3758,17 +3758,17 @@ async function loadPontoEletronicoData() {
                 if (tol) {
                     tol.checked = data.tolerancia_atraso === 'true' || data.tolerancia_atraso === true;
                     const slider = tol.nextElementSibling;
-                    if (slider) slider.style.backgroundColor = tol.checked ? '#10b981' : '#cbd5e1';
+                    if (slider) slider.style.backgroundColor = tol.checked ? '#225cfa' : '#cbd5e1';
                 }
                 if (he) {
                     he.checked = data.horas_extras_auto === 'true' || data.horas_extras_auto === true;
                     const slider = he.nextElementSibling;
-                    if (slider) slider.style.backgroundColor = he.checked ? '#10b981' : '#cbd5e1';
+                    if (slider) slider.style.backgroundColor = he.checked ? '#225cfa' : '#cbd5e1';
                 }
                 if (notif) {
                     notif.checked = data.notificar_gestores === 'true' || data.notificar_gestores === true;
                     const slider = notif.nextElementSibling;
-                    if (slider) slider.style.backgroundColor = notif.checked ? '#10b981' : '#cbd5e1';
+                    if (slider) slider.style.backgroundColor = notif.checked ? '#225cfa' : '#cbd5e1';
                 }
             }
         }

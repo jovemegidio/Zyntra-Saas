@@ -1,4 +1,4 @@
-﻿// ============================================================================
+// ============================================================================
 // SISTEMA DE UPLOAD E GESTÃO DE ANEXOS - Sistema Financeiro Aluforce
 // ============================================================================
 
@@ -93,7 +93,7 @@ class GestorAnexos {
 
                 .btn-adicionar-anexo {
                     padding: 8px 16px;
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
                     color: white;
                     border: none;
                     border-radius: 6px;
@@ -107,7 +107,7 @@ class GestorAnexos {
 
                 .btn-adicionar-anexo:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+                    box-shadow: 0 4px 8px rgba(34, 92, 250, 0.3);
                 }
 
                 .dropzone {
@@ -122,13 +122,13 @@ class GestorAnexos {
 
                 .dropzone:hover,
                 .dropzone.drag-over {
-                    border-color: #10b981;
+                    border-color: #225cfa;
                     background: #f0fdf4;
                 }
 
                 .dropzone i {
                     font-size: 48px;
-                    color: #10b981;
+                    color: #225cfa;
                     margin-bottom: 15px;
                     display: block;
                 }
@@ -162,13 +162,13 @@ class GestorAnexos {
                 }
 
                 .anexo-item:hover {
-                    border-color: #10b981;
+                    border-color: #225cfa;
                     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                 }
 
                 .anexo-icone {
                     font-size: 48px;
-                    color: #10b981;
+                    color: #225cfa;
                     text-align: center;
                 }
 
@@ -242,7 +242,7 @@ class GestorAnexos {
                 }
 
                 .upload-progress-bar {
-                    background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+                    background: linear-gradient(90deg, #225cfa 0%, #1a4fd4 100%);
                     height: 100%;
                     transition: width 0.3s;
                 }

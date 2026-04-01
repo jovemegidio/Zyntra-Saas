@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // COTAÇÕES MANAGER
 // Sistema de Gestão de Cotações - Integrado com API
 // ========================================
@@ -622,7 +622,7 @@ class CotacoesManager {
                 '<div class="view-item"><label>Data</label><p>' + this.formatarData(cotacao.data) + '</p></div>' +
                 '<div class="view-item"><label>Solicitante</label><p>' + this.escapeHtml(cotacao.solicitante || '-') + '</p></div>' +
                 '<div class="view-item"><label>Status</label><p><span class="badge badge-' + statusClass + '">' + this.escapeHtml(cotacao.status || '-') + '</span></p></div>' +
-                '<div class="view-item"><label>Melhor Oferta</label><p style="font-weight:700;color:#059669;">' + melhorOferta + '</p></div>' +
+                '<div class="view-item"><label>Melhor Oferta</label><p style="font-weight:700;color:#1a4fd4;">' + melhorOferta + '</p></div>' +
                 '<div class="view-item"><label>Observações</label><p>' + this.escapeHtml(cotacao.observacoes || '-') + '</p></div>' +
             '</div></div>' +
             '<div class="view-section"><h4><i class="fas fa-boxes"></i> Materiais (' + materiais.length + ')</h4>' + materiaisHtml + '</div>' +

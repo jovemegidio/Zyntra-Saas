@@ -1,4 +1,4 @@
-﻿/**
+/**
  * 🕐 SISTEMA DE GERENCIAMENTO DE INATIVIDADE
  * Monitora atividade do usuário e redireciona automaticamente para login após período de inatividade
  * 
@@ -188,7 +188,7 @@
                             <i class="fas fa-sign-out-alt"></i> Sair Agora
                         </button>
                         <button id="inactivity-continue-btn" style="
-                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            background: linear-gradient(135deg, #225cfa 0%, #1a4fd4 100%);
                             color: white;
                             border: none;
                             padding: 12px 32px;
@@ -197,10 +197,10 @@
                             font-weight: 600;
                             cursor: pointer;
                             transition: all 0.2s;
-                            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                            box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3);
                         "
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.4)'"
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.3)'">
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(34, 92, 250, 0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(34, 92, 250, 0.3)'">
                             <i class="fas fa-check-circle"></i> Continuar Sessão
                         </button>
                     </div>

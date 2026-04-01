@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ALUFORCE v2.0 - Layout Manager
  * Carrega e inicializa o layout padrão em todos os módulos
  * 
@@ -29,7 +29,7 @@
             'compras': { primary: '#38bdf8', icon: 'fa-shopping-cart', name: 'Compras' },
             'vendas': { primary: '#3b82f6', icon: 'fa-handshake', name: 'Vendas' },
             'pcp': { primary: '#ef4444', icon: 'fa-industry', name: 'PCP' },
-            'financeiro': { primary: '#10b981', icon: 'fa-dollar-sign', name: 'Financeiro' },
+            'financeiro': { primary: '#225cfa', icon: 'fa-dollar-sign', name: 'Financeiro' },
             'rh': { primary: '#8b5cf6', icon: 'fa-users', name: 'RH' },
             'nfe': { primary: '#f59e0b', icon: 'fa-file-invoice', name: 'NF-e' },
             'faturamento': { primary: '#ec4899', icon: 'fa-file-invoice-dollar', name: 'Faturamento' }

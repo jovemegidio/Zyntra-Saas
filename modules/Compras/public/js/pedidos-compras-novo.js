@@ -1,4 +1,4 @@
-﻿/**
+/**
  * PEDIDOS DE COMPRA - Módulo Compras
  */
 
@@ -60,7 +60,7 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #225cfa, #1a4fd4);">
                         <i class="fas fa-dollar-sign"></i>
                     </div>
                     <div class="stat-content">

@@ -55,7 +55,7 @@
     '.alu-confirm-topbar.danger  { background: linear-gradient(90deg, #EF4444, #DC2626); }' +
     '.alu-confirm-topbar.warning { background: linear-gradient(90deg, #F59E0B, #D97706); }' +
     '.alu-confirm-topbar.info    { background: linear-gradient(90deg, #3B82F6, #2563EB); }' +
-    '.alu-confirm-topbar.success { background: linear-gradient(90deg, #10B981, #059669); }' +
+    '.alu-confirm-topbar.success { background: linear-gradient(90deg, #225cfa, #1a4fd4); }' +
 
     '.alu-confirm-header { padding: 28px 28px 0; display: flex; align-items: flex-start; gap: 18px; }' +
 
@@ -67,7 +67,7 @@
     '.alu-confirm-icon.danger  { background: linear-gradient(135deg, #FEE2E2, #FECACA); color: #DC2626; }' +
     '.alu-confirm-icon.warning { background: linear-gradient(135deg, #FEF3C7, #FDE68A); color: #D97706; }' +
     '.alu-confirm-icon.info    { background: linear-gradient(135deg, #DBEAFE, #BFDBFE); color: #2563EB; }' +
-    '.alu-confirm-icon.success { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #059669; }' +
+    '.alu-confirm-icon.success { background: linear-gradient(135deg, #D1FAE5, #A7F3D0); color: #1a4fd4; }' +
 
     '.alu-confirm-body { flex: 1; padding-top: 2px; }' +
     '.alu-confirm-title {' +
@@ -123,12 +123,12 @@
     '}' +
 
     '.alu-confirm-btn.confirm.success {' +
-    '    background: linear-gradient(135deg, #10B981, #059669);' +
-    '    box-shadow: 0 2px 8px rgba(16,185,129,0.35);' +
+    '    background: linear-gradient(135deg, #225cfa, #1a4fd4);' +
+    '    box-shadow: 0 2px 8px rgba(34, 92, 250,0.35);' +
     '}' +
     '.alu-confirm-btn.confirm.success:hover {' +
-    '    background: linear-gradient(135deg, #059669, #047857);' +
-    '    box-shadow: 0 4px 12px rgba(16,185,129,0.45);' +
+    '    background: linear-gradient(135deg, #1a4fd4, #1340b0);' +
+    '    box-shadow: 0 4px 12px rgba(34, 92, 250,0.45);' +
     '}' +
 
     '@keyframes aluConfirmPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }' +

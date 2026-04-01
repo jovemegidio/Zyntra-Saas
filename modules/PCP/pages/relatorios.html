@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -56,14 +56,14 @@
     .kpi:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.06)}
     .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:20px 20px 0 0}
     .kpi.blue::before{background:linear-gradient(90deg,#3b82f6,#60a5fa)}
-    .kpi.green::before{background:linear-gradient(90deg,#10b981,#34d399)}
+    .kpi.green::before{background:linear-gradient(90deg,#225cfa,#60a5fa)}
     .kpi.purple::before{background:linear-gradient(90deg,#8b5cf6,#a78bfa)}
     .kpi.amber::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
     .kpi.rose::before{background:linear-gradient(90deg,#f43f5e,#fb7185)}
     .kpi .kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
     .kpi .kpi-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px}
     .kpi.blue .kpi-icon{background:rgba(59,130,246,0.1);color:#3b82f6}
-    .kpi.green .kpi-icon{background:rgba(16,185,129,0.1);color:#10b981}
+    .kpi.green .kpi-icon{background:rgba(34, 92, 250,0.1);color:#225cfa}
     .kpi.purple .kpi-icon{background:rgba(139,92,246,0.1);color:#8b5cf6}
     .kpi.amber .kpi-icon{background:rgba(245,158,11,0.1);color:#f59e0b}
     .kpi.rose .kpi-icon{background:rgba(244,63,94,0.1);color:#f43f5e}
@@ -390,7 +390,7 @@
                             </div>
                             <div class="table-card">
                                 <div class="table-card-head">
-                                    <h3><span class="ico" style="background:rgba(16,185,129,0.1);color:#10b981"><i class="fas fa-building"></i></span> Ranking por Cliente</h3>
+                                    <h3><span class="ico" style="background:rgba(34, 92, 250,0.1);color:#225cfa"><i class="fas fa-building"></i></span> Ranking por Cliente</h3>
                                     <span class="table-count" id="clientes-count">0</span>
                                 </div>
                                 <div style="overflow-x:auto"><table class="dtable"><thead><tr><th style="width:50px">#</th><th>Cliente</th><th style="text-align:right">Pedidos</th><th style="text-align:right">Valor Total</th><th>Últ. Pedido</th></tr></thead>
@@ -438,7 +438,7 @@
 
                         <div class="chart-card">
                             <div class="chart-card-head">
-                                <h3><span class="ico" style="background:rgba(16,185,129,0.1);color:#10b981"><i class="fas fa-chart-area"></i></span> Produção Diária  Apontamentos</h3>
+                                <h3><span class="ico" style="background:rgba(34, 92, 250,0.1);color:#225cfa"><i class="fas fa-chart-area"></i></span> Produção Diária  Apontamentos</h3>
                             </div>
                             <div class="chart-wrapper"><canvas id="chart-metros-apontamentos"></canvas></div>
                         </div>
@@ -860,7 +860,7 @@
             type: 'line',
             data: { labels: le, datasets: [
                 { label: 'Valor Total (R$)', data: ve, borderColor: '#8b5cf6', backgroundColor: function(ctx) { var g = ctx.chart.ctx.createLinearGradient(0,0,0,350); g.addColorStop(0,'rgba(139,92,246,0.15)'); g.addColorStop(1,'rgba(139,92,246,0)'); return g; }, fill: true, tension: 0.4, borderWidth: 3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: '#fff', pointBorderColor: '#8b5cf6', pointBorderWidth: 2, yAxisID: 'y' },
-                { label: 'Nº Pedidos', data: pe, borderColor: '#10b981', backgroundColor: 'transparent', fill: false, tension: 0.4, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#10b981', borderDash: [5,3], yAxisID: 'y1' }
+                { label: 'Nº Pedidos', data: pe, borderColor: '#225cfa', backgroundColor: 'transparent', fill: false, tension: 0.4, borderWidth: 2, pointRadius: 4, pointBackgroundColor: '#225cfa', borderDash: [5,3], yAxisID: 'y1' }
             ] },
             options: {
                 responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
@@ -935,8 +935,8 @@
                 type: 'line',
                 data: { labels: apt.map(function(a){ return formatarData(a.data); }), datasets: [{
                     label: 'Quantidade Produzida', data: apt.map(function(a){ return parseFloat(a.quantidade_produzida)||0; }),
-                    borderColor: '#10b981', backgroundColor: function(ctx){ var g=ctx.chart.ctx.createLinearGradient(0,0,0,350); g.addColorStop(0,'rgba(16,185,129,0.2)'); g.addColorStop(1,'rgba(16,185,129,0)'); return g; },
-                    fill: true, tension: 0.4, borderWidth: 3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: '#fff', pointBorderColor: '#10b981', pointBorderWidth: 2
+                    borderColor: '#225cfa', backgroundColor: function(ctx){ var g=ctx.chart.ctx.createLinearGradient(0,0,0,350); g.addColorStop(0,'rgba(34, 92, 250,0.2)'); g.addColorStop(1,'rgba(34, 92, 250,0)'); return g; },
+                    fill: true, tension: 0.4, borderWidth: 3, pointRadius: 5, pointHoverRadius: 7, pointBackgroundColor: '#fff', pointBorderColor: '#225cfa', pointBorderWidth: 2
                 }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)', drawBorder: false } }, x: { grid: { display: false }, ticks: { maxRotation: 45 } } } }
             });
@@ -1041,7 +1041,7 @@
             allM.forEach(function(m) {
                 var val = parseFloat(m.valor_total) || 0;
                 var pct = (val / totalGeral * 100);
-                var barColor = pct > 15 ? '#10b981' : pct > 8 ? '#3b82f6' : '#94a3b8';
+                var barColor = pct > 15 ? '#225cfa' : pct > 8 ? '#3b82f6' : '#94a3b8';
                 hm += '<tr>';
                 hm += '<td><strong>' + MESES[m.mes_num-1] + '</strong></td>';
                 hm += '<td style="text-align:right">' + (m.total_pedidos||0) + '</td>';
@@ -1079,7 +1079,7 @@
         'MM':{bg:'#e0f2fe',color:'#0284c7',icon:'fa-cogs',nome:'Manut. Mecânica'},
         'PCM':{bg:'#fee2e2',color:'#b91c1c',icon:'fa-times-circle',nome:'Parada Corretiva'},
         'TT':{bg:'#e0e7ff',color:'#4f46e5',icon:'fa-exchange-alt',nome:'Troca de Turno'},
-        'MP':{bg:'#d1fae5',color:'#059669',icon:'fa-clipboard-check',nome:'Manut. Preventiva'},
+        'MP':{bg:'#d1fae5',color:'#1a4fd4',icon:'fa-clipboard-check',nome:'Manut. Preventiva'},
         'MC':{bg:'#ffe4e6',color:'#e11d48',icon:'fa-wrench',nome:'Manut. Corretiva'},
         'TB':{bg:'#ccfbf1',color:'#0d9488',icon:'fa-circle-notch',nome:'Troca Bobina'},
         'TM':{bg:'#f3e8ff',color:'#9333ea',icon:'fa-sync-alt',nome:'Troca Material'},

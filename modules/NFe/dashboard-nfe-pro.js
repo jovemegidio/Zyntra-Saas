@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Dashboard Profissional de NFe & Logística - Aluforce
  * Controle completo de notas fiscais e rastreamento
  */
@@ -46,7 +46,7 @@ class NFeDashboard {
             };
 
             this.data.statusDistribuicao = [
-                { status: 'Autorizada', quantidade: 287, percentual: 83.9, cor: '#10b981' },
+                { status: 'Autorizada', quantidade: 287, percentual: 83.9, cor: '#225cfa' },
                 { status: 'Transmitida', quantidade: 42, percentual: 12.3, cor: '#3b82f6' },
                 { status: 'Rejeitada', quantidade: 6, percentual: 1.8, cor: '#ef4444' },
                 { status: 'Cancelada', quantidade: 7, percentual: 2.0, cor: '#6b7280' }
@@ -277,7 +277,7 @@ class NFeDashboard {
         const ctxValor = document.getElementById('chart-valor-mini');
         if (ctxValor) {
             const ctx = ctxValor.getContext('2d');
-            this.desenharMiniLinha(ctx, this.data.nfesMensais.slice(-6).map(d => d.valor), '#10b981');
+            this.desenharMiniLinha(ctx, this.data.nfesMensais.slice(-6).map(d => d.valor), '#225cfa');
         }
 
         const ctxTempo = document.getElementById('chart-tempo-mini');

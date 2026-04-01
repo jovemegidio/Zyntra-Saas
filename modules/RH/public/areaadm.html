@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -147,7 +147,7 @@
             font-weight: 500;
         }
 
-        .status-badge.active { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .status-badge.active { background: rgba(34, 92, 250, 0.1); color: #225cfa; }
         .status-badge.inactive { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
         .status-badge.pending { background: rgba(251, 191, 36, 0.1); color: #f59e0b; }
         .status-badge.vacation { background: rgba(59, 130, 246, 0.1); color: #6366f1; }
@@ -606,7 +606,7 @@
                             <div class="card-header">
                                 <h3 class="card-title"><i class="fas fa-clock" style="color: var(--primary-pink); margin-right: 8px;"></i>Marcações em Tempo Real</h3>
                                 <div style="display: flex; align-items: center; gap: 12px;">
-                                    <span id="marcacoes-sync-status" style="font-size: 0.75rem; color: #10b981;"><i class="fas fa-circle" style="font-size: 8px; margin-right: 4px;"></i>Atualizado</span>
+                                    <span id="marcacoes-sync-status" style="font-size: 0.75rem; color: #225cfa;"><i class="fas fa-circle" style="font-size: 8px; margin-right: 4px;"></i>Atualizado</span>
                                     <a href="pages/gestão-ponto.html" class="btn-link">Ver Gestão <i class="fas fa-arrow-right"></i></a>
                                 </div>
                             </div>
@@ -617,7 +617,7 @@
                                     </div>
                                     <div style="display: flex; align-items: center; gap: 8px;">
                                         <span style="font-size: 0.75rem; color: #94a3b8;">Presentes:</span>
-                                        <span id="marcacoes-presentes" style="font-size: 0.875rem; font-weight: 600; color: #10b981;">0</span>
+                                        <span id="marcacoes-presentes" style="font-size: 0.875rem; font-weight: 600; color: #225cfa;">0</span>
                                     </div>
                                 </div>
                                 <table class="table-modern">
@@ -734,7 +734,7 @@
             'linear-gradient(135deg, #6366f1, #4f46e5)',
             'linear-gradient(135deg, #6366f1, #4f46e5)',
             'linear-gradient(135deg, #6366f1, #4f46e5)',
-            'linear-gradient(135deg, #10b981, #059669)',
+            'linear-gradient(135deg, #225cfa, #1a4fd4)',
             'linear-gradient(135deg, #f59e0b, #d97706)',
             'linear-gradient(135deg, #ef4444, #dc2626)',
             'linear-gradient(135deg, #06b6d4, #0891b2)',
@@ -974,7 +974,7 @@
                     const hora = m.hora ? m.hora.substring(0, 5) : '--:--';
                     const tipoLabel = m.tipo === 'marcacao' ? 'Marcação' : m.tipo === 'entrada' ? 'Entrada' : m.tipo === 'saida' ? 'Saída' : (m.tipo || 'Marcação');
                     const origemLabel = m.origem === 'rhid_cloud' ? 'RHID Cloud' : m.origem === 'control_id' ? 'Control iD' : m.origem === 'manual' ? 'Manual' : (m.origem || '-');
-                    const origemClass = m.origem === 'rhid_cloud' ? 'color:#6366f1' : m.origem === 'manual' ? 'color:#f59e0b' : 'color:#10b981';
+                    const origemClass = m.origem === 'rhid_cloud' ? 'color:#6366f1' : m.origem === 'manual' ? 'color:#f59e0b' : 'color:#225cfa';
 
                     // Resolver foto do funcionário
                     const fotoUrl = resolverFoto(m);
@@ -1002,7 +1002,7 @@
 
                 // Atualizar status de sync
                 document.getElementById('marcacoes-sync-status').innerHTML = 
-                    `<i class="fas fa-circle" style="font-size:8px;margin-right:4px;color:#10b981;"></i> Atualizado às ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
+                    `<i class="fas fa-circle" style="font-size:8px;margin-right:4px;color:#225cfa;"></i> Atualizado às ${String(agora.getHours()).padStart(2,'0')}:${String(agora.getMinutes()).padStart(2,'0')}`;
 
             } catch (error) {
                 console.error('Erro ao carregar marcações:', error);
@@ -1090,7 +1090,7 @@
                         atividades.push({
                             titulo: `Admissão: ${nome} (${cargo})`,
                             icone: 'fa-user-plus',
-                            cor: '#10b981',
+                            cor: '#225cfa',
                             tempo: dataAdm
                         });
                     }

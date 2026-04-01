@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // OTIMIZAÇÃO DE ESTOQUE
 // Sistema Inteligente de Análise e Otimização
 // ========================================
@@ -370,7 +370,7 @@ class OtimizacaoEstoqueManager {
                     backgroundColor: [
                         'rgba(239, 68, 68, 0.8)',
                         'rgba(245, 158, 11, 0.8)',
-                        'rgba(16, 185, 129, 0.8)'
+                        'rgba(34, 92, 250, 0.8)'
                     ],
                     borderRadius: 8,
                     borderWidth: 0
@@ -434,14 +434,14 @@ class OtimizacaoEstoqueManager {
                     {
                         label: 'Previsão',
                         data: [...Array(12).fill(null), ...previsao],
-                        borderColor: 'rgba(16, 185, 129, 1)',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: 'rgba(34, 92, 250, 1)',
+                        backgroundColor: 'rgba(34, 92, 250, 0.1)',
                         borderWidth: 3,
                         borderDash: [5, 5],
                         fill: true,
                         tension: 0.4,
                         pointRadius: 5,
-                        pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                        pointBackgroundColor: 'rgba(34, 92, 250, 1)'
                     },
                     {
                         label: 'Estoque Mínimo',

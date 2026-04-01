@@ -1,0 +1,344 @@
+<p align="center">
+  <img src="public/images/zyntra-sem-fundo.png" alt="Zyntra ERP" width="200" />
+</p>
+
+<h1 align="center">🏭 ZYNTRA ERP — Plataforma ERP Completa</h1>
+
+<p align="center">
+  <strong>Plataforma ERP completa para gestão industrial e empresarial sob medida</strong><br>
+  Desenvolvido pela <a href="https://www.aluforce.api.br">Agência do Japa</a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/versão-2.3.0-blue?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/status-Produção-brightgreen?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Socket.IO-4.x-010101?style=for-the-badge&logo=socketdotio&logoColor=white" />
+  <img src="https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white" />
+</p>
+
+---
+
+## 📋 Sobre
+
+O **Zyntra ERP** é uma plataforma ERP completa para gestão industrial e empresarial sob medida, desenvolvida com base nas necessidades reais da empresa. Oferece **10+ módulos integrados** cobrindo todas as operações — do pedido de venda à emissão de NF-e, do controle de produção à gestão financeira.
+
+### ✨ Destaques
+
+- 🖥️ **Interface moderna** — Design dark profissional com sidebar lateral
+- 📱 **PWA ready** — Funciona offline com sincronização automática
+- 💬 **Chat corporativo** — Zyntra Teams com canais, DMs, áudio, arquivos e BOB I.A.
+- 🔒 **Segurança enterprise** — JWT, ACL, CSRF, rate limiting, LGPD
+- 📊 **85+ páginas** — Cobertura total de processos empresariais
+- 🤖 **Assistente IA** — BOB I.A. integrado em todas as telas
+
+---
+
+## 🚀 Módulos
+
+| Módulo | Descrição | Páginas |
+|--------|-----------|---------|
+| 📊 **Dashboard** | KPIs, gráficos, alertas, painel executivo | 3 |
+| 🛒 **Vendas** | Pedidos, orçamentos, kanban, comissões, tabelas de preço | 12 |
+| 📦 **Compras** | Requisições, cotações, pedidos, entrada de notas | 8 |
+| 🏭 **PCP** | Ordens de produção, apontamentos, materiais, central de relatórios unificada | 10 |
+| 💰 **Financeiro** | Contas a pagar/receber, CNAB 240, fluxo de caixa, DRE, conciliação, integração bancária | 12 |
+| 👥 **RH** | Funcionários, cargos, folha de pagamento, ponto, férias | 8 |
+| 🧾 **Faturamento/NF-e** | Emissão NF-e/NFS-e, importação XML, impostos, manifestação | 10 |
+| 📦 **Estoque** | Inventário, movimentações, requisições, rastreabilidade | 6 |
+| 🏢 **Clientes** | Cadastro completo, análise de crédito, histórico | 4 |
+| 🤝 **Fornecedores** | Cadastro, avaliação, condições de pagamento | 3 |
+| 📞 **Logística** | Romaneio, expedição, rastreamento | 4 |
+| ⚙️ **Configurações** | 50+ categorias: empresa, impostos, certificados, integrações | 5 |
+
+---
+
+## 💬 Zyntra Teams — Chat Corporativo
+
+Chat empresarial integrado em **todas as 85+ páginas** do sistema:
+
+- **Canais** — Canais de equipe com admin controls
+- **Mensagens Diretas** — DMs com contatos recentes e status online
+- **BOB I.A.** — Assistente virtual 24/7 integrado
+- **Compartilhamento** — Arquivos, imagens, áudio e documentos
+- **Áudio** — Gravação e envio de mensagens de voz
+- **Emojis** — 200+ emojis organizados por categoria
+- **Status** — Online, Em Almoço, Em Reunião, Offline
+- **Tempo real** — Socket.IO com indicadores de digitação
+
+---
+
+## 🔗 Integrações
+
+| Integração | Status |
+|------------|--------|
+| 🏦 **Integração Bancária** | ✅ Produção (Boletos, CNAB 240 Remessa/Retorno, Pagamentos) |
+| 📧 **Email SMTP** | ✅ Produção |
+| 📱 **WhatsApp Business** | ✅ Produção |
+| 🧾 **SEFAZ (NF-e/NFS-e)** | ✅ Produção |
+| 🤖 **OpenAI (BOB I.A.)** | ✅ Produção |
+| 📊 **Open Finance** | 🔄 Em desenvolvimento |
+
+---
+
+## 🛠️ Stack Tecnológica
+
+### Backend
+- **Node.js** 18.x + **Express** 4.x
+- **MySQL** 8.0 com mysql2/promise
+- **Socket.IO** 4.x (chat real-time)
+- **JWT** autenticação + bcrypt
+- **PM2** process manager (produção)
+- **Multer** upload de arquivos
+
+### Frontend
+- **HTML5** + **CSS3** (design system proprietário)
+- **JavaScript** vanilla (sem frameworks)
+- **Chart.js** gráficos e dashboards
+- **Socket.IO Client** real-time
+- **PWA** + Service Worker
+
+### Infraestrutura
+- **VPS** Ubuntu 22.04
+- **Nginx** reverse proxy
+- **Let's Encrypt** SSL
+- **PM2** clustering e monitoramento
+- **Docker** suporte (docker-compose.yml)
+
+---
+
+## 📥 Instalação
+
+### Pré-requisitos
+- Node.js 18.x+
+- MySQL 8.0+
+- npm ou yarn
+
+### Setup rápido
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/jovemegidio/Zyntra.git
+cd Zyntra
+
+# 2. Instale as dependências
+npm install
+
+# 3. Configure o banco
+mysql -u root -p -e "CREATE DATABASE aluforce_vendas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 4. Configure as variáveis de ambiente
+cp .env.example .env
+# Edite o .env com suas credenciais
+
+# 5. Inicie o sistema
+npm start
+```
+
+O sistema estará disponível em: `http://localhost:3000`
+
+### Variáveis de Ambiente
+
+```env
+PORT=3000
+DB_HOST=localhost
+DB_USER=aluforce
+DB_PASSWORD=sua_senha
+DB_NAME=aluforce_vendas
+DB_CONN_LIMIT=20
+JWT_SECRET=sua_chave_secreta
+SESSION_SECRET=outra_chave_secreta
+NODE_ENV=production
+```
+
+### Produção com PM2
+
+```bash
+pm2 start ecosystem.production.config.js
+pm2 save
+pm2 startup
+```
+
+---
+
+## 📁 Estrutura do Projeto
+
+```
+Zyntra/
+├── server.js                    # Servidor principal Express
+├── package.json                 # Dependências
+├── ecosystem.production.config.js
+├── docker-compose.yml
+│
+├── src/
+│   ├── routes/                  # Rotas de autenticação
+│   └── middleware/              # Middlewares (auth, security)
+│
+├── routes/                      # Rotas de API
+│   ├── index.js                 # Registro central de rotas
+│   ├── chat-routes.js           # Chat Teams API + Socket.IO
+│   ├── integracao-bancaria.js   # Integração bancária
+│   ├── vendas-extended.js       # API vendas extendida
+│   ├── nfe-routes.js            # NF-e/NFS-e
+│   └── ...                      # +30 arquivos de rotas
+│
+├── modules/                     # Módulos do sistema
+│   ├── Vendas/                  # Módulo de vendas
+│   │   ├── public/              # HTMLs do módulo
+│   │   └── server.js            # Servidor do módulo
+│   ├── Compras/
+│   ├── PCP/
+│   ├── Financeiro/
+│   ├── RH/
+│   ├── NFe/
+│   ├── Faturamento/
+│   ├── Clientes/
+│   ├── Fornecedores/
+│   ├── Logistica/
+│   └── _shared/                 # Design system compartilhado
+│
+├── public/                      # Assets estáticos
+│   ├── chat-teams/              # Chat widget (JS, CSS, assets)
+│   ├── css/                     # Estilos globais
+│   ├── js/                      # Scripts globais
+│   ├── images/                  # Logos e ícones
+│   └── avatars/                 # Fotos de perfil
+│
+├── templates/                   # Templates PDF/Excel
+├── tests/                       # Testes automatizados
+├── docs/                        # Documentação técnica
+└── backups/                     # Backups automáticos
+```
+
+---
+
+## 🔐 Segurança
+
+- **JWT** — Tokens de autenticação com expiração
+- **ACL** — Controle de acesso por módulo e função
+- **bcrypt** — Hash de senhas
+- **CSRF Protection** — Tokens anti-CSRF
+- **Rate Limiting** — Proteção contra brute force (Redis-backed)
+- **XSS Prevention** — Sanitização de inputs
+- **HTTPS** — SSL/TLS obrigatório em produção
+- **LGPD** — Módulo de criptografia PII
+- **Audit Trail** — Logs de todas as ações
+
+### Perfis de Acesso
+
+| Perfil | Descrição |
+|--------|-----------|
+| 🔴 **admin** | Acesso total ao sistema |
+| 🟠 **gerente** | Acesso gerencial com aprovações |
+| 🟡 **vendedor** | Módulo de vendas |
+| 🟢 **comprador** | Módulo de compras |
+| 🔵 **financeiro** | Módulo financeiro |
+| 🟣 **producao** | Módulo PCP |
+| ⚪ **visualizador** | Apenas consultas |
+
+---
+
+## 🧪 Testes
+
+```bash
+# Teste de login
+node tests/test-login.js
+
+# Teste E2E com Playwright
+npx playwright test
+
+# Todos os testes
+npm run test:ci
+
+# Lint
+npm run lint
+```
+
+---
+
+## 📊 Changelog Recente
+
+### v2.3.0 — 27/03/2026
+- ✅ **Contas a Receber — Módulo Completo** — Status dropdown (pendente/liquidada/parcial/vencida/protestada/cartório), pago_no_dia, aceita_troca_factory, comprovante de pagamento (upload), aba de rastreamento, simulador PM, aba FUNDOS, workbook switching, 7 novas colunas DB
+- ✅ **CNAB 240 — Contas a Pagar** — Multi-seleção de despesas, geração de remessa CNAB 240 (.REM), importação de retorno CNAB (.RET), baixa automática em lote, pagamento em batch
+- ✅ **Central de Relatórios PCP — Unificação** — Relatórios de Apontamentos incorporados como 5ª aba na Central de Relatórios (KPIs, filtros, tabela detalhada, resumo por funcionário, distribuição por atividade, indicadores de eficiência)
+- ✅ **Sidebar PCP Unificada** — Dois links de relatórios consolidados em um único link em todas as 5 páginas PCP (index, ordens-producao, apontamentos, relatorios, relatorios-apontamentos)
+- ✅ **Financeiro Server** — Novas rotas e colunas para contas a receber (pago_no_dia, aceita_troca_factory, comprovante_url, origem_integracao, dia_recomprado, data_para_cartorio, data_protestado)
+- ✅ **Migration DB** — 002-financeiro-schema-cr.js para schema Contas a Receber
+- ✅ **Deploy VPS** — 46 arquivos deployados + migration DB + PM2 restart
+- ✅ **72+ Relatórios** — Catálogo completo mapeado: Vendas (10), Financeiro (11), PCP (5), NFe (17), Faturamento (17), Compras (6), RH (10)
+
+### v2.2.2 — 25/03/2026
+- ✅ **Condição de Pagamento** — Modal redesenhado com visual profissional (dark header, inputs focáveis), salva e carrega condições do banco de dados
+- ✅ **Parcelas Automáticas** — Número de parcelas e tabela de vencimentos calculados automaticamente ao selecionar condição de pagamento
+- ✅ **Fix PDF Vendas** — Corrigido `token is not defined` na geração de PDF e `número is not defined` no nome do documento
+- ✅ **Contadores Padronizados** — Módulo NFe atualizado com footer links e padrão visual Compras (stat-card + stat-footer)
+- ✅ **QR Code Estoque** — Integrado como funcionalidade no dashboard e sidebar do módulo Compras (ação rápida + botão lateral)
+- ✅ **Ligações CDR** — Endpoints /ligacoes/cdr e /ligacoes/resumo com fallback gracioso (retorna dados vazios ao invés de 500/504)
+
+### v2.2.1 — 25/03/2026
+- ✅ **Permissões logistica@** — Usuário de logística agora visualiza cards "Faturamento & Logística" e "Vendas" no dashboard
+- ✅ **Bug parsePermissao** — Corrigido parsing JSON do campo `areas` no `/api/me` (valores como `["nfe","vendas"]` eram corrompidos por split de vírgula antes do JSON.parse)
+- ✅ **Novo Pedido de Venda** — Autocomplete de produtos exibe todos os itens (com e sem estoque); corrigido endpoint do modal "Pesquisar Produto"
+- ✅ **Deploy VPS** — PuTTY instalado via winget; pipeline de deploy funcional com pscp/plink
+
+### v2.2.0 — Março 2026
+- ✅ **QR Code Estoque** — Sistema de entrada/saída de materiais via QR Code no celular
+- ✅ **Auto-Import Ponto** — Importação automática de marcações de ponto (Control iD)
+- ✅ **Auditoria RH** — Correções de segurança (access control, XSS, validação)
+- ✅ **Rebranding** — Nova identidade visual (Agência do Japa), remoção de referências concorrentes
+- ✅ **Login** — Nova logo e rodapé atualizado
+
+### v2.1.7 — Março 2026
+- ✅ **Login Fix** — Correção no fluxo de autenticação (refresh tokens, CSRF, rate limiting)
+- ✅ **Top Vendedores** — Ranking filtrado apenas por usuários com role `comercial`
+- ✅ **Template Financeiro** — Novo template XLSX de importação de Contas a Pagar (62 colunas)
+- ✅ **Padronização CSS** — 88 arquivos padronizados com design system unificado (dark headers, botões, modais)
+- ✅ **Modais Profissionais** — Botão fechar redesenhado, consistência visual em todos os módulos
+- ✅ **Chat Teams** — Widget injetado automaticamente em todas as 85+ páginas
+- ✅ **Chat DM** — Lista de contatos inteligente (recentes + online + todos)
+- ✅ **Nomes** — Exibição de primeiro nome em todo o chat
+- ✅ **Integração Bancária** — API completa com boletos, CNAB e pagamentos
+- ✅ **Auto-inject CSS** — CSS do chat carregado automaticamente pelo JS
+- ✅ **Segurança** — Migração automática de schema, refresh tokens com rastreamento completo
+- ✅ **Auditoria de Produção** — 53/53 verificações passando, dados reais validados
+
+### v2.1.6 — Fevereiro 2026
+- ✅ **BOB I.A.** — Assistente virtual integrado ao chat
+- ✅ **Chat Teams** — Canais, DMs, áudio, arquivos, emojis
+- ✅ **PWA** — Suporte offline completo com sync
+- ✅ **Help Page** — Central de ajuda
+
+### v2.1.5 — Janeiro 2026
+- ✅ **NF-e completa** — Emissão, manifestação, importação XML
+- ✅ **Módulo de Compras** — Requisições, cotações, pedidos de compra
+- ✅ **PCP** — Ordens de produção com importação/exportação Excel
+- ✅ **Conciliação Bancária** — Importação OFX/CNAB e conciliação automática
+- ✅ **eSocial** — Integração com obrigações trabalhistas
+
+---
+
+## 📞 Suporte
+
+| Canal | Detalhes |
+|-------|----------|
+| 🤖 **BOB I.A.** | Assistente integrado 24/7 |
+| 💬 **Chat Teams** | Chat corporativo interno |
+| 📧 **Email** | ti@aluforce.com.br |
+| 📱 **Telefone** | (11) 96239-7527 |
+
+---
+
+## 📄 Licença
+
+Software proprietário da **Agência do Japa**.
+
+© 2025-2026 Agência do Japa. Todos os direitos reservados.
+
+---
+
+<p align="center">
+  <sub>Desenvolvido com ❤️ pela Agência do Japa</sub><br>
+  <sub>CNPJ: 62.221.052/0001-45 | www.aluforce.api.br</sub>
+</p>

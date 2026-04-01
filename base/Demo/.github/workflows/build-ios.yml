@@ -1,0 +1,158 @@
+# Build iOS .IPA automaticamente via GitHub Actions
+# Não precisa de Mac — roda num macOS runner do GitHub
+#
+# Como usar:
+#   1. Faça push deste arquivo para o repositório
+#   2. Vá em Actions → "Build iOS App" → Run workflow
+#   3. Baixe o .ipa em Artifacts quando terminar
+#
+# Pré-requisitos (configurar nos Secrets do repositório):
+#   - APPLE_CERTIFICATE_P12: Certificado de distribuição (.p12) em base64
+#   - APPLE_CERTIFICATE_PASSWORD: Senha do certificado
+#   - APPLE_PROVISIONING_PROFILE: Provisioning Profile Ad Hoc (.mobileprovision) em base64
+#   - APPLE_TEAM_ID: Team ID da conta Apple Developer
+
+name: 📱 Build iOS App
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Tipo de distribuição'
+        required: true
+        default: 'ad-hoc'
+        type: choice
+        options:
+          - ad-hoc
+          - app-store
+      version:
+        description: 'Versão do app (ex: 2.1.7)'
+        required: false
+        default: '2.1.7'
+
+env:
+  APP_ID: br.com.zyntra.erp
+  APP_NAME: Zyntra
+
+jobs:
+  build-ios:
+    name: Build iOS .IPA
+    runs-on: macos-14  # macOS Sonoma com Xcode 15
+    timeout-minutes: 30
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 📦 Instalar dependências
+        run: npm ci --ignore-scripts
+
+      - name: 📱 Adicionar plataforma iOS
+        run: |
+          npx cap add ios || true
+          npx cap sync ios
+
+      - name: 🎨 Gerar assets iOS
+        run: node scripts/generate-ios-assets.js
+
+      - name: 🔐 Instalar certificado Apple
+        env:
+          P12_BASE64: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          P12_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE }}
+        run: |
+          # Criar keychain temporária
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -hex 16)
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+
+          # Importar certificado
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          echo -n "$P12_BASE64" | base64 --decode -o $CERTIFICATE_PATH
+          security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+          # Instalar provisioning profile
+          PROFILE_PATH=$RUNNER_TEMP/profile.mobileprovision
+          echo -n "$PROFILE_BASE64" | base64 --decode -o $PROFILE_PATH
+          
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i $PROFILE_PATH))
+          cp $PROFILE_PATH ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+
+      - name: 🏗️ Build Xcode Archive
+        working-directory: ios/App
+        run: |
+          xcodebuild archive \
+            -workspace App.xcworkspace \
+            -scheme App \
+            -archivePath $RUNNER_TEMP/Zyntra.xcarchive \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=${{ secrets.APPLE_TEAM_ID }}
+
+      - name: 📦 Exportar .IPA
+        run: |
+          # Criar ExportOptions.plist
+          cat > $RUNNER_TEMP/ExportOptions.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>${{ inputs.build_type == 'app-store' && 'app-store' || 'ad-hoc' }}</string>
+              <key>teamID</key>
+              <string>${{ secrets.APPLE_TEAM_ID }}</string>
+              <key>compileBitcode</key>
+              <false/>
+              <key>stripSwiftSymbols</key>
+              <true/>
+              <key>thinning</key>
+              <string>&lt;none&gt;</string>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild -exportArchive \
+            -archivePath $RUNNER_TEMP/Zyntra.xcarchive \
+            -exportPath $RUNNER_TEMP/ipa-output \
+            -exportOptionsPlist $RUNNER_TEMP/ExportOptions.plist
+
+      - name: 📤 Upload .IPA como Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zyntra-iOS-${{ inputs.version || '2.1.7' }}
+          path: ${{ runner.temp }}/ipa-output/*.ipa
+          retention-days: 30
+
+      - name: 🧹 Limpar keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db || true
+
+  notify:
+    name: Notificar conclusão
+    needs: build-ios
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: ✅ Build concluído
+        run: |
+          echo "🎉 Build iOS concluído com sucesso!"
+          echo "📦 Baixe o .IPA em: Actions → Artifacts → Zyntra-iOS-${{ inputs.version || '2.1.7' }}"
+          echo ""
+          echo "Para instalar no iPhone:"
+          echo "  1. Baixe o .ipa do Artifacts"
+          echo "  2. Coloque em https://seudominio/app/Zyntra.ipa"
+          echo "  3. Envie o link: https://seudominio/app/download.html"

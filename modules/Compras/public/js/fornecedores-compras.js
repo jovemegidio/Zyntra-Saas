@@ -1,4 +1,4 @@
-﻿/* ========================================
+/* ========================================
    FORNECEDORES - MÓDULO COMPRAS
    ======================================== */
 
@@ -64,8 +64,8 @@ class FornecedoresCompras {
                     <div style="font-size: 13px; color: #1e40af; font-weight: 600; margin-bottom: 8px;">FORNECEDORES ATIVOS</div>
                     <div style="font-size: 32px; font-weight: 800; color: #1e3a8a;">${ativos}</div>
                 </div>
-                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #10b981;">
-                    <div style="font-size: 13px; color: #047857; font-weight: 600; margin-bottom: 8px;">TOTAL EM COMPRAS</div>
+                <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); padding: 20px; border-radius: 12px; border-left: 4px solid #225cfa;">
+                    <div style="font-size: 13px; color: #1340b0; font-weight: 600; margin-bottom: 8px;">TOTAL EM COMPRAS</div>
                     <div style="font-size: 32px; font-weight: 800; color: #065f46;">R$ ${totalCompras.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </div>
             </div>
@@ -114,7 +114,7 @@ class FornecedoresCompras {
 
                         <div style="padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 16px;">
                             <div style="font-size: 11px; color: #64748b; margin-bottom: 4px;">TOTAL EM COMPRAS</div>
-                            <div style="font-size: 18px; font-weight: 700; color: #10b981;">R$ ${(f.totalCompras || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                            <div style="font-size: 18px; font-weight: 700; color: #225cfa;">R$ ${(f.totalCompras || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                             <div style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Última compra: ${new Date(f.ultimaCompra).toLocaleDateString('pt-BR')}</div>
                         </div>
 

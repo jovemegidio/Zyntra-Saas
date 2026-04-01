@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -72,16 +72,16 @@
             display: flex; align-items: center; justify-content: center;
             font-size: 26px; flex-shrink: 0; color: white;
         }
-        .stat-icon.green  { background: linear-gradient(135deg, #10b981, #059669); }
+        .stat-icon.green  { background: linear-gradient(135deg, #225cfa, #1a4fd4); }
         .stat-icon.red    { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .stat-icon.lime   { background: linear-gradient(135deg, #84cc16, #65a30d); }
+        .stat-icon.lime   { background: linear-gradient(135deg, #225cfa, #1a4fd4); }
         .stat-icon.blue   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
         .stat-content { flex: 1; }
         .stat-label { font-size: 13px; color: #64748b; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px; }
         .stat-value { font-size: 28px; font-weight: 700; color: #1e293b; line-height: 1.2; }
         .stat-value.negative { color: #dc2626; }
         .stat-change { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; padding: 3px 8px; border-radius: 20px; margin-top: 6px; }
-        .stat-change.up { background: #ecfdf5; color: #059669; }
+        .stat-change.up { background: #ecfdf5; color: #1a4fd4; }
         .stat-change.down { background: #fef2f2; color: #dc2626; }
         .stat-change.neutral { background: #f1f5f9; color: #64748b; }
         .stat-change i { font-size: 10px; }
@@ -1347,7 +1347,7 @@
             type = type || 'info';
             var toast = document.createElement('div');
             toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:400px;';
-            toast.style.background = type==='success'?'#10b981':type==='error'?'#ef4444':type==='warning'?'#f59e0b':'#3b82f6';
+            toast.style.background = type==='success'?'#225cfa':type==='error'?'#ef4444':type==='warning'?'#f59e0b':'#3b82f6';
             var span = document.createElement('span');
             span.textContent = message;
             toast.appendChild(span);

@@ -27,6 +27,13 @@ function buildCorteClause(alias, opts = {}) {
 
     // Hard limit: todas as datas relevantes devem ser >= 2026-01-01
     // Não permite dados de 2025 independente de condição
+    if (opts.incluirParcelasFuturas) {
+        // M-002 FIX: inclui parcelas com vencimento futuro mesmo que emissão < CORTE_DATE
+        return `(
+            COALESCE(${a}data_vencimento, ${a}vencimento, ${a}data_criacao) >= '${CORTE_DATE}'
+            OR ${a}data_vencimento >= CURDATE()
+        )`;
+    }
     return `(
         COALESCE(${a}data_vencimento, ${a}vencimento, ${a}data_criacao) >= '${CORTE_DATE}'
     )`;

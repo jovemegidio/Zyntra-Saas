@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ALUFORCE - Offline Sync Manager v4.0.0
  * SISTEMA COMPLETO OFFLINE
  * Interceptor global de fetch + IndexedDB queue + auto-sync
@@ -534,7 +534,7 @@
             window.showNotification(message, type);
             return;
         }
-        const colors = { success: '#10b981', warning: '#f59e0b', error: '#ef4444', info: '#3b82f6' };
+        const colors = { success: '#225cfa', warning: '#f59e0b', error: '#ef4444', info: '#3b82f6' };
         const icons = { success: '&#10004;', warning: '&#9888;', error: '&#10008;', info: '&#8505;' };
         const t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:12px 20px;background:' + (colors[type]||colors.info) + ';color:#fff;border-radius:10px;font-size:13px;font-weight:500;font-family:Inter,sans-serif;box-shadow:0 4px 15px rgba(0,0,0,.3);z-index:99999;max-width:380px;display:flex;align-items:center;gap:8px;animation:oToast .3s ease';

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Sistema de Registro de Notificações de Ações
  * ALUFORCE v2.0
  * 
@@ -34,7 +34,7 @@ window.ActionNotifications = (function() {
         };
         
         const moduloConfig = {
-            'vendas': { nome: 'Vendas', cor: '#10b981' },
+            'vendas': { nome: 'Vendas', cor: '#225cfa' },
             'pcp': { nome: 'PCP', cor: '#dc2626' },
             'rh': { nome: 'RH', cor: '#3b82f6' },
             'financeiro': { nome: 'Financeiro', cor: '#8b5cf6' },

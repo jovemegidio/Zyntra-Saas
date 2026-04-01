@@ -1,4 +1,4 @@
-﻿// ========================================
+// ========================================
 // DASHBOARD EXECUTIVO
 // KPIs em Tempo Real e Análise Estratégica
 // ========================================
@@ -293,7 +293,7 @@ class DashboardExecutivoManager {
                     {
                         label: 'Meta Mensal',
                         data: Array(12).fill(meta),
-                        borderColor: 'rgba(16, 185, 129, 0.5)',
+                        borderColor: 'rgba(34, 92, 250, 0.5)',
                         borderWidth: 2,
                         borderDash: [10, 5],
                         pointRadius: 0,
@@ -346,7 +346,7 @@ class DashboardExecutivoManager {
         const cores = [
             'rgba(139, 92, 246, 0.8)',
             'rgba(59, 130, 246, 0.8)',
-            'rgba(16, 185, 129, 0.8)',
+            'rgba(34, 92, 250, 0.8)',
             'rgba(245, 158, 11, 0.8)',
             'rgba(239, 68, 68, 0.8)'
         ];
@@ -398,7 +398,7 @@ class DashboardExecutivoManager {
 
         const cores = {
             'Aprovado': 'rgba(245, 158, 11, 0.8)',
-            'Recebido': 'rgba(16, 185, 129, 0.8)',
+            'Recebido': 'rgba(34, 92, 250, 0.8)',
             'Parcial': 'rgba(59, 130, 246, 0.8)',
             'Pendente': 'rgba(239, 68, 68, 0.8)'
         };

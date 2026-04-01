@@ -5,8 +5,8 @@ module.exports = {
   apps: [{
     name: 'aluforce-dashboard',
     script: 'server.js',
-    instances: isProduction ? 'max' : 1,
-    exec_mode: isProduction ? 'cluster' : 'fork',
+    instances: 1,
+    exec_mode: 'fork',
     env: {
       NODE_ENV: 'development',
       PORT: 3000

@@ -192,7 +192,7 @@
             transform: translateX(-50%);
             padding: 12px 24px;
             border-radius: 8px;
-            background: ${type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
+            background: ${type === 'success' ? '#225cfa' : type === 'warning' ? '#f59e0b' : '#3b82f6'};
             color: white;
             font-size: 14px;
             font-weight: 500;

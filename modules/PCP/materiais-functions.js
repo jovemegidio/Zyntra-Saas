@@ -1,4 +1,4 @@
-﻿// =====================================================
+// =====================================================
 // GESTÃO DE MATERIAIS - FUNÇÕES JAVASCRIPT
 // =====================================================
 
@@ -227,7 +227,7 @@
                             <td style="padding: 16px 20px; font-size: 14px;"><strong>${escapeHtml(produto.codigo_produto || produto.codigo || '')}</strong></td>
                             <td style="padding: 16px 20px; font-size: 14px;">${escapeHtml(produto.descricao || '')}</td>
                             <td style="padding: 16px 20px; font-size: 14px;">
-                                <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+                                <span style="background: linear-gradient(135deg, #225cfa, #1a4fd4); color: white; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;">
                                     ${escapeHtml(produto.sku || '-')}
                                 </span>
                             </td>
@@ -598,7 +598,7 @@
     function showToast(message, type = 'info') {
         const toast = document.createElement('div');
         const colors = {
-            success: { bg: '#10b981', icon: 'fa-check-circle' },
+            success: { bg: '#225cfa', icon: 'fa-check-circle' },
             error: { bg: '#ef4444', icon: 'fa-exclamation-circle' },
             info: { bg: '#3b82f6', icon: 'fa-info-circle' }
         };
@@ -838,12 +838,12 @@
                             <!-- Campo SKU -->
                             <div style="position: relative;">
                                 <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600; color: #334155; font-size: 14px;">
-                                    <i class="fas fa-qrcode" style="color: #10b981; width: 16px;"></i>
+                                    <i class="fas fa-qrcode" style="color: #225cfa; width: 16px;"></i>
                                     <span>SKU</span>
                                 </label>
                                 <input type="text" id="edit-sku" value="${escapeHtml(produto.sku || '')}" 
                                     style="width: 100%; padding: 12px; border: 2px solid #cbd5e1; border-radius: 10px; font-size: 14px; color: #1e293b; transition: all 0.2s; box-sizing: border-box; text-transform: uppercase;"
-                                    onfocus="this.style.borderColor='#10b981'; this.style.boxShadow='0 0 0 3px rgba(16,185,129,0.1)'"
+                                    onfocus="this.style.borderColor='#225cfa'; this.style.boxShadow='0 0 0 3px rgba(34, 92, 250,0.1)'"
                                     onblur="this.style.borderColor='#cbd5e1'; this.style.boxShadow='none'"
                                     placeholder="SKU-ROSE">
                             </div>

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ESTOQUE - Módulo Compras
  * Controle de estoque e inventário
  */
@@ -109,7 +109,7 @@
                                             <div class="progress-bar bg-${status.classe}" style="width: ${percentual}%; background: ${
                                                 status.classe === 'danger' ? '#ef4444' : 
                                                 status.classe === 'warning' ? '#f59e0b' :
-                                                status.classe === 'info' ? '#3b82f6' : '#10b981'
+                                                status.classe === 'info' ? '#3b82f6' : '#225cfa'
                                             }; height: 100%;"></div>
                                         </div>
                                     </td>
