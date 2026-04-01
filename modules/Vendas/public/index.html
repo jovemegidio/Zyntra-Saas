@@ -644,26 +644,25 @@
         /* ========================================
            FILTROS BAR
            ======================================== */
-        .filters-bar {
-            background: white;
-            padding: 12px 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
         .search-box {
             display: flex;
             align-items: center;
-            background: #f5f5f5;
-            border-radius: 8px;
-            padding: 0 12px;
-            width: 300px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0 14px;
+            flex: 1;
+            max-width: 480px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #225cfa;
+            box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.1);
         }
 
         .search-box i {
-            color: #999;
+            color: #94a3b8;
             font-size: 14px;
         }
 
@@ -671,20 +670,27 @@
             border: none;
             background: transparent;
             padding: 10px 12px;
-            font-size: 14px;
+            font-size: 13px;
             width: 100%;
             outline: none;
+            color: #334155;
+        }
+
+        .search-box input::placeholder {
+            color: #94a3b8;
         }
 
         .filter-link {
-            color: var(--primary-orange);
+            color: #64748b;
             font-size: 13px;
             font-weight: 500;
             text-decoration: none;
             cursor: pointer;
+            white-space: nowrap;
         }
 
         .filter-link:hover {
+            color: #225cfa;
             text-decoration: underline;
         }
 
@@ -5842,7 +5848,7 @@
             </a>
 
             <nav class="sidebar-nav">
-                <button class="sidebar-btn active" title="Kanban" data-page="page.kanban"
+                <button class="sidebar-btn active" title="Pipeline de Vendas" data-page="page.kanban"
                     onclick="window.location.href='index.html'">
                     <i class="fas fa-columns"></i>
                 </button>
@@ -5909,7 +5915,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="header-btn btn-config-etapas" title="Configurar Etapas do Kanban"
+                    <button class="header-btn btn-config-etapas" title="Configurar Etapas do Pipeline"
                         onclick="abrirModalEtapas()">
                         <i class="fas fa-cog"></i>
                     </button>
@@ -5958,38 +5964,44 @@
 
             <!-- Tabs removidas conforme solicitação -->
 
-            <!-- Barra de Ações Rápidas -->
+            <!-- Barra de Ações Rápidas + Busca -->
             <div class="quick-actions-bar"
-                style="display: flex; align-items: center; gap: 12px; padding: 12px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+                style="display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: white; border-bottom: 1px solid #e2e8f0;">
                 <button class="btn-action-primary" onclick="abrirModalNovoPedido()"
-                    style="display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #225cfa, #1a4fd4); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(34, 92, 250, 0.3); transition: all 0.2s;">
-                    <i class="fas fa-plus"></i>
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; background: linear-gradient(135deg, #225cfa, #1a4fd4); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 8px rgba(34, 92, 250, 0.25); transition: all 0.2s; white-space: nowrap;">
+                    <i class="fas fa-plus" style="font-size: 11px;"></i>
                     <span>Novo Pedido</span>
                 </button>
                 <button class="btn-action-secondary" onclick="abrirModalNovoCliente()"
-                    style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s;">
-                    <i class="fas fa-user-plus"></i>
+                    style="display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                    <i class="fas fa-user-plus" style="font-size: 12px;"></i>
                     <span>Novo Cliente</span>
                 </button>
                 <div style="flex: 1;"></div>
-                <button class="btn-action-icon" onclick="abrirModalExportar()" title="Exportar Dados"
-                    style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; background: white; color: #475569; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; transition: all 0.2s;">
-                    <i class="fas fa-download"></i>
-                </button>
-            </div>
-
-            <!-- Filtros -->
-            <div class="filters-bar">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
                     <input type="text" placeholder="Pesquisar por nome, CNPJ, razão social, nome fantasia ou nº pedido"
                         id="search-input">
                 </div>
                 <a class="filter-link" id="filter-toggle">Exibindo tudo</a>
+                <button class="btn-action-icon" onclick="abrirModalExportar()" title="Exportar Dados"
+                    style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; border-radius: 10px; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
+                    <i class="fas fa-download" style="font-size: 13px;"></i>
+                </button>
+                <div id="view-toggle-group" style="display: inline-flex; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; flex-shrink: 0;">
+                    <button id="btn-view-list" onclick="alternarVisao('list')" title="Visualização em Lista"
+                        style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #225cfa; color: white; border: none; cursor: pointer; transition: all 0.2s;">
+                        <i class="fas fa-list" style="font-size: 13px;"></i>
+                    </button>
+                    <button id="btn-view-kanban" onclick="alternarVisao('kanban')" title="Visualização Kanban"
+                        style="display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; background: #f8fafc; color: #64748b; border: none; border-left: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;">
+                        <i class="fas fa-columns" style="font-size: 13px;"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Status Filter Tabs -->
-            <div style="display: flex; gap: 8px; padding: 0 20px 12px; flex-wrap: wrap;">
+            <div style="display: flex; gap: 8px; padding: 10px 20px 12px; flex-wrap: wrap; background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
                 <button class="status-filter-btn active" data-filter="todos" onclick="filtrarListaPorStatus('todos', this)"
                     style="padding: 6px 14px; border-radius: 20px; border: 1px solid #e2e8f0; background: #225cfa; color: white; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;">
                     Todos <span id="count-todos" style="margin-left: 4px; opacity: 0.8;"></span>
@@ -10436,7 +10448,33 @@
         // ========================================
         // VIEW MODE: LIST vs KANBAN
         // ========================================
-        let _viewMode = 'list'; // Default to list view
+        let _viewMode = localStorage.getItem('vendas_viewMode') || 'list'; // Default to list view
+
+        function alternarVisao(modo) {
+            _viewMode = modo;
+            localStorage.setItem('vendas_viewMode', modo);
+            const listView = document.querySelector('.pedidos-list-view');
+            const kanbanView = document.querySelector('.kanban-container');
+            const statusFilters = listView ? listView.previousElementSibling : null;
+            const btnList = document.getElementById('btn-view-list');
+            const btnKanban = document.getElementById('btn-view-kanban');
+            if (modo === 'kanban') {
+                if (listView) listView.style.display = 'none';
+                if (kanbanView) kanbanView.style.display = '';
+                if (btnList) { btnList.style.background = '#f8fafc'; btnList.style.color = '#64748b'; }
+                if (btnKanban) { btnKanban.style.background = '#225cfa'; btnKanban.style.color = 'white'; }
+            } else {
+                if (listView) listView.style.display = '';
+                if (kanbanView) kanbanView.style.display = 'none';
+                if (btnList) { btnList.style.background = '#225cfa'; btnList.style.color = 'white'; }
+                if (btnKanban) { btnKanban.style.background = '#f8fafc'; btnKanban.style.color = '#64748b'; }
+            }
+        }
+
+        // Aplicar visão salva ao carregar
+        if (_viewMode === 'kanban') {
+            document.addEventListener('DOMContentLoaded', function() { alternarVisao('kanban'); });
+        }
 
         // ========================================
         // DADOS DO KANBAN (Carregados da API)
@@ -12921,8 +12959,13 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Chamado da lista (sem pedidoAtual definido) — buscar pelo ID
             if (!pedidoAtual || pedidoAtual.id != pedidoId) {
-                const found = (window.dadosVendas || []).find(p => p.id == pedidoId);
-                if (found) pedidoAtual = found;
+                const coluna = colunaOrigem || 'faturar';
+                const dados = window.dadosVendas || {};
+                let found = Array.isArray(dados[coluna]) ? dados[coluna].find(p => p.id == pedidoId) : null;
+                if (!found) {
+                    found = Object.values(dados).filter(Array.isArray).flat().find(p => p.id == pedidoId);
+                }
+                if (found) pedidoAtual = { ...found, _coluna: coluna };
             }
             if (!pedidoAtual) return;
 
@@ -13016,12 +13059,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Se pedidoAtual não foi definido (ex: chamada via botão na lista),
             // busca o pedido nos dadosVendas pelo id
-            if (!pedidoAtual) {
+            if (!pedidoAtual || pedidoAtual.id != pedidoId) {
                 const coluna = colunaOrigem || 'analise';
                 const dados = window.dadosVendas || {};
-                let found = (dados[coluna] || []).find(p => p.id == pedidoId);
+                let found = Array.isArray(dados[coluna]) ? dados[coluna].find(p => p.id == pedidoId) : null;
                 if (!found) {
-                    found = Object.values(dados).flat().find(p => p.id == pedidoId);
+                    found = Object.values(dados).filter(Array.isArray).flat().find(p => p.id == pedidoId);
                 }
                 if (!found) {
                     alert('Não foi possível carregar os dados do pedido. Atualize a página e tente novamente.');
@@ -19936,8 +19979,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             }
             // Admin/supervisor: manter oculto (default)
 
-            // ---- SIDEBAR: esconder páginas admin para vendedores ----
-            if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {
+            // ---- SIDEBAR: esconder páginas admin para vendedores e supervisores ----
+            if (!usuarioLogado.isAdmin) {
                 // Esconder "Gestão de Vendas" (dashboard-admin.html) — somente admin
                 document.querySelectorAll('.sidebar-btn').forEach(btn => {
                     if (btn.getAttribute('title') === 'Gestão de Vendas') {
@@ -19950,7 +19993,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         btn.style.display = 'none';
                     }
                 });
-                console.log('[Vendas] Botões admin ocultados para vendedor');
+                console.log('[Vendas] Botões admin ocultados para não-admin');
             }
 
             // ---- FILTRO VENDEDOR: bloquear para vendedor puro ----
