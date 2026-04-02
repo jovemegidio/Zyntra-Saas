@@ -5963,18 +5963,20 @@
 
             <!-- Lista View -->
             <div id="list-view" style="display:none;flex:1;overflow:auto;padding:0;">
+                <!-- Filter Tabs -->
+                <div id="list-filter-tabs" style="display:flex;gap:8px;padding:12px 16px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #e5e7eb;background:white;"></div>
                 <table id="list-table" style="width:100%;border-collapse:collapse;font-size:13px;">
                     <thead>
-                        <tr style="background:#f8fafc;position:sticky;top:0;z-index:2;">
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Nº</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Cliente</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Status</th>
-                            <th style="padding:10px 14px;text-align:right;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Valor</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Vendedor</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Pagamento</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Data</th>
-                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">NF</th>
-                            <th style="padding:10px 14px;text-align:center;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;border-bottom:2px solid #e2e8f0;">Ações</th>
+                        <tr style="background:#1e293b;position:sticky;top:0;z-index:2;">
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Nº Pedido</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Cliente</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Valor</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Pagamento</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Estoque</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Vendedor</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Data</th>
+                            <th style="padding:12px 16px;text-align:center;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="list-tbody"></tbody>
@@ -10680,40 +10682,85 @@
         function renderListView() {
             const tbody = document.getElementById('list-tbody');
             if (!tbody) return;
-            const statusLabels = { orcamento: 'Orçamento', analise: 'Em Análise', aprovado: 'Aprovado', faturar: 'A Faturar', faturado: 'Faturado', recibo: 'Recibo' };
-            const statusColors = { orcamento: '#f59e0b', analise: '#3b82f6', aprovado: '#10b981', faturar: '#8b5cf6', faturado: '#059669', recibo: '#6b7280' };
+            const statusLabels = { orcamento: 'ORÇAMENTO', analise: 'ANÁLISE DE CRÉDITO', aprovado: 'APROVADO', faturar: 'FATURAR', faturado: 'FATURADO', recibo: 'RECIBO' };
+            const statusColors = { orcamento: '#f59e0b', analise: '#ea580c', aprovado: '#10b981', faturar: '#eab308', faturado: '#059669', recibo: '#6b7280' };
+            const stages = ['orcamento', 'analise', 'aprovado', 'faturar', 'faturado', 'recibo'];
+
             let allItems = [];
             Object.keys(dadosVendas).forEach(col => {
                 (dadosVendas[col] || []).forEach(item => {
                     allItems.push({ ...item, _coluna: col });
                 });
             });
-            // Apply search filter (same as kanban)
+
+            // Render filter tabs
+            const tabsEl = document.getElementById('list-filter-tabs');
+            if (tabsEl) {
+                const currentFilter = window._listFilter || 'todos';
+                const counts = { todos: allItems.length };
+                stages.forEach(s => { counts[s] = allItems.filter(it => it._coluna === s).length; });
+                const tabDefs = [
+                    { key: 'todos', label: 'Todos', color: '#059669' },
+                    { key: 'orcamento', label: 'Orçamento', color: '#f59e0b' },
+                    { key: 'analise', label: 'Análise', color: '#ef4444' },
+                    { key: 'aprovado', label: 'Aprovado', color: '#10b981' },
+                    { key: 'faturar', label: 'Faturar', color: '#3b82f6' },
+                    { key: 'faturado', label: 'Faturado', color: '#059669' },
+                    { key: 'recibo', label: 'Recibo', color: '#f59e0b' }
+                ];
+                let tabsHtml = '';
+                tabDefs.forEach(t => {
+                    const count = counts[t.key] || 0;
+                    const isActive = currentFilter === t.key;
+                    const countText = count > 0 ? (t.key === 'todos' ? `(${count})` : `${count} registro${count > 1 ? 's' : ''}`) : 'Nenhum registro';
+                    if (isActive) {
+                        tabsHtml += `<button onclick="window._listFilter='${t.key}';renderListView()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border:none;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;background:${t.color};color:white;transition:all 0.15s;">${t.label} <span style="font-weight:400;opacity:0.9;">${countText}</span></button>`;
+                    } else {
+                        tabsHtml += `<button onclick="window._listFilter='${t.key}';renderListView()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid #e5e7eb;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;background:white;color:#374151;transition:all 0.15s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='white'">${t.label} <span style="color:${count > 0 ? t.color : '#9ca3af'};font-weight:${count > 0 ? '600' : '400'};">${countText}</span></button>`;
+                    }
+                });
+                tabsEl.innerHTML = tabsHtml;
+            }
+
+            // Apply tab filter
+            const activeFilter = window._listFilter || 'todos';
+            if (activeFilter !== 'todos') {
+                allItems = allItems.filter(it => it._coluna === activeFilter);
+            }
+
+            // Apply search filter
             const search = (document.getElementById('search-input') || {}).value || '';
             if (search) {
                 const s = search.toLowerCase();
                 allItems = allItems.filter(it => (it.cliente || '').toLowerCase().includes(s) || String(it.numero_pedido || it.id).includes(s) || (it.vendedor || '').toLowerCase().includes(s) || (it.cliente_cnpj || '').includes(s));
             }
+
             let html = '';
             allItems.forEach((it, i) => {
-                const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+                const bg = i % 2 === 0 ? '#fff' : '#f9fafb';
                 const col = it._coluna;
                 const valorFmt = (it.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                const dataInc = it.data_inclusao ? new Date(it.data_inclusao).toLocaleDateString('pt-BR') : '-';
-                const isParcial = it.percentual_faturado > 0 && it.percentual_faturado < 100;
-                const parcialBadge = isParcial ? `<span style="background:#fef3c7;color:#92400e;padding:1px 6px;border-radius:4px;font-size:10px;font-weight:600;margin-left:4px;">${it.percentual_faturado}% NF</span>` : '';
-                const nfBadge = it.nf ? `<span style="color:#059669;font-size:10px;font-weight:600;">NF ${it.nf}</span>` : '';
-                html += `<tr style="background:${bg};cursor:pointer;border-bottom:1px solid #f1f5f9;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#eef2ff'" onmouseout="this.style.background='${bg}'">
-                    <td style="padding:10px 14px;font-weight:600;color:#7c3aed;font-size:13px;white-space:nowrap;">#${it.numero_pedido || it.id}</td>
-                    <td style="padding:10px 14px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;">${escaparHTML(it.cliente || 'Cliente não informado')}</td>
-                    <td style="padding:10px 14px;white-space:nowrap;"><span style="display:inline-block;background:${statusColors[col]}15;color:${statusColors[col]};padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600;border:1px solid ${statusColors[col]}30;">${statusLabels[col] || col}</span>${parcialBadge}</td>
-                    <td style="padding:10px 14px;text-align:right;font-family:'SF Mono',monospace;font-weight:700;font-size:13px;color:#1e293b;white-space:nowrap;">R$ ${valorFmt}</td>
-                    <td style="padding:10px 14px;color:#64748b;font-size:12px;white-space:nowrap;">${escaparHTML(it.vendedor || '-')}</td>
-                    <td style="padding:10px 14px;font-size:12px;color:#64748b;white-space:nowrap;">${escaparHTML(it.parcelas || 'a vista')}</td>
-                    <td style="padding:10px 14px;font-size:12px;color:#64748b;white-space:nowrap;">${dataInc}</td>
-                    <td style="padding:10px 14px;white-space:nowrap;">${nfBadge}</td>
-                    <td style="padding:10px 14px;text-align:center;">
-                        <button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:11px;color:#475569;transition:all 0.15s;" title="Editar" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fas fa-edit"></i></button>
+                const dataInc = it.data_inclusao ? new Date(it.data_inclusao).toLocaleDateString('pt-BR') : '—';
+                const pagamento = escaparHTML(it.parcelas || 'A Vista');
+                const estoqueBadge = it.estoque_baixado === 1 ? '<span style="color:#059669;font-size:12px;font-weight:500;">✓ Baixado</span>' : (col === 'faturar' || col === 'faturado' ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:9px;"></i> Pendente</span>' : '<span style="color:#9ca3af;">—</span>');
+                // Ações baseadas no status
+                let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#475569;" title="Editar" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fas fa-edit"></i></button>`;
+                if (col === 'orcamento') {
+                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
+                } else if (col === 'analise' || col === 'aprovado') {
+                    acoesBtns += ` <button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#059669;" title="Aprovar" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'"><i class="fas fa-check"></i></button>`;
+                }
+                html += `<tr style="background:${bg};cursor:pointer;border-bottom:1px solid #f1f5f9;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f5f5ff'" onmouseout="this.style.background='${bg}'">
+                    <td style="padding:12px 16px;font-weight:600;color:#1e293b;font-size:13px;white-space:nowrap;">Nº ${it.numero_pedido || it.id}</td>
+                    <td style="padding:12px 16px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#1e293b;text-transform:uppercase;">${escaparHTML(it.cliente || 'Cliente não informado')}</td>
+                    <td style="padding:12px 16px;white-space:nowrap;"><span style="display:inline-block;background:${statusColors[col]};color:white;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.3px;">${statusLabels[col] || col}</span></td>
+                    <td style="padding:12px 16px;font-weight:700;font-size:13px;color:#1e293b;white-space:nowrap;">R$ ${valorFmt}</td>
+                    <td style="padding:12px 16px;font-size:12px;color:#374151;white-space:nowrap;">${pagamento}</td>
+                    <td style="padding:12px 16px;white-space:nowrap;">${estoqueBadge}</td>
+                    <td style="padding:12px 16px;color:#374151;font-size:12px;white-space:nowrap;">${escaparHTML(it.vendedor || '-')}</td>
+                    <td style="padding:12px 16px;font-size:12px;color:#6b7280;white-space:nowrap;">${dataInc}</td>
+                    <td style="padding:12px 16px;text-align:center;white-space:nowrap;">
+                        ${acoesBtns}
                     </td>
                 </tr>`;
             });
