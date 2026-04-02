@@ -5968,15 +5968,14 @@
                 <table id="list-table" style="width:100%;border-collapse:collapse;font-size:13px;">
                     <thead>
                         <tr style="background:#1e293b;position:sticky;top:0;z-index:2;">
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Nº Pedido</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Cliente</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Status</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Valor</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Pagamento</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Estoque</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Vendedor</th>
-                            <th style="padding:12px 16px;text-align:left;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Data</th>
-                            <th style="padding:12px 16px;text-align:center;font-weight:600;color:#e2e8f0;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;">Ações</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:110px;">Nº Pedido</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;">Cliente</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:140px;">Status</th>
+                            <th style="padding:10px 16px;text-align:right;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:120px;">Valor</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:110px;">Condição</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;">Vendedor</th>
+                            <th style="padding:10px 16px;text-align:left;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:95px;">Data</th>
+                            <th style="padding:10px 16px;text-align:center;font-weight:600;color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:0.8px;width:130px;">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="list-tbody"></tbody>
@@ -10776,59 +10775,85 @@
 
             let html = '';
             allItems.forEach((it, i) => {
-                const bg = i % 2 === 0 ? '#fff' : '#f9fafb';
+                const bg = i % 2 === 0 ? '#ffffff' : '#f8fafc';
                 const col = it._coluna;
                 const valorFmt = (it.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-                const dataInc = it.data_inclusao ? new Date(it.data_inclusao).toLocaleDateString('pt-BR') : '—';
-                const pagamento = escaparHTML(it.parcelas || 'A Vista');
-                const estoqueBadge = it.estoque_baixado === 1 ? '<span style="color:#059669;font-size:12px;font-weight:500;">✓ Baixado</span>' : (col === 'faturar' || col === 'faturado' ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:9px;"></i> Pendente</span>' : '<span style="color:#9ca3af;">—</span>');
-                // NF badge
-                const nfTag = it.nf ? `<div style="font-size:10px;color:#059669;font-weight:600;margin-top:2px;">NF ${it.nf}</div>` : '';
-                // Status change select (inline, matches Kanban drag behavior)
-                const isBloqueado = col === 'faturado' || col === 'recibo';
-                const statusSelect = `<select onchange="moverParaStatusLista(${it.id}, this.value)" ${isBloqueado ? 'disabled' : ''} style="border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.3px;cursor:${isBloqueado ? 'default' : 'pointer'};background:${statusColors[col]};color:white;outline:none;max-width:120px;">
-                    <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
-                    <option value="analise" ${col==='analise'?'selected':''}>ANÁLISE</option>
-                    <option value="aprovado" ${col==='aprovado'?'selected':''}>APROVADO</option>
-                    <option value="faturar" ${col==='faturar'?'selected':''}>FATURAR</option>
-                    <option value="faturado" ${col==='faturado'?'selected':''}>FATURADO</option>
-                    <option value="recibo" ${col==='recibo'?'selected':''}>RECIBO</option>
-                </select>`;
-                // Action buttons - full Kanban-equivalent set
-                const btnBase = 'background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;';
-                let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="${btnBase}color:#475569;" title="Editar pedido"><i class="fas fa-edit"></i></button>`;
-                if (col === 'orcamento') {
-                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'analise')" style="${btnBase}color:#3b82f6;" title="Enviar para Análise"><i class="fas fa-arrow-right"></i></button>`;
-                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="${btnBase}color:#ef4444;" title="Excluir"><i class="fas fa-trash"></i></button>`;
-                } else if (col === 'analise') {
-                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'aprovado')" style="${btnBase}color:#10b981;" title="Aprovar pedido"><i class="fas fa-check-circle"></i></button>`;
-                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'orcamento')" style="${btnBase}color:#f59e0b;" title="Retornar para Orçamento"><i class="fas fa-arrow-left"></i></button>`;
-                } else if (col === 'aprovado') {
-                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'faturar')" style="${btnBase}color:#8b5cf6;" title="Enviar para Faturar"><i class="fas fa-file-invoice-dollar"></i></button>`;
-                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'analise')" style="${btnBase}color:#ea580c;" title="Retornar para Análise"><i class="fas fa-arrow-left"></i></button>`;
-                } else if (col === 'faturar') {
-                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'faturar')" style="${btnBase}color:white;background:linear-gradient(135deg,#22c55e,#16a34a);border-color:#16a34a;" title="Faturar Agora"><i class="fas fa-file-invoice-dollar"></i></button>`;
-                } else if (col === 'faturado' || col === 'recibo') {
-                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'danfe')" style="${btnBase}color:#059669;" title="Ver DANFE"><i class="fas fa-file-invoice"></i></button>`;
-                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'recibo')" style="${btnBase}color:#0284c7;" title="Imprimir Recibo"><i class="fas fa-receipt"></i></button>`;
-                    if (col === 'faturado') acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'recibo')" style="${btnBase}color:#6b7280;" title="Mover para Recibo"><i class="fas fa-check-double"></i></button>`;
+                const dataInc = it.data_inclusao ? new Date(it.data_inclusao).toLocaleDateString('pt-BR') : (it.created_at ? new Date(it.created_at).toLocaleDateString('pt-BR') : '—');
+
+                // Payment condition — readable format
+                let pagDisplay = 'A Vista';
+                const cp = (it.condicao_pagamento || '').trim();
+                const parcStr = String(it.parcelas || '').trim();
+                if (cp && !/^a.?vista$/i.test(cp)) {
+                    pagDisplay = cp;
+                } else if (parcStr && !/^a.?vista$/i.test(parcStr)) {
+                    const partes = parcStr.split(/[,\/]/).filter(Boolean);
+                    if (partes.length > 1) pagDisplay = `${partes.length}x`;
+                    else if (!isNaN(parcStr)) pagDisplay = `${parcStr} dias`;
+                    else pagDisplay = parcStr;
                 }
-                acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'imprimir')" style="${btnBase}color:#374151;" title="Imprimir Pedido"><i class="fas fa-print"></i></button>`;
-                html += `<tr style="background:${bg};cursor:pointer;border-bottom:1px solid #f1f5f9;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f5f5ff'" onmouseout="this.style.background='${bg}'">
-                    <td style="padding:12px 16px;font-weight:600;color:#1e293b;font-size:13px;white-space:nowrap;">${prefixosPorColuna[col]||'Pedido'} Nº ${it.numero_pedido || it.id}${nfTag}</td>
-                    <td style="padding:12px 16px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#1e293b;text-transform:uppercase;">${escaparHTML(it.cliente || 'Cliente não informado')}</td>
-                    <td style="padding:8px 16px;white-space:nowrap;">${statusSelect}</td>
-                    <td style="padding:12px 16px;font-weight:700;font-size:13px;color:#1e293b;white-space:nowrap;">R$ ${valorFmt}</td>
-                    <td style="padding:12px 16px;font-size:12px;color:#374151;white-space:nowrap;">${pagamento}</td>
-                    <td style="padding:12px 16px;white-space:nowrap;">${estoqueBadge}</td>
-                    <td style="padding:12px 16px;color:#374151;font-size:12px;white-space:nowrap;">${escaparHTML(it.vendedor || '-')}</td>
-                    <td style="padding:12px 16px;font-size:12px;color:#6b7280;white-space:nowrap;">${dataInc}</td>
-                    <td style="padding:12px 16px;text-align:right;white-space:nowrap;display:flex;gap:4px;flex-wrap:nowrap;justify-content:flex-end;">
-                        ${acoesBtns}
+
+                // NF badge (compact)
+                const nfTag = it.nf ? `<span style="display:inline-block;margin-top:3px;padding:1px 6px;background:#dcfce7;color:#15803d;border-radius:4px;font-size:10px;font-weight:600;">NF ${it.nf}</span>` : '';
+
+                // Status badge (inline select for non-locked, static badge for locked)
+                const isBloqueado = col === 'faturado' || col === 'recibo';
+                const statusCfg = { orcamento:['#fff7ed','#b45309'], analise:['#fef2f2','#b91c1c'], aprovado:['#f0fdf4','#15803d'], faturar:['#eff6ff','#1d4ed8'], faturado:['#ecfdf5','#059669'], recibo:['#f1f5f9','#475569'] };
+                const [sbg, sfg] = statusCfg[col] || ['#f1f5f9','#374151'];
+                const statusEl = isBloqueado
+                    ? `<span style="display:inline-block;padding:5px 12px;background:${sbg};color:${sfg};border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;">${statusLabels[col]||col.toUpperCase()}</span>`
+                    : `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
+                        <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
+                        <option value="analise" ${col==='analise'?'selected':''}>ANÁLISE</option>
+                        <option value="aprovado" ${col==='aprovado'?'selected':''}>APROVADO</option>
+                        <option value="faturar" ${col==='faturar'?'selected':''}>AG. FATURAMENTO</option>
+                        <option value="faturado" ${col==='faturado'?'selected':''}>FATURADO</option>
+                        <option value="recibo" ${col==='recibo'?'selected':''}>RECIBO</option>
+                    </select>`;
+
+                // Action buttons — compact icon strip
+                const btn = (icon, click, color, title, solidBg) => `<button onclick="${click}" title="${title}" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid ${solidBg?'transparent':'#e2e8f0'};background:${solidBg||'#f8fafc'};color:${color};cursor:pointer;font-size:11px;transition:opacity 0.1s;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><i class="fas ${icon}"></i></button>`;
+                let acoesBtns = btn('fa-edit', `abrirModalEditar(${it.id})`, '#475569', 'Editar');
+                if (col === 'orcamento') {
+                    acoesBtns += btn('fa-arrow-right', `moverParaStatusLista(${it.id},'analise')`, '#2563eb', 'Enviar para Análise');
+                    acoesBtns += btn('fa-trash', `excluirPedido(${it.id})`, '#ef4444', 'Excluir');
+                } else if (col === 'analise') {
+                    acoesBtns += btn('fa-check-circle', `moverParaStatusLista(${it.id},'aprovado')`, '#059669', 'Aprovar');
+                    acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'orcamento')`, '#92400e', 'Retornar');
+                } else if (col === 'aprovado') {
+                    acoesBtns += btn('fa-file-invoice-dollar', `moverParaStatusLista(${it.id},'faturar')`, '#7c3aed', 'Aguardar Faturamento');
+                    acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'analise')`, '#ea580c', 'Retornar para Análise');
+                } else if (col === 'faturar') {
+                    acoesBtns += btn('fa-file-invoice-dollar', `abrirAcaoDeLista(${it.id},'faturar')`, '#fff', 'Faturar Agora', 'linear-gradient(135deg,#22c55e,#16a34a)');
+                } else if (col === 'faturado' || col === 'recibo') {
+                    acoesBtns += btn('fa-file-invoice', `abrirAcaoDeLista(${it.id},'danfe')`, '#059669', 'Ver DANFE');
+                    acoesBtns += btn('fa-receipt', `abrirAcaoDeLista(${it.id},'recibo')`, '#0284c7', 'Imprimir Recibo');
+                    if (col === 'faturado') acoesBtns += btn('fa-check-double', `moverParaStatusLista(${it.id},'recibo')`, '#6b7280', 'Mover para Recibo');
+                }
+                acoesBtns += btn('fa-print', `abrirAcaoDeLista(${it.id},'imprimir')`, '#374151', 'Imprimir Pedido');
+
+                // Vendedor — first name only for space
+                const vendedorNome = (it.vendedor || '').split(' ')[0] || '—';
+
+                html += `<tr style="background:${bg};cursor:pointer;border-bottom:1px solid #f1f5f9;transition:background 0.1s;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background='${bg}'">
+                    <td style="padding:10px 16px;white-space:nowrap;">
+                        <span style="font-weight:700;color:#1e293b;font-size:13px;">#${it.numero_pedido || it.id}</span>
+                        ${nfTag ? '<br>' + nfTag : ''}
+                    </td>
+                    <td style="padding:10px 16px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+                        <span style="font-size:13px;font-weight:600;color:#0f172a;">${escaparHTML((it.cliente || 'Cliente não informado').toUpperCase())}</span>
+                    </td>
+                    <td style="padding:8px 16px;white-space:nowrap;">${statusEl}</td>
+                    <td style="padding:10px 16px;font-weight:700;font-size:13px;color:#0f172a;white-space:nowrap;text-align:right;">R$\u00a0${valorFmt}</td>
+                    <td style="padding:10px 16px;font-size:12px;color:#374151;white-space:nowrap;">${escaparHTML(pagDisplay)}</td>
+                    <td style="padding:10px 16px;color:#374151;font-size:12px;white-space:nowrap;" title="${escaparHTML(it.vendedor||'')}">${escaparHTML(vendedorNome)}</td>
+                    <td style="padding:10px 16px;font-size:12px;color:#64748b;white-space:nowrap;">${dataInc}</td>
+                    <td style="padding:6px 12px;text-align:center;white-space:nowrap;">
+                        <div style="display:inline-flex;gap:4px;align-items:center;">${acoesBtns}</div>
                     </td>
                 </tr>`;
             });
-            if (!allItems.length) html = '<tr><td colspan="9" style="padding:60px;text-align:center;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:0.5;"></i><div style="font-size:14px;font-weight:500;">Nenhum pedido encontrado</div><div style="font-size:12px;margin-top:4px;">Tente ajustar os filtros de busca</div></td></tr>';
+            if (!allItems.length) html = '<tr><td colspan="8" style="padding:60px;text-align:center;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:36px;margin-bottom:12px;display:block;opacity:0.5;"></i><div style="font-size:14px;font-weight:500;">Nenhum pedido encontrado</div><div style="font-size:12px;margin-top:4px;">Tente ajustar os filtros de busca</div></td></tr>';
             tbody.innerHTML = html;
         }
 
