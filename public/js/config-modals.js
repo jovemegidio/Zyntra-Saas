@@ -71,6 +71,13 @@ async function abrirConfiguracao(tipo) {
         return;
     }
 
+    // Custos & Precificação: handled by standalone module
+    if (tipo === 'custos-precificacao' && typeof window.abrirCustosPrecificacao === 'function') {
+        console.log('[Config Modal] Delegando para módulo standalone Custos & Precificação');
+        window.abrirCustosPrecificacao();
+        return;
+    }
+
     // Verifica se o modal existe - tenta aguardar carregamento
     let modal = document.getElementById(modalId);
     console.log('[Config Modal] Buscando modal:', modalId, '- Encontrado:', !!modal);
