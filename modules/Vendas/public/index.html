@@ -10693,6 +10693,16 @@
                 });
             });
 
+            // Mais recentes primeiro para manter a leitura da lista previsivel.
+            allItems.sort((a, b) => {
+                const da = new Date(a.data_inclusao || a.created_at || 0).getTime() || 0;
+                const db = new Date(b.data_inclusao || b.created_at || 0).getTime() || 0;
+                if (db !== da) return db - da;
+                const na = Number(a.numero_pedido || a.id || 0);
+                const nb = Number(b.numero_pedido || b.id || 0);
+                return nb - na;
+            });
+
             // Render filter tabs
             const tabsEl = document.getElementById('list-filter-tabs');
             if (tabsEl) {
@@ -10746,7 +10756,7 @@
                 // Ações baseadas no status
                 let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#475569;" title="Editar" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fas fa-edit"></i></button>`;
                 if (col === 'orcamento') {
-                    acoesBtns += ` <button onclick="pedidoAtual=encontrarPedidoPorId(${it.id});excluirPedido()" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
+                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
                 } else if (col === 'analise' || col === 'aprovado') {
                     acoesBtns += ` <button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#059669;" title="Aprovar" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'"><i class="fas fa-check"></i></button>`;
                 }
@@ -16583,7 +16593,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Usar modal de confirmação profissional
             const confirmar = await confirmDelete(`Pedido Nº ${pedidoId}`, 'Pedido');
-            if (!confirmar) return;
+            if (!confirmar) {
+                window._excluindoPedido = false;
+                return;
+            }
 
             // Mostrar loading
             showNotification('Excluindo pedido...', 'info');
