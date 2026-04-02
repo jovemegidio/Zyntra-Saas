@@ -10595,9 +10595,9 @@
         }
 
         function renderKanban() {
-            // Also refresh list/pipeline if they're the active view
-            if (_currentView === 'lista') renderListView();
-            if (_currentView === 'pipeline') renderPipelineView();
+            // Refresh active non-kanban views when data changes
+            if (_currentView === 'lista') { renderListView(); return; }
+            if (_currentView === 'pipeline') { renderPipelineView(); return; }
 
             // Orçamento
             const colOrcamento = document.getElementById('col-orcamento');
@@ -10746,7 +10746,7 @@
                 // Ações baseadas no status
                 let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#475569;" title="Editar" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fas fa-edit"></i></button>`;
                 if (col === 'orcamento') {
-                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
+                    acoesBtns += ` <button onclick="pedidoAtual=encontrarPedidoPorId(${it.id});excluirPedido()" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
                 } else if (col === 'analise' || col === 'aprovado') {
                     acoesBtns += ` <button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#059669;" title="Aprovar" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'"><i class="fas fa-check"></i></button>`;
                 }
@@ -11842,7 +11842,7 @@
                 }
 
                 const result = await resp.json();
-                await carregarDadosVendas();
+                await carregarDadosKanban(filtrosState);
                 showNotification(`Pedido duplicado com sucesso! Novo Nº ${result.id || 'gerado'}`, 'success');
             } catch (error) {
                 console.error('Erro ao duplicar pedido:', error);
@@ -16564,17 +16564,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             }
         });
 
-        async function excluirPedido() {
+        async function excluirPedido(idDireto) {
             if (window._excluindoPedido) return;
-            if (!pedidoAtual) {
+            // Se chamado da listagem com ID direto, buscar o pedido
+            let pedidoAlvo = pedidoAtual;
+            if (idDireto && (!pedidoAtual || pedidoAtual.id !== idDireto)) {
+                pedidoAlvo = encontrarPedidoPorId(idDireto);
+            }
+            if (!pedidoAlvo) {
                 showNotification('Nenhum pedido selecionado', 'error');
                 return;
             }
             window._excluindoPedido = true;
 
             // Salvar dados do pedido ANTES do confirm (pois pode ser alterado)
-            const pedidoId = pedidoAtual.id;
-            const pedidoColuna = pedidoAtual._coluna || statusParaColuna[pedidoAtual._statusOriginal] || 'orcamento';
+            const pedidoId = pedidoAlvo.id;
+            const pedidoColuna = pedidoAlvo._coluna || statusParaColuna[pedidoAlvo._statusOriginal] || 'orcamento';
 
             // Usar modal de confirmação profissional
             const confirmar = await confirmDelete(`Pedido Nº ${pedidoId}`, 'Pedido');
@@ -18978,6 +18983,12 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         // ========================================
         document.getElementById('search-input').addEventListener('input', function (e) {
             const termo = e.target.value.toLowerCase().trim();
+
+            // Re-render list/pipeline views (they read search-input internally)
+            if (_currentView === 'lista') { renderListView(); return; }
+            if (_currentView === 'pipeline') { renderPipelineView(); return; }
+
+            // Kanban card filtering
             const cards = document.querySelectorAll('.kanban-card');
 
             cards.forEach(card => {
@@ -19018,6 +19029,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                 card.style.display = match ? 'block' : 'none';
             });
+            // Atualizar lista se estiver na view lista
+            if (typeof _currentView !== 'undefined' && _currentView === 'lista') {
+                renderListView();
+            }
         });
 
         // Função auxiliar para encontrar pedido por ID
