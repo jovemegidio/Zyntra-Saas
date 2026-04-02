@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Template Orçamento de Vendas - Estilo Recibo F9</title>
+  <style>
+    :root {
+      --ink: #0c1726;
+      --text: #385062;
+      --muted: #6d8092;
+      --line: #d8e4ed;
+      --line-soft: #edf4f8;
+      --surface: #ffffff;
+      --soft: #f6fafc;
+      --soft-2: #f2f7fb;
+      --brand: #0b2842;
+      --brand-2: #103758;
+      --accent: #18b6c8;
+      --accent-soft: #e7fbfd;
+      --success: #2f8f6b;
+      --warn-soft: #fff6df;
+      --warn-border: #f3d377;
+      --warn-text: #7b5b00;
+    }
+    * { box-sizing: border-box; }
+    @page { size: A4; margin: 0; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #eef4f8;
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      color: var(--text);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    body { display: flex; justify-content: center; }
+    .a4-stage {
+      width: 210mm;
+      min-height: 297mm;
+      background: #eef4f8;
+      padding: 11mm 0;
+    }
+    .page-frame { width: 184mm; margin: 0 auto; }
+    .page-shell {
+      background: white;
+      border: 1px solid #dbe8f1;
+      border-radius: 20px;
+      box-shadow: 0 18px 42px rgba(11, 40, 66, 0.08);
+      padding: 7mm;
+    }
+    .top-rule {
+      height: 5px;
+      background: linear-gradient(90deg, var(--brand) 0%, var(--brand-2) 62%, var(--accent) 100%);
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .quote {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: white;
+    }
+    .quote-head {
+      padding: 11px 13px 10px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #ffffff 0%, #f8fcfe 100%);
+    }
+    .head-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.78fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .logo-img {
+      height: 46px;
+      width: auto;
+      display: block;
+      flex: 0 0 auto;
+    }
+    .brand-name {
+      margin: 0 0 3px;
+      color: var(--brand);
+      font-size: 17px; 
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .brand-sub {
+      color: var(--muted);
+      font-size: 8px;
+      line-height: 1.5;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .headline {
+      margin: 0;
+      color: var(--ink);
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.08;
+    }
+    .subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 9.5px;
+      line-height: 1.5;
+    }
+    .doc-card {
+      border: 1px solid rgba(24, 182, 200, 0.34);
+      background: linear-gradient(180deg, #ffffff 0%, #f4fcfd 100%);
+      border-radius: 16px;
+      padding: 10px 11px;
+    }
+    .doc-card-title {
+      margin: 0 0 8px;
+      color: var(--brand);
+      font-size: 9px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .doc-no {
+      display:flex;
+      align-items:end;
+      justify-content:space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .doc-no .main {
+      font-size: 25px;
+      line-height: 1;
+      color: var(--brand);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .status-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(24, 182, 200, 0.35);
+      color: var(--brand);
+      font-size: 8px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+    .doc-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px 9px;
+    }
+    .meta-item {
+      padding: 7px 8px;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid var(--line-soft);
+    }
+    .meta-label {
+      display: block;
+      font-size: 7px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+    .meta-value {
+      display: block;
+      color: var(--ink);
+      font-size: 10px;
+      line-height: 1.2;
+      font-weight: 800;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .body { padding: 10px 13px 12px; }
+    .intro-card {
+      padding: 9px 11px;
+      border-radius: 14px;
+      background: var(--soft);
+      border: 1px solid var(--line-soft);
+      font-size: 10px;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+    .intro-card strong { color: var(--ink); }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: 1.12fr 0.92fr 0.76fr 1.2fr;
+      gap: 7px;
+      margin-bottom: 8px;
+    }
+    .field {
+      min-height: 51px;
+      border: 1px solid var(--line);
+      border-radius: 13px;
+      background: white;
+      padding: 7px 9px 8px;
+    }
+    .field.tight { min-height: 44px; }
+    .field-label, .block-title {
+      display: block;
+      color: var(--muted);
+      font-size: 7px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 4px;
+    }
+    .field-value {
+      display: block;
+      color: var(--ink);
+      font-size: 10px;
+      line-height: 1.35;
+      font-weight: 700;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .field-help {
+      display: block;
+      color: var(--muted);
+      font-size: 8px;
+      line-height: 1.35;
+      margin-top: 3px;
+    }
+    .section-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: white;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .section-head {
+      padding: 8px 10px;
+      background: linear-gradient(180deg, #ffffff 0%, #f8fcfe 100%);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-head strong {
+      color: var(--brand);
+      font-size: 9px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+    }
+    .section-head span {
+      color: var(--muted);
+      font-size: 8px;
+      font-weight: 700;
+    }
+    .client-grid {
+      display: grid;
+      grid-template-columns: 1.34fr 0.95fr 0.72fr 0.99fr;
+      gap: 7px;
+      padding: 8px 10px 10px;
+    }
+    .table-wrap {
+      padding: 0 10px 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      table-layout: fixed;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      font-size: 9px;
+    }
+    thead th {
+      background: var(--soft-2);
+      color: var(--brand);
+      font-weight: 900;
+      font-size: 7.3px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+    tbody td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--line-soft);
+      color: var(--text);
+      vertical-align: top;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    .num, .center { text-align: center; }
+    .money { text-align: right; font-variant-numeric: tabular-nums; }
+    .muted { color: var(--muted); }
+    .desc strong { display:block; color: var(--ink); font-size: 9.2px; margin-bottom: 2px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.16fr 0.84fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .stack {
+      display: grid;
+      gap: 7px;
+    }
+    .totals-card {
+      border: 1px solid rgba(24, 182, 200, 0.34);
+      background: linear-gradient(180deg, #ffffff 0%, #f4fcfd 100%);
+      border-radius: 16px;
+      padding: 10px 11px;
+      min-height: 100%;
+    }
+    .total-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+      padding: 6px 0;
+      font-size: 10px;
+      color: var(--text);
+      border-bottom: 1px dashed #d7e6ef;
+    }
+    .total-row:last-of-type { border-bottom: none; }
+    .total-row strong { color: var(--ink); }
+    .grand-total {
+      margin-top: 7px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--brand) 0%, var(--brand-2) 74%, var(--accent) 100%);
+      color: white;
+      padding: 10px 11px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap: 10px;
+    }
+    .grand-total .label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      font-weight: 800;
+      opacity: 0.9;
+    }
+    .grand-total .value {
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 900;
+    }
+    .terms-grid {
+      display: grid;
+      grid-template-columns: 1.12fr 0.92fr 0.76fr 1.2fr;
+      gap: 7px;
+      padding: 8px 10px 10px;
+    }
+    .terms-grid .field-value { font-size: 9.2px; }
+    .obs-card {
+      padding: 8px 10px 10px;
+      min-height: 70px;
+    }
+    .note-box {
+      padding: 9px 11px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--line-soft);
+      font-size: 9.4px;
+      color: var(--text);
+      line-height: 1.55;
+      min-height: 50px;
+    }
+    .footer-band {
+      margin-top: 8px;
+      padding: 7px 10px;
+      border-radius: 12px;
+      background: var(--soft);
+      border: 1px solid var(--line-soft);
+      color: var(--muted);
+      font-size: 7.6px;
+      line-height: 1.45;
+      text-align: center;
+    }
+</style>
+</head>
+<body>
+  <div class="a4-stage">
+    <div class="page-frame">
+      <div class="top-rule"></div>
+      <div class="page-shell">
+        <section class="quote">
+          <div class="quote-head">
+            <div class="head-grid">
+              <div>
+                <div class="brand-wrap">
+                  <img class="logo-img" src="/images/Logo Monocromatico - Azul - Aluforce.webp" alt="ALUFORCE" onerror="this.onerror=null;this.style.cssText='font-size:22px;font-weight:900;color:#0b2842'">
+                  <div>
+                    <p class="brand-name">ALUFORCE</p>
+                    <div class="brand-sub">Cabos de Alumínio • Orçamento Comercial</div>
+                  </div>
+                </div>
+                <h1 class="headline">Orçamento Comercial</h1>
+                <p class="subtitle">
+                  Proposta comercial gerada pelo Sistema de Gestão Empresarial Aluforce.<br>
+                  Válida pelo prazo indicado. Não possui valor fiscal.
+                </p>
+                <div class="intro-card" style="margin-top:8px;margin-bottom:0;">
+                  <strong>{{empresa.nome_fantasia}}</strong><br>
+                  CNPJ {{empresa.cnpj}} - IE {{empresa.inscricao_estadual}}<br>
+                  {{empresa.logradouro}}, {{empresa.numero}} - {{empresa.bairro}} - {{empresa.cidade}}/{{empresa.uf}} - CEP {{empresa.cep}}<br>
+                  {{empresa.telefone}} | {{empresa.email}}
+                </div>
+              </div>
+              <aside class="doc-card">
+                <p class="doc-card-title">Identificação do orçamento</p>
+                <div class="doc-no">
+                  <div class="main">N. {{orcamento.numero}}</div>
+                  <div class="status-pill">{{orcamento.status}}</div>
+                </div>
+                <div class="doc-meta">
+                  <div class="meta-item">
+                    <span class="meta-label">Emissão</span>
+                    <span class="meta-value">{{orcamento.data_emissao}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Validade</span>
+                    <span class="meta-value">{{orcamento.validade}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Vendedor</span>
+                    <span class="meta-value">{{orcamento.vendedor.nome}}</span>
+                  </div>
+                  <div class="meta-item">
+                    <span class="meta-label">Referência</span>
+                    <span class="meta-value">{{orcamento.referencia}}</span>
+                  </div>
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <div class="body">
+            <div class="section-card">
+              <div class="section-head">
+                <strong>Dados do cliente</strong>
+                <span>Cadastro e contato</span>
+              </div>
+              <div class="client-grid">
+                <div class="field">
+                  <span class="field-label">Cliente</span>
+                  <span class="field-value">{{cliente.nome}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">CNPJ / CPF</span>
+                  <span class="field-value">{{cliente.cnpj_cpf}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">IE</span>
+                  <span class="field-value">{{cliente.inscricao_estadual}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">Telefone</span>
+                  <span class="field-value">{{cliente.telefone}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">Endereço</span>
+                  <span class="field-value">{{cliente.endereco_completo}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">Cidade / UF</span>
+                  <span class="field-value">{{cliente.cidade}}/{{cliente.uf}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">CEP</span>
+                  <span class="field-value">{{cliente.cep}}</span>
+                </div>
+                <div class="field">
+                  <span class="field-label">E-mail</span>
+                  <span class="field-value">{{cliente.email}}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="section-card">
+              <div class="section-head">
+                <strong>Itens do orçamento</strong>
+                <span>{{totais.quantidade_itens}} item(ns)</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width: 6%;">#</th>
+                      <th style="width: 10%;">Código</th>
+                      <th style="width: 39%;">Descrição</th>
+                      <th style="width: 8%;" class="center">Qtd.</th>
+                      <th style="width: 7%;" class="center">Un.</th>
+                      <th style="width: 10%;" class="money">Vlr. Unit.</th>
+                      <th style="width: 9%;" class="money">Desc.</th>
+                      <th style="width: 11%;" class="money">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    
+            {{#each itens}}
+            <tr>
+              <td class="center">{{item}}</td>
+              <td class="center">{{codigo}}</td>
+              <td class="desc"><strong>{{descricao}}</strong><span class="muted">{{detalhe}}</span></td>
+              <td class="center">{{quantidade}}</td>
+              <td class="center">{{unidade}}</td>
+              <td class="money">{{valor_unitario}}</td>
+              <td class="money">{{desconto}}</td>
+              <td class="money"><strong>{{valor_total}}</strong></td>
+            </tr>
+            {{/each}}
+            
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="two-col">
+              <div class="stack">
+                <div class="section-card">
+                  <div class="section-head">
+                    <strong>Condições comerciais</strong>
+                    <span>Pagamento e logística</span>
+                  </div>
+                  <div class="terms-grid">
+                    <div class="field tight">
+                      <span class="field-label">Pagamento</span>
+                      <span class="field-value">{{condicoes.pagamento}}</span>
+                    </div>
+                    <div class="field tight">
+                      <span class="field-label">Prazo</span>
+                      <span class="field-value">{{condicoes.prazo_entrega}}</span>
+                    </div>
+                    <div class="field tight">
+                      <span class="field-label">Frete</span>
+                      <span class="field-value">{{condicoes.frete}}</span>
+                    </div>
+                    <div class="field tight">
+                      <span class="field-label">Transportadora</span>
+                      <span class="field-value">{{condicoes.transportadora}}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="section-card">
+                  <div class="section-head">
+                    <strong>Observações</strong>
+                    <span>Informações adicionais</span>
+                  </div>
+                  <div class="obs-card">
+                    <div class="note-box">{{observacoes.texto}}</div>
+                  </div>
+                </div>
+              </div>
+
+              <aside class="totals-card">
+                <p class="doc-card-title">Resumo financeiro</p>
+                <div class="total-row"><span>Subtotal</span><strong>R$ {{totais.subtotal}}</strong></div>
+                <div class="total-row"><span>Frete</span><strong>R$ {{totais.frete}}</strong></div>
+                <div class="total-row"><span>Descontos</span><strong>R$ {{totais.descontos}}</strong></div>
+                <div class="grand-total">
+                  <div>
+                    <div class="label">Valor total</div>
+                  </div>
+                  <div class="value">R$ {{totais.total_geral}}</div>
+                </div>
+              </aside>
+            </div>
+
+            <div class="footer-band" id="tpl-rodape">Orçamento válido por 15 dias • Preços sujeitos a alteração após a validade • Prazo de entrega após confirmação do pedido • Documento sem valor fiscal</div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+<script>
+// =====================================================================
+// ALUFORCE — Template de Orçamento com dados reais
+// Preencha window.orcamentoData antes de abrir esta página, ou a mesma
+// exibirá dados de demonstração.
+// =====================================================================
+(function () {
+  var D = window.orcamentoData || {
+    empresa: {
+      nome_fantasia : 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
+      cnpj          : '88.192.475/0001-60',
+      inscricao_estadual: '103.385.861-110',
+      logradouro    : 'RUA ERNESTINA',
+      numero        : 'S/N',
+      bairro        : 'FERRAZ DE VASCONCELOS',
+      cidade        : 'FERRAZ DE VASCONCELOS',
+      uf            : 'SP',
+      cep           : '08537-400',
+      telefone      : '(11) 91793-9089',
+      email         : 'sistema@aluforce.ind.br'
+    },
+    orcamento: {
+      numero       : '000001',
+      status       : 'Em Aberto',
+      data_emissao : new Date().toLocaleDateString('pt-BR'),
+      validade     : new Date(Date.now() + 15*86400000).toLocaleDateString('pt-BR'),
+      referencia   : '-',
+      vendedor     : { nome: '-' }
+    },
+    cliente: {
+      nome              : 'CLIENTE NÃO INFORMADO',
+      cnpj_cpf          : '-',
+      inscricao_estadual: 'Isento',
+      telefone          : '-',
+      endereco_completo : '-',
+      cidade            : '-',
+      uf                : '-',
+      cep               : '-',
+      email             : '-'
+    },
+    itens: [],
+    condicoes: { pagamento: '30 dias', prazo_entrega: 'A combinar', frete: '-', transportadora: '-' },
+    totais: { subtotal: '0,00', frete: '0,00', descontos: '0,00', total_geral: '0,00', quantidade_itens: 0 },
+    observacoes: { texto: '' }
+  };
+
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Resolve nested key like "cliente.nome" against the data object
+  function resolve(key, data) {
+    return key.trim().split('.').reduce(function(o, k) {
+      return o != null ? o[k] : '';
+    }, data);
+  }
+
+  // Fill {{#each itens}}...{{/each}} blocks first
+  var bodyHTML = document.body.innerHTML;
+  bodyHTML = bodyHTML.replace(
+    /{{#each itens}}([\s\S]*?){{\s*\/each\s*}}/g,
+    function (_, rowTpl) {
+      if (!D.itens || D.itens.length === 0) {
+        return '<tr><td colspan="8" style="text-align:center;color:#94a3b8;padding:20px;">Nenhum item adicionado.</td></tr>';
+      }
+      return D.itens.map(function (item, idx) {
+        return rowTpl
+          .replace(/{{item}}/g,          esc(String(idx + 1).padStart(2, '0')))
+          .replace(/{{codigo}}/g,         esc(item.codigo || ''))
+          .replace(/{{descricao}}/g,      esc(item.descricao || ''))
+          .replace(/{{detalhe}}/g,        esc(item.detalhe || ''))
+          .replace(/{{quantidade}}/g,     esc(item.quantidade || ''))
+          .replace(/{{unidade}}/g,        esc(item.unidade || ''))
+          .replace(/{{valor_unitario}}/g, esc(item.valor_unitario || ''))
+          .replace(/{{desconto}}/g,       esc(item.desconto || '--'))
+          .replace(/{{valor_total}}/g,    '<strong>' + esc(item.valor_total || '') + '</strong>');
+      }).join('');
+    }
+  );
+
+  // Fill all remaining {{key}} and {{key.subkey}} placeholders
+  bodyHTML = bodyHTML.replace(/{{([^#\/][^}]*)}}/g, function (_, key) {
+    var val = resolve(key, D);
+    return esc(val);
+  });
+
+  document.body.innerHTML = bodyHTML;
+})();
+</script>
+</body>
+</html>

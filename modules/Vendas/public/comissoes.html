@@ -1053,7 +1053,7 @@
         // Carregar resumo por vendedor
         async function carregarResumo(periodo, vendedor) {
             try {
-                let url = `/api/vendas/comissoes/resumo?periodo=${período}`;
+                let url = `/api/vendas/comissoes/resumo?periodo=${periodo}`;
                 if (vendedor) url += `&vendedor_id=${vendedor}`;
                 
                 const response = await fetch(url, { credentials: 'include' });
@@ -1177,7 +1177,8 @@
                 }
                 
                 tbody.innerHTML = historico.map(h => {
-                    const [ano, mes] = h.período.split('-');
+                    const periodo_val = h.período || h.periodo || '';
+                    const [ano, mes] = periodo_val.split('-');
                     const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
                     
                     return `

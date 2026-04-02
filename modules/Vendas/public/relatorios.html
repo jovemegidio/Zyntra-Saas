@@ -2297,8 +2297,10 @@
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
                     const primeiroNome = user.apelido || (_partesNome[0] || 'Usuário');
                     
-                    document.getElementById('user-name').textContent = primeiroNome;
-                    document.getElementById('user-initials').textContent = userName.charAt(0).toUpperCase();
+                    const _elUserName = document.getElementById('user-name');
+                    const _elUserInitials = document.getElementById('user-initials');
+                    if (_elUserName) _elUserName.textContent = primeiroNome;
+                    if (_elUserInitials) _elUserInitials.textContent = userName.charAt(0).toUpperCase();
                     
                     // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
@@ -2326,7 +2328,8 @@
                     let saudacao = 'Bom dia';
                     if (hora >= 12 && hora < 18) saudacao = 'Boa tarde';
                     else if (hora >= 18 || hora < 5) saudacao = 'Boa noite';
-                    document.getElementById('greeting-text').textContent = saudacao;
+                    const _elGreeting = document.getElementById('greeting-text');
+                    if (_elGreeting) _elGreeting.textContent = saudacao;
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error);

@@ -1,0 +1,277 @@
+/* ========================================
+   Zyntra - Subpages Styles
+   ======================================== */
+
+/* ========== PAGE HERO ========== */
+.page-hero {
+    padding: 140px 0 60px;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(108, 92, 231, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.page-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -50%;
+    right: -20%;
+    width: 60%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(0, 184, 148, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.page-hero__title {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+}
+
+.page-hero__subtitle {
+    font-size: 18px;
+    color: var(--gray-400);
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.7;
+    position: relative;
+    z-index: 1;
+}
+
+/* ========== PAGE BODY ========== */
+.page-body {
+    padding: 80px 0;
+}
+
+.page-body .container {
+    max-width: 900px;
+}
+
+.page-body h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 16px;
+    margin-top: 48px;
+    letter-spacing: -0.01em;
+}
+
+.page-body h2:first-child {
+    margin-top: 0;
+}
+
+.page-body h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--dark-2);
+    margin-bottom: 12px;
+    margin-top: 32px;
+}
+
+.page-body p {
+    font-size: 16px;
+    color: var(--gray-600);
+    line-height: 1.8;
+    margin-bottom: 16px;
+}
+
+.page-body ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-left: 0;
+}
+
+.page-body ul li {
+    font-size: 15px;
+    color: var(--gray-600);
+    padding-left: 28px;
+    position: relative;
+    line-height: 1.7;
+}
+
+.page-body ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--primary);
+}
+
+/* ========== CONTACT FORM (Fale Conosco) ========== */
+.page-body .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+    margin-top: 24px;
+}
+
+.page-body .contact-form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.page-body .contact-form label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.page-body .contact-form input,
+.page-body .contact-form textarea {
+    font-family: var(--font);
+    font-size: 15px;
+    padding: 12px 16px;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-sm);
+    background: var(--gray-50);
+    color: var(--dark);
+    transition: var(--transition);
+}
+
+.page-body .contact-form input:focus,
+.page-body .contact-form textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+
+.page-body .contact-form textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* ========== BLOG GRID ========== */
+.blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+    margin-top: 24px;
+}
+
+.blog-card {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    padding: 28px;
+    transition: var(--transition);
+}
+
+.blog-card:hover {
+    border-color: var(--primary);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-4px);
+}
+
+.blog-card__tag {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--primary);
+    background: rgba(108, 92, 231, 0.08);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    margin-bottom: 12px;
+}
+
+.blog-card__title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.blog-card__excerpt {
+    font-size: 14px;
+    color: var(--gray-500);
+    line-height: 1.7;
+    margin-bottom: 16px;
+}
+
+.blog-card__meta {
+    font-size: 13px;
+    color: var(--gray-400);
+}
+
+/* ========== CTA SECTION IN SUBPAGES ========== */
+.page-body .cta-inline {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--radius-lg);
+    padding: 48px;
+    text-align: center;
+    margin-top: 48px;
+}
+
+.page-body .cta-inline h2 {
+    color: var(--white);
+    margin-top: 0;
+    margin-bottom: 12px;
+}
+
+.page-body .cta-inline p {
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 24px;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .page-hero {
+        padding: 120px 0 48px;
+    }
+
+    .page-hero__title {
+        font-size: 30px;
+    }
+
+    .page-hero__subtitle {
+        font-size: 16px;
+    }
+
+    .page-body {
+        padding: 48px 0;
+    }
+
+    .page-body h2 {
+        font-size: 24px;
+        margin-top: 36px;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page-body .cta-inline {
+        padding: 32px 24px;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-hero__title {
+        font-size: 26px;
+    }
+}

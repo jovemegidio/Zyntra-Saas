@@ -9473,7 +9473,16 @@
                     <div id="cp-footer" style="padding:12px 28px;border-top:1px solid #e5e7eb;background:white;display:flex;justify-content:space-between;align-items:center;">
                         <span id="cp-footer-info" style="font-size:12px;color:#9ca3af;"></span>
                         <div style="display:flex;gap:10px;">
-                            <button onclick="cpExportarPDF()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF</button>
+                            <div style="position:relative;display:inline-block;" id="cp-pdf-dropdown-wrap">
+                                <button onclick="document.getElementById('cp-pdf-menu').style.display=document.getElementById('cp-pdf-menu').style.display==='block'?'none':'block'" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF <i class="fas fa-caret-down" style="margin-left:4px;"></i></button>
+                                <div id="cp-pdf-menu" style="display:none;position:absolute;bottom:42px;left:0;background:white;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:999;padding:6px 0;">
+                                    <div style="padding:8px 16px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Tipo de Relatório</div>
+                                    <button onclick="cpExportarPDF('completo');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-table" style="color:#7c3aed;width:18px;"></i> Tabela Completa</button>
+                                    <button onclick="cpExportarPDF('por_categoria');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-layer-group" style="color:#ea580c;width:18px;"></i> Por Categoria</button>
+                                    <button onclick="cpExportarPDF('por_estado');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-map-marked-alt" style="color:#0ea5e9;width:18px;"></i> Comparativo por Estado</button>
+                                    <button onclick="cpExportarPDF('por_produto');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-barcode" style="color:#059669;width:18px;"></i> Ficha por Produto</button>
+                                </div>
+                            </div>
                             <button onclick="cpSalvarParâmetros()" style="padding:8px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
                             <button onclick="cpAplicarPrecos()" style="padding:8px 18px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-tags" style="margin-right:6px;"></i>Aplicar Preços aos Produtos</button>
                         </div>
@@ -10128,7 +10137,7 @@
         async function cpSalvarParâmetros() {
             if (!_cpParâmetros) return;
             try {
-                const resp = await fetch('/api/pcp/arvore-produto/parâmetros', {
+                const resp = await fetch('/api/pcp/arvore-produto/parametros', {
                     credentials: 'include', method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(_cpParâmetros)
@@ -10144,8 +10153,13 @@
             }
         }
 
-        function cpExportarPDF() {
+        function cpExportarPDF(modo) {
             if (!_cpCache || !_cpParâmetros) return;
+            modo = modo || 'completo';
+
+            if (modo === 'por_estado') { cpExportarPDF_PorEstado(); return; }
+            if (modo === 'por_produto') { cpExportarPDF_PorProduto(); return; }
+
             const products = cpGetFilteredProducts();
             const mk = _cpParâmetros.markup_pct;
             const desp = _cpParâmetros.despesas;
@@ -10163,8 +10177,11 @@
                 cats[p.categoria].push(p);
             });
 
+            const modoTitulos = { completo: 'Tabela Completa', por_categoria: 'Relatório por Categoria' };
+            const pageBreakCat = modo === 'por_categoria' ? 'page-break-before:always;' : '';
+
             let tablesHTML = '';
-            Object.keys(cats).sort().forEach(cat => {
+            Object.keys(cats).sort().forEach((cat, catIdx) => {
                 const prods = cats[cat];
                 let rows = prods.map((p, i) => `
                     <tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'};">
@@ -10178,7 +10195,7 @@
                         <td style="padding:5px 8px;text-align:center;"><span style="background:${p._ml_pct >= 15 ? '#ecfdf5' : '#fef2f2'};color:${p._ml_pct >= 15 ? '#059669' : '#dc2626'};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">${p._ml_pct.toFixed(2)}%</span></td>
                     </tr>`).join('');
                 tablesHTML += `
-                <div style="margin-bottom:18px;page-break-inside:avoid;">
+                <div style="margin-bottom:18px;page-break-inside:avoid;${catIdx > 0 ? pageBreakCat : ''}">
                     <div style="background:#1e293b;color:white;padding:6px 12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;border-radius:4px 4px 0 0;">
                         ${cat} <span style="font-weight:400;opacity:0.7;">(${prods.length} produtos)</span>
                     </div>
@@ -10234,7 +10251,7 @@
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:14px;font-weight:700;">CUSTOS & PRECIFICAÇÃO</div>
-                    <div style="font-size:10px;opacity:0.7;">Tabela de Preços — ${dataHora}</div>
+                    <div style="font-size:10px;opacity:0.7;">${modoTitulos[modo] || 'Tabela de Preços'} — ${dataHora}</div>
                 </div>
             </div>
             <!-- PARAMS BAR -->
@@ -10289,6 +10306,141 @@
             pdfWin.document.write(pdfHTML);
             pdfWin.document.close();
             showNotification('PDF gerado com sucesso! Use Ctrl+P para salvar.', 'success');
+        }
+
+        // === PDF POR ESTADO (Comparativo) ===
+        function cpExportarPDF_PorEstado() {
+            if (!_cpCache || !_cpParâmetros) return;
+            const products = cpGetFilteredProducts();
+            const icmsEstados = _cpParâmetros.icms_estados || {};
+            const estados = Object.keys(icmsEstados).sort();
+            if (!estados.length) { showNotification('Nenhum estado configurado nos parâmetros.', 'error'); return; }
+            const mk = _cpParâmetros.markup_pct;
+            const baseDespesas = { ...(_cpParâmetros.despesas) };
+            const dataHora = new Date().toLocaleString('pt-BR');
+
+            // Calculate price per state for each product
+            const resultados = products.map(p => {
+                const porEstado = {};
+                estados.forEach(uf => {
+                    const stData = icmsEstados[uf] || {};
+                    const despMod = { ...baseDespesas, icms: stData.icms || 12, difal: _cpTipoCliente === 'consumidor_final' ? (stData.difal || 0) : 0, icms_st: _cpTipoCliente === 'revenda' ? (stData.st || 0) : 0 };
+                    const paramsMod = { ..._cpParâmetros, despesas: despMod };
+                    const r = cpCalcProduto(p, paramsMod);
+                    porEstado[uf] = r;
+                });
+                return { codigo: p.codigo, descricao: p.descricao, categoria: p.categoria, porEstado };
+            });
+
+            // Group by category
+            const cats = {};
+            resultados.forEach(r => { if (!cats[r.categoria]) cats[r.categoria] = []; cats[r.categoria].push(r); });
+
+            // Build tables: each category, states as columns
+            const maxCols = Math.min(estados.length, 8);
+            const estadoChunks = [];
+            for (let i = 0; i < estados.length; i += maxCols) estadoChunks.push(estados.slice(i, i + maxCols));
+
+            let tablesHTML = '';
+            estadoChunks.forEach((chunk, ci) => {
+                Object.keys(cats).sort().forEach((cat, catIdx) => {
+                    const prods = cats[cat];
+                    const ths = chunk.map(uf => `<th style="padding:4px 6px;text-align:right;font-weight:700;color:#374151;border-bottom:2px solid #cbd5e1;font-size:9px;">${uf}<br><span style="font-weight:400;color:#9ca3af;">ICMS ${(icmsEstados[uf]||{}).icms||12}%</span></th>`).join('');
+                    let rows = prods.map((r, i) => {
+                        const tds = chunk.map(uf => {
+                            const v = r.porEstado[uf];
+                            const mlColor = v.ml_pct >= 15 ? '#059669' : '#dc2626';
+                            return `<td style="padding:4px 6px;text-align:right;font-family:monospace;font-size:9px;background:${i%2===0?'#fff':'#f8fafc'};"><span style="font-weight:700;color:#1e40af;">R$ ${v.preco.toFixed(4)}</span><br><span style="color:${mlColor};font-size:8px;">${v.ml_pct.toFixed(1)}% ML</span></td>`;
+                        }).join('');
+                        return `<tr style="background:${i%2===0?'#fff':'#f8fafc'};"><td style="padding:4px 6px;font-weight:600;color:#1e40af;font-size:9px;">${r.codigo}</td><td style="padding:4px 6px;font-size:9px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.descricao}</td><td style="padding:4px 6px;text-align:right;font-family:monospace;font-weight:600;color:#ea580c;font-size:9px;">R$ ${r.porEstado[chunk[0]].cmp.toFixed(4)}</td>${tds}</tr>`;
+                    }).join('');
+                    tablesHTML += `<div style="margin-bottom:14px;page-break-inside:avoid;${catIdx > 0 || ci > 0 ? 'page-break-before:always;' : ''}"><div style="background:#1e293b;color:white;padding:5px 12px;font-size:11px;font-weight:700;text-transform:uppercase;border-radius:4px 4px 0 0;">${cat} <span style="font-weight:400;opacity:0.7;">(${prods.length} produtos)</span>${ci > 0 ? ' <span style="opacity:0.5;">— cont.</span>' : ''}</div><table style="width:100%;border-collapse:collapse;font-size:9px;border:1px solid #e5e7eb;"><thead><tr style="background:#f1f5f9;"><th style="padding:4px 6px;text-align:left;font-weight:700;color:#374151;border-bottom:2px solid #cbd5e1;font-size:9px;">Código</th><th style="padding:4px 6px;text-align:left;font-weight:700;color:#374151;border-bottom:2px solid #cbd5e1;font-size:9px;">Descrição</th><th style="padding:4px 6px;text-align:right;font-weight:700;color:#374151;border-bottom:2px solid #cbd5e1;font-size:9px;">CMP</th>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
+                });
+            });
+
+            const pdfHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Comparativo por Estado - ALUFORCE</title>
+            <style>@page{size:A4 landscape;margin:12mm 10mm;}@media print{body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}.no-print{display:none!important;}}body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;margin:0;padding:0;font-size:10px;}.header-bar{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}.footer{border-top:2px solid #1e293b;padding:8px 20px;display:flex;justify-content:space-between;font-size:8px;color:#64748b;position:fixed;bottom:0;left:0;right:0;background:white;}.print-float{position:fixed;top:12px;right:12px;z-index:999;background:#1e293b;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);}</style></head><body>
+            <button class="print-float no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+            <div class="header-bar"><div style="display:flex;align-items:center;gap:12px;"><img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:32px;object-fit:contain;" onerror="this.style.display='none'"><div><h1 style="margin:0;font-size:16px;">ALUFORCE</h1><div style="font-size:10px;opacity:0.8;">Cabos de Alumínio e Condutores Elétricos</div></div></div><div style="text-align:right;"><div style="font-size:13px;font-weight:700;">COMPARATIVO POR ESTADO</div><div style="font-size:9px;opacity:0.7;">${estados.length} estados · Markup ${mk.toFixed(1)}% · ${_cpTipoCliente === 'revenda' ? 'Revenda' : 'Cons. Final'} · ${dataHora}</div></div></div>
+            <div style="padding:12px 20px;">${tablesHTML}</div>
+            <div class="footer"><div><b>ALUFORCE</b> — Cabos de Alumínio e Condutores Elétricos</div><div>Gerado em ${dataHora} · <b>CONFIDENCIAL — USO INTERNO</b></div></div>
+            </body></html>`;
+            const pdfWin = window.open('', '_blank');
+            if (!pdfWin) { showNotification('Popup bloqueado! Permita popups para gerar o PDF.', 'error'); return; }
+            pdfWin.document.write(pdfHTML);
+            pdfWin.document.close();
+            showNotification('PDF comparativo por estado gerado!', 'success');
+        }
+
+        // === PDF POR PRODUTO (Ficha Individual) ===
+        function cpExportarPDF_PorProduto() {
+            if (!_cpCache || !_cpParâmetros) return;
+            const products = cpGetFilteredProducts();
+            if (!products.length) { showNotification('Nenhum produto para exportar.', 'error'); return; }
+            const mk = _cpParâmetros.markup_pct;
+            const desp = _cpParâmetros.despesas;
+            const pr = _cpParâmetros.precos_kg;
+            const dataHora = new Date().toLocaleString('pt-BR');
+            const matNames = { AL: 'Alumínio', PE: 'Polietileno (PE)', XLPE: 'XLPE', XLPE_AT: 'XLPE/Alta Tensão', HEPR: 'HEPR (Borracha)', PVC: 'PVC', MB_UV: 'Masterbatch UV' };
+            const despLabels = { bobina: 'Bobina', comissao: 'Comissão', custo_fixo: 'Custo Fixo', financeira: 'Financeira', icms: 'ICMS', difal: 'DIFAL', pis_cofins: 'PIS/COFINS', icms_st: 'ICMS-ST', redespacho: 'Redespacho', frete: 'Frete' };
+
+            let fichasHTML = '';
+            products.forEach((p, idx) => {
+                const r = cpCalcProduto(p, _cpParâmetros);
+                // Material breakdown
+                let matRows = '';
+                Object.keys(p.kg_m || {}).forEach(mat => {
+                    const w = p.kg_m[mat] || 0;
+                    if (w <= 0) return;
+                    const cost = r.matCosts[mat] || 0;
+                    matRows += `<tr><td style="padding:4px 8px;font-size:10px;">${matNames[mat] || mat}</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-size:10px;">${w.toFixed(4)} kg/m</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-size:10px;">R$ ${(pr[mat]||0).toFixed(2)}/kg</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-weight:600;font-size:10px;color:#ea580c;">R$ ${cost.toFixed(4)}/m</td></tr>`;
+                });
+                // Despesas breakdown
+                let despRows = '';
+                Object.keys(r.despTotal).forEach(d => {
+                    if (r.despTotal[d] <= 0) return;
+                    despRows += `<tr><td style="padding:3px 8px;font-size:10px;">${despLabels[d] || d}</td><td style="padding:3px 8px;text-align:right;font-family:monospace;font-size:10px;">${(desp[d]||0).toFixed(2)}%</td><td style="padding:3px 8px;text-align:right;font-family:monospace;font-weight:600;font-size:10px;">R$ ${r.despTotal[d].toFixed(4)}</td></tr>`;
+                });
+                const mlColor = r.ml_pct >= 20 ? '#059669' : r.ml_pct >= 15 ? '#ca8a04' : '#dc2626';
+                fichasHTML += `
+                <div style="page-break-inside:avoid;${idx > 0 ? 'page-break-before:always;' : ''}margin-bottom:20px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                    <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+                        <div><span style="font-size:16px;font-weight:800;">${p.codigo}</span><span style="margin-left:8px;font-size:11px;opacity:0.85;">${p.cores ? '· ' + p.cores : ''}</span></div>
+                        <div style="font-size:9px;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:12px;">${p.categoria}</div>
+                    </div>
+                    <div style="padding:10px 16px;background:#faf5ff;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:500;color:#374151;">${p.descricao}</div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+                        <div style="padding:12px 16px;border-right:1px solid #f3f4f6;">
+                            <div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:8px;">Composição de Materiais</div>
+                            <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid #e5e7eb;"><th style="padding:3px 8px;text-align:left;font-size:9px;color:#6b7280;">Material</th><th style="padding:3px 8px;text-align:right;font-size:9px;color:#6b7280;">Peso</th><th style="padding:3px 8px;text-align:right;font-size:9px;color:#6b7280;">Preço/kg</th><th style="padding:3px 8px;text-align:right;font-size:9px;color:#6b7280;">Custo/m</th></tr></thead><tbody>${matRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:4px 8px;font-size:10px;" colspan="3">TOTAL (CMP)</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-size:11px;color:#ea580c;">R$ ${r.cmp.toFixed(4)}/m</td></tr></tbody></table>
+                        </div>
+                        <div style="padding:12px 16px;">
+                            <div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:8px;">Despesas sobre Preço</div>
+                            <table style="width:100%;border-collapse:collapse;"><thead><tr style="border-bottom:1px solid #e5e7eb;"><th style="padding:3px 8px;text-align:left;font-size:9px;color:#6b7280;">Despesa</th><th style="padding:3px 8px;text-align:right;font-size:9px;color:#6b7280;">%</th><th style="padding:3px 8px;text-align:right;font-size:9px;color:#6b7280;">R$/m</th></tr></thead><tbody>${despRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:3px 8px;font-size:10px;">TOTAL</td><td style="padding:3px 8px;text-align:right;font-family:monospace;font-size:10px;">${Object.values(desp).reduce((a,b)=>a+b,0).toFixed(2)}%</td><td style="padding:3px 8px;text-align:right;font-family:monospace;font-size:10px;">R$ ${r.sumDesp.toFixed(4)}</td></tr></tbody></table>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#e2e8f0;border-top:1px solid #e2e8f0;">
+                        <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">CMP</div><div style="font-size:14px;font-weight:800;color:#ea580c;font-family:monospace;">R$ ${r.cmp.toFixed(4)}</div></div>
+                        <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Preço Sugerido</div><div style="font-size:14px;font-weight:800;color:#1e40af;font-family:monospace;">R$ ${r.preco.toFixed(4)}</div></div>
+                        <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Margem Bruta</div><div style="font-size:14px;font-weight:800;color:#059669;">${r.mb_pct.toFixed(2)}%</div></div>
+                        <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">ML (R$/m)</div><div style="font-size:14px;font-weight:800;color:${mlColor};font-family:monospace;">R$ ${r.ml.toFixed(4)}</div></div>
+                        <div style="background:${mlColor}10;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Margem Líquida</div><div style="font-size:14px;font-weight:800;color:${mlColor};">${r.ml_pct.toFixed(2)}%</div></div>
+                    </div>
+                </div>`;
+            });
+
+            const pdfHTML = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Ficha por Produto - ALUFORCE</title>
+            <style>@page{size:A4 portrait;margin:12mm;}@media print{body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}.no-print{display:none!important;}}body{font-family:'Segoe UI',Arial,sans-serif;color:#1e293b;margin:0;padding:0;font-size:11px;}.header-bar{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);color:white;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;}.footer{border-top:2px solid #1e293b;padding:8px 20px;display:flex;justify-content:space-between;font-size:8px;color:#64748b;position:fixed;bottom:0;left:0;right:0;background:white;}.print-float{position:fixed;top:12px;right:12px;z-index:999;background:#1e293b;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);}</style></head><body>
+            <button class="print-float no-print" onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+            <div class="header-bar"><div style="display:flex;align-items:center;gap:12px;"><img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:32px;object-fit:contain;" onerror="this.style.display='none'"><div><h1 style="margin:0;font-size:16px;">ALUFORCE</h1><div style="font-size:10px;opacity:0.8;">Cabos de Alumínio e Condutores Elétricos</div></div></div><div style="text-align:right;"><div style="font-size:13px;font-weight:700;">FICHA POR PRODUTO</div><div style="font-size:9px;opacity:0.7;">${products.length} produtos · Markup ${mk.toFixed(1)}% · ${_cpEstado} · ${dataHora}</div></div></div>
+            <div style="padding:16px 20px;">${fichasHTML}</div>
+            <div class="footer"><div><b>ALUFORCE</b> — Cabos de Alumínio e Condutores Elétricos</div><div>Gerado em ${dataHora} · <b>CONFIDENCIAL — USO INTERNO</b></div></div>
+            </body></html>`;
+            const pdfWin = window.open('', '_blank');
+            if (!pdfWin) { showNotification('Popup bloqueado! Permita popups para gerar o PDF.', 'error'); return; }
+            pdfWin.document.write(pdfHTML);
+            pdfWin.document.close();
+            showNotification('PDF fichas por produto gerado!', 'success');
         }
 
         // ============================================

@@ -437,6 +437,10 @@
     // ═══════════════════════════════════════════════════════
 
     function initSocket() {
+        if (typeof io === 'undefined') {
+            console.warn('[CHAT] Socket.IO não disponível — lib não carregada');
+            return;
+        }
         const authToken = getAuthToken();
         socket = io('/chat-teams', {
             transports: ['websocket'],

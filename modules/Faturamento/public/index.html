@@ -313,7 +313,20 @@
                     carregarNFes();
                     carregarEstatisticas();
                     alert('NF-e gerada com sucesso!');
-                } else { const e = await r.json(); alert(e.message || 'Erro ao gerar NF-e'); }
+                } else {
+                    const e = await r.json().catch(() => null);
+                    if (e?.errorCode === 'IBGE_PREFLIGHT' && e?.camposFaltantes?.length) {
+                        alert('Dados fiscais incompletos:\n\n• ' + e.camposFaltantes.join('\n• ') + '\n\nCorrija os cadastros e tente novamente.');
+                    } else if (e?.errorCode === 'RBAC_DENIED') {
+                        alert('Permissão insuficiente:\n\n' + (e?.message || 'Você não possui permissão para gerar NF-e.'));
+                    } else if (e?.errorCode === 'CERTIFICADO_INVALIDO') {
+                        alert('Certificado Digital:\n\n' + (e?.message || 'Certificado inválido ou expirado.'));
+                    } else if (e?.errorCode === 'NFE_DUPLICADA') {
+                        alert('NF-e Duplicada:\n\n' + (e?.message || 'Já existe NF-e para este pedido.'));
+                    } else {
+                        alert('Erro ao gerar NF-e: ' + (e?.message || e?.error || 'Erro desconhecido'));
+                    }
+                }
             } catch (e) { alert('Erro de conexão'); } finally {
                 gerarNFe._running = false;
                 if (btn) btn.disabled = false;
@@ -321,17 +334,38 @@
         }
 
         async function cancelarNFe(id) {
-            if (!confirm('Deseja realmente cancelar esta NF-e?')) return;
+            const motivo = prompt('Digite o motivo do cancelamento (mínimo 15 caracteres):');
+            if (!motivo) return;
+            if (motivo.trim().length < 15) {
+                alert('O motivo deve ter no mínimo 15 caracteres.');
+                return;
+            }
+            if (!confirm('Deseja realmente cancelar esta NF-e? Esta ação não pode ser desfeita.')) return;
             // SECURITY FIX: Idempotency guard - prevent double-click on fiscal cancellation
             if (cancelarNFe._running) return;
             cancelarNFe._running = true;
             const btn = event?.target?.closest?.('button');
             if (btn) btn.disabled = true;
             try {
-                await fetch(`/api/faturamento/nfes/${id}/cancelar`, { method: 'POST', credentials: 'include' });
-                carregarNFes();
-                carregarEstatisticas();
-            } catch (e) { alert('Erro ao cancelar'); } finally {
+                const resp = await fetch(`/api/faturamento/nfes/${id}/cancelar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ motivo })
+                });
+                const data = await resp.json().catch(() => null);
+                if (resp.ok) {
+                    alert(data?.message || 'NF-e cancelada com sucesso!');
+                    carregarNFes();
+                    carregarEstatisticas();
+                } else {
+                    const mensagemErro = data?.message || data?.error || 'Falha ao cancelar NF-e. Tente novamente.';
+                    alert('Erro ao cancelar NF-e: ' + mensagemErro);
+                }
+            } catch (e) {
+                const mensagemErro = e?.message || 'Falha na comunicação com o servidor.';
+                alert('Erro ao cancelar NF-e: ' + mensagemErro);
+            } finally {
                 cancelarNFe._running = false;
                 if (btn) btn.disabled = false;
             }
@@ -348,7 +382,20 @@
             try {
                 const r = await fetch(`/api/faturamento/nfes/${id}/enviar-sefaz`, { method: 'POST', credentials: 'include' });
                 if (r.ok) { alert('Enviado à SEFAZ com sucesso!'); carregarNFes(); }
-                else { alert('Erro ao enviar à SEFAZ'); }
+                else {
+                    const e = await r.json().catch(() => null);
+                    if (e?.errorCode === 'CERTIFICADO_INVALIDO') {
+                        alert('Certificado Digital:\n\n' + (e?.message || 'Certificado inválido ou expirado.'));
+                    } else if (e?.errorCode === 'CREDENCIAL_SEFAZ') {
+                        alert('Credenciais SEFAZ:\n\n' + (e?.message || 'Credenciais de acesso inválidas.'));
+                    } else if (e?.errorCode === 'SEFAZ_INDISPONIVEL') {
+                        alert('SEFAZ Indisponível:\n\n' + (e?.message || 'Serviço temporariamente indisponível.'));
+                    } else if (e?.errorCode === 'RBAC_DENIED') {
+                        alert('Permissão insuficiente:\n\n' + (e?.message || 'Você não possui permissão para enviar à SEFAZ.'));
+                    } else {
+                        alert('Erro ao enviar à SEFAZ: ' + (e?.message || e?.motivo || 'Erro desconhecido'));
+                    }
+                }
             } catch (e) { alert('Erro de conexão'); } finally {
                 enviarSEFAZ._running = false;
                 if (btn) btn.disabled = false;

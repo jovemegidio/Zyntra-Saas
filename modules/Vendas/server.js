@@ -6681,10 +6681,22 @@ const startServer = async () => {
 
     io.on('connection', (socket) => {
             try {
-                // Accept token via handshake.auth.token or Authorization header
+                // Accept token via handshake.auth.token, Authorization header, or httpOnly cookie
                 const tokenFromAuth = socket.handshake && socket.handshake.auth && socket.handshake.auth.token;
                 const authHeader = socket.handshake && socket.handshake.headers && (socket.handshake.headers.authorization || socket.handshake.headers.Authorization);
-                const token = tokenFromAuth || (typeof authHeader === 'string' ? (authHeader.split(' ')[1] || null) : null);
+                // Parse httpOnly cookies
+                let cookieToken = null;
+                const cookieHeader = socket.handshake && socket.handshake.headers && socket.handshake.headers.cookie;
+                if (cookieHeader) {
+                    const cookies = Object.fromEntries(
+                        cookieHeader.split(';').map(c => {
+                            const [k, ...v] = c.trim().split('=');
+                            return [k, v.join('=')];
+                        })
+                    );
+                    cookieToken = cookies['authToken'] || cookies['token'] || null;
+                }
+                const token = tokenFromAuth || (typeof authHeader === 'string' ? (authHeader.split(' ')[1] || null) : null) || cookieToken;
 
                 if (!token) {
                     socket.emit('chat:error', { message: 'Token ausente. Conexão negada.' });

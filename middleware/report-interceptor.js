@@ -165,13 +165,15 @@ function reportInterceptor() {
         // Interceptar res.send
         res.send = function (...args) {
             notificarSeRelatorio();
-            return originalSend(...args);
+            res.send = originalSend; // restore to avoid re-entry
+            return originalSend.apply(res, args);
         };
 
         // Interceptar res.end (para streams/pipes)
         res.end = function (...args) {
             notificarSeRelatorio();
-            return originalEnd(...args);
+            res.end = originalEnd; // restore to avoid re-entry
+            return originalEnd.apply(res, args);
         };
 
         next();

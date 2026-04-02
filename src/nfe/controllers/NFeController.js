@@ -525,11 +525,39 @@ class NFeController {
                 });
             }
 
+            // Verificar existência ANTES de atualizar (previne crash em registro inexistente)
+            const [nfes] = await this.pool.query(
+                'SELECT id, status FROM nfes WHERE id = ?',
+                [nfeId]
+            );
+
+            if (!nfes || nfes.length === 0) {
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Nota fiscal não encontrada'
+                });
+            }
+
+            if (nfes[0].status === 'cancelada') {
+                return res.status(400).json({
+                    sucesso: false,
+                    mensagem: 'Nota fiscal já está cancelada'
+                });
+            }
+
             // Atualizar status (transmissão SEFAZ será implementada em Sprint 3)
-            await this.pool.query(
+            const [result] = await this.pool.query(
                 'UPDATE nfes SET status = ?, justificativa_cancelamento = ? WHERE id = ?',
                 ['cancelada', justificativa, nfeId]
             );
+
+            if (result.affectedRows === 0) {
+                console.warn(`⚠️ [NFe] UPDATE retornou 0 linhas afetadas para NFe #${nfeId}`);
+                return res.status(404).json({
+                    sucesso: false,
+                    mensagem: 'Nota fiscal não encontrada para atualização'
+                });
+            }
 
             res.json({
                 sucesso: true,
@@ -542,7 +570,7 @@ class NFeController {
             
             res.status(500).json({
                 sucesso: false,
-                mensagem: 'Erro ao cancelar NFe',
+                mensagem: 'Erro ao cancelar nota fiscal. Tente novamente.',
                 erro: error.message
             });
         }

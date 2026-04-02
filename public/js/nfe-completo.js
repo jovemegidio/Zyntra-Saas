@@ -475,8 +475,13 @@ const NFeCompleto = {
     },
 
     async cancelarNFe(id) {
-        const motivo = prompt('Digite o motivo do cancelamento:');
+        const motivo = prompt('Digite o motivo do cancelamento (mínimo 15 caracteres):');
         if (!motivo) return;
+
+        if (motivo.trim().length < 15) {
+            this.mostrarNotificacao('warning', 'O motivo deve ter no mínimo 15 caracteres.');
+            return;
+        }
 
         if (!confirm('Tem certeza que deseja cancelar esta NF-e? Esta ação não pode ser desfeita.')) return;
 
@@ -488,15 +493,19 @@ const NFeCompleto = {
                 body: JSON.stringify({ motivo })
             });
 
+            const data = await resp.json().catch(() => null);
+
             if (resp.ok) {
-                this.mostrarNotificacao('success', 'NF-e cancelada com sucesso');
+                this.mostrarNotificacao('success', data?.message || 'NF-e cancelada com sucesso');
                 await this.carregarNotas();
             } else {
-                this.mostrarNotificacao('error', 'Erro ao cancelar NF-e');
+                const mensagemErro = data?.message || data?.mensagem || data?.error || 'Falha ao cancelar NF-e. Tente novamente.';
+                this.mostrarNotificacao('error', `Erro ao cancelar NF-e: ${mensagemErro}`);
             }
         } catch (error) {
             console.error('Erro ao cancelar:', error);
-            this.mostrarNotificacao('error', 'Erro ao cancelar NF-e');
+            const mensagemErro = error?.message || 'Falha na comunicação com o servidor.';
+            this.mostrarNotificacao('error', `Erro ao cancelar NF-e: ${mensagemErro}`);
         }
     },
 

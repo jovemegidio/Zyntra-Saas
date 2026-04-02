@@ -72,8 +72,9 @@ module.exports = (pool, authenticateToken) => {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou gerar NF-e sem permissão`);
                 return res.status(403).json({
                     success: false,
-                    error: 'Acesso negado',
-                    message: 'Apenas usuários com permissão de faturamento podem gerar NF-e.'
+                    error: 'Permissão insuficiente',
+                    message: `Seu perfil (${userRole || 'não definido'}) não possui permissão para gerar NF-e. Perfis autorizados: ${rolesPermitidas.join(', ')}. Solicite ao administrador a alteração do seu cargo.`,
+                    errorCode: 'RBAC_DENIED'
                 });
             }
 
@@ -218,6 +219,39 @@ module.exports = (pool, authenticateToken) => {
                 cep: pedido.cliente_cep || '',
                 email: pedido.cliente_email || ''
             };
+
+            // HOTFIX: PRE-FLIGHT — Validar dados fiscais obrigatórios (IBGE, UF, CEP) antes de prosseguir
+            const camposFaltantes = [];
+            if (!emitente.codigoMunicipio || String(emitente.codigoMunicipio).replace(/\D/g, '').length !== 7) {
+                camposFaltantes.push('Código IBGE do município do emitente (deve ter 7 dígitos)');
+            }
+            if (!emitente.uf || emitente.uf.length !== 2) {
+                camposFaltantes.push('UF do emitente');
+            }
+            if (!emitente.cnpj || emitente.cnpj.replace(/\D/g, '').length !== 14) {
+                camposFaltantes.push('CNPJ do emitente');
+            }
+            if (!emitente.cep || emitente.cep.replace(/\D/g, '').length !== 8) {
+                camposFaltantes.push('CEP do emitente');
+            }
+            if (!destinatario.codigoMunicipio || String(destinatario.codigoMunicipio).replace(/\D/g, '').length !== 7) {
+                camposFaltantes.push(`Código IBGE do município do cliente "${destinatario.nome}". Atualize o cadastro do cliente.`);
+            }
+            if (!destinatario.uf || destinatario.uf.length !== 2) {
+                camposFaltantes.push(`UF do cliente "${destinatario.nome}"`);
+            }
+            if (!destinatario.cep || destinatario.cep.replace(/\D/g, '').length !== 8) {
+                camposFaltantes.push(`CEP do cliente "${destinatario.nome}"`);
+            }
+            if (camposFaltantes.length > 0) {
+                await connection.rollback();
+                return res.status(400).json({
+                    success: false,
+                    errorCode: 'IBGE_PREFLIGHT',
+                    message: 'Dados fiscais incompletos. Corrija antes de gerar a NF-e.',
+                    camposFaltantes
+                });
+            }
 
             // Calcular tributos de cada item usando CalculoTributosService
             const itensCalculados = itens.map((item, index) => {
@@ -499,8 +533,23 @@ module.exports = (pool, authenticateToken) => {
         } catch (error) {
             await connection.rollback();
             console.error('[FATURAMENTO] Erro ao gerar NF-e:', error);
-            res.status(500).json({
+            // HOTFIX: Diferenciar causa raiz para mensagens granulares
+            const msg = (error.message || '').toLowerCase();
+            let statusCode = 500;
+            let errorCode = 'GERAR_NFE_ERRO';
+            if (msg.includes('certificado') || msg.includes('certificate') || msg.includes('pfx')) {
+                statusCode = 401;
+                errorCode = 'CERTIFICADO_INVALIDO';
+            } else if (msg.includes('estoque')) {
+                statusCode = 400;
+                errorCode = 'ESTOQUE_INSUFICIENTE';
+            } else if (msg.includes('já existe')) {
+                statusCode = 409;
+                errorCode = 'NFE_DUPLICADA';
+            }
+            res.status(statusCode).json({
                 success: false,
+                errorCode,
                 message: error.message
             });
         } finally {
@@ -859,8 +908,9 @@ module.exports = (pool, authenticateToken) => {
                 console.log(`[FATURAMENTO-RBAC] Usuário ${usuario_id} (${userRole}) tentou enviar NFe ${id} à SEFAZ sem permissão`);
                 return res.status(403).json({
                     success: false,
-                    error: 'Acesso negado',
-                    message: 'Apenas usuários com permissão fiscal podem enviar NF-e à SEFAZ.'
+                    error: 'Permissão insuficiente',
+                    message: `Seu perfil (${userRole || 'não definido'}) não possui permissão para enviar NF-e à SEFAZ. Perfis autorizados: ${rolesPermitidas.join(', ')}. Solicite ao administrador a alteração do seu cargo.`,
+                    errorCode: 'RBAC_DENIED'
                 });
             }
 
@@ -954,6 +1004,29 @@ module.exports = (pool, authenticateToken) => {
 
         } catch (error) {
             console.error('[FATURAMENTO] Erro ao enviar NFe:', error);
+            // HOTFIX: Diferenciar causa raiz — certificado/credencial vs erro genérico
+            const msg = (error.message || '').toLowerCase();
+            if (msg.includes('certificado') || msg.includes('certificate') || msg.includes('pfx') || msg.includes('pkcs12')) {
+                return res.status(401).json({
+                    success: false,
+                    errorCode: 'CERTIFICADO_INVALIDO',
+                    message: 'Certificado digital inválido, expirado ou não encontrado. Verifique o arquivo .pfx e a senha nas configurações do sistema.'
+                });
+            }
+            if (msg.includes('401') || msg.includes('unauthorized') || msg.includes('credencial') || msg.includes('credential')) {
+                return res.status(401).json({
+                    success: false,
+                    errorCode: 'CREDENCIAL_SEFAZ',
+                    message: 'Credenciais de acesso à SEFAZ inválidas. Verifique o certificado digital e as configurações de integração.'
+                });
+            }
+            if (msg.includes('econnrefused') || msg.includes('timeout') || msg.includes('enotfound') || msg.includes('socket')) {
+                return res.status(502).json({
+                    success: false,
+                    errorCode: 'SEFAZ_INDISPONIVEL',
+                    message: 'Não foi possível conectar à SEFAZ. O serviço pode estar temporariamente indisponível. Tente novamente em alguns minutos.'
+                });
+            }
             res.status(500).json({ success: false, message: error.message });
         } finally {
             connection.release();
@@ -1824,6 +1897,79 @@ module.exports = (pool, authenticateToken) => {
         } catch (error) {
             console.error('[PIX] Erro no dashboard:', error);
             res.status(500).json({ success: false, message: error.message });
+        }
+    });
+
+    // ============================================================
+    // WEBHOOK NFe — Recebe callbacks de provedores externos (SEFAZ/Focus NFe)
+    // Resiliência: não quebra se o registro não existir no banco
+    // ============================================================
+
+    router.post('/nfe/webhook/status', async (req, res) => {
+        try {
+            const { chave_acesso, numero_protocolo, status, motivo, xml_retorno, referencia_id } = req.body;
+
+            // Identificar o registro: por chave_acesso (44 dígitos) ou referencia_id
+            const identificador = chave_acesso || referencia_id;
+            if (!identificador) {
+                console.warn('[NFe-WEBHOOK] ⚠️ Evento recebido sem identificador (chave_acesso ou referencia_id). Payload descartado.');
+                // Retorna 200 para evitar re-envios infinitos do provedor
+                return res.status(200).json({ received: true, processed: false, reason: 'Identificador ausente' });
+            }
+
+            // RESILIÊNCIA: Verificar existência ANTES de atualizar (previne "Record not found")
+            let nfeQuery, nfeParams;
+            if (chave_acesso && /^\d{44}$/.test(chave_acesso)) {
+                nfeQuery = 'SELECT id, status, numero_nfe FROM nfe WHERE chave_acesso = ?';
+                nfeParams = [chave_acesso];
+            } else {
+                nfeQuery = 'SELECT id, status, numero_nfe FROM nfe WHERE id = ?';
+                nfeParams = [referencia_id];
+            }
+
+            const [nfes] = await pool.query(nfeQuery, nfeParams);
+
+            if (nfes.length === 0) {
+                // Registro não encontrado — Race condition ou mapeamento incorreto
+                console.warn(`[NFe-WEBHOOK] ⚠️ Registro não encontrado para webhook. Identificador: ${identificador}. Status recebido: ${status || 'N/A'}`);
+                // Retorna 200 OK para que o provedor pare de re-enviar
+                return res.status(200).json({ received: true, processed: false, reason: 'Registro não encontrado' });
+            }
+
+            const nfe = nfes[0];
+
+            // Mapear status do provedor para status interno
+            const statusMap = {
+                'autorizada': 'autorizada',
+                'aprovada': 'autorizada',
+                'cancelada': 'cancelada',
+                'rejeitada': 'rejeitada',
+                'denegada': 'rejeitada',
+                'processando': 'processando'
+            };
+
+            const statusInterno = statusMap[(status || '').toLowerCase()] || status;
+
+            if (statusInterno) {
+                // updateMany pattern: não quebra se 0 rows afetadas
+                const [result] = await pool.query(`
+                    UPDATE nfe
+                    SET status = ?,
+                        numero_protocolo = COALESCE(?, numero_protocolo),
+                        motivo_rejeicao = COALESCE(?, motivo_rejeicao),
+                        data_autorizacao = CASE WHEN ? IN ('autorizada') THEN NOW() ELSE data_autorizacao END,
+                        xml_retorno_sefaz = COALESCE(?, xml_retorno_sefaz)
+                    WHERE id = ?
+                `, [statusInterno, numero_protocolo, motivo, statusInterno, xml_retorno, nfe.id]);
+
+                console.log(`[NFe-WEBHOOK] ✅ NFe #${nfe.numero_nfe || nfe.id} atualizada: ${nfe.status} → ${statusInterno} (${result.affectedRows} linha(s) afetada(s))`);
+            }
+
+            res.status(200).json({ received: true, processed: true, nfe_id: nfe.id });
+        } catch (error) {
+            console.error('[NFe-WEBHOOK] ❌ Erro ao processar webhook:', error);
+            // Ainda retorna 200 para evitar retries infinitos do provedor
+            res.status(200).json({ received: true, processed: false, reason: 'Erro interno' });
         }
     });
 

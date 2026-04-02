@@ -577,10 +577,13 @@
         }
 
         /* ========================================
-           TABS (removido - kanban ocupa todo espaço)
+           TABS - View Mode Toggle
            ======================================== */
         .tabs-bar {
-            display: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0 8px;
         }
 
         .tab {
@@ -5793,43 +5796,24 @@
                     </div>
                 </div>
                 <div class="header-right">
+                    <div class="tabs-bar">
+                        <button class="tab active" data-view="kanban" onclick="switchView('kanban', this)" title="Kanban">
+                            <i class="fas fa-columns"></i> Kanban
+                        </button>
+                        <button class="tab" data-view="lista" onclick="switchView('lista', this)" title="Lista">
+                            <i class="fas fa-list"></i> Lista
+                        </button>
+                        <button class="tab" data-view="pipeline" onclick="switchView('pipeline', this)" title="Pipeline">
+                            <i class="fas fa-stream"></i> Pipeline
+                        </button>
+                    </div>
                     <button class="header-btn btn-config-etapas" title="Configurar Etapas do Kanban"
                         onclick="abrirModalEtapas()">
                         <i class="fas fa-cog"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count">3</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-tabs">
-                                <button class="notif-tab active"
-                                    onclick="filtrarNotificacoes('todas', this)">Todas</button>
-                                <button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não
-                                    lidas</button>
-                                <button class="notif-tab"
-                                    onclick="filtrarNotificacoes('importantes', this)">Importantes</button>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <!-- Notificações serão inseridas via JavaScript -->
-                            </div>
-                            <div class="notification-footer">
-                                <a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="header-btn" title="Atualizar" onclick="carregarDadosKanban()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
@@ -5839,8 +5823,6 @@
                     </div>
                 </div>
             </header>
-
-            <!-- Tabs removidas conforme solicitação -->
 
             <!-- Barra de Ações Rápidas -->
             <div class="quick-actions-bar"
@@ -5977,6 +5959,31 @@
 
                 </div>
             </div>
+
+            <!-- Lista View -->
+            <div id="list-view" style="display:none;flex:1;overflow:auto;padding:0;">
+                <table id="list-table" style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="background:#f8fafc;position:sticky;top:0;z-index:2;">
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Nº</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Cliente</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Status</th>
+                            <th style="padding:10px 14px;text-align:right;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Valor</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Vendedor</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Pagamento</th>
+                            <th style="padding:10px 14px;text-align:left;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Origem</th>
+                            <th style="padding:10px 14px;text-align:center;font-weight:700;color:#64748b;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="list-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- Pipeline View -->
+            <div id="pipeline-view" style="display:none;flex:1;overflow:auto;padding:16px 20px;">
+                <div id="pipeline-content"></div>
+            </div>
+
         </main>
     </div>
 
@@ -10584,6 +10591,10 @@
         }
 
         function renderKanban() {
+            // Also refresh list/pipeline if they're the active view
+            if (_currentView === 'lista') renderListView();
+            if (_currentView === 'pipeline') renderPipelineView();
+
             // Orçamento
             const colOrcamento = document.getElementById('col-orcamento');
             if (!colOrcamento) {
@@ -10631,6 +10642,108 @@
 
             // Atualizar contadores
             updateCounters();
+        }
+
+        // === VIEW SWITCHING (Kanban / Lista / Pipeline) ===
+        let _currentView = 'kanban';
+
+        function switchView(view, btnEl) {
+            _currentView = view;
+            // Toggle active tab
+            document.querySelectorAll('.tabs-bar .tab').forEach(t => t.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+
+            const kanbanEl = document.querySelector('.kanban-container');
+            const listEl = document.getElementById('list-view');
+            const pipeEl = document.getElementById('pipeline-view');
+
+            if (kanbanEl) kanbanEl.style.display = view === 'kanban' ? '' : 'none';
+            if (listEl) listEl.style.display = view === 'lista' ? '' : 'none';
+            if (pipeEl) pipeEl.style.display = view === 'pipeline' ? '' : 'none';
+
+            if (view === 'lista') renderListView();
+            if (view === 'pipeline') renderPipelineView();
+        }
+
+        function renderListView() {
+            const tbody = document.getElementById('list-tbody');
+            if (!tbody) return;
+            const statusLabels = { orcamento: 'Orçamento', analise: 'Em Análise', aprovado: 'Aprovado', faturar: 'A Faturar', faturado: 'Faturado', recibo: 'Recibo' };
+            const statusColors = { orcamento: '#f59e0b', analise: '#3b82f6', aprovado: '#10b981', faturar: '#8b5cf6', faturado: '#059669', recibo: '#6b7280' };
+            let allItems = [];
+            Object.keys(dadosVendas).forEach(col => {
+                (dadosVendas[col] || []).forEach(item => {
+                    allItems.push({ ...item, _coluna: col });
+                });
+            });
+            // Apply search filter
+            const search = (document.getElementById('search-input') || {}).value || '';
+            if (search) {
+                const s = search.toLowerCase();
+                allItems = allItems.filter(it => (it.cliente || '').toLowerCase().includes(s) || String(it.id).includes(s) || (it.vendedor || '').toLowerCase().includes(s));
+            }
+            let html = '';
+            allItems.forEach((it, i) => {
+                const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+                const col = it._coluna;
+                const valorFmt = (it.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                html += `<tr style="background:${bg};cursor:pointer;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bg}'">
+                    <td style="padding:8px 14px;font-weight:600;color:#7c3aed;">#${it.numero_pedido || it.id}</td>
+                    <td style="padding:8px 14px;max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHTML(it.cliente || '')}</td>
+                    <td style="padding:8px 14px;"><span style="background:${statusColors[col] || '#6b7280'}15;color:${statusColors[col] || '#6b7280'};padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;">${statusLabels[col] || col}</span></td>
+                    <td style="padding:8px 14px;text-align:right;font-family:monospace;font-weight:600;">R$ ${valorFmt}</td>
+                    <td style="padding:8px 14px;color:#64748b;font-size:12px;">${escaparHTML(it.vendedor || '-')}</td>
+                    <td style="padding:8px 14px;font-size:12px;color:#64748b;">${escaparHTML(it.parcelas || 'a vista')}</td>
+                    <td style="padding:8px 14px;font-size:12px;color:#64748b;">${it.origem || 'Omie'}</td>
+                    <td style="padding:8px 14px;text-align:center;"><button onclick="abrirModalEditar(${it.id})" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#475569;" title="Editar"><i class="fas fa-edit"></i></button></td>
+                </tr>`;
+            });
+            if (!allItems.length) html = '<tr><td colspan="8" style="padding:40px;text-align:center;color:#9ca3af;"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:8px;display:block;"></i>Nenhum pedido encontrado</td></tr>';
+            tbody.innerHTML = html;
+        }
+
+        function renderPipelineView() {
+            const container = document.getElementById('pipeline-content');
+            if (!container) return;
+            const statusLabels = { orcamento: 'Orçamento', analise: 'Em Análise', aprovado: 'Aprovado', faturar: 'A Faturar', faturado: 'Faturado', recibo: 'Recibo' };
+            const statusColors = { orcamento: '#f59e0b', analise: '#3b82f6', aprovado: '#10b981', faturar: '#8b5cf6', faturado: '#059669', recibo: '#6b7280' };
+            const statusIcons = { orcamento: 'fa-file-alt', analise: 'fa-search', aprovado: 'fa-check-circle', faturar: 'fa-file-invoice', faturado: 'fa-check-double', recibo: 'fa-receipt' };
+            let html = '';
+            const stages = ['orcamento', 'analise', 'aprovado', 'faturar', 'faturado', 'recibo'];
+            stages.forEach(stage => {
+                const items = dadosVendas[stage] || [];
+                const total = items.reduce((s, it) => s + (parseFloat(it.valor) || 0), 0);
+                const totalFmt = total.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                const color = statusColors[stage];
+                html += `<div style="margin-bottom:16px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+                    <div style="background:${color};color:white;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            <i class="fas ${statusIcons[stage]}" style="font-size:16px;"></i>
+                            <span style="font-weight:700;font-size:14px;">${statusLabels[stage]}</span>
+                            <span style="background:rgba(255,255,255,0.25);padding:2px 10px;border-radius:12px;font-size:12px;font-weight:600;">${items.length}</span>
+                        </div>
+                        <div style="font-weight:700;font-size:14px;">R$ ${totalFmt}</div>
+                    </div>`;
+                if (items.length > 0) {
+                    html += '<div style="padding:0;">';
+                    items.forEach((it, i) => {
+                        const valorFmt = (it.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        const bg = i % 2 === 0 ? '#fff' : '#f8fafc';
+                        html += `<div style="display:flex;align-items:center;padding:10px 16px;background:${bg};border-bottom:1px solid #f1f5f9;cursor:pointer;gap:16px;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bg}'">
+                            <span style="font-weight:600;color:#7c3aed;min-width:70px;">#${it.numero_pedido || it.id}</span>
+                            <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escaparHTML(it.cliente || '')}</span>
+                            <span style="color:#64748b;font-size:12px;min-width:100px;">${escaparHTML(it.vendedor || '-')}</span>
+                            <span style="font-family:monospace;font-weight:600;min-width:110px;text-align:right;">R$ ${valorFmt}</span>
+                            <button onclick="abrirModalEditar(${it.id})" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 10px;cursor:pointer;font-size:11px;color:#475569;" title="Editar"><i class="fas fa-edit"></i></button>
+                        </div>`;
+                    });
+                    html += '</div>';
+                } else {
+                    html += '<div style="padding:24px;text-align:center;color:#9ca3af;font-size:13px;"><i class="fas fa-inbox"></i> Nenhum pedido nesta etapa</div>';
+                }
+                html += '</div>';
+            });
+            container.innerHTML = html;
         }
 
         // Função para atualizar apenas um card específico no Kanban

@@ -375,12 +375,12 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="contas-receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
-                <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
-                <a href="fluxo-caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="/" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="/contas-pagar" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="/contas-receber" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="/bancos" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
+                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="/relatorios" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a>
@@ -483,7 +483,8 @@
                     <div class="filter-group">
                         <label><i class="fas fa-calendar"></i> Período</label>
                         <select class="filter-input" id="filtro-período" onchange="filtrarContas()">
-                            <option value="mes" selected>Este Mês</option>
+                            <option value="todas" selected>Todas</option>
+                            <option value="mes">Este Mês</option>
                             <option value="mes-anterior">Mês Anterior</option>
                             <option value="proximos7">Próximos 7 dias</option>
                             <option value="proximos30">Próximos 30 dias</option>
@@ -509,7 +510,6 @@
                             <option value="2026-10">Outubro/2026</option>
                             <option value="2026-11">Novembro/2026</option>
                             <option value="2026-12">Dezembro/2026</option>
-                            <option value="todas">Todas</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -1113,7 +1113,12 @@
             } catch (error) { console.error('Erro ao carregar usuário:', error); }
         }
 
-        async function init() { await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias()]); }
+        async function init() {
+            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias()]);
+            // Abrir modal automaticamente se URL tiver ?acao=nova
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('acao') === 'nova') { abrirModal(); }
+        }
 
         async function carregarResumo() {
             try {
@@ -1340,7 +1345,7 @@
                 ações += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
 
                 if (currentView === 'completa') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.número_documento||'-')+'</td><td>'+(c.número_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+ações+'</tr>';
                 }
                 if (currentView === 'impostos') {
                     return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+ações+'</tr>';
@@ -1438,7 +1443,7 @@
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
                 document.getElementById('observacoes').value = c.observacoes || '';
-                document.getElementById('número-documento').value = c.número_documento || '';
+                document.getElementById('número-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
                 document.getElementById('cr-emissão').value = (c.data_emissao||'').split('T')[0];
@@ -1505,7 +1510,7 @@
             var statusVal = document.getElementById('cr-status').value;
             var pagoNoDia = document.getElementById('cr-pago-no-dia').value;
             var aceitaTroca = document.getElementById('cr-aceita-troca').checked;
-            var dados = { descrição: document.getElementById('descrição').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, número_documento: document.getElementById('número-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
+            var dados = { descricao: document.getElementById('descrição').value, cliente_id: document.getElementById('cliente-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, vencimento: document.getElementById('conta-vencimento').value, forma_recebimento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('número-documento').value, num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1 };
             // [DEV SPEC 2.4] Novos campos
             if (statusVal) dados.status = statusVal;
             if (pagoNoDia) dados.pago_no_dia = pagoNoDia;
@@ -1593,7 +1598,7 @@
             if (portador) filtradas = filtradas.filter(function(c){ return c.portador === portador; });
             if (situacao) filtradas = filtradas.filter(function(c){ return (c.situacao||'').toUpperCase() === situacao.toUpperCase(); });
             if (clienteNome) filtradas = filtradas.filter(function(c){ return c.cliente_nome === clienteNome; });
-            if (pesquisa) filtradas = filtradas.filter(function(c){ return (c.descricao||'').toLowerCase().indexOf(pesquisa)>-1||(c.cliente_nome||'').toLowerCase().indexOf(pesquisa)>-1||(c.valor+'').indexOf(pesquisa)>-1||(c.número_documento||'').toLowerCase().indexOf(pesquisa)>-1||(c.nota_fiscal||'').toLowerCase().indexOf(pesquisa)>-1||(c.portador||'').toLowerCase().indexOf(pesquisa)>-1||(c.cnpj_cpf||c.cnpj_cliente||'').indexOf(pesquisa)>-1||(c.vendedor||'').toLowerCase().indexOf(pesquisa)>-1; });
+            if (pesquisa) filtradas = filtradas.filter(function(c){ return (c.descricao||'').toLowerCase().indexOf(pesquisa)>-1||(c.cliente_nome||'').toLowerCase().indexOf(pesquisa)>-1||(c.valor+'').indexOf(pesquisa)>-1||(c.numero_documento||'').toLowerCase().indexOf(pesquisa)>-1||(c.nota_fiscal||'').toLowerCase().indexOf(pesquisa)>-1||(c.portador||'').toLowerCase().indexOf(pesquisa)>-1||(c.cnpj_cpf||c.cnpj_cliente||'').indexOf(pesquisa)>-1||(c.vendedor||'').toLowerCase().indexOf(pesquisa)>-1; });
             // Sort by vencimento ascending (vencidas first within vencidas filter, otherwise by date)
             filtradas.sort(function(a, b) {
                 var da = new Date(String(a.data_vencimento||a.vencimento||'').slice(0,10)+'T00:00:00').getTime();
@@ -1620,7 +1625,7 @@
         var pesquisaTimeout;
         function pesquisarGlobal() { clearTimeout(pesquisaTimeout); var i=document.getElementById('pesquisa-global'); i.parentElement.querySelector('.btn-clear-search').style.display=i.value?'flex':'none'; pesquisaTimeout=setTimeout(function(){filtrarContas();},300); }
         function limparPesquisa() { document.getElementById('pesquisa-global').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-período').value='mes'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situação'))document.getElementById('filtro-situação').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-período').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situação'))document.getElementById('filtro-situação').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
         async function visualizarConta(id) {
@@ -1678,7 +1683,7 @@
                 '"'+csvSafe(c.empresa||'')+'"','"'+csvSafe(c.nota_fiscal||'')+'"','"'+csvSafe(c.parcela_info||'')+'"',
                 '"'+csvSafe(c.cliente_nome||'').replace(/"/g,'""')+'"','"'+csvSafe(c.cnpj_cpf||c.cnpj_cliente||'')+'"',
                 fmtData(c.data_emissao),fmtData(c.data_vencimento||c.vencimento),
-                csvSafe(c.categoria||''),csvSafe(c.centro_receita||''),csvSafe(c.número_documento||''),csvSafe(c.número_boleto||''),
+                csvSafe(c.categoria||''),csvSafe(c.centro_receita||''),csvSafe(c.numero_documento||''),csvSafe(c.numero_boleto||''),
                 csvSafe(c.vendedor||''),csvSafe(c.projeto||''),
                 '"'+(parseFloat(c.valor_total||c.valor)||0).toFixed(2).replace('.',',')+'"',
                 '"'+(parseFloat(c.valor_pis)||0).toFixed(2).replace('.',',')+'"',

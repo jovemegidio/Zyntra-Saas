@@ -598,4 +598,133 @@ router.get('/:material_id', async (req, res) => {
     }
 });
 
+// ============ MATERIAIS PCP - GESTÃO ============
+router.get('/materiais-pcp', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { busca, search, tipo, ativo, page = 1, limit = 50 } = req.query;
+        const searchTerm = busca || search || '';
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        let where = '1=1';
+        const params = [];
+
+        if (searchTerm) {
+            where += ' AND (m.codigo_material LIKE ? OR m.descricao LIKE ?)';
+            params.push(`%${searchTerm}%`, `%${searchTerm}%`);
+        }
+        if (tipo && tipo !== 'todos') {
+            if (tipo === 'sem_tipo') {
+                where += ' AND (m.tipo IS NULL OR m.tipo = "")';
+            } else {
+                where += ' AND m.tipo = ?';
+                params.push(tipo);
+            }
+        }
+        if (ativo !== undefined && ativo !== '') {
+            where += ' AND m.ativo = ?';
+            params.push(parseInt(ativo));
+        }
+
+        const [countResult] = await db.query(`SELECT COUNT(*) as total FROM materiais m WHERE ${where}`, params);
+        const total = countResult[0].total;
+
+        const [materiais] = await db.query(`
+            SELECT m.id, m.codigo_material, m.descricao, m.unidade_medida, m.tipo, m.ativo,
+                   m.custo_unitario, m.quantidade_estoque, m.estoque_minimo, m.ncm
+            FROM materiais m WHERE ${where}
+            ORDER BY m.ativo DESC, m.descricao ASC
+            LIMIT ? OFFSET ?
+        `, [...params, parseInt(limit), offset]);
+
+        const [tipos] = await db.query(`
+            SELECT COALESCE(tipo, 'sem_tipo') as tipo, COUNT(*) as count
+            FROM materiais GROUP BY COALESCE(tipo, 'sem_tipo') ORDER BY count DESC
+        `);
+
+        const [stats] = await db.query(`
+            SELECT COUNT(*) as total,
+                   SUM(CASE WHEN ativo = 1 THEN 1 ELSE 0 END) as ativos,
+                   SUM(CASE WHEN ativo = 0 THEN 1 ELSE 0 END) as inativos
+            FROM materiais
+        `);
+
+        res.json({
+            materiais,
+            tipos,
+            stats: stats[0],
+            paginacao: { page: parseInt(page), limit: parseInt(limit), total, totalPages: Math.ceil(total / parseInt(limit)) }
+        });
+    } catch (err) {
+        console.error('[COMPRAS] Erro ao listar materiais PCP:', err);
+        res.status(500).json({ message: 'Erro ao listar materiais PCP' });
+    }
+});
+
+router.put('/materiais-pcp/:id', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { id } = req.params;
+        const { descricao, unidade_medida, tipo, ativo, custo_unitario, quantidade_estoque, estoque_minimo, ncm } = req.body;
+        const fields = [];
+        const values = [];
+        if (descricao !== undefined) { fields.push('descricao = ?'); values.push(descricao); }
+        if (unidade_medida !== undefined) { fields.push('unidade_medida = ?'); values.push(unidade_medida); }
+        if (tipo !== undefined) { fields.push('tipo = ?'); values.push(tipo); }
+        if (ativo !== undefined) { fields.push('ativo = ?'); values.push(parseInt(ativo)); }
+        if (custo_unitario !== undefined) { fields.push('custo_unitario = ?'); values.push(parseFloat(custo_unitario)); }
+        if (quantidade_estoque !== undefined) { fields.push('quantidade_estoque = ?'); values.push(parseFloat(quantidade_estoque)); }
+        if (estoque_minimo !== undefined) { fields.push('estoque_minimo = ?'); values.push(parseFloat(estoque_minimo)); }
+        if (ncm !== undefined) { fields.push('ncm = ?'); values.push(ncm); }
+        if (!fields.length) return res.status(400).json({ message: 'Nenhum campo para atualizar' });
+        values.push(id);
+        await db.query(`UPDATE materiais SET ${fields.join(', ')} WHERE id = ?`, values);
+        res.json({ success: true, message: 'Material atualizado' });
+    } catch (err) {
+        console.error('[COMPRAS] Erro ao atualizar material PCP:', err);
+        res.status(500).json({ message: 'Erro ao atualizar material' });
+    }
+});
+
+router.post('/materiais-pcp/bulk-toggle', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { ids, ativo } = req.body;
+        if (!ids || !ids.length) return res.status(400).json({ message: 'IDs obrigatórios' });
+        await db.query(`UPDATE materiais SET ativo = ? WHERE id IN (?)`, [parseInt(ativo), ids]);
+        res.json({ success: true, message: `${ids.length} materiais atualizados` });
+    } catch (err) {
+        console.error('[COMPRAS] Erro bulk-toggle:', err);
+        res.status(500).json({ message: 'Erro ao atualizar materiais' });
+    }
+});
+
+router.post('/materiais-pcp/bulk-delete', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { ids } = req.body;
+        if (!ids || !ids.length) return res.status(400).json({ message: 'IDs obrigatórios' });
+        await db.query(`DELETE FROM materiais WHERE id IN (?)`, [ids]);
+        res.json({ success: true, message: `${ids.length} materiais excluídos` });
+    } catch (err) {
+        console.error('[COMPRAS] Erro bulk-delete:', err);
+        res.status(500).json({ message: 'Erro ao excluir materiais' });
+    }
+});
+
+router.post('/materiais-pcp/criar', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { codigo_material, descricao, unidade_medida, tipo, custo_unitario, quantidade_estoque, estoque_minimo, ncm } = req.body;
+        if (!descricao) return res.status(400).json({ message: 'Descrição é obrigatória' });
+        const [result] = await db.query(
+            `INSERT INTO materiais (codigo_material, descricao, unidade_medida, tipo, custo_unitario, quantidade_estoque, estoque_minimo, ncm, ativo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`,
+            [codigo_material || null, descricao, unidade_medida || 'UN', tipo || null, parseFloat(custo_unitario) || 0, parseFloat(quantidade_estoque) || 0, parseFloat(estoque_minimo) || 0, ncm || null]
+        );
+        res.json({ success: true, id: result.insertId, message: 'Material criado' });
+    } catch (err) {
+        console.error('[COMPRAS] Erro ao criar material:', err);
+        res.status(500).json({ message: 'Erro ao criar material' });
+    }
+});
+
 module.exports = router;
