@@ -5813,7 +5813,7 @@
             <div class="vendas-toolbar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;flex-wrap:nowrap;">
                 <!-- Ações -->
                 <button onclick="abrirModalNovoPedido()" style="display:flex;align-items:center;gap:6px;padding:8px 16px;background:linear-gradient(135deg,#10b981,#059669);color:white;border:none;border-radius:7px;font-weight:600;font-size:13px;cursor:pointer;box-shadow:0 2px 6px rgba(16,185,129,0.25);white-space:nowrap;">
-                    <i class="fas fa-plus" style="font-size:11px;"></i> Novo Pedido
+                    <i class="fas fa-plus" style="font-size:11px;"></i> Novo Orçamento de Venda
                 </button>
                 <button onclick="abrirModalNovoCliente()" style="display:flex;align-items:center;gap:6px;padding:8px 14px;background:white;color:#475569;border:1px solid #e2e8f0;border-radius:7px;font-weight:500;font-size:13px;cursor:pointer;white-space:nowrap;">
                     <i class="fas fa-user-plus" style="font-size:11px;"></i> Novo Cliente
@@ -6071,7 +6071,7 @@
                         </div>
                     </div>
 
-                    <!-- Linha de Vendedor, Parcelas, Cenário -->
+                    <!-- Linha Vendedor + Tipo de Venda + Condições de Pagamento -->
                     <div class="info-row">
                         <div class="info-field">
                             <label>Vendedor</label>
@@ -6079,38 +6079,48 @@
                                 style="background: #f9fafb; cursor: default;">
                         </div>
                         <div class="info-field">
-                            <label>Número de Parcelas</label>
-                            <input type="text" id="edit-parcelas" placeholder="Ex: 30" maxlength="3"
-                                oninput="validarParcelas(this)">
+                            <label>Tipo de Venda</label>
+                            <div style="display:flex;gap:6px;">
+                                <button type="button" id="edit-btn-consumidor" onclick="setTipoVendaEdit('consumidor')" style="flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;">Consumidor Final</button>
+                                <button type="button" id="edit-btn-revenda" onclick="setTipoVendaEdit('revenda')" style="flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;">Revenda</button>
+                            </div>
+                            <input type="hidden" id="edit-tipo-venda" value="consumidor">
                         </div>
-                        <div class="info-field" style="min-width: 0;">
-                            <label>Cenário Fiscal</label>
-                            <select id="edit-cenario-fiscal"
-                                style="width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;">
-                                <option value="monitoramento_automatico">Monitoramento Automático de Impostos -
-                                    Indústria, Comércio (Varejista), Comércio (Atacadista), Presta...</option>
-                                <option value="padrao">Padrão - Indústria, Comércio (Varejista), Comércio (Atacadista),
-                                    Prestador de Serviço, Construção Civil</option>
+                        <div class="info-field">
+                            <label>Condições de Pagamento</label>
+                            <select id="edit-condicao-pagamento-header" onchange="syncCondicaoPagamento('edit')" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="a_vista">À Vista</option>
+                                <option value="30">30 dias</option>
+                                <option value="30_60">30/60 dias</option>
+                                <option value="30_60_90">30/60/90 dias</option>
+                                <option value="28_35_42_49">28/35/42/49 dias</option>
+                                <option value="personalizado">Personalizado</option>
                             </select>
                         </div>
-                        <button type="button" class="btn-atualizar-impostos" style="white-space: nowrap;"
-                            onclick="atualizarImpostosDosItens()">
-                            <i class="fas fa-sync-alt"></i> Atualizar os impostos dos itens
-                        </button>
+                        <div class="info-field" style="min-width:110px;">
+                            <label>Estado Destino</label>
+                            <select id="edit-estado-destino" onchange="setTipoVendaEdit(document.getElementById('edit-tipo-venda').value)" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="SP">SP</option><option value="MG">MG</option><option value="RJ">RJ</option>
+                                <option value="RS">RS</option><option value="PR">PR</option><option value="SC">SC</option>
+                                <option value="BA">BA</option><option value="GO">GO</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="ES">ES</option><option value="PA">PA</option>
+                                <option value="CE">CE</option><option value="PE">PE</option><option value="MA">MA</option>
+                                <option value="PB">PB</option><option value="RN">RN</option><option value="AL">AL</option>
+                                <option value="SE">SE</option><option value="PI">PI</option><option value="TO">TO</option>
+                                <option value="RO">RO</option><option value="AC">AC</option><option value="AM">AM</option>
+                                <option value="RR">RR</option><option value="AP">AP</option><option value="DF">DF</option>
+                            </select>
+                        </div>
                     </div>
 
                     <!-- Tabs -->
                     <div class="modal-tabs">
-                        <button class="modal-tab active" data-tab="itens" onclick="switchModalTab('itens')">Itens da
-                            Venda</button>
+                        <button class="modal-tab active" data-tab="frete" onclick="switchModalTab('frete')">Frete</button>
+                        <button class="modal-tab" data-tab="itens" onclick="switchModalTab('itens')">Itens da Venda</button>
                         <button class="modal-tab" data-tab="departamentos"
                             onclick="switchModalTab('departamentos')">Departamentos</button>
-                        <button class="modal-tab" data-tab="frete" onclick="switchModalTab('frete')">Frete e Outras
-                            Despesas</button>
                         <button class="modal-tab" data-tab="informações"
                             onclick="switchModalTab('informações')">Informações Adicionais</button>
-                        <button class="modal-tab" data-tab="parcelas"
-                            onclick="switchModalTab('parcelas')">Parcelas</button>
                         <button class="modal-tab" data-tab="observacoes"
                             onclick="switchModalTab('observacoes')">Observações</button>
                         <button class="modal-tab" data-tab="email" onclick="switchModalTab('email')">E-mail para o
@@ -6118,7 +6128,7 @@
                     </div>
 
                     <!-- Tab Content: Itens da Venda -->
-                    <div class="tab-content active" id="tab-itens">
+                    <div class="tab-content" id="tab-itens">
                         <!-- Botões de Ação -->
                         <div class="table-actions">
                             <button type="button" class="btn-table-action success" onclick="adicionarItem()">
@@ -6184,10 +6194,8 @@
                     </div>
 
                     <!-- Tab Content: Frete e Transporte -->
-                    <div class="tab-content" id="tab-frete">
-                        <!-- Linha 1: Transportadora, Tipo Frete, Placa, UF, RNTRC -->
-                        <div class="form-row"
-                            style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 0.5fr 1fr; gap: 12px;">
+                    <div class="tab-content active" id="tab-frete">
+                        <div class="form-row" style="display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 12px; margin-bottom:12px;">
                             <div class="form-group" style="position: relative;">
                                 <label><i class="fas fa-truck" style="color: #f97316;"></i> Transportadora</label>
                                 <input type="text" id="edit-transportadora"
@@ -6201,145 +6209,42 @@
                                 <label>Tipo do Frete</label>
                                 <select id="edit-tipo-frete">
                                     <option value="">Selecione...</option>
-                                    <option value="0">0 - Contratação do Frete por conta do Remetente (CIF)</option>
-                                    <option value="1">1 - Contratação do Frete por conta do Destinatário (FOB)</option>
-                                    <option value="2">2 - Contratação do Frete por conta de Terceiros</option>
-                                    <option value="3">3 - Transporte Próprio por conta do Remetente</option>
-                                    <option value="4">4 - Transporte Próprio por conta do Destinatário</option>
-                                    <option value="9">9 - Sem Ocorrência de Transporte</option>
+                                    <option value="0">0 - CIF (Remetente)</option>
+                                    <option value="1">1 - FOB (Destinatário)</option>
+                                    <option value="2">2 - Terceiros</option>
+                                    <option value="3">3 - Próprio/Remetente</option>
+                                    <option value="4">4 - Próprio/Destinatário</option>
+                                    <option value="9">9 - Sem Transporte</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Placa do Veículo</label>
-                                <input type="text" id="edit-placa-veiculo" placeholder="ABC-1234" maxlength="8"
-                                    style="text-transform: uppercase;">
-                            </div>
-                            <div class="form-group">
-                                <label>UF</label>
-                                <select id="edit-veiculo-uf" style="min-width: 70px;">
-                                    <option value=""></option>
-                                    <option value="AC">AC</option>
-                                    <option value="AL">AL</option>
-                                    <option value="AP">AP</option>
-                                    <option value="AM">AM</option>
-                                    <option value="BA">BA</option>
-                                    <option value="CE">CE</option>
-                                    <option value="DF">DF</option>
-                                    <option value="ES">ES</option>
-                                    <option value="GO">GO</option>
-                                    <option value="MA">MA</option>
-                                    <option value="MT">MT</option>
-                                    <option value="MS">MS</option>
-                                    <option value="MG">MG</option>
-                                    <option value="PA">PA</option>
-                                    <option value="PB">PB</option>
-                                    <option value="PR">PR</option>
-                                    <option value="PE">PE</option>
-                                    <option value="PI">PI</option>
-                                    <option value="RJ">RJ</option>
-                                    <option value="RN">RN</option>
-                                    <option value="RS">RS</option>
-                                    <option value="RO">RO</option>
-                                    <option value="RR">RR</option>
-                                    <option value="SC">SC</option>
-                                    <option value="SP">SP</option>
-                                    <option value="SE">SE</option>
-                                    <option value="TO">TO</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>RNTRC (ANTT)</label>
-                                <input type="text" id="edit-rntrc" placeholder="Registro ANTT" maxlength="20">
-                            </div>
-                        </div>
-
-                        <!-- Linha 2: Volumes -->
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
-                            <div class="form-group">
-                                <label>Quantidade de Volumes</label>
-                                <input type="number" id="edit-qtd-volumes" min="0" placeholder="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Espécie dos Volumes</label>
-                                <input type="text" id="edit-especie-volumes" placeholder="Ex: Caixa, Bobina...">
-                            </div>
-                            <div class="form-group">
-                                <label>Marca dos Volumes</label>
-                                <input type="text" id="edit-marca-volumes" placeholder="Marca">
-                            </div>
-                            <div class="form-group">
-                                <label>Numeração dos Volumes</label>
-                                <input type="text" id="edit-numeracao-volumes" placeholder="Ex: 1/10">
-                            </div>
-                        </div>
-
-                        <!-- Linha 3: Pesos e Valores -->
-                        <div class="form-row"
-                            style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap: 12px;">
-                            <div class="form-group">
-                                <label>Peso Líquido (Kg)</label>
-                                <input type="number" id="edit-peso-liquido" step="0.001" min="0" placeholder="0,000">
-                            </div>
-                            <div class="form-group">
-                                <label>Peso Bruto (Kg)</label>
-                                <input type="number" id="edit-peso-bruto" step="0.001" min="0" placeholder="0,000">
-                            </div>
-                            <div class="form-group">
-                                <label>Valor do Frete</label>
+                                <label>Valor do Frete (R$)</label>
                                 <input type="number" id="edit-valor-frete" step="0.01" min="0" placeholder="0,00"
                                     oninput="if(typeof atualizarTotalModalEditar==='function') atualizarTotalModalEditar()">
                             </div>
-                            <div class="form-group">
-                                <label>Valor do Seguro</label>
-                                <input type="number" id="edit-valor-seguro" step="0.01" min="0" placeholder="0,00">
-                            </div>
-                            <div class="form-group">
-                                <label>Tipo de Entrega</label>
-                                <select id="edit-tipo-entrega">
-                                    <option value="">Selecione...</option>
-                                    <option value="normal">Normal</option>
-                                    <option value="expressa">Expressa</option>
-                                    <option value="agendada">Agendada</option>
-                                    <option value="retira">Retira no Local</option>
-                                </select>
-                            </div>
                         </div>
-
-                        <!-- Linha 4: Lacre, Despesas, Previsão, Rastreio -->
-                        <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px;">
-                            <div class="form-group">
-                                <label>Número do Lacre</label>
-                                <input type="text" id="edit-número-lacre" placeholder="Lacre">
-                            </div>
-                            <div class="form-group">
-                                <label>Outras Despesas Acessórias</label>
-                                <input type="number" id="edit-outras-despesas" step="0.01" min="0" placeholder="0,00">
-                            </div>
-                            <div class="form-group">
-                                <label>Previsão de Entrega</label>
-                                <input type="date" id="edit-previsao-entrega">
-                            </div>
-                            <div class="form-group">
-                                <label>Código de Rastreio</label>
-                                <input type="text" id="edit-código-rastreio" placeholder="Código de rastreamento">
-                            </div>
+                        <!-- Endereço de Entrega -->
+                        <div class="form-group">
+                            <label>Endereço de Entrega</label>
+                            <textarea id="edit-endereco-entrega" placeholder="Endereço completo de entrega..." style="min-height:60px;"></textarea>
                         </div>
-
-                        <!-- Linha 5: Checkbox veículo próprio e link ICMS -->
-                        <div class="form-row"
-                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding: 12px; background: #f9fafb; border-radius: 8px;">
-                            <label
-                                style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500;">
-                                <input type="checkbox" id="edit-veiculo-proprio"
-                                    style="width: 18px; height: 18px; cursor: pointer;">
-                                O transporte será realizado com veículo próprio
-                            </label>
-                            <a href="#" onclick="abrirModalICMSTransporte(); return false;"
-                                style="color: #f97316; font-size: 13px; text-decoration: none;">
-                                <i class="fas fa-info-circle"></i> Informar os valores para o ICMS Retido do Serviço de
-                                Transporte
-                            </a>
-                        </div>
+                        <!-- hidden fields para compatibilidade com API -->
+                        <input type="hidden" id="edit-placa-veiculo">
+                        <input type="hidden" id="edit-veiculo-uf">
+                        <input type="hidden" id="edit-rntrc">
+                        <input type="hidden" id="edit-qtd-volumes">
+                        <input type="hidden" id="edit-especie-volumes">
+                        <input type="hidden" id="edit-marca-volumes">
+                        <input type="hidden" id="edit-numeracao-volumes">
+                        <input type="hidden" id="edit-peso-liquido">
+                        <input type="hidden" id="edit-peso-bruto">
+                        <input type="hidden" id="edit-valor-seguro">
+                        <input type="hidden" id="edit-tipo-entrega">
+                        <input type="hidden" id="edit-número-lacre">
+                        <input type="hidden" id="edit-outras-despesas">
+                        <input type="hidden" id="edit-previsao-entrega">
+                        <input type="hidden" id="edit-código-rastreio">
+                        <input type="hidden" id="edit-veiculo-proprio" value="0">
                     </div>
 
                     <!-- Tab Content: Informações Adicionais -->
@@ -6362,60 +6267,6 @@
                             <textarea id="edit-info-complementar"
                                 placeholder="Informações adicionais para a nota fiscal..."
                                 style="min-height: 100px;"></textarea>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content: Parcelas -->
-                    <div class="tab-content" id="tab-parcelas">
-                        <div class="form-group">
-                            <label>Condição de Pagamento <button type="button" onclick="abrirModalNovaCondicao()"
-                                    class="btn-add-inline" title="Cadastrar condição"><i
-                                        class="fas fa-plus"></i></button></label>
-                            <select id="edit-condicao-pagamento" onchange="recalcularParcelasAutomatico()">
-                                <option value="a vista">À Vista</option>
-                                <option value="28/35/42/49">28/35/42/49 dias</option>
-                                <option value="30/60">30/60 dias</option>
-                                <option value="30/60/90">30/60/90 dias</option>
-                                <option value="30/60/90/120">30/60/90/120 dias</option>
-                            </select>
-                        </div>
-                        <div class="items-table-container">
-                            <table class="items-table">
-                                <thead>
-                                    <tr>
-                                        <th>Parcela</th>
-                                        <th>Vencimento</th>
-                                        <th>Valor</th>
-                                        <th>Forma de Pagamento</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="parcelas-tbody">
-                                    <tr>
-                                        <td>1/4</td>
-                                        <td>14/01/2026</td>
-                                        <td>R$ 20.195,00</td>
-                                        <td>Boleto</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2/4</td>
-                                        <td>21/01/2026</td>
-                                        <td>R$ 20.195,00</td>
-                                        <td>Boleto</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3/4</td>
-                                        <td>28/01/2026</td>
-                                        <td>R$ 20.195,00</td>
-                                        <td>Boleto</td>
-                                    </tr>
-                                    <tr>
-                                        <td>4/4</td>
-                                        <td>04/02/2026</td>
-                                        <td>R$ 20.195,00</td>
-                                        <td>Boleto</td>
-                                    </tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
 
@@ -7018,7 +6869,7 @@
             style="max-width: 1100px; height: 95vh; display: flex; flex-direction: column; position: relative;">
             <!-- Header -->
             <div class="modal-header-omie" style="flex-shrink: 0;">
-                <h2><i class="fas fa-file-invoice" style="color: #f97316;"></i> Incluir Orçamento</h2>
+                <h2><i class="fas fa-file-invoice" style="color: #f97316;"></i> Novo Orçamento de Venda</h2>
                 <div style="display: flex; align-items: center; gap: 12px;">
                     <button class="close-btn" onclick="fecharModalNovoOrcamento()">
                         Fechar <i class="fas fa-times"></i>
@@ -7119,50 +6970,53 @@
                             </div>
                         </div>
                         <div class="orcamento-field-group">
-                            <label>Número de Parcelas</label>
-                            <div class="input-with-btn">
-                                <select id="novo-parcelas" class="orcamento-input" onchange="sincronizarParcelasAba()">
-                                    <option value="a_vista">À Vista</option>
-                                    <option value="30">30 dias</option>
-                                    <option value="30_60">30/60 dias</option>
-                                    <option value="30_60_90">30/60/90 dias</option>
-                                    <option value="personalizado">Personalizado</option>
-                                </select>
-                                <button type="button" class="btn-input-action"
-                                    onclick="ativarAbaOrcamento('parcelas')"><i class="fas fa-cog"></i></button>
+                            <label>Tipo de Venda</label>
+                            <div style="display:flex;gap:6px;">
+                                <button type="button" id="novo-btn-consumidor" onclick="setTipoVendaNovo('consumidor')" style="flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;">Consumidor Final</button>
+                                <button type="button" id="novo-btn-revenda" onclick="setTipoVendaNovo('revenda')" style="flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;">Revenda</button>
                             </div>
+                            <input type="hidden" id="novo-tipo-venda" value="consumidor">
                         </div>
                         <div class="orcamento-field-group" style="flex: 1; min-width: 0;">
-                            <label>Cenário Fiscal</label>
-                            <div class="input-with-btn">
-                                <select id="novo-cenario-fiscal" class="orcamento-input"
-                                    onchange="aplicarCenarioFiscal()" style="text-overflow: ellipsis;">
-                                    <option value="monitoramento_automatico">Monitoramento Automático de Impostos -
-                                        Indústria, Comércio (Varejista), Comércio (Atacadista), Prestador de Serviço,
-                                        Construção Civil</option>
-                                    <option value="padrao">Padrão - Indústria, Comércio (Varejista), Comércio
-                                        (Atacadista), Prestador de Serviço, Construção Civil</option>
-                                </select>
-                                <button type="button" class="btn-input-action" onclick="ativarAbaOrcamento('impostos')"
-                                    title="Configurar Impostos"><i class="fas fa-cog"></i></button>
-                            </div>
+                            <label>Condições de Pagamento</label>
+                            <select id="novo-condicao-pagamento" class="orcamento-input" onchange="syncCondicaoPagamento('novo')">
+                                <option value="a_vista">À Vista</option>
+                                <option value="30">30 dias</option>
+                                <option value="30_60">30/60 dias</option>
+                                <option value="30_60_90">30/60/90 dias</option>
+                                <option value="28_35_42_49">28/35/42/49 dias</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="orcamento-field-group" style="min-width:100px;">
+                            <label>Estado Destino</label>
+                            <select id="novo-estado-destino" class="orcamento-input" onchange="setTipoVendaNovo(document.getElementById('novo-tipo-venda').value)">
+                                <option value="SP">SP</option><option value="MG">MG</option><option value="RJ">RJ</option>
+                                <option value="RS">RS</option><option value="PR">PR</option><option value="SC">SC</option>
+                                <option value="BA">BA</option><option value="GO">GO</option><option value="MS">MS</option>
+                                <option value="MT">MT</option><option value="ES">ES</option><option value="PA">PA</option>
+                                <option value="CE">CE</option><option value="PE">PE</option><option value="MA">MA</option>
+                                <option value="PB">PB</option><option value="RN">RN</option><option value="AL">AL</option>
+                                <option value="SE">SE</option><option value="PI">PI</option><option value="TO">TO</option>
+                                <option value="RO">RO</option><option value="AC">AC</option><option value="AM">AM</option>
+                                <option value="RR">RR</option><option value="AP">AP</option><option value="DF">DF</option>
+                            </select>
                         </div>
                     </div>
 
                     <!-- Abas -->
                     <div class="orcamento-tabs">
-                        <button class="orcamento-tab active" data-tab="itens">Itens da Venda</button>
+                        <button class="orcamento-tab active" data-tab="frete">Frete</button>
+                        <button class="orcamento-tab" data-tab="itens">Itens da Venda</button>
                         <button class="orcamento-tab" data-tab="impostos">Impostos</button>
                         <button class="orcamento-tab" data-tab="departamentos">Departamentos</button>
-                        <button class="orcamento-tab" data-tab="frete">Frete e Outras Despesas</button>
                         <button class="orcamento-tab" data-tab="info">Informações Adicionais</button>
-                        <button class="orcamento-tab" data-tab="parcelas">Parcelas</button>
                         <button class="orcamento-tab" data-tab="obs">Observações</button>
                         <button class="orcamento-tab" data-tab="email">E-mail para o Cliente</button>
                     </div>
 
                     <!-- Conteúdo das Abas -->
-                    <div class="orcamento-tab-content active" id="tab-itens">
+                    <div class="orcamento-tab-content" id="tab-itens">
                         <!-- Botões de Ação -->
                         <div class="orcamento-itens-actions">
                             <button type="button" class="btn-orcamento-action verde" onclick="adicionarItemOrcamento()">
@@ -7235,32 +7089,16 @@
                                     Configurações → Impostos)</span>
                             </div>
 
-                            <!-- Cabeçalho: Cenário Fiscal e Botão Calcular -->
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
-                                <div style="display: flex; align-items: center; gap: 16px;">
-                                    <div class="orcamento-field-group" style="margin: 0; width: 350px;">
-                                        <label style="font-weight: 600;">Cenário Fiscal</label>
-                                        <select id="impostos-cenario-fiscal" class="orcamento-input"
-                                            onchange="carregarCenarioFiscal()">
-                                            <option value="">Selecione o cenário fiscal</option>
-                                            <option value="monitoramento_automatico">Monitoramento Automático de
-                                                Impostos - Indústria, Comércio (Varejista), Comércio (Atacadista),
-                                                Prestador de Serviço, Construção Civil</option>
-                                            <option value="padrao">Padrão - Indústria, Comércio (Varejista), Comércio
-                                                (Atacadista), Prestador de Serviço, Construção Civil</option>
-                                        </select>
-                                    </div>
-                                    <button type="button" class="btn-orcamento-action laranja"
-                                        onclick="calcularImpostos()" style="padding: 10px 20px; margin-top: 18px;">
+                            <!-- Controles removidos: cenário fiscal movido para configurações do sistema -->
+                            <div style="display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e5e7eb;">
+                                <div style="display:flex;gap:12px;">
+                                    <label class="checkbox-label" style="display:flex;align-items:center;gap:8px;">
+                                        <input type="checkbox" id="impostos-destacar-nf" checked>
+                                        <span style="font-size:13px;color:#333;">Destacar Impostos na NF</span>
+                                    </label>
+                                    <button type="button" class="btn-orcamento-action laranja" onclick="calcularImpostos()" style="padding:10px 20px;">
                                         <i class="fas fa-calculator"></i> Calcular Impostos
                                     </button>
-                                </div>
-                                <div style="display: flex; gap: 12px;">
-                                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" id="impostos-destacar-nf" checked>
-                                        <span style="font-size: 13px; color: #333;">Destacar Impostos na NF</span>
-                                    </label>
                                 </div>
                             </div>
 
@@ -7604,20 +7442,21 @@
                     </div>
 
                     <!-- Aba Frete -->
-                    <div class="orcamento-tab-content" id="tab-frete">
+                    <div class="orcamento-tab-content active" id="tab-frete">
                         <div class="orcamento-frete-section">
-                            <!-- Linha 1: Transportadora, Tipo do Frete, Placa, UF, RNTRC -->
                             <div class="orcamento-form-row"
-                                style="display: grid; grid-template-columns: 2fr 1.5fr 1fr 80px 1fr; gap: 12px; margin-bottom: 16px;">
+                                style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
                                 <div class="orcamento-field-group">
                                     <label>Transportadora <i class="fas fa-link"
                                             style="color: #999; font-size: 10px;"></i></label>
                                     <div class="input-with-btn">
                                         <input type="text" id="novo-transportadora" placeholder=""
-                                            class="orcamento-input">
+                                            class="orcamento-input" autocomplete="off"
+                                            oninput="buscarTransportadoraAutocompleteNovo(this.value)">
                                         <button type="button" class="btn-input-action"><i
                                                 class="fas fa-search"></i></button>
                                     </div>
+                                    <div id="novo-transportadora-suggestions" class="autocomplete-dropdown" style="display:none;"></div>
                                 </div>
                                 <div class="orcamento-field-group">
                                     <label>Tipo do Frete</label>
@@ -7631,139 +7470,33 @@
                                     </select>
                                 </div>
                                 <div class="orcamento-field-group">
-                                    <label>Placa do Veículo</label>
-                                    <input type="text" id="novo-placa-veiculo" class="orcamento-input" placeholder=""
-                                        maxlength="8">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>UF</label>
-                                    <select id="novo-placa-uf" class="orcamento-input">
-                                        <option value=""></option>
-                                        <option value="AC">AC</option>
-                                        <option value="AL">AL</option>
-                                        <option value="AP">AP</option>
-                                        <option value="AM">AM</option>
-                                        <option value="BA">BA</option>
-                                        <option value="CE">CE</option>
-                                        <option value="DF">DF</option>
-                                        <option value="ES">ES</option>
-                                        <option value="GO">GO</option>
-                                        <option value="MA">MA</option>
-                                        <option value="MT">MT</option>
-                                        <option value="MS">MS</option>
-                                        <option value="MG">MG</option>
-                                        <option value="PA">PA</option>
-                                        <option value="PB">PB</option>
-                                        <option value="PR">PR</option>
-                                        <option value="PE">PE</option>
-                                        <option value="PI">PI</option>
-                                        <option value="RJ">RJ</option>
-                                        <option value="RN">RN</option>
-                                        <option value="RS">RS</option>
-                                        <option value="RO">RO</option>
-                                        <option value="RR">RR</option>
-                                        <option value="SC">SC</option>
-                                        <option value="SP">SP</option>
-                                        <option value="SE">SE</option>
-                                        <option value="TO">TO</option>
-                                    </select>
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>RNTRC (ANTT)</label>
-                                    <input type="text" id="novo-rntrc" class="orcamento-input" placeholder="">
+                                    <label>Valor do Frete (R$)</label>
+                                    <input type="number" id="novo-valor-frete" class="orcamento-input" placeholder="0,00" min="0" step="0.01">
                                 </div>
                             </div>
-
-                            <!-- Linha 2: Volumes -->
-                            <div class="orcamento-form-row"
-                                style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+                            <div class="orcamento-form-row" style="margin-bottom: 16px;">
                                 <div class="orcamento-field-group">
-                                    <label>Quantidade de Volumes</label>
-                                    <input type="number" id="novo-qtd-volumes" class="orcamento-input" value="0"
-                                        min="0">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Espécie dos Volumes</label>
-                                    <input type="text" id="novo-especie-volumes" class="orcamento-input" placeholder="">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Marca dos Volumes</label>
-                                    <input type="text" id="novo-marca-volumes" class="orcamento-input" placeholder="">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Numeração dos Volumes</label>
-                                    <input type="text" id="novo-numeracao-volumes" class="orcamento-input"
-                                        placeholder="">
+                                    <label>Endereço de Entrega</label>
+                                    <input type="text" id="novo-endereco-entrega" class="orcamento-input" placeholder="Endereço de entrega (opcional)">
                                 </div>
                             </div>
-
-                            <!-- Linha 3: Pesos e Valores + Link ICMS -->
-                            <div class="orcamento-form-row"
-                                style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 2fr; gap: 12px; margin-bottom: 16px; align-items: end;">
-                                <div class="orcamento-field-group">
-                                    <label>Peso Líquido (Kg)</label>
-                                    <input type="text" id="novo-peso-liquido" class="orcamento-input" value="0,000"
-                                        style="text-align: right;">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Peso Bruto (Kg)</label>
-                                    <input type="text" id="novo-peso-bruto" class="orcamento-input" value="0,000"
-                                        style="text-align: right;">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Valor do Frete</label>
-                                    <input type="text" id="novo-frete" class="orcamento-input" value="0,00"
-                                        style="text-align: right;">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Valor do Seguro</label>
-                                    <input type="text" id="novo-seguro" class="orcamento-input" value="0,00"
-                                        style="text-align: right;">
-                                </div>
-                                <div style="text-align: right; padding-bottom: 8px;">
-                                    <a href="#" onclick="abrirModalICMSTransporte(); return false;"
-                                        style="color: #3b82f6; font-size: 12px; text-decoration: none;">Informar os
-                                        valores para o<br><strong>ICMS Retido do Serviço<br>de Transporte</strong></a>
-                                </div>
-                            </div>
-
-                            <!-- Linha 4: Lacre e Outras Despesas -->
-                            <div class="orcamento-form-row"
-                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
-                                <div class="orcamento-field-group">
-                                    <label>Número do Lacre</label>
-                                    <input type="text" id="novo-número-lacre" class="orcamento-input" placeholder="">
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Outras Despesas Acessórias</label>
-                                    <input type="text" id="novo-outras-despesas" class="orcamento-input" value="0,00"
-                                        style="text-align: right;">
-                                </div>
-                            </div>
-
-                            <!-- Linha 5: Previsão de Entrega e Rastreio -->
-                            <div class="orcamento-form-row"
-                                style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 12px; margin-bottom: 16px; align-items: end;">
-                                <div class="orcamento-field-group">
-                                    <label>Previsão de Entrega</label>
-                                    <div class="input-with-btn">
-                                        <input type="date" id="novo-previsao-entrega" class="orcamento-input">
-                                        <button type="button" class="btn-input-action"><i
-                                                class="fas fa-calendar"></i></button>
-                                    </div>
-                                </div>
-                                <div class="orcamento-field-group">
-                                    <label>Código de Rastreio</label>
-                                    <input type="text" id="novo-código-rastreio" class="orcamento-input" placeholder="">
-                                </div>
-                                <div style="padding-bottom: 8px;">
-                                    <label class="checkbox-label" style="display: flex; align-items: center; gap: 8px;">
-                                        <input type="checkbox" id="novo-veiculo-proprio">
-                                        <span style="font-size: 13px; color: #333;">O transporte será realizado com
-                                            veículo próprio</span>
-                                    </label>
-                                </div>
-                            </div>
+                            <!-- Campos ocultos para compatibilidade com API -->
+                            <input type="hidden" id="novo-placa-veiculo">
+                            <input type="hidden" id="novo-veiculo-uf">
+                            <input type="hidden" id="novo-rntrc">
+                            <input type="hidden" id="novo-qtd-volumes">
+                            <input type="hidden" id="novo-especie-volumes">
+                            <input type="hidden" id="novo-marca-volumes">
+                            <input type="hidden" id="novo-numeracao-volumes">
+                            <input type="hidden" id="novo-peso-liquido">
+                            <input type="hidden" id="novo-peso-bruto">
+                            <input type="hidden" id="novo-valor-seguro">
+                            <input type="hidden" id="novo-tipo-entrega">
+                            <input type="hidden" id="novo-numero-lacre">
+                            <input type="hidden" id="novo-outras-despesas">
+                            <input type="hidden" id="novo-previsao-entrega">
+                            <input type="hidden" id="novo-codigo-rastreio">
+                            <input type="hidden" id="novo-veiculo-proprio">
                         </div>
                     </div>
 
@@ -7875,78 +7608,6 @@
                                 <a href="#" onclick="abrirModalAgropecuaria(); return false;"
                                     style="color: #3b82f6; font-size: 12px; text-decoration: none;">Dados de produtos da
                                     <strong>Agricultura,<br>Pecuária e Produção Florestal</strong></a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Aba Parcelas -->
-                    <div class="orcamento-tab-content" id="tab-parcelas">
-                        <div class="orcamento-section-form">
-                            <!-- Cabeçalho: Contas a Receber e Valor Total -->
-                            <div
-                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                                <div>
-                                    <span style="font-size: 13px; color: #333;">Contas a Receber</span>
-                                    <span style="font-size: 11px; color: #999; margin-left: 8px;">(clique duas vezes
-                                        para modificar a parcela)</span>
-                                </div>
-                                <div style="display: flex; align-items: center; gap: 12px;">
-                                    <div class="orcamento-valor-box destaque" style="margin: 0;">
-                                        <label style="font-size: 11px;">Valor Total a Receber</label>
-                                        <input type="text" id="novo-valor-total-receber"
-                                            class="orcamento-valor-input destaque" value="0,00" readonly
-                                            style="width: 120px;">
-                                    </div>
-                                    <button type="button" class="btn-orcamento-action laranja"
-                                        onclick="refazerParcelas()" style="padding: 8px 16px;">
-                                        <i class="fas fa-sync-alt"></i> Refazer Parcelas
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Tabela de Parcelas estilo Omie -->
-                            <div class="orcamento-tabela-container">
-                                <table class="orcamento-tabela">
-                                    <thead>
-                                        <tr>
-                                            <th style="width: 80px;">Situação <span style="color: #999;">É</span></th>
-                                            <th style="width: 80px;">Parcela <span style="color: #999;">É</span></th>
-                                            <th style="width: 120px;">Vencimento <span style="color: #999;">É</span>
-                                            </th>
-                                            <th style="width: 120px;">Valor a Receber <span
-                                                    style="color: #999;">É</span></th>
-                                            <th style="width: 100px;">Percentual <span style="color: #999;">É</span>
-                                            </th>
-                                            <th style="width: 140px;">Tipo de Documento <span
-                                                    style="color: #999;">É</span></th>
-                                            <th style="width: 140px;">Meio de Pagamento <span
-                                                    style="color: #999;">É</span></th>
-                                            <th style="width: 100px;">Gerar Boleto <span style="color: #999;">É</span>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tbody-parcelas">
-                                        <!-- Parcelas serão geradas dinamicamente -->
-                                    </tbody>
-                                </table>
-                                <div class="orcamento-tabela-empty" id="empty-parcelas">
-                                    <i class="fas fa-inbox"></i>
-                                    <p>Nenhum registro encontrado</p>
-                                </div>
-                            </div>
-
-                            <!-- Paginação -->
-                            <div class="orcamento-paginacao">
-                                <span class="paginacao-info">Nenhum registro encontrado</span>
-                                <div class="paginacao-controls">
-                                    <button class="pag-btn" disabled><i class="fas fa-angle-double-left"></i></button>
-                                    <button class="pag-btn" disabled><i class="fas fa-angle-left"></i></button>
-                                    <span class="pag-text">anterior</span>
-                                    <span class="pag-current">1</span>
-                                    <span class="pag-text">próximo</span>
-                                    <button class="pag-btn" disabled><i class="fas fa-angle-right"></i></button>
-                                    <button class="pag-btn" disabled><i class="fas fa-angle-double-right"></i></button>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -8150,42 +7811,6 @@
                                 <span class="toggle-switch"></span>
                                 Não gerar conta a receber para este item
                             </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Seção Impostos e Informações da NF-e -->
-                <div class="section-row-split">
-                    <div class="section-omie" style="flex: 1;">
-                        <h3 class="section-title-omie">Impostos</h3>
-                        <div class="field-group">
-                            <label>Cenário Fiscal</label>
-                            <div class="input-with-clear">
-                                <select id="item-pedido-cenario">
-                                    <option value="" disabled>Selecione o cenário fiscal...</option>
-                                    <option value="monitoramento_automatico" selected>Monitoramento Automático de
-                                        Impostos</option>
-                                    <option value="padrao">Padrão</option>
-                                    <option value="industria">Indústria</option>
-                                    <option value="comercio_varejo">Comércio (Varejista)</option>
-                                    <option value="comercio_atacado">Comércio (Atacadista)</option>
-                                    <option value="prestador_servico">Prestador de Serviço</option>
-                                    <option value="construcao_civil">Construção Civil</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="section-omie" style="flex: 1;">
-                        <h3 class="section-title-omie">Informações da NF-e</h3>
-                        <div class="section-row">
-                            <div class="field-group" style="flex: 1;">
-                                <label>Número do Pedido de Compra</label>
-                                <input type="text" id="item-pedido-npc" placeholder="Nº do pedido">
-                            </div>
-                            <div class="field-group" style="flex: 0 0 120px;">
-                                <label>Item do Pedido de Compra</label>
-                                <input type="number" id="item-pedido-item-npc" value="0" class="input-number">
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -9924,6 +9549,88 @@
          MODAIS DE CADASTRO RÁPIDO
          ======================================== -->
 
+    <!-- Modal Aprovação de Crédito -->
+    <div class="modal-overlay" id="modal-aprovacao-credito">
+        <div class="modal-content" style="max-width:560px;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.3);">
+            <div class="modal-header-omie" style="padding:16px 24px;min-height:auto;background:linear-gradient(135deg,#1e293b,#334155);">
+                <div>
+                    <h2 style="font-size:16px;color:white;"><i class="fas fa-shield-alt" style="color:#60a5fa;margin-right:8px;"></i> Análise de Crédito — Pedido <span id="cred-pedido-num" style="color:#60a5fa;"></span></h2>
+                    <p id="cred-cliente-nome" style="font-size:12px;color:#94a3b8;margin-top:4px;"></p>
+                </div>
+                <button class="close-btn" onclick="fecharModalAprovacaoCredito()" style="padding:8px 16px;font-size:12px;color:white;border-color:rgba(255,255,255,0.2);background:rgba(255,255,255,0.1);">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div style="padding:24px;">
+                <!-- Resumo financeiro -->
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+                    <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px;">
+                        <div style="font-size:11px;color:#64748b;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Valor do Pedido</div>
+                        <div id="cred-valor-pedido" style="font-size:20px;font-weight:700;color:#1e293b;">R$ 0,00</div>
+                    </div>
+                    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;">
+                        <div style="font-size:11px;color:#15803d;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">Crédito Disponível (CNPJ)</div>
+                        <div id="cred-valor-disponivel" style="font-size:20px;font-weight:700;color:#15803d;">—</div>
+                    </div>
+                </div>
+
+                <!-- Condição de Pagamento -->
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;display:block;margin-bottom:8px;">Condição de Pagamento</label>
+                    <select id="cred-condicao-pagamento" style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#f8fafc;">
+                        <option value="a_vista">À Vista</option>
+                        <option value="30">30 dias</option>
+                        <option value="30_60">30/60 dias</option>
+                        <option value="30_60_90">30/60/90 dias</option>
+                        <option value="28_35_42_49">28/35/42/49 dias</option>
+                        <option value="personalizado">Personalizado</option>
+                    </select>
+                </div>
+
+                <!-- Parecer -->
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;display:block;margin-bottom:10px;">Parecer da Análise</label>
+                    <div style="display:flex;gap:10px;">
+                        <button type="button" id="cred-btn-reprovado" onclick="setCredParecer('reprovado')"
+                            style="flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">
+                            <i class="fas fa-times-circle" style="margin-right:5px;"></i>Reprovado
+                        </button>
+                        <button type="button" id="cred-btn-aprovado-avista" onclick="setCredParecer('aprovado_avista')"
+                            style="flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">
+                            <i class="fas fa-check" style="margin-right:5px;"></i>Aprovado à Vista
+                        </button>
+                        <button type="button" id="cred-btn-aprovado" onclick="setCredParecer('aprovado')"
+                            style="flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">
+                            <i class="fas fa-check-double" style="margin-right:5px;"></i>Aprovado
+                        </button>
+                    </div>
+                    <input type="hidden" id="cred-parecer-value" value="">
+                </div>
+
+                <!-- Observações -->
+                <div style="margin-bottom:20px;">
+                    <label style="font-size:13px;font-weight:600;color:#1e293b;display:block;margin-bottom:8px;">Justificativa / Observações</label>
+                    <textarea id="cred-observacoes" placeholder="Descreva o motivo do parecer..." rows="3"
+                        style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;background:#f8fafc;resize:vertical;font-family:inherit;"></textarea>
+                </div>
+
+                <!-- Histórico -->
+                <div id="cred-historico-container" style="display:none;margin-bottom:16px;">
+                    <div style="font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Histórico de Análises</div>
+                    <div id="cred-historico" style="max-height:150px;overflow-y:auto;border:1px solid #e2e8f0;border-radius:8px;padding:10px;background:#f8fafc;font-size:12px;color:#374151;"></div>
+                </div>
+            </div>
+            <div style="padding:14px 24px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:12px;justify-content:flex-end;">
+                <button type="button" onclick="fecharModalAprovacaoCredito()"
+                    style="padding:10px 24px;border:1.5px solid #e2e8f0;background:white;border-radius:10px;font-size:13px;font-weight:500;color:#64748b;cursor:pointer;">Cancelar</button>
+                <button type="button" onclick="salvarAprovacaoCredito()"
+                    style="padding:10px 24px;background:linear-gradient(135deg,#1e293b,#334155);border:none;border-radius:10px;font-size:13px;font-weight:600;color:white;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+                    <i class="fas fa-gavel"></i> Confirmar Parecer
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Cadastro Rápido - Condição de Pagamento -->
     <div class="modal-overlay" id="modal-nova-condicao">
         <div class="modal-content" style="max-width: 480px; border-radius: 16px; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
@@ -10698,8 +10405,28 @@
             if (statusBloqueados.includes(p._statusOriginal || p._coluna)) {
                 showNotification('Pedidos FATURADOS não podem ser movidos', 'warning'); return;
             }
+            // Confirmação especial ao mover para APROVADO: baixar estoque
+            if (novoStatus === 'aprovado') {
+                const confirmar = await showConfirmDialog({
+                    title: 'Aprovar Pedido',
+                    message: 'Ao aprovar o pedido, o <strong>estoque dos produtos será baixado automaticamente</strong>.<br><br>Deseja continuar?',
+                    type: 'warning',
+                    confirmText: 'Aprovar e Baixar Estoque',
+                    confirmIcon: 'fa-check-circle'
+                });
+                if (!confirmar) return;
+            }
             const ok = await salvarStatusPedido(id, novoStatus);
             if (ok) {
+                if (novoStatus === 'aprovado') {
+                    try {
+                        await fetch(`/api/vendas/pedidos/${id}/baixar-estoque`, {
+                            method: 'POST', credentials: 'include',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ pedido_id: id })
+                        });
+                    } catch (e) { console.error('[ESTOQUE] Erro ao baixar estoque:', e); }
+                }
                 showNotification('Status atualizado!', 'success');
                 await carregarDadosKanban();
             } else {
@@ -10818,7 +10545,8 @@
                     acoesBtns += btn('fa-arrow-right', `moverParaStatusLista(${it.id},'analise')`, '#2563eb', 'Enviar para Análise');
                     acoesBtns += btn('fa-trash', `excluirPedido(${it.id})`, '#ef4444', 'Excluir');
                 } else if (col === 'analise') {
-                    acoesBtns += btn('fa-check-circle', `moverParaStatusLista(${it.id},'aprovado')`, '#059669', 'Aprovar');
+                    acoesBtns += btn('fa-shield-alt', `abrirModalAprovacaoCredito(${it.id})`, '#fff', 'Análise de Crédito', 'linear-gradient(135deg,#1e293b,#334155)');
+                    acoesBtns += btn('fa-check-circle', `moverParaStatusLista(${it.id},'aprovado')`, '#059669', 'Aprovar Direto');
                     acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'orcamento')`, '#92400e', 'Retornar');
                 } else if (col === 'aprovado') {
                     acoesBtns += btn('fa-file-invoice-dollar', `moverParaStatusLista(${it.id},'faturar')`, '#7c3aed', 'Aguardar Faturamento');
@@ -13469,7 +13197,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 };
 
                 // Atualizar título do modal
-                document.getElementById('modal-título-pedido').textContent = 'Novo Pedido de Venda';
+                document.getElementById('modal-título-pedido').textContent = 'Novo Orçamento de Venda';
 
                 // Limpar avatar do cliente
                 document.getElementById('modal-cliente-avatar').textContent = 'NC';
@@ -15769,16 +15497,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 return;
             }
 
-            tbody.innerHTML = itensPedidoAtual.map((item, idx) => `
-                <tr data-index="${idx}" data-id="${item.id}" onclick="selecionarItemTabela(${idx})" ondblclick="editarItemPorIndice(${idx})">
+            tbody.innerHTML = itensPedidoAtual.map((item, idx) => {
+                const estoque = parseFloat(item.estoque_atual || 0);
+                const estoqueBadge = estoque > 0
+                    ? `<span style="background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;"><i class="fas fa-check-circle" style="font-size:9px"></i> ${formatarQuantidade(estoque)} em estoque</span>`
+                    : `<span style="background:#fee2e2;color:#dc2626;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:600;white-space:nowrap;"><i class="fas fa-industry" style="font-size:9px"></i> Sob encomenda</span>`;
+                return `
+                <tr data-index="${idx}" data-id="${item.id}" onclick="selecionarItemTabela(${idx})" ondblclick="editarItemPorIndice(${idx})"
+                    style="${estoque > 0 ? '' : 'background:linear-gradient(90deg,#fef2f2 0%,#fff 60%);border-left:3px solid #dc262633;'}">
                     <td class="produto-code">${escaparHTML(item.código || item.codigo || '')}</td>
-                    <td class="produto-desc">${escaparHTML(item.descrição || item.descricao || item.nome || '')}</td>
+                    <td class="produto-desc">${escaparHTML(item.descrição || item.descricao || item.nome || '')} ${estoqueBadge}</td>
                     <td>${formatarQuantidade(item.quantidade)} ${escaparHTML(item.unidade || 'M')}</td>
                     <td>${formatarQuantidade(item.quantidade_parcial)} ${escaparHTML(item.unidade || 'M')}</td>
                     <td>${escaparHTML(item.local_estoque || 'PADRAO')}</td>
                     <td>${formatarMoeda(item.preco_unitario)}</td>
-                </tr>
-            `).join('');
+                </tr>`;
+            }).join('');
 
             paginationInfo.textContent = `1 - ${itensPedidoAtual.length} de ${itensPedidoAtual.length} registros`;
         }
@@ -15827,9 +15561,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             document.getElementById('item-pedido-tabela-preco').value = '';
             document.getElementById('item-pedido-desconto-pct').value = '0';
             document.getElementById('item-pedido-estoque').value = 'PADRAO - Local de Estoque Padrão';
-            document.getElementById('item-pedido-cenario').value = 'Padrão';
-            document.getElementById('item-pedido-npc').value = '';
-            document.getElementById('item-pedido-item-npc').value = '0';
+            document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = 'Padrão');
+            document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = '');
+            document.getElementById('item-pedido-item-npc')?.value != null && (document.getElementById('item-pedido-item-npc').value = '0');
             document.getElementById('item-pedido-observacoes').value = '';
 
             // Limpar checkboxes
@@ -15899,9 +15633,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             document.getElementById('item-pedido-tabela-preco').value = item.tabela_preco || '';
             document.getElementById('item-pedido-desconto-pct').value = item.desconto_pct || '0';
             document.getElementById('item-pedido-estoque').value = item.local_estoque || 'PADRAO - Local de Estoque Padrão';
-            document.getElementById('item-pedido-cenario').value = item.cenario_fiscal || 'Padrão';
-            document.getElementById('item-pedido-npc').value = item.numero_pedido_compra || '';
-            document.getElementById('item-pedido-item-npc').value = item.item_pedido_compra || '0';
+            document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = item.cenario_fiscal || 'Padrão');
+            document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = item.numero_pedido_compra || '');
+            document.getElementById('item-pedido-item-npc')?.value != null && (document.getElementById('item-pedido-item-npc').value = item.item_pedido_compra || '0');
             document.getElementById('item-pedido-observacoes').value = item.observacoes || '';
 
             // Atualizar cálculos
@@ -15962,7 +15696,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 const desconto = (quantidade * precoUnitario) * (descontoPct / 100); // Calcular valor do desconto
                 const localEstoque = document.getElementById('item-pedido-estoque').value;
                 const cfop = document.getElementById('item-pedido-cfop').value;
-                const cenarioFiscal = document.getElementById('item-pedido-cenario').value;
+                const cenarioFiscal = document.getElementById('item-pedido-cenario')?.value || 'Padrão';
                 const observacoes = document.getElementById('item-pedido-observacoes').value;
                 const unidade = produtoSelecionadoAutoComplete?.unidade || 'M';
 
@@ -15988,8 +15722,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     cfop,
                     cenario_fiscal: cenarioFiscal,
                     observacoes,
-                    produto_id: produtoSelecionadoAutoComplete?.id || null
-                };
+                    produto_id: produtoSelecionadoAutoComplete?.id || null,
+                    estoque_atual: parseFloat(produtoSelecionadoAutoComplete?.estoque_atual) || 0
 
                 // Calcular IPI e ICMS ST do item
                 const subtotalCalc = (quantidade * precoUnitario) - desconto;
@@ -22697,6 +22431,164 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 }, 500);
             }
         });
+
+        // =====================================================================
+        // Aprovação de Crédito
+        // =====================================================================
+        let _creditoPedidoId = null;
+
+        async function abrirModalAprovacaoCredito(pedidoId) {
+            _creditoPedidoId = pedidoId;
+            const p = encontrarPedidoPorId(pedidoId);
+            if (!p) return;
+
+            document.getElementById('cred-pedido-num').textContent = '#' + (p.numero_pedido || pedidoId);
+            document.getElementById('cred-cliente-nome').textContent = p.cliente || p.razao_social || '';
+            document.getElementById('cred-valor-pedido').textContent = formatarMoeda(p.valor || 0);
+            document.getElementById('cred-parecer-value').value = '';
+            document.getElementById('cred-observacoes').value = '';
+
+            // Reset condição from pedido
+            const cond = p.condicao_pagamento || p.parcelas || 'a_vista';
+            const sel = document.getElementById('cred-condicao-pagamento');
+            if (sel) {
+                for (let opt of sel.options) { opt.selected = opt.value === cond; }
+            }
+
+            // Reset parecer buttons
+            ['reprovado','aprovado_avista','aprovado'].forEach(k => setCredParecer_style(k, false));
+
+            // Carregar crédito disponível via API (contas a receber pendentes)
+            try {
+                document.getElementById('cred-valor-disponivel').textContent = 'Carregando...';
+                const resp = await fetch(`/api/vendas/clientes/${p.cliente_id || p.empresa_id}/credito`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const disp = parseFloat(data.credito_disponivel || data.limite_credito || 0);
+                    document.getElementById('cred-valor-disponivel').textContent = disp > 0 ? formatarMoeda(disp) : 'Sem limite cadastrado';
+                } else {
+                    document.getElementById('cred-valor-disponivel').textContent = 'Não disponível';
+                }
+            } catch (e) {
+                document.getElementById('cred-valor-disponivel').textContent = 'Não disponível';
+            }
+
+            // Histórico de análises do pedido
+            try {
+                const hResp = await fetch(`/api/vendas/pedidos/${pedidoId}/historico`, { credentials: 'include' });
+                if (hResp.ok) {
+                    const historia = await hResp.json();
+                    const analises = (historia || []).filter(h => h.action && h.action.includes('credito'));
+                    const histCont = document.getElementById('cred-historico-container');
+                    const histEl = document.getElementById('cred-historico');
+                    if (analises.length > 0) {
+                        histEl.innerHTML = analises.map(h =>
+                            `<div style="padding:6px 0;border-bottom:1px solid #e2e8f0;">`+
+                            `<span style="font-weight:600;">${h.user_name||'Sistema'}</span> — ${h.descricao||h.action} `+
+                            `<span style="color:#94a3b8;">(${new Date(h.created_at||h.data).toLocaleDateString('pt-BR')})</span></div>`
+                        ).join('');
+                        histCont.style.display = 'block';
+                    } else {
+                        histCont.style.display = 'none';
+                    }
+                }
+            } catch (e) { /* silencioso */ }
+
+            document.getElementById('modal-aprovacao-credito').classList.add('active');
+        }
+
+        function fecharModalAprovacaoCredito() {
+            document.getElementById('modal-aprovacao-credito').classList.remove('active');
+            _creditoPedidoId = null;
+        }
+
+        function setCredParecer_style(tipo, ativo) {
+            const cfgs = {
+                reprovado:      { el: 'cred-btn-reprovado',      cor: '#ef4444', bg: '#fef2f2', label: 'Reprovado' },
+                aprovado_avista:{ el: 'cred-btn-aprovado-avista',cor: '#f59e0b', bg: '#fffbeb', label: 'Aprovado à Vista' },
+                aprovado:       { el: 'cred-btn-aprovado',       cor: '#059669', bg: '#f0fdf4', label: 'Aprovado' }
+            };
+            const cfg = cfgs[tipo];
+            if (!cfg) return;
+            const btn = document.getElementById(cfg.el);
+            if (!btn) return;
+            if (ativo) {
+                btn.style.cssText = `flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid ${cfg.cor};background:${cfg.bg};color:${cfg.cor};font-size:12px;font-weight:700;cursor:pointer;`;
+            } else {
+                btn.style.cssText = 'flex:1;padding:12px 8px;border-radius:8px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            }
+        }
+
+        function setCredParecer(tipo) {
+            document.getElementById('cred-parecer-value').value = tipo;
+            ['reprovado','aprovado_avista','aprovado'].forEach(k => setCredParecer_style(k, k === tipo));
+            // Se Aprovado à Vista, forçar condição a_vista
+            if (tipo === 'aprovado_avista') {
+                const sel = document.getElementById('cred-condicao-pagamento');
+                if (sel) { for (let opt of sel.options) opt.selected = opt.value === 'a_vista'; }
+            }
+        }
+
+        async function salvarAprovacaoCredito() {
+            const parecer = document.getElementById('cred-parecer-value').value;
+            if (!parecer) { showNotification('Selecione um parecer antes de confirmar', 'warning'); return; }
+            if (!_creditoPedidoId) return;
+
+            const condicao = document.getElementById('cred-condicao-pagamento').value;
+            const obs = document.getElementById('cred-observacoes').value;
+
+            try {
+                const resp = await fetch(`/api/vendas/pedidos/${_creditoPedidoId}/aprovacao-credito`, {
+                    method: 'POST', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ parecer, condicao_pagamento: condicao, observacoes: obs })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    showNotification(data.message || 'Parecer registrado com sucesso!', 'success');
+                    fecharModalAprovacaoCredito();
+                    await carregarDadosKanban();
+                } else {
+                    showNotification(data.message || 'Erro ao salvar parecer', 'error');
+                }
+            } catch (e) {
+                showNotification('Erro de conexão ao salvar parecer', 'error');
+            }
+        }
+
+        // =====================================================================
+        // Tipo de Venda: Consumidor Final / Revenda com estado destino
+        // =====================================================================
+        const _UF_LABELS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT',
+                            'PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
+
+        function setTipoVendaEdit(tipo) {
+            document.getElementById('edit-tipo-venda').value = tipo;
+            const btnCons = document.getElementById('edit-btn-consumidor');
+            const btnRev  = document.getElementById('edit-btn-revenda');
+            if (!btnCons || !btnRev) return;
+            if (tipo === 'consumidor') {
+                btnCons.style.cssText = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;';
+                btnRev.style.cssText  = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            } else {
+                btnRev.style.cssText  = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;';
+                btnCons.style.cssText = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            }
+        }
+
+        function setTipoVendaNovo(tipo) {
+            document.getElementById('novo-tipo-venda').value = tipo;
+            const btnCons = document.getElementById('novo-btn-consumidor');
+            const btnRev  = document.getElementById('novo-btn-revenda');
+            if (!btnCons || !btnRev) return;
+            if (tipo === 'consumidor') {
+                btnCons.style.cssText = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;';
+                btnRev.style.cssText  = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            } else {
+                btnRev.style.cssText  = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;';
+                btnCons.style.cssText = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            }
+        }
     </script>
 
     <!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->

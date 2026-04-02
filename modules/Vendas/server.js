@@ -4209,6 +4209,116 @@ apiVendasRouter.post('/pedidos/:id/faturamento-parcial', async (req, res, next) 
     }
 });
 
+// Aprovação de Crédito
+apiVendasRouter.post('/pedidos/:id/aprovacao-credito', async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { parecer, condicao_pagamento, observacoes } = req.body;
+        const user = req.user || {};
+
+        if (!parecer || !['reprovado', 'aprovado_avista', 'aprovado'].includes(parecer)) {
+            return res.status(400).json({ success: false, message: 'Parecer inválido.' });
+        }
+
+        // Atualizar condição de pagamento se fornecida
+        if (condicao_pagamento) {
+            await pool.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', [condicao_pagamento, id]);
+        }
+
+        // Mover status baseado no parecer
+        let novoStatus = null;
+        let descricao = '';
+        if (parecer === 'aprovado') {
+            novoStatus = 'pedido-aprovado';
+            descricao = `Crédito APROVADO — condição: ${condicao_pagamento || 'padrão'}`;
+        } else if (parecer === 'aprovado_avista') {
+            novoStatus = 'pedido-aprovado';
+            await pool.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', ['a_vista', id]);
+            descricao = `Crédito APROVADO À VISTA`;
+        } else {
+            novoStatus = 'orcamento';
+            descricao = `Crédito REPROVADO — devolvido para Orçamento`;
+        }
+
+        if (novoStatus) {
+            await pool.query('UPDATE pedidos SET status = ? WHERE id = ?', [novoStatus, id]);
+        }
+
+        // Registrar histórico
+        await pool.query(
+            'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao) VALUES (?, ?, ?, ?, ?)',
+            [id, user.id || null, user.nome || 'Sistema', `analise_credito_${parecer}`,
+             `${descricao}${observacoes ? ' — ' + observacoes : ''}`]
+        );
+
+        res.json({ success: true, message: 'Parecer registrado com sucesso!', novo_status: novoStatus });
+    } catch (err) {
+        next(err);
+    }
+});
+
+// Baixar Estoque ao Aprovar Pedido
+apiVendasRouter.post('/pedidos/:id/baixar-estoque', async (req, res, next) => {
+    const connection = await pool.getConnection();
+    try {
+        const { id } = req.params;
+        const user = req.user || {};
+
+        await connection.beginTransaction();
+
+        const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+        if (pedidoRows.length === 0) {
+            await connection.rollback();
+            return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+        }
+        const pedido = pedidoRows[0];
+        if (pedido.estoque_baixado === 1) {
+            await connection.rollback();
+            return res.status(400).json({ success: false, message: 'Estoque já foi baixado para este pedido.' });
+        }
+
+        const [itens] = await connection.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+        const baixados = [];
+
+        for (const item of itens) {
+            if (!item.produto_id || !item.quantidade) continue;
+
+            try {
+                await connection.query(
+                    `INSERT INTO estoque_movimentos (produto_id, tipo, quantidade, referencia_tipo, referencia_id, observacoes, usuario_id)
+                     VALUES (?, 'saida', ?, 'aprovacao_pedido', ?, ?, ?)`,
+                    [item.produto_id, item.quantidade, id, `Aprovação do Pedido #${id}`, user.id || null]
+                );
+            } catch (e) {
+                // estoque_movimentos pode não existir em todas as instâncias — continuar
+            }
+
+            const [stockResult] = await connection.query(
+                'UPDATE produtos SET estoque_atual = estoque_atual - ? WHERE id = ? AND estoque_atual >= ?',
+                [item.quantidade, item.produto_id, item.quantidade]
+            );
+            baixados.push({ produto_id: item.produto_id, quantidade: item.quantidade, atualizado: stockResult.affectedRows > 0 });
+        }
+
+        await connection.query(
+            'UPDATE pedidos SET estoque_baixado = 1, data_baixa_estoque = NOW() WHERE id = ?', [id]
+        );
+
+        await connection.query(
+            'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao) VALUES (?, ?, ?, ?, ?)',
+            [id, user.id || null, user.nome || 'Sistema', 'baixa_estoque', `Estoque baixado na aprovação do pedido #${id}`]
+        );
+
+        await connection.commit();
+        res.json({ success: true, message: 'Estoque baixado com sucesso.', itens_baixados: baixados });
+    } catch (err) {
+        await connection.rollback();
+        next(err);
+    } finally {
+        connection.release();
+    }
+});
+
 // Faturamento Parcial - Etapa 2: Remessa/Entrega (baixa estoque)
 apiVendasRouter.post('/pedidos/:id/remessa-entrega', async (req, res, next) => {
     const connection = await pool.getConnection();
