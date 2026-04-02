@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'aluforce-v2-production',
       script: 'server.js',
-      instances: 4, // Cluster mode - aumentado para 4 instâncias
+      instances: 1, // 1 instância estável (evita race condition de migração DB)
       exec_mode: 'cluster',
       node_args: '--max-old-space-size=2048', // 2GB de memória por instância
       env: {
@@ -44,8 +44,8 @@ module.exports = {
       watch: false,
       ignore_watch: ['node_modules', 'logs', 'temp_excel', 'backups'],
       kill_timeout: 5000, // Graceful shutdown
-      wait_ready: true,
-      listen_timeout: 10000,
+      wait_ready: false,
+      listen_timeout: 15000,
       
       // Configurações de monitoramento
       monitoring: {
