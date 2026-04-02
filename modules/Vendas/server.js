@@ -3844,6 +3844,15 @@ apiVendasRouter.post('/pedidos/:id/faturar', async (req, res, next) => {
                  JSON.stringify({ nf_numero: novaNf, valor: pedido.valor, nfe_gerada: !!nfeData })]
             );
 
+            // Criar conta a receber automaticamente (evita duplicata se refaturar)
+            const diasVencimento = parseInt(pedido.parcelas) || 30;
+            await connection.query(`
+                INSERT INTO contas_receber (pedido_id, cliente_id, cliente_nome, descricao, valor, data_vencimento, status, tipo, nota_fiscal, numero_pedido, origem_integracao)
+                SELECT ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL ? DAY), 'pendente', 'receber', ?, ?, 'vendas'
+                FROM DUAL
+                WHERE NOT EXISTS (SELECT 1 FROM contas_receber WHERE pedido_id = ? AND tipo = 'receber')
+            `, [id, pedido.cliente_id, pedido.cliente, `Faturamento - Pedido #${id} - NF ${novaNf}`, pedido.valor, diasVencimento, novaNf, String(id), id]);
+
             await connection.commit();
         } catch (txError) {
             await connection.rollback();
