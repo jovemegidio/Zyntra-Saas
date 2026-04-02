@@ -5835,14 +5835,14 @@
 
                 <!-- View Toggles -->
                 <div class="tabs-bar" style="display:flex;gap:2px;background:#e2e8f0;border-radius:7px;padding:2px;">
-                    <button class="tab active" data-view="kanban" onclick="switchView('kanban', this)" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;background:white;color:#1e293b;box-shadow:0 1px 2px rgba(0,0,0,0.08);transition:all 0.15s;">
-                        <i class="fas fa-columns" style="font-size:11px;"></i> Kanban
+                    <button class="tab active" data-view="lista" onclick="switchView('lista', this)" title="Lista" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:white;color:#1e293b;box-shadow:0 1px 2px rgba(0,0,0,0.08);transition:all 0.15s;">
+                        <i class="fas fa-list" style="font-size:13px;"></i>
                     </button>
-                    <button class="tab" data-view="lista" onclick="switchView('lista', this)" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
-                        <i class="fas fa-list" style="font-size:11px;"></i> Lista
+                    <button class="tab" data-view="kanban" onclick="switchView('kanban', this)" title="Kanban" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
+                        <i class="fas fa-columns" style="font-size:13px;"></i>
                     </button>
-                    <button class="tab" data-view="pipeline" onclick="switchView('pipeline', this)" style="display:flex;align-items:center;gap:5px;padding:6px 12px;border:none;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
-                        <i class="fas fa-stream" style="font-size:11px;"></i> Pipeline
+                    <button class="tab" data-view="pipeline" onclick="switchView('pipeline', this)" title="Pipeline" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
+                        <i class="fas fa-stream" style="font-size:13px;"></i>
                     </button>
                 </div>
 
@@ -5856,7 +5856,7 @@
             </div>
 
             <!-- Kanban Board -->
-            <div class="kanban-container">
+            <div class="kanban-container" style="display:none;">
                 <div class="kanban-board" id="kanban-board">
 
                     <!-- Coluna: Orçamento -->
@@ -5962,7 +5962,7 @@
             </div>
 
             <!-- Lista View -->
-            <div id="list-view" style="display:none;flex:1;overflow:auto;padding:0;">
+            <div id="list-view" style="display:flex;flex-direction:column;flex:1;overflow:auto;padding:0;">
                 <!-- Filter Tabs -->
                 <div id="list-filter-tabs" style="display:flex;gap:8px;padding:12px 16px;flex-wrap:wrap;align-items:center;border-bottom:1px solid #e5e7eb;background:white;"></div>
                 <table id="list-table" style="width:100%;border-collapse:collapse;font-size:13px;">
@@ -10649,7 +10649,7 @@
         }
 
         // === VIEW SWITCHING (Kanban / Lista / Pipeline) ===
-        let _currentView = 'kanban';
+        let _currentView = 'lista';
 
         function switchView(view, btnEl) {
             _currentView = view;
@@ -10677,6 +10677,35 @@
 
             if (view === 'lista') renderListView();
             if (view === 'pipeline') renderPipelineView();
+        }
+
+        // Helper: set pedidoAtual from list and trigger an action
+        function abrirAcaoDeLista(id, acao) {
+            const p = encontrarPedidoPorId(id);
+            if (!p) { showNotification('Pedido não encontrado', 'error'); return; }
+            pedidoAtual = { ...p, _statusOriginal: p._statusOriginal || p._coluna };
+            itensPedidoAtual = p.itens || [];
+            if (acao === 'danfe') { verDanfe(); return; }
+            if (acao === 'recibo') { verRecibo(); return; }
+            if (acao === 'faturar') { faturarPedido(); return; }
+            if (acao === 'imprimir') { imprimirPedido(); return; }
+        }
+
+        // Helper: move pedido to a new status directly from list
+        async function moverParaStatusLista(id, novoStatus) {
+            const p = encontrarPedidoPorId(id);
+            if (!p) { showNotification('Pedido não encontrado', 'error'); return; }
+            const statusBloqueados = ['faturado', 'recibo'];
+            if (statusBloqueados.includes(p._statusOriginal || p._coluna)) {
+                showNotification('Pedidos FATURADOS não podem ser movidos', 'warning'); return;
+            }
+            const ok = await salvarStatusPedido(id, novoStatus);
+            if (ok) {
+                showNotification('Status atualizado!', 'success');
+                await carregarDadosKanban();
+            } else {
+                showNotification('Erro ao atualizar status', 'error');
+            }
         }
 
         function renderListView() {
@@ -10753,23 +10782,48 @@
                 const dataInc = it.data_inclusao ? new Date(it.data_inclusao).toLocaleDateString('pt-BR') : '—';
                 const pagamento = escaparHTML(it.parcelas || 'A Vista');
                 const estoqueBadge = it.estoque_baixado === 1 ? '<span style="color:#059669;font-size:12px;font-weight:500;">✓ Baixado</span>' : (col === 'faturar' || col === 'faturado' ? '<span style="display:inline-flex;align-items:center;gap:4px;background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;"><i class="fas fa-exclamation-triangle" style="font-size:9px;"></i> Pendente</span>' : '<span style="color:#9ca3af;">—</span>');
-                // Ações baseadas no status
-                let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#475569;" title="Editar" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='white'"><i class="fas fa-edit"></i></button>`;
+                // NF badge
+                const nfTag = it.nf ? `<div style="font-size:10px;color:#059669;font-weight:600;margin-top:2px;">NF ${it.nf}</div>` : '';
+                // Status change select (inline, matches Kanban drag behavior)
+                const isBloqueado = col === 'faturado' || col === 'recibo';
+                const statusSelect = `<select onchange="moverParaStatusLista(${it.id}, this.value)" ${isBloqueado ? 'disabled' : ''} style="border:none;padding:4px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.3px;cursor:${isBloqueado ? 'default' : 'pointer'};background:${statusColors[col]};color:white;outline:none;max-width:120px;">
+                    <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
+                    <option value="analise" ${col==='analise'?'selected':''}>ANÁLISE</option>
+                    <option value="aprovado" ${col==='aprovado'?'selected':''}>APROVADO</option>
+                    <option value="faturar" ${col==='faturar'?'selected':''}>FATURAR</option>
+                    <option value="faturado" ${col==='faturado'?'selected':''}>FATURADO</option>
+                    <option value="recibo" ${col==='recibo'?'selected':''}>RECIBO</option>
+                </select>`;
+                // Action buttons - full Kanban-equivalent set
+                const btnBase = 'background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;';
+                let acoesBtns = `<button onclick="abrirModalEditar(${it.id})" style="${btnBase}color:#475569;" title="Editar pedido"><i class="fas fa-edit"></i></button>`;
                 if (col === 'orcamento') {
-                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#ef4444;" title="Excluir" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='white'"><i class="fas fa-trash"></i></button>`;
-                } else if (col === 'analise' || col === 'aprovado') {
-                    acoesBtns += ` <button onclick="abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:5px 8px;cursor:pointer;font-size:12px;color:#059669;" title="Aprovar" onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background='white'"><i class="fas fa-check"></i></button>`;
+                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'analise')" style="${btnBase}color:#3b82f6;" title="Enviar para Análise"><i class="fas fa-arrow-right"></i></button>`;
+                    acoesBtns += ` <button onclick="excluirPedido(${it.id})" style="${btnBase}color:#ef4444;" title="Excluir"><i class="fas fa-trash"></i></button>`;
+                } else if (col === 'analise') {
+                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'aprovado')" style="${btnBase}color:#10b981;" title="Aprovar pedido"><i class="fas fa-check-circle"></i></button>`;
+                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'orcamento')" style="${btnBase}color:#f59e0b;" title="Retornar para Orçamento"><i class="fas fa-arrow-left"></i></button>`;
+                } else if (col === 'aprovado') {
+                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'faturar')" style="${btnBase}color:#8b5cf6;" title="Enviar para Faturar"><i class="fas fa-file-invoice-dollar"></i></button>`;
+                    acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'analise')" style="${btnBase}color:#ea580c;" title="Retornar para Análise"><i class="fas fa-arrow-left"></i></button>`;
+                } else if (col === 'faturar') {
+                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'faturar')" style="${btnBase}color:white;background:linear-gradient(135deg,#22c55e,#16a34a);border-color:#16a34a;" title="Faturar Agora"><i class="fas fa-file-invoice-dollar"></i></button>`;
+                } else if (col === 'faturado' || col === 'recibo') {
+                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'danfe')" style="${btnBase}color:#059669;" title="Ver DANFE"><i class="fas fa-file-invoice"></i></button>`;
+                    acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'recibo')" style="${btnBase}color:#0284c7;" title="Imprimir Recibo"><i class="fas fa-receipt"></i></button>`;
+                    if (col === 'faturado') acoesBtns += ` <button onclick="moverParaStatusLista(${it.id},'recibo')" style="${btnBase}color:#6b7280;" title="Mover para Recibo"><i class="fas fa-check-double"></i></button>`;
                 }
+                acoesBtns += ` <button onclick="abrirAcaoDeLista(${it.id},'imprimir')" style="${btnBase}color:#374151;" title="Imprimir Pedido"><i class="fas fa-print"></i></button>`;
                 html += `<tr style="background:${bg};cursor:pointer;border-bottom:1px solid #f1f5f9;" ondblclick="abrirModalEditar(${it.id})" onmouseover="this.style.background='#f5f5ff'" onmouseout="this.style.background='${bg}'">
-                    <td style="padding:12px 16px;font-weight:600;color:#1e293b;font-size:13px;white-space:nowrap;">Nº ${it.numero_pedido || it.id}</td>
+                    <td style="padding:12px 16px;font-weight:600;color:#1e293b;font-size:13px;white-space:nowrap;">${prefixosPorColuna[col]||'Pedido'} Nº ${it.numero_pedido || it.id}${nfTag}</td>
                     <td style="padding:12px 16px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#1e293b;text-transform:uppercase;">${escaparHTML(it.cliente || 'Cliente não informado')}</td>
-                    <td style="padding:12px 16px;white-space:nowrap;"><span style="display:inline-block;background:${statusColors[col]};color:white;padding:4px 12px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:0.3px;">${statusLabels[col] || col}</span></td>
+                    <td style="padding:8px 16px;white-space:nowrap;">${statusSelect}</td>
                     <td style="padding:12px 16px;font-weight:700;font-size:13px;color:#1e293b;white-space:nowrap;">R$ ${valorFmt}</td>
                     <td style="padding:12px 16px;font-size:12px;color:#374151;white-space:nowrap;">${pagamento}</td>
                     <td style="padding:12px 16px;white-space:nowrap;">${estoqueBadge}</td>
                     <td style="padding:12px 16px;color:#374151;font-size:12px;white-space:nowrap;">${escaparHTML(it.vendedor || '-')}</td>
                     <td style="padding:12px 16px;font-size:12px;color:#6b7280;white-space:nowrap;">${dataInc}</td>
-                    <td style="padding:12px 16px;text-align:center;white-space:nowrap;">
+                    <td style="padding:12px 16px;text-align:right;white-space:nowrap;display:flex;gap:4px;flex-wrap:nowrap;justify-content:flex-end;">
                         ${acoesBtns}
                     </td>
                 </tr>`;
@@ -11881,7 +11935,9 @@
             // Verificar se tem número de NF (checar todos os campos possíveis)
             const nfNumero = pedidoAtual.nf || pedidoAtual.nfe_numero || pedidoAtual.nfe_faturamento_numero || pedidoAtual.numero_nf;
             if (!nfNumero) {
-                showNotification('Este pedido não possui Nota Fiscal emitida. Use "Faturar Agora" para gerar.', 'warning');
+                // Pedido faturado mas sem NF emitida no sistema — gerar recibo de entrega como fallback
+                showNotification('NF-e não encontrada. Gerando recibo de entrega...', 'info');
+                setTimeout(() => gerarReciboHTML(), 300);
                 return;
             }
 
@@ -12031,7 +12087,7 @@
             pedidoAtual.cliente_contato = dados.contato || dados.responsavel || pedidoAtual.cliente_contato;
         }
 
-        // Gerar recibo HTML com dados reais - Suporta Meia Nota (F9)
+        // Gerar recibo HTML com dados reais - Template Profissional A4 (Suporta Meia Nota F9)
         function gerarReciboHTML() {
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -12046,181 +12102,178 @@
 
             // Calcular total dos itens
             let totalItens = 0;
-            const itensHTML = itensPedidoAtual.length > 0 ? itensPedidoAtual.map((item, idx) => {
+            const itensRows = itensPedidoAtual.length > 0 ? itensPedidoAtual.map((item, idx) => {
                 const qtd = parseFloat(item.quantidade || 0);
                 const precoUnit = parseFloat(item.preco_unitario || 0);
                 const total = parseFloat(item.preco_total) || (qtd * precoUnit);
                 totalItens += total;
-                const bgColor = idx % 2 === 0 ? '#ffffff' : '#f7fafc';
-                return `<tr style="background: ${bgColor};">
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px;">${item.código || '-'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px;">${item.descrição || '-'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px; text-align: center;">${qtd.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ${item.unidade || 'M'}</td>
-                    <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; font-size: 10px; text-align: right;">R$ ${total.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                return `<tr style="background:${idx % 2 === 0 ? '#ffffff' : '#f8fafc'}">
+                    <td style="border:1px solid #dbe8f1;padding:6px 8px;font-size:9px;color:#385062">${item.código || item.codigo || '-'}</td>
+                    <td style="border:1px solid #dbe8f1;padding:6px 8px;font-size:9px;color:#0c1726;font-weight:600">${item.descrição || item.descricao || '-'}</td>
+                    <td style="border:1px solid #dbe8f1;padding:6px 8px;font-size:9px;text-align:center;color:#385062">${qtd.toLocaleString('pt-BR',{minimumFractionDigits:2})} ${item.unidade||'PC'}</td>
+                    <td style="border:1px solid #dbe8f1;padding:6px 8px;font-size:9px;text-align:right;color:#0c1726;font-weight:700">R$ ${total.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
                 </tr>`;
-            }).join('') : '<tr><td colspan="4" style="text-align: center; padding: 20px; color: #888;">Nenhum item</td></tr>';
+            }).join('') : `<tr><td colspan="4" style="text-align:center;padding:20px;color:#6d8092;font-size:9px;border:1px solid #dbe8f1">Nenhum item registrado</td></tr>`;
 
             if (totalItens === 0) totalItens = valorTotal;
 
-            // Título e badge para meia nota
-            const títuloRecibo = isMeiaNota ? 'RECIBO DE ENTREGA - MEIA NOTA' : 'RECIBO DE ENTREGA';
-            const badgeMeiaNota = isMeiaNota ? `<div style="background: #f59e0b; color: white; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 600; display: inline-block; margin-top: 8px;">⚡ FATURAMENTO ${percentualFaturado}%</div>` : '';
+            const nfNumero = pedidoAtual.nf || pedidoAtual.numero_nf || '-';
+            const pedidoNumStr = String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(5, '0');
+            const valorExibir = isMeiaNota ? valorFaturado : totalItens;
+            const accentColor = isMeiaNota ? '#f59e0b' : '#18b6c8';
+            const brandColor = '#0b2842';
 
-            // Box de valores para meia nota
-            const valorEntregaExibir = isMeiaNota ? valorFaturado : totalItens;
+            // Box de valores
             const boxValores = isMeiaNota ? `
-                <div class="totais-box" style="background: linear-gradient(135deg, #fef3c7, #fde68a); border-color: #f59e0b;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; text-align: center;">
-                        <div>
-                            <div class="label">Valor Total Pedido</div>
-                            <div class="valor" style="color: #64748b; font-size: 18px;">R$ ${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
-                        <div style="border-left: 2px solid #f59e0b; border-right: 2px solid #f59e0b; padding: 0 20px;">
-                            <div class="label" style="color: #92400e;">Valor Faturado (${percentualFaturado}%)</div>
-                            <div class="valor" style="color: #d97706; font-size: 22px;">R$ ${valorFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
-                        <div>
-                            <div class="label" style="color: #dc2626;">Valor Pendente</div>
-                            <div class="valor" style="color: #ef4444; font-size: 18px;">R$ ${valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        </div>
-                    </div>
+              <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:2px solid #f59e0b;border-radius:14px;padding:14px 18px;text-align:center;margin:9px 0">
+                <div style="display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;gap:12px;align-items:center">
+                  <div><div style="font-size:8px;color:#92400e;text-transform:uppercase;letter-spacing:.1em;font-weight:700">Valor Total</div><div style="font-size:15px;font-weight:700;color:#78350f">R$ ${valorTotal.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                  <div style="background:#f59e0b;height:100%"></div>
+                  <div><div style="font-size:8px;color:#92400e;text-transform:uppercase;letter-spacing:.1em;font-weight:700">Faturado (${percentualFaturado}%)</div><div style="font-size:20px;font-weight:800;color:#d97706">R$ ${valorFaturado.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
+                  <div style="background:#f59e0b;height:100%"></div>
+                  <div><div style="font-size:8px;color:#dc2626;text-transform:uppercase;letter-spacing:.1em;font-weight:700">Pendente</div><div style="font-size:15px;font-weight:700;color:#ef4444">R$ ${valorPendente.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>
                 </div>
-            ` : `
-                <div class="totais-box">
-                    <div class="label">Valor Total da Entrega</div>
-                    <div class="valor">R$ ${totalItens.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                </div>
-            `;
-
-            // Observação para meia nota
-            const obsMeiaNota = isMeiaNota ? `
-                <div style="margin-top: 15px; padding: 12px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 6px; font-size: 9px;">
-                    <strong style="color: #92400e;">⚠️ ATENÇÃO - FATURAMENTO PARCIAL:</strong>
-                    <br>Este recibo refere-se à entrega de mercadorias com faturamento parcial (${percentualFaturado}%).
-                    <br>NF emitida: R$ ${valorFaturado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} | Pendente de faturamento: R$ ${valorPendente.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                </div>
-            ` : '';
+              </div>` : `
+              <div style="background:linear-gradient(135deg,#e7fbfd,#f4fcfd);border:2px solid ${accentColor};border-radius:14px;padding:16px 18px;text-align:center;margin:9px 0">
+                <div style="font-size:8px;color:#6d8092;text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:6px">VALOR TOTAL DA ENTREGA</div>
+                <div style="font-size:26px;font-weight:900;color:${brandColor}">R$ ${valorExibir.toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
+              </div>`;
 
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Recibo - Pedido ${pedidoAtual.numero_pedido || pedidoAtual.id}</title>
-                    <style>
-                        @page { margin: 10mm; size: A4; }
-                        @media print {
-                            @page { margin: 10mm; }
-                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        }
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: Arial, Helvetica, sans-serif; color: #2d3748; background: #fff; font-size: 11px; }
-                        .container { padding: 20px; max-width: 100%; }
-                        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 15px; border-bottom: 3px solid #0284c7; }
-                        .logo-area img { height: 45px; }
-                        .empresa-info { text-align: right; font-size: 8px; color: #718096; line-height: 1.4; }
-                        .empresa-info .razao { font-size: 9px; font-weight: 700; color: #1e293b; margin-bottom: 2px; }
-                        .doc-title { background: linear-gradient(135deg, ${isMeiaNota ? '#f59e0b 0%, #d97706' : '#0284c7 0%, #0369a1'} 100%); color: #fff; padding: 12px 20px; margin-top: 15px; text-align: center; border-radius: 8px; }
-                        .doc-title h1 { font-size: 16px; font-weight: 700; letter-spacing: 1px; margin: 0; }
-                        .doc-title .número { font-size: 12px; color: ${isMeiaNota ? '#fef3c7' : '#bae6fd'}; margin-top: 3px; }
-                        .section { margin-top: 15px; }
-                        .section-header { background: #0284c7; color: #fff; padding: 6px 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 4px 4px 0 0; }
-                        .section-content { border: 1px solid #e2e8f0; border-top: none; padding: 12px; background: #fff; border-radius: 0 0 4px 4px; }
-                        .cliente-nome { font-size: 12px; font-weight: 700; color: #1e293b; text-transform: uppercase; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; margin-bottom: 10px; }
-                        .cliente-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px 20px; font-size: 9px; }
-                        .cliente-item { display: flex; gap: 6px; }
-                        .cliente-item label { color: #64748b; font-weight: 700; min-width: 60px; }
-                        .cliente-item span { color: #1e293b; }
-                        .items-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-                        .items-table th { background: #0284c7; color: #fff; padding: 8px; font-size: 9px; font-weight: 700; text-transform: uppercase; text-align: left; }
-                        .totais-box { background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid #0284c7; padding: 15px 20px; margin-top: 15px; border-radius: 8px; text-align: center; }
-                        .totais-box .label { font-size: 10px; color: #64748b; text-transform: uppercase; letter-spacing: 1px; }
-                        .totais-box .valor { font-size: 24px; font-weight: 700; color: #0284c7; margin-top: 5px; }
-                        .assinatura-area { margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
-                        .assinatura { text-align: center; }
-                        .assinatura-linha { border-top: 1px solid #1e293b; padding-top: 8px; font-size: 10px; color: #64748b; }
-                        .footer { margin-top: 30px; padding-top: 10px; border-top: 1px solid #0284c7; font-size: 8px; color: #64748b; text-align: center; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <div class="logo-area">
-                                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:22px;font-weight:700;color:#0284c7>ALUFORCE</div>'">
-                            </div>
-                            <div class="empresa-info">
-                                <div class="razao">${getEmpresaRazao()}</div>
-                                <div>CNPJ: ${getEmpresaCnpj()} | IE: ${getEmpresaIe()}</div>
-                                <div>${getEmpresaEndereco()}</div>
-                                <div>${getEmpresaCidade()}</div>
-                                <div>Tel: ${getEmpresaTel()}</div>
-                            </div>
-                        </div>
-
-                        <div class="doc-title">
-                            <h1>${títuloRecibo}</h1>
-                            <div class="número">Pedido Nº ${String(pedidoAtual.numero_pedido || pedidoAtual.id).padStart(5, '0')} | NF: ${pedidoAtual.nf || pedidoAtual.numero_nf || '-'}</div>
-                            ${badgeMeiaNota}
-                        </div>
-
-                        <div class="section">
-                            <div class="section-header">Dados do Cliente</div>
-                            <div class="section-content">
-                                <div class="cliente-nome">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</div>
-                                <div class="cliente-grid">
-                                    <div class="cliente-item"><label>CNPJ:</label><span>${escaparHTML(pedidoAtual.cliente_cnpj || '-')}</span></div>
-                                    <div class="cliente-item"><label>IE:</label><span>${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
-                                    <div class="cliente-item"><label>Endereço:</label><span>${escaparHTML(pedidoAtual.cliente_endereco || '-')}</span></div>
-                                    <div class="cliente-item"><label>Bairro:</label><span>${escaparHTML(pedidoAtual.cliente_bairro || '-')}</span></div>
-                                    <div class="cliente-item"><label>Cidade/UF:</label><span>${escaparHTML(pedidoAtual.cliente_cidade || '-')}/${escaparHTML(pedidoAtual.cliente_uf || '-')}</span></div>
-                                    <div class="cliente-item"><label>CEP:</label><span>${escaparHTML(pedidoAtual.cliente_cep || '-')}</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="section">
-                            <div class="section-header">Itens Entregues</div>
-                            <table class="items-table">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 80px;">CÓDIGO</th>
-                                        <th>DESCRIÇÃO</th>
-                                        <th style="width: 80px; text-align: center;">QTD</th>
-                                        <th style="width: 100px; text-align: right;">VALOR</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${itensHTML}</tbody>
-                            </table>
-                        </div>
-
-                        ${boxValores}
-                        ${obsMeiaNota}
-
-                        <div class="assinatura-area">
-                            <div class="assinatura">
-                                <div class="assinatura-linha">Assinatura do Entregador</div>
-                            </div>
-                            <div class="assinatura">
-                                <div class="assinatura-linha">Assinatura do Recebedor</div>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 20px; padding: 10px; background: #f8fafc; border-radius: 6px; font-size: 9px;">
-                            <strong>Data de Entrega:</strong> ____/____/________ &nbsp;&nbsp;&nbsp; <strong>Hora:</strong> ____:____ &nbsp;&nbsp;&nbsp; <strong>Nome do Recebedor:</strong> ___________________________________
-                        </div>
-
-                        <div class="footer">
-                            <div>Documento gerado em ${dataAtual} às ${horaAtual}</div>
-                            <div style="margin-top: 3px;">ALUFORCE - Sistema de Gestão Empresarial | Este recibo comprova a entrega das mercadorias descritas acima.</div>
-                        </div>
-                    </div>
-
-                    <scr` + `ipt>
-                        setTimeout(function() { window.print(); }, 500);
-                    <\/scr` + `ipt>
-                </body>
-                </html>
-            `);
+            printWindow.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Recibo - Pedido Nº ${pedidoNumStr}</title>
+  <style>
+    :root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--line-soft:#edf4f8;--brand:#0b2842;--accent:${accentColor}}
+    *{box-sizing:border-box;margin:0;padding:0}
+    @page{size:A4;margin:0}
+    html,body{background:#eef4f8;font-family:Arial,Helvetica,sans-serif;color:var(--text);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    body{display:flex;justify-content:center}
+    .a4{width:210mm;min-height:297mm;background:#eef4f8;padding:11mm 0;display:flex;flex-direction:column;align-items:center}
+    .frame{width:184mm}
+    .shell{background:white;border:1px solid #dbe8f1;border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
+    .top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,#103758 62%,var(--accent) 100%);border-radius:999px;margin-bottom:10px}
+    .receipt{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:white}
+    .rhead{padding:11px 13px 10px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%)}
+    .head-grid{display:grid;grid-template-columns:1.22fr 0.88fr;gap:12px;align-items:start}
+    .brand-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+    .logo-box{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand) 0%,#103758 72%,var(--accent) 100%);color:white;flex:0 0 42px;overflow:hidden}
+    .logo-box img{width:100%;height:100%;object-fit:contain;padding:6px}
+    .brand-name{color:var(--brand);font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+    .headline{color:var(--ink);font-size:16px;font-weight:900;line-height:1.08}
+    .subtitle{color:var(--muted);font-size:9px;line-height:1.5;margin-top:5px}
+    .doc-card{border:1px solid rgba(24,182,200,.34);background:linear-gradient(180deg,#fff,#f4fcfd);border-radius:16px;padding:10px 11px}
+    .doc-card-title{color:var(--brand);font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;margin-bottom:8px}
+    .doc-meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px 9px}
+    .meta-item{padding:7px 8px;border-radius:12px;background:white;border:1px solid var(--line-soft)}
+    .meta-label{display:block;font-size:7px;color:var(--muted);text-transform:uppercase;letter-spacing:.14em;margin-bottom:3px;font-weight:700}
+    .meta-value{display:block;color:var(--ink);font-size:10px;font-weight:800;word-break:break-word}
+    .body{padding:10px 13px 11px}
+    .statement{padding:9px 11px;border-radius:14px;background:#f6fafc;border:1px solid var(--line-soft);font-size:10px;line-height:1.55;color:var(--text);margin-bottom:9px}
+    .statement strong{color:var(--ink)}
+    .grid-4{display:grid;grid-template-columns:1.3fr .95fr .75fr .7fr;gap:7px;margin-bottom:7px}
+    .grid-3{display:grid;grid-template-columns:1.26fr .94fr .8fr;gap:7px;margin-bottom:7px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+    .field{min-height:51px;border:1px solid var(--line);border-radius:13px;background:white;padding:7px 9px 8px}
+    .field-label{display:block;color:var(--muted);font-size:7px;font-weight:800;text-transform:uppercase;letter-spacing:.14em;margin-bottom:4px}
+    .field-value{display:block;color:var(--ink);font-size:10px;font-weight:700;word-break:break-word}
+    .field-help{display:block;color:var(--muted);font-size:8px;margin-top:3px}
+    .sig-grid{display:grid;grid-template-columns:.9fr .86fr 1.24fr;gap:7px;margin-top:4px}
+    .sig-card{min-height:70px;border:1px solid var(--line);border-radius:13px;padding:8px 9px 9px;background:white}
+    .sig-line{border-top:1px solid #9db0c2;margin-top:20px;padding-top:5px;color:var(--muted);font-size:7px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+    .items-table{width:100%;border-collapse:collapse;font-size:9px;border-radius:10px;overflow:hidden;margin-bottom:9px}
+    .items-table th{background:var(--brand);color:white;padding:7px 8px;text-align:left;font-size:7px;text-transform:uppercase;letter-spacing:.09em;border:1px solid var(--brand)}
+    .items-table th:last-child,.items-table td:last-child{text-align:right}
+    .tear-line{position:relative;margin:10px 0 11px;border-top:2px dashed #9fb5c7;height:0}
+    .tear-line span{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:white;padding:0 10px;color:var(--muted);font-size:7px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;white-space:nowrap}
+    .footer-note{margin-top:8px;font-size:8px;color:var(--muted);line-height:1.5;text-align:center}
+    ${isMeiaNota ? '.parcial-badge{display:inline-block;background:#f59e0b;color:white;padding:3px 10px;border-radius:999px;font-size:8px;font-weight:800;letter-spacing:.06em;margin-top:4px}' : ''}
+    @media print{body,.a4{background:white}.shell{box-shadow:none;border-color:transparent}}
+  </style>
+</head>
+<body>
+<main class="a4">
+  <div class="frame">
+    <section class="shell">
+      <div class="top-rule"></div>
+      <section class="receipt">
+        <header class="rhead">
+          <div class="head-grid">
+            <div>
+              <div class="brand-wrap">
+                <div class="logo-box">
+                  <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="${getEmpresaRazao()}" onerror="this.outerHTML='<svg viewBox=\'0 0 64 64\' fill=\'none\'><path d=\'M14 16H30L22 28L14 16Z\' fill=\'white\' fill-opacity=\'.95\'/><path d=\'M34 16H50L24 48H8L34 16Z\' fill=\'white\'/></svg>'">
+                </div>
+                <div>
+                  <div class="brand-name">${getEmpresaRazao()}</div>
+                  <div style="color:var(--muted);font-size:8px;letter-spacing:.12em;text-transform:uppercase">CNPJ: ${getEmpresaCnpj()} · IE: ${getEmpresaIe()}</div>
+                </div>
+              </div>
+              <h2 class="headline">${isMeiaNota ? 'Recibo de Entrega — Faturamento Parcial' : 'Recibo de Entrega / Recebimento'}</h2>
+              <p class="subtitle">${getEmpresaEndereco()}, ${getEmpresaCidade()} · Tel: ${getEmpresaTel()}</p>
+              ${isMeiaNota ? '<span class="parcial-badge">⚡ FATURAMENTO ' + percentualFaturado + '%</span>' : ''}
+            </div>
+            <aside class="doc-card">
+              <p class="doc-card-title">Referência do pedido</p>
+              <div class="doc-meta">
+                <div class="meta-item"><span class="meta-label">Pedido Nº</span><span class="meta-value">${pedidoNumStr}</span></div>
+                <div class="meta-item"><span class="meta-label">NF-e</span><span class="meta-value">${nfNumero}</span></div>
+                <div class="meta-item"><span class="meta-label">Emissão</span><span class="meta-value">${dataAtual}</span></div>
+                <div class="meta-item"><span class="meta-label">Valor Total</span><span class="meta-value">R$ ${valorExibir.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div>
+              </div>
+            </aside>
+          </div>
+        </header>
+        <div class="body">
+          <div class="statement">
+            Recebi(emos) de <strong>${getEmpresaRazao()}</strong> os produtos e/ou serviços constantes deste recibo,
+            relativos ao pedido <strong>${pedidoNumStr}</strong>${nfNumero !== '-' ? ', NF-e <strong>' + nfNumero + '</strong>' : ''}, e os conferi no ato da entrega.
+          </div>
+          <div class="grid-4">
+            <div class="field"><span class="field-label">Destinatário / Recebedor</span><span class="field-value">${escaparHTML(pedidoAtual.cliente||'—')}</span></div>
+            <div class="field"><span class="field-label">CNPJ / CPF</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_cnpj||'-')}</span></div>
+            <div class="field"><span class="field-label">IE</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_ie||'Isento')}</span></div>
+            <div class="field"><span class="field-label">Pagamento</span><span class="field-value">${escaparHTML(pedidoAtual.parcelas||'A Vista')}</span></div>
+          </div>
+          <div class="grid-3">
+            <div class="field"><span class="field-label">Endereço de entrega</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_endereco||'—')}</span><span class="field-help">${escaparHTML(pedidoAtual.cliente_bairro||'')} · ${escaparHTML(pedidoAtual.cliente_cidade||'')}/${escaparHTML(pedidoAtual.cliente_uf||'')} · ${escaparHTML(pedidoAtual.cliente_cep||'')}</span></div>
+            <div class="field"><span class="field-label">Transportadora</span><span class="field-value">${escaparHTML(pedidoAtual.transportadora||'—')}</span></div>
+            <div class="field"><span class="field-label">Vendedor</span><span class="field-value">${escaparHTML(pedidoAtual.vendedor||'—')}</span></div>
+          </div>
+          <div class="items-table" style="overflow:hidden;border-radius:10px">
+            <table style="width:100%;border-collapse:collapse;font-size:9px">
+              <thead><tr>
+                <th style="width:10%">Código</th>
+                <th style="width:46%">Descrição</th>
+                <th style="width:22%;text-align:center">Qtd / Un</th>
+                <th style="width:22%">Valor</th>
+              </tr></thead>
+              <tbody>${itensRows}</tbody>
+            </table>
+          </div>
+          ${boxValores}
+          <div class="grid-2">
+            <div class="field" style="min-height:44px"><span class="field-label">Observações</span><span class="field-value">${escaparHTML(pedidoAtual.mensagem||pedidoAtual.observacoes||'—')}</span></div>
+            <div class="field" style="min-height:44px"><span class="field-label">Status de conferência</span><span class="field-value">Mercadorias conferidas na entrega</span></div>
+          </div>
+          <div class="sig-grid">
+            <div class="sig-card"><span class="field-label">Data e hora do recebimento</span><div class="sig-line">Data / hora</div></div>
+            <div class="sig-card"><span class="field-label">Documento do recebedor (CPF/RG)</span><div class="sig-line">CPF / RG</div></div>
+            <div class="sig-card"><span class="field-label">Nome legível e assinatura</span><div class="sig-line">Assinatura / carimbo</div></div>
+          </div>
+        </div>
+      </section>
+      <div class="tear-line"><span>destacar e arquivar com a DANFE / NF-e</span></div>
+      <div class="footer-note">
+        Documento gerado em ${dataAtual} às ${horaAtual} · ${getEmpresaRazao()} – Sistema de Gestão Empresarial · Este recibo comprova a entrega das mercadorias descritas acima.
+      </div>
+    </section>
+  </div>
+</main>
+<scr` + `ipt>setTimeout(function(){window.print();},500);<\/scr` + `ipt>
+</body></html>`);
             printWindow.document.close();
         }
 

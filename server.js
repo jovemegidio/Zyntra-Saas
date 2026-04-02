@@ -1137,25 +1137,51 @@ app.use((req, res, next) => {
 
 // Servir arquivos estáticos dos módulos (APENAS JS, CSS e imagens - NÃO HTML)
 app.use('/Vendas/js', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'js'), {
-    setHeaders: (res, path) => {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'application/javascript');
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
 }));
 
 app.use('/Vendas/css', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'css'), {
-    setHeaders: (res, path) => {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res, filePath) => {
         res.setHeader('Content-Type', 'text/css');
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
 }));
 
-app.use('/Vendas/images', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'images'), { dotfiles: 'deny', index: false }));
-app.use('/Vendas/assets', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'assets'), { dotfiles: 'deny', index: false }));
+app.use('/Vendas/images', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'images'), {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => { res.setHeader('Cache-Control', 'no-cache, must-revalidate'); }
+}));
+app.use('/Vendas/assets', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'assets'), {
+    dotfiles: 'deny',
+    index: false,
+    etag: true,
+    lastModified: true,
+    setHeaders: (res) => { res.setHeader('Cache-Control', 'no-cache, must-revalidate'); }
+}));
 
 // Servir uploads específicos do Vendas
 app.use('/uploads', express.static(path.join(__dirname, 'modules', 'Vendas', 'public', 'uploads'), {
     dotfiles: 'deny',
     index: false,
+    etag: true,
+    lastModified: true,
     setHeaders: (res, filePath) => {
+        // Fotos e uploads sempre revalidam para mostrar versão mais recente
+        res.setHeader('Cache-Control', 'no-cache, must-revalidate');
         if (filePath.endsWith('.png') || filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
             res.setHeader('Content-Type', 'image/' + filePath.split('.').pop().replace('jpg', 'jpeg'));
         }
