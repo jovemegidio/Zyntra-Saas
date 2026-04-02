@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // CUSTOS & PRECIFICAÇÃO — Módulo Standalone
 // Extraído do PCP para uso no Configurações do Sistema
 // ============================================
@@ -26,61 +26,61 @@
 
         modal = document.createElement('div');
         modal.id = 'modal-custos-prec';
-        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:200001;display:flex;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);';
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(15,23,42,0.6);z-index:200001;display:flex;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);';
         modal.innerHTML = `
-            <div style="background:#f8fafc;border-radius:16px;width:96%;max-width:1200px;max-height:93vh;display:flex;flex-direction:column;box-shadow:0 25px 50px rgba(0,0,0,0.25);overflow:hidden;">
+            <div style="background:#f8fafc;border-radius:12px;width:96%;max-width:1200px;max-height:93vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 0 1px rgba(255,255,255,0.05);overflow:hidden;">
                 <!-- HEADER -->
-                <div style="padding:18px 28px;background:linear-gradient(135deg,#6d28d9 0%,#7c3aed 50%,#8b5cf6 100%);display:flex;justify-content:space-between;align-items:center;">
+                <div style="padding:16px 28px;background:#1e293b;display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0ea5e9;">
                     <div style="display:flex;align-items:center;gap:14px;">
-                        <div style="width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);">
-                            <i class="fas fa-sitemap" style="font-size:20px;color:white;"></i>
+                        <div style="width:42px;height:42px;background:linear-gradient(135deg,#0ea5e9,#0284c7);border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(14,165,233,0.3);">
+                            <i class="fas fa-chart-bar" style="font-size:18px;color:white;"></i>
                         </div>
                         <div>
-                            <h2 class="modal-title" style="margin:0;font-size:18px;font-weight:700;color:white;">Custos & Precificação</h2>
-                            <span style="font-size:12px;color:rgba(255,255,255,0.8);">Árvore de Produto — Parâmetros de Custo</span>
+                            <h2 class="modal-title" style="margin:0;font-size:17px;font-weight:700;color:white;letter-spacing:0.3px;">Custos & Precificação</h2>
+                            <span style="font-size:11px;color:#94a3b8;letter-spacing:0.2px;">Gestão de Preços · Árvore de Produto</span>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:10px;">
-                        <div id="cp-notification" style="display:none;padding:6px 14px;background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.4);border-radius:8px;color:#10b981;font-size:12px;font-weight:600;">
+                        <div id="cp-notification" style="display:none;padding:6px 14px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);border-radius:6px;color:#10b981;font-size:11px;font-weight:600;">
                             <i class="fas fa-check-circle" style="margin-right:4px;"></i><span id="cp-notif-text"></span>
                         </div>
-                        <button onclick="fecharCustosPrec()" style="background:rgba(255,255,255,0.15);border:none;width:36px;height:36px;border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
-                            <i class="fas fa-times" style="color:white;font-size:16px;"></i>
+                        <button onclick="fecharCustosPrec()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.15)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fas fa-times" style="color:#94a3b8;font-size:14px;"></i>
                         </button>
                     </div>
                 </div>
                 <!-- TABS -->
-                <div style="display:flex;border-bottom:2px solid #e5e7eb;background:white;">
-                    <button id="cp-tab-parâmetros" onclick="cpSwitchTab('parâmetros')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                <div style="display:flex;border-bottom:1px solid #e2e8f0;background:white;">
+                    <button id="cp-tab-parâmetros" onclick="cpSwitchTab('parâmetros')" style="flex:1;padding:11px 20px;border:none;background:transparent;font-size:12.5px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;letter-spacing:0.2px;">
                         <i class="fas fa-sliders-h" style="margin-right:6px;"></i>Parâmetros
                     </button>
-                    <button id="cp-tab-previa" onclick="cpSwitchTab('previa')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    <button id="cp-tab-previa" onclick="cpSwitchTab('previa')" style="flex:1;padding:11px 20px;border:none;background:transparent;font-size:12.5px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;letter-spacing:0.2px;">
                         <i class="fas fa-table" style="margin-right:6px;"></i>Prévia de Preços
                     </button>
-                    <button id="cp-tab-simulador" onclick="cpSwitchTab('simulador')" style="flex:1;padding:12px 20px;border:none;background:transparent;font-size:13px;font-weight:600;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s;">
+                    <button id="cp-tab-simulador" onclick="cpSwitchTab('simulador')" style="flex:1;padding:11px 20px;border:none;background:transparent;font-size:12.5px;font-weight:600;color:#64748b;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.2s;letter-spacing:0.2px;">
                         <i class="fas fa-calculator" style="margin-right:6px;"></i>Simulador
                     </button>
                 </div>
                 <!-- CONTENT -->
                 <div id="cp-content" style="flex:1;overflow:auto;padding:0;">
-                    <div style="text-align:center;padding:60px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:#7c3aed;"></i><p style="color:#6b7280;margin-top:12px;">Carregando dados...</p></div>
+                    <div style="text-align:center;padding:60px;"><i class="fas fa-spinner fa-spin" style="font-size:28px;color:#0ea5e9;"></i><p style="color:#64748b;margin-top:12px;font-size:13px;">Carregando dados...</p></div>
                 </div>
                 <!-- FOOTER -->
-                <div id="cp-footer" style="padding:12px 28px;border-top:1px solid #e5e7eb;background:white;display:flex;justify-content:space-between;align-items:center;">
-                    <span id="cp-footer-info" style="font-size:12px;color:#9ca3af;"></span>
-                    <div style="display:flex;gap:10px;">
+                <div id="cp-footer" style="padding:10px 28px;border-top:1px solid #e2e8f0;background:#f8fafc;display:flex;justify-content:space-between;align-items:center;">
+                    <span id="cp-footer-info" style="font-size:11px;color:#94a3b8;"></span>
+                    <div style="display:flex;gap:8px;">
                         <div style="position:relative;display:inline-block;" id="cp-pdf-dropdown-wrap">
-                            <button onclick="document.getElementById('cp-pdf-menu').style.display=document.getElementById('cp-pdf-menu').style.display==='block'?'none':'block'" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF <i class="fas fa-caret-down" style="margin-left:4px;"></i></button>
-                            <div id="cp-pdf-menu" style="display:none;position:absolute;bottom:42px;left:0;background:white;border:1px solid #e2e8f0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:260px;z-index:999;padding:6px 0;">
-                                <div style="padding:8px 16px;font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;">Tipo de Relatório</div>
-                                <button onclick="cpExportarPDF('completo');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-table" style="color:#7c3aed;width:18px;"></i> Tabela Completa</button>
-                                <button onclick="cpExportarPDF('por_categoria');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-layer-group" style="color:#ea580c;width:18px;"></i> Por Categoria</button>
-                                <button onclick="cpExportarPDF('por_estado');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-map-marked-alt" style="color:#0ea5e9;width:18px;"></i> Comparativo por Estado</button>
-                                <button onclick="cpExportarPDF('por_produto');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:10px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#1e293b;text-align:left;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-barcode" style="color:#059669;width:18px;"></i> Ficha por Produto</button>
+                            <button onclick="document.getElementById('cp-pdf-menu').style.display=document.getElementById('cp-pdf-menu').style.display==='block'?'none':'block'" style="padding:7px 16px;background:white;color:#374151;border:1px solid #d1d5db;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='#9ca3af'" onmouseout="this.style.borderColor='#d1d5db'"><i class="fas fa-file-pdf" style="margin-right:6px;color:#dc2626;"></i>Exportar PDF <i class="fas fa-caret-down" style="margin-left:4px;color:#9ca3af;"></i></button>
+                            <div id="cp-pdf-menu" style="display:none;position:absolute;bottom:40px;left:0;background:white;border:1px solid #e2e8f0;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.12);min-width:260px;z-index:999;padding:4px 0;">
+                                <div style="padding:8px 16px;font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;">Tipo de Relatório</div>
+                                <button onclick="cpExportarPDF('completo');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 16px;border:none;background:none;cursor:pointer;font-size:12.5px;color:#1e293b;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-table" style="color:#0ea5e9;width:18px;"></i> Tabela Completa</button>
+                                <button onclick="cpExportarPDF('por_categoria');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 16px;border:none;background:none;cursor:pointer;font-size:12.5px;color:#1e293b;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-layer-group" style="color:#ea580c;width:18px;"></i> Por Categoria</button>
+                                <button onclick="cpExportarPDF('por_estado');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 16px;border:none;background:none;cursor:pointer;font-size:12.5px;color:#1e293b;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-map-marked-alt" style="color:#0ea5e9;width:18px;"></i> Comparativo por Estado</button>
+                                <button onclick="cpExportarPDF('por_produto');document.getElementById('cp-pdf-menu').style.display='none'" style="display:flex;align-items:center;gap:10px;width:100%;padding:9px 16px;border:none;background:none;cursor:pointer;font-size:12.5px;color:#1e293b;text-align:left;transition:background 0.15s;" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'"><i class="fas fa-barcode" style="color:#059669;width:18px;"></i> Ficha por Produto</button>
                             </div>
                         </div>
-                        <button onclick="cpSalvarParâmetros()" style="padding:8px 18px;background:#7c3aed;color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
-                        <button onclick="cpAplicarPrecos()" style="padding:8px 18px;background:linear-gradient(135deg,#ea580c,#f97316);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;"><i class="fas fa-tags" style="margin-right:6px;"></i>Aplicar Preços aos Produtos</button>
+                        <button onclick="cpSalvarParâmetros()" style="padding:7px 16px;background:#1e293b;color:white;border:none;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar Parâmetros</button>
+                        <button onclick="cpAplicarPrecos()" style="padding:7px 16px;background:#0ea5e9;color:white;border:none;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#0284c7'" onmouseout="this.style.background='#0ea5e9'"><i class="fas fa-tags" style="margin-right:6px;"></i>Aplicar Preços aos Produtos</button>
                     </div>
                 </div>
             </div>`;
@@ -170,9 +170,9 @@
         ['parâmetros', 'previa', 'simulador'].forEach(t => {
             const btn = document.getElementById('cp-tab-' + t);
             if (btn) {
-                btn.style.color = t === tab ? '#7c3aed' : '#6b7280';
-                btn.style.borderBottomColor = t === tab ? '#7c3aed' : 'transparent';
-                btn.style.background = t === tab ? '#faf5ff' : 'transparent';
+                btn.style.color = t === tab ? '#0ea5e9' : '#64748b';
+                btn.style.borderBottomColor = t === tab ? '#0ea5e9' : 'transparent';
+                btn.style.background = t === tab ? '#f0f9ff' : 'transparent';
             }
         });
         if (tab === 'parâmetros') cpRenderParâmetros();
@@ -190,7 +190,7 @@
         const mb_pct_calc = (1 - 1 / (1 + mk / 100)) * 100;
         const ml_pct_calc = mb_pct_calc - totDesp;
         const matNames = { AL: 'Alumínio', PE: 'Polietileno (PE)', XLPE: 'XLPE', XLPE_AT: 'XLPE / Alta Tensão', HEPR: 'HEPR (Borracha)', PVC: 'PVC', MB_UV: 'Masterbatch UV' };
-        const matIcons = { AL: '⬜', PE: '🔵', XLPE: '🟣', XLPE_AT: '🟡', HEPR: '🔴', PVC: '🟢', MB_UV: '🩷' };
+        const matIcons = { AL: '⬜', PE: '🔵', XLPE: '🟣', XLPE_AT: '🟡', HEPR: '🔴', PVC: '🟢', MB_UV: '⚪' };
         const icmsEstados = _cpParâmetros.icms_estados || {};
         const freteOpcoes = _cpParâmetros.frete_opcoes || _cpParâmetros['frete_opções'] || { FOB: 0, CIF_SUDESTE: 6, CIF_SUL: 6, CIF_CENTRO_OESTE: 7, CIF_NE_NO: 9 };
         const comNormal = _cpParâmetros.comissao_normal || 1.0;
@@ -222,7 +222,7 @@
             const isAuto = autoFields.includes(d);
             despInputs += `
             <div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid #f3f4f6;">
-                <i class="fas ${despIcons[d] || 'fa-percent'}" style="color:#7c3aed;font-size:12px;width:18px;text-align:center;"></i>
+                <i class="fas ${despIcons[d] || 'fa-percent'}" style="color:#0ea5e9;font-size:12px;width:18px;text-align:center;"></i>
                 <span style="flex:1;font-size:13px;color:#374151;font-weight:500;">${despLabels[d] || d}${isAuto ? ' <span style="font-size:9px;color:#3b82f6;font-weight:600;">⚙ auto</span>' : ''}</span>
                 <div style="display:flex;align-items:center;gap:4px;">
                     <input type="number" step="0.01" value="${desp[d].toFixed(2)}" data-desp="${d}" onchange="cpUpdateDespesa(this)" style="width:68px;padding:6px 8px;border:1px solid ${isAuto ? '#93c5fd' : '#e5e7eb'};border-radius:6px;font-size:13px;font-weight:600;text-align:right;font-family:monospace;background:${isAuto ? '#eff6ff' : 'white'};" />
@@ -235,7 +235,7 @@
         <div style="padding:16px 28px;background:#f8fafc;border-bottom:1px solid #e5e7eb;">
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;">
                 <div>
-                    <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;"><i class="fas fa-map-marked-alt" style="margin-right:4px;color:#6366f1;"></i>Estado de Destino</label>
+                    <label style="font-size:10px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;"><i class="fas fa-map-marked-alt" style="margin-right:4px;color:#0ea5e9;"></i>Estado de Destino</label>
                     <select onchange="cpUpdateEstado(this.value)" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;font-weight:600;background:white;">${estadoOpts}</select>
                 </div>
                 <div>
@@ -261,7 +261,7 @@
         <div style="padding:24px 28px;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
             <div>
                 <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
-                    <div style="padding:14px 18px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-bottom:1px solid #f59e0b30;">
+                    <div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                         <div style="font-size:11px;font-weight:700;color:#92400e;text-transform:uppercase;letter-spacing:0.5px;">
                             <i class="fas fa-flask" style="margin-right:6px;"></i>Preços de Matéria-Prima (R$/Kg)
                         </div>
@@ -271,14 +271,14 @@
             </div>
             <div style="display:flex;flex-direction:column;gap:16px;">
                 <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;">
-                    <div style="padding:14px 18px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-bottom:1px solid #3b82f630;">
-                        <div style="font-size:11px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:0.5px;">
-                            <i class="fas fa-percentage" style="margin-right:6px;"></i>Markup sobre CMP
+                    <div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
+                        <div style="font-size:11px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:0.5px;">
+                            <i class="fas fa-percentage" style="margin-right:6px;color:#0ea5e9;"></i>Markup sobre CMP
                         </div>
                     </div>
                     <div style="padding:14px 18px;">
                         <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-                            <input type="number" step="0.5" value="${mk.toFixed(2)}" id="cp-markup-input" onchange="cpUpdateMarkup(this)" style="width:90px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:16px;font-weight:700;text-align:center;font-family:monospace;color:#1e40af;" />
+                            <input type="number" step="0.5" value="${mk.toFixed(2)}" id="cp-markup-input" onchange="cpUpdateMarkup(this)" style="width:90px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:8px;font-size:16px;font-weight:700;text-align:center;font-family:monospace;color:#0c4a6e;" />
                             <span style="font-size:14px;font-weight:600;color:#6b7280;">%</span>
                         </div>
                         <div style="font-size:11px;color:#6b7280;background:#f8fafc;padding:8px 12px;border-radius:6px;border-left:3px solid #3b82f6;">
@@ -287,25 +287,25 @@
                     </div>
                 </div>
                 <div style="background:white;border-radius:12px;border:1px solid #e5e7eb;overflow:hidden;flex:1;">
-                    <div style="padding:14px 18px;background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-bottom:1px solid #ec489930;">
+                    <div style="padding:14px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;">
                         <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <div style="font-size:11px;font-weight:700;color:#9d174d;text-transform:uppercase;letter-spacing:0.5px;">
-                                <i class="fas fa-receipt" style="margin-right:6px;"></i>Despesas (% sobre preço)
-                            </div>
-                            <span style="font-size:11px;color:#9d174d;font-weight:600;">Total: ${totDesp.toFixed(2)}%</span>
+                            <span style="font-size:11px;font-weight:700;color:#1e293b;text-transform:uppercase;letter-spacing:0.5px;">
+                                <i class="fas fa-receipt" style="margin-right:6px;color:#0ea5e9;"></i>Despesas (% sobre preço)
+                            </span>
+                            <span style="font-size:11px;color:#64748b;font-weight:600;">Total: ${totDesp.toFixed(2)}%</span>
                         </div>
                     </div>
                     <div style="padding:8px 18px;">${despInputs}</div>
                 </div>
             </div>
         </div>
-        <div style="margin:0 28px 20px;padding:14px 20px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:10px;border:1px solid #10b98130;display:flex;justify-content:space-between;align-items:center;">
-            <div style="font-size:13px;color:#065f46;">
-                <b>ML</b> = Preço − (CMP + Σ Despesas) &nbsp;→&nbsp; <b>ML% atual: <span style="font-size:16px;color:#059669;">${ml_pct_calc.toFixed(2)}%</span></b>
+        <div style="margin:0 28px 20px;padding:14px 20px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:13px;color:#0c4a6e;">
+                <b>ML</b> = Preço − (CMP + Σ Despesas) &nbsp;→&nbsp; <b>ML% atual: <span style="font-size:16px;color:#0284c7;">${ml_pct_calc.toFixed(2)}%</span></b>
             </div>
-            <div style="font-size:12px;color:#6b7280;">
+            <div style="font-size:12px;color:#64748b;">
                 MB%: <b>${mb_pct_calc.toFixed(2)}%</b> &nbsp;|&nbsp; Despesas: <b>${totDesp.toFixed(2)}%</b> &nbsp;|&nbsp;
-                <span style="color:#6366f1;"><b>${_cpEstado}</b> · ${_cpTipoCliente === 'revenda' ? 'Revenda' : 'Cons. Final'} · ${_cpIsRepresentante ? 'Repr.' : 'Vend.'} · ${freteNames[_cpFreteOpcao] || _cpFreteOpcao}</span>
+                <span style="color:#0ea5e9;"><b>${_cpEstado}</b> · ${_cpTipoCliente === 'revenda' ? 'Revenda' : 'Cons. Final'} · ${_cpIsRepresentante ? 'Repr.' : 'Vend.'} · ${freteNames[_cpFreteOpcao] || _cpFreteOpcao}</span>
             </div>
         </div>`;
     }
@@ -402,11 +402,11 @@
         filtered.forEach((p, idx) => {
             const bgColor = idx % 2 === 0 ? 'white' : '#fafbfc';
             const mlColor = p._ml_pct >= 20 ? '#059669' : p._ml_pct >= 15 ? '#ca8a04' : '#dc2626';
-            tbody += `<tr style="background:${bgColor};" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bgColor}'">
-                <td style="padding:8px 12px;font-weight:600;color:#7c3aed;font-size:12px;">${p.codigo}</td>
+            tbody += `<tr style="background:${bgColor};" onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='${bgColor}'">
+                <td style="padding:8px 12px;font-weight:600;color:#0c4a6e;font-size:12px;">${p.codigo}</td>
                 <td style="padding:8px 12px;font-size:12px;color:#374151;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.descricao}">${p.descricao}</td>
                 <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
-                <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
+                <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#0c4a6e;">R$ ${p._preco.toFixed(4)}</td>
                 <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${p._mb_pct.toFixed(2)}%</td>
                 <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:${mlColor};">R$ ${p._ml.toFixed(4)}</td>
                 <td style="padding:8px 12px;text-align:center;"><span style="background:${mlColor}15;color:${mlColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">${p._ml_pct.toFixed(2)}%</span></td>
@@ -513,9 +513,9 @@
             Object.keys(r.despTotal).forEach(d => {
                 const pct = _cpParâmetros.despesas[d];
                 despRows += `<tr>
-                    <td style="padding:5px 10px;font-size:12px;"><i class="fas ${despIcons[d] || 'fa-minus'}" style="color:#7c3aed;margin-right:6px;font-size:10px;"></i>${despNames[d] || d}</td>
+                    <td style="padding:5px 10px;font-size:12px;"><i class="fas ${despIcons[d] || 'fa-minus'}" style="color:#0ea5e9;margin-right:6px;font-size:10px;"></i>${despNames[d] || d}</td>
                     <td style="padding:5px 10px;text-align:right;font-size:12px;color:#6b7280;">${pct.toFixed(2)}%</td>
-                    <td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#7c3aed;">R$ ${r.despTotal[d].toFixed(4)}</td>
+                    <td style="padding:5px 10px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#0ea5e9;">R$ ${r.despTotal[d].toFixed(4)}</td>
                 </tr>`;
             });
 
@@ -557,8 +557,8 @@
                             <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${r.mb.toFixed(4)}</span>
                         </div>
                         <div style="display:flex;justify-content:space-between;padding:8px 12px;margin:6px 0;background:#eff6ff;border-radius:8px;">
-                            <span style="font-size:13px;font-weight:700;color:#1e40af;"><i class="fas fa-tag" style="margin-right:6px;"></i>Preço Sugerido</span>
-                            <span style="font-family:monospace;font-size:15px;font-weight:800;color:#1e40af;">R$ ${r.preco.toFixed(4)}</span>
+                            <span style="font-size:13px;font-weight:700;color:#0c4a6e;"><i class="fas fa-tag" style="margin-right:6px;"></i>Preço Sugerido</span>
+                            <span style="font-family:monospace;font-size:15px;font-weight:800;color:#0c4a6e;">R$ ${r.preco.toFixed(4)}</span>
                         </div>
                         <div style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;margin:8px 0 4px;">Despesas:</div>
                         <table style="width:100%;border-collapse:collapse;">${despRows}
@@ -582,14 +582,14 @@
                 </div>
             </div>
             <div style="margin-top:16px;background:white;border-radius:12px;border:1px solid #e5e7eb;padding:16px 20px;">
-                <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-sliders-h" style="color:#7c3aed;margin-right:6px;"></i>Simulação Rápida — Variar Markup</div>
+                <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;"><i class="fas fa-sliders-h" style="color:#0ea5e9;margin-right:6px;"></i>Simulação Rápida — Variar Markup</div>
                 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
                     ${[60, 70, 80, 85, 90, 95, 100, 110, 120, 130].map(m => {
                         const simParams = JSON.parse(JSON.stringify(_cpParâmetros));
                         simParams.markup_pct = m;
                         const sr = cpCalcProduto(p, simParams);
                         const isCurrent = m === _cpParâmetros.markup_pct;
-                        return '<div style="text-align:center;padding:8px;border-radius:8px;' + (isCurrent ? 'background:#7c3aed;color:white;' : 'background:#f8fafc;border:1px solid #e5e7eb;') + '">' +
+                        return '<div style="text-align:center;padding:8px;border-radius:8px;' + (isCurrent ? 'background:#1e293b;color:white;' : 'background:#f8fafc;border:1px solid #e5e7eb;') + '">' +
                             '<div style="font-size:10px;font-weight:600;' + (isCurrent ? 'color:rgba(255,255,255,0.8);' : 'color:#9ca3af;') + '">MK ' + m + '%</div>' +
                             '<div style="font-size:12px;font-weight:700;font-family:monospace;margin-top:2px;">R$ ' + sr.preco.toFixed(2) + '</div>' +
                             '<div style="font-size:10px;font-weight:600;margin-top:1px;' + (sr.ml_pct >= 15 ? (isCurrent ? 'color:#a7f3d0;' : 'color:#059669;') : (isCurrent ? 'color:#fca5a5;' : 'color:#dc2626;')) + '">ML ' + sr.ml_pct.toFixed(1) + '%</div>' +
@@ -612,7 +612,7 @@
                             const isCurrent = uf === _cpEstado;
                             const totalImp = (icos[uf].icms || 0) + (_cpTipoCliente === 'consumidor_final' ? (icos[uf].difal || 0) : 0) + (icos[uf].st || 0);
                             return '<div style="text-align:center;padding:8px 6px;border-radius:8px;' + (isCurrent ? 'background:#2563eb;color:white;box-shadow:0 2px 8px rgba(37,99,235,0.3);' : 'background:#f8fafc;border:1px solid #e5e7eb;') + 'cursor:pointer;" onclick="cpUpdateEstado(\'' + uf + '\');cpRenderSimulador()" title="ICMS: ' + (icos[uf].icms||0) + '% | DIFAL: ' + (icos[uf].difal||0) + '% | ST: ' + (icos[uf].st||0) + '%">' +
-                                '<div style="font-size:13px;font-weight:800;' + (isCurrent ? '' : 'color:#1e40af;') + '">' + uf + '</div>' +
+                                '<div style="font-size:13px;font-weight:800;' + (isCurrent ? '' : 'color:#0c4a6e;') + '">' + uf + '</div>' +
                                 '<div style="font-size:11px;font-weight:700;font-family:monospace;margin-top:2px;">R$ ' + sr.preco.toFixed(2) + '</div>' +
                                 '<div style="font-size:9px;font-weight:600;margin-top:1px;' + (isCurrent ? 'color:rgba(255,255,255,0.8);' : 'color:#6b7280;') + '">Imp: ' + totalImp.toFixed(1) + '%</div>' +
                                 '<div style="font-size:9px;font-weight:600;' + (sr.ml_pct >= 15 ? (isCurrent ? 'color:#a7f3d0;' : 'color:#059669;') : (isCurrent ? 'color:#fca5a5;' : 'color:#dc2626;')) + '">ML ' + sr.ml_pct.toFixed(1) + '%</div>' +
@@ -632,7 +632,7 @@
                         const stData = icos[uf] || {};
                         const canais = [
                             { label: 'Revenda', sublabel: 'Vendedor Interno', tipo: 'revenda', repr: false, icon: 'fas fa-user-tie', color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe' },
-                            { label: 'Revenda', sublabel: 'Representante', tipo: 'revenda', repr: true, icon: 'fas fa-handshake', color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe' },
+                            { label: 'Revenda', sublabel: 'Representante', tipo: 'revenda', repr: true, icon: 'fas fa-handshake', color: '#475569', bg: '#f8fafc', border: '#cbd5e1' },
                             { label: 'Consumidor Final', sublabel: 'Vendedor Interno', tipo: 'consumidor_final', repr: false, icon: 'fas fa-user', color: '#059669', bg: '#f0fdf4', border: '#bbf7d0' },
                             { label: 'Consumidor Final', sublabel: 'Representante', tipo: 'consumidor_final', repr: true, icon: 'fas fa-users', color: '#d97706', bg: '#fffbeb', border: '#fde68a' }
                         ];
@@ -670,7 +670,7 @@
             <div style="display:flex;gap:12px;align-items:center;margin-bottom:4px;">
                 <select id="cp-sim-select" onchange="cpSelectSimProduto(this.value)" style="flex:1;padding:10px 14px;border:1px solid #e5e7eb;border-radius:10px;font-size:13px;background:white;">${options}</select>
             </div>
-            ${_cpSimProduto ? '<div style="margin-top:4px;padding:8px 14px;background:#faf5ff;border-radius:8px;border:1px solid #e9d5ff;font-size:12px;color:#6d28d9;"><i class="fas fa-info-circle" style="margin-right:6px;"></i><b>' + _cpSimProduto.codigo + '</b> — ' + (_cpSimProduto.descricao || '') + '  |  Cores: ' + (_cpSimProduto.cores || '—') + '</div>' : '<div style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-calculator" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.4;"></i><p>Selecione um produto para simular a formação de preço</p></div>'}
+            ${_cpSimProduto ? '<div style="margin-top:4px;padding:8px 14px;background:#f0f9ff;border-radius:8px;border:1px solid #bae6fd;font-size:12px;color:#0284c7;"><i class="fas fa-info-circle" style="margin-right:6px;"></i><b>' + _cpSimProduto.codigo + '</b> — ' + (_cpSimProduto.descricao || '') + '  |  Cores: ' + (_cpSimProduto.cores || '—') + '</div>' : '<div style="text-align:center;padding:60px;color:#9ca3af;"><i class="fas fa-calculator" style="font-size:40px;margin-bottom:12px;display:block;opacity:0.4;"></i><p>Selecione um produto para simular a formação de preço</p></div>'}
             ${detail}
         </div>`;
     }
@@ -762,11 +762,11 @@
             const prods = cats[cat];
             let rows = prods.map((p, i) => `
                 <tr style="background:${i % 2 === 0 ? '#fff' : '#f8fafc'};">
-                    <td style="padding:5px 8px;font-weight:600;color:#1e40af;">${p.codigo}</td>
+                    <td style="padding:5px 8px;font-weight:600;color:#0c4a6e;">${p.codigo}</td>
                     <td style="padding:5px 8px;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.descricao}</td>
                     <td style="padding:5px 8px;text-align:center;color:#6b7280;">${p.cores || '—'}</td>
                     <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
-                    <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
+                    <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:700;color:#0c4a6e;">R$ ${p._preco.toFixed(4)}</td>
                     <td style="padding:5px 8px;text-align:center;font-weight:600;color:#059669;">${p._mb_pct.toFixed(2)}%</td>
                     <td style="padding:5px 8px;text-align:right;font-family:monospace;font-weight:600;color:${p._ml_pct >= 15 ? '#059669' : '#dc2626'};">R$ ${p._ml.toFixed(4)}</td>
                     <td style="padding:5px 8px;text-align:center;"><span style="background:${p._ml_pct >= 15 ? '#ecfdf5' : '#fef2f2'};color:${p._ml_pct >= 15 ? '#059669' : '#dc2626'};padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700;">${p._ml_pct.toFixed(2)}%</span></td>
@@ -867,9 +867,9 @@
                     const tds = chunk.map(uf => {
                         const v = r.porEstado[uf];
                         const mlColor = v.ml_pct >= 15 ? '#059669' : '#dc2626';
-                        return `<td style="padding:4px 6px;text-align:right;font-family:monospace;font-size:9px;background:${i%2===0?'#fff':'#f8fafc'};"><span style="font-weight:700;color:#1e40af;">R$ ${v.preco.toFixed(4)}</span><br><span style="color:${mlColor};font-size:8px;">${v.ml_pct.toFixed(1)}% ML</span></td>`;
+                        return `<td style="padding:4px 6px;text-align:right;font-family:monospace;font-size:9px;background:${i%2===0?'#fff':'#f8fafc'};"><span style="font-weight:700;color:#0c4a6e;">R$ ${v.preco.toFixed(4)}</span><br><span style="color:${mlColor};font-size:8px;">${v.ml_pct.toFixed(1)}% ML</span></td>`;
                     }).join('');
-                    return `<tr style="background:${i%2===0?'#fff':'#f8fafc'};"><td style="padding:4px 6px;font-weight:600;color:#1e40af;font-size:9px;">${r.codigo}</td><td style="padding:4px 6px;font-size:9px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.descricao}</td><td style="padding:4px 6px;text-align:right;font-family:monospace;font-weight:600;color:#ea580c;font-size:9px;">R$ ${r.porEstado[chunk[0]].cmp.toFixed(4)}</td>${tds}</tr>`;
+                    return `<tr style="background:${i%2===0?'#fff':'#f8fafc'};"><td style="padding:4px 6px;font-weight:600;color:#0c4a6e;font-size:9px;">${r.codigo}</td><td style="padding:4px 6px;font-size:9px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.descricao}</td><td style="padding:4px 6px;text-align:right;font-family:monospace;font-weight:600;color:#ea580c;font-size:9px;">R$ ${r.porEstado[chunk[0]].cmp.toFixed(4)}</td>${tds}</tr>`;
                 }).join('');
                 tablesHTML += `<div style="margin-bottom:14px;page-break-inside:avoid;${catIdx > 0 || ci > 0 ? 'page-break-before:always;' : ''}"><div style="background:#1e293b;color:white;padding:5px 12px;font-size:11px;font-weight:700;text-transform:uppercase;border-radius:4px 4px 0 0;">${cat} (${prods.length})</div><table style="width:100%;border-collapse:collapse;font-size:9px;border:1px solid #e5e7eb;"><thead><tr style="background:#f1f5f9;"><th style="padding:4px 6px;text-align:left;font-weight:700;border-bottom:2px solid #cbd5e1;font-size:9px;">Código</th><th style="padding:4px 6px;text-align:left;font-weight:700;border-bottom:2px solid #cbd5e1;font-size:9px;">Descrição</th><th style="padding:4px 6px;text-align:right;font-weight:700;border-bottom:2px solid #cbd5e1;font-size:9px;">CMP</th>${ths}</tr></thead><tbody>${rows}</tbody></table></div>`;
             });
@@ -915,15 +915,15 @@
             });
             const mlColor = r.ml_pct >= 20 ? '#059669' : r.ml_pct >= 15 ? '#ca8a04' : '#dc2626';
             fichasHTML += `<div style="page-break-inside:avoid;${idx > 0 ? 'page-break-before:always;' : ''}margin-bottom:20px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
-                <div style="background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;padding:12px 16px;display:flex;justify-content:space-between;"><div><span style="font-size:16px;font-weight:800;">${p.codigo}</span><span style="margin-left:8px;font-size:11px;opacity:0.85;">${p.cores ? '· ' + p.cores : ''}</span></div><div style="font-size:9px;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:12px;">${p.categoria}</div></div>
-                <div style="padding:10px 16px;background:#faf5ff;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:500;">${p.descricao}</div>
+                <div style="background:#1e293b;color:white;padding:12px 16px;display:flex;justify-content:space-between;"><div><span style="font-size:16px;font-weight:800;">${p.codigo}</span><span style="margin-left:8px;font-size:11px;opacity:0.85;">${p.cores ? '· ' + p.cores : ''}</span></div><div style="font-size:9px;background:rgba(255,255,255,0.2);padding:3px 10px;border-radius:12px;">${p.categoria}</div></div>
+                <div style="padding:10px 16px;background:#f0f9ff;border-bottom:1px solid #e2e8f0;font-size:12px;font-weight:500;">${p.descricao}</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
-                    <div style="padding:12px 16px;border-right:1px solid #f3f4f6;"><div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:8px;">Composição de Materiais</div><table style="width:100%;border-collapse:collapse;"><tbody>${matRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:4px 8px;font-size:10px;" colspan="3">TOTAL (CMP)</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-size:11px;color:#ea580c;">R$ ${r.cmp.toFixed(4)}/m</td></tr></tbody></table></div>
-                    <div style="padding:12px 16px;"><div style="font-size:9px;font-weight:700;color:#7c3aed;text-transform:uppercase;margin-bottom:8px;">Despesas sobre Preço</div><table style="width:100%;border-collapse:collapse;"><tbody>${despRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:3px 8px;font-size:10px;">TOTAL</td><td style="padding:3px 8px;text-align:right;font-size:10px;">${Object.values(desp).reduce((a,b)=>a+b,0).toFixed(2)}%</td><td style="padding:3px 8px;text-align:right;font-size:10px;">R$ ${r.sumDesp.toFixed(4)}</td></tr></tbody></table></div>
+                    <div style="padding:12px 16px;border-right:1px solid #f3f4f6;"><div style="font-size:9px;font-weight:700;color:#0ea5e9;text-transform:uppercase;margin-bottom:8px;">Composição de Materiais</div><table style="width:100%;border-collapse:collapse;"><tbody>${matRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:4px 8px;font-size:10px;" colspan="3">TOTAL (CMP)</td><td style="padding:4px 8px;text-align:right;font-family:monospace;font-size:11px;color:#ea580c;">R$ ${r.cmp.toFixed(4)}/m</td></tr></tbody></table></div>
+                    <div style="padding:12px 16px;"><div style="font-size:9px;font-weight:700;color:#0ea5e9;text-transform:uppercase;margin-bottom:8px;">Despesas sobre Preço</div><table style="width:100%;border-collapse:collapse;"><tbody>${despRows}<tr style="border-top:2px solid #e5e7eb;font-weight:700;"><td style="padding:3px 8px;font-size:10px;">TOTAL</td><td style="padding:3px 8px;text-align:right;font-size:10px;">${Object.values(desp).reduce((a,b)=>a+b,0).toFixed(2)}%</td><td style="padding:3px 8px;text-align:right;font-size:10px;">R$ ${r.sumDesp.toFixed(4)}</td></tr></tbody></table></div>
                 </div>
                 <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:#e2e8f0;border-top:1px solid #e2e8f0;">
                     <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">CMP</div><div style="font-size:14px;font-weight:800;color:#ea580c;font-family:monospace;">R$ ${r.cmp.toFixed(4)}</div></div>
-                    <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Preço Sugerido</div><div style="font-size:14px;font-weight:800;color:#1e40af;font-family:monospace;">R$ ${r.preco.toFixed(4)}</div></div>
+                    <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Preço Sugerido</div><div style="font-size:14px;font-weight:800;color:#0c4a6e;font-family:monospace;">R$ ${r.preco.toFixed(4)}</div></div>
                     <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Margem Bruta</div><div style="font-size:14px;font-weight:800;color:#059669;">${r.mb_pct.toFixed(2)}%</div></div>
                     <div style="background:white;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">ML (R$/m)</div><div style="font-size:14px;font-weight:800;color:${mlColor};font-family:monospace;">R$ ${r.ml.toFixed(4)}</div></div>
                     <div style="background:${mlColor}10;padding:10px;text-align:center;"><div style="font-size:8px;color:#6b7280;text-transform:uppercase;font-weight:700;">Margem Líquida</div><div style="font-size:14px;font-weight:800;color:${mlColor};">${r.ml_pct.toFixed(2)}%</div></div>

@@ -2100,9 +2100,7 @@
                 // Nome + Sobrenome para dropdown (nome completo só em RH)
                 function nomeESobrenome(nome) {
                     if (!nome) return 'Usuário';
-                    const parts = nome.trim().split(/\s+/);
-                    if (parts.length <= 2) return nome;
-                    return parts[0] + ' ' + parts[parts.length - 1];
+                    return nome.trim().split(/\s+/)[0];
                 }
 
                 // Atualizar saudação
@@ -2141,8 +2139,12 @@
                 const noConfigEmails = ['adm@aluforce.ind.br'];
                 const isNoConfig = userEmail && noConfigEmails.includes(userEmail);
 
+                // Emails não-admin que devem ter acesso ao modal Configurações
+                const configAllowedEmails = ['thiago.scarcella@aluforce.ind.br', 'guilherme.bastos@aluforce.ind.br'];
+                const isConfigAllowed = userEmail && configAllowedEmails.includes(userEmail);
+
                 // Mostrar opções de admin (exceto para consultoria e emails restritos)
-                if (isAdmin && !isConsultoria && !isNoConfig) {
+                if ((isAdmin && !isConsultoria && !isNoConfig) || isConfigAllowed) {
                     document.querySelectorAll('[data-admin-only]').forEach(el => {
                         el.style.display = '';
                     });
