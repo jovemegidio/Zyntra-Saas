@@ -593,7 +593,7 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
             return null;
         }
-        // Obter token CSRF fresco do servidor (necessrio para operações de escrita)
+        // Obter token CSRF fresco do servidor (necessário para operações de escrita)
         async function getCsrfToken() {
             try {
                 var resp = await fetch('/api/csrf-token', { credentials: 'include' });
@@ -610,7 +610,7 @@
             if (csrf) h['X-CSRF-Token'] = csrf;
             return h;
         }
-        // Fetch com CSRF automtico para operações de escrita (POST/PUT/DELETE)
+        // Fetch com CSRF automático para operações de escrita (POST/PUT/DELETE)
         async function fetchWithCsrf(url, options) {
             options = options || {};
             options.credentials = 'include';

@@ -435,13 +435,8 @@
             if (user.apelido && user.apelido.trim() !== '') {
                 nomeSaudacao = user.apelido.trim();
             } else if (user.nome) {
-                // Usar primeiro + último nome se nome completo for longo
-                const partes = user.nome.split(/\s+/).filter(Boolean);
-                if (partes.length > 2) {
-                    nomeSaudacao = `${partes[0]} ${partes[partes.length - 1]}`;
-                } else {
-                    nomeSaudacao = user.nome;
-                }
+                // Usar apenas primeiro nome
+                nomeSaudacao = user.nome.split(/\s+/)[0];
             }
 
             console.log('[ProfileManager] Atualizando saudação para:', nomeSaudacao);

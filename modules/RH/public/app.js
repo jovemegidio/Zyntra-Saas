@@ -789,12 +789,9 @@ function initAdminPage() {
             const greeting = document.getElementById('header-greeting');
             if (avatar) avatar.src = me.foto_perfil_url || me.foto_url || 'Interativo-Aluforce.jpg';
             if (greeting) {
-                // Use first and last name only
                 const parts = (me.nome_completo || '').trim().split(/\s+/);
-                const first = parts[0] || '';
-                const last = parts.length > 1 ? parts[parts.length-1] : '';
-                const display = `${first}${last ? ' ' + last : ''}`.trim();
-                greeting.textContent = display ? `Olá, ${display}` : 'Olá, Usuário';
+                const first = parts[0] || 'Usuário';
+                greeting.textContent = `Olá, ${first}`;
             }
         } catch (err) {
             console.warn('Náo foi possível preencher header com /api/me', err);
@@ -2482,10 +2479,8 @@ function populateUserData(userData) {
     if (headerAvatar) headerAvatar.src = userData.foto_thumb_url || userData.foto_perfil_url || userData.foto_perfil || 'Interativo-Aluforce.jpg';
     if (headerGreeting) {
         const parts = (userData.nome_completo || '').trim().split(/\s+/);
-        const first = parts[0] || '';
-        const last = parts.length > 1 ? parts[parts.length-1] : '';
-        const display = `${first}${last ? ' ' + last : ''}`.trim();
-        headerGreeting.textContent = display ? `Olá, ${display}` : 'Olá, Usuário';
+        const first = parts[0] || 'Usuário';
+        headerGreeting.textContent = `Olá, ${first}`;
     }
     const lastLoginEl = document.getElementById('last-login');
     if (lastLoginEl) lastLoginEl.textContent = new Date().toLocaleString('pt-BR');

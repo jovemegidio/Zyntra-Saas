@@ -299,7 +299,7 @@
                                     <div>
                                         <label style="font-size:0.8rem;font-weight:600;color:#475569;margin-bottom:6px;display:block;">Código do Material</label>
                                         <div style="display:flex;gap:8px;">
-                                            <input type="text" id="qr-inline-manual-code" placeholder="Digite o código ou descrição..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" autocomplete="off">
+                                            <input type="text" id="qr-inline-manual-code" placeholder="Digite o código ou descrição..." style="flex:1;padding:10px 14px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;" autocomplete="off" oninput="qrInlineManualAutocomplete(this.value)">
                                             <button onclick="qrInlineSearchManual()" class="btn btn-primary" style="padding:10px 18px;"><i class="fas fa-search"></i></button>
                                         </div>
                                         <div id="qr-inline-manual-suggestions" style="max-height:280px;overflow-y:auto;margin-top:10px;"></div>
@@ -848,9 +848,42 @@
     }
 
     // ---- Manual Search ----
+    let _qrManualDebounce = null;
+    async function qrInlineManualAutocomplete(query) {
+        const container = document.getElementById('qr-inline-manual-suggestions');
+        if (!container) return;
+        if (!query || query.length < 2) { container.innerHTML = ''; return; }
+        clearTimeout(_qrManualDebounce);
+        _qrManualDebounce = setTimeout(async () => {
+            try {
+                const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(query), { headers: getQrAuthHeaders() });
+                const data = await response.json();
+                const items = data.materiais || data.estoque || [];
+                if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:8px;">Nenhum resultado</p>'; return; }
+                container.innerHTML = items.slice(0, 8).map(m => {
+                    const nome = escapeHtml(m.descricao || m.nome || '—');
+                    const cod = escapeHtml(m.codigo || m.codigo_material || '—');
+                    const est = m.quantidade_estoque || m.estoque_atual || 0;
+                    return '<div onclick="qrInlineSelectSuggestion(\'' + cod.replace(/'/g, "\\'") + '\')" style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#f8fafc;border-radius:8px;margin-bottom:4px;cursor:pointer;border:1px solid #e2e8f0;transition:border-color 0.15s;" onmouseover="this.style.borderColor=\'#6366f1\'" onmouseout="this.style.borderColor=\'#e2e8f0\'">' +
+                        '<div><div style="font-weight:600;font-size:0.82rem;">' + nome + '</div><div style="font-size:0.7rem;color:#64748b;font-family:monospace;">' + cod + '</div></div>' +
+                        '<span style="font-size:0.75rem;font-weight:600;color:#6366f1;">' + est + ' un</span></div>';
+                }).join('');
+            } catch (e) { container.innerHTML = ''; }
+        }, 300);
+    }
+
+    function qrInlineSelectSuggestion(codigo) {
+        document.getElementById('qr-inline-manual-code').value = codigo;
+        document.getElementById('qr-inline-manual-suggestions').innerHTML = '';
+        qrInlineSearchManual();
+    }
+
     async function qrInlineSearchManual() {
         const code = document.getElementById('qr-inline-manual-code').value.trim();
         if (!code) return;
+        // Hide suggestions
+        const sug = document.getElementById('qr-inline-manual-suggestions');
+        if (sug) sug.innerHTML = '';
         await qrInlineLoadMaterial(code, 'qr-inline-manual-result');
     }
 
@@ -859,10 +892,11 @@
         if (!panel) return;
         panel.innerHTML = '<div style="text-align:center;padding:20px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem;color:#6366f1;"></i></div>';
         try {
+            // Try busca endpoint that searches across ALL materials
             const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(code), { headers: getQrAuthHeaders() });
             if (!response.ok) throw new Error('Erro ao buscar');
             const data = await response.json();
-            const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
+            const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
             const match = items.find(m => m.codigo === code || m.código === code) || items[0];
             if (!match) {
                 panel.innerHTML = '<div style="text-align:center;padding:20px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i><p>Material não encontrado</p></div>';
@@ -931,7 +965,7 @@
         try {
             const response = await fetch('/api/compras/estoque?busca=' + encodeURIComponent(query), { headers: getQrAuthHeaders() });
             const data = await response.json();
-            const items = Array.isArray(data) ? data : (data.data || data.materiais || []);
+            const items = data.materiais || data.estoque || (Array.isArray(data) ? data : []);
             if (items.length === 0) { container.innerHTML = '<p style="color:#94a3b8;font-size:0.8rem;padding:10px;">Nenhum material encontrado</p>'; return; }
             container.innerHTML = items.slice(0, 10).map(m => {
                 const nome = escapeHtml(m.descricao || m.descrição || m.nome || '—');

@@ -10,18 +10,19 @@ router.get('/qrcode/lookup', async (req, res) => {
         if (!code) {
             return res.status(400).json({ error: 'Código é obrigatório' });
         }
-        // Try multiple tables with fallback
+        const searchParam = `%${code}%`;
         let material = null;
-        // Try estoque_materias_primas
+        // Try estoque_materias_primas (exact match first, then LIKE)
         try {
             const [rows] = await db.query(
                 `SELECT id, codigo, descricao, unidade_medida as unidade,
                         quantidade_minima as estoque_min, quantidade_minima as estoque_max,
                         COALESCE(quantidade_atual, 0) as estoque_atual, localizacao, tipo
                  FROM estoque_materias_primas
-                 WHERE codigo = ? OR id = ?
+                 WHERE codigo = ? OR id = ? OR codigo LIKE ? OR descricao LIKE ?
+                 ORDER BY CASE WHEN codigo = ? THEN 0 ELSE 1 END
                  LIMIT 1`,
-                [code, parseInt(code) || 0]
+                [code, parseInt(code) || 0, searchParam, searchParam, code]
             );
             if (rows.length > 0) material = rows[0];
         } catch (e) { /* table may not exist */ }
@@ -34,9 +35,10 @@ router.get('/qrcode/lookup', async (req, res) => {
                             m.estoque_maximo as estoque_max,
                             COALESCE(e.quantidade_atual, 0) as estoque_atual, m.tipo
                      FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id
-                     WHERE m.codigo_material = ? OR m.id = ?
+                     WHERE m.codigo_material = ? OR m.id = ? OR m.codigo_material LIKE ? OR m.descricao LIKE ?
+                     ORDER BY CASE WHEN m.codigo_material = ? THEN 0 ELSE 1 END
                      LIMIT 1`,
-                    [code, parseInt(code) || 0]
+                    [code, parseInt(code) || 0, searchParam, searchParam, code]
                 );
                 if (rows.length > 0) material = rows[0];
             } catch (e) { /* table may not exist */ }
@@ -53,12 +55,150 @@ router.get('/qrcode/lookup', async (req, res) => {
     }
 });
 
+// ============ MATERIAIS PCP (Gestão de Estoque) ============
+router.get('/materiais-pcp', async (req, res) => {
+    try {
+        const db = getDatabase();
+        const { page = 1, limit = 50, busca = '', tipo = '', ativo = '' } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
+        const limitNum = parseInt(limit);
+
+        let materiais = [];
+        let total = 0;
+        let tipos = [];
+
+        // Try estoque_materias_primas first
+        try {
+            let sql = `SELECT id, codigo, descricao, unidade_medida as unidade,
+                        quantidade_minima as estoque_min,
+                        COALESCE(quantidade_atual, 0) as estoque_atual,
+                        localizacao, tipo, ativo,
+                        CASE WHEN EXISTS (SELECT 1 FROM estoque e2 WHERE e2.material_id = estoque_materias_primas.id) THEN 1 ELSE 0 END as vinculado_estoque
+                 FROM estoque_materias_primas WHERE 1=1`;
+            const params = [];
+
+            if (busca) {
+                sql += ' AND (codigo LIKE ? OR descricao LIKE ?)';
+                params.push(`%${busca}%`, `%${busca}%`);
+            }
+            if (tipo) {
+                sql += ' AND tipo = ?';
+                params.push(tipo);
+            }
+            if (ativo === '1') sql += ' AND ativo = 1';
+            else if (ativo === '0') sql += ' AND ativo = 0';
+
+            // Count
+            const countSql = sql.replace(/SELECT .* FROM/, 'SELECT COUNT(*) as total FROM');
+            const [countRows] = await db.query(countSql, params);
+            total = countRows[0]?.total || 0;
+
+            sql += ' ORDER BY descricao LIMIT ? OFFSET ?';
+            params.push(limitNum, offset);
+            const [rows] = await db.query(sql, params);
+            materiais = rows;
+
+            // Get tipos
+            const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM estoque_materias_primas GROUP BY tipo ORDER BY tipo');
+            tipos = tiposRows;
+        } catch (e) {
+            // Fallback to materiais table
+            try {
+                let sql = `SELECT m.id, m.codigo_material as codigo, m.descricao,
+                            m.unidade_medida as unidade, m.estoque_minimo as estoque_min,
+                            COALESCE(e.quantidade_atual, 0) as estoque_atual,
+                            m.tipo, m.ativo,
+                            CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END as vinculado_estoque
+                     FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id WHERE 1=1`;
+                const params = [];
+
+                if (busca) {
+                    sql += ' AND (m.codigo_material LIKE ? OR m.descricao LIKE ?)';
+                    params.push(`%${busca}%`, `%${busca}%`);
+                }
+                if (tipo) {
+                    sql += ' AND m.tipo = ?';
+                    params.push(tipo);
+                }
+                if (ativo === '1') sql += ' AND m.ativo = 1';
+                else if (ativo === '0') sql += ' AND m.ativo = 0';
+
+                const countSql = sql.replace(/SELECT .* FROM/, 'SELECT COUNT(*) as total FROM');
+                const [countRows] = await db.query(countSql, params);
+                total = countRows[0]?.total || 0;
+
+                sql += ' ORDER BY m.descricao LIMIT ? OFFSET ?';
+                params.push(limitNum, offset);
+                const [rows] = await db.query(sql, params);
+                materiais = rows;
+
+                const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM materiais GROUP BY tipo ORDER BY tipo');
+                tipos = tiposRows;
+            } catch (e2) {
+                materiais = [];
+            }
+        }
+
+        const ativos = materiais.filter(m => m.ativo !== 0).length;
+        const totalPages = Math.ceil(total / limitNum) || 1;
+
+        res.json({
+            materiais,
+            paginacao: { total, totalPages, page: parseInt(page), limit: limitNum },
+            tipos,
+            stats: { total, ativos, inativos: total - ativos }
+        });
+    } catch (error) {
+        console.error('Erro ao buscar materiais PCP:', error);
+        res.status(500).json({ error: 'Erro ao buscar materiais' });
+    }
+});
+
 // ============ CONSULTAR ESTOQUE ============
 router.get('/', async (req, res) => {
     try {
         const db = getDatabase();
-        const { material_id, baixo_estoque } = req.query;
-        
+        const { material_id, baixo_estoque, busca } = req.query;
+
+        // Se tiver busca, procurar em todas as tabelas de materiais (não exige entrada prévia)
+        if (busca) {
+            const searchParam = `%${busca}%`;
+            let materiais = [];
+
+            // Tentar estoque_materias_primas primeiro
+            try {
+                const [rows] = await db.query(
+                    `SELECT id, codigo, descricao, unidade_medida as unidade,
+                            quantidade_minima as estoque_minimo, quantidade_minima as estoque_maximo,
+                            COALESCE(quantidade_atual, 0) as quantidade_estoque, localizacao, tipo
+                     FROM estoque_materias_primas
+                     WHERE codigo LIKE ? OR descricao LIKE ?
+                     ORDER BY descricao LIMIT 20`,
+                    [searchParam, searchParam]
+                );
+                materiais = rows;
+            } catch (e) { /* table may not exist */ }
+
+            // Se não achou, tenta materiais + estoque
+            if (materiais.length === 0) {
+                try {
+                    const [rows] = await db.query(
+                        `SELECT m.id, m.codigo_material as codigo, m.descricao,
+                                m.unidade_medida as unidade, m.estoque_minimo,
+                                m.estoque_maximo,
+                                COALESCE(e.quantidade_atual, 0) as quantidade_estoque, m.tipo
+                         FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id
+                         WHERE m.codigo_material LIKE ? OR m.descricao LIKE ?
+                         ORDER BY m.descricao LIMIT 20`,
+                        [searchParam, searchParam]
+                    );
+                    materiais = rows;
+                } catch (e) { /* table may not exist */ }
+            }
+
+            return res.json({ materiais });
+        }
+
         let sql = `SELECT e.*, m.codigo_material, m.descricao, m.unidade_medida,
                           m.estoque_minimo, m.estoque_maximo
                    FROM estoque e

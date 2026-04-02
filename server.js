@@ -1186,7 +1186,9 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
     }
     // Extrair apenas o basename (nome do arquivo sem diretório)
     const safeName = path.basename(rawParam);
-    const htmlPath = path.join(moduleDir, safeName + '.html');
+    // Evitar duplicação de .html (route wildcard já captura .html)
+    const htmlFile = safeName.endsWith('.html') ? safeName : safeName + '.html';
+    const htmlPath = path.join(moduleDir, htmlFile);
     // Verificar se o caminho resolvido está dentro do diretório do módulo
     const resolvedPath = path.resolve(htmlPath);
     const resolvedDir = path.resolve(moduleDir);
@@ -2197,6 +2199,123 @@ const getUserFuncionarioId = (user) => {
     const id = Number(user?.funcionario_id || user?.id);
     return Number.isFinite(id) && id > 0 ? id : null;
 };
+
+// ─── PENSÃO ALIMENTÍCIA (RH) ───────────────────────────────────────────
+
+// Ensure table exists
+pool.query(`CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL,
+  valor DECIMAL(10,2) DEFAULT 0,
+  nome_recebedor VARCHAR(255),
+  cpf_recebedor VARCHAR(14),
+  banco_recebedor VARCHAR(100),
+  agencia_recebedor VARCHAR(20),
+  conta_recebedor VARCHAR(30),
+  observacoes TEXT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_func_pensao (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_pensao_alimenticia:', e.message);
+});
+
+app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        res.json(rows);
+    } catch (error) {
+        logger.error('Erro ao listar pensões:', error);
+        res.status(500).json({ error: 'Erro ao listar pensões' });
+    }
+});
+
+app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO rh_pensao_alimenticia (funcionario_id, valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [req.params.id, valor || 0, nome_recebedor || null, cpf_recebedor || null, banco_recebedor || null, agencia_recebedor || null, conta_recebedor || null, observacoes || null]
+        );
+        res.json({ success: true, id: result.insertId });
+    } catch (error) {
+        logger.error('Erro ao criar pensão:', error);
+        res.status(500).json({ error: 'Erro ao criar pensão' });
+    }
+});
+
+app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    try {
+        await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao remover pensão:', error);
+        res.status(500).json({ error: 'Erro ao remover pensão' });
+    }
+});
+
+// ─── SALÁRIO FAMÍLIA (RH) ──────────────────────────────────────────────
+
+pool.query(`CREATE TABLE IF NOT EXISTS rh_salario_familia (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL UNIQUE,
+  recebe TINYINT(1) DEFAULT 0,
+  quantidade_dependentes INT DEFAULT 0,
+  observacoes TEXT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_func_sf (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_salario_familia:', e.message);
+});
+
+pool.query(`CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  funcionario_id INT NOT NULL,
+  nome VARCHAR(255) NOT NULL,
+  parentesco VARCHAR(50),
+  data_nascimento DATE,
+  cpf VARCHAR(14),
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_func_sf_dep (funcionario_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(e => {
+    if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_sf_dependentes:', e.message);
+});
+
+app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    try {
+        const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
+        const [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
+        const sf = sfRows[0] || { recebe: 0, observacoes: '' };
+        res.json({ recebe: sf.recebe, observacoes: sf.observacoes || '', dependentes: depRows });
+    } catch (error) {
+        logger.error('Erro ao carregar salário família:', error);
+        res.status(500).json({ error: 'Erro ao carregar salário família' });
+    }
+});
+
+app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+    const { recebe, observacoes, dependentes } = req.body;
+    try {
+        await pool.query(
+            `INSERT INTO rh_salario_familia (funcionario_id, recebe, observacoes) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE recebe=VALUES(recebe), observacoes=VALUES(observacoes)`,
+            [req.params.id, recebe ? 1 : 0, observacoes || null]
+        );
+        if (Array.isArray(dependentes)) {
+            await pool.query('DELETE FROM rh_sf_dependentes WHERE funcionario_id = ?', [req.params.id]);
+            for (const dep of dependentes) {
+                await pool.query(
+                    'INSERT INTO rh_sf_dependentes (funcionario_id, nome, parentesco, data_nascimento, cpf) VALUES (?, ?, ?, ?, ?)',
+                    [req.params.id, dep.nome, dep.parentesco || null, dep.data_nascimento || null, dep.cpf || null]
+                );
+            }
+        }
+        res.json({ success: true });
+    } catch (error) {
+        logger.error('Erro ao salvar salário família:', error);
+        res.status(500).json({ error: 'Erro ao salvar salário família' });
+    }
+});
 
 const ensureHoleritesColumns = `
     ALTER TABLE rh_holerites

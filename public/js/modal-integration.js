@@ -14,6 +14,7 @@
     // State vars declared at top to avoid TDZ when init() runs synchronously
     let notificationSocket = null;
     let _notificationListenersSetup = false;
+    let _modalObserver = null;
 
     // Aguardar DOM
     if (document.readyState === 'loading') {
@@ -352,7 +353,6 @@
         });
     }
 
-    let _modalObserver = null;
     function observeNewModals() {
         // Desconectar observer anterior se existir (evita acumular)
         if (_modalObserver) _modalObserver.disconnect();

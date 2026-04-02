@@ -1,4 +1,4 @@
-(function () {
+﻿(function () {
   'use strict';
 
   const ADMIN_ROLES = new Set(['admin', 'administrador', 'superadmin', 'rh', 'diretoria', 'ti', 'analista de t.i', 'financeiro']);
@@ -51,7 +51,7 @@
       headers: getAuthHeaders(),
       credentials: 'include'
     });
-    if (!resp.ok) throw new Error('Nao foi possivel carregar usuario');
+    if (!resp.ok) throw new Error('Não foi possível carregar usuário');
     const user = await resp.json();
     cachedUser = user;
     return user;

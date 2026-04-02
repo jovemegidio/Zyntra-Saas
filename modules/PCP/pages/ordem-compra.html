@@ -726,10 +726,12 @@
             const aguardando = ordensCompraData.filter(oc => oc.status === 'aguardando' || oc.status === 'em_aprovacao').length;
             const valorTotal = ordensCompraData.reduce((sum, oc) => sum + (parseFloat(oc.valor_total) || 0), 0);
 
-            document.getElementById('oc-abertas').textContent = pendentes;
-            document.getElementById('oc-aprovadas').textContent = aprovadas;
-            document.getElementById('oc-aguardando').textContent = aguardando;
-            document.getElementById('oc-valor').textContent = formatarMoeda(valorTotal);
+            const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setEl('oc-abertas', pendentes);
+            setEl('oc-aprovadas', aprovadas);
+            setEl('oc-aguardando', aguardando);
+            setEl('oc-valor', formatarMoeda(valorTotal));
+            setEl('oc-valor-total', formatarMoeda(valorTotal));
         }
 
         function renderizarOrdensCompra() {

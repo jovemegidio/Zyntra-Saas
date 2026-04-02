@@ -361,7 +361,7 @@
                 const user = JSON.parse(userData);
                 const nome = (user.nome || user.nome_completo || 'Usuário').trim();
                 const partes = nome.split(/\s+/);
-                const primeiroNome = partes.length > 1 ? partes[0] + ' ' + partes[partes.length - 1] : partes[0];
+                const primeiroNome = partes[0];
 
                 // Atualizar saudação baseada na hora
                 const hora = new Date().getHours();

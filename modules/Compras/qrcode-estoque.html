@@ -970,8 +970,8 @@
     // ==================== LOAD MATERIAL ====================
     async function loadMaterial(codeOrId) {
         try {
-            // Try by code first — search in materiais-com-entrada
-            const res = await fetch(`${API_BASE}/materiais-com-entrada?search=${encodeURIComponent(codeOrId)}`, {
+            // Search across all materials by code or description
+            const res = await fetch(`${API_BASE}?busca=${encodeURIComponent(codeOrId)}`, {
                 headers: getAuthHeaders()
             });
 
@@ -1156,11 +1156,11 @@
         }
         searchTimeout = setTimeout(async () => {
             try {
-                const res = await fetch(`${API_BASE}/materiais-com-entrada?search=${encodeURIComponent(query)}`, {
+                const res = await fetch(`${API_BASE}?busca=${encodeURIComponent(query)}`, {
                     headers: getAuthHeaders()
                 });
                 const data = await res.json();
-                const materiais = data.materiais || [];
+                const materiais = data.materiais || data.estoque || [];
                 const container = document.getElementById('qr-search-results');
 
                 if (materiais.length === 0) {

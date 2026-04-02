@@ -182,7 +182,7 @@ function converterStatusPCPParaRequisicao(statusPCP) {
         'aprovado': 'aprovada',
         'Aprovado': 'aprovada',
         'em_transito': 'aprovada',
-        'Em Trnsito': 'aprovada',
+        'Em Trânsito': 'aprovada',
         'recebido': 'convertida',
         'Recebido': 'convertida',
         'cancelado': 'cancelada',

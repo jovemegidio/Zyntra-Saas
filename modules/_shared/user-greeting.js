@@ -87,11 +87,8 @@
         
         const fullName = user.nome || user.nome_completo || user.name || '';
         if (fullName) {
-            // Retorna primeiro + último nome se muito longo
+            // Retorna apenas primeiro nome
             const parts = fullName.split(/\s+/).filter(Boolean);
-            if (parts.length > 2) {
-                return `${parts[0]} ${parts[parts.length - 1]}`;
-            }
             return parts[0] || fullName;
         }
         

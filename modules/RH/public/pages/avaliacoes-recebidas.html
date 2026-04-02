@@ -102,7 +102,7 @@ async function carregarAvaliacoes(){
   const rows = await resp.json().catch(()=>[]);
   const tb = document.getElementById('tbody-avaliações');
   if(!resp.ok){tb.innerHTML='<tr><td colspan="6">Falha ao carregar avaliações.</td></tr>'; return;}
-  if(!Array.isArray(rows) || !rows.length){tb.innerHTML='<tr><td colspan="6">Voce ainda nao recebeu avaliações.</td></tr>'; return;}
+  if(!Array.isArray(rows) || !rows.length){tb.innerHTML='<tr><td colspan="6">Você ainda não recebeu avaliações.</td></tr>'; return;}
   tb.innerHTML = rows.map(r=>`<tr><td>${rhUiCommon.escapeHtml(r.período_nome || r['per\u00edodo_nome'] || '--')}</td><td>${rhUiCommon.escapeHtml(r.avaliador_nome || '--')}</td><td>${rhUiCommon.escapeHtml(r.tipo_avaliação || '--')}</td><td>${statusHtml(r.status)}</td><td>${rhUiCommon.escapeHtml(formatarData(r.data_avaliação))}</td><td><button class='saas-btn saas-btn-outline' onclick='abrirDetalhes(${Number(r.id)})'><i class='fas fa-eye'></i> Ver</button></td></tr>`).join('');
 }
 

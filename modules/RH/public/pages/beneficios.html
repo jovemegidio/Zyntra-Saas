@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#1a1a2e">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <title>Aluforce: Benefcios</title>
+    <title>Aluforce: Benefícios</title>
 
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
@@ -200,7 +200,7 @@
                 <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
                 <a href="meus-holerites.html" class="sidebar-btn" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
-                <a href="beneficios.html" class="sidebar-btn active" title="Meus Benefcios"><i class="fas fa-gift"></i></a>
+                <a href="beneficios.html" class="sidebar-btn active" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
@@ -227,7 +227,7 @@
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
-                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Benefcios</span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Benefícios</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -247,7 +247,7 @@
                 <div class="page-header">
                     <h1 class="page-title">
                         <i class="fas fa-gift"></i>
-                        Meus Benefcios
+                        Meus Benefícios
                     </h1>
                     <p class="page-subtitle">Consulte e gerencie seus benefcios corporativos</p>
                 </div>
@@ -259,7 +259,7 @@
                     </a>
                     <button class="btn btn-primary admin-only" id="btn-gerenciar" onclick="abrirModalGerenciar()" style="display: none;">
                         <i class="fas fa-cog"></i>
-                        Gerenciar Benefcios
+                        Gerenciar Benefícios
                     </button>
                 </div>
 
@@ -270,7 +270,7 @@
                             <i class="fas fa-check-circle"></i>
                         </div>
                         <div class="summary-content">
-                            <h4>Benefcios Ativos</h4>
+                            <h4>Benefícios Ativos</h4>
                             <div class="value" id="count-ativos">0</div>
                         </div>
                     </div>
@@ -305,12 +305,12 @@
         </main>
     </div>
 
-    <!-- Modal Gerenciar Benefcios (Admin) -->
+    <!-- Modal Gerenciar Benefícios (Admin) -->
     <div id="modalGerenciar" class="modal">
         <div class="modal-overlay" onclick="fecharModalGerenciar()"></div>
         <div class="modal-content" style="max-width: 800px;">
             <div class="modal-header">
-                <h3><i class="fas fa-cog"></i> Gerenciar Benefcios da Empresa</h3>
+                <h3><i class="fas fa-cog"></i> Gerenciar Benefícios da Empresa</h3>
                 <button class="modal-close" onclick="fecharModalGerenciar()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
@@ -425,7 +425,7 @@
             return div.innerHTML;
         }
 
-        // Benefcios padro da empresa (podem ser editados pelo admin)
+        // Benefícios padro da empresa (podem ser editados pelo admin)
         const benefíciosPadrao = [
             {
                 id: 1,
@@ -536,7 +536,7 @@
                     }
                 }
             } catch (e) {
-                console.warn('[Benefcios] API indisponvel, usando cache local:', e.message);
+                console.warn('[Benefícios] API indisponvel, usando cache local:', e.message);
             }
             // Fallback: localStorage
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -1142,7 +1142,7 @@
                 }
 
             } catch (e) {
-                console.warn('[Benefcios] Erro ao verificar elegibilidade cesta bsica:', e.message);
+                console.warn('[Benefícios] Erro ao verificar elegibilidade cesta bsica:', e.message);
             }
         }
 
