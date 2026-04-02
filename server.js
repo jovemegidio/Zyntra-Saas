@@ -2652,7 +2652,20 @@ const startServer = async () => {
             console.log('⚠️  Iniciando em modo DEV_MOCK — pulando checagem/criação de tabelas no MySQL.');
         } else {
             try {
-                await pool.query('SELECT 1');
+                // Retry DB connection up to 5x (30s total) to survive slow MySQL startup
+                let dbReady = false;
+                for (let attempt = 1; attempt <= 5 && !dbReady; attempt++) {
+                    try {
+                        await pool.query('SELECT 1');
+                        dbReady = true;
+                    } catch (e) {
+                        if (attempt < 5) {
+                            console.warn(`⏳ DB not ready (attempt ${attempt}/5): ${e.message} — retrying in 6s...`);
+                            await new Promise(r => setTimeout(r, 6000));
+                        }
+                    }
+                }
+                if (!dbReady) throw new Error('MySQL não respondeu após 5 tentativas');
                 console.log('✅ Conexão com o banco de dados estabelecida com sucesso.');
                 console.log(`⚡ Conexão DB em ${Date.now() - startupTime}ms`);
 
