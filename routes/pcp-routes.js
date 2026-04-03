@@ -765,7 +765,7 @@ module.exports = function createPCPRoutes(deps) {
     router.get('/produtos/:id(\\d+)', async (req, res, next) => {
         try {
             const { id } = req.params;
-            const [rows] = await pool.query('SELECT * FROM produtos WHERE id = ?', [id]);
+            const [rows] = await pool.query('SELECT id, codigo, codigo_produto, nome, descricao, unidade, preco, preco_custo, preco_venda, ncm, cfop, cst, categoria, estoque_atual, estoque_minimo, peso_liquido, peso_bruto, ativo, created_at, updated_at FROM produtos WHERE id = ?', [id]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'Produto não encontrado' });
@@ -3097,7 +3097,7 @@ module.exports = function createPCPRoutes(deps) {
         try {
             const { id } = req.params;
 
-            const [produtos] = await pool.query('SELECT * FROM produtos WHERE id = ?', [id]);
+            const [produtos] = await pool.query('SELECT id, codigo, codigo_produto, nome, descricao, unidade, preco, preco_custo, preco_venda, ncm, cfop, cst, categoria, estoque_atual, estoque_minimo, peso_liquido, peso_bruto, ativo, created_at, updated_at FROM produtos WHERE id = ?', [id]);
 
             if (produtos.length === 0) {
                 return res.status(404).json({ error: 'Produto não encontrado' });
@@ -3792,7 +3792,7 @@ module.exports = function createPCPRoutes(deps) {
         const emailNfeCobranca = dados.email_nfe_cobranca || dados.email_cliente || dados.email ||
                                  dados.email_nfe;
         if (emailNfeCobranca) {
-            abaVendas.getCell('G14').value = emailNfeCobranca;
+            abaVendas.getCell('D14').value = emailNfeCobranca;
         }
 
         // C15 - CPF/CNPJ do CLIENTE (Dados para Cobrança - conforme template)
@@ -3805,7 +3805,7 @@ module.exports = function createPCPRoutes(deps) {
             cnpjStr = ''; // Deixar vazio se não informado
         }
         const cellC15 = abaVendas.getCell('C15');
-        cellC15.value = cnpjStr;
+        cellC15.value = Number(cnpjStr);
         // Formatação visual igual ao template preenchido
         cellC15.numFmt = '[<=99999999999]000.000.000-00;00.000.000/0000-00';
 
@@ -3975,7 +3975,7 @@ module.exports = function createPCPRoutes(deps) {
             console.log('📝 Preenchendo observações do pedido...');
             // Linha 37-42 são células mescladas para observações
             const obs = dados.observacoes || dados.observacoes_pedido || '';
-            abaVendas.getCell('B37').value = obs;
+            abaVendas.getCell('A37').value = obs;
         }
 
         // ========================================
@@ -4058,9 +4058,9 @@ module.exports = function createPCPRoutes(deps) {
         // A43 é label fixo "CONDIÇOES DE PAGAMENTO." - NÃO sobrescrever
         // Condições extras vão na área de observações (B37) junto com as obs do pedido
         if (dados.condicoes_pagamento) {
-            const obsExistente = abaVendas.getCell('B37').value || '';
+            const obsExistente = abaVendas.getCell('A37').value || '';
             const condPag = `Cond. Pagamento: ${dados.condicoes_pagamento}`;
-            abaVendas.getCell('B37').value = obsExistente ? `${obsExistente}\n${condPag}` : condPag;
+            abaVendas.getCell('A37').value = obsExistente ? `${obsExistente}\n${condPag}` : condPag;
         }
 
         // ========================================
@@ -4096,7 +4096,7 @@ module.exports = function createPCPRoutes(deps) {
             // Também precisa atualizar a coluna F (Código de Cores)
 
             // Pegar produtos já preenchidos na VENDAS_PCP
-            const linhasProducao = [13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52];
+            const linhasProducao = [13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52, 55];
 
             // Mapeamento: linha VENDAS_PCP (18,19,20...) -> linha PRODUÇÃO (13,16,19...)
             // VENDAS_PCP linha 18 = primeiro produto -> PRODUÇÃO linha 13
@@ -6256,6 +6256,14 @@ module.exports = function createPCPRoutes(deps) {
         const { codigo, nome, descricao, cor, icone } = req.body;
         console.log('[API_PCP] Criando nova coluna kanban:', nome);
 
+        // AUDIT-FIX S7.5: Validar input
+        if (!nome || typeof nome !== 'string' || nome.trim().length === 0 || nome.trim().length > 100) {
+            return res.status(400).json({ success: false, message: 'Nome é obrigatório (máx 100 caracteres)' });
+        }
+        if (cor && !/^#[0-9a-fA-F]{6}$/.test(cor)) {
+            return res.status(400).json({ success: false, message: 'Cor deve ser hexadecimal (#RRGGBB)' });
+        }
+
         try {
             // Buscar próxima ordem
             const [[maxOrdem]] = await pool.query('SELECT MAX(ordem) as max FROM kanban_colunas_pcp');
@@ -6288,14 +6296,28 @@ module.exports = function createPCPRoutes(deps) {
         const { ordem } = req.body; // Array de { id, ordem }
         console.log('[API_PCP] Reordenando colunas kanban');
 
+        // AUDIT-FIX S7.1: Validar input + transaction
+        if (!Array.isArray(ordem) || ordem.length === 0 || ordem.length > 100) {
+            return res.status(400).json({ success: false, message: 'Dados de ordenação inválidos' });
+        }
+
+        const conn = await pool.getConnection();
         try {
+            await conn.beginTransaction();
             for (const item of ordem) {
-                await pool.query('UPDATE kanban_colunas_pcp SET ordem = ? WHERE id = ?', [item.ordem, item.id]);
+                const id = parseInt(item.id);
+                const pos = parseInt(item.ordem);
+                if (!Number.isInteger(id) || !Number.isInteger(pos) || id <= 0) continue;
+                await conn.query('UPDATE kanban_colunas_pcp SET ordem = ? WHERE id = ?', [pos, id]);
             }
+            await conn.commit();
             res.json({ success: true, message: 'Colunas reordenadas com sucesso' });
         } catch (error) {
+            await conn.rollback().catch(() => {});
             console.error('[API_PCP] Erro ao reordenar colunas:', error.message);
             res.status(500).json({ success: false, message: 'Erro ao reordenar colunas', error: 'Erro interno no servidor. Tente novamente.' });
+        } finally {
+            conn.release();
         }
     });
 
