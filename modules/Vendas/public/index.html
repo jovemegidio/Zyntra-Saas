@@ -22,6 +22,7 @@
     <!-- Sistema de Autenticação Unificado - DEVE ser carregado primeiro -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/user-greeting-avatar.js?v=20260402" defer></script>
 
     <!-- Favicon e Ícones PWA -->
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -19437,59 +19438,22 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     // Atualizar visibilidade dos botões de documentos fiscais (DANFE/Recibo)
                     atualizarBotoesDocumentosFiscais();
 
-                    // Usar apelido se disponível, senão primeiro nome + sobrenome
-                    const userName = user.apelido || user.nome || 'Usuário';
-                    // Saudação: apenas primeiro nome + último sobrenome
-                    const nomePartes = (user.nome || '').trim().split(/\s+/);
-                    const primeiroNome = user.apelido || (nomePartes.length > 1 ? nomePartes[0] + ' ' + nomePartes[nomePartes.length - 1] : nomePartes[0] || 'Usuário');
-
-                    // Prioridade: avatar > foto > foto_perfil_url > mapeamento por email/nome
-                    let userAvatar = user.avatar || user.foto || user.foto_perfil_url;
-                    if (!userAvatar || userAvatar === '/avatars/default.webp') {
-                        userAvatar = getAvatarFromEmail(user.email, userName);
+                    // Saudação + avatar via componente global
+                    if (window.ZyntraUser) {
+                        window.ZyntraUser.atualizarUI(user);
+                    } else {
+                        // Fallback inline caso o script global não carregue
+                        const primeiroNome = (user.apelido || (user.nome || 'Usuário').split(/\s+/)[0]);
+                        const greetingTextEl = document.getElementById('greeting-text');
+                        if (greetingTextEl) {
+                            const h = new Date().getHours();
+                            greetingTextEl.textContent = h >= 5 && h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+                        }
+                        const userNameEl = document.getElementById('user-name');
+                        if (userNameEl) userNameEl.textContent = primeiroNome;
                     }
 
-                    // Atualizar saudação dinâmica baseada na hora
-                    const greetingTextEl = document.getElementById('greeting-text');
-                    if (greetingTextEl) {
-                        const hour = new Date().getHours();
-                        let greeting = 'Bom dia';
-                        if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
-                        else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
-                        greetingTextEl.textContent = greeting;
-                    }
-
-                    // Atualizar nome na saudação
-                    const userNameEl = document.getElementById('user-name');
-                    if (userNameEl) {
-                        userNameEl.textContent = primeiroNome;
-                    }
-
-                    // Atualizar avatar/foto
-                    const userPhotoEl = document.getElementById('user-photo');
-                    const userInitialEl = document.getElementById('user-initial');
-
-                    if (userAvatar && userPhotoEl) {
-                        userPhotoEl.src = userAvatar;
-                        userPhotoEl.onload = () => {
-                            userPhotoEl.classList.add('visible');
-                            userPhotoEl.style.display = 'block';
-                            if (userInitialEl) userInitialEl.style.display = 'none';
-                        };
-                        userPhotoEl.onerror = () => {
-                            userPhotoEl.style.display = 'none';
-                            if (userInitialEl) {
-                                userInitialEl.textContent = userName.charAt(0).toUpperCase();
-                                userInitialEl.style.display = 'flex';
-                            }
-                        };
-                    } else if (userInitialEl) {
-                        userInitialEl.textContent = userName.charAt(0).toUpperCase();
-                        userInitialEl.style.display = 'flex';
-                        if (userPhotoEl) userPhotoEl.style.display = 'none';
-                    }
-
-                    console.log('[Vendas] Usuário carregado:', primeiroNome, '| Foto:', userAvatar ? 'Sim' : 'Não');
+                    console.log('[Vendas] Usuário carregado:', (user.nome || '').split(' ')[0], '| Foto:', (user.avatar || user.foto) ? 'Sim' : 'Não');
                 }
             } catch (error) {
                 console.error('Erro ao carregar usuário:', error);

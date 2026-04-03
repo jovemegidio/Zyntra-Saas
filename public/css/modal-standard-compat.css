@@ -1,5 +1,5 @@
 /* ============================================================
-   MODAL STANDARD COMPAT — ALUFORCE ERP v1.0 — 2026-03-23
+   MODAL STANDARD COMPAT — ZYNTRA ERP v2.0 — 2026-04-02
    Cobertura de todas as famílias de modal não-padrão.
    Garante padrão visual unificado em 100% do sistema.
    SOMENTE VISUAL — nenhuma funcionalidade foi alterada.
@@ -706,4 +706,109 @@
 .modal-header-pro-indigo .btn-close-pro:hover {
     background: rgba(255,255,255,0.25) !important;
     color: #ffffff !important;
+}
+
+/* ============================================================
+   21. FAMÍLIA: .modal-op-* (PCP — Ordens de Produção)
+   Header já usa dark gradient. Normaliza overlay, radius,
+   body background e form controls para padrão unificado.
+   ============================================================ */
+.modal-overlay:has(.modal-op-wrapper) {
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.modal-op-wrapper {
+    border-radius: 16px !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+}
+
+.modal-op-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+    border-bottom: none !important;
+    padding: 16px 24px !important;
+}
+
+.modal-op-close {
+    background: rgba(255,255,255,0.12) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    color: rgba(255,255,255,0.85) !important;
+    border-radius: 8px !important;
+}
+
+.modal-op-close:hover {
+    background: rgba(255,255,255,0.25) !important;
+    color: #ffffff !important;
+}
+
+.modal-op-body {
+    background: #f8fafc !important;
+}
+
+.modal-op-section {
+    border-radius: 12px !important;
+}
+
+.modal-op-info-field input:focus,
+.modal-op-info-field select:focus,
+.modal-op-info-field textarea:focus,
+.modal-op-input-lg:focus,
+.modal-op-input-date:focus {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+
+/* ============================================================
+   22. GLOBAL: Overlay padronizado para TODAS as famílias
+   ============================================================ */
+.modal-overlay {
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* ============================================================
+   23. GLOBAL: Icon badges padronizados em headers escuros
+   Qualquer ícone-badge dentro de header de modal escuro
+   ============================================================ */
+.modal-header .icon-badge,
+.modal-header-omie .rel-icon-badge,
+.modal-op-header .modal-op-avatar,
+[class*="modal-header"] [class*="icon-badge"],
+[class*="modal-header"] [class*="header-icon"] {
+    background: rgba(255,255,255,0.15) !important;
+    color: rgba(255,255,255,0.9) !important;
+    border-radius: 10px;
+}
+
+/* ============================================================
+   24. GLOBAL: Subtítulos em headers escuros
+   ============================================================ */
+[class*="modal-header"] .rel-subtitle,
+[class*="modal-header"] [class*="subtitle"],
+[class*="modal-header"] p:not(.modal-title) {
+    color: rgba(255,255,255,0.7) !important;
+    font-size: 12px;
+}
+
+/* ============================================================
+   25. GLOBAL: Scrollbar uniforme em modal-body
+   ============================================================ */
+[class*="modal-body"]::-webkit-scrollbar {
+    width: 6px;
+}
+
+[class*="modal-body"]::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[class*="modal-body"]::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
+    border-radius: 3px;
+}
+
+[class*="modal-body"]::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.25);
 }

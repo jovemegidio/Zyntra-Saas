@@ -85,13 +85,13 @@ module.exports = function createNfeRoutes(deps) {
                 await connection.query('UPDATE pedidos SET status = "faturado", nfe_id = ?, data_faturamento = NOW() WHERE id = ?', [nfeId, pedido_id]);
             }
     
-            // Integração Estoque: decrementar materiais se itens informados
+            // AUDIT-FIX S1.2: Integração Estoque com FOR UPDATE (previne race condition / oversell)
             if (itens && Array.isArray(itens) && itens.length > 0) {
                 for (const item of itens) {
                     if (item.material_id && item.quantidade > 0) {
-                        // Verificar se há estoque suficiente
+                        // FOR UPDATE: lock exclusivo na linha para evitar oversell por concorrência
                         const [material] = await connection.query(
-                            'SELECT id, nome, quantidade_estoque FROM materiais WHERE id = ?',
+                            'SELECT id, nome, quantidade_estoque FROM materiais WHERE id = ? FOR UPDATE',
                             [item.material_id]
                         );
     
@@ -110,13 +110,15 @@ module.exports = function createNfeRoutes(deps) {
                                 [item.quantidade, item.material_id]
                             );
 
-                            // FIX-2: Sync estoque unificado (produtos.estoque_atual + tabela estoque)
+                            // Sync estoque unificado (produtos.estoque_atual + tabela estoque)
                             try {
                                 if (item.produto_id) {
                                     await connection.query('UPDATE produtos SET estoque_atual = GREATEST(0, estoque_atual - ?) WHERE id = ?', [item.quantidade, item.produto_id]);
                                     await connection.query('UPDATE estoque SET quantidade_disponivel = GREATEST(0, quantidade_disponivel - ?) WHERE produto_id = ?', [item.quantidade, item.produto_id]);
                                 }
-                            } catch (syncErr) { /* tabelas podem nao existir */ }
+                            } catch (syncErr) {
+                                console.warn(`[NFE] Sync estoque secundário falhou para material ${item.material_id}:`, syncErr.message);
+                            }
 
                             // Registrar movimentação de estoque
                             await connection.query(`
@@ -181,28 +183,39 @@ module.exports = function createNfeRoutes(deps) {
             // Reverter conta a receber (marcar como cancelada)
             await connection.query('UPDATE contas_receber SET status = "cancelada", observacao = ? WHERE nfe_id = ?', [`Cancelamento NF-e: ${motivo}`, nfe_id]);
     
-            // Reverter estoque (devolver materiais)
-            const [movimentacoes] = await connection.query(
-                'SELECT material_id, quantidade FROM estoque_movimentacoes WHERE referencia_tipo = "nfe" AND referencia_id = ? AND tipo = "saida"',
+            // AUDIT-FIX S1.3: Reverter estoque com idempotência (verifica se já foi estornado)
+            const [jaEstornada] = await connection.query(
+                'SELECT COUNT(*) as cnt FROM estoque_movimentacoes WHERE referencia_tipo = "nfe_cancelamento" AND referencia_id = ?',
                 [nfe_id]
             );
-    
-            for (const mov of movimentacoes) {
-                // Devolver ao estoque
-                await connection.query('UPDATE materiais SET quantidade_estoque = quantidade_estoque + ? WHERE id = ?', [mov.quantidade, mov.material_id]);
-    
-                // FIX-2: Sync estoque unificado de volta
-                try {
-                    await connection.query('UPDATE produtos SET estoque_atual = estoque_atual + ? WHERE id = (SELECT produto_id FROM materiais WHERE id = ? LIMIT 1)', [mov.quantidade, mov.material_id]);
-                    await connection.query('UPDATE estoque SET quantidade_disponivel = quantidade_disponivel + ? WHERE produto_id = (SELECT produto_id FROM materiais WHERE id = ? LIMIT 1)', [mov.quantidade, mov.material_id]);
-                } catch (syncErr) { /* tabelas podem nao existir */ }
-    
-                // Registrar movimentação de estorno
-                await connection.query(`
-                    INSERT INTO estoque_movimentacoes
-                    (material_id, tipo, quantidade, referencia_tipo, referencia_id, observacao, data_movimentacao)
-                    VALUES (?, 'entrada', ?, 'nfe_cancelamento', ?, 'Estorno por cancelamento de NF-e', NOW())
-                `, [mov.material_id, mov.quantidade, nfe_id]);
+            if (jaEstornada[0].cnt > 0) {
+                // Já foi estornado anteriormente — pular para evitar duplicação
+                console.warn(`⚠️ NF-e #${nfe_id}: estorno de estoque já realizado, pulando.`);
+            } else {
+                const [movimentacoes] = await connection.query(
+                    'SELECT material_id, quantidade FROM estoque_movimentacoes WHERE referencia_tipo = "nfe" AND referencia_id = ? AND tipo = "saida"',
+                    [nfe_id]
+                );
+
+                for (const mov of movimentacoes) {
+                    // FOR UPDATE implícito: UPDATE atômico (quantidade_estoque + ?)
+                    await connection.query('UPDATE materiais SET quantidade_estoque = quantidade_estoque + ? WHERE id = ?', [mov.quantidade, mov.material_id]);
+
+                    // Sync estoque unificado de volta
+                    try {
+                        await connection.query('UPDATE produtos SET estoque_atual = estoque_atual + ? WHERE id = (SELECT produto_id FROM materiais WHERE id = ? LIMIT 1)', [mov.quantidade, mov.material_id]);
+                        await connection.query('UPDATE estoque SET quantidade_disponivel = quantidade_disponivel + ? WHERE produto_id = (SELECT produto_id FROM materiais WHERE id = ? LIMIT 1)', [mov.quantidade, mov.material_id]);
+                    } catch (syncErr) {
+                        console.warn(`[NFE-CANCEL] Sync estoque secundário falhou para material ${mov.material_id}:`, syncErr.message);
+                    }
+
+                    // Registrar movimentação de estorno
+                    await connection.query(`
+                        INSERT INTO estoque_movimentacoes
+                        (material_id, tipo, quantidade, referencia_tipo, referencia_id, observacao, data_movimentacao)
+                        VALUES (?, 'entrada', ?, 'nfe_cancelamento', ?, 'Estorno por cancelamento de NF-e', NOW())
+                    `, [mov.material_id, mov.quantidade, nfe_id]);
+                }
             }
     
             // Atualizar pedido vinculado (volta a 'aprovado' para poder ser re-faturado)

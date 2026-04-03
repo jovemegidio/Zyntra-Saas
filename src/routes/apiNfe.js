@@ -280,8 +280,9 @@ module.exports = function createApiNfeRouter({ pool, authenticateToken, authoriz
       await connection.beginTransaction();
       
       try {
-        // Gerar número da NFe (simulação)
-        const numero_nfe = Math.floor(Math.random() * 1000000);
+        // AUDIT-FIX S1.1: Gerar número da NFe via sequence atômica (elimina duplicatas)
+        const { nextVal } = require('../../services/sequence.service');
+        const numero_nfe = await nextVal(pool, 'nfe', connection);
         
         // Inserir NFe
         const [nfeResult] = await connection.query(`

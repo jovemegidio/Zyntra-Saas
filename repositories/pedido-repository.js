@@ -50,7 +50,7 @@ class PedidoRepository extends BaseRepository {
      * Sprint E2E-S1 (E1-HIGH-01 fix): Non-admin users only see their own pedidos.
      * @param {Object} options - { period, page, limit, userId, isAdmin }
      */
-    async list({ period, page = 1, limit = 1000, userId, isAdmin } = {}) {
+    async list({ period, page = 1, limit = 1000, userId, isAdmin, status } = {}) {
         const conditions = [];
         const params = [];
 
@@ -63,6 +63,12 @@ class PedidoRepository extends BaseRepository {
         if (userId && !isAdmin) {
             conditions.push('p.vendedor_id = ?');
             params.push(userId);
+        }
+
+        // HOTFIX Pipeline E2E: Filtro por status (usado pelo dashboard Faturamento)
+        if (status && status !== 'all') {
+            conditions.push('p.status = ?');
+            params.push(status);
         }
 
         const whereClause = conditions.length > 0 ? 'WHERE ' + conditions.join(' AND ') : '';

@@ -419,9 +419,9 @@ router.post('/movimentacao', async (req, res) => {
             return res.status(400).json({ error: 'Tipo de movimentação inválido. Use "entrada" ou "saida"' });
         }
         
-        // Buscar estoque atual
+        // AUDIT-FIX S1.2: FOR UPDATE lock para evitar race condition em movimentação
         const [estoqueAtual] = await connection.query(
-            'SELECT quantidade_atual FROM estoque WHERE material_id = ?',
+            'SELECT quantidade_atual FROM estoque WHERE material_id = ? FOR UPDATE',
             [material_id]
         );
         
@@ -630,9 +630,9 @@ router.post('/ajuste', async (req, res) => {
             return res.status(400).json({ error: 'Quantidade contada deve ser um número >= 0' });
         }
         
-        // Buscar estoque atual
+        // AUDIT-FIX S1.2: FOR UPDATE lock para evitar race condition em ajuste
         const [estoqueAtual] = await connection.query(
-            'SELECT quantidade_atual FROM estoque WHERE material_id = ?',
+            'SELECT quantidade_atual FROM estoque WHERE material_id = ? FOR UPDATE',
             [material_id]
         );
         

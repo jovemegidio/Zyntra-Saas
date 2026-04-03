@@ -476,16 +476,16 @@ module.exports = function createVendasExtendedRoutes(deps) {
             res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(nomeArquivoSafe)}.pdf"`);
             doc.pipe(res);
 
-            // ===== PALETA CORPORATIVA PREMIUM =====
+            // ===== PALETA CORPORATIVA ZYNTRA =====
             const C = {
-                navy:       '#0A1929',    // azul marinho profundo
-                navyMid:    '#132F4C',    // azul medio
-                navyLight:  '#1E4976',    // azul claro
-                gold:       '#C8A951',    // dourado principal
-                goldDark:   '#9E8234',    // dourado escuro
-                goldLight:  '#E8D48B',    // dourado claro
+                navy:       '#0b2842',    // azul marinho institucional (brand)
+                navyMid:    '#103758',    // azul médio
+                navyLight:  '#1a5585',    // azul claro
+                gold:       '#18b6c8',    // ciano/teal destaque (accent)
+                goldDark:   '#139bab',    // ciano escuro
+                goldLight:  '#a5e8ef',    // ciano claro
                 text:       '#1A202C',    // texto principal
-                textMid:    '#4A5568',    // texto secundario
+                textMid:    '#4A5568',    // texto secundário
                 textLight:  '#A0AEC0',    // texto suave
                 bg:         '#F8F9FB',    // fundo alternado
                 border:     '#CBD5E0',    // borda
