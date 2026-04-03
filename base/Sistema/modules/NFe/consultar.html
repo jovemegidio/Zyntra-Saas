@@ -1,0 +1,625 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Zyntra: Consultar NFe</title>
+
+    <!-- Sistema de Autenticação Unificado é DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260325" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260325" defer></script>
+
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSP Fix - Converter onclick inline para addEventListener -->
+    <script src="/js/csp-fix.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Design System é Faturamento Layout -->
+    <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
+
+    <!-- Global Header & Sidebar é Padrão Institucional -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+
+    <!-- Performance: Skeleton Loaders -->
+    <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
+
+    <!-- Popup Confirmação -->
+    <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260325">
+
+    <!-- Anti-Copy Protection -->
+    <script src="/js/anti-copy-protection.js" defer></script>
+
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260325">
+    <style>
+        /* Page-specific: rejeitada badge (not in design system) */
+        .badge.rejeitada { background: #fef3c7; color: #92400e; }
+        .badge.rejeitada::before { background: #f59e0b; }
+        /* Loading indicator */
+        .loading { text-align: center; padding: 30px; color: var(--text-muted); }
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260325">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="consultar.html" class="sidebar-btn active" title="Consultar NFe"><i class="fas fa-search"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+            </div>
+        </aside>
+        <main class="main-area">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Consultar NFe</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img alt="Foto" id="user-photo" style="display:none">
+                            <span id="user-initials">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="main-content">
+                <div class="page-content">
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <div class="page-header-top">
+                            <div class="page-title-wrapper">
+                                <div class="page-icon"><i class="fas fa-search"></i></div>
+                                <div>
+                                    <h1 class="page-title">Consultar NFe</h1>
+                                    <p class="page-subtitle">Pesquise e gerencie suas notas fiscais eletrônicas</p>
+                                </div>
+                            </div>
+                            <div class="page-actions">
+                                <button class="btn btn-primary" onclick="carregarNFes()"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                                <button class="btn btn-secondary" onclick="exportarResultados()"><i class="fas fa-file-excel"></i> Exportar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alert Container (moved to fixed position outside main) -->
+
+                    <!-- Filters Card -->
+                    <div class="card fade-in mb-6">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-filter"></i> Filtros de Consulta</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Número NFe</label>
+                                    <input type="text" class="form-control" id="filtroNumero" placeholder="Ex: 000001234">
+                                </div>
+                                <div class="form-group">
+                                    <label>Série</label>
+                                    <input type="text" class="form-control" id="filtroSerie" placeholder="Ex: 1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Chave de Acesso</label>
+                                    <input type="text" class="form-control" id="filtroChave" placeholder="44 dígitos">
+                                </div>
+                                <div class="form-group">
+                                    <label>Cliente</label>
+                                    <input type="text" class="form-control" id="filtroCliente" placeholder="Nome ou CNPJ">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data Início</label>
+                                    <input type="date" class="form-control" id="filtroDataInicio">
+                                </div>
+                                <div class="form-group">
+                                    <label>Data Fim</label>
+                                    <input type="date" class="form-control" id="filtroDataFim">
+                                </div>
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select class="form-control" id="filtroStatus">
+                                        <option value="">Todos</option>
+                                        <option value="autorizada">Autorizada</option>
+                                        <option value="cancelada">Cancelada</option>
+                                        <option value="rejeitada">Rejeitada</option>
+                                        <option value="pendente">Pendente</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="page-actions mt-4">
+                                <button class="btn btn-primary" onclick="carregarNFes()"><i class="fas fa-search"></i> Consultar</button>
+                                <button class="btn btn-secondary" onclick="limparFiltros()"><i class="fas fa-eraser"></i> Limpar</button>
+                                <button class="btn btn-secondary" onclick="exportarResultados()"><i class="fas fa-file-excel"></i> Exportar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Card -->
+                    <div class="card fade-in-delay-1">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-list"></i> Resultados</h3>
+                            <span class="text-muted" id="resultsCount">0 notas encontradas</span>
+                        </div>
+                        <div class="card-body">
+                            <div id="loadingIndicator" class="loading" style="display:none;">
+                                <i class="fas fa-spinner fa-spin"></i> Carregando...
+                            </div>
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="nfesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Número</th>
+                                            <th>Série</th>
+                                            <th>Cliente</th>
+                                            <th>Data/Hora</th>
+                                            <th>Valor</th>
+                                            <th>Status</th>
+                                            <th style="text-align:center;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="nfesTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="emptyState" class="empty-state">
+                                <i class="fas fa-search"></i>
+                                <h3>Nenhuma nota encontrada</h3>
+                                <p>Use os filtros acima para consultar notas fiscais ou clique em Consultar para exibir todas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position:fixed;top:20px;right:20px;z-index:10001;display:flex;flex-direction:column;gap:10px;"></div>
+
+    <!-- --- Modal: Visualizar NFe --- -->
+    <div class="modal-overlay" id="modalVisualizarNFe">
+        <div class="modal modal-lg" style="max-width:680px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice" style="margin-right:8px;color:var(--primary-500);"></i> Detalhes da NFe</h3>
+                <button class="modal-close" onclick="fecharModal('modalVisualizarNFe')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="nfeDetalhesBody" style="max-height:65vh;overflow-y:auto;">
+                <div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p>Carregando...</p></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modalVisualizarNFe')">Fechar</button>
+                <button class="btn btn-outline" id="btnNfeDANFE" onclick="irParaDANFE()"><i class="fas fa-print"></i> DANFE</button>
+                <button class="btn btn-primary" id="btnNfeXML" onclick="baixarXMLFromModal()"><i class="fas fa-download"></i> Baixar XML</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- --- Modal: Enviar Email --- -->
+    <div class="modal-overlay" id="modalEnviarEmail">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-envelope" style="margin-right:8px;color:var(--info);"></i> Enviar NFe por Email</h3>
+                <button class="modal-close" onclick="fecharModal('modalEnviarEmail')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:12px 16px;background:var(--bg-secondary);border-radius:var(--radius-md);border:1px solid var(--border-color);">
+                    <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#2563eb);display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-file-invoice" style="color:#fff;font-size:16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);">NFe</div>
+                        <div style="font-size:14px;font-weight:700;" id="emailNfeLabel">-</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email do Destinatério *</label>
+                    <input type="email" class="form-control" id="emailDestinatario" placeholder="exemplo@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Assunto</label>
+                    <input type="text" class="form-control" id="emailAssunto" placeholder="NFe - Nota Fiscal Eletrônica">
+                </div>
+                <div class="form-group">
+                    <label>Mensagem <span style="color:var(--text-muted);font-weight:400;">(opcional)</span></label>
+                    <textarea class="form-control" id="emailMensagem" rows="3" placeholder="Mensagem adicional..."></textarea>
+                </div>
+                <div style="display:flex;gap:20px;margin-top:12px;">
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;">
+                        <input type="checkbox" id="emailAnexarXML" checked style="width:16px;height:16px;accent-color:var(--primary-500);"> Anexar XML
+                    </label>
+                    <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500;color:var(--text-secondary);cursor:pointer;">
+                        <input type="checkbox" id="emailAnexarDANFE" checked style="width:16px;height:16px;accent-color:var(--primary-500);"> Anexar DANFE (PDF)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modalEnviarEmail')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmarEnvioEmail()"><i class="fas fa-paper-plane"></i> Enviar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // == Toggle mobile sidebar ==
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        function toggleNotificacoes() {}
+
+        // == Avatar map ==
+        const avatarNameMap = {
+            'clemerson':'CM','isabela':'IB','thaina':'TH','thiago':'TG','nicolas':'NC',
+            'nicolasdaniel':'ND','rh':'RH','admin':'AD','ti':'TI','tialuforce':'TI',
+            'antonio':'AT','andreia':'AN','guilherme':'GH','marcelo':'MC','financeiro':'FN',
+            'douglas':'DG','hellen':'HL','helen':'HL','marcia':'MR','augusto':'AG',
+            'renata':'RN','fabiano':'FB','fabiola':'FL'
+        };
+
+        // == Carregar Usuário ==
+        function carregarUsuario() {
+            fetch('/api/me', { credentials:'include' })
+            .then(r => r.json())
+            .then(user => {
+                const d = user.dados || user;
+                const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
+                document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
+                const h = new Date().getHours();
+                document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+                const el = document.getElementById('user-initials');
+                const photo = document.getElementById('user-photo');
+                if (d.foto || d.avatar) {
+                    photo.src = d.foto || d.avatar;
+                    photo.style.display = 'block';
+                    photo.style.width = '100%';
+                    photo.style.height = '100%';
+                    photo.style.borderRadius = '50%';
+                    photo.style.objectFit = 'cover';
+                    el.style.display = 'none';
+                } else {
+                    const key = nome.toLowerCase().replace(/\s/g,'');
+                    el.textContent = avatarNameMap[key] || nome.substring(0,2).toUpperCase();
+                }
+            }).catch(() => {});
+        }
+
+        let nfesCarregadas = [];
+
+        // == Carregar NFes ==
+        function carregarNFes() {
+            const loading = document.getElementById('loadingIndicator');
+            const empty = document.getElementById('emptyState');
+            const tbody = document.getElementById('nfesTableBody');
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            tbody.innerHTML = '';
+
+            fetch('/api/nfe/listar?limite=100', { credentials:'include' })
+            .then(r => r.json())
+            .then(data => {
+                loading.style.display = 'none';
+                nfesCarregadas = data.notas || data.data || data || [];
+                if (!Array.isArray(nfesCarregadas)) { nfesCarregadas = []; }
+                filtrarEExibir();
+            })
+            .catch(() => {
+                loading.style.display = 'none';
+                nfesCarregadas = [];
+                showAlert('Erro ao carregar NFe. Verifique sua conexão.', 'danger');
+                filtrarEExibir();
+            });
+        }
+
+        // == Filter and display ==
+        function filtrarEExibir() {
+            const numero = document.getElementById('filtroNumero').value.trim().toLowerCase();
+            const serie = document.getElementById('filtroSerie').value.trim();
+            const chave = document.getElementById('filtroChave').value.trim();
+            const cliente = document.getElementById('filtroCliente').value.trim().toLowerCase();
+            const dataInicio = document.getElementById('filtroDataInicio').value;
+            const dataFim = document.getElementById('filtroDataFim').value;
+            const status = document.getElementById('filtroStatus').value;
+
+            let filtradas = nfesCarregadas.filter(nfe => {
+                if (numero && !(nfe.numero||'').toLowerCase().includes(numero)) return false;
+                if (serie && (nfe.serie||'') !== serie) return false;
+                if (chave && !(nfe.chave||'').includes(chave)) return false;
+                if (cliente && !(nfe.cliente||nfe.destinatario||'').toLowerCase().includes(cliente)) return false;
+                if (status && (nfe.status||'').toLowerCase() !== status) return false;
+                if (dataInicio && (nfe.dataEmissao||'') < dataInicio) return false;
+                if (dataFim && (nfe.dataEmissao||'') > dataFim + 'T23:59:59') return false;
+                return true;
+            });
+
+            const tbody = document.getElementById('nfesTableBody');
+            const empty = document.getElementById('emptyState');
+            document.getElementById('resultsCount').textContent = filtradas.length + ' nota(s) encontrada(s)';
+
+            if (filtradas.length === 0) {
+                tbody.innerHTML = '';
+                empty.style.display = 'block';
+                return;
+            }
+            empty.style.display = 'none';
+
+            tbody.innerHTML = filtradas.map(nfe => {
+                const dt = nfe.dataEmissao ? new Date(nfe.dataEmissao).toLocaleString('pt-BR') : '-';
+                const valor = (nfe.valor || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+                const st = escapeHtml((nfe.status||'pendente').toLowerCase());
+                const stLabel = st.charAt(0).toUpperCase() + st.slice(1);
+                const chaveEsc = escapeHtml(nfe.chave||'');
+                const nfeIdentificador = chaveEsc || String(nfe.id || '');
+                return `<tr>
+                    <td><strong>${escapeHtml(nfe.número||'-')}</strong></td>
+                    <td>${escapeHtml(nfe.serie||'1')}</td>
+                    <td>${escapeHtml(nfe.cliente||nfe.destinatario||'-')}</td>
+                    <td>${escapeHtml(dt)}</td>
+                    <td>${escapeHtml(valor)}</td>
+                    <td><span class="badge ${st}">${escapeHtml(stLabel)}</span></td>
+                    <td style="text-align:center;">
+                        <button class="action-btn view" title="Visualizar" onclick="visualizarNFe('${chaveEsc}')"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" title="Download XML" onclick="baixarXML('${chaveEsc}')"><i class="fas fa-download"></i></button>
+                        <button class="action-btn" title="DANFE" onclick="window.location.href='danfe.html?chave=${chaveEsc}'"><i class="fas fa-print"></i></button>
+                        <button class="action-btn" title="Enviar Email" onclick="enviarEmail('${chaveEsc}')"><i class="fas fa-envelope"></i></button>
+                        <button class="action-btn" title="Espelho NF-e (pr\u00e9-visualiza\u00e7\u00e3o)" onclick="verEspelho('${nfeIdentificador}')" style="background:#f0f9ff;color:#0369a1;border:1px solid #bae6fd;"><i class="fas fa-file-alt"></i></button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        // == Actions ==
+        function verEspelho(chave) {
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
+            window.open('/api/nfe/' + encodeURIComponent(chave) + '/espelho', '_blank');
+        }
+
+        function baixarXML(chave) {
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
+            fetch('/api/nfe/' + encodeURIComponent(chave) + '/xml', { credentials:'include' })
+            .then(function(r) {
+                if (!r.ok) throw new Error('Erro ao baixar XML. Verifique se a NFe existe.');
+                return r.blob();
+            })
+            .then(function(blob) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'NFe_' + chave + '.xml';
+                a.click();
+                URL.revokeObjectURL(url);
+                showAlert('XML baixado com sucesso', 'success');
+            })
+            .catch(function(e) { showAlert(e.message, 'danger'); });
+        }
+
+        var _consultarOriginalTitle = document.title;
+        var _currentModalChave = '';
+
+        function abrirModal(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.add('active');
+            var titleEl = el.querySelector('.modal-header h3, .modal-header h2');
+            if (titleEl) document.title = 'Aluforce: ' + titleEl.textContent.trim();
+        }
+        function fecharModal(id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            el.classList.remove('active');
+            if (!document.querySelector('.modal-overlay.active')) {
+                document.title = _consultarOriginalTitle;
+            }
+        }
+        // Close on overlay click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
+                e.target.classList.remove('active');
+                if (!document.querySelector('.modal-overlay.active')) document.title = _consultarOriginalTitle;
+            }
+        });
+
+        function showAlert(msg, type) {
+            var c = document.getElementById('alertContainer');
+            var d = document.createElement('div');
+            d.className = 'alert ' + (type || 'info');
+            var iconMap = { 'success': 'check-circle', 'danger': 'times-circle', 'error': 'times-circle', 'warning': 'exclamation-triangle', 'info': 'info-circle' };
+            d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + escapeHtml(msg);
+            c.prepend(d);
+            setTimeout(function() { if (d.parentNode) d.remove(); }, 5000);
+        }
+
+        function escapeHtml(text) {
+            var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return String(text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        function visualizarNFe(chave) {
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
+            _currentModalChave = chave;
+            var body = document.getElementById('nfeDetalhesBody');
+            body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin" style="font-size:24px;"></i><p>Carregando...</p></div>';
+            abrirModal('modalVisualizarNFe');
+
+            fetch('/api/nfe/' + encodeURIComponent(chave), { credentials:'include' })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var nfe = data.nota || data.nfe || data.data || data;
+                renderNFeDetalhes(nfe, chave);
+            })
+            .catch(function() {
+                // Fallback from loaded data
+                var local = nfesCarregadas.find(function(n) { return n.chave === chave; });
+                if (local) {
+                    renderNFeDetalhes(local, chave);
+                } else {
+                    body.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:var(--warning);"></i><p>Não foi possível carregar os detalhes desta NFe</p></div>';
+                }
+            });
+        }
+
+        function renderNFeDetalhes(nfe, chave) {
+            var esc = escapeHtml;
+            var dt = nfe.dataEmissao ? new Date(nfe.dataEmissao).toLocaleString('pt-BR') : (nfe.data_emissao ? new Date(nfe.data_emissao).toLocaleString('pt-BR') : '-');
+            var valor = (parseFloat(nfe.valor || nfe.valor_total || 0)).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+            var st = (nfe.status||'pendente').toLowerCase();
+            var stLabel = st.charAt(0).toUpperCase() + st.slice(1);
+            var stClass = st;
+
+            document.getElementById('nfeDetalhesBody').innerHTML =
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Número</label><p style="font-size:18px;font-weight:700;color:var(--primary-600);margin:0;">' + esc(nfe.numero || nfe.numero_nfe || '-') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Série</label><p style="font-size:18px;font-weight:700;color:var(--text-primary);margin:0;">' + esc(nfe.serie || '1') + '</p></div>' +
+                    '<div style="grid-column:1/-1;"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Chave de Acesso</label><p style="font-size:13px;font-weight:600;color:var(--text-primary);margin:0;font-family:monospace;word-break:break-all;background:var(--bg-secondary);padding:8px 12px;border-radius:var(--radius-md);border:1px solid var(--border-color);">' + esc(chave) + '</p></div>' +
+                    '<div style="grid-column:1/-1;"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Cliente / Destinatério</label><p style="font-size:15px;font-weight:600;color:var(--text-primary);margin:0;">' + esc(nfe.cliente || nfe.destinatario || nfe.dest_nome || '-') + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Data de Emissão</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(dt) + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Valor Total</label><p style="font-size:18px;font-weight:700;color:var(--success);margin:0;">' + valor + '</p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Status</label><p style="margin:0;"><span class="badge ' + stClass + '">' + stLabel + '</span></p></div>' +
+                    '<div><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--text-muted);margin-bottom:4px;">Natureza da Operação</label><p style="font-size:14px;font-weight:500;color:var(--text-primary);margin:0;">' + esc(nfe.natureza_operacao || nfe.nat_op || 'Venda de mercadoria') + '</p></div>' +
+                '</div>';
+        }
+
+        function irParaDANFE() {
+            if (_currentModalChave) {
+                window.location.href = 'danfe.html?chave=' + _currentModalChave;
+            }
+        }
+        function baixarXMLFromModal() {
+            if (_currentModalChave) baixarXML(_currentModalChave);
+        }
+
+        function enviarEmail(chave) {
+            if (!chave) { showAlert('Chave de acesso não disponível', 'warning'); return; }
+            _currentModalChave = chave;
+            var nfe = nfesCarregadas.find(function(n) { return n.chave === chave; });
+            document.getElementById('emailNfeLabel').textContent = nfe ? (nfe.numero || chave.slice(-10)) : chave.slice(-10);
+            document.getElementById('emailDestinatario').value = '';
+            document.getElementById('emailAssunto').value = 'NFe ' + (nfe ? nfe.numero : '') + ' - Nota Fiscal Eletrônica';
+            document.getElementById('emailMensagem').value = '';
+            document.getElementById('emailAnexarXML').checked = true;
+            document.getElementById('emailAnexarDANFE').checked = true;
+            abrirModal('modalEnviarEmail');
+        }
+
+        async function confirmarEnvioEmail() {
+            var email = document.getElementById('emailDestinatario').value.trim();
+            if (!email) { showAlert('Informe o email do destinatério', 'warning'); return; }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showAlert('Email inválido', 'warning'); return; }
+
+            try {
+                var response = await fetch('/api/nfe/' + encodeURIComponent(_currentModalChave) + '/email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: email,
+                        assunto: document.getElementById('emailAssunto').value,
+                        mensagem: document.getElementById('emailMensagem').value,
+                        anexar_xml: document.getElementById('emailAnexarXML').checked,
+                        anexar_danfe: document.getElementById('emailAnexarDANFE').checked
+                    })
+                });
+                var result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || result.error || 'Erro no envio do email');
+                }
+                showAlert('Email enviado com sucesso para ' + email, 'success');
+                fecharModal('modalEnviarEmail');
+            } catch(e) {
+                showAlert('Erro ao enviar email: ' + e.message, 'danger');
+            }
+        }
+
+        function limparFiltros() {
+            document.getElementById('filtroNumero').value = '';
+            document.getElementById('filtroSerie').value = '';
+            document.getElementById('filtroChave').value = '';
+            document.getElementById('filtroCliente').value = '';
+            document.getElementById('filtroDataInicio').value = '';
+            document.getElementById('filtroDataFim').value = '';
+            document.getElementById('filtroStatus').value = '';
+            document.getElementById('nfesTableBody').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'block';
+            document.getElementById('resultsCount').textContent = '0 notas encontradas';
+        }
+
+        function exportarResultados() {
+            if (nfesCarregadas.length === 0) { showAlert('Nenhum dado para exportar', 'warning'); return; }
+            let csv = 'Número;Série;Cliente;Data;Valor;Status\n';
+            nfesCarregadas.forEach(nfe => {
+                csv += `${nfe.número||''};${nfe.serie||''};${nfe.cliente||''};${nfe.dataEmissao||''};${nfe.valor||0};${nfe.status||''}\n`;
+            });
+            const blob = new Blob(['\uFEFF' + csv], { type:'text/csv;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'nfes_consulta.csv';
+            a.click();
+        }
+
+        // == Modal placeholder ==
+        function abrirModalConfiguracoes() {
+            showAlert('Configurações é Em desenvolvimento', 'info');
+        }
+
+        // == Init ==
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarUsuario();
+            carregarNFes();
+        });
+    </script>
+
+    <!-- Sistema de Notificações Global -->
+    <script src="/js/notification-manager.js?v=20260325"></script>
+    <script src="/_shared/connection-monitor.js?v=20260325"></script>
+    <script src="/js/popup-confirmacao.js?v=20260325"></script>
+
+    <!-- Utilitários Compartilhados -->
+    <script src="/_shared/confirm-dialog.js?v=20260325"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
+
+    <!-- Chat Widget BOB AI -->
+    <script src="/chat/widget.js?v=20260325" defer></script>
+
+    <!-- Enterprise Shared -->
+    <script src="/js/sidebar-click-animation.js?v=20260325"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260325"></script>
+    <script src="/js/user-dropdown.js?v=20260325" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260325" defer></script>
+</body>
+</html>

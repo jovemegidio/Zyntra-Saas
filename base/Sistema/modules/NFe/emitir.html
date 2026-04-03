@@ -1,0 +1,1027 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Zyntra: Emitir NFe</title>
+
+    <!-- Sistema de Autenticação Unificado é DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260325" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260325" defer></script>
+
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSP Fix - Converter onclick inline para addEventListener -->
+    <script src="/js/csp-fix.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+    <!-- Design System é Faturamento Layout -->
+    <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
+
+    <!-- Global Header & Sidebar é Padrão Institucional -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+
+    <!-- Performance: Skeleton Loaders -->
+    <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
+
+    <!-- Popup Confirmação -->
+    <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260325">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+
+    <!-- Anti-Copy Protection -->
+    <script src="/js/anti-copy-protection.js" defer></script>
+
+    <!-- Zyntra Chat Teams -->
+    <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260325">
+    <style>
+        /* Page-specific: XML preview dark code block */
+        .preview-area {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        /* Page-specific: Resultado success */
+        .resultado-content {
+            padding: 20px;
+            text-align: center;
+        }
+        .resultado-content .success-icon {
+            font-size: 48px;
+            color: #10b981;
+            margin-bottom: 16px;
+        }
+
+        /* ===== Wizard Stepper Fix ===== */
+        .wizard-steps {
+            background: #fff !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 14px !important;
+            padding: 16px 24px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03) !important;
+        }
+        .wizard-number {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            background: #f1f5f9;
+            color: #94a3b8;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        .wizard-step.active .wizard-number {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .wizard-step.completed .wizard-number {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+        .wizard-title { font-size: 13px; font-weight: 600; color: #334155; }
+        .wizard-desc { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+        .wizard-step.active .wizard-title { color: #2563eb; }
+        .wizard-step.active .wizard-desc { color: #60a5fa; }
+        .wizard-step.completed .wizard-title { color: #059669; }
+        .wizard-step.completed .wizard-desc { color: #34d399; }
+        .wizard-separator {
+            width: 32px !important;
+            height: 2px !important;
+            background: linear-gradient(90deg, #e2e8f0, #cbd5e1) !important;
+            border-radius: 2px !important;
+            margin: 0 4px !important;
+        }
+
+        /* ===== Section Card Headers ===== */
+        #section-dados .card-header,
+        #section-itens .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fff;
+        }
+        #section-dados .card-header i,
+        #section-itens .card-header i {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        #section-dados .card-header i {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            color: #2563eb;
+        }
+        #section-itens .card-header i {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            color: #16a34a;
+        }
+        #section-dados .card-header .card-title,
+        #section-itens .card-header .card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        /* ===== Destinatério section title ===== */
+        #section-dados h4 {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            margin: 24px 0 16px !important;
+            padding: 10px 14px !important;
+            border-bottom: none !important;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        #section-dados h4 i {
+            width: auto !important;
+            height: auto !important;
+            background: none !important;
+            color: #64748b !important;
+            font-size: 13px !important;
+        }
+
+        /* ===== Items Table Inputs ===== */
+        .data-table input[type="text"],
+        .data-table input[type="number"] {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #1e293b;
+            background: #fff;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        .data-table input[type="text"]:focus,
+        .data-table input[type="number"]:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: #fefefe;
+        }
+        .data-table input[type="text"]::placeholder,
+        .data-table input[type="number"]::placeholder {
+            color: #cbd5e1;
+            font-weight: 400;
+        }
+        .data-table td { vertical-align: middle; }
+
+        /* ===== Totals Cards é Compras Pattern ===== */
+
+
+        /* ===== Remove Item Button ===== */
+        .data-table .btn-danger {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            padding: 0;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+        .data-table .btn-danger:hover {
+            background: #dc2626;
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(220, 38, 38, 0.25);
+        }
+
+        /* ===== Add Item Button ===== */
+        #section-itens .btn-secondary.btn-sm {
+            background: #f0fdf4 !important;
+            color: #16a34a !important;
+            border: 1px solid #bbf7d0 !important;
+            font-weight: 600;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        #section-itens .btn-secondary.btn-sm:hover {
+            background: #16a34a !important;
+            color: #fff !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22, 163, 106, 0.25);
+        }
+
+        /* ===== Cards General ===== */
+        #section-dados,
+        #section-itens {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 16px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03) !important;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        /* ===== Alert Fix ===== */
+        .alert-container { margin-bottom: 16px; }
+        .alert { display: none; }
+        .alert.show { display: flex; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+
+    <!-- -------------- SIDEBAR -------------- -->
+    <aside class="sidebar" id="mobile-sidebar">
+        <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+            <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
+            <a href="nfse.html" class="sidebar-btn" title="NFSe Serviços"><i class="fas fa-file-contract"></i></a>
+            <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+            <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
+            <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+        </nav>
+        <div class="sidebar-bottom">
+            <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+        </div>
+    </aside>
+
+    <!-- -------------- MAIN AREA -------------- -->
+    <main class="main-area">
+
+    <!-- -------------- HEADER -------------- -->
+    <header class="header">
+        <div class="header-left">
+            <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+            <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Emitir NFe</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+            <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+            <div class="user-greeting">
+                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                <div class="user-avatar" id="user-avatar">
+                    <img alt="Foto" id="user-photo" style="display:none">
+                    <span id="user-initials">U</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- -------------- MAIN CONTENT -------------- -->
+        <div class="page-content">
+
+                <!-- Steps Indicator -->
+                <div class="wizard-steps">
+                    <div class="wizard-step active" id="step-1">
+                        <div class="wizard-number">1</div>
+                        <div>
+                            <div class="wizard-title">Dados da NFe</div>
+                            <div class="wizard-desc">Informações gerais e destinatério</div>
+                        </div>
+                    </div>
+                    <div class="wizard-separator"></div>
+                    <div class="wizard-step" id="step-2">
+                        <div class="wizard-number">2</div>
+                        <div>
+                            <div class="wizard-title">Itens</div>
+                            <div class="wizard-desc">Produtos e serviços</div>
+                        </div>
+                    </div>
+                    <div class="wizard-separator"></div>
+                    <div class="wizard-step" id="step-3">
+                        <div class="wizard-number">3</div>
+                        <div>
+                            <div class="wizard-title">Preview</div>
+                            <div class="wizard-desc">Visualizar XML gerado</div>
+                        </div>
+                    </div>
+                    <div class="wizard-separator"></div>
+                    <div class="wizard-step" id="step-4">
+                        <div class="wizard-number">4</div>
+                        <div>
+                            <div class="wizard-title">Emitir</div>
+                            <div class="wizard-desc">Enviar para SEFAZ</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Container -->
+                <div class="alert-container">
+                    <div class="alert" id="alertBox">
+                        <i class="fas fa-info-circle"></i>
+                        <span id="alertMessage"></span>
+                    </div>
+                </div>
+
+                <!-- NFe Form -->
+                <form id="nfeForm" onsubmit="return false;">
+
+                    <!-- Section 1: Dados Gerais -->
+                    <div class="card" id="section-dados">
+                        <div class="card-header">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="card-title">Dados Gerais</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="naturezaOperacao">Natureza da Operação</label>
+                                    <input type="text" class="form-control" id="naturezaOperacao" name="naturezaOperacao" value="Venda de mercadoria" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tipoOperacao">Tipo de Operação</label>
+                                    <select class="form-control" id="tipoOperacao" name="tipoOperacao" required>
+                                        <option value="1">Saída</option>
+                                        <option value="0">Entrada</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="dataEmissao">Data de Emissão</label>
+                                    <input type="datetime-local" class="form-control" id="dataEmissao" name="dataEmissao" required>
+                                </div>
+                            </div>
+
+                            <!-- Destinatério -->
+                            <h4 style="font-size:13px;font-weight:600;color:#6b7280;margin:20px 0 14px;padding-bottom:8px;border-bottom:1px solid #e5e7eb;">
+                                <i class="fas fa-user"></i> Destinatério
+                            </h4>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="tipoDocDestinatario">Tipo de Documento</label>
+                                    <select class="form-control" id="tipoDocDestinatario" name="tipoDocDestinatario">
+                                        <option value="CNPJ">CNPJ</option>
+                                        <option value="CPF">CPF</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioDoc">Documento</label>
+                                    <input type="text" class="form-control" id="destinatarioDoc" name="destinatarioDoc" placeholder="00.000.000/0000-00" required>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="destinatarioNome">Razão Social / Nome</label>
+                                    <input type="text" class="form-control" id="destinatarioNome" name="destinatarioNome" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="destinatarioEndereco">Endereço (Logradouro)</label>
+                                    <input type="text" class="form-control" id="destinatarioEndereco" name="destinatarioEndereco" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioNumero">Número</label>
+                                    <input type="text" class="form-control" id="destinatarioNumero" name="destinatarioNumero" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioComplemento">Complemento</label>
+                                    <input type="text" class="form-control" id="destinatarioComplemento" name="destinatarioComplemento">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="destinatarioBairro">Bairro</label>
+                                    <input type="text" class="form-control" id="destinatarioBairro" name="destinatarioBairro" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioMunicipio">Município</label>
+                                    <input type="text" class="form-control" id="destinatarioMunicipio" name="destinatarioMunicipio" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioCodigoMunicipio">Código IBGE Município</label>
+                                    <input type="text" class="form-control" id="destinatarioCodigoMunicipio" name="destinatarioCodigoMunicipio" placeholder="0000000">
+                                </div>
+                                <div class="form-group">
+                                    <label for="destinatarioUF">UF</label>
+                                    <select class="form-control" id="destinatarioUF" name="destinatarioUF" required>
+                                        <option value="">Selecione</option>
+                                        <option value="AC">AC</option>
+                                        <option value="AL">AL</option>
+                                        <option value="AP">AP</option>
+                                        <option value="AM">AM</option>
+                                        <option value="BA">BA</option>
+                                        <option value="CE">CE</option>
+                                        <option value="DF">DF</option>
+                                        <option value="ES">ES</option>
+                                        <option value="GO">GO</option>
+                                        <option value="MA">MA</option>
+                                        <option value="MT">MT</option>
+                                        <option value="MS">MS</option>
+                                        <option value="MG">MG</option>
+                                        <option value="PA">PA</option>
+                                        <option value="PB">PB</option>
+                                        <option value="PR">PR</option>
+                                        <option value="PE">PE</option>
+                                        <option value="PI">PI</option>
+                                        <option value="RJ">RJ</option>
+                                        <option value="RN">RN</option>
+                                        <option value="RS">RS</option>
+                                        <option value="RO">RO</option>
+                                        <option value="RR">RR</option>
+                                        <option value="SC">SC</option>
+                                        <option value="SP">SP</option>
+                                        <option value="SE">SE</option>
+                                        <option value="TO">TO</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="destinatarioCEP">CEP</label>
+                                    <input type="text" class="form-control" id="destinatarioCEP" name="destinatarioCEP" placeholder="00000-000" required>
+                                </div>
+                                <div class="form-group" style="grid-column: span 2;">
+                                    <label for="destinatarioEmail">E-mail</label>
+                                    <input type="email" class="form-control" id="destinatarioEmail" name="destinatarioEmail" placeholder="email@exemplo.com.br">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Itens da NFe -->
+                    <div class="card" id="section-itens">
+                        <div class="card-header">
+                            <i class="fas fa-cubes"></i>
+                            <span class="card-title">Itens da NFe</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Código</th>
+                                            <th>Descrição</th>
+                                            <th>NCM</th>
+                                            <th>CFOP</th>
+                                            <th>Unid.</th>
+                                            <th>Qtd</th>
+                                            <th>Valor Unit.</th>
+                                            <th>Total</th>
+                                            <th style="text-align:center;width:60px;">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="itensTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div style="margin-top:14px;">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarItem()">
+                                    <i class="fas fa-plus"></i> Adicionar Item
+                                </button>
+                            </div>
+
+                            <!-- Totais -->
+                            <div class="metrics-grid">
+                                <div class="metric-card blue">
+                                    <div class="metric-header">
+                                        <div class="metric-icon blue"><i class="fas fa-box"></i></div>
+                                    </div>
+                                    <div class="metric-value" id="totalProdutos">R$ 0,00</div>
+                                    <div class="metric-label">Total Produtos</div>
+                                </div>
+                                <div class="metric-card orange">
+                                    <div class="metric-header">
+                                        <div class="metric-icon orange"><i class="fas fa-tags"></i></div>
+                                    </div>
+                                    <div class="metric-value" id="totalDesconto">R$ 0,00</div>
+                                    <div class="metric-label">Total Desconto</div>
+                                </div>
+                                <div class="metric-card purple">
+                                    <div class="metric-header">
+                                        <div class="metric-icon purple"><i class="fas fa-truck"></i></div>
+                                    </div>
+                                    <div class="metric-value" id="totalFrete">R$ 0,00</div>
+                                    <div class="metric-label">Total Frete</div>
+                                </div>
+                                <div class="metric-card green">
+                                    <div class="metric-header">
+                                        <div class="metric-icon green"><i class="fas fa-receipt"></i></div>
+                                    </div>
+                                    <div class="metric-value" id="valorTotalNFe">R$ 0,00</div>
+                                    <div class="metric-label">Valor Total NFe</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Preview XML (hidden) -->
+                    <div class="card" id="section-preview" style="display:none;">
+                        <div class="card-header">
+                            <i class="fas fa-code"></i>
+                            <span class="card-title">Preview XML</span>
+                        </div>
+                        <div class="card-body">
+                            <pre class="preview-area" id="xmlPreview">Clique em "Gerar Preview" para visualizar o XML.</pre>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Resultado (hidden) -->
+                    <div class="card" id="section-resultado" style="display:none;">
+                        <div class="card-header">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="card-title">Resultado</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="resultado-content" id="resultadoContent"></div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="actions" style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;justify-content:flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="gerarPreview()">
+                            <i class="fas fa-eye"></i> Gerar Preview
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="validarXML()">
+                            <i class="fas fa-check-double"></i> Validar XML
+                        </button>
+                        <button type="submit" class="btn btn-success" id="btnEmitir" onclick="emitirNFe()">
+                            <i class="fas fa-paper-plane"></i> Emitir NFe
+                        </button>
+                    </div>
+
+                </form>
+
+        </div>
+    </main>
+    </div>
+
+    <!-- -------------- SCRIPTS -------------- -->
+    <script>
+        // -- Mobile Sidebar & Notification Toggles --
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            if (sidebar) sidebar.classList.toggle('mobile-open');
+        }
+
+        function toggleNotificacoes() {
+            if (typeof window.NotificationManager !== 'undefined' && window.NotificationManager.toggle) {
+                window.NotificationManager.toggle();
+            }
+        }
+
+        function abrirModalConfiguracoes() {
+            // Redirecionar para o dashboard NFe que possui o modal de configurações completo
+            window.location.href = 'index.html?openConfig=true';
+        }
+
+        // -- Helper: obter headers de autenticação --
+        function getAuthHeaders() {
+            const headers = { 'Content-Type': 'application/json' };
+            // CSRF token do cookie
+            const csrfMatch = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]*)/);
+            if (csrfMatch) {
+                headers['X-CSRF-Token'] = decodeURIComponent(csrfMatch[1]);
+            }
+            return headers;
+        }
+
+        // -- Avatar Name Map --
+        const avatarNameMap = {
+            'clemerson': 'Clemerson',
+            'isabela': 'Isabela',
+            'thaina': 'Thain',
+            'thiago': 'Thiago',
+            'nicolas': 'Nicolas',
+            'nicolasdaniel': 'Nicolas Daniel',
+            'rh': 'RH',
+            'admin': 'Administrador',
+            'ti': 'TI',
+            'tialuforce': 'TI Aluforce',
+            'antonio': 'Antônio',
+            'andreia': 'Andréia',
+            'guilherme': 'Guilherme',
+            'marcelo': 'Marcelo',
+            'financeiro': 'Financeiro',
+            'douglas': 'Douglas',
+            'hellen': 'Hellen',
+            'helen': 'Helen',
+            'marcia': 'Márcia',
+            'augusto': 'Augusto',
+            'renata': 'Renata',
+            'fabiano': 'Fabiano',
+            'fabiola': 'Fabíola'
+        };
+
+        // -- Carregar Usuário --
+        async function carregarUsuario() {
+            try {
+                const resp = await fetch('/api/me', { credentials: 'include' });
+                if (!resp.ok) throw new Error('Não autenticado');
+                const user = await resp.json();
+
+                // Greeting based on hour
+                const h = new Date().getHours();
+                const greetEl = document.getElementById('greeting-text');
+                if (greetEl) {
+                    greetEl.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+                }
+
+                // User name
+                const nameEl = document.getElementById('user-name');
+                const username = (user.username || user.nome || user.login || 'Usuário').toLowerCase();
+                const displayName = avatarNameMap[username] || user.nome || user.username || 'Usuário';
+                if (nameEl) nameEl.textContent = displayName.split(' ')[0];
+
+                // Initials
+                const initialsEl = document.getElementById('user-initials');
+                if (initialsEl) {
+                    const parts = displayName.split(' ');
+                    initialsEl.textContent = parts.length > 1
+                        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+                        : displayName.substring(0, 2).toUpperCase();
+                }
+
+                // Avatar photo
+                const photoEl = document.getElementById('user-photo');
+                if (photoEl && user.foto) {
+                    photoEl.src = user.foto;
+                    photoEl.style.display = 'block';
+                    photoEl.onerror = () => { photoEl.style.display = 'none'; };
+                    if (initialsEl) initialsEl.style.display = 'none';
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar usuário:', e);
+            }
+        }
+
+        // -- Itens Array --
+        let itens = [];
+
+        function adicionarItem() {
+            itens.push({
+                codigo: '',
+                descricao: '',
+                ncm: '',
+                cfop: '5102',
+                unidade: 'UN',
+                quantidade: 1,
+                valorUnitario: 0,
+                total: 0
+            });
+            renderizarItens();
+        }
+
+        function renderizarItens() {
+            const tbody = document.getElementById('itensTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            itens.forEach((item, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" value="${item.código}" onchange="atualizarItem(${index},'código',this.value)" placeholder="Código"></td>
+                    <td><input type="text" value="${item.descrição}" onchange="atualizarItem(${index},'descrição',this.value)" placeholder="Descrição do produto"></td>
+                    <td><input type="text" value="${item.ncm}" onchange="atualizarItem(${index},'ncm',this.value)" placeholder="00000000" style="width:100px;"></td>
+                    <td><input type="text" value="${item.cfop}" onchange="atualizarItem(${index},'cfop',this.value)" placeholder="5102" style="width:80px;"></td>
+                    <td><input type="text" value="${item.unidade}" onchange="atualizarItem(${index},'unidade',this.value)" placeholder="UN" style="width:60px;"></td>
+                    <td><input type="number" value="${item.quantidade}" onchange="atualizarItem(${index},'quantidade',this.value)" min="0" step="0.01" style="width:80px;"></td>
+                    <td><input type="number" value="${item.valorUnitario}" onchange="atualizarItem(${index},'valorUnitario',this.value)" min="0" step="0.01" style="width:110px;"></td>
+                    <td style="font-weight:600;white-space:nowrap;">R$ ${item.total.toFixed(2)}</td>
+                    <td style="text-align:center;width:60px;">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removerItem(${index})" title="Remover item">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            calcularTotais();
+        }
+
+        function atualizarItem(index, campo, valor) {
+            if (campo === 'quantidade' || campo === 'valorUnitario') {
+                itens[index][campo] = parseFloat(valor) || 0;
+                itens[index].total = itens[index].quantidade * itens[index].valorUnitario;
+            } else {
+                itens[index][campo] = valor;
+            }
+            renderizarItens();
+        }
+
+        function removerItem(index) {
+            itens.splice(index, 1);
+            renderizarItens();
+        }
+
+        function calcularTotais() {
+            const totalProd = itens.reduce((sum, i) => sum + i.total, 0);
+            const totalDesc = 0;
+            const totalFrete = 0;
+            const valorTotal = totalProd - totalDesc + totalFrete;
+
+            document.getElementById('totalProdutos').textContent = 'R$ ' + totalProd.toFixed(2).replace('.', ',');
+            document.getElementById('totalDesconto').textContent = 'R$ ' + totalDesc.toFixed(2).replace('.', ',');
+            document.getElementById('totalFrete').textContent = 'R$ ' + totalFrete.toFixed(2).replace('.', ',');
+            document.getElementById('valorTotalNFe').textContent = 'R$ ' + valorTotal.toFixed(2).replace('.', ',');
+        }
+
+        // -- Construir NFe Data --
+        function construirNFeData() {
+            return {
+                naturezaOperacao: document.getElementById('naturezaOperacao').value,
+                tipoOperacao: document.getElementById('tipoOperacao').value,
+                dataEmissao: document.getElementById('dataEmissao').value,
+                destinatario: {
+                    tipoDocumento: document.getElementById('tipoDocDestinatario').value,
+                    documento: document.getElementById('destinatarioDoc').value,
+                    nome: document.getElementById('destinatarioNome').value,
+                    endereco: document.getElementById('destinatarioEndereco').value,
+                    numero: document.getElementById('destinatarioNumero').value,
+                    complemento: document.getElementById('destinatarioComplemento').value,
+                    bairro: document.getElementById('destinatarioBairro').value,
+                    municipio: document.getElementById('destinatarioMunicipio').value,
+                    codigoMunicipio: document.getElementById('destinatarioCodigoMunicipio').value,
+                    uf: document.getElementById('destinatarioUF').value,
+                    cep: document.getElementById('destinatarioCEP').value,
+                    email: document.getElementById('destinatarioEmail').value
+                },
+                itens: itens.map((item, idx) => ({
+                    numero: idx + 1,
+                    codigo: item.codigo,
+                    descricao: item.descricao,
+                    ncm: item.ncm,
+                    cfop: item.cfop,
+                    unidade: item.unidade,
+                    quantidade: item.quantidade,
+                    valorUnitario: item.valorUnitario,
+                    valorTotal: item.total
+                })),
+                totais: {
+                    totalProdutos: itens.reduce((s, i) => s + i.total, 0),
+                    totalDesconto: 0,
+                    totalFrete: 0,
+                    valorTotal: itens.reduce((s, i) => s + i.total, 0)
+                }
+            };
+        }
+
+        // -- Gerar Preview --
+        async function gerarPreview() {
+            try {
+                const nfeData = construirNFeData();
+                if (!nfeData.itens.length) {
+                    showAlert('Adicione ao menos um item é NFe.', 'warning');
+                    return;
+                }
+
+                showAlert('Gerando preview do XML...', 'warning');
+
+                const resp = await fetch('/api/nfe/preview', { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: JSON.stringify(nfeData)
+                });
+
+                const result = await resp.json();
+
+                if (result.success && result.xml) {
+                    document.getElementById('section-preview').style.display = 'block';
+                    document.getElementById('xmlPreview').textContent = formatXML(result.xml);
+                    document.getElementById('step-3').classList.add('active');
+                    document.getElementById('step-1').classList.add('completed');
+                    document.getElementById('step-2').classList.add('completed');
+                    showAlert('Preview gerado com sucesso!', 'success');
+                } else {
+                    showAlert(result.message || 'Erro ao gerar preview.', 'danger');
+                }
+            } catch (e) {
+                console.error('Erro ao gerar preview:', e);
+                showAlert('Erro de conexão ao gerar preview.', 'danger');
+            }
+        }
+
+        // -- Validar XML --
+        async function validarXML() {
+            try {
+                const nfeData = construirNFeData();
+                if (!nfeData.itens.length) {
+                    showAlert('Adicione ao menos um item é NFe.', 'warning');
+                    return;
+                }
+
+                showAlert('Validando XML...', 'warning');
+
+                const resp = await fetch('/api/nfe/validar', { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: JSON.stringify(nfeData)
+                });
+
+                const result = await resp.json();
+
+                if (result.valid || result.success) {
+                    showAlert('XML validado com sucesso! Nenhum erro encontrado.', 'success');
+                } else {
+                    const erros = result.errors || result.erros || [];
+                    showAlert('Erros de validação: ' + (erros.join(', ') || result.message || 'Verifique os dados.'), 'danger');
+                }
+            } catch (e) {
+                console.error('Erro ao validar XML:', e);
+                showAlert('Erro de conexão ao validar XML.', 'danger');
+            }
+        }
+
+        // -- Emitir NFe (form submit) --
+        async function emitirNFe() {
+            try {
+                const nfeData = construirNFeData();
+                if (!nfeData.itens.length) {
+                    showAlert('Adicione ao menos um item é NFe.', 'warning');
+                    return;
+                }
+
+                const btnEmitir = document.getElementById('btnEmitir');
+                btnEmitir.disabled = true;
+                btnEmitir.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Emitindo...';
+
+                showAlert('Enviando NFe para SEFAZ...', 'warning');
+
+                const resp = await fetch('/api/nfe/emitir', { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: JSON.stringify(nfeData)
+                });
+
+                const result = await resp.json();
+
+                if (result.success) {
+                    document.getElementById('step-4').classList.add('active', 'completed');
+                    document.getElementById('step-3').classList.add('completed');
+                    document.getElementById('section-resultado').style.display = 'block';
+                    document.getElementById('resultadoContent').innerHTML = `
+                        <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+                        <h3 style="margin-bottom:8px;color:#059669;">NFe Emitida com Sucesso!</h3>
+                        <p style="color:#6b7280;margin-bottom:12px;">Chave de acesso:</p>
+                        <p style="font-family:monospace;font-size:14px;font-weight:600;word-break:break-all;">${result.chave || result.chaveAcesso || '-'}</p>
+                        <p style="margin-top:8px;color:#9ca3af;font-size:12px;">Protocolo: ${result.protocolo || result.nProtocolo || '-'}</p>
+                        <div style="margin-top:20px;">
+                            <a href="consultar.html" class="btn btn-primary"><i class="fas fa-search"></i> Consultar NFe</a>
+                            <button type="button" class="btn btn-secondary" onclick="location.reload()" style="margin-left:8px;">
+                                <i class="fas fa-plus"></i> Nova NFe
+                            </button>
+                        </div>
+                    `;
+                    showAlert('NFe emitida com sucesso!', 'success');
+                } else {
+                    showAlert(result.message || result.erro || 'Erro ao emitir NFe. Verifique os dados.', 'danger');
+                }
+            } catch (e) {
+                console.error('Erro ao emitir NFe:', e);
+                showAlert('Erro de conexão ao emitir NFe.', 'danger');
+            } finally {
+                const btnEmitir = document.getElementById('btnEmitir');
+                if (btnEmitir) {
+                    btnEmitir.disabled = false;
+                    btnEmitir.innerHTML = '<i class="fas fa-paper-plane"></i> Emitir NFe';
+                }
+            }
+        }
+
+        // -- Format XML --
+        function formatXML(xml) {
+            if (!xml) return '';
+            try {
+                let formatted = '';
+                let indent = '';
+                const tab = '  ';
+                xml.split(/>\s*</).forEach(function (node) {
+                    if (node.match(/^\/\w/)) indent = indent.substring(tab.length);
+                    formatted += indent + '<' + node + '>\n';
+                    if (node.match(/^<?\w[^>]*[^\/]$/) && !node.startsWith('?')) indent += tab;
+                });
+                return formatted.substring(1, formatted.length - 2);
+            } catch (e) {
+                return xml;
+            }
+        }
+
+        // -- Show Alert --
+        function showAlert(message, type) {
+            const box = document.getElementById('alertBox');
+            const msg = document.getElementById('alertMessage');
+            if (!box || !msg) return;
+
+            box.className = 'alert alert-' + (type || 'warning') + ' show';
+            msg.textContent = message;
+
+            // Icon
+            const icon = box.querySelector('i');
+            if (icon) {
+                icon.className = type === 'success' ? 'fas fa-check-circle'
+                    : type === 'danger' ? 'fas fa-exclamation-triangle'
+                    : 'fas fa-info-circle';
+            }
+
+            clearTimeout(window._alertTimeout);
+            window._alertTimeout = setTimeout(() => {
+                box.classList.remove('show');
+            }, 5000);
+        }
+
+        // -- Carregar Emitente --
+        async function carregarEmitente() {
+            try {
+                const resp = await fetch('/api/nfe/configuracoes', { credentials: 'include', headers });
+                if (!resp.ok) throw new Error('Sem config');
+                const config = await resp.json();
+                console.log('Emitente carregado:', config.emitente || config);
+            } catch (e) {
+                console.warn('Usando dados de emitente padrão (fallback).');
+            }
+        }
+
+        // -- Init --
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set current datetime
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const local = new Date(now - offset);
+            const dtField = document.getElementById('dataEmissao');
+            if (dtField) dtField.value = local.toISOString().slice(0, 16);
+
+            // Add first item
+            adicionarItem();
+
+            // Steps activation
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-2').classList.add('active');
+
+            // Load emitente config
+            carregarEmitente();
+
+            // Load user
+            carregarUsuario();
+        });
+    </script>
+
+    <!-- External scripts -->
+    <script src="/js/notification-manager.js?v=20260325"></script>
+    <script src="/_shared/connection-monitor.js?v=20260325"></script>
+    <script src="/js/popup-confirmacao.js?v=20260325"></script>
+
+    <!-- Utilitários Compartilhados -->
+    <script src="/_shared/confirm-dialog.js?v=20260325"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
+
+    <!-- Zyntra Chat Teams -->    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/chat-teams/chat-widget.js?v=20260325" defer></script>
+
+    <!-- Enterprise Shared -->
+    <script src="/js/sidebar-click-animation.js?v=20260325"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260325"></script>
+    <script src="/js/user-dropdown.js?v=20260325" defer></script>
+</body>
+</html>

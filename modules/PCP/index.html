@@ -2887,10 +2887,11 @@
 
         .modal-op-section {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 22px;
             margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
         }
 
         .modal-op-product-row {
@@ -2974,17 +2975,26 @@
             flex: 1;
             min-width: 140px;
             background: white;
-            border-radius: 10px;
-            padding: 14px 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            padding: 14px 18px;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .modal-op-value-field:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            border-color: #e2e8f0;
         }
 
         .modal-op-value-field label {
             display: block;
-            font-size: 12px;
-            font-weight: 500;
+            font-size: 11.5px;
+            font-weight: 600;
             color: #64748b;
             margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .modal-op-value-field input,
@@ -3011,11 +3021,12 @@
             border-radius: 12px 12px 0 0;
             border-bottom: 2px solid #e2e8f0;
             overflow-x: auto;
+            padding: 0 4px;
         }
 
         .modal-op-tab {
-            padding: 14px 20px;
-            font-size: 14px;
+            padding: 14px 18px;
+            font-size: 13.5px;
             font-weight: 500;
             color: #64748b;
             background: transparent;
@@ -3029,9 +3040,14 @@
             gap: 8px;
         }
 
+        .modal-op-tab i {
+            font-size: 13px;
+        }
+
         .modal-op-tab:hover {
             color: #1e293b;
-            background: #f8fafc;
+            background: #f1f5f9;
+            border-radius: 8px 8px 0 0;
         }
 
         .modal-op-tab.active {
@@ -3043,10 +3059,11 @@
             content: '';
             position: absolute;
             bottom: -2px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: #1e293b;
+            left: 8px;
+            right: 8px;
+            height: 2.5px;
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            border-radius: 2px 2px 0 0;
         }
 
         .modal-op-tab-content {
@@ -3208,8 +3225,8 @@
         .modal-op-info-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 20px;
+            gap: 18px;
+            padding: 24px;
         }
 
         .modal-op-info-field {
@@ -3219,27 +3236,37 @@
         }
 
         .modal-op-info-field label {
-            font-size: 13px;
-            font-weight: 500;
-            color: #64748b;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #475569;
+            letter-spacing: 0.01em;
         }
 
         .modal-op-info-field input,
         .modal-op-info-field select,
         .modal-op-info-field textarea {
-            padding: 12px 16px;
+            padding: 11px 14px;
             font-size: 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            background: #fafbfc;
+            transition: all 0.2s ease;
         }
 
         .modal-op-info-field input:focus,
         .modal-op-info-field select:focus,
         .modal-op-info-field textarea:focus {
             outline: none;
-            border-color: #dc2626;
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        .modal-op-info-field input:not(:placeholder-shown):not(:focus),
+        .modal-op-info-field select:not(:focus),
+        .modal-op-info-field textarea:not(:placeholder-shown):not(:focus) {
+            background: white;
+            border-color: #cbd5e1;
         }
 
         /* ===== Sidebar Destino Checkboxes - Design Moderno ===== */
@@ -9204,7 +9231,7 @@
         }
 
         // Carregar badge na inicialização (sem abrir painel)
-        (async function initNotificacoesBadge() {
+        async function initNotificacoesBadge() {
             try {
                 const headers = { 'Content-Type': 'application/json' };
                 const response = await fetch('/api/pcp/alertas', {
@@ -9225,7 +9252,8 @@
             } catch (e) {
                 console.warn('Não foi possível carregar badge de notificações:', e);
             }
-        })();
+        }
+        initNotificacoesBadge();
 
         // Auto-refresh badge a cada 5 minutos
         setInterval(() => {
@@ -9491,7 +9519,7 @@
             document.body.appendChild(modal);
             modal.style.display = 'flex';
             document.body.classList.add('modal-open');
-            document.title = 'Aluforce: Custos & Precificação';
+            document.title = 'Zyntra: Custos & Precificação';
             await cpCarregarDados();
         }
 
@@ -10444,7 +10472,7 @@
         }
 
         // ============================================
-        // MODAIS + TÍTULO DINÂMICO (padrão Aluforce: nome do modal)
+        // MODAIS + TÍTULO DINÂMICO (padrão Zyntra: nome do modal)
         // ============================================
         const _pcpOriginalTitle = document.title; // Guarda título original da página
 
@@ -10471,7 +10499,7 @@
                 document.body.appendChild(overlay);
                 // Atualiza título da aba
                 const modalTitle = _getModalTitle(overlay);
-                if (modalTitle) document.title = 'Aluforce: ' + modalTitle;
+                if (modalTitle) document.title = 'Zyntra: ' + modalTitle;
             }
         }
 
@@ -10506,7 +10534,7 @@
                         if (el.classList.contains('modal-overlay')) {
                             if (el.classList.contains('active')) {
                                 const t = _getModalTitle(el);
-                                if (t) document.title = 'Aluforce: ' + t;
+                                if (t) document.title = 'Zyntra: ' + t;
                             } else {
                                 const anyOpen = document.querySelector('.modal-overlay.active');
                                 if (!anyOpen) document.title = _pcpOriginalTitle;
@@ -11821,8 +11849,11 @@
                         contato: c.contato || '',
                         telefone: c.telefone || '',
                         email: c.email || '',
+                        endereco: c.endereco || '',
                         cidade: c.cidade || '',
-                        estado: c.estado || ''
+                        estado: c.estado || '',
+                        cep: c.cep || '',
+                        email_nfe: c.email_nfe || c.email || ''
                     }));
                     console.log(`? Cache de clientes carregado: ${clientesCache.length} clientes`);
                 } else if (data.clientes) {
@@ -11880,6 +11911,15 @@
             document.getElementById('op-cliente-contato').value = cliente.contato || '';
             document.getElementById('op-cliente-fone').value = formatarTelefone(cliente.telefone || '');
             document.getElementById('op-cliente-email').value = cliente.email || '';
+
+            // Preencher endereço, CEP e email NF-e
+            let enderecoCliente = cliente.endereco || '';
+            if (!enderecoCliente && cliente.cidade) {
+                enderecoCliente = `${cliente.cidade}/${cliente.estado || ''}`;
+            }
+            document.getElementById('op-cliente-endereco').value = enderecoCliente;
+            document.getElementById('op-cliente-cep').value = formatarCEP(cliente.cep || '');
+            document.getElementById('op-cliente-email-nfe').value = cliente.email_nfe || cliente.email || '';
 
             // Esconder dropdown
             document.getElementById('op-cliente-dropdown').style.display = 'none';
@@ -11961,6 +12001,8 @@
         let transportadorasCache = [];
         let autocompleteTranspTimeout = null;
         let autocompleteTranspIndex = -1;
+        let _transpCacheLoading = false;
+        let _transpCacheCooldown = 0;
 
         // Buscar transportadoras para autocomplete
         async function buscarTransportadorasAutocomplete(termo) {
@@ -11997,9 +12039,13 @@
                         return;
                     }
 
-                    // Se Não tem cache, busca da API
-                    await carregarTransportadorasParaCache();
-                    buscarTransportadorasAutocomplete(termo);
+                    // Se não tem cache, busca da API (com cooldown para evitar flood)
+                    if (Date.now() > _transpCacheCooldown) {
+                        await carregarTransportadorasParaCache();
+                        if (transportadorasCache.length > 0) {
+                            buscarTransportadorasAutocomplete(termo);
+                        }
+                    }
                 } catch (error) {
                     console.error('Erro no autocomplete de transportadoras:', error);
                 }
@@ -12008,8 +12054,17 @@
 
         // Carregar transportadoras para cache
         async function carregarTransportadorasParaCache() {
+            if (_transpCacheLoading) return;
+            _transpCacheLoading = true;
             try {
-                const response = await fetch('/api/transportadoras');
+                const response = await fetch('/api/pcp/transportadoras', {
+                    credentials: 'include'
+                });
+                if (!response.ok) {
+                    // Cooldown de 30s ao receber erro do servidor
+                    _transpCacheCooldown = Date.now() + 30000;
+                    return;
+                }
                 const data = await response.json();
                 if (Array.isArray(data)) {
                     transportadorasCache = data;
@@ -12020,7 +12075,11 @@
                 }
                 console.log('Transportadoras carregadas:', transportadorasCache.length);
             } catch (error) {
+                // Cooldown de 30s ao receber erro
+                _transpCacheCooldown = Date.now() + 30000;
                 console.error('Erro ao carregar transportadoras:', error);
+            } finally {
+                _transpCacheLoading = false;
             }
         }
 
@@ -21830,7 +21889,7 @@
                                 </div>
                                 <div>
                                     <h2 style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px;">${titulo}</h2>
-                                    <p style="margin: 3px 0 0; opacity: 0.85; font-size: 12px; font-weight: 500;">Aluforce: ${config.subtitulo}</p>
+                                    <p style="margin: 3px 0 0; opacity: 0.85; font-size: 12px; font-weight: 500;">Zyntra: ${config.subtitulo}</p>
                                 </div>
                             </div>
                             <button onclick="fecharModalDiario()" style="background: rgba(255,255,255,0.15); border: none; color: white; width: 40px; height: 40px; border-radius: 10px; cursor: pointer; font-size: 16px; transition: all 0.2s; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.transform='rotate(90deg)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.transform='rotate(0deg)'">
@@ -24577,7 +24636,7 @@
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
 <script src="/chat/widget.js?v=20260218" defer></script> -->
 
-    <!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->
+    <!-- Zyntra: Confirm Dialog Profissional v2.0 -->
     <script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <script src="/js/user-dropdown.js?v=20260223" defer></script>
 

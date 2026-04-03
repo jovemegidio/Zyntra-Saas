@@ -428,10 +428,12 @@
                 const r = await fetch('/api/logistica/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    document.getElementById('count-aguardando').textContent = d.aguardando_separacao || d.aguardando || 0;
-                    document.getElementById('count-separacao').textContent = d.em_separacao || d.separacao || 0;
-                    document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
-                    document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
+                    // HOTFIX Pipeline E2E: d.pendente inclui pedidos com status_logistica NULL/vazio/'pendente'
+                    // Somar pendente + aguardando_separacao para o card "Aguardando"
+                    document.getElementById('count-aguardando').textContent = (d.pendente || 0) + (d.aguardando_separacao || 0);
+                    document.getElementById('count-separacao').textContent = d.em_separacao || 0;
+                    document.getElementById('count-expedicao').textContent = d.em_expedicao || 0;
+                    document.getElementById('count-transporte').textContent = d.em_transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
                 }
             } catch (e) { console.error(e); }
@@ -872,7 +874,7 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
 
-    <!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->
+    <!-- Zyntra: Confirm Dialog Profissional v2.0 -->
     <script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
     <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->

@@ -40,6 +40,15 @@
         return sessionStorage.getItem('tabAuthToken') || null;
     }
 
+    // Verificar se o usuário está autenticado (via cookie/sessionStorage)
+    async function isUserAuthenticated() {
+        if (getAuthToken()) return true;
+        if (window.AluforceAuth && window.AluforceAuth.isAuthenticated) {
+            try { return await window.AluforceAuth.isAuthenticated(); } catch (e) { return false; }
+        }
+        return false;
+    }
+
     // ── Notificação sonora ────────────────────────────────
     let notifSound = null;
     function playNotifSound() {
@@ -1318,11 +1327,30 @@
     // INIT
     // ═══════════════════════════════════════════════════════
 
-    function init() {
-        if (!getAuthToken()) { setTimeout(init, 2000); return; }
-        buildWidget();
-        setTimeout(checkUnread, 3000);
+    let _initAttempts = 0;
+    const MAX_INIT_ATTEMPTS = 15; // 15 x 2s = 30s máximo de espera
+
+    async function init() {
+        // 1. Tentar via token direto (rápido)
+        if (getAuthToken()) { buildWidget(); setTimeout(checkUnread, 3000); return; }
+
+        // 2. Tentar via AluforceAuth (cookie-based auth v7.4+)
+        try {
+            const authed = await isUserAuthenticated();
+            if (authed) { buildWidget(); setTimeout(checkUnread, 3000); return; }
+        } catch (e) { /* ignore */ }
+
+        // 3. Retry com limite
+        _initAttempts++;
+        if (_initAttempts < MAX_INIT_ATTEMPTS) {
+            setTimeout(init, 2000);
+        }
     }
+
+    // Escutar evento de auth success (disparado por auth-unified.js após validar sessão)
+    window.addEventListener('authSuccess', () => {
+        if (!document.getElementById('ct-fab')) { init(); }
+    });
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
     else init();

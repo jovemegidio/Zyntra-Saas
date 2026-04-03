@@ -1,0 +1,185 @@
+﻿ï»¿<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="theme-color" content="#1a2744">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ALUFORCE PCP">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="ALUFORCE PCP">
+    <meta name="msapplication-TileColor" content="#1a2744">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>Zyntra: Login PCP</title>
+
+    <!-- Favicon e ícones -->
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json">
+
+    <!-- Font Awesome - Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+    <!-- CSS Principal do Login PCP -->
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+</head>
+
+<body>
+    <a href="#login-form" class="skip-link">Pular para o formulário</a>
+    <div class="login-container">
+        <form id="login-form" class="login-form">
+            <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="Logo Aluforce" class="login-logo">
+            
+            <!-- Avatar do usuário (aparece dinamicamente) -->
+            <div id="user-avatar" class="user-avatar">
+                <div class="avatar-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+            
+            <h2>Acesso à Área de PCP</h2>
+            <p>Faça login para continuar.</p>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-container">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <input type="email" id="email" name="email" placeholder="seuemail@aluforce.ind.br" autocomplete="email" aria-describedby="error-message" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <div class="input-container">
+                    <i class="fas fa-lock input-icon"></i>
+                    <input type="password" id="password" name="password" placeholder="Sua senha" autocomplete="current-password" aria-describedby="error-message" required>
+                    <i class="fas fa-eye password-toggle" id="password-toggle" title="Mostrar/Ocultar senha"></i>
+                </div>
+            </div>
+            
+            <!-- Opções de login -->
+            <div class="login-options">
+                <label class="remember-me">
+                    <div class="custom-checkbox">
+                        <input type="checkbox" id="remember-me" name="remember">
+                        <span class="checkbox-custom"></span>
+                    </div>
+                    <span>Lembrar-me</span>
+                </label>
+                <a href="#" class="forgot-password" id="forgot-password">Esqueceu a senha?</a>
+            </div>
+            
+            <button type="submit" id="login-submit-btn" aria-label="Entrar no sistema" aria-describedby="error-message">
+                <span class="btn-text">Entrar</span>
+                <div class="spinner" aria-hidden="true"></div>
+            </button>
+            <div id="error-message" class="error-message" role="alert" aria-live="assertive"></div>
+        </form>
+    </div>
+
+    <!-- Modal de Recuperação de Senha -->
+    <div id="forgot-password-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">&times;</button>
+            
+            <div class="modal-header">
+                <h3><i class="fas fa-key"></i> Recuperar Senha</h3>
+                <p>Siga os passos para redefinir sua senha</p>
+            </div>
+
+            <div class="step-indicator">
+                <div class="step-dot active" id="step-dot-1"></div>
+                <div class="step-dot" id="step-dot-2"></div>
+                <div class="step-dot" id="step-dot-3"></div>
+            </div>
+
+            <!-- Passo 1: Verificar Email -->
+            <div class="modal-step active" id="step-1">
+                <div class="modal-form-group">
+                    <label for="verify-email">Email</label>
+                    <input type="email" id="verify-email" class="modal-input" placeholder="seuemail@aluforce.ind.br" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="cancel-step-1">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="modal-btn modal-btn-primary" id="next-step-1">
+                        <i class="fas fa-arrow-right"></i> Próximo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Passo 2: Verificar Dados -->
+            <div class="modal-step" id="step-2">
+                <div class="modal-form-group">
+                    <label for="verify-name">Nome Completo</label>
+                    <input type="text" id="verify-name" class="modal-input" placeholder="Seu nome completo" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="verify-department">Departamento</label>
+                    <select id="verify-department" class="modal-input" required>
+                        <option value="">Selecione seu departamento</option>
+                        <option value="PCP">PCP - Planejamento e Controle</option>
+                        <option value="Produção">Produção</option>
+                        <option value="Comercial">Comercial</option>
+                        <option value="Vendas">Vendas</option>
+                        <option value="Administrativo">Administrativo</option>
+                        <option value="Financeiro">Financeiro</option>
+                        <option value="RH">RH</option>
+                        <option value="Diretoria">Diretoria</option>
+                        <option value="TI">TI</option>
+                        <option value="Conservação">Conservação</option>
+                        <option value="Consultoria">Consultoria</option>
+                    </select>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="back-step-2">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                    <button type="button" class="modal-btn modal-btn-primary" id="next-step-2">
+                        <i class="fas fa-arrow-right"></i> Verificar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Passo 3: Nova Senha -->
+            <div class="modal-step" id="step-3">
+                <div class="modal-form-group">
+                    <label for="new-password">Nova Senha</label>
+                    <input type="password" id="new-password" class="modal-input" placeholder="Digite sua nova senha" required>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-fill"></div>
+                        </div>
+                        <span class="strength-text">Digite uma senha forte</span>
+                    </div>
+                </div>
+                <div class="modal-form-group">
+                    <label for="confirm-password">Confirmar Senha</label>
+                    <input type="password" id="confirm-password" class="modal-input" placeholder="Digite novamente sua nova senha" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-btn modal-btn-secondary" id="back-step-3">
+                        <i class="fas fa-arrow-left"></i> Voltar
+                    </button>
+                    <button type="button" class="modal-btn modal-btn-primary" id="change-password">
+                        <i class="fas fa-check"></i> Alterar Senha
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="login.js"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
+
+</body>
+
+</html>

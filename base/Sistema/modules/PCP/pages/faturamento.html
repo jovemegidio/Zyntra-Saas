@@ -1,0 +1,1405 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="theme-color" content="#1a2744">
+    <title>Aluforce: Faturamento</title>
+    <script src="/js/auth-unified.js?v=20260214" defer></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/pcp-layout.css">
+    <link rel="stylesheet" href="../css/pcp-components.css">
+
+    <style>
+
+
+        .page-header-top { display: flex; justify-content: flex-end; margin-bottom: var(--space-6); }
+        .page-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+        .card-title { display: flex; align-items: center; gap: var(--space-2); font-size: 15px; font-weight: 600; color: var(--gray-800); }
+        .card-title i { color: var(--primary-500); }
+        .table-container { overflow-x: auto; }
+
+        .tabs { display: flex; gap: var(--space-1); border-bottom: 1px solid var(--gray-200); margin-bottom: var(--space-4); flex-wrap: wrap; }
+        .tab-btn { padding: var(--space-3) var(--space-4); border: none; background: transparent; color: var(--gray-500); font-size: 13px; font-weight: 500; cursor: pointer; position: relative; display: flex; align-items: center; gap: 6px; }
+        .tab-btn:hover { color: var(--gray-700); }
+        .tab-btn.active { color: var(--primary-600); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 2px; background: var(--primary-500); }
+
+        /* Calendário */
+        .calendario-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+        .calendario-day { min-height: 80px; padding: 8px; border: 1px solid var(--gray-200); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; }
+        .calendario-day:hover { background: var(--gray-50); }
+        .calendario-day.hoje { border-color: var(--primary-500); background: var(--primary-50); }
+        .calendario-day.outro-mes { opacity: 0.4; }
+        .calendario-day-number { font-weight: 600; font-size: 14px; color: var(--gray-700); }
+        .calendario-events { margin-top: 4px; }
+        .calendario-event { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+        .calendario-event:hover { opacity: 0.8; }
+        .calendario-event.faturado { background: #dcfce7; color: #166534; }
+        .calendario-event.programado { background: #dbeafe; color: #1e40af; }
+        .calendario-event.pendente { background: #fef3c7; color: #92400e; }
+        .calendario-event.cancelado { background: #fee2e2; color: #991b1b; }
+
+        .calendario-header { display: flex; gap: 16px; margin-bottom: 8px; }
+        .calendario-header-day { text-align: center; padding: 8px; font-size: 12px; font-weight: 600; color: var(--gray-600); }
+        .calendario-header-day.dom { color: #ef4444; }
+        .calendario-header-day.sab { color: #3b82f6; }
+
+        .calendario-nav { display: flex; align-items: center; gap: 12px; }
+        .calendario-nav button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--gray-200); background: white; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .calendario-nav button:hover { background: var(--gray-50); }
+        .calendario-mes-ano { font-size: 16px; font-weight: 600; color: var(--gray-800); min-width: 150px; text-align: center; }
+
+        .legenda { display: flex; gap: 20px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-200); flex-wrap: wrap; }
+        .legenda-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--gray-600); }
+        .legenda-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* ========================================
+           MODAL NOVO FATURAMENTO - ESTILO SAAS EMPRESARIAL
+           ======================================== */
+        .modal-overlay-fat {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(17, 24, 39, 0.7);
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay-fat.active { display: flex; }
+
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-fat {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 720px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: slideUp 0.3s ease;
+        }
+
+        /* Header do Modal */
+        .modal-fat-header {
+            background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
+            padding: 24px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-fat-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .modal-fat-header-content {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal-fat-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+        }
+
+        .modal-fat-title {
+            color: white;
+        }
+
+        .modal-fat-title h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+        }
+
+        .modal-fat-title p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+        }
+
+        .modal-fat-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .modal-fat-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Body do Modal */
+        .modal-fat-body {
+            padding: 0;
+            overflow-y: auto;
+            max-height: calc(90vh - 180px);
+        }
+
+        /* Seções do Formulário */
+        .form-section-fat {
+            padding: 24px 28px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .form-section-fat:last-child {
+            border-bottom: none;
+        }
+
+        .form-section-fat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .form-section-fat-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        .form-section-fat-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .form-section-fat-subtitle {
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        /* Grid de Campos */
+        .form-grid-fat {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .form-grid-fat.cols-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .form-grid-fat .full-width {
+            grid-column: 1 / -1;
+        }
+
+        /* Campos do Formulário */
+        .form-group-fat {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label-fat {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-700);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-label-fat .required {
+            color: #ef4444;
+        }
+
+        .form-label-fat .optional {
+            font-weight: 400;
+            color: var(--gray-400);
+            font-size: 11px;
+        }
+
+        .form-input-fat,
+        .form-select-fat,
+        .form-textarea-fat {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            background: #f9fafb;
+            transition: all 0.2s;
+        }
+
+        .form-input-fat:hover,
+        .form-select-fat:hover,
+        .form-textarea-fat:hover {
+            border-color: var(--gray-400);
+        }
+
+        .form-input-fat:focus,
+        .form-select-fat:focus,
+        .form-textarea-fat:focus {
+            outline: none;
+            border-color: #4b5563;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(75, 85, 99, 0.1);
+        }
+
+        .form-textarea-fat {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-input-fat::placeholder {
+            color: var(--gray-400);
+        }
+
+        /* Input com ícone */
+        .input-with-icon-fat {
+            position: relative;
+        }
+
+        .input-with-icon-fat i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            font-size: 14px;
+        }
+
+        .input-with-icon-fat .form-input-fat {
+            padding-left: 40px;
+        }
+
+        /* Input de valor monetário */
+        .input-currency-fat {
+            position: relative;
+        }
+
+        .input-currency-fat::before {
+            content: 'R$';
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .input-currency-fat .form-input-fat {
+            padding-left: 44px;
+        }
+
+        /* Seletor de Pedido */
+        .pedido-selector-fat {
+            background: #f9fafb;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pedido-selector-fat:hover {
+            border-color: var(--gray-400);
+            background: var(--gray-100);
+        }
+
+        .pedido-selector-fat.selected {
+            border-color: #4b5563;
+            background: white;
+        }
+
+        .pedido-selector-fat-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .pedido-selector-fat-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4b5563;
+        }
+
+        .pedido-selector-fat-text {
+            flex: 1;
+        }
+
+        .pedido-selector-fat-text span {
+            display: block;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .pedido-selector-fat-text strong {
+            font-size: 14px;
+            color: #1f2937;
+        }
+
+        /* Info Card */
+        .info-card-fat {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .info-card-fat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .info-card-fat-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-card-fat-label {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .info-card-fat-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .info-card-fat-value.total {
+            font-size: 16px;
+            color: #059669;
+        }
+
+        /* Footer do Modal */
+        .modal-fat-footer {
+            padding: 20px 28px;
+            background: #f9fafb;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .modal-fat-footer-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--gray-500);
+        }
+
+        .modal-fat-footer-info i {
+            color: var(--gray-400);
+        }
+
+        .modal-fat-footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-fat-cancel {
+            padding: 12px 24px;
+            border: 1px solid var(--gray-300);
+            background: white;
+            color: var(--gray-700);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-fat-cancel:hover {
+            background: var(--gray-100);
+            border-color: var(--gray-400);
+        }
+
+        .btn-fat-save {
+            padding: 12px 28px;
+            border: none;
+            background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(31, 41, 55, 0.25);
+        }
+
+        .btn-fat-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(31, 41, 55, 0.4);
+        }
+
+        .btn-fat-save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .modal-fat {
+                max-width: 100%;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+
+            .form-grid-fat,
+            .form-grid-fat.cols-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-fat-footer {
+                flex-direction: column;
+            }
+
+            .modal-fat-footer-actions {
+                width: 100%;
+            }
+
+            .modal-fat-footer-actions button {
+                flex: 1;
+            }
+        }
+
+        /* Status Badge melhorado */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.programado { background: #dbeafe; color: #1e40af; } /* info */
+        .status-badge.faturado { background: #dcfce7; color: #166534; } /* success */
+        .status-badge.pendente { background: #fef3c7; color: #92400e; } /* warning */
+        .status-badge.cancelado { background: #fee2e2; color: #991b1b; } /* danger */
+
+        /* Botão Novo Faturamento destacado */
+        .btn-novo-fat {
+            background: linear-gradient(135deg, var(--gray-700), var(--gray-800));
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(31, 41, 55, 0.25);
+            transition: all 0.2s;
+        }
+
+        .btn-novo-fat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(31, 41, 55, 0.4);
+        }
+    
+        /* === Metric Card Standard (prospeccao.html) === */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+        }
+        .metric-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+        .metric-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+        .metric-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+        .metric-card.green::before { background: linear-gradient(90deg, #22c55e, #4ade80); }
+        .metric-card.red::before { background: linear-gradient(90deg, #ef4444, #f87171); }
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        .metric-icon {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .metric-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .metric-icon.orange { background: #fff7ed; color: #f59e0b; }
+        .metric-icon.purple { background: #faf5ff; color: #8b5cf6; }
+        .metric-icon.green { background: #f0fdf4; color: #22c55e; }
+        .metric-icon.red { background: #fef2f2; color: #ef4444; }
+        .metric-trend {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .metric-trend.up { background: #dcfce7; color: #16a34a; }
+        .metric-trend.down { background: #fee2e2; color: #dc2626; }
+        .metric-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .metric-label {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        /* Pattern B/C compat: metric-content/metric-info wrappers */
+        .metric-content, .metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+        .metric-content .metric-value,
+        .metric-info .value,
+        .metric-info h3 {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1;
+            margin: 0 0 4px;
+            order: 1;
+        }
+        .metric-content .metric-label,
+        .metric-info h3:first-child {
+            font-size: 13px;
+            color: #64748b;
+            font-weight: 500;
+            margin: 0;
+        }
+        .metric-content .metric-trend {
+            order: 3;
+            margin-top: 4px;
+        }
+        @media (max-width: 1400px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 1024px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .metrics-grid { grid-template-columns: 1fr; } }
+        /* === End Metric Card Standard === */
+
+    </style>
+
+    <!-- Tooltips Profissionais -->
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <script src="/js/tooltips-professional.js?v=20260209"></script>
+
+    <!-- Global Header & Sidebar -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260224">
+
+    <!-- PCP Header & Sidebar  Design Refinado (DEVE SER O ÚLTIMO) -->
+    <link rel="stylesheet" href="../css/pcp-header-sidebar.css?v=20260224">
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
+    <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
+                <i class="fas fa-home"></i>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="../index.html" class="sidebar-btn" title="Dashboard PCP"><i class="fas fa-tachometer-alt"></i></a>
+                <a href="estoque.html" class="sidebar-btn" title="Estoque"><i class="fas fa-boxes"></i></a>
+                <a href="materiais.html" class="sidebar-btn" title="Materiais"><i class="fas fa-layer-group"></i></a>
+                <a href="ordem-compra.html" class="sidebar-btn" title="Ordem de Compra"><i class="fas fa-shopping-cart"></i></a>
+                <a href="../ordens-producao.html" class="sidebar-btn" title="Ordens de Produção"><i class="fas fa-clipboard-list"></i></a>
+                <a href="gestao-producao.html" class="sidebar-btn" title="Gestão de Produção"><i class="fas fa-industry"></i></a>
+                <a href="faturamento.html" class="sidebar-btn active" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
+            </div>
+        </aside>
+
+        <!-- Overlay para fechar sidebar em mobile -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- Main Area -->
+        <main class="main-area">
+            <!-- HEADER -->
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Faturamento</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span id="saudacao">Bom dia,</span>
+                        <strong id="userName">Usuário</strong>
+                    </div>
+                    <div class="user-avatar"><span id="userInitial">U</span></div>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-content">
+                    <div class="page-header-top">
+                        <div class="page-actions">
+                            <button class="btn-novo-fat" onclick="novoFaturamento()"><i class="fas fa-plus"></i> Novo Faturamento</button>
+                        </div>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card blue">
+                            <div class="metric-header">
+                                <div class="metric-icon blue"><i class="fas fa-calendar-alt"></i></div>
+                            </div>
+                            <div class="metric-value" id="fat-programados">0</div>
+                            <div class="metric-label">Programados</div>
+                        </div>
+                        <div class="metric-card green">
+                            <div class="metric-header">
+                                <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                            <div class="metric-value" id="fat-emitidos">0</div>
+                            <div class="metric-label">Faturados</div>
+                        </div>
+                        <div class="metric-card orange">
+                            <div class="metric-header">
+                                <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                            </div>
+                            <div class="metric-value" id="fat-pendentes">0</div>
+                            <div class="metric-label">Pendentes</div>
+                        </div>
+                        <div class="metric-card red">
+                            <div class="metric-header">
+                                <div class="metric-icon red"><i class="fas fa-times-circle"></i></div>
+                            </div>
+                            <div class="metric-value" id="fat-cancelados">0</div>
+                            <div class="metric-label">Cancelados</div>
+                        </div>
+                    </div>
+
+                    <!-- Calendário -->
+                    <div class="card" style="margin-bottom: 24px;">
+                        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                            <h3 class="card-title"><i class="fas fa-calendar-alt"></i> Calendário de Faturamento</h3>
+                            <div class="calendario-nav">
+                                <button onclick="navegarCalendario(-1)"><i class="fas fa-chevron-left"></i></button>
+                                <span id="calendario-mes-ano" class="calendario-mes-ano">Janeiro 2026</span>
+                                <button onclick="navegarCalendario(1)"><i class="fas fa-chevron-right"></i></button>
+                                <button onclick="irParaHoje()" style="padding: 8px 16px; border-radius: 6px; width: auto; font-size: 13px; color: var(--gray-600);">Hoje</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendario-header" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;">
+                                <div class="calendario-header-day dom">DOM</div>
+                                <div class="calendario-header-day">SEG</div>
+                                <div class="calendario-header-day">TER</div>
+                                <div class="calendario-header-day">QUA</div>
+                                <div class="calendario-header-day">QUI</div>
+                                <div class="calendario-header-day">SEX</div>
+                                <div class="calendario-header-day sab">SÁB</div>
+                            </div>
+                            <div id="calendario-grid" class="calendario-grid"></div>
+
+                            <div class="legenda">
+                                <div class="legenda-item"><div class="legenda-dot" style="background: #22c55e;"></div> Faturado</div>
+                                <div class="legenda-item"><div class="legenda-dot" style="background: #3b82f6;"></div> Programado</div>
+                                <div class="legenda-item"><div class="legenda-dot" style="background: #f97316;"></div> Pendente</div>
+                                <div class="legenda-item"><div class="legenda-dot" style="background: #ef4444;"></div> Cancelado</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="tabs">
+                        <button class="tab-btn active" data-tab-fat="todos"><i class="fas fa-list"></i> Todos</button>
+                        <button class="tab-btn" data-tab-fat="programados"><i class="fas fa-clock"></i> Programados</button>
+                        <button class="tab-btn" data-tab-fat="emitidos"><i class="fas fa-check-circle"></i> Emitidos</button>
+                        <button class="tab-btn" data-tab-fat="cancelados"><i class="fas fa-times-circle"></i> Cancelados</button>
+                    </div>
+
+                    <!-- Tabela -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-file-invoice"></i> Lista de Faturamentos</h3>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-container">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Nº Pedido</th>
+                                            <th>Cliente</th>
+                                            <th>Data Programada</th>
+                                            <th>Valor</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="faturamento-table-body">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; padding: 60px;">
+                                                <div class="loading-spinner" style="margin: 0 auto;"></div>
+                                                <p style="margin-top: 16px; color: var(--gray-500);">Carregando faturamentos...</p>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ========================================
+         MODAL NOVO FATURAMENTO - SAAS EMPRESARIAL
+         ======================================== -->
+    <div class="modal-overlay-fat" id="modalNovoFaturamento">
+        <div class="modal-fat">
+            <!-- Header do Modal -->
+            <div class="modal-fat-header">
+                <div class="modal-fat-header-content">
+                    <div class="modal-fat-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div class="modal-fat-title">
+                        <h2>Novo Faturamento</h2>
+                        <p>Programe um novo faturamento no calendário</p>
+                    </div>
+                </div>
+                <button class="modal-fat-close" onclick="fecharModalFaturamento()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Body do Modal -->
+            <div class="modal-fat-body">
+                <!-- Seção: Dados do Pedido -->
+                <div class="form-section-fat">
+                    <div class="form-section-fat-header">
+                        <div class="form-section-fat-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                        <div>
+                            <div class="form-section-fat-title">Dados do Pedido</div>
+                            <div class="form-section-fat-subtitle">Selecione o pedido para faturamento</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-fat">
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Número do Pedido <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon-fat">
+                                <i class="fas fa-hashtag"></i>
+                                <input type="text" class="form-input-fat" id="fat-pedido-número"
+                                       placeholder="Ex: 12345" oninput="buscarPedido(this.value)">
+                            </div>
+                        </div>
+
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Cliente
+                            </label>
+                            <input type="text" class="form-input-fat" id="fat-cliente"
+                                   placeholder="Será preenchido automaticamente" readonly>
+                        </div>
+
+                        <div class="form-group-fat full-width">
+                            <div class="info-card-fat" id="info-pedido-card" style="display: none;">
+                                <div class="info-card-fat-row">
+                                    <span class="info-card-fat-label">Pedido</span>
+                                    <span class="info-card-fat-value" id="info-pedido-número">-</span>
+                                </div>
+                                <div class="info-card-fat-row">
+                                    <span class="info-card-fat-label">Cliente</span>
+                                    <span class="info-card-fat-value" id="info-pedido-cliente">-</span>
+                                </div>
+                                <div class="info-card-fat-row">
+                                    <span class="info-card-fat-label">Data do Pedido</span>
+                                    <span class="info-card-fat-value" id="info-pedido-data">-</span>
+                                </div>
+                                <div class="info-card-fat-row">
+                                    <span class="info-card-fat-label">Valor Total</span>
+                                    <span class="info-card-fat-value total" id="info-pedido-valor">-</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Programação -->
+                <div class="form-section-fat">
+                    <div class="form-section-fat-header">
+                        <div class="form-section-fat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div>
+                            <div class="form-section-fat-title">Programação</div>
+                            <div class="form-section-fat-subtitle">Defina a data e valores do faturamento</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-fat cols-3">
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Data Programada <span class="required">*</span>
+                            </label>
+                            <div class="input-with-icon-fat">
+                                <i class="fas fa-calendar"></i>
+                                <input type="date" class="form-input-fat" id="fat-data-programada">
+                            </div>
+                        </div>
+
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Valor do Faturamento <span class="required">*</span>
+                            </label>
+                            <div class="input-currency-fat">
+                                <input type="text" class="form-input-fat" id="fat-valor"
+                                       placeholder="0,00" oninput="formatarCampoMoeda(this)">
+                            </div>
+                        </div>
+
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Status Inicial
+                            </label>
+                            <select class="form-select-fat" id="fat-status">
+                                <option value="programado">Programado</option>
+                                <option value="pendente">Pendente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seção: Informações Adicionais -->
+                <div class="form-section-fat">
+                    <div class="form-section-fat-header">
+                        <div class="form-section-fat-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div>
+                            <div class="form-section-fat-title">Informações Adicionais</div>
+                            <div class="form-section-fat-subtitle">Dados complementares do faturamento</div>
+                        </div>
+                    </div>
+
+                    <div class="form-grid-fat">
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Tipo de Faturamento
+                            </label>
+                            <select class="form-select-fat" id="fat-tipo">
+                                <option value="normal">Faturamento Normal</option>
+                                <option value="parcial">Faturamento Parcial</option>
+                                <option value="antecipado">Faturamento Antecipado</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-fat">
+                            <label class="form-label-fat">
+                                Responsável
+                            </label>
+                            <div class="input-with-icon-fat">
+                                <i class="fas fa-user"></i>
+                                <input type="text" class="form-input-fat" id="fat-responsavel"
+                                       placeholder="Nome do responsável">
+                            </div>
+                        </div>
+
+                        <div class="form-group-fat full-width">
+                            <label class="form-label-fat">
+                                Observações <span class="optional">(opcional)</span>
+                            </label>
+                            <textarea class="form-textarea-fat" id="fat-observacoes"
+                                      placeholder="Insira observações relevantes sobre este faturamento..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer do Modal -->
+            <div class="modal-fat-footer">
+                <div class="modal-fat-footer-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>O faturamento será exibido no calendário após salvar</span>
+                </div>
+                <div class="modal-fat-footer-actions">
+                    <button class="btn-fat-cancel" onclick="fecharModalFaturamento()">
+                        Cancelar
+                    </button>
+                    <button class="btn-fat-save" onclick="salvarNovoFaturamento()">
+                        <i class="fas fa-check"></i> Salvar Faturamento
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/pcp-common.js"></script>
+    <script>
+        let faturamentosData = [];
+        let calendarioData = new Date();
+
+        async function carregarFaturamentos() {
+            try {
+                const API_BASE = getAPIBase();
+                const response = await fetch(`${API_BASE}/api/pcp/faturamentos`);
+                if (response.ok) {
+                    const data = await response.json();
+                    // Garantir que é um array (compatibilidade com diferentes formatos de resposta)
+                    if (Array.isArray(data)) {
+                        faturamentosData = data;
+                    } else if (data && Array.isArray(data.data)) {
+                        faturamentosData = data.data;
+                    } else {
+                        faturamentosData = [];
+                    }
+                    atualizarEstatisticas();
+                    renderizarFaturamentos();
+                    renderizarCalendario();
+                } else {
+                    faturamentosData = [];
+                    atualizarEstatisticas();
+                    renderizarFaturamentos();
+                    renderizarCalendario();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar faturamentos:', error);
+                faturamentosData = [];
+                atualizarEstatisticas();
+                renderizarFaturamentos();
+                renderizarCalendario();
+            }
+        }
+
+        function atualizarEstatisticas() {
+            // Garantir que faturamentosData é um array
+            const dados = Array.isArray(faturamentosData) ? faturamentosData : [];
+            document.getElementById('fat-programados').textContent = dados.filter(f => f.status === 'programado').length;
+            document.getElementById('fat-emitidos').textContent = dados.filter(f => f.status === 'faturado').length;
+            document.getElementById('fat-pendentes').textContent = dados.filter(f => f.status === 'pendente').length;
+            document.getElementById('fat-cancelados').textContent = dados.filter(f => f.status === 'cancelado').length;
+        }
+
+        function renderizarFaturamentos() {
+            const tbody = document.getElementById('faturamento-table-body');
+            // Garantir que faturamentosData é um array
+            const dados = Array.isArray(faturamentosData) ? faturamentosData : [];
+
+            if (dados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 60px;">
+                    <i class="fas fa-file-invoice" style="font-size: 48px; color: var(--gray-300); margin-bottom: 16px;"></i>
+                    <p style="color: var(--gray-500);">Nenhum faturamento encontrado</p>
+                </td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = dados.map(f => `
+                <tr>
+                    <td><strong>#${f.pedido_id}</strong></td>
+                    <td>${f.cliente || '-'}</td>
+                    <td>${formatarData(f.data_programada)}</td>
+                    <td>${formatarMoeda(f.valor)}</td>
+                    <td><span class="status-badge ${f.status}">${f.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-secondary" onclick="verFaturamento(${f.id})"><i class="fas fa-eye"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderizarCalendario() {
+            const grid = document.getElementById('calendario-grid');
+            const ano = calendarioData.getFullYear();
+            const mes = calendarioData.getMonth();
+
+            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            document.getElementById('calendario-mes-ano').textContent = `${meses[mes]} ${ano}`;
+
+            const primeiroDia = new Date(ano, mes, 1);
+            const ultimoDia = new Date(ano, mes + 1, 0);
+            const diasNoMes = ultimoDia.getDate();
+            const diaSemanaInicio = primeiroDia.getDay();
+
+            const hoje = new Date();
+
+            let html = '';
+
+            // Dias do mês anterior
+            const diasMesAnterior = new Date(ano, mes, 0).getDate();
+            for (let i = diaSemanaInicio - 1; i >= 0; i--) {
+                html += `<div class="calendario-day outro-mes"><span class="calendario-day-number">${diasMesAnterior - i}</span></div>`;
+            }
+
+            // Dias do mês atual
+            for (let dia = 1; dia <= diasNoMes; dia++) {
+                const dataAtual = new Date(ano, mes, dia);
+                const isHoje = hoje.getDate() === dia && hoje.getMonth() === mes && hoje.getFullYear() === ano;
+
+                // Buscar eventos do dia
+                const eventos = faturamentosData.filter(f => {
+                    const dataEvento = new Date(f.data_programada);
+                    return dataEvento.getDate() === dia && dataEvento.getMonth() === mes && dataEvento.getFullYear() === ano;
+                });
+
+                let eventosHtml = '';
+                eventos.slice(0, 2).forEach(e => {
+                    eventosHtml += `<div class="calendario-event ${e.status}">${e.cliente?.substring(0, 15) || 'Pedido'}</div>`;
+                });
+                if (eventos.length > 2) {
+                    eventosHtml += `<div class="calendario-event" style="background: var(--gray-100); color: var(--gray-600);">+${eventos.length - 2} mais</div>`;
+                }
+
+                html += `
+                    <div class="calendario-day ${isHoje ? 'hoje' : ''}" onclick="verDia(${dia})">
+                        <span class="calendario-day-number">${dia}</span>
+                        <div class="calendario-events">${eventosHtml}</div>
+                    </div>
+                `;
+            }
+
+            // Dias do próximo mês
+            const diasRestantes = 42 - (diaSemanaInicio + diasNoMes);
+            for (let i = 1; i <= diasRestantes; i++) {
+                html += `<div class="calendario-day outro-mes"><span class="calendario-day-number">${i}</span></div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function navegarCalendario(direcao) {
+            calendarioData.setMonth(calendarioData.getMonth() + direcao);
+            renderizarCalendario();
+        }
+
+        function irParaHoje() {
+            calendarioData = new Date();
+            renderizarCalendario();
+        }
+
+        function verDia(dia) {
+            const ano = calendarioData.getFullYear();
+            const mes = calendarioData.getMonth();
+            const eventos = faturamentosData.filter(f => {
+                const dataEvento = new Date(f.data_programada);
+                return dataEvento.getDate() === dia && dataEvento.getMonth() === mes && dataEvento.getFullYear() === ano;
+            });
+
+            if (eventos.length > 0) {
+                showToast(`${eventos.length} faturamento(s) no dia ${dia}`, 'info');
+            } else {
+                // Abrir modal com data pré-preenchida
+                abrirModalFaturamento(new Date(ano, mes, dia));
+            }
+        }
+
+        // ========================================
+        // FUNÇÕES DO MODAL NOVO FATURAMENTO
+        // ========================================
+
+        let pedidoSelecionado = null;
+
+        function novoFaturamento() {
+            abrirModalFaturamento();
+        }
+
+        function abrirModalFaturamento(dataPadrao = null) {
+            const modal = document.getElementById('modalNovoFaturamento');
+            modal.classList.add('active');
+
+            // Limpar formulário
+            document.getElementById('fat-pedido-número').value = '';
+            document.getElementById('fat-cliente').value = '';
+            document.getElementById('fat-valor').value = '';
+            document.getElementById('fat-observacoes').value = '';
+            document.getElementById('fat-responsavel').value = '';
+            document.getElementById('fat-status').value = 'programado';
+            document.getElementById('fat-tipo').value = 'normal';
+            document.getElementById('info-pedido-card').style.display = 'none';
+            pedidoSelecionado = null;
+
+            // Definir data
+            if (dataPadrao) {
+                document.getElementById('fat-data-programada').value = dataPadrao.toISOString().split('T')[0];
+            } else {
+                document.getElementById('fat-data-programada').value = new Date().toISOString().split('T')[0];
+            }
+
+            // Focar no primeiro campo
+            setTimeout(() => {
+                document.getElementById('fat-pedido-número').focus();
+            }, 100);
+        }
+
+        function fecharModalFaturamento() {
+            const modal = document.getElementById('modalNovoFaturamento');
+            modal.classList.remove('active');
+            pedidoSelecionado = null;
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharModalFaturamento();
+            }
+        });
+
+        // Fechar modal clicando fora
+        document.getElementById('modalNovoFaturamento').addEventListener('click', function(e) {
+            if (e.target === this) {
+                fecharModalFaturamento();
+            }
+        });
+
+        async function buscarPedido(numero) {
+            if (!numero || numero.length < 1) {
+                document.getElementById('fat-cliente').value = '';
+                document.getElementById('info-pedido-card').style.display = 'none';
+                pedidoSelecionado = null;
+                return;
+            }
+
+            try {
+                const API_BASE = getAPIBase();
+                const response = await fetch(`${API_BASE}/api/vendas/pedidos/${numero}`);
+
+                if (response.ok) {
+                    const pedido = await response.json();
+                    pedidoSelecionado = pedido;
+
+                    // Preencher campos
+                    document.getElementById('fat-cliente').value = pedido.cliente || pedido.empresa || '-';
+                    document.getElementById('fat-valor').value = formatarMoedaInput(pedido.valor_total || pedido.total || 0);
+
+                    // Mostrar info card
+                    document.getElementById('info-pedido-card').style.display = 'block';
+                    document.getElementById('info-pedido-número').textContent = `#${pedido.id || pedido.número || número}`;
+                    document.getElementById('info-pedido-cliente').textContent = pedido.cliente || pedido.empresa || '-';
+                    document.getElementById('info-pedido-data').textContent = formatarData(pedido.data_criacao || pedido.data_pedido || new Date());
+                    document.getElementById('info-pedido-valor').textContent = formatarMoeda(pedido.valor_total || pedido.total || 0);
+                } else {
+                    document.getElementById('fat-cliente').value = '';
+                    document.getElementById('info-pedido-card').style.display = 'none';
+                    pedidoSelecionado = null;
+                }
+            } catch (error) {
+                console.error('Erro ao buscar pedido:', error);
+            }
+        }
+
+        function formatarCampoMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            if (valor.length === 0) {
+                input.value = '';
+                return;
+            }
+            valor = (parseInt(valor) / 100).toFixed(2);
+            input.value = valor.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function formatarMoedaInput(valor) {
+            if (!valor) return '';
+            return parseFloat(valor).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        async function salvarNovoFaturamento() {
+            const pedidoNumero = document.getElementById('fat-pedido-número').value.trim();
+            const cliente = document.getElementById('fat-cliente').value.trim();
+            const dataProgramada = document.getElementById('fat-data-programada').value;
+            const valorStr = document.getElementById('fat-valor').value.replace(/\./g, '').replace(',', '.');
+            const valor = parseFloat(valorStr) || 0;
+            const status = document.getElementById('fat-status').value;
+            const tipo = document.getElementById('fat-tipo').value;
+            const responsavel = document.getElementById('fat-responsavel').value.trim();
+            const observacoes = document.getElementById('fat-observacoes').value.trim();
+
+            // Validações
+            if (!pedidoNumero) {
+                showToast('Informe o número do pedido', 'error');
+                document.getElementById('fat-pedido-número').focus();
+                return;
+            }
+
+            if (!dataProgramada) {
+                showToast('Informe a data programada', 'error');
+                document.getElementById('fat-data-programada').focus();
+                return;
+            }
+
+            if (valor <= 0) {
+                showToast('Informe um valor válido', 'error');
+                document.getElementById('fat-valor').focus();
+                return;
+            }
+
+            const dadosFaturamento = {
+                pedido_id: parseInt(pedidoNumero),
+                cliente: cliente || `Pedido #${pedidoNumero}`,
+                data_programada: dataProgramada,
+                valor: valor,
+                status: status,
+                tipo: tipo,
+                responsavel: responsavel,
+                observacoes: observacoes
+            };
+
+            try {
+                const API_BASE = getAPIBase();
+                const response = await fetch(`${API_BASE}/api/pcp/faturamentos`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dadosFaturamento)
+                });
+
+                if (response.ok) {
+                    showToast('Faturamento programado com sucesso!', 'success');
+                    fecharModalFaturamento();
+                    carregarFaturamentos(); // Recarrega a lista e atualiza calendário
+                } else {
+                    const error = await response.json();
+                    showToast('Erro ao salvar faturamento', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar faturamento:', error);
+
+                // Fallback: Adicionar localmente para demonstração
+                const novoFat = {
+                    id: Date.now(),
+                    ...dadosFaturamento
+                };
+
+                faturamentosData.push(novoFat);
+                atualizarEstatisticas();
+                renderizarFaturamentos();
+                renderizarCalendario();
+
+                showToast('Faturamento adicionado ao calendário!', 'success');
+                fecharModalFaturamento();
+            }
+        }
+
+        function verFaturamento(id) { showToast('Ver faturamento ' + id, 'info'); }
+
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            atualizarSaudacao();
+            carregarFaturamentos();
+            renderizarCalendario();
+        });
+    </script>
+    <script src="/modules/_shared/connection-monitor.js?v=20260205c"></script>
+    <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
+    <script src="/chat/widget.js?v=20260218" defer></script> -->
+
+    <!-- Sidebar Click Animation -->
+    <script src="/js/sidebar-click-animation.js?v=20260224"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226"></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+</body>
+</html>

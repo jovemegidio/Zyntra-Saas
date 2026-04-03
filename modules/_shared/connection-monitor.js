@@ -441,10 +441,9 @@
             try {
                 const response = await originalFetch.apply(this, [url, options]);
 
-                // Se o servidor respondeu (qualquer status), resetar contador de falhas de conexão
-                // 401/403 = servidor vivo, apenas sem permissão
-                // 500/502 = servidor vivo, mas com erro interno
-                if (response.status > 0) {
+                // Se o servidor respondeu com status que indica backend vivo, resetar
+                // 502/503/504 = Nginx vivo mas backend caído - NÃO resetar
+                if (response.status > 0 && response.status !== 502 && response.status !== 503 && response.status !== 504) {
                     consecutiveFailures = 0;
                 }
 

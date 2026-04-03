@@ -699,6 +699,7 @@
             display: flex;
             flex: 1;
             overflow: hidden;
+            min-height: 0;
         }
 
         .modal-ordem-main {
@@ -715,6 +716,82 @@
             padding: 16px 0;
             display: flex;
             flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Footer fixo com botões de ação */
+        .modal-ordem-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: #ffffff;
+            border-top: 1px solid #e5e5e5;
+            flex-shrink: 0;
+        }
+
+        .modal-ordem-footer .footer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-ordem-footer .footer-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-ordem-footer .btn-footer {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .modal-ordem-footer .btn-cancelar {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .modal-ordem-footer .btn-cancelar:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        .modal-ordem-footer .btn-salvar {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .modal-ordem-footer .btn-salvar:hover:not(:disabled) {
+            background: linear-gradient(135deg, #b91c1c, #991b1b);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .modal-ordem-footer .btn-salvar:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 900px) {
+            .modal-ordem-sidebar {
+                display: none;
+            }
         }
 
         .sidebar-action {
@@ -1107,29 +1184,9 @@
             background: #334155;
         }
 
-        /* Status Badge Rodapé */
+        /* Status Badge Rodapé (legado - substituído pelo footer fixo) */
         .status-badge-footer {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 20px;
-            background: linear-gradient(135deg, #334155, #475569);
-            color: white;
-            font-size: 13px;
-            font-weight: 600;
-            border-radius: 0 0 16px 0;
-        }
-
-        .status-badge-footer i {
-            color: white;
-            font-size: 16px;
-        }
-
-        .status-badge-footer span {
-            color: white;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            display: none;
         }
 
         /* Botões de opções na tabela */
@@ -1974,10 +2031,20 @@
                 </div>
             </div>
 
-            <!-- Footer Status -->
-            <div class="status-badge-footer" id="modal-status-footer">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="modal-status-text">Atrasada</span>
+            <!-- Footer Fixo com Ações -->
+            <div class="modal-ordem-footer">
+                <div class="footer-status">
+                    <i class="fas fa-exclamation-circle" id="modal-footer-icon"></i>
+                    <span id="modal-status-text">Atrasada</span>
+                </div>
+                <div class="footer-actions">
+                    <button type="button" class="btn-footer btn-cancelar" onclick="fecharModalOrdem()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="button" class="btn-footer btn-salvar" id="btn-salvar-ordem" onclick="salvarOrdemModal()">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -3088,20 +3155,52 @@
         }
 
         // Funções de ação da sidebar
-        function salvarOrdemModal() {
+        async function salvarOrdemModal() {
             if (!ordemAtualId) return;
 
             const ordem = ordensProducao.find(o => o.id === ordemAtualId);
-            if (ordem) {
-                // Salvar alterações
+            if (!ordem) return;
+
+            const btnSalvar = document.getElementById('btn-salvar-ordem');
+            const textoOriginal = btnSalvar.innerHTML;
+
+            try {
+                // Estado de carregamento
+                btnSalvar.disabled = true;
+                btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
                 const novaPrevisao = document.getElementById('modal-previsao-conclusao').value;
-                if (novaPrevisao) {
-                    ordem.dataConclusao = novaPrevisao;
+                const observacoes = document.getElementById('modal-observacoes').value;
+
+                const payload = {};
+                if (novaPrevisao) payload.data_prevista = novaPrevisao;
+                if (observacoes !== undefined) payload.observacoes = observacoes;
+
+                const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.message || 'Erro ao salvar ordem');
                 }
-                ordem.observacoes = document.getElementById('modal-observacoes').value;
+
+                // Atualizar estado local
+                if (novaPrevisao) ordem.dataConclusao = novaPrevisao;
+                ordem.observacoes = observacoes;
 
                 renderizarKanban();
                 showNotification('Ordem salva com sucesso!', 'success');
+                fecharModalOrdem();
+            } catch (error) {
+                console.error('[PCP] Erro ao salvar ordem:', error);
+                showNotification('Erro ao salvar ordem: ' + error.message, 'error');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerHTML = textoOriginal;
             }
         }
 
@@ -3578,10 +3677,30 @@
             document.getElementById('modal-enviar-email').remove();
         }
 
-        function executarImpressaoOrdem() {
+        async function executarImpressaoOrdem() {
             if (!ordemAtualId) return;
             const ordem = ordensProducao.find(o => o.id === ordemAtualId);
             if (!ordem) return;
+
+            // Buscar itens da API (mesmo padrão de visualizarOrdemProducao)
+            let itens = [];
+            try {
+                const response = await fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    itens = (result.success && result.data) ? result.data : [];
+                }
+            } catch (error) {
+                console.error('[PCP] Erro ao buscar itens para impressão:', error);
+            }
+
+            // Pre-flight: validar se há itens antes de gerar o documento
+            if (!itens || itens.length === 0) {
+                showNotification('Atenção: Esta ordem não possui itens/materiais cadastrados. Verifique a estrutura do produto ou o pedido original no módulo de Vendas.', 'warning');
+                return;
+            }
 
             // Paleta de cores VERMELHA igual ao PCP (baseado no template de Vendas)
             const cores = {
@@ -3604,8 +3723,6 @@
             };
 
             const printWindow = window.open('', '_blank', 'width=900,height=700');
-
-            const itens = ordem.itensDB || ordem.itens || [];
             let itensHtml = itens.map((item, idx) => `
                 <tr style="background: ${idx % 2 === 0 ? '#ffffff' : '#fef2f2'};">
                     <td style="padding: 8px 10px; border-bottom: 1px solid #fecaca; font-weight: 600; color: ${cores.vermelhoPrimario};">${item.codigo_material || item.codigo || '-'}</td>
@@ -3808,10 +3925,30 @@
             showNotification('Ordem de produção aberta para impressão', 'success');
         }
 
-        function executarImpressaoMapaCusto() {
+        async function executarImpressaoMapaCusto() {
             if (!ordemAtualId) return;
             const ordem = ordensProducao.find(o => o.id === ordemAtualId);
             if (!ordem) return;
+
+            // Buscar itens da API (mesmo padrão de visualizarOrdemProducao)
+            let itens = [];
+            try {
+                const response = await fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    itens = (result.success && result.data) ? result.data : [];
+                }
+            } catch (error) {
+                console.error('[PCP] Erro ao buscar itens para mapa de custo:', error);
+            }
+
+            // Pre-flight: validar se há itens antes de gerar o documento
+            if (!itens || itens.length === 0) {
+                showNotification('Atenção: Esta ordem não possui itens/materiais cadastrados. Verifique a estrutura do produto ou o pedido original no módulo de Vendas.', 'warning');
+                return;
+            }
 
             // Paleta de cores VERMELHA igual ao PCP (baseado no template de Vendas)
             const cores = {
@@ -3835,7 +3972,6 @@
 
             const printWindow = window.open('', '_blank', 'width=900,height=700');
 
-            const itens = ordem.itensDB || ordem.itens || [];
             let custoMateriais = 0;
             let custoMaoObra = 0;
             let custoIndireto = 0;
@@ -6462,7 +6598,7 @@
 
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
 
-<!-- ALUFORCE: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>
+<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <script src="/chat/widget.js?v=20260218" defer></script> -->
 

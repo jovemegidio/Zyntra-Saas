@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -5799,6 +5799,27 @@
                     <button class="header-btn" title="Atualizar" onclick="carregarDadosKanban()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
+                    <!-- Notificações -->
+                    <div class="notification-container">
+                        <button class="notification-btn header-btn" onclick="toggleNotificacoes()" title="Notificações">
+                            <i class="fas fa-bell"></i>
+                            <span id="notification-count" class="notification-badge hidden">0</span>
+                        </button>
+                        <div class="notification-panel" id="notification-panel">
+                            <div class="notification-header">
+                                <h3><i class="fas fa-bell"></i> Notificações</h3>
+                            </div>
+                            <div class="notification-tabs">
+                                <button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button>
+                                <button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button>
+                                <button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button>
+                            </div>
+                            <div class="notification-list" id="notification-list"></div>
+                            <div class="notification-footer">
+                                <a onclick="verTodasNotificacoes()" style="cursor:pointer;">Ver histórico completo</a>
+                            </div>
+                        </div>
+                    </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                         <div class="user-avatar" id="user-avatar">
@@ -5841,7 +5862,7 @@
                     <button class="tab" data-view="kanban" onclick="switchView('kanban', this)" title="Kanban" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
                         <i class="fas fa-columns" style="font-size:13px;"></i>
                     </button>
-                    <button class="tab" data-view="pipeline" onclick="switchView('pipeline', this)" title="Pipeline" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
+                    <button class="tab" id="btn-pipeline-view" data-view="pipeline" onclick="switchView('pipeline', this)" title="Pipeline (Admin)" style="display:flex;align-items:center;justify-content:center;width:32px;height:28px;border:none;border-radius:5px;cursor:pointer;background:transparent;color:#64748b;transition:all 0.15s;">
                         <i class="fas fa-stream" style="font-size:13px;"></i>
                     </button>
                 </div>
@@ -6313,6 +6334,8 @@
 
                     <!-- Campo oculto para ID -->
                     <input type="hidden" id="edit-pedido-id">
+                    <input type="hidden" id="edit-parcelas">
+                    <input type="hidden" id="edit-condicao-pagamento">
                 </div>
 
                 <!-- Sidebar de Ações -->
@@ -11089,8 +11112,8 @@
             document.getElementById('edit-valor-total').value = formatarMoeda(pedido.valor || 0);
             document.getElementById('edit-total-mercadorias').value = formatarMoeda(pedido.valor || 0);
             document.getElementById('edit-vendedor').value = pedido.vendedor || '';
-            document.getElementById('edit-parcelas').value = pedido.parcelas || '28/35/42/49';
-            document.getElementById('edit-observacoes').value = pedido.mensagem || '';
+            if (document.getElementById('edit-parcelas')) document.getElementById('edit-parcelas').value = pedido.parcelas || '28/35/42/49';
+            if (document.getElementById('edit-observacoes')) document.getElementById('edit-observacoes').value = pedido.mensagem || '';
 
             // Campos de frete e transporte
             if (document.getElementById('edit-transportadora')) {
@@ -11221,8 +11244,10 @@
                 content.classList.remove('active');
             });
             // Ativar tab e conteúdo selecionados
-            document.querySelector(`.modal-tab[data-tab="${tabId}"]`).classList.add('active');
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const tabBtn = document.querySelector(`.modal-tab[data-tab="${tabId}"]`);
+            if (tabBtn) tabBtn.classList.add('active');
+            const tabContent = document.getElementById(`tab-${tabId}`);
+            if (tabContent) tabContent.classList.add('active');
         }
 
         function formatarMoeda(valor) {
@@ -11303,7 +11328,7 @@
                 alteracoes.push(`Cliente alterado de "${pedidoAtual.cliente}" para "${novoCliente}"`);
             }
 
-            const novasParcelas = document.getElementById('edit-parcelas').value;
+            const novasParcelas = document.getElementById('edit-parcelas')?.value || '';
             if (novasParcelas !== pedidoAtual.parcelas) {
                 alteracoes.push(`Parcelas alteradas para "${novasParcelas}"`);
             }
@@ -11469,7 +11494,7 @@
                 const cliente = document.getElementById('edit-cliente').value;
                 const clienteId = document.getElementById('edit-cliente-id')?.value || null;
                 const vendedor = document.getElementById('edit-vendedor').value;
-                const parcelas = document.getElementById('edit-parcelas').value;
+                const parcelas = document.getElementById('edit-parcelas')?.value || '';
                 const obs = document.getElementById('edit-observacoes')?.value || '';
                 const transportadora = document.getElementById('edit-transportadora')?.value || '';
                 const tipoFrete = document.getElementById('edit-tipo-frete')?.value || '';
@@ -11534,8 +11559,9 @@
                         switchModalTab('frete');
                         document.getElementById('edit-tipo-frete').focus();
                     } else if (!condicaoPagamento || condicaoPagamento === '') {
-                        switchModalTab('parcelas');
-                        document.getElementById('edit-condicao-pagamento').focus();
+                        switchModalTab('frete');
+                        const elCondPag = document.getElementById('edit-condicao-pagamento') || document.getElementById('edit-condicao-pagamento-header');
+                        if (elCondPag) elCondPag.focus();
                     } else if (!cenarioFiscal || cenarioFiscal === '') {
                         document.getElementById('edit-cenario-fiscal').focus();
                     } else if (!obs || obs.trim() === '') {
@@ -12129,7 +12155,7 @@
             const tipoDoc = mapaStatus[status] || 'ORÇAMENTO';
 
             if (formato === 'arquivo') {
-                // Para nome de arquivo: ORCAMENTO - 00009Aluforce:
+                // Para nome de arquivo: ORCAMENTO - 00009Zyntra:
                 return `${tipoDoc.replace(/Ç/g, 'C').replace(/Ã/g, 'A')} - ${numero} - ${empresa}`;
             } else {
                 // Para título do documento
@@ -13209,7 +13235,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 document.getElementById('edit-total-mercadorias').value = 'R$ 0,00';
                 // Preencher vendedor com o usuário logado
                 document.getElementById('edit-vendedor').value = usuarioLogado.nome || '';
-                document.getElementById('edit-parcelas').value = '';
+                if (document.getElementById('edit-parcelas')) document.getElementById('edit-parcelas').value = '';
 
                 // Limpar campos de desconto e impostos
                 if (document.getElementById('edit-desconto-pct')) {
@@ -13358,9 +13384,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Atualizar dados do pedido
             pedidoAtual.cliente = cliente;
-            pedidoAtual.vendedor = document.getElementById('edit-vendedor').value;
-            pedidoAtual.parcelas = document.getElementById('edit-parcelas').value;
-            pedidoAtual.mensagem = document.getElementById('edit-observacoes').value;
+            pedidoAtual.vendedor = document.getElementById('edit-vendedor')?.value || '';
+            pedidoAtual.parcelas = document.getElementById('edit-parcelas')?.value || '';
+            pedidoAtual.mensagem = document.getElementById('edit-observacoes')?.value || '';
             if (document.getElementById('edit-origem')) {
                 pedidoAtual.origem = document.getElementById('edit-origem').value;
             }
@@ -14424,7 +14450,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 emailsPedido[pedidoAtual.id] = [
                     {
                         destinatario: 'cliente@empresa.com',
-                        assunto: `Orçamento Nº ${pedidoAtual.id}Aluforce:  `,
+                        assunto: `Orçamento Nº ${pedidoAtual.id}Zyntra:  `,
                         data: '15/12/2025 14:30',
                         status: 'lido'
                     }
@@ -15724,6 +15750,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     observacoes,
                     produto_id: produtoSelecionadoAutoComplete?.id || null,
                     estoque_atual: parseFloat(produtoSelecionadoAutoComplete?.estoque_atual) || 0
+                };
 
                 // Calcular IPI e ICMS ST do item
                 const subtotalCalc = (quantidade * precoUnitario) - desconto;
@@ -19391,6 +19418,14 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     }
 
                     // ========================================
+                    // PIPELINE: esconder para não-admins
+                    // ========================================
+                    if (!usuarioLogado.isAdmin) {
+                        const btnPipeline = document.getElementById('btn-pipeline-view');
+                        if (btnPipeline) btnPipeline.style.display = 'none';
+                    }
+
+                    // ========================================
                     // APLICAR RESTRIÇÕES DE VENDEDOR
                     // ========================================
                     aplicarRestricoesVendedor();
@@ -20519,7 +20554,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             document.addEventListener('click', function (e) {
                 const container = document.querySelector('.notification-container');
                 const panel = document.getElementById('notification-panel');
-                if (container && !container.contains(e.target) && panel.classList.contains('active')) {
+                if (container && panel && !container.contains(e.target) && panel.classList.contains('active')) {
                     panel.classList.remove('active');
                 }
             });
@@ -20591,6 +20626,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         // Toggle do painel de notificações
         function toggleNotificacoes() {
             const panel = document.getElementById('notification-panel');
+            if (!panel) return;
             panel.classList.toggle('active');
 
             if (panel.classList.contains('active')) {
@@ -20859,6 +20895,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         function atualizarContador(count) {
             const naoLidas = count !== undefined ? count : notificacoes.filter(n => !n.lida).length;
             const badge = document.getElementById('notification-count');
+            if (!badge) return;
 
             if (naoLidas > 0) {
                 badge.textContent = naoLidas > 99 ? '99+' : naoLidas;
@@ -20871,7 +20908,8 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
         // Ver histórico completo
         function verTodasNotificacoes() {
             // Fechar o dropdown de notificações
-            document.getElementById('notification-panel').classList.remove('active');
+            const painel = document.getElementById('notification-panel');
+            if (painel) painel.classList.remove('active');
 
             // Criar modal de histórico completo
             const modalHtml = `
@@ -21432,8 +21470,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Efeito visual no badge
             const badge = document.getElementById('notification-count');
-            badge.style.animation = 'none';
-            setTimeout(() => badge.style.animation = '', 10);
+            if (badge) {
+                badge.style.animation = 'none';
+                setTimeout(() => badge.style.animation = '', 10);
+            }
         }
 
         function getIconePorTipo(tipo) {
@@ -21915,7 +21955,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             try {
                 // Coletar dados baseado no tipo de relatório
                 let dadosRelatorio = [];
-                let títuloRelatorio = '';
+                let tituloRelatorio = '';
                 let colunas = [];
                 let totais = { quantidade: 0, valor: 0 };
 
@@ -21977,7 +22017,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
                     switch (tipoRelatorio) {
                         case 'vendas':
-                            títuloRelatorio = 'Relatório de Vendas';
+                            tituloRelatorio = 'Relatório de Vendas';
                             colunas = ['Nº Pedido', 'Cliente', 'Vendedor', 'Valor', 'Condição', 'Status'];
                             dadosRelatorio = pedidosFiltrados.map(p => ({
                                 id: p.id,
@@ -22054,7 +22094,7 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                             break;
 
                         case 'comissoes':
-                            títuloRelatorio = 'Relatório de Comissões';
+                            tituloRelatorio = 'Relatório de Comissões';
                             colunas = ['Vendedor', 'Qtd. Vendas', 'Valor Total', 'Comissão (3%)'];
                             const vendedoresAgrupados = {};
                             pedidosFiltrados.forEach(p => {
@@ -22589,9 +22629,19 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                 btnCons.style.cssText = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
             }
         }
-    </script>
 
-    <!-- Sistema de Chat e Suporte (widgets condicionais por usuário) -->
+        // ========================================
+        // EXPOSIÇÃO GLOBAL - Funções chamadas via onclick inline
+        // ========================================
+        window.abrirModalNovoPedido = abrirModalNovoPedido;
+        window.abrirModalNovoCliente = abrirModalNovoCliente;
+        window.switchModalTab = switchModalTab;
+        window.salvarPedido = salvarPedido;
+        window.fecharModalEditar = fecharModalEditar;
+        window.fecharModalNovoOrcamento = fecharModalNovoOrcamento;
+        window.fecharModalNovoCliente = fecharModalNovoCliente;
+        window.fecharModalNovoProduto = typeof fecharModalNovoProduto === 'function' ? fecharModalNovoProduto : undefined;
+    </script>
 
     <!-- Sistema de Monitoramento de Conexão -->
     <script src="../../_shared/connection-monitor.js?v=20260219"></script>

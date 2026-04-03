@@ -1,0 +1,171 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aluforce: Central de Avaliações</title>
+  <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
+  <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+  <style>
+    :root { --sidebar-width:48px; --header-height:42px; --primary-dark:#1a1a2e; --primary-accent:#ec4899; }
+    *{box-sizing:border-box} body{margin:0;font-family:var(--font-sans);background:var(--gray-100)}
+    .app-container{display:flex;min-height:100vh}.sidebar{width:var(--sidebar-width);background:var(--primary-dark);display:flex;flex-direction:column;align-items:center;padding:12px 0}
+    .sidebar-logo,.sidebar-btn{display:flex;align-items:center;justify-content:center;text-decoration:none}.sidebar-logo{width:36px;height:36px;border-radius:8px;background:var(--primary-accent);color:#fff;margin-bottom:16px}
+    .sidebar-nav,.sidebar-bottom{display:flex;flex-direction:column;gap:4px}.sidebar-nav{flex:1}.sidebar-btn{width:40px;height:40px;border-radius:10px;color:#8b8b9a}.sidebar-btn.active,.sidebar-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+    .main-area{flex:1;display:flex;flex-direction:column;min-width:0}.header{height:var(--header-height);background:var(--primary-dark);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+    .header-left,.header-right{display:flex;align-items:center;gap:10px}.header-btn,.mobile-menu-btn{width:34px;height:34px;border:0;background:transparent;color:#8b8b9a;border-radius:8px;cursor:pointer}
+    .header-btn:hover,.mobile-menu-btn:hover{background:rgba(255,255,255,.12);color:#fff}.header-brand{color:#fff;font-size:13px;font-weight:600}
+    .user-greeting{display:flex;align-items:center;gap:10px;color:#8b8b9a;font-size:13px}.user-greeting strong{color:#fff}.user-avatar{width:30px;height:30px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#ec4899,#be185d);color:#fff;display:flex;align-items:center;justify-content:center}.user-avatar img{display:none;width:100%;height:100%;object-fit:cover}.user-avatar img.visible{display:block}
+    .content{padding:20px;display:grid;gap:16px}.page-title{margin:0;font-size:1.5rem}.page-subtitle{margin:4px 0 0;color:var(--gray-500)}
+    .grid-4{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
+    .kpi{padding:14px;border-radius:var(--radius-lg);background:#fff;border:1px solid var(--gray-200)}.kpi span{font-size:.75rem;color:var(--gray-500)}.kpi strong{display:block;margin-top:4px;font-size:1.4rem;color:var(--gray-900)}
+    .channels{display:grid;grid-template-columns:repeat(3,minmax(220px,1fr));gap:12px}
+    .channel{background:#fff;border:1px solid var(--gray-200);border-radius:var(--radius-lg);padding:14px;display:grid;gap:10px}
+    .channel h3{margin:0;font-size:1.05rem}.channel p{margin:0;color:var(--gray-500);font-size:.9rem}
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;border-radius:10px;padding:10px 14px;opacity:0;transform:translateY(8px);transition:all .2s;z-index:9999}.toast.show{opacity:1;transform:translateY(0)}
+    .sidebar-overlay{display:none}.sidebar-overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50}
+    @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,minmax(150px,1fr))}.channels{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{position:fixed;left:-60px;top:0;bottom:0;z-index:60;transition:left .2s}.sidebar.open{left:0}.content{padding:14px}}
+  
+    /* ===== COMPRAS STANDARD — STAT CARDS ===== */
+
+
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="rhUiCommon.toggleMobileSidebar()" title="Abrir menu"></div>
+    <aside class="sidebar" id="mobile-sidebar">
+      <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
+      <nav class="sidebar-nav">
+        <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
+        <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+        <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+        <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+        <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
+        <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+        <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+        <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="avaliacoes.html" class="sidebar-btn active" title="Avaliações"><i class="fas fa-star"></i></a>
+        <a href="aplicar-avaliacoes.html" class="sidebar-btn" title="Aplicar Avaliações"><i class="fas fa-clipboard-check"></i></a>
+        <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="header">
+        <div class="header-left"><button class="mobile-menu-btn" onclick="rhUiCommon.toggleMobileSidebar()" title="Abrir menu"><i class="fas fa-bars"></i></button><div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Central de Avaliações</span>
+                    </div></div>
+        <div class="header-right"><button class="header-btn" onclick="carregarDashboard()" title="Atualizar indicadores"><i class="fas fa-sync-alt"></i></button><div class="user-greeting"><span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span><div class="user-avatar"><img id="user-photo" alt="avatar"><span id="user-initials">U</span></div></div></div>
+      </header>
+
+      <section class="content">
+        <div>
+          <h1 class="page-title">Central de Avaliações</h1>
+          <p class="page-subtitle">Fluxos separados para evitar confusão: gestor aplica, colaborador visualiza recebidas, colaborador envia autoavaliação.</p>
+        </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card green">
+                    <div class="metric-header">
+                        <div class="metric-icon green"><i class="fas fa-check-double"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-concluídas">--</div>
+                    <div class="metric-label">Avaliações Concluídas</div>
+                </div>
+                <div class="metric-card blue">
+                    <div class="metric-header">
+                        <div class="metric-icon blue"><i class="fas fa-users"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-funcionários">--</div>
+                    <div class="metric-label">Funcionários Avaliados</div>
+                </div>
+                <div class="metric-card orange">
+                    <div class="metric-header">
+                        <div class="metric-icon orange"><i class="fas fa-star"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-nota">--</div>
+                    <div class="metric-label">Nota Média</div>
+                </div>
+                <div class="metric-card purple">
+                    <div class="metric-header">
+                        <div class="metric-icon purple"><i class="fas fa-project-diagram"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-pdi">--</div>
+                    <div class="metric-label">PDIs Concluídos</div>
+                </div>
+            </div>
+
+        <div class="channels">
+          <article class="channel">
+            <h3><i class="fas fa-clipboard-check"></i> Canal Gestor</h3>
+            <p>Aplicar avaliações de desempenho aos colaboradores sob sua gestão.</p>
+            <a href="aplicar-avaliacoes.html" class="saas-btn saas-btn-primary"><i class="fas fa-arrow-right"></i> Ir para Aplicação</a>
+          </article>
+          <article class="channel">
+            <h3><i class="fas fa-inbox"></i> Canal Colaborador - Recebidas</h3>
+            <p>Visualizar avaliações recebidas de gestores, com historico e detalhes.</p>
+            <a href="avaliacoes-recebidas.html" class="saas-btn saas-btn-outline"><i class="fas fa-arrow-right"></i> Ver Recebidas</a>
+          </article>
+          <article class="channel">
+            <h3><i class="fas fa-user-check"></i> Canal Colaborador - Autoavaliação</h3>
+            <p>Registrar autoavaliação em página dedicada e separada do feedback recebido.</p>
+            <a href="autoavaliação.html" class="saas-btn saas-btn-outline"><i class="fas fa-arrow-right"></i> Abrir Autoavaliação</a>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"><span id="toast-message"></span></div>
+
+  <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+  <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+  <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
+  <script>
+    async function carregarDashboard() {
+      const resp = await fetch('/api/rh/avaliacoes/dashboard', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' });
+      const data = await resp.json().catch(function () { return {}; });
+      if (!resp.ok) {
+        rhUiCommon.showToast('Não foi possível carregar indicadores.', 'info');
+        return;
+      }
+
+      const resumo = data.resumo || {};
+      document.getElementById('kpi-concluídas').textContent = Number(resumo.avaliacoes_concluidas || 0);
+      document.getElementById('kpi-funcionários').textContent = Number(resumo.funcionários_avaliados || 0);
+      document.getElementById('kpi-nota').textContent = resumo.nota_media == null ? '--' : Number(resumo.nota_media).toFixed(2);
+      document.getElementById('kpi-pdi').textContent = Number(resumo.pdis_concluidos || 0);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      try {
+        const user = await rhUiCommon.getCurrentUser();
+        rhUiCommon.updateHeaderUser(user);
+        await carregarDashboard();
+      } catch (e) {
+        rhUiCommon.showToast('Falha ao carregar central de avaliações.', 'info');
+      }
+    });
+  </script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+</body>
+</html>
+

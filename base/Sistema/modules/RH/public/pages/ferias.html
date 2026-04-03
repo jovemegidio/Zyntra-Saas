@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aluforce: Gestão de Férias Administrativa</title>
+  <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="/css/modern-saas.css?v=3.0">
+  <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+  <style>
+    :root { --sidebar-width:48px; --header-height:42px; --primary-dark:#1a1a2e; --primary-accent:#ec4899; }
+    *{box-sizing:border-box} body{margin:0;font-family:var(--font-sans);background:var(--gray-100)}
+    .app-container{display:flex;min-height:100vh}.sidebar{width:var(--sidebar-width);background:var(--primary-dark);display:flex;flex-direction:column;align-items:center;padding:12px 0}
+    .sidebar-logo,.sidebar-btn{display:flex;align-items:center;justify-content:center;text-decoration:none}.sidebar-logo{width:36px;height:36px;border-radius:8px;background:var(--primary-accent);color:#fff;margin-bottom:16px}
+    .sidebar-nav,.sidebar-bottom{display:flex;flex-direction:column;gap:4px}.sidebar-nav{flex:1}.sidebar-btn{width:40px;height:40px;border-radius:10px;color:#8b8b9a}.sidebar-btn.active,.sidebar-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+    .main-area{flex:1;display:flex;flex-direction:column;min-width:0}.header{height:var(--header-height);background:var(--primary-dark);display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+    .header-left,.header-right{display:flex;align-items:center;gap:10px}.header-btn,.mobile-menu-btn{width:34px;height:34px;border:0;background:transparent;color:#8b8b9a;border-radius:8px;cursor:pointer}
+    .header-btn:hover,.mobile-menu-btn:hover{background:rgba(255,255,255,.12);color:#fff}.header-brand{color:#fff;font-size:13px;font-weight:600}
+    .user-greeting{display:flex;align-items:center;gap:10px;color:#8b8b9a;font-size:13px}.user-greeting strong{color:#fff}.user-avatar{width:30px;height:30px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#ec4899,#be185d);color:#fff;display:flex;align-items:center;justify-content:center}.user-avatar img{display:none;width:100%;height:100%;object-fit:cover}.user-avatar img.visible{display:block}
+    .content{padding:20px;display:grid;gap:16px}.page-title{margin:0;font-size:1.5rem}.page-subtitle{margin:4px 0 0;color:var(--gray-500)}.grid-4{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
+    .kpi{padding:14px;border-radius:var(--radius-lg);background:#fff;border:1px solid var(--gray-200)}.kpi span{font-size:.75rem;color:var(--gray-500)}.kpi strong{display:block;margin-top:4px;font-size:1.4rem;color:var(--gray-900)}
+    .filters{display:grid;grid-template-columns:repeat(3,minmax(160px,1fr));gap:10px}.filter-action{align-self:end}.card-body-grid{display:grid;gap:12px}.form-input,select{width:100%;border:1px solid var(--gray-300);border-radius:var(--radius-md);padding:10px 12px;font:inherit}
+    .table-wrap{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px 12px;border-bottom:1px solid var(--gray-200);text-align:left;font-size:.9rem}th{color:var(--gray-600);font-size:.75rem;text-transform:uppercase}
+    .badge{border-radius:999px;padding:3px 8px;font-size:.75rem;font-weight:600}.badge-pendente{background:#fff7ed;color:#c2410c}.badge-aprovada{background:#ecfdf5;color:#047857}.badge-reprovada{background:#fef2f2;color:#b91c1c}
+    .toast{position:fixed;right:16px;bottom:16px;background:#111827;color:#fff;border-radius:10px;padding:10px 14px;opacity:0;transform:translateY(8px);transition:all .2s;z-index:9999}.toast.show{opacity:1;transform:translateY(0)}.toast-danger{background:#dc2626}.toast-success{background:#059669}
+    .sidebar-overlay{display:none}.sidebar-overlay.show{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:50}
+    @media(max-width:1024px){.grid-4{grid-template-columns:repeat(2,minmax(150px,1fr))}.filters{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{position:fixed;left:-60px;top:0;bottom:0;z-index:60;transition:left .2s}.sidebar.open{left:0}.content{padding:14px}}
+  
+    /* ===== COMPRAS STANDARD — STAT CARDS ===== */
+
+
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+</head>
+<body>
+  <div class="app-container">
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="rhUiCommon.toggleMobileSidebar()"></div>
+    <aside class="sidebar" id="mobile-sidebar">
+      <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
+      <nav class="sidebar-nav">
+        <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
+        <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+        <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+        <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+        <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
+        <a href="ferias.html" class="sidebar-btn active" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+        <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+        <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
+        <a href="aplicar-avaliacoes.html" class="sidebar-btn" title="Aplicar Avaliações"><i class="fas fa-clipboard-check"></i></a>
+        <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="header">
+        <div class="header-left"><button class="mobile-menu-btn" title="Abrir menu" onclick="rhUiCommon.toggleMobileSidebar()"><i class="fas fa-bars"></i></button><div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">&mdash;</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Gestão de Férias</span>
+                    </div></div>
+        <div class="header-right"><button class="header-btn" title="Atualizar dados" onclick="carregarTudo()"><i class="fas fa-sync-alt"></i></button><div class="user-greeting"><span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span><div class="user-avatar"><img id="user-photo" alt="avatar"><span id="user-initials">U</span></div></div></div>
+      </header>
+
+      <section class="content">
+        <div>
+          <h1 class="page-title">Gestão de Férias Administrativa</h1>
+          <p class="page-subtitle">Painel administrativo para aprovar/reprovar solicitações e acompanhar indicadores.</p>
+        </div>
+
+            <div class="metrics-grid">
+                <div class="metric-card orange">
+                    <div class="metric-header">
+                        <div class="metric-icon orange"><i class="fas fa-hourglass-half"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-pendentes">--</div>
+                    <div class="metric-label">Pendentes</div>
+                </div>
+                <div class="metric-card green">
+                    <div class="metric-header">
+                        <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-aprovadas">--</div>
+                    <div class="metric-label">Aprovadas (mês)</div>
+                </div>
+                <div class="metric-card red">
+                    <div class="metric-header">
+                        <div class="metric-icon red"><i class="fas fa-times-circle"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-reprovadas">--</div>
+                    <div class="metric-label">Reprovadas (mês)</div>
+                </div>
+                <div class="metric-card purple">
+                    <div class="metric-header">
+                        <div class="metric-icon purple"><i class="fas fa-calendar-alt"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-vencendo">--</div>
+                    <div class="metric-label">Vencendo em 30 dias</div>
+                </div>
+            </div>
+
+        <article class="saas-card">
+          <div class="saas-card-header"><h2 class="saas-card-title">Solicitações Pendentes</h2></div>
+          <div class="saas-card-body card-body-grid">
+            <div class="filters">
+              <div><label for="filtro-departamento">Departamento</label><input id="filtro-departamento" class="form-input" placeholder="Ex: RH"></div>
+              <div><label for="filtro-texto">Buscar Colaborador</label><input id="filtro-texto" class="form-input" placeholder="Nome"></div>
+              <div class="filter-action"><button class="saas-btn saas-btn-outline" onclick="aplicarFiltros()"><i class="fas fa-filter"></i> Aplicar Filtros</button></div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>Colaborador</th><th>Período</th><th>Inicio</th><th>Fim</th><th>Dias</th><th>Status</th><th>Ações</th></tr></thead>
+                <tbody id="tbody-pendentes"><tr><td colspan="7">Carregando...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </article>
+
+        <article class="saas-card">
+          <div class="saas-card-header"><h2 class="saas-card-title">Calendário de Férias</h2></div>
+          <div class="saas-card-body table-wrap">
+            <table>
+              <thead><tr><th>Colaborador</th><th>Departamento</th><th>Inicio</th><th>Fim</th><th>Status</th></tr></thead>
+              <tbody id="tbody-calendario"><tr><td colspan="5">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"><span id="toast-message"></span></div>
+
+  <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+  <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+  <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
+  <script>
+    let pendentesCache = [];
+
+    function formatarData(dataIso) {
+      if (!dataIso) return '--';
+      const d = new Date(dataIso);
+      if (Number.isNaN(d.getTime())) return '--';
+      return d.toLocaleDateString('pt-BR');
+    }
+
+    function badgeStatus(status) {
+      const s = String(status || '').toLowerCase();
+      if (s.includes('aprova')) return '<span class="badge badge-aprovada">Aprovada</span>';
+      if (s.includes('reprova')) return '<span class="badge badge-reprovada">Reprovada</span>';
+      return '<span class="badge badge-pendente">Pendente</span>';
+    }
+
+    function renderPendentes(rows) {
+      const tbody = document.getElementById('tbody-pendentes');
+      if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="7">Nenhuma solicitacao pendente.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(function (r) {
+        const período = `${new Date(r.período_aquisitivo_inicio || r.perodo_aquisitivo_inicio || r.data_inicio).getFullYear()}/${new Date(r.periodo_aquisitivo_fim || r.perodo_aquisitivo_fim || r.data_fim).getFullYear()}`;
+        return `<tr>
+          <td>${rhUiCommon.escapeHtml(r.funcionário_nome || '-')}</td>
+          <td>${rhUiCommon.escapeHtml(período)}</td>
+          <td>${rhUiCommon.escapeHtml(formatarData(r.data_inicio))}</td>
+          <td>${rhUiCommon.escapeHtml(formatarData(r.data_fim))}</td>
+          <td>${rhUiCommon.escapeHtml(String(r.dias_solicitados || r.dias_corridos || 0))}</td>
+          <td>${badgeStatus(r.status)}</td>
+          <td>
+            <div style='display:flex;gap:6px;flex-wrap:wrap;'>
+              <button class='saas-btn saas-btn-success' onclick='aprovar(${Number(r.id)})'><i class='fas fa-check'></i> Aprovar</button>
+              <button class='saas-btn saas-btn-outline' onclick='reprovar(${Number(r.id)})'><i class='fas fa-times'></i> Reprovar</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+
+    function aplicarFiltros() {
+      const dep = document.getElementById('filtro-departamento').value.trim().toLowerCase();
+      const txt = document.getElementById('filtro-texto').value.trim().toLowerCase();
+      const filtered = pendentesCache.filter(function (r) {
+        const depOk = !dep || String(r.departamento || '').toLowerCase().includes(dep);
+        const txtOk = !txt || String(r.funcionário_nome || '').toLowerCase().includes(txt);
+        return depOk && txtOk;
+      });
+      renderPendentes(filtered);
+    }
+
+    async function carregarKpis() {
+      const resp = await fetch('/api/rh/ferias/dashboard', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' });
+      const data = await resp.json().catch(function () { return {}; });
+      if (!resp.ok) return;
+
+      const resumo = data.resumo || data;
+      document.getElementById('kpi-pendentes').textContent = Number(resumo.total_pendentes || resumo.pendentes || 0);
+      document.getElementById('kpi-aprovadas').textContent = Number(resumo.aprovadas_mes || resumo.total_aprovadas || 0);
+      document.getElementById('kpi-reprovadas').textContent = Number(resumo.reprovadas_mes || resumo.total_reprovadas || 0);
+      document.getElementById('kpi-vencendo').textContent = Number(resumo.vencendo_30_dias || resumo.total_vencendo || 0);
+    }
+
+    async function carregarPendentes() {
+      const dep = document.getElementById('filtro-departamento').value.trim();
+      const url = dep ? `/api/rh/ferias/pendentes?departamento=${encodeURIComponent(dep)}` : '/api/rh/ferias/pendentes';
+      const resp = await fetch(url, { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' });
+      const payload = await resp.json().catch(function () { return []; });
+      const rows = Array.isArray(payload)
+        ? payload
+        : (payload.solicitacoes || payload.data || payload.rows || []);
+      pendentesCache = Array.isArray(rows) ? rows : [];
+      aplicarFiltros();
+    }
+
+    async function carregarCalendario() {
+      const resp = await fetch('/api/rh/ferias/calendario', { headers: rhUiCommon.getAuthHeaders(), credentials: 'include' });
+      const payload = await resp.json().catch(function () { return []; });
+      const rows = Array.isArray(payload)
+        ? payload
+        : (payload.solicitacoes || payload.data || payload.rows || []);
+      const tbody = document.getElementById('tbody-calendario');
+      if (!resp.ok || !Array.isArray(rows) || !rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5">Sem registros no calendario.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = rows.map(function (r) {
+        return `<tr>
+          <td>${rhUiCommon.escapeHtml(r.funcionário_nome || r.nome || '-')}</td>
+          <td>${rhUiCommon.escapeHtml(r.departamento || '-')}</td>
+          <td>${rhUiCommon.escapeHtml(formatarData(r.data_inicio))}</td>
+          <td>${rhUiCommon.escapeHtml(formatarData(r.data_fim))}</td>
+          <td>${badgeStatus(r.status)}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    async function aprovar(id) {
+      const obs = prompt('Observacoes do RH (opcional):') || '';
+      const resp = await fetch('/api/rh/ferias/aprovar', {
+        method: 'POST',
+        headers: rhUiCommon.getAuthHeaders({ 'Content-Type': 'application/json' }),
+        credentials: 'include',
+        body: JSON.stringify({ solicitacao_id: id, observacoes_rh: obs })
+      });
+      const body = await resp.json().catch(function () { return {}; });
+      if (!resp.ok) {
+        rhUiCommon.showToast(body.message || 'Falha ao aprovar solicitacao.', 'danger');
+        return;
+      }
+      rhUiCommon.showToast('Solicitacao aprovada com sucesso.', 'success');
+      await carregarTudo();
+    }
+
+    async function reprovar(id) {
+      const motivo = prompt('Informe o motivo da reprovacao:');
+      if (!motivo) return;
+      const resp = await fetch('/api/rh/ferias/reprovar', {
+        method: 'POST',
+        headers: rhUiCommon.getAuthHeaders({ 'Content-Type': 'application/json' }),
+        credentials: 'include',
+        body: JSON.stringify({ solicitacao_id: id, motivo_reprovacao: motivo })
+      });
+      const body = await resp.json().catch(function () { return {}; });
+      if (!resp.ok) {
+        rhUiCommon.showToast(body.message || 'Falha ao reprovar solicitacao.', 'danger');
+        return;
+      }
+      rhUiCommon.showToast('Solicitacao reprovada.', 'success');
+      await carregarTudo();
+    }
+
+    async function carregarTudo() {
+      await Promise.all([carregarKpis(), carregarPendentes(), carregarCalendario()]);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      try {
+        const user = await rhUiCommon.ensureRole({ adminOnly: true });
+        rhUiCommon.updateHeaderUser(user);
+        await carregarTudo();
+      } catch (e) {
+        rhUiCommon.showToast(e.message || 'Acesso restrito ao RH administrativo.', 'danger');
+        setTimeout(function () { window.location.href = '/rh/pages/minhas-ferias'; }, 900);
+      }
+    });
+  </script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+</body>
+</html>
