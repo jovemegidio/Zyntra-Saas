@@ -3061,8 +3061,14 @@ module.exports = function createPCPRoutes(deps) {
 
             console.log('📝 Campos que serão atualizados:', Object.keys(camposParaAtualizar).join(', '));
 
-            // Construir SET clause
-            const setClauses = Object.keys(camposParaAtualizar).map(campo => `${campo} = ?`);
+            // AUDIT-FIX S1.4: Validar nomes de coluna contra regex seguro (defesa em profundidade)
+            const SAFE_IDENTIFIER = /^[a-zA-Z_][a-zA-Z0-9_]{0,63}$/;
+            const setClauses = Object.keys(camposParaAtualizar).map(campo => {
+                if (!SAFE_IDENTIFIER.test(campo)) {
+                    throw new Error(`Campo inválido rejeitado: ${campo}`);
+                }
+                return `\`${campo}\` = ?`;
+            });
             const valores = Object.values(camposParaAtualizar);
             valores.push(id); // WHERE id = ?
 
@@ -3478,18 +3484,29 @@ module.exports = function createPCPRoutes(deps) {
 
             const connection = await pool.getConnection();
             try {
-                // Buscar o maior número de pedido registrado
-                const [rows] = await connection.query(`
-                    SELECT MAX(CAST(numero_pedido AS UNSIGNED)) as ultimo_numero
-                    FROM ordens_producao
-                    WHERE numero_pedido IS NOT NULL
-                    AND numero_pedido REGEXP '^[0-9]+$'
-                `);
+                // AUDIT-FIX S1.1: Usar sequence table ou fallback para MAX com FOR UPDATE
+                let ultimoNumero = '0002025000';
 
-                let ultimoNumero = '0002025000'; // Número inicial padrão
-
-                if (rows && rows.length > 0 && rows[0].ultimo_numero) {
-                    ultimoNumero = String(rows[0].ultimo_numero);
+                // Tentar sequence table primeiro (atômico)
+                try {
+                    const [seqRows] = await connection.query(
+                        'SELECT current_val FROM sequences WHERE seq_name = ? FOR UPDATE',
+                        ['pedido_op']
+                    );
+                    if (seqRows.length > 0 && seqRows[0].current_val > 0) {
+                        ultimoNumero = String(seqRows[0].current_val);
+                    }
+                } catch (_) {
+                    // Fallback: MAX query (tabela sequences pode não existir ainda)
+                    const [rows] = await connection.query(`
+                        SELECT MAX(CAST(numero_pedido AS UNSIGNED)) as ultimo_numero
+                        FROM ordens_producao
+                        WHERE numero_pedido IS NOT NULL
+                        AND numero_pedido REGEXP '^[0-9]+$'
+                    `);
+                    if (rows && rows.length > 0 && rows[0].ultimo_numero) {
+                        ultimoNumero = String(rows[0].ultimo_numero);
+                    }
                 }
 
                 console.log('✅ Último número de pedido:', ultimoNumero);
@@ -3519,6 +3536,17 @@ module.exports = function createPCPRoutes(deps) {
             console.log('📊 Iniciando geração de Ordem de Produção em Excel...');
 
             const dadosOrdem = req.body;
+
+            // 🔧 FIX BUG-OP-01: Normalizar nomes de campos com cedilha (ç) enviados pelo frontend
+            if (!dadosOrdem.numero_orcamento && dadosOrdem['num_orçamento']) {
+                dadosOrdem.numero_orcamento = dadosOrdem['num_orçamento'];
+            }
+            if (!dadosOrdem.numero_orcamento && dadosOrdem.num_orcamento) {
+                dadosOrdem.numero_orcamento = dadosOrdem.num_orcamento;
+            }
+            if (!dadosOrdem.numero_pedido && dadosOrdem.num_pedido) {
+                dadosOrdem.numero_pedido = dadosOrdem.num_pedido;
+            }
 
             console.log('🔍 DADOS RECEBIDOS - TRANSPORTADORA:', {
                 transportadora_nome: dadosOrdem.transportadora_nome,
@@ -3599,8 +3627,7 @@ module.exports = function createPCPRoutes(deps) {
         } catch (error) {
             console.error('❌ Erro ao gerar Excel da ordem de produção:', error);
             res.status(500).json({
-                error: 'Erro interno do servidor ao gerar Excel',
-                details: error.message
+                error: 'Erro interno do servidor ao gerar Excel'
             });
         }
     });
@@ -3630,9 +3657,23 @@ module.exports = function createPCPRoutes(deps) {
 
         console.log('📝 Preenchendo cabeçalho...');
 
+        // 🔧 FIX BUG-OP-01: Normalizar campos com cedilha vindos do frontend
+        if (!dados.numero_orcamento && dados['num_orçamento']) {
+            dados.numero_orcamento = dados['num_orçamento'];
+        }
+        if (!dados.numero_orcamento && dados.num_orcamento) {
+            dados.numero_orcamento = dados.num_orcamento;
+        }
+        if (!dados.numero_pedido && dados.num_pedido) {
+            dados.numero_pedido = dados.num_pedido;
+        }
+
         // C4 - Número do Orçamento (como número se possível)
         const numOrcamento = dados.numero_orcamento || '';
         abaVendas.getCell('C4').value = isNaN(numOrcamento) ? numOrcamento : parseFloat(numOrcamento);
+
+        // 🔧 FIX BUG-OP-04: E4 - Revisão (campo existente no modal mas nunca escrito no template)
+        abaVendas.getCell('E4').value = dados.revisao || '';
 
         // G4 - Número do Pedido (como número se possível)
         const numPedido = dados.numero_pedido || dados.num_pedido || '0';
@@ -3836,7 +3877,8 @@ module.exports = function createPCPRoutes(deps) {
         produtos.forEach((prod, index) => {
             if (prod && linhaAtual <= LINHA_MAXIMA_PRODUTOS) {
                 const codigoProd = String(prod.codigo || '').trim().toUpperCase();
-                const descricaoCatalogo = catalogoProdutos[codigoProd] || prod.descricao || '';
+                // 🔧 FIX BUG-OP-05: Fallback para 'descrição' com cedilha (frontend envia com ç)
+                const descricaoCatalogo = catalogoProdutos[codigoProd] || prod.descricao || prod['descrição'] || prod.nome || '';
 
                 console.log(`   📦 Produto ${index + 1} → Linha ${linhaAtual}:`);
                 console.log(`      Código: ${codigoProd}`);
@@ -4065,7 +4107,8 @@ module.exports = function createPCPRoutes(deps) {
                 if (index < linhasProducao.length && prod) {
                     const linhaProd = linhasProducao[index];
                     const codigoProd = String(prod.codigo || '').trim().toUpperCase();
-                    const descricaoCatalogo = catalogoProdutos[codigoProd] || prod.descricao || '';
+                    // 🔧 FIX BUG-OP-05: Fallback para 'descrição' com cedilha (frontend envia com ç)
+                    const descricaoCatalogo = catalogoProdutos[codigoProd] || prod.descricao || prod['descrição'] || prod.nome || '';
 
                     // B - Código (pode ser uma fórmula referenciando VENDAS_PCP ou valor direto)
                     const cellB = abaProducao.getCell(`B${linhaProd}`);
@@ -7968,7 +8011,8 @@ module.exports = function createPCPRoutes(deps) {
                     ops_ativas: opsAtivas,
                     ops_em_producao: opsEmProducao,
                     apontamentos_hoje: apontamentosHoje,
-                    qtd_produzida_hoje: qtdProduzidaHoje
+                    qtd_produzida_hoje: qtdProduzidaHoje,
+                    total_segundos_hoje: qtdProduzidaHoje
                 }
             });
         } catch (error) {
@@ -8651,7 +8695,7 @@ tr:nth-child(even){background:#f8fafc}
     // APONTAMENTOS CHÃO DE FÁBRICA — Endpoint específico para salvar registros do chão de fábrica
     router.post('/apontamentos/chao', async (req, res) => {
         try {
-            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, pedido_numero, produto_descricao, observacoes } = req.body;
+            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, ordem_producao_id, pedido_numero, produto_descricao, observacoes } = req.body;
             const usuario_id = req.user?.id;
             const operador = req.user?.nome || 'Operador';
 
@@ -8661,6 +8705,22 @@ tr:nth-child(even){background:#f8fafc}
 
             const horaInicioFormatada = hora_inicio ? new Date(hora_inicio).toISOString().slice(0, 19).replace('T', ' ') : null;
             const horaFimFormatada = hora_fim ? new Date(hora_fim).toISOString().slice(0, 19).replace('T', ' ') : null;
+
+            // Anti-duplicidade: rejeitar se existe registro idêntico nos últimos 30s
+            if (horaInicioFormatada) {
+                try {
+                    const [dup] = await pool.query(
+                        `SELECT id FROM apontamentos_producao
+                         WHERE usuario_id = ? AND tipo_atividade = ? AND hora_inicio = ?
+                         AND created_at >= DATE_SUB(NOW(), INTERVAL 30 SECOND) LIMIT 1`,
+                        [usuario_id, tipo_atividade, horaInicioFormatada]
+                    );
+                    if (dup.length > 0) {
+                        console.log('[PCP/APONTAMENTOS/CHAO] Duplicidade detectada, ignorando');
+                        return res.json({ success: true, id: dup[0].id, duplicate: true });
+                    }
+                } catch (e) { /* coluna created_at pode não existir — prosseguir */ }
+            }
 
             // Buscar pedido_id se pedido_numero fornecido
             let pedidoId = null;
@@ -8682,18 +8742,18 @@ tr:nth-child(even){background:#f8fafc}
             if (hasExtraColumns) {
                 [result] = await pool.query(
                     `INSERT INTO apontamentos_producao
-                     (usuario_id, operador, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, pedido_id, produto_descricao, observacoes)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [usuario_id, operador, tipo_atividade, nome_atividade,
+                     (usuario_id, operador, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, pedido_id, produto_descricao, observacoes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [usuario_id, operador, ordem_producao_id || null, tipo_atividade, nome_atividade,
                      horaInicioFormatada, horaFimFormatada, duracao_segundos || 0,
                      pedidoId, produto_descricao || null, observacoes || null]
                 );
             } else {
                 [result] = await pool.query(
                     `INSERT INTO apontamentos_producao
-                     (usuario_id, operador, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos)
-                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-                    [usuario_id, operador, tipo_atividade, nome_atividade,
+                     (usuario_id, operador, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [usuario_id, operador, ordem_producao_id || null, tipo_atividade, nome_atividade,
                      horaInicioFormatada, horaFimFormatada, duracao_segundos || 0]
                 );
             }
@@ -8703,6 +8763,80 @@ tr:nth-child(even){background:#f8fafc}
         } catch (error) {
             console.error('[PCP/APONTAMENTOS/CHAO] Erro:', error.message);
             res.status(500).json({ success: false, message: 'Erro ao salvar apontamento' });
+        }
+    });
+
+    // Editar apontamento
+    router.put('/apontamentos/:id', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const usuario_id = req.user?.id;
+            const { tipo_atividade, nome_atividade, observacoes, pedido_numero, produto_descricao } = req.body;
+
+            // Verificar se o apontamento pertence ao usuário
+            const [existing] = await pool.query(
+                'SELECT id, usuario_id FROM apontamentos_producao WHERE id = ?', [id]
+            );
+            if (!existing.length) {
+                return res.status(404).json({ success: false, message: 'Apontamento não encontrado' });
+            }
+            if (existing[0].usuario_id !== usuario_id && req.user?.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Sem permissão para editar este apontamento' });
+            }
+
+            const updates = [];
+            const params = [];
+            if (tipo_atividade) { updates.push('tipo_atividade = ?'); params.push(tipo_atividade); }
+            if (nome_atividade) { updates.push('nome_atividade = ?'); params.push(nome_atividade); }
+            if (observacoes !== undefined) { updates.push('observacoes = ?'); params.push(observacoes); }
+            if (produto_descricao !== undefined) { updates.push('produto_descricao = ?'); params.push(produto_descricao); }
+            if (pedido_numero !== undefined) {
+                let pedidoId = null;
+                if (pedido_numero) {
+                    try {
+                        const [pedidos] = await pool.query('SELECT id FROM pedidos WHERE id = ? OR numero = ? LIMIT 1', [pedido_numero, pedido_numero]);
+                        if (pedidos.length > 0) pedidoId = pedidos[0].id;
+                    } catch (e) { /* ok */ }
+                }
+                updates.push('pedido_id = ?'); params.push(pedidoId);
+            }
+
+            if (!updates.length) {
+                return res.status(400).json({ success: false, message: 'Nenhum campo para atualizar' });
+            }
+
+            params.push(id);
+            await pool.query(`UPDATE apontamentos_producao SET ${updates.join(', ')} WHERE id = ?`, params);
+            console.log('[PCP/APONTAMENTOS] Apontamento editado:', id);
+            res.json({ success: true, message: 'Apontamento atualizado' });
+        } catch (error) {
+            console.error('[PCP/APONTAMENTOS] Erro ao editar:', error.message);
+            res.status(500).json({ success: false, message: 'Erro ao editar apontamento' });
+        }
+    });
+
+    // Excluir/cancelar apontamento
+    router.delete('/apontamentos/:id', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const usuario_id = req.user?.id;
+
+            const [existing] = await pool.query(
+                'SELECT id, usuario_id FROM apontamentos_producao WHERE id = ?', [id]
+            );
+            if (!existing.length) {
+                return res.status(404).json({ success: false, message: 'Apontamento não encontrado' });
+            }
+            if (existing[0].usuario_id !== usuario_id && req.user?.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Sem permissão para excluir este apontamento' });
+            }
+
+            await pool.query('DELETE FROM apontamentos_producao WHERE id = ?', [id]);
+            console.log('[PCP/APONTAMENTOS] Apontamento excluído:', id);
+            res.json({ success: true, message: 'Apontamento excluído' });
+        } catch (error) {
+            console.error('[PCP/APONTAMENTOS] Erro ao excluir:', error.message);
+            res.status(500).json({ success: false, message: 'Erro ao excluir apontamento' });
         }
     });
 

@@ -329,6 +329,10 @@
                                     <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">CEP</label>
                                     <input type="text" id="transportadora_cep" placeholder="00000-000" style="width: 100%; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
                                 </div>
+                                <div>
+                                    <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">Endereço</label>
+                                    <input type="text" id="transportadora_endereco" placeholder="Rua, nº, bairro, cidade - UF" style="width: 100%; padding: 11px 14px; border: 1.5px solid #e5e7eb; border-radius: 8px; font-size: 14px;">
+                                </div>
                             </div>
                         </div>
                         
@@ -592,6 +596,7 @@ async function submitNovaOrdem(event) {
         transportadora_nome: document.getElementById('transportadora_nome').value,
         transportadora_fone: document.getElementById('transportadora_fone').value,
         transportadora_cep: document.getElementById('transportadora_cep').value,
+        transportadora_endereco: document.getElementById('transportadora_endereco').value,
         
         // Pagamento
         forma_pagamento: document.getElementById('forma_pagamento').value,
@@ -653,6 +658,7 @@ async function submitNovaOrdem(event) {
             transportadora_nome: dados.transportadora_nome,
             transportadora_fone: dados.transportadora_fone,
             transportadora_cep: dados.transportadora_cep,
+            transportadora_endereco: dados.transportadora_endereco,
             
             // Pagamento
             forma_pagamento: dados.forma_pagamento,

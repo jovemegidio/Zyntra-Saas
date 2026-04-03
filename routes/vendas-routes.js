@@ -333,7 +333,7 @@ module.exports = function createVendasRoutes(deps) {
             const nomeCliente = sanitize(cliente_nome) || sanitize(cliente) || null;
             const obs = sanitize(observacao) || sanitize(observacoes) || sanitize(descricao) || null;
 
-            // empresa_id: aceitar do body OU buscar/criar pelo nome do cliente
+            // empresa_id: aceitar do body OU buscar pelo nome do cliente
             let empresaFinalId = sanitize(empresa_id) ? parseInt(empresa_id) : null;
             if (!empresaFinalId && nomeCliente) {
                 const [existing] = await connection.query(
@@ -342,13 +342,9 @@ module.exports = function createVendasRoutes(deps) {
                 );
                 if (existing.length > 0) {
                     empresaFinalId = existing[0].id;
-                } else {
-                    const [newEmp] = await connection.query(
-                        'INSERT INTO empresas (nome_fantasia, razao_social, cnpj) VALUES (?, ?, ?)',
-                        [nomeCliente, nomeCliente, `TMP-${Date.now()}-${Math.floor(Math.random()*9999)}`]
-                    );
-                    empresaFinalId = newEmp.insertId;
                 }
+                // AUDIT-FIX 2026-04-03: Removida auto-criação de empresa com CNPJ falso (TMP-...)
+                // Se empresa não encontrada, prossegue sem empresa_id (não bloqueia pedido)
             }
 
             if (!empresaFinalId && !nomeCliente) {
@@ -565,12 +561,35 @@ module.exports = function createVendasRoutes(deps) {
                 return res.status(400).json({ message: 'Nenhum campo para atualizar.' });
             }
 
-            params.push(parseInt(id));
-            const [result] = await pool.query(
-                `UPDATE pedidos SET ${sets.join(', ')} WHERE id = ?`,
-                params
-            );
-            if (result.affectedRows === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+            // AUDIT-FIX S4.6: Optimistic locking — increment version + check
+            sets.push('version = version + 1');
+            const expectedVersion = req.body.version ? parseInt(req.body.version) : null;
+
+            if (expectedVersion) {
+                params.push(parseInt(id), expectedVersion);
+                const [result] = await pool.query(
+                    `UPDATE pedidos SET ${sets.join(', ')} WHERE id = ? AND version = ?`,
+                    params
+                );
+                if (result.affectedRows === 0) {
+                    // Verificar se o pedido existe
+                    const [[exists]] = await pool.query('SELECT id, version FROM pedidos WHERE id = ?', [parseInt(id)]);
+                    if (!exists) return res.status(404).json({ message: 'Pedido não encontrado.' });
+                    return res.status(409).json({
+                        message: 'Pedido foi alterado por outro usuário. Recarregue e tente novamente.',
+                        code: 'VERSION_CONFLICT',
+                        current_version: exists.version
+                    });
+                }
+            } else {
+                // Sem version no request → update sem check (retrocompatibilidade)
+                params.push(parseInt(id));
+                const [result] = await pool.query(
+                    `UPDATE pedidos SET ${sets.join(', ')} WHERE id = ?`,
+                    params
+                );
+                if (result.affectedRows === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+            }
             res.json({ message: 'Pedido atualizado com sucesso.' });
         } catch (error) { next(error); }
     });
@@ -624,22 +643,28 @@ module.exports = function createVendasRoutes(deps) {
                 console.log('⚠️ Verificação ordens_producao ignorada:', e.message);
             }
 
-            // Excluir itens do pedido primeiro
-            await connection.query('DELETE FROM pedido_itens WHERE pedido_id = ?', [id]);
+            // AUDIT-FIX S4.1: Soft-delete — preserva dados para auditoria fiscal
+            const [result] = await connection.query(
+                `UPDATE pedidos SET status = 'excluido', deleted_at = NOW() WHERE id = ?`,
+                [id]
+            );
 
-            // Excluir anexos do pedido
-            await connection.query('DELETE FROM pedido_anexos WHERE pedido_id = ?', [id]);
-
-            // Excluir histórico do pedido
-            await connection.query('DELETE FROM pedido_historico WHERE pedido_id = ?', [id]);
-
-            // Excluir pedido
-            const [result] = await connection.query('DELETE FROM pedidos WHERE id = ?', [id]);
+            // Registrar no histórico
+            try {
+                await connection.query(
+                    `INSERT INTO pedido_historico (pedido_id, acao, usuario_id, detalhes, created_at)
+                     VALUES (?, 'exclusao_logica', ?, 'Pedido marcado como excluído (soft-delete)', NOW())`,
+                    [id, req.user?.id || null]
+                );
+            } catch (histErr) {
+                // Tabela pode não existir — não bloquear a operação
+                console.log('⚠️ Histórico de exclusão não registrado:', histErr.message);
+            }
 
             await connection.commit();
 
-            console.log(`🗑️ Pedido #${id} excluído com sucesso por usuário ${req.user?.id}`);
-            res.status(204).send();
+            console.log(`🗑️ Pedido #${id} soft-deleted por usuário ${req.user?.id}`);
+            res.json({ message: 'Pedido excluído com sucesso.', soft_deleted: true });
         } catch (error) {
             await connection.rollback();
             next(error);
@@ -1412,6 +1437,55 @@ module.exports = function createVendasRoutes(deps) {
                 }
 
                 // Permissão já verificada pelo sistema userPermissions acima
+            }
+
+            // ========================================
+            // AUDIT-FIX 2026-04-03: VALIDAÇÃO DE LIMITE DE CRÉDITO
+            // Quando pedido vai para 'aprovado' ou 'pedido-aprovado', verificar se
+            // o cliente possui limite de crédito suficiente.
+            // Admin pode forçar com forceTransition=true.
+            // ========================================
+            if (['aprovado', 'pedido-aprovado'].includes(status) && !canForce) {
+                try {
+                    const pedidoData = pedidoAtual[0];
+                    const valorPedido = parseFloat(pedidoData.valor || 0);
+
+                    if (pedidoData.cliente_id && valorPedido > 0) {
+                        const [clienteData] = await connection.query(
+                            'SELECT limite_credito FROM clientes WHERE id = ? LIMIT 1',
+                            [pedidoData.cliente_id]
+                        );
+                        const limiteCredito = parseFloat(clienteData[0]?.limite_credito || 0);
+
+                        // Só valida se o cliente possui limite configurado (> 0)
+                        if (limiteCredito > 0) {
+                            // Somar pedidos pendentes do mesmo cliente (excluir cancelados e o pedido atual)
+                            const [creditUsed] = await connection.query(
+                                `SELECT COALESCE(SUM(valor), 0) as total_pendente
+                                 FROM pedidos
+                                 WHERE cliente_id = ? AND id != ?
+                                   AND status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'parcial')`,
+                                [pedidoData.cliente_id, id]
+                            );
+                            const totalExposicao = parseFloat(creditUsed[0].total_pendente) + valorPedido;
+
+                            if (totalExposicao > limiteCredito) {
+                                console.log(`[CREDITO] ❌ Limite excedido para cliente #${pedidoData.cliente_id}: limite=R$${limiteCredito.toFixed(2)}, exposição=R$${totalExposicao.toFixed(2)}`);
+                                await connection.rollback();
+                                return res.status(400).json({
+                                    message: `Limite de crédito excedido. Limite: R$${limiteCredito.toFixed(2)}, Exposição total: R$${totalExposicao.toFixed(2)} (pendente: R$${parseFloat(creditUsed[0].total_pendente).toFixed(2)} + este pedido: R$${valorPedido.toFixed(2)}). Solicite aprovação com forceTransition via admin.`,
+                                    code: 'CREDIT_LIMIT_EXCEEDED',
+                                    limite: limiteCredito,
+                                    exposicao: totalExposicao
+                                });
+                            }
+                            console.log(`[CREDITO] ✅ Cliente #${pedidoData.cliente_id} dentro do limite: R$${totalExposicao.toFixed(2)} / R$${limiteCredito.toFixed(2)}`);
+                        }
+                    }
+                } catch (creditErr) {
+                    console.warn('[CREDITO] Erro ao validar limite (não-bloqueante):', creditErr.message);
+                    // Não bloqueia operação se a validação falhar por erro técnico
+                }
             }
 
             // Atualiza status e registra histórico (usando updated_at se existir)
@@ -2918,6 +2992,19 @@ module.exports = function createVendasRoutes(deps) {
 
             await connection.beginTransaction();
 
+            // AUDIT-FIX 2026-04-03: Bloquear exclusão de item se pedido já faturado/parcial
+            const [pedidoCheck] = await connection.query(
+                'SELECT status FROM pedidos WHERE id = ? FOR UPDATE',
+                [pedidoId]
+            );
+            if (pedidoCheck.length > 0 && ['faturado', 'parcial', 'entregue'].includes(pedidoCheck[0].status)) {
+                await connection.rollback();
+                return res.status(400).json({
+                    message: `Não é possível excluir itens de um pedido com status '${pedidoCheck[0].status}'. Cancele o faturamento primeiro.`,
+                    code: 'ITEM_DELETE_BLOCKED_BY_STATUS'
+                });
+            }
+
             // Delete the item
             const [deleteResult] = await connection.query(
                 'DELETE FROM pedido_itens WHERE id = ? AND pedido_id = ?',
@@ -3907,6 +3994,48 @@ module.exports = function createVendasRoutes(deps) {
                     return res.status(400).json({ success: false, message: 'Validacao falhou', problemas });
                 }
 
+                // AUDIT-FIX 2026-04-03: Deduzir estoque dos itens faturados parcialmente
+                // FIX-02-v2: Corrigido para usar colunas reais da tabela estoque_movimentacoes
+                for (const itemFat of itens_faturar) {
+                    const itemPedido = itensPedido.find(i => i.produto_id === itemFat.produto_id);
+                    if (itemPedido && parseInt(itemPedido.controla_estoque) !== 0 && parseFloat(itemFat.quantidade) > 0) {
+                        // Verificar se já existe movimentação para este faturamento parcial (idempotência)
+                        const [existingMov] = await connection.query(
+                            `SELECT id FROM estoque_movimentacoes
+                             WHERE documento_tipo = 'faturamento_parcial' AND documento_id = ?
+                               AND codigo_material = ? AND tipo_movimento = 'saida'
+                               AND quantidade = ?
+                             LIMIT 1`,
+                            [id, itemPedido.produto_descricao ? (itemPedido.codigo || itemPedido.produto_descricao) : String(itemFat.produto_id), itemFat.quantidade]
+                        );
+                        if (existingMov.length === 0) {
+                            const estoqueAnterior = parseFloat(itemPedido.estoque_atual || 0);
+                            const novoEstoque = estoqueAnterior - parseFloat(itemFat.quantidade);
+                            await connection.query(
+                                'UPDATE produtos SET estoque_atual = ? WHERE id = ?',
+                                [novoEstoque, itemFat.produto_id]
+                            );
+                            // Buscar codigo do produto para usar como codigo_material
+                            const [prodInfo] = await connection.query(
+                                'SELECT codigo FROM produtos WHERE id = ? LIMIT 1',
+                                [itemFat.produto_id]
+                            );
+                            const codigoMaterial = prodInfo[0]?.codigo || String(itemFat.produto_id);
+                            await connection.query(
+                                `INSERT INTO estoque_movimentacoes
+                                 (codigo_material, tipo_movimento, origem, quantidade, quantidade_anterior, quantidade_atual,
+                                  documento_tipo, documento_id, usuario_id, observacao, data_movimento)
+                                 VALUES (?, 'saida', 'faturamento_parcial', ?, ?, ?, 'faturamento_parcial', ?, ?, ?, NOW())`,
+                                [codigoMaterial, itemFat.quantidade, estoqueAnterior, novoEstoque,
+                                 id, user.id || null, `Faturamento parcial - Pedido #${id} - ${itemFat.quantidade}${itemPedido.unidade || 'UN'}`]
+                            );
+                            if (novoEstoque < 0) {
+                                console.warn(`[ESTOQUE_PARCIAL] ⚠️ Produto ${codigoMaterial} ficará negativo (${estoqueAnterior} -> ${novoEstoque}). Pedido #${id}`);
+                            }
+                        }
+                    }
+                }
+
                 percentualFaturar = valorTotal > 0 ? Math.round((valorFaturar / valorTotal) * 10000) / 100 : 0;
                 percentualFaturar = Math.min(percentualFaturar, 100 - (parseFloat(pedido.percentual_faturado) || 0));
             } else {
@@ -3943,12 +4072,12 @@ module.exports = function createVendasRoutes(deps) {
 
             const [fatResult] = await connection.query(`
                 INSERT INTO pedido_faturamentos (pedido_id, sequencia, tipo, percentual, valor, nfe_numero, nfe_cfop, baixa_estoque, usuario_id, usuario_nome, observacoes)
-                VALUES (?, ?, 'faturamento', ?, ?, ?, ?, 0, ?, ?, ?)
-            `, [id, proxSeq, percentualFaturar, valorFaturar, novoNfNumero, cfop, user.id || null, user.nome || 'Sistema', observacoes]);
+                VALUES (?, ?, 'faturamento', ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [id, proxSeq, percentualFaturar, valorFaturar, novoNfNumero, cfop, itens_faturar ? 1 : 0, user.id || null, user.nome || 'Sistema', observacoes]);
 
             await registrarHistoricoPedido(id, user.id, user.nome || 'Sistema', 'faturamento_parcial',
                 `Faturamento Parcial (${percentualFaturar}%) - NF ${novoNfNumero} - CFOP ${cfop} - R$ ${valorFaturar.toFixed(2)}`,
-                { tipo: 'faturamento', percentual: percentualFaturar, valor: valorFaturar, nf_numero: novoNfNumero, cfop, baixa_estoque: false, itens_faturar: itens_faturar || 'percentual' });
+                { tipo: 'faturamento', percentual: percentualFaturar, valor: valorFaturar, nf_numero: novoNfNumero, cfop, baixa_estoque: !!itens_faturar, itens_faturar: itens_faturar || 'percentual' });
 
             let contaReceberId = null;
             if (gerarFinanceiro) {
@@ -3976,7 +4105,7 @@ module.exports = function createVendasRoutes(deps) {
                 dados: {
                     pedido_id: id, nf_numero: novoNfNumero, cfop,
                     percentual_faturado: novoPercentualFaturado, valor_faturado: novoValorFaturado,
-                    valor_pendente: Math.round((valorTotal - novoValorFaturado) * 100) / 100, baixa_estoque: false,
+                    valor_pendente: Math.round((valorTotal - novoValorFaturado) * 100) / 100, baixa_estoque: !!itens_faturar,
                     conta_receber_id: contaReceberId,
                     modo: itens_faturar ? 'por_item' : 'percentual',
                     proximo_passo: novoPercentualFaturado < 100 ? 'Aguardando remessa para completar faturamento' : 'Faturamento completo'
