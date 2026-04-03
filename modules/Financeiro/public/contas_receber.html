@@ -4,7 +4,7 @@
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Aluforce: Contas a Receber</title>
+    <title>Zyntra: Contas a Receber</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -436,7 +436,7 @@
                 <div class="search-bar-global">
                     <div class="search-input-wrapper">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="pesquisa-global" class="search-input-global" placeholder="Pesquisar por descricao, cliente, valor, documento..." oninput="pesquisarGlobal()">
+                        <input type="text" id="pesquisa-global" class="search-input-global" placeholder="Pesquisar por descrição, cliente, valor, documento..." oninput="pesquisarGlobal()">
                         <button class="btn-clear-search" onclick="limparPesquisa()" title="Limpar"><i class="fas fa-times"></i></button>
                     </div>
                 </div>
@@ -444,14 +444,14 @@
                 <!-- Filtros -->
                 <div class="filters-bar">
                     <div class="filter-group">
-                        <label><i class="fas fa-calendar"></i> Periodo</label>
+                        <label><i class="fas fa-calendar"></i> Período</label>
                         <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()">
                             <option value="todas" selected>Todas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
                             <option value="mes">Este Mês</option>
-                            <option value="proximos7">Proximos 7 dias</option>
-                            <option value="proximos30">Proximos 30 dias</option>
+                            <option value="proximos7">Próximos 7 dias</option>
+                            <option value="proximos30">Próximos 30 dias</option>
                             <option value="vencidas">Vencidas</option>
                         </select>
                     </div>
@@ -475,7 +475,7 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label><i class="fas fa-map-marker-alt"></i> Situacao</label>
+                        <label><i class="fas fa-map-marker-alt"></i> Situação</label>
                         <select class="filter-input" id="filtro-situacao" onchange="filtrarContas()">
                             <option value="">Todas</option>
                             <option value="OPERADO">Operado</option>
@@ -507,7 +507,7 @@
                         <h3 class="table-title">Listagem de Contas a Receber <span id="contagem-total" style="font-weight:400;color:var(--gray-400);font-size:12px;"></span></h3>
                         <div class="table-actions">
                             <button class="btn-secondary-outline" onclick="abrirModalImportar()" title="Importar planilha Excel"><i class="fas fa-file-upload"></i> Importar Excel</button>
-                            <button class="btn-primary" onclick="enviarCobrancas()" title="Enviar cobrancas em lote"><i class="fas fa-paper-plane"></i> Cobrancas</button>
+                            <button class="btn-primary" onclick="enviarCobranças()" title="Enviar cobranças em lote"><i class="fas fa-paper-plane"></i> Cobranças</button>
                             <button class="btn-success" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar</button>
                         </div>
                     </div>
@@ -516,8 +516,8 @@
                         <thead id="tabela-header">
                             <tr>
                                 <th>Empresa</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th>CNPJ</th>
-                                <th>Valor</th><th>Vencimento</th><th>Situacao</th><th>Portador</th>
-                                <th>Status</th><th>Dias</th><th>Acoes</th>
+                                <th>Valor</th><th>Vencimento</th><th>Situação</th><th>Portador</th>
+                                <th>Status</th><th>Dias</th><th>Ações</th>
                             </tr>
                         </thead>
                         <tbody id="tabela-contas">
@@ -599,11 +599,11 @@
                     </div>
                 </div><!-- /tab-fundos -->
 
-                <!-- Tab: PM (Prazo Medio) -->
+                <!-- Tab: PM (Prazo Médio) -->
                 <div id="tab-pm" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calculator" style="color:#a142f4;margin-right:8px;"></i>Simulador de Prazo Medio</h2>
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calculator" style="color:#a142f4;margin-right:8px;"></i>Simulador de Prazo Médio</h2>
                     <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:16px;margin-bottom:20px;">
-                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Medio (PM):</strong> Calculado com base nos titulos em aberto. PM = Soma(Valor x Dias) / Soma(Valor). As taxas sao aplicadas conforme tabela de referencia.</p>
+                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Médio (PM):</strong> Calculado com base nos títulos em aberto. PM = Soma(Valor x Dias) / Soma(Valor). As taxas são aplicadas conforme tabela de referência.</p>
                     </div>
                     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
@@ -615,7 +615,7 @@
                             <div style="font-size:24px;font-weight:800;color:#1e40af;margin-top:4px;" id="pm-total-ponderado">R$ 0,00</div>
                         </div>
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Titulos em Aberto</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Títulos em Aberto</div>
                             <div style="font-size:24px;font-weight:800;color:#059669;margin-top:4px;" id="pm-titulos-aberto">0</div>
                         </div>
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
@@ -626,7 +626,7 @@
                     <!-- Simulador -->
                     <div class="table-container" style="margin-bottom:20px;">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-sliders-h" style="margin-right:6px;"></i> Simulacao de Prazo</h3>
+                            <h3 class="table-title"><i class="fas fa-sliders-h" style="margin-right:6px;"></i> Simulação de Prazo</h3>
                         </div>
                         <div style="padding:16px;">
                             <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
@@ -658,14 +658,14 @@
                     <!-- Tabela PM por Portador -->
                     <div class="table-container">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-table" style="margin-right:6px;"></i> Prazo Medio por Portador</h3>
+                            <h3 class="table-title"><i class="fas fa-table" style="margin-right:6px;"></i> Prazo Médio por Portador</h3>
                         </div>
                         <div style="overflow-x:auto;">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Portador</th>
-                                    <th>Qtd. Titulos</th>
+                                    <th>Qtd. Títulos</th>
                                     <th>Valor Total</th>
                                     <th>PM (dias)</th>
                                     <th>Custo Fin. Estimado</th>
@@ -718,7 +718,7 @@
                                 <select id="categoria-id"><option value="">Selecione...</option></select>
                             </div>
                             <div class="form-group-conta">
-                                <label>Previsao de Recebimento</label>
+                                <label>Previsão de Recebimento</label>
                                 <div class="input-icon-conta"><input type="date" id="cr-previsao"><i class="fas fa-calendar"></i></div>
                             </div>
                             <div class="form-group-conta">
@@ -754,17 +754,17 @@
                         <button type="button" class="tab-conta" data-tab="cr-comprovante"><i class="fas fa-file-invoice" style="margin-right:4px;opacity:0.6;"></i> Comprovante</button>
                         <button type="button" class="tab-conta" data-tab="cr-rastreamento"><i class="fas fa-search-location" style="margin-right:4px;opacity:0.6;"></i> Rastreamento</button>
                         <button type="button" class="tab-conta" data-tab="cr-departamentos">Departamentos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-repeticao">Repeticao</button>
+                        <button type="button" class="tab-conta" data-tab="cr-repetição">Repetição</button>
                         <button type="button" class="tab-conta" data-tab="cr-recebimentos">Recebimentos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-integracao"><i class="fas fa-link" style="margin-right:4px;opacity:0.5;"></i> Integracao Bancaria e CNAB</button>
+                        <button type="button" class="tab-conta" data-tab="cr-integracao"><i class="fas fa-link" style="margin-right:4px;opacity:0.5;"></i> Integração Bancária e CNAB</button>
                         <button type="button" class="tab-conta" data-tab="cr-diversos">Diversos</button>
                     </div>
                     <div class="tab-content-conta">
                         <div class="tab-pane-conta active" id="tab-cr-detalhes">
                             <div class="form-row-conta">
                                 <div class="form-group-conta" style="flex:2;">
-                                    <label>Descricao</label>
-                                    <input type="text" id="descricao" placeholder="Ex: Venda de produtos, Servico prestado...">
+                                    <label>Descrição</label>
+                                    <input type="text" id="descricao" placeholder="Ex: Venda de produtos, Serviço prestado...">
                                 </div>
                                 <div class="form-group-conta" style="max-width:150px;">
                                     <label>Nota Fiscal</label>
@@ -773,7 +773,7 @@
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta">
-                                    <label>Data de Emissao</label>
+                                    <label>Data de Emissão</label>
                                     <div class="input-icon-conta"><input type="date" id="cr-emissao"><i class="fas fa-calendar"></i></div>
                                 </div>
                                 <div class="form-group-conta">
@@ -786,7 +786,7 @@
                                 </div>
                             </div>
                             <div class="form-row-conta">
-                                <div class="form-group-conta"><label>Observacoes</label><textarea id="observacoes" rows="4" placeholder=""></textarea></div>
+                                <div class="form-group-conta"><label>Observações</label><textarea id="observações" rows="4" placeholder=""></textarea></div>
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-impostos">
@@ -835,7 +835,7 @@
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-rastreamento">
                             <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-bottom:16px;">
-                                <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Rastreamento:</strong> Datas de recompra, encaminhamento para cartorio e protesto sao preenchidas automaticamente via importacao ou manualmente.</p>
+                                <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Rastreamento:</strong> Datas de recompra, encaminhamento para cartório e protesto são preenchidas automaticamente via importação ou manualmente.</p>
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta">
@@ -843,8 +843,8 @@
                                     <div class="input-icon-conta"><input type="date" id="cr-dia-recomprado"><i class="fas fa-calendar"></i></div>
                                 </div>
                                 <div class="form-group-conta">
-                                    <label><i class="fas fa-gavel"></i> Data para Cartorio</label>
-                                    <div class="input-icon-conta"><input type="date" id="cr-data-cartorio"><i class="fas fa-calendar"></i></div>
+                                    <label><i class="fas fa-gavel"></i> Data para Cartório</label>
+                                    <div class="input-icon-conta"><input type="date" id="cr-data-cartório"><i class="fas fa-calendar"></i></div>
                                 </div>
                                 <div class="form-group-conta">
                                     <label><i class="fas fa-exclamation-triangle"></i> Data Protestado</label>
@@ -853,10 +853,10 @@
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-departamentos">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma distribuicao por departamentos para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para fazer a distribuicao agora.</a></div>
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda não foi informada nenhuma distribuição por departamentos para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para fazer a distribuição agora.</a></div>
                         </div>
-                        <div class="tab-pane-conta" id="tab-cr-repeticao">
-                            <div class="empty-state-conta"><span>=\(</span><p>Ainda nao foi informada nenhuma repeticao para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para incluir repeticoes agora.</a></div>
+                        <div class="tab-pane-conta" id="tab-cr-repetição">
+                            <div class="empty-state-conta"><span>=\(</span><p>Ainda não foi informada nenhuma repetição para esta conta.</p><a href="#" class="link-acao" onclick="event.preventDefault()">Clique aqui para incluir repetições agora.</a></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-recebimentos">
                             <div class="recebimentos-layout">
@@ -871,7 +871,7 @@
                                     </div>
                                 </div>
                                 <div class="recebimentos-resumo">
-                                    <div class="resumo-item-cr"><label>Total ja Recebido</label><input type="text" id="cr-total-recebido" value="0,00" readonly></div>
+                                    <div class="resumo-item-cr"><label>Total já Recebido</label><input type="text" id="cr-total-recebido" value="0,00" readonly></div>
                                     <div class="resumo-item-cr"><label>Total de Descontos</label><input type="text" id="cr-total-descontos" value="0,00" readonly></div>
                                     <div class="resumo-item-cr"><label>Total de Juros e Multas</label><input type="text" id="cr-total-juros" value="0,00" readonly></div>
                                     <div class="resumo-item-cr destaque"><label>$ A Receber da Conta</label><input type="text" id="cr-valor-a-receber" value="0,00" readonly></div>
@@ -879,7 +879,7 @@
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-integracao">
-                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda nao temos suporte para integracao bancaria CNAB para esta conta.</p></div>
+                            <div class="empty-state-conta"><span>&#128533;</span><p>Ainda não temos suporte para integração bancária CNAB para esta conta.</p></div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-diversos">
                             <div class="form-row-conta">
@@ -888,7 +888,7 @@
                                 <div class="form-group-conta" style="max-width:120px;"><label>Parcelas</label><input type="number" id="num-parcelas" min="1" max="48" value="1"></div>
                             </div>
                             <div class="form-row-conta">
-                                <div class="form-group-conta"><label>Forma de Recebimento</label><select id="forma-pagamento"><option value="pix">PIX</option><option value="transferencia">Transferencia</option><option value="boleto">Boleto</option><option value="cartao">Cartao</option><option value="dinheiro">Dinheiro</option><option value="cheque">Cheque</option></select></div>
+                                <div class="form-group-conta"><label>Forma de Recebimento</label><select id="forma-pagamento"><option value="pix">PIX</option><option value="transferencia">Transferência</option><option value="boleto">Boleto</option><option value="cartao">Cartão</option><option value="dinheiro">Dinheiro</option><option value="cheque">Cheque</option></select></div>
                                 <div class="form-group-conta"><label>Centro de Custo</label><select id="centro-custo"><option value="">Selecione (opcional)</option></select></div>
                             </div>
                             <div class="form-row-conta">
@@ -921,13 +921,13 @@
                 <div class="form-group">
                     <label><i class="fas fa-file-upload"></i> Arquivo Excel (.xlsx)</label>
                     <input type="file" class="form-input" id="arquivo-excel" accept=".xlsx,.xls" style="padding:8px;">
-                    <span class="input-hint">Selecione o arquivo - todas as colunas serao importadas automaticamente</span>
+                    <span class="input-hint">Selecione o arquivo - todas as colunas serão importadas automaticamente</span>
                 </div>
                 <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Colunas importadas:</strong> Empresa, Emissao, Tipo, NFe, Parcela, Cliente, CNPJ, Valor, Vencimento, Situacao, Portador, Status, Observacao, PIS, COFINS, CSLL, IR, ISS, INSS</p>
+                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Colunas importadas:</strong> Empresa, Emissão, Tipo, NFe, Parcela, Cliente, CNPJ, Valor, Vencimento, Situação, Portador, Status, Observação, PIS, COFINS, CSLL, IR, ISS, INSS</p>
                 </div>
                 <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>Atencao:</strong> A importacao substituira todos os registros importados anteriormente.</p>
+                    <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> A importação substituirá todos os registros importados anteriormente.</p>
                 </div>
                 <div id="importar-progresso" style="display:none;margin-top:16px;text-align:center;">
                     <i class="fas fa-spinner fa-spin" style="font-size:24px;color:#059669;"></i>
@@ -960,9 +960,9 @@
                     <div class="form-group"><label><i class="fas fa-money-bill-wave"></i> Valor Recebido *</label><div class="input-with-prefix"><span class="input-prefix">R$</span><input type="number" step="0.01" class="form-input with-prefix" id="receber-valor" required></div></div>
                     <div class="form-row">
                         <div class="form-group"><label><i class="fas fa-calendar"></i> Data do Recebimento *</label><input type="date" class="form-input" id="receber-data" required></div>
-                        <div class="form-group"><label><i class="fas fa-credit-card"></i> Forma</label><select class="form-input" id="receber-forma"><option value="pix">PIX</option><option value="transferencia">Transferencia</option><option value="boleto">Boleto</option><option value="cartao">Cartao</option><option value="dinheiro">Dinheiro</option></select></div>
+                        <div class="form-group"><label><i class="fas fa-credit-card"></i> Forma</label><select class="form-input" id="receber-forma"><option value="pix">PIX</option><option value="transferencia">Transferência</option><option value="boleto">Boleto</option><option value="cartao">Cartão</option><option value="dinheiro">Dinheiro</option></select></div>
                     </div>
-                    <div class="form-group"><label><i class="fas fa-comment"></i> Observacoes</label><textarea class="form-input" id="receber-obs" rows="2" placeholder="Observacoes sobre o recebimento..."></textarea></div>
+                    <div class="form-group"><label><i class="fas fa-comment"></i> Observações</label><textarea class="form-input" id="receber-obs" rows="2" placeholder="Observações sobre o recebimento..."></textarea></div>
                 </div>
                 <div class="modal-receber-footer">
                     <button type="button" class="btn-cancel" onclick="fecharModalReceber()"><i class="fas fa-times"></i> Cancelar</button>
@@ -1083,10 +1083,10 @@
             document.getElementById('stat-vencidas').textContent = fmtMoeda(totalVencido);
             document.getElementById('stat-recebidas').textContent = fmtMoeda(totalLiquidado);
 
-            document.getElementById('stat-total-meta').innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' titulos em aberto';
-            document.getElementById('stat-vencendo-meta').innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' titulos';
-            document.getElementById('stat-vencidas-meta').innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' titulos';
-            document.getElementById('stat-recebidas-meta').innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' titulos';
+            document.getElementById('stat-total-meta').innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' títulos em aberto';
+            document.getElementById('stat-vencendo-meta').innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' títulos';
+            document.getElementById('stat-vencidas-meta').innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' títulos';
+            document.getElementById('stat-recebidas-meta').innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' títulos';
         }
 
         function atualizarResumoComplementar(dados) {
@@ -1209,9 +1209,9 @@
         }
 
         function getTableHeaders() {
-            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','Situacao','Portador','Pago no Dia','Status','Dias','Acoes'];
-            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Liquido','Recebido','A Receber','Acoes'];
-            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situacao','Portador','Pago no Dia','Status','Dias','Acoes'];
+            if (currentView === 'completa') return ['Empresa','CNPJ Emp.','NFe','Parcela','Cliente','CNPJ/CPF','Emissão','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','Vl.Liquido','Recebido','A Receber','Situação','Portador','Pago no Dia','Status','Dias','Ações'];
+            if (currentView === 'impostos') return ['Cliente','NFe','Parcela','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Vl.Liquido','Recebido','A Receber','Ações'];
+            return ['Empresa','NFe','Parcela','Cliente','CNPJ','Valor','Vencimento','Situação','Portador','Pago no Dia','Status','Dias','Ações'];
         }
 
         function renderizarTabela(dados, pesquisa) {
@@ -1316,7 +1316,7 @@
             document.getElementById('cr-pago-no-dia').value = '';
             document.getElementById('cr-aceita-troca-factory').checked = false;
             document.getElementById('cr-dia-recomprado').value = '';
-            document.getElementById('cr-data-cartorio').value = '';
+            document.getElementById('cr-data-cartório').value = '';
             document.getElementById('cr-data-protestado').value = '';
             document.getElementById('cr-comprovante-preview').style.display = 'none';
             document.getElementById('cr-comprovante-file').value = '';
@@ -1349,7 +1349,7 @@
                 document.getElementById('conta-valor').value = val ? val.toFixed(2).replace('.',',') : '';
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
-                document.getElementById('observacoes').value = c.observacoes || '';
+                document.getElementById('observações').value = c.observações || '';
                 document.getElementById('numero-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
@@ -1375,7 +1375,7 @@
                 document.getElementById('cr-pago-no-dia').value = (c.pago_no_dia||'').split('T')[0];
                 document.getElementById('cr-aceita-troca-factory').checked = !!(c.aceita_troca_factory);
                 document.getElementById('cr-dia-recomprado').value = (c.dia_recomprado||'').split('T')[0];
-                document.getElementById('cr-data-cartorio').value = (c.data_para_cartorio||'').split('T')[0];
+                document.getElementById('cr-data-cartório').value = (c.data_para_cartório||'').split('T')[0];
                 document.getElementById('cr-data-protestado').value = (c.data_protestado||'').split('T')[0];
                 // Comprovante
                 if (c.comprovante_url) {
@@ -1409,7 +1409,7 @@
         async function confirmarRecebimento(event) {
             event.preventDefault();
             var id = document.getElementById('receber-conta-id').value;
-            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_recebimento: document.getElementById('receber-forma').value, observacoes: document.getElementById('receber-obs').value };
+            var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_recebimento: document.getElementById('receber-forma').value, observações: document.getElementById('receber-obs').value };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id+'/receber', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { showToast('Recebimento confirmado com sucesso!'); fecharModalReceber(); await init(); } else { showToast('Erro ao confirmar recebimento', 'error'); }
@@ -1428,14 +1428,14 @@
                 data_vencimento: document.getElementById('conta-vencimento').value,
                 vencimento: document.getElementById('conta-vencimento').value,
                 forma_recebimento: document.getElementById('forma-pagamento').value,
-                observacoes: document.getElementById('observacoes').value,
+                observações: document.getElementById('observações').value,
                 numero_documento: document.getElementById('numero-documento').value,
                 num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1,
                 status: document.getElementById('cr-status').value,
                 pago_no_dia: document.getElementById('cr-pago-no-dia').value || null,
                 aceita_troca_factory: document.getElementById('cr-aceita-troca-factory').checked,
                 dia_recomprado: document.getElementById('cr-dia-recomprado').value || null,
-                data_para_cartorio: document.getElementById('cr-data-cartorio').value || null,
+                data_para_cartório: document.getElementById('cr-data-cartório').value || null,
                 data_protestado: document.getElementById('cr-data-protestado').value || null
             };
             try {
@@ -1458,19 +1458,19 @@
             if (!confirm('Tem certeza que deseja excluir esta conta?')) return;
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id, { method:'DELETE', credentials:'include' });
-                if (r.ok) { showToast('Conta excluida com sucesso!'); await init(); } else { showToast('Erro ao excluir', 'error'); }
+                if (r.ok) { showToast('Conta excluída com sucesso!'); await init(); } else { showToast('Erro ao excluir', 'error'); }
             } catch(e) { console.error(e); showToast('Erro ao excluir', 'error'); }
         }
 
-        async function enviarCobrancas() {
+        async function enviarCobranças() {
             var pendentes = contas.filter(function(c){ return c.status === 'pendente' || c.status === 'vencido'; });
-            if (pendentes.length === 0) { showToast('Nao ha contas pendentes para cobranca', 'warning'); return; }
-            if (!confirm('Enviar cobranca para '+pendentes.length+' conta(s)?')) return;
+            if (pendentes.length === 0) { showToast('Não há contas pendentes para cobrança', 'warning'); return; }
+            if (!confirm('Enviar cobrança para '+pendentes.length+' conta(s)?')) return;
             try {
                 var ids = pendentes.map(function(c){return c.id;});
-                var r = await fetch('/api/financeiro/enviar-cobranca-lote', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({ ids: ids }) });
-                if (r.ok) { showToast('Cobrancas enviadas para '+pendentes.length+' conta(s)!'); } else { showToast('Erro ao enviar cobrancas em lote', 'error'); }
-            } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); }
+                var r = await fetch('/api/financeiro/enviar-cobrança-lote', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({ ids: ids }) });
+                if (r.ok) { showToast('Cobranças enviadas para '+pendentes.length+' conta(s)!'); } else { showToast('Erro ao enviar cobranças em lote', 'error'); }
+            } catch(e) { showToast('Erro ao enviar cobranças', 'error'); }
         }
         function getFilteredContas() {
             var periodo = document.getElementById('filtro-periodo').value;
@@ -1501,14 +1501,14 @@
         function visualizarConta(id) {
             abrirModal(id);
         }
-        function formatarForma(f) { var m={'dinheiro':'Dinheiro','pix':'PIX','transferencia':'Transferencia','cartao':'Cartao','boleto':'Boleto','cheque':'Cheque'}; return m[f]||f||'-'; }
+        function formatarForma(f) { var m={'dinheiro':'Dinheiro','pix':'PIX','transferencia':'Transferência','cartao':'Cartão','boleto':'Boleto','cheque':'Cheque'}; return m[f]||f||'-'; }
         function fecharModalVisualizar() { fecharModal(); }
         function editarContaFromView() { }
         function receberContaFromView() { }
         function exportarExcel() {
-            if(contas.length===0){showToast('Nao ha dados para exportar','warning');return;}
+            if(contas.length===0){showToast('Não há dados para exportar','warning');return;}
             var csvSafe=function(s){if(typeof s!=='string')return String(s==null?'':s);var v=s.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g,'');if(/^[=+\-@\t\r]/.test(v))v="'"+v;return v;};
-            var headers=['Empresa','NFe','Parcela','Cliente','CNPJ','Emissao','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Valor Liquido','Recebido','A Receber','Situacao','Portador','Status','Dias','Observacoes'];
+            var headers=['Empresa','NFe','Parcela','Cliente','CNPJ','Emissão','Vencimento','Categoria','Conta Corrente','Documento','Boleto','Vendedor','Projeto','Valor','PIS','COFINS','CSLL','IR','ISS','INSS','Valor Liquido','Recebido','A Receber','Situação','Portador','Status','Dias','Observações'];
             var linhas=contas.map(function(c){return [
                 '"'+csvSafe(c.empresa||'')+'"','"'+csvSafe(c.nota_fiscal||'')+'"','"'+csvSafe(c.parcela_info||'')+'"',
                 '"'+csvSafe(c.cliente_nome||'').replace(/"/g,'""')+'"','"'+csvSafe(c.cnpj_cpf||c.cnpj_cliente||'')+'"',
@@ -1526,7 +1526,7 @@
                 '"'+(parseFloat(c.valor_recebido)||0).toFixed(2).replace('.',',')+'"',
                 '"'+(parseFloat(c.a_receber)||0).toFixed(2).replace('.',',')+'"',
                 csvSafe(c.situacao||''),csvSafe(c.portador||''),csvSafe(c.status||'pendente'),c.dias_vencido||'',
-                '"'+csvSafe(c.observacoes||'').replace(/"/g,'""')+'"'
+                '"'+csvSafe(c.observações||'').replace(/"/g,'""')+'"'
             ];});
             var csv=[headers.join(';')].concat(linhas.map(function(l){return l.join(';');})).join('\n');
             var blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
@@ -1562,12 +1562,12 @@
                     await init();
                 } else {
                     document.getElementById('importar-resultado').style.display = 'block';
-                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+(data.error||'Erro na importacao')+'</p></div>';
-                    showToast(data.error || 'Erro na importacao', 'error');
+                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+(data.error||'Erro na importação')+'</p></div>';
+                    showToast(data.error || 'Erro na importação', 'error');
                     document.getElementById('btn-importar').disabled = false;
                 }
             } catch(e) {
-                console.error('Erro importacao:', e);
+                console.error('Erro importação:', e);
                 document.getElementById('importar-progresso').style.display = 'none';
                 showToast('Erro ao importar arquivo', 'error');
                 document.getElementById('btn-importar').disabled = false;
@@ -1613,7 +1613,7 @@
             if (tabId === 'tab-fundos') renderizarFundosDetalhado();
         }
 
-        // Dev Spec 1.3: Simulador de Prazo Medio
+        // Dev Spec 1.3: Simulador de Prazo Médio
         function calcularPM() {
             var hoje = new Date();
             hoje.setHours(0,0,0,0);

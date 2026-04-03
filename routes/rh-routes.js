@@ -66,7 +66,16 @@ module.exports = function createRHRoutes(deps) {
     }
 
     router.use(authenticateToken);
-    router.use(authorizeArea('rh'));
+
+    // Self-service: rotas que qualquer funcionário autenticado pode acessar (seus próprios dados)
+    // As demais rotas exigem permissão ao módulo RH
+    // AUDIT-FIX: prefix match agora exige '/' após prefix para evitar match em /media, /memory etc.
+    const rhSelfServicePrefixes = ['/me', '/holerites/meu-ultimo', '/ferias/minhas/', '/ferias/saldo/', '/avaliacoes/funcionario/'];
+    router.use((req, res, next) => {
+        const isSelfService = rhSelfServicePrefixes.some(p => req.path === p || req.path.startsWith(p + '/'));
+        if (isSelfService) return next();
+        return authorizeArea('rh')(req, res, next);
+    });
 
     // Rota /me para o RH retornar dados do usuário logado
     router.get('/me', async (req, res) => {

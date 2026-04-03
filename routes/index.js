@@ -358,11 +358,12 @@ module.exports = function registerAllRoutes(app, deps) {
 
     // ============================================================
     // 9.4. Dashboard API (KPIs, Alerts, Modules)
+    // AUDIT-FIX: Adicionado authenticateToken — era público
     // ============================================================
     try {
         const dashboardRouter = require('./dashboard-api');
-        app.use('/api/dashboard', dashboardRouter);
-        console.log('[ROUTES] ✅ Dashboard API mounted at /api/dashboard');
+        app.use('/api/dashboard', sharedDeps.authenticateToken, dashboardRouter);
+        console.log('[ROUTES] ✅ Dashboard API mounted at /api/dashboard (authenticated)');
     } catch (err) {
         console.error('[ROUTES] ❌ Failed to load dashboard-api:', err.message);
     }

@@ -266,7 +266,7 @@ async function sendEmail(to, subject, html, text) {
 }
 
 // =================================================================
-// 3. MIDDLEWARES DE AUTORIZAÇÁO (declarados antes de serem usados)
+// 3. MIDDLEWARES DE AUTORIZAÇÃO (declarados antes de serem usados)
 // =================================================================
 
 // Middleware para validar resultado das validações
@@ -653,8 +653,8 @@ const allowedOrigins = [
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://YOUR_VPS_IP:3000',     // VPS IP (HTTP — only for internal/dev access)
-    'http://YOUR_VPS_IP',            // VPS IP (HTTP — only for internal/dev access)
+    'http://31.97.64.102:3000',     // VPS IP (HTTP — only for internal/dev access)
+    'http://31.97.64.102',            // VPS IP (HTTP — only for internal/dev access)
     'http://tauri.localhost',        // App Desktop Tauri (ALUFORCE ERP Desktop)
     'https://tauri.localhost',       // App Desktop Tauri (HTTPS variant)
     'tauri://localhost',             // App Desktop Tauri (custom scheme)
@@ -706,6 +706,10 @@ applySecurityMiddlewares(app, {
     enableRateLimit: true,
     enableAudit: true
 });
+
+// ⚡ ENTERPRISE: Request timeout middleware (30s default)
+// AUDIT-FIX: Movido para ANTES das rotas — estava depois e era ineficaz
+app.use('/api', requestTimeout(parseInt(process.env.REQUEST_TIMEOUT) || 30000));
 
 // DEBUG: Log de todos os cookies recebidos
 app.use((req, res, next) => {
@@ -1477,7 +1481,11 @@ const authenticateToken = authCentral.authenticateToken;
 
 // Middleware para autorizar admin ou comercial para Vendas/CRM
 const authorizeAdminOrComercial = (req, res, next) => {
-    if (req.user?.role === 'admin' || req.user?.role === 'comercial') {
+    const role = String(req.user?.role || '').toLowerCase().trim();
+    const isAdm = role === 'admin' || role === 'administrador' ||
+                  req.user?.is_admin === 1 || req.user?.is_admin === true || req.user?.is_admin === '1';
+    const isComercial = role === 'comercial';
+    if (isAdm || isComercial) {
         return next();
     }
     return res.status(403).json({ message: 'Acesso negado. Requer privilégios de administrador ou comercial.' });
@@ -1520,15 +1528,10 @@ app.use('/api/nfe', nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
-// 🚚 LOGÍSTICA API — Extracted to routes/logistica-routes.js
+// 🚚 LOGÍSTICA API — AUDIT-FIX: Removido mount duplicado
+// Já montado via routes/index.js → registerAllRoutes()
 // =================================================================
-try {
-    const logisticaRouter = require('./routes/logistica-routes')({ pool, authenticateToken, authorizeArea });
-    app.use('/api/logistica', logisticaRouter);
-    console.log('✅ Rotas Logística API carregadas: /api/logistica/*');
-} catch (err) {
-    console.error('❌ Erro ao carregar rotas Logística:', err.message);
-}
+// (logistica-routes agora carregado apenas em routes/index.js)
 
 // =================================================================
 // 📄 FATURAMENTO API — Módulo de Faturamento/NFe (SEFAZ, certificado)
@@ -1602,8 +1605,7 @@ app.get('/metrics', (req, res, next) => {
     next();
 }, createMetricsEndpoint(pool, cacheService));
 
-// ⚡ ENTERPRISE: Request timeout middleware (30s default)
-app.use('/api', requestTimeout(parseInt(process.env.REQUEST_TIMEOUT) || 30000));
+// AUDIT-FIX: requestTimeout movido para antes das rotas (agora após applySecurityMiddlewares)
 
 // =================================================================
 // ENDPOINT DE FOTO DO USUÁRIO - Busca foto pelo email (autenticado)
@@ -2558,7 +2560,7 @@ app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) 
 
 console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 
-// 7. TRATAMENTO DE ERROS E INICIALIZAÇÁO DO SERVIDOR
+// 7. TRATAMENTO DE ERROS E INICIALIZAÇÃO DO SERVIDOR
 // =================================================================
 
 // 404 handler — rota não encontrada (deve vir antes do error handler)

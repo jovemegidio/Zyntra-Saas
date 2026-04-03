@@ -499,7 +499,7 @@ class DanfeService {
     desenharRodape(doc) {
         const y = 780;
         doc.fontSize(6).font('Helvetica');
-        doc.text('Emitido via sistema ALUFORCE - www.aluforce.com.br', 10, y, { 
+        doc.text('Emitido via sistema Zyntra ERP', 10, y, { 
             width: 575, 
             align: 'center' 
         });

@@ -19,38 +19,39 @@ module.exports = function createLogisticaRoutes(deps) {
         console.log('[LOGISTICA/DASHBOARD] Requisição recebida');
         try {
             // Sprint E2E-S2 (E4-HIGH-06): Separar pendente de aguardando_separacao no dashboard
-            // Contar pedidos faturados pendentes (NULL, 'pendente' ou '')
+            // HOTFIX Pipeline E2E: Incluir status 'entregue' para que pedidos entregues não sumam do dashboard
+            // (quando status_logistica='entregue', o status principal muda para 'entregue')
             const [[aguardando]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo')
+                WHERE status IN ('faturado', 'recibo', 'entregue')
                 AND (status_logistica IS NULL OR status_logistica = 'pendente' OR status_logistica = '')
             `);
             console.log('[LOGISTICA/DASHBOARD] Pendente:', aguardando);
 
             const [[aguardandoSep]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'aguardando_separacao'
+                WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'aguardando_separacao'
             `);
             console.log('[LOGISTICA/DASHBOARD] Aguardando separação:', aguardandoSep);
     
             const [[separacao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'em_separacao'
+                WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_separacao'
             `);
     
             const [[expedicao]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'em_expedicao'
+                WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_expedicao'
             `);
     
             const [[transporte]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'em_transporte'
+                WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'em_transporte'
             `);
     
             const [[entregues]] = await pool.query(`
                 SELECT COUNT(*) as total FROM pedidos
-                WHERE status IN ('faturado', 'recibo') AND status_logistica = 'entregue'
+                WHERE status IN ('faturado', 'recibo', 'entregue') AND status_logistica = 'entregue'
             `);
     
             const result = {
@@ -111,7 +112,7 @@ module.exports = function createLogisticaRoutes(deps) {
                 FROM pedidos p
                 LEFT JOIN clientes c ON p.cliente_id = c.id
                 LEFT JOIN transportadoras t ON p.transportadora_id = t.id
-                WHERE p.status IN ('faturado', 'recibo')
+                WHERE p.status IN ('faturado', 'recibo', 'entregue')
             `;
     
             const params = [];

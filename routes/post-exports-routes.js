@@ -3235,7 +3235,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         try {
             const ExcelJS = require('exceljs');
             const workbook = new ExcelJS.Workbook();
-            workbook.creator = 'ALUFORCE - Sistema de Gestão';
+            workbook.creator = 'Zyntra - Sistema de Gestão';
             workbook.created = new Date();
 
             const ws = workbook.addWorksheet('Estoque Bobinas', {
@@ -3245,7 +3245,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             // Cabeçalho de instrução
             ws.mergeCells('A1:H1');
             const instrCell = ws.getCell('A1');
-            instrCell.value = 'ALUFORCE - Template de Importação de Estoque (Bobinas)';
+            instrCell.value = 'Zyntra - Template de Importação de Estoque (Bobinas)';
             instrCell.font = { bold: true, size: 14, color: { argb: 'FFFFFF' } };
             instrCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: '1E40AF' } };
             instrCell.alignment = { horizontal: 'center', vertical: 'middle' };

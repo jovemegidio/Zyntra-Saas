@@ -6420,7 +6420,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Erro interno no servidor.' })
 })
 
-// --- INICIALIZAÇÁO DO SERVIDOR ---
+// --- INICIALIZAÇÃO DO SERVIDOR ---
 // Prefer binding to 0.0.0.0 so the server is reachable from other hosts/containers during tests.
 // Also add a listen error handler to log bind issues (useful on Windows if address is unavailable).
 const LISTEN_ADDR = process.env.LISTEN_ADDR || '0.0.0.0'

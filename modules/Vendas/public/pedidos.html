@@ -302,7 +302,14 @@
         .pedidos-table th {
             background: #f9fafb; font-size: 12px; font-weight: 600;
             color: #6b7280; text-transform: uppercase;
+            cursor: pointer; user-select: none; position: relative;
+            transition: background 0.15s;
         }
+        .pedidos-table th:hover { background: #f0f0f5; }
+        .pedidos-table th .sort-icon { margin-left: 4px; font-size: 10px; opacity: 0.4; }
+        .pedidos-table th.sorted .sort-icon { opacity: 1; color: var(--primary-orange); }
+        .pedidos-table th:first-child { cursor: default; }
+        .pedidos-table th:first-child:hover { background: #f9fafb; }
         .pedidos-table tbody tr:hover { background: #f9fafb; }
 
         .pedido-número { font-weight: 600; color: var(--primary-orange); }
@@ -365,6 +372,78 @@
         ::-webkit-scrollbar-track { background: #f5f5f5; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 16px; margin-bottom: 20px;
+        }
+        @media (max-width: 1100px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+        .metric-card {
+            background: white; border-radius: 12px; padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08); cursor: pointer;
+            transition: all 0.2s; border: 2px solid transparent;
+        }
+        .metric-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
+        .metric-card.active-filter { border-color: var(--primary-orange); box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.15); }
+        .metric-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+        .metric-icon {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 16px;
+        }
+        .metric-icon.blue { background: #dbeafe; color: #2563eb; }
+        .metric-icon.purple { background: #ede9fe; color: #7c3aed; }
+        .metric-icon.orange { background: #ffedd5; color: #ea580c; }
+        .metric-icon.green { background: #dcfce7; color: #16a34a; }
+        .metric-icon.red { background: #fee2e2; color: #dc2626; }
+        .metric-value { font-size: 24px; font-weight: 800; color: #1e293b; }
+        .metric-label { font-size: 12px; color: #6b7280; margin-top: 2px; }
+        .metric-trend { font-size: 11px; font-weight: 600; margin-top: 4px; }
+        .metric-trend.up { color: #16a34a; }
+        .metric-trend.down { color: #dc2626; }
+
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            display: none; align-items: center; gap: 12px;
+            padding: 12px 20px; background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 10px; margin-bottom: 16px; color: white;
+            animation: slideDown 0.2s ease;
+        }
+        .bulk-actions-bar.visible { display: flex; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .bulk-count { font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .bulk-btn {
+            padding: 6px 14px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.1); color: white;
+            border-radius: 6px; font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px;
+        }
+        .bulk-btn:hover { background: rgba(255,255,255,0.2); }
+        .bulk-btn.danger { border-color: rgba(239,68,68,0.4); }
+        .bulk-btn.danger:hover { background: rgba(239,68,68,0.2); }
+        .bulk-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.6); cursor: pointer; font-size: 16px; }
+        .bulk-close:hover { color: white; }
+
+        /* Quick Status Dropdown */
+        .quick-status-select {
+            padding: 3px 6px; border: 1px solid #e5e7eb; border-radius: 4px;
+            font-size: 11px; background: white; cursor: pointer;
+            max-width: 110px; color: #374151;
+        }
+        .quick-status-select:focus { outline: none; border-color: var(--primary-orange); }
+
+        /* Checkbox in table */
+        .row-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-orange); }
+
+        /* Table tab badge */
+        .table-tab .tab-count {
+            display: inline-block; min-width: 18px; height: 18px; line-height: 18px;
+            text-align: center; font-size: 10px; font-weight: 700;
+            border-radius: 9px; margin-left: 6px; padding: 0 5px;
+            background: #e5e7eb; color: #6b7280;
+        }
+        .table-tab.active .tab-count { background: rgba(255,255,255,0.3); color: white; }
 
         /* Modal Styles */
         .modal-overlay {
@@ -1499,37 +1578,39 @@
                 </div>
 
                 <div class="metrics-grid">
-                    <div class="metric-card blue">
+                    <div class="metric-card" onclick="filtrarPorMetrica('')" id="metric-total">
                         <div class="metric-header">
                             <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                         </div>
                         <div class="metric-value" id="valorTotal">R$ 0</div>
                         <div class="metric-label">Valor Total (Mês)</div>
+                        <div class="metric-trend" id="trendValor"></div>
                     </div>
-                    <div class="metric-card purple">
+                    <div class="metric-card" onclick="filtrarPorMetrica('')" id="metric-qtd">
                         <div class="metric-header">
                             <div class="metric-icon purple"><i class="fas fa-file-alt"></i></div>
                         </div>
                         <div class="metric-value" id="totalPedidos">0</div>
                         <div class="metric-label">Total de Pedidos</div>
+                        <div class="metric-trend" id="trendTotal"></div>
                     </div>
-                    <div class="metric-card orange">
+                    <div class="metric-card" onclick="filtrarPorMetrica('orcamento')" id="metric-pendentes">
                         <div class="metric-header">
                             <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosPendentes">0</div>
-                        <div class="metric-label">Pendentes</div>
+                        <div class="metric-label">Orçamentos / Pendentes</div>
                     </div>
-                    <div class="metric-card green">
+                    <div class="metric-card" onclick="filtrarPorMetrica('aprovado')" id="metric-aprovados">
                         <div class="metric-header">
                             <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosAprovados">0</div>
                         <div class="metric-label">Aprovados</div>
                     </div>
-                    <div class="metric-card orange">
+                    <div class="metric-card" onclick="filtrarPorMetrica('faturado')" id="metric-faturados">
                         <div class="metric-header">
-                            <div class="metric-icon orange"><i class="fas fa-file-invoice"></i></div>
+                            <div class="metric-icon blue"><i class="fas fa-file-invoice"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosFaturados">0</div>
                         <div class="metric-label">Faturados</div>
@@ -1539,7 +1620,7 @@
                 <div class="filters-bar">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Buscar pedido ou cliente..." oninput="debounceFiltrar()">
+                        <input type="text" id="searchInput" placeholder="Buscar pedido, cliente ou vendedor..." oninput="debounceFiltrar()">
                     </div>
                     <div class="filter-group">
                         <label>Status:</label>
@@ -1554,43 +1635,66 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Período:</label>
-                        <select id="filterPeriodo" onchange="filtrarPedidos()">
+                        <label>De:</label>
+                        <input type="date" id="filterDataInicio" onchange="filtrarPedidos()" style="min-width:130px;">
+                    </div>
+                    <div class="filter-group">
+                        <label>Até:</label>
+                        <input type="date" id="filterDataFim" onchange="filtrarPedidos()" style="min-width:130px;">
+                    </div>
+                    <div class="filter-group">
+                        <label>Vendedor:</label>
+                        <select id="filterVendedor" onchange="filtrarPedidos()" style="min-width:160px;">
                             <option value="">Todos</option>
-                            <option value="7">últimos 7 dias</option>
-                            <option value="30">últimos 30 dias</option>
-                            <option value="90">últimos 90 dias</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label>Exibir:</label>
                         <select id="filterLimit" onchange="carregarPedidos()">
                             <option value="25">25 por página</option>
-                            <option value="50">50 por página</option>
+                            <option value="50" selected>50 por página</option>
                             <option value="100">100 por página</option>
+                            <option value="500">500</option>
                         </select>
                     </div>
+                    <button onclick="limparFiltros()" title="Limpar Filtros" style="padding:8px 12px;border:1px solid #e5e7eb;background:white;border-radius:6px;cursor:pointer;color:#6b7280;font-size:13px;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                        <i class="fas fa-times-circle"></i> Limpar
+                    </button>
+                </div>
+
+                <!-- Bulk Actions Bar -->
+                <div class="bulk-actions-bar" id="bulkActionsBar">
+                    <span class="bulk-count"><span id="bulkCount">0</span> pedido(s) selecionado(s)</span>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('aprovado')"><i class="fas fa-check"></i> Aprovar</button>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('faturado')"><i class="fas fa-file-invoice"></i> Faturar</button>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('entregue')"><i class="fas fa-truck"></i> Entregue</button>
+                    <button class="bulk-btn danger" onclick="bulkChangeStatus('cancelado')"><i class="fas fa-ban"></i> Cancelar</button>
+                    <button class="bulk-btn" onclick="bulkExportar()"><i class="fas fa-download"></i> Exportar Seleção</button>
+                    <button class="bulk-close" onclick="limparSelecao()" title="Limpar seleção"><i class="fas fa-times"></i></button>
                 </div>
 
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>Lista de Pedidos</h3>
+                        <h3><i class="fas fa-clipboard-list" style="color:var(--primary-orange);margin-right:8px;"></i>Lista de Pedidos <span id="tableCountLabel" style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:8px;"></span></h3>
                         <div class="table-tabs">
-                            <button class="table-tab active" onclick="setTab(this, '')">Todos</button>
-                            <button class="table-tab" onclick="setTab(this, 'orcamento')">Orçamentos</button>
-                            <button class="table-tab" onclick="setTab(this, 'aprovado')">Aprovados</button>
-                            <button class="table-tab" onclick="setTab(this, 'faturado')">Faturados</button>
+                            <button class="table-tab active" onclick="setTab(this, '')">Todos <span class="tab-count" id="countAll">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'orcamento')">Orçamentos <span class="tab-count" id="countOrcamento">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'aprovado')">Aprovados <span class="tab-count" id="countAprovado">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'faturado')">Faturados <span class="tab-count" id="countFaturado">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'entregue')">Entregues <span class="tab-count" id="countEntregue">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'cancelado')">Cancelados <span class="tab-count" id="countCancelado">0</span></button>
                         </div>
                     </div>
                     <table class="pedidos-table">
                         <thead>
                             <tr>
-                                <th>Nº Pedido</th>
-                                <th>Cliente</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Valor</th>
-                                <th>Vendedor</th>
+                                <th style="width:36px;cursor:default;" onclick="event.stopPropagation()"><input type="checkbox" class="row-checkbox" id="checkAll" onchange="toggleSelectAll(this)"></th>
+                                <th onclick="sortColumn('numero')">Nº Pedido <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('cliente_nome')">Cliente <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('data_pedido')">Data <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('status')">Status <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('valor_total')">Valor <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('vendedor_nome')">Vendedor <i class="fas fa-sort sort-icon"></i></th>
                                 <th>Ações</th>
                             </tr>
                         </thead>
@@ -1608,7 +1712,10 @@
     </div>
 
     <script>
-        let todosPedidos = [], pedidosFiltrados = [], paginaAtual = 1, itensPorPagina = 25, tabAtiva = '';
+        let todosPedidos = [], pedidosFiltrados = [], paginaAtual = 1, itensPorPagina = 50, tabAtiva = '';
+        let selectedIds = new Set();
+        let sortState = { column: 'data_pedido', direction: 'desc' };
+        let usuarioInfo = { isAdmin: false, role: '', id: null };
 
         // Função para obter headers de autenticação (cookie-based)
         function getAuthHeaders() {
@@ -1680,9 +1787,33 @@
             const valorTotal = todosPedidos.reduce((sum, p) => sum + (parseFloat(p.valor_total) || 0), 0);
             document.getElementById('valorTotal').textContent = `R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
             document.getElementById('totalPedidos').textContent = total;
-            document.getElementById('pedidosPendentes').textContent = todosPedidos.filter(p => p.status === 'pendente' || p.status === 'orcamento').length;
-            document.getElementById('pedidosAprovados').textContent = todosPedidos.filter(p => p.status === 'aprovado').length;
-            document.getElementById('pedidosFaturados').textContent = todosPedidos.filter(p => p.status === 'faturado').length;
+            const pendentes = todosPedidos.filter(p => p.status === 'pendente' || p.status === 'orcamento').length;
+            const aprovados = todosPedidos.filter(p => p.status === 'aprovado').length;
+            const faturados = todosPedidos.filter(p => p.status === 'faturado').length;
+            const entregues = todosPedidos.filter(p => p.status === 'entregue').length;
+            const cancelados = todosPedidos.filter(p => p.status === 'cancelado').length;
+            document.getElementById('pedidosPendentes').textContent = pendentes;
+            document.getElementById('pedidosAprovados').textContent = aprovados;
+            document.getElementById('pedidosFaturados').textContent = faturados;
+            // Tab counts
+            const setCount = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            setCount('countAll', total);
+            setCount('countOrcamento', pendentes);
+            setCount('countAprovado', aprovados);
+            setCount('countFaturado', faturados);
+            setCount('countEntregue', entregues);
+            setCount('countCancelado', cancelados);
+            // Populate vendedor filter
+            const vendedorSelect = document.getElementById('filterVendedor');
+            if (vendedorSelect && vendedorSelect.options.length <= 1) {
+                const vendedores = [...new Set(todosPedidos.map(p => p.vendedor_nome).filter(Boolean))].sort();
+                vendedores.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    vendedorSelect.appendChild(opt);
+                });
+            }
         }
 
         function setTab(btn, status) {
@@ -1703,13 +1834,28 @@
         function filtrarPedidos() {
             const busca = document.getElementById('searchInput').value.toLowerCase();
             const statusFiltro = document.getElementById('filterStatus').value || tabAtiva;
+            const dataInicio = document.getElementById('filterDataInicio').value;
+            const dataFim = document.getElementById('filterDataFim').value;
+            const vendedorFiltro = document.getElementById('filterVendedor').value;
             itensPorPagina = parseInt(document.getElementById('filterLimit').value);
             paginaAtual = 1;
             pedidosFiltrados = todosPedidos.filter(p => {
-                const matchBusca = !busca || (p.numero && p.numero.toString().includes(busca)) || (p.cliente_nome && p.cliente_nome.toLowerCase().includes(busca));
+                const matchBusca = !busca || (p.numero && p.numero.toString().includes(busca)) || (p.cliente_nome && p.cliente_nome.toLowerCase().includes(busca)) || (p.vendedor_nome && p.vendedor_nome.toLowerCase().includes(busca));
                 const matchStatus = !statusFiltro || p.status === statusFiltro;
-                return matchBusca && matchStatus;
+                const matchVendedor = !vendedorFiltro || p.vendedor_nome === vendedorFiltro;
+                let matchData = true;
+                if (dataInicio || dataFim) {
+                    const dataPedido = p.data_pedido || p.created_at;
+                    if (dataPedido) {
+                        const d = new Date(dataPedido).toISOString().split('T')[0];
+                        if (dataInicio && d < dataInicio) matchData = false;
+                        if (dataFim && d > dataFim) matchData = false;
+                    }
+                }
+                return matchBusca && matchStatus && matchVendedor && matchData;
             });
+            // Apply sort
+            aplicarOrdenacao();
             renderizarTabela();
         }
 
@@ -1723,8 +1869,11 @@
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
             const pedidosPagina = pedidosFiltrados.slice(inicio, fim);
+            // Update count label
+            const countLabel = document.getElementById('tableCountLabel');
+            if (countLabel) countLabel.textContent = `(${pedidosFiltrados.length} resultado${pedidosFiltrados.length !== 1 ? 's' : ''})`;
             if (!pedidosPagina.length) {
-                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-file-alt"></i><h3>Nenhum pedido encontrado</h3><p>Tente alterar os filtros</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-file-alt"></i><h3>Nenhum pedido encontrado</h3><p>Tente alterar os filtros</p></div></td></tr>`;
                 document.getElementById('paginationContainer').style.display = 'none';
                 return;
             }
@@ -1733,6 +1882,7 @@
             const perms = window.ALUFORCE_PERMISSIONS || {};
 
             tbody.innerHTML = pedidosPagina.map(p => {
+                const isChecked = selectedIds.has(p.id) ? 'checked' : '';
                 // Verificar se o usuário pode editar este pedido específico
                 const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
 
@@ -1741,22 +1891,32 @@
                     ? `<button class="action-btn" title="Editar" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i></button>`
                     : `<button class="action-btn" title="Sem permissão para editar este pedido" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-edit"></i></button>`;
 
+                // Quick status change dropdown
+                const statusOptions = ['orcamento','aprovado','faturado','entregue','cancelado'];
+                const statusSelectHtml = podeEditar
+                    ? `<select class="quick-status-select" onchange="quickStatusChange(${p.id}, this.value)" title="Alterar status rapidamente">
+                        ${statusOptions.map(s => `<option value="${s}" ${p.status === s ? 'selected' : ''}>${getStatusLabel(s)}</option>`).join('')}
+                       </select>`
+                    : '';
+
                 return `
-                <tr>
+                <tr class="${isChecked ? 'selected-row' : ''}" style="${isChecked ? 'background:#f0f7ff;' : ''}">
+                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-checkbox" ${isChecked} onchange="toggleRowSelect(${p.id}, this)"></td>
                     <td><span class="pedido-número">#${p.numero || p.id}</span></td>
                     <td><span class="cliente-nome" title="${p.cliente_nome || ''}">${p.cliente_nome || 'Cliente não informado'}</span></td>
                     <td>${formatarData(p.data_pedido || p.created_at)}</td>
-                    <td><span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span></td>
+                    <td>${statusSelectHtml || `<span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span>`}</td>
                     <td class="valor-cell">${formatarValor(p.valor_total)}</td>
                     <td>${p.vendedor_nome || '-'}</td>
                     <td>
-                        <button class="action-btn" title="Ver" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" title="Ver Detalhes" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
                         ${btnEditar}
                         <button class="action-btn" title="Imprimir" onclick="imprimirPedido(${p.id})"><i class="fas fa-print"></i></button>
                     </td>
                 </tr>
             `}).join('');
             atualizarPaginacao(inicio, fim);
+            atualizarBulkBar();
         }
 
         function atualizarPaginacao(inicio, fim) {
@@ -1963,7 +2123,7 @@
                 <button class="sidebar-action-btn" onclick="imprimirPedido(${id})"><i class="fas fa-print"></i> Imprimir</button>
                 <button class="sidebar-action-btn" onclick="duplicarPedidoFromView(${id})"><i class="fas fa-copy"></i> Duplicar</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
-                <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/orcamento-pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
+                <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
                 <button class="sidebar-action-btn" onclick="verHistoricoPedido(${id})"><i class="fas fa-history"></i> Histórico</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
                 <button class="sidebar-action-btn" onclick="fecharModalVisualizar()" style="color:#6b7280;"><i class="fas fa-times"></i> Fechar</button>
@@ -3458,13 +3618,189 @@
         }
 
         function exportarPedidos() {
-            let csv = 'Número;Cliente;Data;Status;Valor;Vendedor';
-            pedidosFiltrados.forEach(p => { csv += `"${p.numero || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"`; });
+            const lista = selectedIds.size > 0 ? pedidosFiltrados.filter(p => selectedIds.has(p.id)) : pedidosFiltrados;
+            let csv = 'Número;Cliente;Data;Status;Valor;Vendedor\n';
+            lista.forEach(p => { csv += `"${p.numero || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"\n`; });
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `pedidos_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
+        }
+
+        // ============ SORTING ============
+        function sortColumn(column) {
+            if (sortState.column === column) {
+                sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState.column = column;
+                sortState.direction = column === 'data_pedido' || column === 'valor_total' ? 'desc' : 'asc';
+            }
+            // Update header visual
+            document.querySelectorAll('.pedidos-table th').forEach(th => th.classList.remove('sorted'));
+            const headers = document.querySelectorAll('.pedidos-table th');
+            const colMap = {1:'numero',2:'cliente_nome',3:'data_pedido',4:'status',5:'valor_total',6:'vendedor_nome'};
+            headers.forEach((th, idx) => {
+                if (colMap[idx] === column) {
+                    th.classList.add('sorted');
+                    const icon = th.querySelector('.sort-icon');
+                    if (icon) icon.className = `fas fa-sort-${sortState.direction === 'asc' ? 'up' : 'down'} sort-icon`;
+                }
+            });
+            aplicarOrdenacao();
+            renderizarTabela();
+        }
+
+        function aplicarOrdenacao() {
+            const { column, direction } = sortState;
+            pedidosFiltrados.sort((a, b) => {
+                let va = a[column], vb = b[column];
+                if (column === 'valor_total') {
+                    va = parseFloat(va) || 0; vb = parseFloat(vb) || 0;
+                } else if (column === 'data_pedido') {
+                    va = va ? new Date(va).getTime() : 0; vb = vb ? new Date(vb).getTime() : 0;
+                } else if (column === 'numero') {
+                    va = parseInt(va) || 0; vb = parseInt(vb) || 0;
+                } else {
+                    va = String(va || '').toLowerCase(); vb = String(vb || '').toLowerCase();
+                }
+                if (va < vb) return direction === 'asc' ? -1 : 1;
+                if (va > vb) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // ============ BULK SELECTION ============
+        function toggleSelectAll(el) {
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
+            const paginaIds = pedidosFiltrados.slice(inicio, fim).map(p => p.id);
+            if (el.checked) {
+                paginaIds.forEach(id => selectedIds.add(id));
+            } else {
+                paginaIds.forEach(id => selectedIds.delete(id));
+            }
+            renderizarTabela();
+        }
+
+        function toggleRowSelect(id, el) {
+            if (el.checked) selectedIds.add(id); else selectedIds.delete(id);
+            atualizarBulkBar();
+            // Update select-all checkbox state
+            const checkAll = document.getElementById('checkAll');
+            if (checkAll) {
+                const inicio = (paginaAtual - 1) * itensPorPagina;
+                const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
+                const paginaIds = pedidosFiltrados.slice(inicio, fim).map(p => p.id);
+                checkAll.checked = paginaIds.length > 0 && paginaIds.every(id => selectedIds.has(id));
+            }
+            // Highlight row
+            el.closest('tr').style.background = el.checked ? '#f0f7ff' : '';
+        }
+
+        function atualizarBulkBar() {
+            const bar = document.getElementById('bulkActionsBar');
+            const count = document.getElementById('bulkCount');
+            if (selectedIds.size > 0) {
+                bar.classList.add('visible');
+                count.textContent = selectedIds.size;
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        function limparSelecao() {
+            selectedIds.clear();
+            document.getElementById('checkAll').checked = false;
+            renderizarTabela();
+        }
+
+        async function bulkChangeStatus(novoStatus) {
+            if (selectedIds.size === 0) return;
+            const label = getStatusLabel(novoStatus);
+            const confirmado = await showConfirmModal({
+                type: novoStatus === 'cancelado' ? 'danger' : 'info',
+                title: `Alterar ${selectedIds.size} pedido(s)`,
+                message: `Alterar o status de <strong>${selectedIds.size}</strong> pedido(s) para <strong>${label}</strong>?`,
+                confirmText: 'Confirmar',
+                cancelText: 'Cancelar'
+            });
+            if (!confirmado) return;
+
+            let sucesso = 0, falha = 0;
+            for (const id of selectedIds) {
+                try {
+                    const res = await fetch(`/api/vendas/pedidos/${id}/status`, {
+                        credentials: 'include', method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: novoStatus })
+                    });
+                    if (res.ok) sucesso++; else falha++;
+                } catch { falha++; }
+            }
+            showToast(`${sucesso} pedido(s) atualizado(s)${falha ? `, ${falha} falha(s)` : ''}`, sucesso > 0 ? 'success' : 'error');
+            selectedIds.clear();
+            await carregarPedidos();
+        }
+
+        function bulkExportar() { exportarPedidos(); }
+
+        // ============ QUICK STATUS CHANGE ============
+        async function quickStatusChange(id, novoStatus) {
+            try {
+                const res = await fetch(`/api/vendas/pedidos/${id}/status`, {
+                    credentials: 'include', method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: novoStatus })
+                });
+                if (res.ok) {
+                    // Update local data
+                    const p = todosPedidos.find(p => p.id === id);
+                    if (p) p.status = novoStatus;
+                    atualizarEstatisticas();
+                    showToast(`Pedido #${id} → ${getStatusLabel(novoStatus)}`, 'success');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.message || 'Erro ao alterar status', 'error');
+                    renderizarTabela(); // Revert visual
+                }
+            } catch (e) {
+                showToast('Erro de conexão', 'error');
+                renderizarTabela();
+            }
+        }
+
+        // ============ FILTER HELPERS ============
+        function filtrarPorMetrica(status) {
+            // Highlight active metric card
+            document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+            if (status) {
+                const mapId = { orcamento: 'metric-pendentes', aprovado: 'metric-aprovados', faturado: 'metric-faturados' };
+                const el = document.getElementById(mapId[status]);
+                if (el) el.classList.add('active-filter');
+            }
+            document.getElementById('filterStatus').value = status;
+            tabAtiva = status;
+            // Sync tab buttons
+            document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.table-tab').forEach(t => {
+                const tabStatus = t.getAttribute('onclick')?.match(/setTab\(this,\s*'([^']*)'\)/)?.[1] ?? '';
+                if (tabStatus === status) t.classList.add('active');
+            });
+            filtrarPedidos();
+        }
+
+        function limparFiltros() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterDataInicio').value = '';
+            document.getElementById('filterDataFim').value = '';
+            document.getElementById('filterVendedor').value = '';
+            tabAtiva = '';
+            document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.table-tab').classList.add('active');
+            document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+            filtrarPedidos();
         }
 
         // Mapeamento de avatares por nome de usuário

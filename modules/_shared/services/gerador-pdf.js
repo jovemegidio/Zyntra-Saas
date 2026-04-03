@@ -2,7 +2,7 @@
  * SERVIÇO DE GERAÇÍO DE PDF
  * Gera PDFs para pedidos, orçamentos, relatórios e documentos diversos
  * 
- * @author Aluforce ERP
+ * @author Zyntra ERP
  * @version 1.0.0
  * @date 2025-12-19
  */
@@ -10,7 +10,7 @@
 class GeradorPDF {
     constructor(config = {}) {
         this.empresa = config.empresa || {
-            nome: 'ALUFORCE INDÚSTRIA',
+            nome: 'ZYNTRA ERP',
             cnpj: '00.000.000/0001-00',
             endereco: 'Rua Example, 123 - Centro',
             cidade: 'São Paulo - SP',

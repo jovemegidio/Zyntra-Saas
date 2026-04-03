@@ -197,10 +197,10 @@ module.exports = function createVendasRoutes(deps) {
     // PEDIDOS
     router.get('/pedidos', cacheMiddleware('vendas_pedidos', 60000), async (req, res, next) => {
         try {
-            const { period, page = 1, limit = 1000 } = req.query;
+            const { period, page = 1, limit = 1000, status } = req.query;
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
-            const rows = await repos.pedido.list({ period, page, limit, userId: user.id, isAdmin });
+            const rows = await repos.pedido.list({ period, page, limit, userId: user.id, isAdmin, status });
             res.json(rows);
         } catch (error) { next(error); }
     });

@@ -469,7 +469,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
                 margins: { top: 28, bottom: 28, left: 42, right: 42 },
                 autoFirstPage: true,
                 bufferPages: false,
-                info: { Title: nomeArquivo, Author: 'ALUFORCE', Creator: 'ALUFORCE ERP V.2', Producer: 'ALUFORCE', Subject: 'Proposta Comercial / Orcamento' }
+                info: { Title: nomeArquivo, Author: 'Zyntra', Creator: 'Zyntra ERP V.2', Producer: 'Zyntra', Subject: 'Proposta Comercial / Orcamento' }
             });
 
             res.setHeader('Content-Type', 'application/pdf');
@@ -872,7 +872,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.fontSize(4.5).fillColor('#5B6E82')
                .text(`${nomeArquivo}`, ML, fY + 17, { width: MW, align: 'center' });
             doc.fontSize(4.2).fillColor('#4A5D71')
-               .text('ALUFORCE - Industria e Comercio de Condutores  |  Sistema de Gestao Empresarial V.2  |  Documento sem valor fiscal', ML, fY + 25, { width: MW, align: 'center' });
+               .text('Zyntra ERP  |  Sistema de Gestão Empresarial V.2  |  Documento sem valor fiscal', ML, fY + 25, { width: MW, align: 'center' });
 
             doc.end();
             console.log('[PDF] Documento gerado: ' + nomeArquivo);
@@ -1539,7 +1539,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             doc.rect(0, 0, doc.page.width, 6).fill('#1e40af');
 
             // Logo e nome
-            doc.fontSize(22).font('Helvetica-Bold').fillColor('#1e293b').text('ALUFORCE', margin, 18);
+            doc.fontSize(22).font('Helvetica-Bold').fillColor('#1e293b').text('Zyntra', margin, 18);
             doc.fontSize(9).font('Helvetica').fillColor('#94a3b8').text('Sistema de Gestão Empresarial', margin, 44);
 
             // Data de geração no canto direito
@@ -1581,7 +1581,7 @@ module.exports = function createVendasExtendedRoutes(deps) {
             const y = doc.page.height - 30;
             doc.moveTo(margin, y - 8).lineTo(doc.page.width - margin, y - 8).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
             doc.fontSize(7).font('Helvetica').fillColor('#94a3b8')
-               .text('ALUFORCE - Relatório Confidencial', margin, y, { width: pageW / 2 })
+               .text('Zyntra - Relatório Confidencial', margin, y, { width: pageW / 2 })
                .text(`Página ${pageNum} de ${totalPages}`, margin, y, { align: 'right', width: pageW });
         }
 

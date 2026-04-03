@@ -1,7 +1,8 @@
 ﻿/**
- * ALUFORCE - Dashboard API Routes
- * Versão: 2026-01-18
+ * Zyntra - Dashboard API Routes
+ * Versão: 2026-04-02
  * Rotas para KPIs, Alertas e Métricas do Dashboard Principal
+ * AUDIT-FIX: authenticateToken aplicado no mount (routes/index.js)
  */
 
 const express = require('express');

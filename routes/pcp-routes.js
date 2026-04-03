@@ -1703,7 +1703,7 @@ module.exports = function createPCPRoutes(deps) {
                 platform: process.platform
             },
             application: {
-                name: 'ALUFORCE v2.0',
+                name: 'Zyntra v2.0',
                 version: (() => { try { return require('../package.json').version; } catch(e) { return '2.0.0'; } })(),
                 environment: process.env.NODE_ENV || 'development'
             },
@@ -1714,7 +1714,7 @@ module.exports = function createPCPRoutes(deps) {
         };
 
         res.set('Content-Type', 'text/plain');
-        res.send(`# ALUFORCE v2.0 Metrics
+        res.send(`# Zyntra v2.0 Metrics
     aluforce_uptime_seconds ${metrics.process.uptime}
     aluforce_memory_used_bytes ${metrics.process.memory.heapUsed}
     aluforce_memory_total_bytes ${metrics.process.memory.heapTotal}
@@ -4140,7 +4140,7 @@ module.exports = function createPCPRoutes(deps) {
         const csv = [];
 
         // Header da Ordem de Produção
-        csv.push(['ORDEM DE PRODUÇÁO ALUFORCE']);
+        csv.push(['ORDEM DE PRODUÇÃO ZYNTRA']);
         csv.push(['']);
         csv.push(['Dados da Ordem:']);
         csv.push(['Número do Orçamento:', dados.numero_orcamento || '']);
@@ -4496,7 +4496,7 @@ module.exports = function createPCPRoutes(deps) {
         // === CABEÇALHO ===
         worksheet.mergeCells('A1:K1');
         const tituloCell = worksheet.getCell('A1');
-        tituloCell.value = 'ORDEM DE PRODUÇÁO ALUFORCE';
+        tituloCell.value = 'ORDEM DE PRODUÇÃO ZYNTRA';
         tituloCell.font = { bold: true, size: 18, color: { argb: 'FFFFFFFF' } };
         tituloCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF0070C0' } };
         tituloCell.alignment = { horizontal: 'center', vertical: 'middle' };
@@ -8474,12 +8474,12 @@ tr:nth-child(even){background:#f8fafc}
 .footer{text-align:center;margin-top:20px;font-size:11px;color:#94a3b8}
 @media print{body{margin:0}h1{font-size:18px}.no-print{display:none}}
 </style></head><body>
-<h1>Catálogo de Produtos — ALUFORCE</h1>
+<h1>Catálogo de Produtos — Zyntra</h1>
 <p class="subtitle">Gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')} — ${produtos.length} produtos</p>
 <table><thead><tr><th>Código</th><th>Descrição</th><th>SKU</th><th>GTIN</th><th>Unidade</th><th>Estoque</th><th>Categoria</th><th>Custo Unit.</th></tr></thead>
 <tbody>${produtos.map(p => `<tr><td>${p.codigo || ''}</td><td>${p.nome || ''}</td><td>${p.sku || ''}</td><td>${p.gtin || ''}</td><td>${p.unidade_medida || ''}</td><td>${Number(p.estoque_atual || 0).toFixed(2)}</td><td>${p.categoria || ''}</td><td>R$ ${Number(p.custo_unitario || 0).toFixed(2)}</td></tr>`).join('')}
 </tbody></table>
-<p class="footer">ALUFORCE — Sistema PCP</p>
+<p class="footer">Zyntra — Sistema PCP</p>
 </body></html>`;
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -8512,12 +8512,12 @@ tr:nth-child(even){background:#f8fafc}
 .footer{text-align:center;margin-top:20px;font-size:11px;color:#94a3b8}
 @media print{body{margin:0}h1{font-size:18px}}
 </style></head><body>
-<h1>Catálogo de Materiais — ALUFORCE</h1>
+<h1>Catálogo de Materiais — Zyntra</h1>
 <p class="subtitle">Gerado em ${new Date().toLocaleDateString('pt-BR')} — ${materiais.length} materiais</p>
 <table><thead><tr><th>Código</th><th>Descrição</th><th>Unidade</th><th>Estoque</th><th>Preço Unit.</th><th>Fornecedor</th></tr></thead>
 <tbody>${materiais.map(m => `<tr><td>${m.codigo_material || ''}</td><td>${m.descricao || ''}</td><td>${m.unidade_medida || ''}</td><td>${Number(m.quantidade_estoque || 0).toFixed(2)}</td><td>R$ ${Number(m.preco_unitario || 0).toFixed(2)}</td><td>${m.fornecedor || ''}</td></tr>`).join('')}
 </tbody></table>
-<p class="footer">ALUFORCE — Sistema PCP</p>
+<p class="footer">Zyntra — Sistema PCP</p>
 </body></html>`;
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');

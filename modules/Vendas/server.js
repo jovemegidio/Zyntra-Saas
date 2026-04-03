@@ -6772,7 +6772,7 @@ const startServer = async () => {
             'https://aluforce.api.br', 'https://www.aluforce.api.br',
             'https://aluforce.ind.br', 'https://erp.aluforce.ind.br',
             'https://www.aluforce.ind.br',
-            'http://YOUR_VPS_IP:3000', 'http://YOUR_VPS_IP',
+            'http://31.97.64.102:3000', 'http://31.97.64.102',
             'http://tauri.localhost', 'https://tauri.localhost', 'tauri://localhost',
             process.env.CORS_ORIGIN
         ].filter(Boolean);

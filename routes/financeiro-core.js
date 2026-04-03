@@ -187,14 +187,8 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
             };
             permissoes = Object.assign({}, defaults, permissoes);
 
-            // Restrições específicas por usuário
-            const email = (user.email || userData?.email || '').toLowerCase();
-            if (email.includes('hellen')) {
-                permissoes.contas_receber = false;
-            }
-            if (email.includes('tatiane')) {
-                permissoes.contas_pagar = false;
-            }
+            // AUDIT-FIX: Restrições removidas — hardcoded email overrides eliminados
+            // Permissões agora vêm exclusivamente do campo permissoes_financeiro no DB
 
             res.json({
                 success: true,
