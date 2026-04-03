@@ -18,8 +18,8 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: 'noreply@aluforce.ind.br',
-        pass: 'noreplyalu'
+        user: process.env.SMTP_USER || 'noreply@aluforce.ind.br',
+        pass: process.env.SMTP_PASS || 'noreplyalu'
     },
     tls: { rejectUnauthorized: false }
 });

@@ -1656,15 +1656,21 @@ router.post('/verify-2fa', async (req, res) => {
         const deviceId = uuidv4();
         console.log(`[AUTH/2FA] ✅ 2FA verificado para ${user.email}, DeviceId: ${deviceId.substring(0, 8)}...`);
 
-        // Gerar JWT (mesmo processo do login normal)
-        const token = jwt.sign({
+        // Gerar PAR de tokens: access (15m) + refresh (7d) com rotação (igual login normal)
+        const tokenPair = await refreshTokenModule.generateTokenPair(
+            { id: user.id, username: user.email, nome: user.nome, role: user.role, empresa_id: user.empresa_id, area: user.areas },
+            pool,
+            deviceId
+        );
+        const accessToken = jwt.sign({
             id: user.id,
             nome: user.nome,
             email: user.email,
             role: user.role,
             setor: user.setor || null,
-            deviceId: deviceId
-        }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: '8h' });
+            deviceId: deviceId,
+            type: 'access'
+        }, JWT_SECRET, { algorithm: 'HS256', audience: 'aluforce', expiresIn: refreshTokenModule.ACCESS_TOKEN_EXPIRY });
 
         // Configurar cookie
         const cookieOptions = { httpOnly: true, path: '/' };
@@ -1674,10 +1680,14 @@ router.post('/verify-2fa', async (req, res) => {
         } else {
             cookieOptions.sameSite = 'lax';
         }
-        const finalCookieOptions = Object.assign({}, cookieOptions, { maxAge: 1000 * 60 * 60 * 8 });
-        res.cookie('authToken', token, finalCookieOptions);
+        // Access token cookie: 15 minutos
+        const accessCookieOptions = Object.assign({}, cookieOptions, { maxAge: 1000 * 60 * 15 });
+        res.cookie('authToken', accessToken, accessCookieOptions);
+        // Refresh token cookie: 7 dias
+        const refreshCookieOptions = Object.assign({}, cookieOptions, { maxAge: 1000 * 60 * 60 * 24 * 7 });
+        res.cookie('refreshToken', tokenPair.refreshToken, refreshCookieOptions);
 
-        console.log('[AUTH/2FA] ✅ Cookie authToken setado para userId:', user.id);
+        console.log('[AUTH/2FA] ✅ Cookies authToken (15m) + refreshToken (7d) setados para userId:', user.id);
 
         // 🔐 Salvar dispositivo confiável se solicitado
         let savedTrustedToken = null;
@@ -2039,15 +2049,17 @@ router.post('/auth/esqueci-senha', async (req, res) => {
         const all = upper + lower + digits + special;
         // Garante pelo menos 1 de cada tipo
         let novaSenha = '';
-        novaSenha += upper.charAt(Math.floor(Math.random() * upper.length));
-        novaSenha += lower.charAt(Math.floor(Math.random() * lower.length));
-        novaSenha += digits.charAt(Math.floor(Math.random() * digits.length));
-        novaSenha += special.charAt(Math.floor(Math.random() * special.length));
+        novaSenha += upper.charAt(crypto.randomInt(upper.length));
+        novaSenha += lower.charAt(crypto.randomInt(lower.length));
+        novaSenha += digits.charAt(crypto.randomInt(digits.length));
+        novaSenha += special.charAt(crypto.randomInt(special.length));
         for (let i = 4; i < 12; i++) {
-            novaSenha += all.charAt(Math.floor(Math.random() * all.length));
+            novaSenha += all.charAt(crypto.randomInt(all.length));
         }
-        // Embaralha a senha
-        novaSenha = novaSenha.split('').sort(() => Math.random() - 0.5).join('');
+        // Embaralha a senha (Fisher-Yates com crypto seguro)
+        const arr1 = novaSenha.split('');
+        for (let i = arr1.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [arr1[i], arr1[j]] = [arr1[j], arr1[i]]; }
+        novaSenha = arr1.join('');
 
         // Hash da nova senha
         const senhaHash = await bcrypt.hash(novaSenha, 12);
@@ -2134,14 +2146,16 @@ router.post('/auth/forgot-password', async (req, res) => {
         const special = '!@#$%&*';
         const all = upper + lower + digits + special;
         let novaSenha = '';
-        novaSenha += upper.charAt(Math.floor(Math.random() * upper.length));
-        novaSenha += lower.charAt(Math.floor(Math.random() * lower.length));
-        novaSenha += digits.charAt(Math.floor(Math.random() * digits.length));
-        novaSenha += special.charAt(Math.floor(Math.random() * special.length));
+        novaSenha += upper.charAt(crypto.randomInt(upper.length));
+        novaSenha += lower.charAt(crypto.randomInt(lower.length));
+        novaSenha += digits.charAt(crypto.randomInt(digits.length));
+        novaSenha += special.charAt(crypto.randomInt(special.length));
         for (let i = 4; i < 12; i++) {
-            novaSenha += all.charAt(Math.floor(Math.random() * all.length));
+            novaSenha += all.charAt(crypto.randomInt(all.length));
         }
-        novaSenha = novaSenha.split('').sort(() => Math.random() - 0.5).join('');
+        const arr2 = novaSenha.split('');
+        for (let i = arr2.length - 1; i > 0; i--) { const j = crypto.randomInt(i + 1); [arr2[i], arr2[j]] = [arr2[j], arr2[i]]; }
+        novaSenha = arr2.join('');
 
         const senhaHash = await bcrypt.hash(novaSenha, 12);
         await safeQuery('UPDATE usuarios SET senha_hash = ?, senha_temporaria = 1 WHERE id = ?', [senhaHash, user.id]);

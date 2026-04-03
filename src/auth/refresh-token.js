@@ -50,6 +50,7 @@ async function generateTokenPair(user, pool, deviceId = 'default') {
     
     // Access token - curta duração
     const accessToken = jwt.sign(accessPayload, JWT_SECRET, {
+        algorithm: 'HS256',
         expiresIn: ACCESS_TOKEN_EXPIRY,
         issuer: 'aluforce-erp'
     });
@@ -64,6 +65,7 @@ async function generateTokenPair(user, pool, deviceId = 'default') {
     };
     
     const refreshToken = jwt.sign(refreshPayload, REFRESH_SECRET, {
+        algorithm: 'HS256',
         expiresIn: REFRESH_TOKEN_EXPIRY,
         issuer: 'aluforce-erp'
     });
@@ -106,7 +108,7 @@ async function generateTokenPair(user, pool, deviceId = 'default') {
 async function refreshTokens(refreshToken, pool) {
     try {
         // Verificar e decodificar refresh token
-        const decoded = jwt.verify(refreshToken, REFRESH_SECRET);
+        const decoded = jwt.verify(refreshToken, REFRESH_SECRET, { algorithms: ['HS256'] });
         
         if (decoded.type !== 'refresh') {
             throw new Error('Token inválido: não é um refresh token');
@@ -255,7 +257,7 @@ function verifyAccessToken(req, res, next) {
     }
     
     try {
-        const decoded = jwt.verify(token, JWT_SECRET);
+        const decoded = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
         
         if (decoded.type !== 'access') {
             return res.status(401).json({ 

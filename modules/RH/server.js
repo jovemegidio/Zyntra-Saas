@@ -23,6 +23,7 @@ const {
 } = require('../../security-middleware');
 const { authenticateToken: authCentralToken, optionalAuth: authCentralOptional, requireModule } = require('../../middleware/auth-central');
 const { adminRoles, adminUsers, rolesGestao } = require('./config/roles');
+const { validatePasswordStrength } = require('../../utils/password-validator');
 
 // Middleware RBAC: restringe rotas administrativas a usuários com acesso ao módulo RH
 const requireRHAdmin = (req, res, next) => {
@@ -600,7 +601,7 @@ app.post(['/api/funcionarios', '/api/rh/funcionarios'],
   },
   // validação mínima
   body('email').isEmail().withMessage('Email inválido'),
-  body('senha').isLength({ min: 6 }).withMessage('Senha deve ter ao menos 6 caracteres'),
+  body('senha').isLength({ min: 10 }).withMessage('Senha deve ter ao menos 10 caracteres'),
   body('dependentes').optional().isInt({ min: 0 }).withMessage('Dependentes deve ser um número inteiro >= 0'),
   async (req, res) => {
     const errors = validationResult(req)
@@ -608,7 +609,11 @@ app.post(['/api/funcionarios', '/api/rh/funcionarios'],
 
     const dados = req.body || {}
     try {
-      const hashed = await bcrypt.hash(dados.senha, 10)
+      const pwCheck = validatePasswordStrength(dados.senha);
+      if (!pwCheck.valid) {
+        return res.status(400).json({ errors: pwCheck.errors.map(e => ({ msg: e })) });
+      }
+      const hashed = await bcrypt.hash(dados.senha, 12)
     const sql = `INSERT INTO funcionarios (
         email, senha, role, nome_completo, cargo, departamento, cpf, rg,
         telefone, estado_civil, data_nascimento, dependentes, foto_perfil_url, status,
@@ -3471,13 +3476,13 @@ app.put('/api/rh/folha/:id/fechar', authMiddleware, async (req, res) => {
       financeiroResp = await axios.post(financeiroUrl, payload, { headers });
     } catch (err) {
       logger.error('Erro ao integrar com Financeiro:', err?.response?.data || err.message);
-      return res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+      return res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro' });
     }
 
     res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
   } catch (error) {
     logger.error('Erro ao fechar folha:', error);
-    res.status(500).json({ error: 'Erro ao fechar folha', details: error.message });
+    res.status(500).json({ error: 'Erro ao fechar folha' });
   }
 });
 
@@ -3502,7 +3507,7 @@ app.get('/api/rh/folha-manual/competencia', authMiddleware, async (req, res) => 
     res.json(folhas);
   } catch (error) {
     logger.error('Erro ao buscar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao buscar folhas', details: error.message });
+    res.status(500).json({ error: 'Erro ao buscar folhas' });
   }
 });
 
@@ -3587,7 +3592,7 @@ app.post('/api/rh/folha-manual/salvar', authMiddleware, async (req, res) => {
   } catch (error) {
     await conn.rollback();
     logger.error('Erro ao salvar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao salvar folha', details: error.message });
+    res.status(500).json({ error: 'Erro ao salvar folha' });
   } finally {
     conn.release();
   }
@@ -3630,13 +3635,13 @@ app.put('/api/rh/folha-manual/:id/fechar', authMiddleware, async (req, res) => {
       financeiroResp = await axios.post(financeiroUrl, payload, { headers });
     } catch (err) {
       logger.error('Erro ao integrar folha manual com Financeiro:', err?.response?.data || err.message);
-      return res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro', details: err?.response?.data || err.message });
+      return res.status(500).json({ error: 'Erro ao criar conta a pagar no Financeiro' });
     }
 
     res.json({ success: true, folha_id: folhaId, valor_total: valorTotal, financeiro: financeiroResp.data });
   } catch (error) {
     logger.error('Erro ao fechar folha manual:', error);
-    res.status(500).json({ error: 'Erro ao fechar folha manual', details: error.message });
+    res.status(500).json({ error: 'Erro ao fechar folha manual' });
   }
 });
 

@@ -60,7 +60,8 @@ if (process.env.NODE_ENV === 'production') {
  * @returns {string} Token JWT
  */
 function signToken(payload, options = { expiresIn: '8h' }) {
-    return jwt.sign(payload, JWT_SECRET, options);
+    const finalOptions = Object.assign({ algorithm: 'HS256' }, options);
+    return jwt.sign(payload, JWT_SECRET, finalOptions);
 }
 
 /**
@@ -70,7 +71,7 @@ function signToken(payload, options = { expiresIn: '8h' }) {
  * @throws {Error} Se token inválido ou expirado
  */
 function verifyToken(token) {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
 }
 
 /**
