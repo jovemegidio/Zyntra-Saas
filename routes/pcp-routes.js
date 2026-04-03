@@ -1,4 +1,4 @@
-/**
+﻿/**
  * PCP ROUTES - Extracted from server.js (Lines 4022-14567)
  * Compras, Estoque, Producao, Apontamentos, Materiais, Ordens de Producao
  * LARGEST module: ~10,500 lines, ~204 routes
@@ -3596,8 +3596,10 @@ module.exports = function createPCPRoutes(deps) {
                 console.log('✅ Template processado');
                 console.log(`📊 Buffer gerado: ${fileBuffer.length} bytes`);
 
-                // Configurar headers para download
-                res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
+                // FIX BUG-17: Content-Disposition com RFC 5987 encoding para Unicode + prevenir header injection
+                const encodedFilename = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+                const asciiFilename = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+                res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
                 res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 res.setHeader('Content-Length', fileBuffer.length);
 

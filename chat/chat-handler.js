@@ -8,6 +8,43 @@
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const { getBobResponse } = require('./bob-knowledge');
+const OpenAI = require('openai');
+
+// ==================== OPENAI CLIENT (lazy init) ====================
+let _openaiClient = null;
+function getOpenAIClient() {
+    if (!_openaiClient && process.env.OPENAI_API_KEY) {
+        _openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    }
+    return _openaiClient;
+}
+
+/**
+ * Chama OpenAI GPT como fallback quando a base de conhecimento não tem resposta.
+ * Retorna null se não houver chave configurada ou em caso de erro.
+ */
+async function callOpenAI(question) {
+    const client = getOpenAIClient();
+    if (!client) return null;
+    try {
+        const completion = await client.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: 'Você é BOB, assistente de ERP rápido e objetivo da Aluforce/Zyntra. Responda sempre em português brasileiro, de forma direta e prática. Máximo 3 parágrafos curtos. Foque em operações de ERP: vendas, compras, estoque, financeiro, PCP, NF-e, RH. Se não souber, diga brevemente e sugira falar com um atendente.'
+                },
+                { role: 'user', content: question }
+            ],
+            max_tokens: 400,
+            temperature: 0.4
+        });
+        return completion.choices[0]?.message?.content?.trim() || null;
+    } catch (err) {
+        console.error('[BOB OpenAI] Erro ao chamar API:', err.message);
+        return null;
+    }
+}
 
 // ==================== STATE (runtime only) ====================
 // Real-time connections - these are ephemeral by nature (socket-based)
@@ -521,9 +558,15 @@ async function handleBobResponse(conversationId, userMsg, socket, io) {
         return;
     }
 
-    // Get BOB response
+    // Get BOB response — com fallback OpenAI para perguntas fora da base de conhecimento
     const bobResult = getBobResponse(userMsg.content || '');
-    const responseText = (typeof bobResult === 'object' && bobResult !== null && bobResult.answer) ? bobResult.answer : String(bobResult);
+    let responseText;
+    if (bobResult.type === 'no_answer') {
+        const aiResponse = await callOpenAI(userMsg.content || '');
+        responseText = aiResponse || bobResult.answer;
+    } else {
+        responseText = bobResult.answer;
+    }
 
     // Simulate typing
     socket.emit('typing:update', { conversationId, isTyping: true, userName: 'BOB' });
@@ -594,7 +637,13 @@ async function handleBobAudioResponse(conversationId, audioMsg, socket, io) {
     }
 
     const bobResult2 = getBobResponse(context);
-    const responseText = (typeof bobResult2 === 'object' && bobResult2 !== null && bobResult2.answer) ? bobResult2.answer : String(bobResult2);
+    let responseText;
+    if (bobResult2.type === 'no_answer') {
+        const aiResponse = await callOpenAI(context);
+        responseText = aiResponse || bobResult2.answer;
+    } else {
+        responseText = (typeof bobResult2 === 'object' && bobResult2 !== null && bobResult2.answer) ? bobResult2.answer : String(bobResult2);
+    }
 
     socket.emit('typing:update', { conversationId, isTyping: true, userName: 'BOB' });
 

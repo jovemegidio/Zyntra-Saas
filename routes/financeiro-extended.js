@@ -73,40 +73,13 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 });
             }
 
-            // Verificar permissões específicas do usuário baseado no nome/apelido
-            const userName = (userData?.apelido || userData?.nome || user.nome || '').toLowerCase().split(' ')[0];
+            // FIX BUG-15: Permissões baseadas em role/cargo do banco (não por nome de usuário)
+            // Roles com acesso ao financeiro
+            const rolesFinanceiroFull = ['financeiro', 'contabilidade', 'contador', 'gerente', 'gerente_financeiro', 'supervisor', 'diretor'];
+            const userRole = (userData?.role || user.role || '').toString().toLowerCase();
+            const userCargo = (userData?.cargo || '').toString().toLowerCase();
 
-            // Permissões específicas por usuário
-            const permissoesUsuarios = {
-                'hellen': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'helen': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'junior': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true },
-                'eldir': { contas_pagar: true, contas_receber: true, fluxo_caixa: true, bancos: true, relatorios: true }
-            };
-
-            // Verificar se usuário tem permissões específicas
-            if (permissoesUsuarios[userName]) {
-                const perms = permissoesUsuarios[userName];
-                return res.json({
-                    success: true,
-                    permissoes: {
-                        acesso: 'parcial',
-                        contas_receber: perms.contas_receber,
-                        contas_pagar: perms.contas_pagar,
-                        fluxo_caixa: perms.fluxo_caixa,
-                        bancos: perms.bancos,
-                        relatorios: perms.relatorios,
-                        visualizar: true,
-                        criar: true,
-                        editar: true,
-                        excluir: false
-                    }
-                });
-            }
-
-            // Usuários com role financeiro têm acesso
-            const roleFinanceiro = ['financeiro', 'contabilidade', 'contador'];
-            if (userData?.role && roleFinanceiro.includes(userData.role.toLowerCase())) {
+            if (rolesFinanceiroFull.includes(userRole) || rolesFinanceiroFull.includes(userCargo)) {
                 return res.json({
                     success: true,
                     permissoes: {
@@ -119,9 +92,37 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                         visualizar: true,
                         criar: true,
                         editar: true,
-                        excluir: false
+                        excluir: userRole === 'gerente' || userRole === 'diretor' || userRole === 'gerente_financeiro'
                     }
                 });
+            }
+
+            // Verificar permissões específicas do banco (tabela permissoes_usuario se existir)
+            try {
+                const [permRows] = await pool.query(
+                    'SELECT * FROM permissoes_usuario WHERE usuario_id = ? AND modulo = ? LIMIT 1',
+                    [user.id, 'financeiro']
+                );
+                if (permRows.length > 0) {
+                    const perm = permRows[0];
+                    return res.json({
+                        success: true,
+                        permissoes: {
+                            acesso: 'parcial',
+                            contas_receber: !!perm.contas_receber,
+                            contas_pagar: !!perm.contas_pagar,
+                            fluxo_caixa: !!perm.fluxo_caixa,
+                            bancos: !!perm.bancos,
+                            relatorios: !!perm.relatorios,
+                            visualizar: !!perm.visualizar,
+                            criar: !!perm.criar,
+                            editar: !!perm.editar,
+                            excluir: !!perm.excluir
+                        }
+                    });
+                }
+            } catch (e) {
+                // Tabela permissoes_usuario pode não existir ainda — seguir para fallback
             }
 
             // Usuário sem permissão específica - sem acesso ao financeiro
@@ -398,8 +399,8 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
             // AUDIT-FIX ARCH-002: Removed duplicate CREATE TABLE (already in GET route with FK)
 
-            // Verificar se o id corresponde a um banco existente para a FK
-            const [bancoCheck] = await pool.query('SELECT id FROM bancos WHERE id = ?', [id]);
+            // FIX BUG-11: Usar contas_bancarias em vez de bancos (tabela consolidada)
+            const [bancoCheck] = await pool.query('SELECT id FROM contas_bancarias WHERE id = ?', [id]);
             const validBancoId = bancoCheck.length > 0 ? id : null;
 
             // Inserir movimentação
@@ -454,12 +455,12 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 return res.status(400).json({ error: 'Data inválida. Use formato YYYY-MM-DD' });
             }
 
-            // Buscar saldo atual do banco COM LOCK para evitar race condition
-            const [banco] = await connection.query('SELECT saldo_atual FROM bancos WHERE id = ? FOR UPDATE', [banco_id]);
+            // FIX BUG-11: Usar contas_bancarias em vez de bancos (tabela consolidada)
+            const [banco] = await connection.query('SELECT COALESCE(saldo_atual, saldo, 0) as saldo_atual FROM contas_bancarias WHERE id = ? FOR UPDATE', [banco_id]);
             if (!banco || banco.length === 0) {
                 await connection.rollback();
                 connection.release();
-                return res.status(404).json({ error: 'Banco não encontrado' });
+                return res.status(404).json({ error: 'Conta bancária não encontrada' });
             }
 
             const saldoAtual = parseFloat(banco[0].saldo_atual) || 0;
@@ -474,8 +475,8 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                 [banco_id, data || new Date().toISOString().split('T')[0], tipo, valorSanitizado, novoSaldo, descricao, categoria || null]
             );
 
-            // Atualizar saldo do banco
-            await connection.query('UPDATE bancos SET saldo_atual = ? WHERE id = ?', [novoSaldo, banco_id]);
+            // FIX BUG-11: Atualizar saldo em contas_bancarias (não na tabela bancos legada)
+            await connection.query('UPDATE contas_bancarias SET saldo_atual = ? WHERE id = ?', [novoSaldo, banco_id]);
 
             await connection.commit();
             res.json({ success: true, message: 'Movimentação registrada com sucesso', novo_saldo: novoSaldo });
@@ -1026,7 +1027,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                     importados++;
                 } catch (err) {
                     console.error(`[IMPORTAR] Erro linha ${i + 2}:`, err.message);
-                    erros.push({ linha: i + 2, erro: err.message });
+                    erros.push({ linha: i + 2, erro: 'Erro ao processar dados da linha' });
                 }
             }
 
@@ -1212,7 +1213,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                     importados++;
                 } catch (err) {
                     console.error(`[IMPORTAR] Erro linha ${i + 2}:`, err.message);
-                    erros.push({ linha: i + 2, erro: err.message });
+                    erros.push({ linha: i + 2, erro: 'Erro ao processar dados da linha' });
                 }
             }
 
@@ -1282,7 +1283,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
                     importados++;
                 } catch (err) {
-                    erros.push({ linha: i + 2, erro: err.message });
+                    erros.push({ linha: i + 2, erro: 'Erro ao processar dados da linha' });
                 }
             }
 
@@ -1321,6 +1322,10 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
             connection = await pool.getConnection();
             await connection.beginTransaction();
 
+            // AUDIT-FIX S7.6: Pré-carregar bancos para evitar N+1 query no loop
+            const [allBancos] = await connection.query('SELECT id, nome FROM contas_bancarias');
+            const bancosMap = new Map(allBancos.map(b => [b.nome.toLowerCase(), b.id]));
+
             let importados = 0;
             let erros = [];
 
@@ -1338,11 +1343,13 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
                         continue;
                     }
 
-                    // Buscar banco_id pelo nome se fornecido
+                    // Buscar banco_id pelo nome se fornecido (AUDIT-FIX S7.6: lookup em memória)
                     let banco_id = null;
                     if (row.conta_bancaria) {
-                        const [bancos] = await connection.query('SELECT id FROM contas_bancarias WHERE nome LIKE ? LIMIT 1', [`%${row.conta_bancaria}%`]);
-                        if (bancos.length > 0) banco_id = bancos[0].id;
+                        const searchTerm = row.conta_bancaria.toLowerCase();
+                        for (const [nome, id] of bancosMap) {
+                            if (nome.includes(searchTerm) || searchTerm.includes(nome)) { banco_id = id; break; }
+                        }
                     }
 
                     const tipo = row.tipo.toLowerCase().includes('entrada') ? 'entrada' :
@@ -1368,7 +1375,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
                     importados++;
                 } catch (err) {
-                    erros.push({ linha: i + 2, erro: err.message });
+                    erros.push({ linha: i + 2, erro: 'Erro ao processar dados da linha' });
                 }
             }
 
@@ -1444,7 +1451,7 @@ module.exports = function createFinanceiroExtendedRoutes(deps) {
 
                     importados++;
                 } catch (err) {
-                    erros.push({ linha: i + 2, erro: err.message });
+                    erros.push({ linha: i + 2, erro: 'Erro ao processar dados da linha' });
                 }
             }
 
