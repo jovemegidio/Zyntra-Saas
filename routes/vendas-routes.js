@@ -393,8 +393,8 @@ module.exports = function createVendasRoutes(deps) {
                 valorTotal = sanitizeNum(valor) || 0;
             }
 
-            // Gerar numero_pedido sequencial
-            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos');
+            // Gerar numero_pedido sequencial — AUDIT-FIX BUG-02: FOR UPDATE lock para evitar duplicata
+            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos FOR UPDATE');
             const numeroPedido = npRow.next_num || 1;
 
             const [result] = await connection.query(`
@@ -535,7 +535,10 @@ module.exports = function createVendasRoutes(deps) {
             }
             if (valor !== undefined && sanitizeNum(valor) !== null) { sets.push('valor = ?'); params.push(sanitizeNum(valor)); }
             if (obs !== null) { sets.push('descricao = ?'); params.push(obs); sets.push('observacao = ?'); params.push(obs); }
-            if (status !== undefined && sanitize(status)) { sets.push('status = ?'); params.push(sanitize(status)); }
+            // AUDIT-FIX BUG-03: Block status changes via PUT — must use PUT /pedidos/:id/status (state machine)
+            if (status !== undefined && sanitize(status)) {
+                return res.status(400).json({ message: 'Alteração de status não permitida via PUT. Use PUT /pedidos/:id/status para garantir validação de transição.' });
+            }
             if (condicao_pagamento !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicao_pagamento)); }
             if (cenario_fiscal !== undefined) { sets.push('cenario_fiscal = ?'); params.push(sanitize(cenario_fiscal)); }
             if (transportadora_nome !== undefined || transportadora !== undefined) {
@@ -1211,13 +1214,13 @@ module.exports = function createVendasRoutes(deps) {
             if (!codigoMaterial || quantidade <= 0) continue;
 
             try {
-                // Buscar produto no estoque
+                // Buscar produto no estoque — AUDIT-FIX BUG-01: Remover LIKE wildcard para evitar match errado
                 const [produtos] = await connection.query(`
                     SELECT id, codigo, descricao, estoque_atual, unidade_medida
                     FROM produtos
-                    WHERE codigo = ? OR sku = ? OR LOWER(descricao) LIKE LOWER(?)
+                    WHERE codigo = ? OR sku = ?
                     LIMIT 1
-                `, [codigoMaterial, codigoMaterial, `%${codigoMaterial}%`]);
+                `, [codigoMaterial, codigoMaterial]);
 
                 if (produtos.length === 0) {
                     console.log(`[ESTOQUE_AUTO] Produto não encontrado: ${codigoMaterial}`);
@@ -1226,7 +1229,11 @@ module.exports = function createVendasRoutes(deps) {
 
                 const produto = produtos[0];
                 const estoqueAnterior = parseFloat(produto.estoque_atual || 0);
-                const novoEstoque = Math.max(0, estoqueAnterior - quantidade);
+                // AUDIT-FIX BUG-05: Log warning when stock goes negative instead of silently clamping
+                const novoEstoque = estoqueAnterior - quantidade;
+                if (novoEstoque < 0) {
+                    console.warn(`[ESTOQUE_AUTO] ⚠️ ALERTA: Produto ${produto.codigo} ficará com estoque negativo (${estoqueAnterior} - ${quantidade} = ${novoEstoque}). Pedido #${pedidoId}`);
+                }
 
                 // Atualizar estoque do produto
                 await connection.query(`
@@ -1423,9 +1430,9 @@ module.exports = function createVendasRoutes(deps) {
                         'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
                     );
                     if (opExistente.length === 0) {
-                        // Buscar itens do pedido para nome do produto
+                        // BUG-10 FIX: Buscar TODOS os itens do pedido (não só o primeiro)
                         const [itensOP] = await connection.query(
-                            'SELECT codigo, descricao, quantidade, unidade FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC LIMIT 1', [id]
+                            'SELECT codigo, descricao, quantidade, unidade FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC', [id]
                         );
                         // Gerar código sequencial da OP (com FOR UPDATE para evitar race condition)
                         const [ultimaOrdem] = await connection.query(`
@@ -1443,11 +1450,26 @@ module.exports = function createVendasRoutes(deps) {
                         const codigoOP = `OP N° ${ano}/${String(proximoNumero).padStart(5, '0')}`;
 
                         const pedidoData = pedidoAtual[0];
-                        const descProduto = itensOP.length > 0
-                            ? `${itensOP[0].descricao}${itensOP[0].codigo ? ' - ' + itensOP[0].codigo : ''}`
-                            : `Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`;
-                        const qtdOP = itensOP.length > 0 ? itensOP[0].quantidade : 1;
-                        const undOP = itensOP.length > 0 ? itensOP[0].unidade : 'UN';
+                        let descProduto, qtdOP, undOP, obsItens;
+                        if (itensOP.length > 1) {
+                            // Múltiplos itens: listar todos na descrição e observações
+                            descProduto = itensOP.map(i => `${i.descricao}${i.codigo ? ' (' + i.codigo + ')' : ''}`).join(', ');
+                            if (descProduto.length > 250) descProduto = descProduto.substring(0, 247) + '...';
+                            qtdOP = itensOP.reduce((sum, i) => sum + (parseFloat(i.quantidade) || 0), 0);
+                            undOP = itensOP[0].unidade || 'UN';
+                            obsItens = `Auto-gerada a partir do Pedido #${id} | ${itensOP.length} itens: ` +
+                                itensOP.map(i => `${i.descricao} x${i.quantidade} ${i.unidade || 'UN'}`).join('; ');
+                        } else if (itensOP.length === 1) {
+                            descProduto = `${itensOP[0].descricao}${itensOP[0].codigo ? ' - ' + itensOP[0].codigo : ''}`;
+                            qtdOP = itensOP[0].quantidade;
+                            undOP = itensOP[0].unidade || 'UN';
+                            obsItens = `Auto-gerada a partir do Pedido #${id}`;
+                        } else {
+                            descProduto = `Pedido #${id} - ${pedidoData.cliente_nome || 'Cliente'}`;
+                            qtdOP = 1;
+                            undOP = 'UN';
+                            obsItens = `Auto-gerada a partir do Pedido #${id}`;
+                        }
 
                         const [opResult] = await connection.query(`
                             INSERT INTO ordens_producao (
@@ -1455,7 +1477,7 @@ module.exports = function createVendasRoutes(deps) {
                                 status, prioridade, data_prevista, responsavel, observacoes,
                                 progresso, quantidade_produzida, pedido_id, created_at, updated_at
                             ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?, NOW(), NOW())
-                        `, [codigoOP, descProduto, qtdOP, undOP, `Auto-gerada a partir do Pedido #${id}`, id]);
+                        `, [codigoOP, descProduto, qtdOP, undOP, obsItens, id]);
 
                         // Marcar pedido com produção iniciada
                         await connection.query('UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [id]);
@@ -1481,6 +1503,14 @@ module.exports = function createVendasRoutes(deps) {
             if (baixar_estoque && ['faturar', 'faturado'].includes(status) &&
                 !['faturar', 'faturado'].includes(statusAtual)) {
                 try {
+                    // AUDIT-FIX: Verificar se já existem movimentações de saída para evitar duplicação
+                    const [movExistentes] = await connection.query(
+                        "SELECT COUNT(*) as count FROM estoque_movimentacoes WHERE documento_tipo = 'pedido' AND documento_id = ? AND tipo_movimento = 'saida'",
+                        [id]
+                    );
+                    if (movExistentes[0]?.count > 0) {
+                        console.log(`[ESTOQUE_AUTO] Estoque já baixado anteriormente para pedido #${id} — pulando`);
+                    } else {
                     // Buscar itens do pedido
                     const [itens] = await connection.query(`
                         SELECT codigo, descricao, quantidade, unidade, preco_unitario
@@ -1492,6 +1522,7 @@ module.exports = function createVendasRoutes(deps) {
                         console.log(`[ESTOQUE_AUTO] Baixando estoque para pedido #${id} (${itens.length} itens)`);
                         movimentacoesEstoque = await baixarEstoqueAutomatico(connection, id, itens, user?.id);
                     }
+                    } // fecha else (movExistentes check)
                 } catch (estoqueError) {
                     console.error('[ESTOQUE_AUTO] Erro (não crítico):', estoqueError.message);
                     // Não falha a operação principal se a baixa de estoque falhar
@@ -3580,6 +3611,12 @@ module.exports = function createVendasRoutes(deps) {
             const { gerarNFe = true } = req.body;
             const user = req.user || {};
 
+            // AUDIT-FIX BUG-04: Verificar permissão de faturamento antes de processar
+            if (!faturamentoShared.canFaturar(user)) {
+                connection.release();
+                return res.status(403).json({ message: 'Você não tem permissão para faturar pedidos.', code: 'FATURAMENTO_DENIED' });
+            }
+
             // TRANSAÇÃO ATÔMICA — tudo dentro da transaction com FOR UPDATE para evitar race condition
             await connection.beginTransaction();
 
@@ -3679,12 +3716,21 @@ module.exports = function createVendasRoutes(deps) {
                     ['faturado', novaNf, novaNf, nfeData?.chave || null, id]
                 );
 
-                // 4c. Baixar estoque automaticamente
+                // 4c. Baixar estoque automaticamente — AUDIT-FIX: Verificar se já foi baixado pelo endpoint de status
                 let movimentacoesEstoque = [];
                 try {
-                    if (itensRows.length > 0) {
+                    // Checar se já existem movimentações de saída para este pedido (evita duplicação)
+                    const [movExistentes] = await connection.query(
+                        "SELECT COUNT(*) as count FROM estoque_movimentacoes WHERE documento_tipo = 'pedido' AND documento_id = ? AND tipo_movimento = 'saida'",
+                        [id]
+                    );
+                    const jaTemBaixa = movExistentes[0]?.count > 0;
+
+                    if (itensRows.length > 0 && !jaTemBaixa) {
                         movimentacoesEstoque = await baixarEstoqueAutomatico(connection, id, itensRows, user?.id);
                         console.log(`[FATURAR] Estoque baixado: ${movimentacoesEstoque.length} item(s) para pedido #${id}`);
+                    } else if (jaTemBaixa) {
+                        console.log(`[FATURAR] Estoque já baixado anteriormente para pedido #${id} — pulando`);
                     }
                 } catch (estoqueError) {
                     console.error('[FATURAR] Erro ao baixar estoque (não crítico):', estoqueError.message);
@@ -3792,6 +3838,13 @@ module.exports = function createVendasRoutes(deps) {
         // FIX-2026-02-24: gerarNFe=true, faturamento por item, numeração unificada, validação estoque, CFOP inteligente
         const connection = await pool.getConnection();
         try {
+            // AUDIT-FIX BUG-06: Verificar permissão de faturamento
+            const user = req.user || {};
+            if (!faturamentoShared.canFaturar(user)) {
+                connection.release();
+                return res.status(403).json({ success: false, message: 'Você não tem permissão para faturar pedidos.', code: 'FATURAMENTO_DENIED' });
+            }
+
             await connection.beginTransaction();
             await ensureFaturamentoParcialTables();
             const { id } = req.params;
@@ -3804,7 +3857,6 @@ module.exports = function createVendasRoutes(deps) {
                 observacoes = '',
                 itens_faturar = null
             } = req.body;
-            const user = req.user || {};
 
             // Lock do pedido para evitar faturamento concorrente
             const [pedidoRows] = await connection.query('SELECT p.*, c.estado as cliente_uf, e.estado as empresa_uf FROM pedidos p LEFT JOIN clientes c ON p.cliente_id = c.id LEFT JOIN empresas e ON p.empresa_id = e.id WHERE p.id = ? FOR UPDATE', [id]);
@@ -3943,11 +3995,18 @@ module.exports = function createVendasRoutes(deps) {
         // FIX-2026-02-24: Rollback estoque, numeração unificada, sync estoque table, CFOP inteligente
         const connection = await pool.getConnection();
         try {
-            await connection.beginTransaction();
-            await ensureFaturamentoParcialTables();
             const { id } = req.params;
             const { cfop: cfopManual, gerarNFe = true, gerarFinanceiro = true, baixarEstoque = true, observacoes = '' } = req.body;
             const user = req.user || {};
+
+            // AUDIT-FIX BUG-07: Verificar permissão de faturamento
+            if (!faturamentoShared.canFaturar(user)) {
+                connection.release();
+                return res.status(403).json({ success: false, message: 'Você não tem permissão para operações de remessa.', code: 'FATURAMENTO_DENIED' });
+            }
+
+            await connection.beginTransaction();
+            await ensureFaturamentoParcialTables();
 
             // Lock do pedido com UF para CFOP inteligente
             const [pedidoRows] = await connection.query('SELECT p.*, c.estado as cliente_uf, e.estado as empresa_uf FROM pedidos p LEFT JOIN clientes c ON p.cliente_id = c.id LEFT JOIN empresas e ON p.empresa_id = e.id WHERE p.id = ? FOR UPDATE', [id]);

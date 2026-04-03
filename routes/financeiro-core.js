@@ -453,30 +453,42 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
     // ============================================================
     // CONTAS A PAGAR — AVANÇADO (pagar, vencidas, vencendo, stats, lote)
     // ============================================================
+    // BUG-11 FIX: Wrapped in transaction (UPDATE + movimentacao must be atomic)
     router.post('/contas-pagar/:id/pagar', checkFinanceiroPermission('contas_pagar'), async (req, res, next) => {
         // Guard: pular para rota de pagamento em lote
         if (req.params.id === 'lote') return next('route');
+        let connection;
         try {
             const { id } = req.params;
             const { valor_pago, data_pagamento, banco_id, forma_pagamento, observacoes } = req.body;
-            const [conta] = await pool.query('SELECT * FROM contas_pagar WHERE id = ?', [id]);
-            if (!conta || conta.length === 0) return res.status(404).json({ message: 'Conta não encontrada' });
+            connection = await pool.getConnection();
+            await connection.beginTransaction();
+            const [conta] = await connection.query('SELECT * FROM contas_pagar WHERE id = ? FOR UPDATE', [id]);
+            if (!conta || conta.length === 0) {
+                await connection.rollback();
+                connection.release();
+                return res.status(404).json({ message: 'Conta não encontrada' });
+            }
             const valorTotal = conta[0].valor + (conta[0].valor_juros || 0) + (conta[0].valor_multa || 0) - (conta[0].valor_desconto || 0);
             const status = valor_pago >= valorTotal ? 'pago' : 'pendente';
-            await pool.query(
+            await connection.query(
                 `UPDATE contas_pagar SET status = ?, valor_pago = ?, data_pagamento = ?, banco_id = ?, forma_pagamento = ?, observacoes = ? WHERE id = ?`,
                 [status, valor_pago, data_pagamento || new Date().toISOString().split('T')[0], banco_id, forma_pagamento, observacoes, id]
             );
             if (banco_id && status === 'pago') {
-                await pool.query(
+                await connection.query(
                     `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, cliente_fornecedor, data, observacoes) VALUES (?, 'saida', ?, ?, ?, ?)`,
                     [banco_id, valor_pago, conta[0].descricao || 'Pagamento conta a pagar', data_pagamento || new Date().toISOString().split('T')[0], observacoes || '']
                 );
             }
+            await connection.commit();
             res.json({ success: true, message: 'Pagamento registrado com sucesso' });
         } catch (err) {
+            if (connection) try { await connection.rollback(); } catch (_) {}
             console.error('[FINANCEIRO] Erro ao marcar como pago:', err);
             res.status(500).json({ message: 'Erro ao registrar pagamento' });
+        } finally {
+            if (connection) connection.release();
         }
     });
 
@@ -557,27 +569,39 @@ module.exports = function createFinanceiroCoreRoutes(deps) {
     // ============================================================
     // CONTAS A RECEBER — AVANÇADO
     // ============================================================
+    // BUG-12 FIX: Wrapped in transaction (UPDATE + movimentacao must be atomic)
     router.post('/contas-receber/:id/receber', checkFinanceiroPermission('contas_receber'), async (req, res) => {
+        let connection;
         try {
             const { id } = req.params;
             const { valor_recebido, data_recebimento, banco_id, forma_recebimento, observacoes } = req.body;
-            const [conta] = await pool.query('SELECT * FROM contas_receber WHERE id = ?', [id]);
-            if (!conta || conta.length === 0) return res.status(404).json({ message: 'Conta não encontrada' });
+            connection = await pool.getConnection();
+            await connection.beginTransaction();
+            const [conta] = await connection.query('SELECT * FROM contas_receber WHERE id = ? FOR UPDATE', [id]);
+            if (!conta || conta.length === 0) {
+                await connection.rollback();
+                connection.release();
+                return res.status(404).json({ message: 'Conta não encontrada' });
+            }
             const status = valor_recebido >= conta[0].valor ? 'recebido' : 'parcial';
-            await pool.query(
+            await connection.query(
                 `UPDATE contas_receber SET status = ?, valor_recebido = ?, data_recebimento = ?, banco_id = ?, forma_recebimento = ?, observacoes = ? WHERE id = ?`,
                 [status, valor_recebido, data_recebimento || new Date().toISOString().split('T')[0], banco_id, forma_recebimento, observacoes, id]
             );
             if (banco_id) {
-                await pool.query(
+                await connection.query(
                     `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, cliente_fornecedor, data, observacoes) VALUES (?, 'entrada', ?, ?, ?, ?)`,
                     [banco_id, valor_recebido, conta[0].descricao || 'Recebimento conta a receber', data_recebimento || new Date().toISOString().split('T')[0], observacoes || '']
                 );
             }
+            await connection.commit();
             res.json({ success: true, message: 'Recebimento registrado com sucesso' });
         } catch (err) {
+            if (connection) try { await connection.rollback(); } catch (_) {}
             console.error('[FINANCEIRO] Erro:', err);
             res.status(500).json({ message: 'Erro ao registrar recebimento' });
+        } finally {
+            if (connection) connection.release();
         }
     });
 

@@ -142,8 +142,8 @@ class FaturamentoSharedService {
         const serieNFe = serie || config.serie_padrao;
 
         // Lock global para evitar race condition — verifica TODAS as fontes
-        // Usa colunas reais: pedidos.nf, pedidos.numero_nf
-        let maxNfe = 0, maxNf = 0, maxNumeroNf = 0;
+        // Usa colunas reais: pedidos.nf, pedidos.numero_nf, nfes.numero
+        let maxNfe = 0, maxNf = 0, maxNumeroNf = 0, maxNfeTable = 0;
         try {
             const [nfRows] = await connection.query(
                 'SELECT MAX(CAST(nf AS UNSIGNED)) as max_num FROM pedidos WHERE nf IS NOT NULL AND nf REGEXP "^[0-9]+$" FOR UPDATE'
@@ -156,8 +156,15 @@ class FaturamentoSharedService {
             );
             maxNumeroNf = numNfRows[0]?.max_num || 0;
         } catch(e) { console.warn('[FATURAMENTO-SHARED] Coluna numero_nf não encontrada:', e.message); }
+        // AUDIT-FIX BUG-09: Verificar tabela nfes separada para evitar colisão de numeração
+        try {
+            const [nfeRows] = await connection.query(
+                'SELECT MAX(CAST(numero AS UNSIGNED)) as max_num FROM nfes WHERE numero IS NOT NULL AND numero REGEXP "^[0-9]+$" FOR UPDATE'
+            );
+            maxNfeTable = nfeRows[0]?.max_num || 0;
+        } catch(e) { /* tabela nfes pode não existir */ }
 
-        const proximo = Math.max(maxNf, maxNumeroNf) + 1;
+        const proximo = Math.max(maxNf, maxNumeroNf, maxNfeTable) + 1;
 
         return {
             numero: String(proximo).padStart(9, '0'),
