@@ -438,7 +438,7 @@
         function carregarDadosUsuario() {
             const h = new Date().getHours();
             document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
-            fetch('/api/me', { credentials: 'include' }).then(r => r.json()).then(u => {
+            fetch('/api/me', { credentials: 'include' }).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(u => {
                 document.getElementById('user-name').textContent = (u.nome || u.name || 'Usuário').split(' ')[0];
                 document.getElementById('user-initials').textContent = (u.nome || u.name || 'U').substring(0, 2).toUpperCase();
                 if (u.foto || u.avatar) { document.getElementById('user-photo').src = u.foto || u.avatar; document.getElementById('user-photo').style.display = 'block'; document.getElementById('user-initials').style.display = 'none'; }

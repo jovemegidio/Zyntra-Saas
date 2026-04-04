@@ -413,7 +413,7 @@
             const g = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
             document.getElementById('greeting-text').textContent = g;
             fetch('/api/me', { credentials: 'include' })
-                .then(r => r.json())
+                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
                 .then(u => {
                     const nome = u.nome || u.name || 'Usuário';
                     document.getElementById('user-name').textContent = nome.split(' ')[0];
