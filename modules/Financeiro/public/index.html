@@ -498,6 +498,9 @@
 </div>
 
 <script>
+    // FIX-100: XSS protection for innerHTML with API data
+    function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
     // ===== TOAST NOTIFICATION =====
     function showToast(message, type) {
         type = type || 'info';
@@ -746,8 +749,8 @@
 
     // ===== AÇÕES =====
     function novoLancamento() { abrirModalLancamento(); }
-    function novaReceita() { window.location.href = '/contas-receber?acao=nova'; }
-    function novaDespesa() { window.location.href = '/contas-pagar?acao=nova'; }
+    function novaReceita() { window.location.href = 'contas_receber.html?acao=nova'; }
+    function novaDespesa() { window.location.href = 'contas_pagar.html?acao=nova'; }
     function novaTransferencia() { abrirModalTransferencia(); }
 
     // ===== MODAL TRANSFERÊNCIA =====
@@ -785,7 +788,7 @@
                 const origemSelect = document.getElementById('transf-origem');
                 const destinoSelect = document.getElementById('transf-destino');
                 contas.forEach(c => {
-                    const option = `<option value="${c.id}">${c.nome} - R$ ${(c.saldo || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</option>`;
+                    const option = `<option value="${c.id}">${esc(c.nome)} - R$ ${(c.saldo || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</option>`;
                     origemSelect.innerHTML += option;
                     destinoSelect.innerHTML += option;
                 });
