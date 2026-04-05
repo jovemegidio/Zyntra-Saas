@@ -123,7 +123,7 @@ module.exports = function registerAllRoutes(app, deps) {
         // Load core FIRST to get checkFinanceiroPermission middleware
         const createFinanceiroCore = require('./financeiro-core');
         const financeiroCoreResult = createFinanceiroCore(sharedDeps);
-        app.use('/api/financeiro', financeiroCoreResult.router);
+        app.use('/api/financeiro', authenticateToken, financeiroCoreResult.router);
 
         // Make checkFinanceiroPermission available to other financeiro modules
         sharedDeps.checkFinanceiroPermission = financeiroCoreResult.checkFinanceiroPermission;
@@ -402,10 +402,10 @@ module.exports = function registerAllRoutes(app, deps) {
     }
 
     // ============================================================
-    // 11. Admin routes
+    // 11. Admin routes (FIX BUG-18: protegido com auth + admin)
     // ============================================================
     try {
-        app.use('/api/admin', require(path.join(__dirname, '..', 'src', 'routes', 'apiAdmin'))(pool));
+        app.use('/api/admin', authenticateToken, authorizeAdmin, require(path.join(__dirname, '..', 'src', 'routes', 'apiAdmin'))(pool));
     } catch (_) {}
 
     // ============================================================

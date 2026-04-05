@@ -197,10 +197,12 @@ module.exports = function createVendasRoutes(deps) {
     // PEDIDOS
     router.get('/pedidos', cacheMiddleware('vendas_pedidos', 60000), async (req, res, next) => {
         try {
-            const { period, page = 1, limit = 1000, status } = req.query;
+            const { period, page = 1, limit = 100, status } = req.query;
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
-            const rows = await repos.pedido.list({ period, page, limit, userId: user.id, isAdmin, status });
+            // AUDIT-FIX S9.8: Cap limit to prevent unbounded queries
+            const safeLimit = Math.min(Math.max(1, parseInt(limit) || 100), 500);
+            const rows = await repos.pedido.list({ period, page, limit: safeLimit, userId: user.id, isAdmin, status });
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -777,8 +779,6 @@ module.exports = function createVendasRoutes(deps) {
                 updates[key] = sanitizeValue(updates[key]);
             });
 
-            console.log(`📝 PATCH /pedidos/${id} - Dados recebidos:`, updates);
-
             // Verificar se pedido existe — Sprint E2E-S1: usa patchConn (transação)
             const [existingRows] = await patchConn.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (existingRows.length === 0) {
@@ -1131,8 +1131,6 @@ module.exports = function createVendasRoutes(deps) {
             values.push(id);
 
             const query = `UPDATE pedidos SET ${fieldsToUpdate.join(', ')} WHERE id = ?`;
-            console.log(`📝 Query: ${query}`);
-            console.log(`📝 Values:`, values);
 
             const [result] = await patchConn.query(query, values);
 
@@ -2345,6 +2343,14 @@ module.exports = function createVendasRoutes(deps) {
     });
     router.put('/metas/:id', authorizeAdminOrComercial, async (req, res, next) => {
         try {
+            // AUDIT-FIX R3: Comercial só pode editar metas do próprio vendedor
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) {
+                const [metaCheck] = await pool.query('SELECT vendedor_id FROM metas_vendas WHERE id = ?', [req.params.id]);
+                if (!metaCheck.length) return res.status(404).json({ error: 'Meta não encontrada' });
+                if (metaCheck[0].vendedor_id !== user.id) return res.status(403).json({ error: 'Acesso negado' });
+            }
             const { vendedor_id, periodo, tipo, valor_meta } = req.body;
             await pool.query('UPDATE metas_vendas SET vendedor_id=?, periodo=?, tipo=?, valor_meta=? WHERE id=?', [vendedor_id || null, periodo, tipo, valor_meta, req.params.id]);
             res.json({ message: 'Meta atualizada com sucesso!' });
@@ -2352,7 +2358,16 @@ module.exports = function createVendasRoutes(deps) {
     });
     router.delete('/metas/:id', authorizeAdminOrComercial, async (req, res, next) => {
         try {
-            await pool.query('DELETE FROM metas_vendas WHERE id=?', [req.params.id]);
+            // AUDIT-FIX R3: Comercial só pode excluir metas do próprio vendedor
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) {
+                const [metaCheck] = await pool.query('SELECT vendedor_id FROM metas_vendas WHERE id = ?', [req.params.id]);
+                if (!metaCheck.length) return res.status(404).json({ error: 'Meta não encontrada' });
+                if (metaCheck[0].vendedor_id !== user.id) return res.status(403).json({ error: 'Acesso negado' });
+            }
+            // AUDIT-FIX R3: Soft delete (SET ativo = 0) em vez de DELETE
+            await pool.query('UPDATE metas_vendas SET ativo = 0 WHERE id=?', [req.params.id]);
             res.json({ message: 'Meta excluída com sucesso!' });
         } catch (error) { next(error); }
     });
@@ -2920,6 +2935,16 @@ module.exports = function createVendasRoutes(deps) {
         try {
             await ensurePedidoItensTable();
             const { pedidoId, itemId } = req.params;
+
+            // AUDIT-FIX R3: Ownership check — vendedor só edita itens de seus próprios pedidos
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) {
+                const [ownerCheck] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [pedidoId]);
+                if (!ownerCheck.length) return res.status(404).json({ error: 'Pedido não encontrado' });
+                if (ownerCheck[0].vendedor_id !== user.id) return res.status(403).json({ error: 'Acesso negado' });
+            }
+
             const b = req.body;
             // Accept both accented and unaccented keys from frontend
             const codigo = b.codigo || b['código'] || '';
@@ -2989,6 +3014,15 @@ module.exports = function createVendasRoutes(deps) {
         try {
             await ensurePedidoItensTable();
             const { pedidoId, itemId } = req.params;
+
+            // AUDIT-FIX R3: Ownership check — vendedor só exclui itens de seus próprios pedidos
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) {
+                const [ownerCheck] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [pedidoId]);
+                if (!ownerCheck.length) { connection.release(); return res.status(404).json({ error: 'Pedido não encontrado' }); }
+                if (ownerCheck[0].vendedor_id !== user.id) { connection.release(); return res.status(403).json({ error: 'Acesso negado' }); }
+            }
 
             await connection.beginTransaction();
 
@@ -3414,6 +3448,18 @@ module.exports = function createVendasRoutes(deps) {
             const { id } = req.params;
             const data = req.body;
 
+            // AUDIT-FIX R2: IDOR protection — verificar ownership ou admin
+            const userRole = (req.user?.role || '').toLowerCase();
+            const isAdmin = userRole === 'admin' || req.user?.is_admin;
+            if (!isAdmin) {
+                const [lead] = await pool.query('SELECT vendedor_id FROM leads_prospeccao WHERE id = ?', [id]);
+                if (!lead.length || String(lead[0].vendedor_id) !== String(req.user?.id)) {
+                    return res.status(403).json({ error: 'Você só pode editar seus próprios leads.' });
+                }
+                // Não-admin não pode reassignar vendedor_id
+                delete data.vendedor_id;
+            }
+
             const fields = [];
             const values = [];
 
@@ -3447,7 +3493,16 @@ module.exports = function createVendasRoutes(deps) {
     router.delete('/leads/:id', async (req, res, next) => {
         try {
             const { id } = req.params;
-            await pool.query('DELETE FROM leads_prospeccao WHERE id = ?', [id]);
+            // AUDIT-FIX R2: IDOR protection — verificar ownership ou admin
+            const userRole = (req.user?.role || '').toLowerCase();
+            const isAdmin = userRole === 'admin' || req.user?.is_admin;
+            if (!isAdmin) {
+                const [lead] = await pool.query('SELECT vendedor_id FROM leads_prospeccao WHERE id = ?', [id]);
+                if (!lead.length || String(lead[0].vendedor_id) !== String(req.user?.id)) {
+                    return res.status(403).json({ error: 'Você só pode excluir seus próprios leads.' });
+                }
+            }
+            await pool.query('UPDATE leads_prospeccao SET status = "excluido", deleted_at = NOW() WHERE id = ?', [id]);
             res.json({ message: 'Lead excluído com sucesso' });
         } catch (error) {
             console.error('❌ Erro ao excluir lead:', error);

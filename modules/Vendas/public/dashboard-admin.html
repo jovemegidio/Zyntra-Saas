@@ -1519,7 +1519,11 @@
                     if (Array.isArray(vendedores) && vendedores.length > 0) {
                         vendedores.forEach(v => {
                             const nome = v.apelido || v.nome || 'Vendedor';
-                            select.innerHTML += `<option value="${v.id}">${nome}</option>`;
+                            // FIX BUG-20: usar textContent em vez de innerHTML para evitar XSS
+                            const opt = document.createElement('option');
+                            opt.value = v.id;
+                            opt.textContent = nome;
+                            select.appendChild(opt);
                         });
                     } else {
                         select.innerHTML = '<option value="">Nenhum vendedor encontrado</option>';

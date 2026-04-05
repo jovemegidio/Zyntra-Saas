@@ -38,7 +38,7 @@ async function initRedis() {
         redis = createClient({
             url: url.startsWith('redis://') ? url : `redis://${url}`,
             socket: {
-                connectTimeout: 5000,
+                connectTimeout: 120000,
                 reconnectStrategy: (retries) => Math.min(retries * 500, 5000)
             }
         });

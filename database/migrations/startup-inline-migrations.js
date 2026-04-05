@@ -88,13 +88,17 @@ async function runInlineMigrations(pool) {
     }
 
     // ============================================================
-    // Expand role ENUM to include supervisor/gerente
+    // FIX: Converter role de ENUM para VARCHAR(50) — suporte a todos os roles
+    // (admin, user, financeiro, vendedor, pcp, operador, diretor, gerente, etc.)
     // ============================================================
     try {
-        await pool.query("ALTER TABLE usuarios MODIFY COLUMN role ENUM('admin','user','comercial','consultoria','rh','recursos_humanos','supervisor','gerente') NOT NULL DEFAULT 'user'");
-        console.log('✅ ENUM role expandido com supervisor/gerente');
+        const [[col]] = await pool.query("SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'usuarios' AND COLUMN_NAME = 'role'");
+        if (col && col.DATA_TYPE === 'enum') {
+            await pool.query("ALTER TABLE usuarios MODIFY COLUMN role VARCHAR(50) NOT NULL DEFAULT 'user'");
+            console.log('✅ Coluna role migrada de ENUM para VARCHAR(50)');
+        }
     } catch (e) {
-        if (!e.message.includes('Duplicate')) console.warn('⚠️ role ENUM:', e.message);
+        console.warn('⚠️ role VARCHAR migration:', e.message);
     }
 
     // ============================================================

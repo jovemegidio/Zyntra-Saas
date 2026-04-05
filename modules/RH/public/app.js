@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Carregar avisos do admin para todos os funcionários
         if (isEmployeePage) {
             fetch('/api/avisos', { headers: getAuthHeaders() })
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(r => r.json())
                 .then(data => {
                     const avisosBox = document.getElementById('avisos-box');
                     if (avisosBox && Array.isArray(data) && data.length) {
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) { /* ignore DOM errors */ }
                 if (id) {
                     fetch(`/api/funcionarios/${id}/doc-status`, { headers: getAuthHeaders() })
-                        .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                        .then(r => r.json())
                         .then(s => {
                             const holLink = document.getElementById('widget-holerite-link')
                             const pontoLink = document.getElementById('widget-ponto-link')
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Corrigir aniversariantes na área admin
         if (isAdminPage) {
             fetch('/api/aniversariantes', { headers: getAuthHeaders() })
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(r => r.json())
                 .then(data => {
                     const ul = document.getElementById('dashboard-aniversariantes-list');
                     if (ul && Array.isArray(data) && data.length) {

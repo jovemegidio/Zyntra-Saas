@@ -249,7 +249,7 @@
         function visualizarNFe(id) {
             if (!id) { alert('ID não disponível'); return; }
             fetch(`/api/faturamento/nfes/${id}`, { credentials: 'include' })
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(r => r.json())
                 .then(nfe => {
                     const info = [
                         'NF-e #' + (nfe.numero || id),
@@ -282,7 +282,7 @@
             const h = new Date().getHours();
             document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
             fetch('/api/me', { credentials: 'include' })
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+                .then(r => r.json())
                 .then(u => {
                     const nome = u.nome || u.name || 'Usuário';
                     document.getElementById('user-name').textContent = nome.split(' ')[0];

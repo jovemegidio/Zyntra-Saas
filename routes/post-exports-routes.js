@@ -352,23 +352,20 @@ module.exports = function createPostExportsRoutes(deps) {
             const { inicio, fim } = req.query;
     
             // Buscar movimentações de contas pagas e recebidas
-            const [pagas] = await pool.query(
-                `SELECT 'despesa' as tipo, fornecedor as descricao, valor, data_pagamento as data
-                 FROM contas_pagar
-                 WHERE banco_id = ? AND status = 'paga'
-                 ${inicio ? 'AND data_pagamento >= ?' : ''}
-                 ${fim ? 'AND data_pagamento <= ?' : ''}`,
-                [id, inicio, fim].filter(Boolean)
-            );
+            // AUDIT-FIX S10.4: Safe query builder to prevent params misalignment
+            let sqlPagas = `SELECT 'despesa' as tipo, fornecedor as descricao, valor, data_pagamento as data
+                 FROM contas_pagar WHERE banco_id = ? AND status = 'paga'`;
+            const paramsPagas = [id];
+            if (inicio) { sqlPagas += ' AND data_pagamento >= ?'; paramsPagas.push(inicio); }
+            if (fim) { sqlPagas += ' AND data_pagamento <= ?'; paramsPagas.push(fim); }
+            const [pagas] = await pool.query(sqlPagas, paramsPagas);
     
-            const [recebidas] = await pool.query(
-                `SELECT 'receita' as tipo, cliente as descricao, valor, data_recebimento as data
-                 FROM contas_receber
-                 WHERE banco_id = ? AND status = 'recebida'
-                 ${inicio ? 'AND data_recebimento >= ?' : ''}
-                 ${fim ? 'AND data_recebimento <= ?' : ''}`,
-                [id, inicio, fim].filter(Boolean)
-            );
+            let sqlRecebidas = `SELECT 'receita' as tipo, cliente as descricao, valor, data_recebimento as data
+                 FROM contas_receber WHERE banco_id = ? AND status = 'recebida'`;
+            const paramsRecebidas = [id];
+            if (inicio) { sqlRecebidas += ' AND data_recebimento >= ?'; paramsRecebidas.push(inicio); }
+            if (fim) { sqlRecebidas += ' AND data_recebimento <= ?'; paramsRecebidas.push(fim); }
+            const [recebidas] = await pool.query(sqlRecebidas, paramsRecebidas);
     
             const extrato = [...pagas, ...recebidas].sort((a, b) =>
                 new Date(b.data) - new Date(a.data)
@@ -588,6 +585,12 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             }
     
             query += ' ORDER BY r.descricao ASC';
+
+            // AUDIT-FIX S9.6: Cap results
+            const safeLimit = Math.min(Math.max(1, parseInt(req.query.limit) || 200), 500);
+            const safePage = Math.max(1, parseInt(req.query.page) || 1);
+            query += ' LIMIT ? OFFSET ?';
+            params.push(safeLimit, (safePage - 1) * safeLimit);
     
             const [recorrencias] = await pool.query(query, params);
             res.json(recorrencias);
@@ -671,7 +674,21 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     // Deletar recorrência
     router.delete('/financeiro/recorrencias/:id', authenticateToken, async (req, res) => {
         try {
-            const { id } = req.params;
+            const id = parseInt(req.params.id, 10);
+            if (!Number.isFinite(id)) return res.status(400).json({ message: 'ID inválido' });
+
+            // AUDIT-FIX S9.7: Check FK references before hard delete
+            const [refs] = await pool.query(
+                'SELECT COUNT(*) as cnt FROM contas_pagar WHERE recorrencia_id = ? UNION ALL SELECT COUNT(*) FROM contas_receber WHERE recorrencia_id = ?',
+                [id, id]
+            );
+            const totalRefs = refs.reduce((sum, r) => sum + r.cnt, 0);
+            if (totalRefs > 0) {
+                // Soft-delete instead
+                await pool.query('UPDATE recorrencias SET ativa = 0 WHERE id = ?', [id]);
+                return res.json({ success: true, message: 'Recorrência desativada (possui lançamentos vinculados)' });
+            }
+
             await pool.query('DELETE FROM recorrencias WHERE id = ?', [id]);
             res.json({ success: true, message: 'Recorrência excluída com sucesso' });
     
@@ -1846,7 +1863,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             console.error('[FINANCEIRO] Erro na migração:', err);
             res.status(500).json({
                 success: false,
-                message: 'Erro na migração: ' + err.message
+                message: 'Erro na migração. Tente novamente.'
             });
         } finally {
             connection.release();
@@ -3222,7 +3239,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             });
         } catch (err) {
             console.error('[ESTOQUE] Erro ao registrar movimentação:', err);
-            res.status(500).json({ success: false, message: 'Erro ao registrar movimentação: ' + err.message });
+            res.status(500).json({ success: false, message: 'Erro ao registrar movimentação. Tente novamente.' });
         }
     });
 
@@ -3577,7 +3594,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             console.error('[TEMPLATE] Erro ao importar template:', err);
             // Limpar arquivo temporário em caso de erro
             if (filePath) try { fs.unlinkSync(filePath); } catch(e) {}
-            res.status(500).json({ success: false, message: 'Erro ao importar template: ' + err.message });
+            res.status(500).json({ success: false, message: 'Erro ao importar template. Tente novamente.' });
         }
     });
 
@@ -3720,7 +3737,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     // Importar módulos de segurança e integração
     const encryption = require('../src/utils/encryption');
     let lgpdCrypto;
-    try { lgpdCrypto = require('./lgpd-crypto'); } catch(e) { console.warn('⚠️ lgpd-crypto não encontrado, descriptografia PII desabilitada'); lgpdCrypto = { decryptPII: (v) => v }; }
+    try { lgpdCrypto = require('../lgpd-crypto'); } catch(e) { console.warn('⚠️ lgpd-crypto não encontrado, descriptografia PII desabilitada'); lgpdCrypto = { decryptPII: (v) => v }; }
     const { generateTokenPair, refreshTokens, revokeAllUserTokens, cleanupExpiredTokens } = require('../src/auth/refresh-token');
     const { criarContasReceberDePedido, criarContasPagarDePedidoCompra, verificarPendenciasCliente } = require('../src/integrations/modules-integration');
     const { createOptimisticLockMiddleware, acquireEditLock, releaseEditLock } = require('../src/utils/concurrency-control');
