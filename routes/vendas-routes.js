@@ -1313,13 +1313,13 @@ module.exports = function createVendasRoutes(deps) {
     const userPermissions = {
         // Mapa de permissões por role do banco (usuarios.role)
         statusPermissions: {
-            // Vendedores (role=user/comercial) podem mover até analise e cancelar
-            'default': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
-            'user': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
-            'comercial': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
-            // Sprint E2E-S2 (E2-CRIT-02): Roles intermediários — supervisor aprova, aprovador fatura
-            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'cancelado'],
-            'aprovador': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
+            // Vendedores (role=user/comercial) podem mover até analise-credito e cancelar
+            'default': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
+            'user': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
+            'comercial': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
+            // Supervisores podem aprovar e faturar
+            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
+            'aprovador': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'cancelado'],
             // Admin tem acesso total (redundante pois admin bypassa, mas documenta)
             'admin': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo', 'cancelado']
         },

@@ -717,14 +717,21 @@
                     const role = (user.role || '').toLowerCase();
                     const departamento = (user.departamento || user.setor || '').toLowerCase();
                     const email = (user.email || '').toLowerCase();
-                    const permissoesPcp = user.permissoes_pcp || '';
-                    const rolesPermitidas = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'consultoria'];
-                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administração', 'gerência'];
+                    const permissoesPcp = user.permissoes_pcp || [];
+                    const rolesPermitidas = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'consultoria', 'operador'];
+                    const deptPermitidos = ['ti', 'pcp', 'diretoria', 'administração', 'gerência', 'producao', 'produção', 'fabrica', 'fábrica'];
 
                     const temRole = rolesPermitidas.some(r => role.includes(r));
                     const temDept = deptPermitidos.some(d => departamento.includes(d));
                     const temEmail = email.includes('ti@') || email.includes('admin@') || email.includes('pcp@');
-                    const temPermPcp = permissoesPcp === 'all' || (typeof permissoesPcp === 'string' && permissoesPcp.includes('dashboard'));
+                    const permsArray = Array.isArray(permissoesPcp)
+                        ? permissoesPcp.map(p => String(p).toLowerCase())
+                        : (typeof permissoesPcp === 'string'
+                            ? permissoesPcp.toLowerCase().split(',').map(p => p.trim()).filter(Boolean)
+                            : (permissoesPcp && typeof permissoesPcp === 'object'
+                                ? Object.values(permissoesPcp).map(p => String(p).toLowerCase())
+                                : []));
+                    const temPermPcp = permsArray.includes('all') || permsArray.includes('dashboard') || permsArray.includes('relatorios') || permsArray.includes('apontamentos');
 
                     if (!temRole && !temDept && !temEmail && !temPermPcp) {
                         window.location.href = 'apontamentos.html';

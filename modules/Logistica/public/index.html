@@ -5,10 +5,9 @@
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zyntra: Logística</title>
+    <title>Zyntra: Logística & Expedição</title>
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
-    <script src="/js/user-greeting-avatar.js?v=20260402" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -19,7 +18,6 @@
     <!-- <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
-    <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260402">
 </head>
 
 <body>
@@ -29,7 +27,10 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
+                <a href="/modules/Faturamento/public/dashboard.html" class="sidebar-btn" title="Faturamento & Logística"><i class="fas fa-tachometer-alt"></i></a>
+                <a href="/Vendas/index.html" class="sidebar-btn" title="Pedidos"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="index.html" class="sidebar-btn active" title="Expedição & Entregas"><i class="fas fa-truck"></i></a>
+                <a href="/modules/Faturamento/public/consultar.html" class="sidebar-btn" title="Consultar NF-e"><i class="fas fa-search"></i></a>
             </nav>
             <div class="sidebar-bottom">
             </div>
@@ -421,6 +422,7 @@
         }
 
         function formatarMoeda(v) { return (parseFloat(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
         let pedidos = [], transportadoras = [];
         let _statusPedidoId = null;
@@ -430,12 +432,10 @@
                 const r = await fetch('/api/logistica/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    // HOTFIX Pipeline E2E: d.pendente inclui pedidos com status_logistica NULL/vazio/'pendente'
-                    // Somar pendente + aguardando_separacao para o card "Aguardando"
-                    document.getElementById('count-aguardando').textContent = (d.pendente || 0) + (d.aguardando_separacao || 0);
-                    document.getElementById('count-separacao').textContent = d.em_separacao || 0;
-                    document.getElementById('count-expedicao').textContent = d.em_expedicao || 0;
-                    document.getElementById('count-transporte').textContent = d.em_transporte || 0;
+                    document.getElementById('count-aguardando').textContent = d.aguardando_separacao || d.aguardando || 0;
+                    document.getElementById('count-separacao').textContent = d.em_separacao || d.separacao || 0;
+                    document.getElementById('count-expedicao').textContent = d.em_expedicao || d.expedicao || 0;
+                    document.getElementById('count-transporte').textContent = d.em_transporte || d.transporte || 0;
                     document.getElementById('count-entregues').textContent = d.entregues || 0;
                 }
             } catch (e) { console.error(e); }
@@ -453,11 +453,11 @@
             if (!lista.length) { tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-truck"></i><p>Nenhum pedido encontrado</p></div></td></tr>'; return; }
             tbody.innerHTML = lista.map(p => `
         <tr>
-            <td><span class="code">${p.nfe_numero || p.nfe || '-'}</span></td>
+            <td><span class="code">${esc(p.nfe_numero || p.nfe || '-')}</span></td>
             <td>#${p.pedido_id || p.id}</td>
-            <td>${p.cliente || '-'}</td>
-            <td>${p.transportadora || '-'}</td>
-            <td>${p.cidade_uf || '-'}</td>
+            <td>${esc(p.cliente || '-')}</td>
+            <td>${esc(p.transportadora || '-')}</td>
+            <td>${esc(p.cidade_uf || '-')}</td>
             <td>${p.previsao && p.previsao !== '-' ? new Date(p.previsao).toLocaleDateString('pt-BR') : '-'}</td>
             <td>${getStatusBadge(p.status)}</td>
             <td>
@@ -509,6 +509,8 @@
 
         async function confirmarMudancaStatus() {
             if (!_statusPedidoId) return;
+            if (window._guardConfirmarStatus) return;
+            window._guardConfirmarStatus = true;
             const novoStatus = document.getElementById('modal-status-novo').value;
             const obs = document.getElementById('modal-status-obs').value;
             try {
@@ -526,7 +528,7 @@
                     const err = await r.json().catch(() => ({}));
                     alert('Erro ao atualizar status');
                 }
-            } catch (e) { alert('Erro de conexão'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardConfirmarStatus = false; }
         }
 
         // ========== Modal Detalhes Pedido ==========
@@ -542,15 +544,15 @@
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">NF-e</label>
-                <p style="font-size:16px;font-weight:600;"><span class="code">${p.nfe_numero || p.nfe || '-'}</span></p>
+                <p style="font-size:16px;font-weight:600;"><span class="code">${esc(p.nfe_numero || p.nfe || '-')}</span></p>
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Cliente</label>
-                <p style="font-size:14px;">${p.cliente || '-'}</p>
+                <p style="font-size:14px;">${esc(p.cliente || '-')}</p>
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Cidade/UF</label>
-                <p style="font-size:14px;">${p.cidade_uf || '-'}</p>
+                <p style="font-size:14px;">${esc(p.cidade_uf || '-')}</p>
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Valor</label>
@@ -562,7 +564,7 @@
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Transportadora</label>
-                <p style="font-size:14px;">${p.transportadora || 'Não definida'}</p>
+                <p style="font-size:14px;">${esc(p.transportadora || 'Não definida')}</p>
             </div>
             <div class="form-group">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Previsão de Entrega</label>
@@ -574,11 +576,11 @@
             </div>
             <div class="form-group" style="grid-column:span 2;">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Endereço de Entrega</label>
-                <p style="font-size:13px;background:var(--bg-secondary);padding:8px 12px;border-radius:8px;min-height:30px;">${p.endereco_entrega || 'Não informado'}</p>
+                <p style="font-size:13px;background:var(--bg-secondary);padding:8px 12px;border-radius:8px;min-height:30px;">${esc(p.endereco_entrega || 'Não informado')}</p>
             </div>
             <div class="form-group" style="grid-column:span 2;">
                 <label style="font-weight:600;color:var(--text-secondary);font-size:11px;text-transform:uppercase;margin-bottom:4px;">Observações</label>
-                <p style="font-size:13px;white-space:pre-wrap;background:var(--bg-secondary);padding:8px 12px;border-radius:8px;min-height:40px;">${p.observacao || 'Nenhuma observação'}</p>
+                <p style="font-size:13px;white-space:pre-wrap;background:var(--bg-secondary);padding:8px 12px;border-radius:8px;min-height:40px;">${esc(p.observacao || 'Nenhuma observação')}</p>
             </div>
         </div>
     `;
@@ -648,6 +650,8 @@
         }
 
         async function salvarExpedicao() {
+            if (window._guardSalvarExpedicao) return;
+            window._guardSalvarExpedicao = true;
             try {
                 const r = await fetch('/api/logistica/expedicao', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({
@@ -670,7 +674,7 @@
                     const err = await r.json().catch(() => ({}));
                     alert('Erro ao salvar expedição');
                 }
-            } catch (e) { alert('Erro de conexão'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarExpedicao = false; }
         }
 
         async function carregarTransportadoras() {
@@ -700,11 +704,11 @@
             if (!transportadoras.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-truck-moving"></i><p>Nenhuma transportadora cadastrada</p></div></td></tr>'; return; }
             tbody.innerHTML = transportadoras.map(t => `
         <tr>
-            <td><strong>${t.razao_social || '-'}</strong></td>
-            <td>${t.nome_fantasia || t.fantasia || '-'}</td>
-            <td><span class="code">${t.cnpj_cpf || t.cnpj || '-'}</span></td>
-            <td>${t.telefone || '-'}</td>
-            <td>${t.email || '-'}</td>
+            <td><strong>${esc(t.razao_social || '-')}</strong></td>
+            <td>${esc(t.nome_fantasia || t.fantasia || '-')}</td>
+            <td><span class="code">${esc(t.cnpj_cpf || t.cnpj || '-')}</span></td>
+            <td>${esc(t.telefone || '-')}</td>
+            <td>${esc(t.email || '-')}</td>
             <td>
                 <div style="display:flex;gap:4px;">
                     <button class="action-btn view" onclick="verTransportadora(${t.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
@@ -719,6 +723,8 @@
         async function salvarTransportadora() {
             const razao = document.getElementById('transp-razao').value.trim();
             if (!razao) { alert('Razão Social é obrigatória'); return; }
+            if (window._guardSalvarTransp) return;
+            window._guardSalvarTransp = true;
             const editId = document.getElementById('transp-edit-id').value;
             const payload = {
                 razao_social: razao,
@@ -747,7 +753,7 @@
                 } else {
                     alert(data.error || 'Erro ao salvar transportadora');
                 }
-            } catch (e) { alert('Erro de conexão'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarTransp = false; }
         }
 
         function adicionarTransportadora() {
@@ -776,10 +782,12 @@
 
         async function excluirTransportadora(id, nome) {
             if (!confirm(`Deseja excluir a transportadora "${nome}"?`)) return;
+            if (window._guardExcluirTransp) return;
+            window._guardExcluirTransp = true;
             try {
                 const r = await fetch(`/api/logistica/transportadoras/${id}`, { method: 'DELETE', credentials: 'include' });
                 if (r.ok) { carregarTransportadoras(); } else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro ao excluir'); }
-            } catch (e) { alert('Erro de conexão'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardExcluirTransp = false; }
         }
 
         // ========== Atribuir Transportadora ao Pedido ==========
@@ -806,6 +814,8 @@
             const transportadoraId = document.getElementById('modal-atrib-transportadora').value;
             const previsao = document.getElementById('modal-atrib-previsao').value;
             if (!transportadoraId) { alert('Selecione uma transportadora'); return; }
+            if (window._guardAtribuirTransp) return;
+            window._guardAtribuirTransp = true;
             try {
                 const r = await fetch(`/api/logistica/pedidos/${_atribPedidoId}/transportadora`, {
                     method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
@@ -815,7 +825,7 @@
                     closeModal('modal-atribuir-transportadora');
                     carregarPedidos();
                 } else { alert('Erro ao atribuir transportadora'); }
-            } catch (e) { alert('Erro de conexão'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardAtribuirTransp = false; }
         }
 
         function verTransportadora(id) {
@@ -857,12 +867,11 @@
         }
 
         function carregarDadosUsuario() {
+            const h = new Date().getHours();
+            document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
             fetch('/api/me', { credentials: 'include' }).then(r => r.json()).then(u => {
-                if (window.ZyntraUser) { window.ZyntraUser.atualizarUI(u); return; }
-                const h = new Date().getHours();
-                document.getElementById('greeting-text').textContent = h >= 5 && h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                 document.getElementById('user-name').textContent = (u.nome || u.name || 'Usuário').split(' ')[0];
-                document.getElementById('user-initials').textContent = (u.nome || u.name || 'U').charAt(0).toUpperCase();
+                document.getElementById('user-initials').textContent = (u.nome || u.name || 'U').substring(0, 2).toUpperCase();
                 if (u.foto || u.avatar) { document.getElementById('user-photo').src = u.foto || u.avatar; document.getElementById('user-photo').style.display = 'block'; document.getElementById('user-initials').style.display = 'none'; }
             }).catch(() => { });
         }
@@ -877,7 +886,7 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
 
-    <!-- Zyntra: Confirm Dialog Profissional v2.0 -->
+    <!-- ALUFORCE: Confirm Dialog Profissional v2.0 -->
     <script src="/_shared/confirm-dialog.js?v=20260217"></script>
     <!-- Chat Widget BOB AI - DESATIVADO 23/02/2026 -->
     <!-- <script src="/chat/widget.js?v=20260218" defer></script> -->
