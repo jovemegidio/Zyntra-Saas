@@ -250,8 +250,8 @@ router.post('/login', async (req, res) => {
                     setor, departamento, apelido, areas, telefone, login,
                     ultimo_login, ativo, senha_temporaria, two_factor_disabled,
                     totp_enabled, totp_secret
-             FROM usuarios WHERE email = ? LIMIT 1`,
-            [email.toLowerCase().trim()]
+             FROM usuarios WHERE email = ? OR login = ? LIMIT 1`,
+            [email.toLowerCase().trim(), email.toLowerCase().trim()]
         );
 
         console.log('[RBAC LOGIN] Usuários encontrados:', users.length);

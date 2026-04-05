@@ -27,6 +27,8 @@ const generalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
     max: isDev ? 5000 : 3000, // 3000 req/15min em produção (páginas SPA fazem múltiplas chamadas API), 5000 em dev
     ...(generalStore ? { store: generalStore } : {}),
+    // AUDIT-FIX S4.3: Se Redis cair em runtime, permite requests (fallback graceful)
+    passOnStoreError: true,
     message: {
         error: 'Muitas requisições deste IP. Aguarde alguns minutos.',
         retryAfter: '15 minutos',
@@ -52,14 +54,16 @@ const generalLimiter = rateLimit({
 const authStore = createRedisStore('auth');
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: isDev ? 100 : 5, // 5 tentativas em produção, 100 em dev
+    max: isDev ? 100 : 20, // 20 tentativas em produção, 100 em dev
     ...(authStore ? { store: authStore } : {}),
+    // AUDIT-FIX S4.3: Auth bloqueia por segurança se store falhar (deny-by-default)
+    passOnStoreError: false,
     message: {
         error: 'Muitas tentativas de login. Tente novamente em 15 minutos.',
         retryAfter: '15 minutos',
         code: 'AUTH_RATE_LIMIT'
     },
-    skipSuccessfulRequests: true, // Não conta requests bem-sucedidas
+    skipSuccessfulRequests: false, // AUDIT-FIX: Conta TODAS as tentativas para prevenir credential stuffing
     standardHeaders: true,
     legacyHeaders: false,
     validate: { xForwardedForHeader: false }, // Desabilita validação - usamos trust proxy
@@ -81,6 +85,7 @@ const writeLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minuto
     max: isDev ? 500 : 100, // 100 escritas/minuto em produção
     ...(writeStore ? { store: writeStore } : {}),
+    passOnStoreError: true,
     message: {
         error: 'Limite de operações de escrita excedido. Aguarde 1 minuto.',
         retryAfter: '1 minuto',
@@ -98,6 +103,7 @@ const heavyApiLimiter = rateLimit({
     windowMs: 60 * 1000, // 1 minuto
     max: isDev ? 200 : 50, // 50 requests/minuto em produção
     ...(heavyStore ? { store: heavyStore } : {}),
+    passOnStoreError: true,
     message: {
         error: 'Limite de relatórios/exports excedido. Aguarde 1 minuto.',
         retryAfter: '1 minuto',
@@ -114,6 +120,7 @@ const uploadLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hora
     max: isDev ? 500 : 50, // 50 uploads/hora em produção
     ...(uploadStore ? { store: uploadStore } : {}),
+    passOnStoreError: true,
     message: {
         error: 'Limite de uploads excedido. Tente novamente mais tarde.',
         retryAfter: '1 hora',

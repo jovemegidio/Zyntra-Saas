@@ -5,10 +5,12 @@
 const BaseRepository = require('./base-repository');
 
 const PEDIDO_SELECT_FIELDS = `
-    p.id, p.valor, p.valor as valor_total, p.status, p.created_at, p.created_at as data_pedido,
+    p.id, p.numero_pedido, p.valor, p.valor as valor_total, p.status, p.created_at, p.created_at as data_pedido,
     p.vendedor_id, p.cliente_id, p.observacao,
+    p.condicao_pagamento, p.parcelas,
     p.nf, p.numero_nf, p.nfe_chave,
-    ROW_NUMBER() OVER (ORDER BY p.id) AS numero,
+    COALESCE(p.version, 1) AS version,
+    ROW_NUMBER() OVER (ORDER BY p.numero_pedido ASC, p.id ASC) AS numero,
     COALESCE(c.nome_fantasia, c.razao_social, c.nome, p.cliente_nome, p.cliente, 'Cliente não informado') AS cliente_nome,
     c.email AS cliente_email, c.telefone AS cliente_telefone,
     e.nome_fantasia AS empresa_nome,
@@ -51,7 +53,7 @@ class PedidoRepository extends BaseRepository {
      * @param {Object} options - { period, page, limit, userId, isAdmin }
      */
     async list({ period, page = 1, limit = 1000, userId, isAdmin, status } = {}) {
-        const conditions = [];
+        const conditions = ['p.status != \'excluido\''];
         const params = [];
 
         if (period && period !== 'all') {
@@ -87,8 +89,8 @@ class PedidoRepository extends BaseRepository {
         const like = `%${q}%`;
         return this.query(
             `SELECT ${PEDIDO_SELECT_FIELDS} ${PEDIDO_JOINS}
-             WHERE c.nome_fantasia LIKE ? OR c.razao_social LIKE ? OR c.nome LIKE ?
-                OR e.nome_fantasia LIKE ? OR p.id LIKE ? OR u.nome LIKE ?
+             WHERE p.status != 'excluido' AND (c.nome_fantasia LIKE ? OR c.razao_social LIKE ? OR c.nome LIKE ?
+                OR e.nome_fantasia LIKE ? OR p.id LIKE ? OR u.nome LIKE ?)
              ORDER BY p.id DESC`,
             [like, like, like, like, like, like]
         );
@@ -119,13 +121,13 @@ class PedidoRepository extends BaseRepository {
     }
 
     /**
-     * Delete a pedido and its itens (in transaction).
+     * Soft-delete a pedido (AUDIT-FIX S4.1).
      */
     async delete(id) {
-        return this.transaction(async (conn) => {
-            await conn.query('DELETE FROM pedido_itens WHERE pedido_id = ?', [id]);
-            await conn.query('DELETE FROM pedidos WHERE id = ?', [id]);
-        });
+        return this.execute(
+            `UPDATE pedidos SET status = 'excluido', deleted_at = NOW() WHERE id = ?`,
+            [id]
+        );
     }
 
     /**

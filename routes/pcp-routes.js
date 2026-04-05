@@ -15,7 +15,9 @@ module.exports = function createPCPRoutes(deps) {
 
     // --- Standard requires for extracted routes ---
     const { body, param, query, validationResult } = require('express-validator');
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
     // LGPD Crypto - descriptografia PII (pode não existir)
@@ -1410,9 +1412,9 @@ module.exports = function createPCPRoutes(deps) {
                     const pipeConn = await pool.getConnection();
                     try {
                         await pipeConn.beginTransaction();
-                        const [opData] = await pipeConn.query('SELECT pedido_id FROM ordens_producao WHERE id = ?', [id]);
-                        if (opData.length > 0 && opData[0].pedido_id) {
-                            const pedidoId = opData[0].pedido_id;
+                        const [opData] = await pipeConn.query('SELECT pedido_vinculado_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opData.length > 0 && opData[0].pedido_vinculado_id) {
+                            const pedidoId = opData[0].pedido_vinculado_id;
                             const [pedido] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoId]);
                             if (pedido.length > 0 && pedido[0].status === 'pedido-aprovado') {
                                 await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoId]);
@@ -1501,9 +1503,9 @@ module.exports = function createPCPRoutes(deps) {
                     const pipeConn = await pool.getConnection();
                     try {
                         await pipeConn.beginTransaction();
-                        const [opDataPatch] = await pipeConn.query('SELECT pedido_id FROM ordens_producao WHERE id = ?', [id]);
-                        if (opDataPatch.length > 0 && opDataPatch[0].pedido_id) {
-                            const pedidoIdPatch = opDataPatch[0].pedido_id;
+                        const [opDataPatch] = await pipeConn.query('SELECT pedido_vinculado_id FROM ordens_producao WHERE id = ?', [id]);
+                        if (opDataPatch.length > 0 && opDataPatch[0].pedido_vinculado_id) {
+                            const pedidoIdPatch = opDataPatch[0].pedido_vinculado_id;
                             const [pedidoPatch] = await pipeConn.query('SELECT status FROM pedidos WHERE id = ? FOR UPDATE', [pedidoIdPatch]);
                             if (pedidoPatch.length > 0 && pedidoPatch[0].status === 'pedido-aprovado') {
                                 await pipeConn.query('UPDATE pedidos SET status = "faturar", updated_at = NOW() WHERE id = ?', [pedidoIdPatch]);
@@ -3608,8 +3610,7 @@ module.exports = function createPCPRoutes(deps) {
                 console.log(`✅ Excel gerado com sucesso usando template: ${nomeArquivo}`);
 
             } catch (excelError) {
-                console.log('❌ ERRO ao gerar XLSX:', excelError.message);
-                console.log('📍 Stack trace:', excelError.stack);
+                console.error('[XLSX] Erro ao gerar:', excelError.message);
 
                 // Fallback para CSV
                 const csvBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
@@ -4806,7 +4807,7 @@ module.exports = function createPCPRoutes(deps) {
             console.error('❌ Erro na nova rota:', error);
             res.status(500).json({
                 sucesso: false,
-                erro: error.message,
+                erro: 'Erro interno ao processar ordem',
                 mensagem: 'Erro ao gerar ordem de produção'
             });
         }
@@ -7993,6 +7994,19 @@ module.exports = function createPCPRoutes(deps) {
 
     // =================== APONTAMENTOS DE PRODUÇÃO ===================
 
+    // Cache para verificação de colunas extras (evita query a cada POST)
+    let _hasExtraColumnsCache = null; // null = não verificado, true/false = resultado
+    async function checkHasExtraColumns() {
+        if (_hasExtraColumnsCache !== null) return _hasExtraColumnsCache;
+        try {
+            await pool.query('SELECT pedido_id, maquina FROM apontamentos_producao LIMIT 0');
+            _hasExtraColumnsCache = true;
+        } catch (e) {
+            _hasExtraColumnsCache = false;
+        }
+        return _hasExtraColumnsCache;
+    }
+
     // Estatísticas de apontamentos
     router.get('/apontamentos/stats', async (req, res) => {
         console.log('[API_APONTAMENTOS] Buscando estatísticas...');
@@ -8198,9 +8212,8 @@ module.exports = function createPCPRoutes(deps) {
 
     // Salvar apontamento
     router.post('/apontamentos', async (req, res) => {
-        console.log('[API_APONTAMENTOS] Salvando apontamento...', req.body);
         try {
-            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, ordem_producao_id, pedido_numero, produto_descricao, observacoes } = req.body;
+            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, ordem_producao_id, pedido_numero, produto_descricao, observacoes, maquina, turno, quantidade_produzida, quantidade_refugo } = req.body;
             const usuario_id = req.user?.id;
             const operador = req.user?.nome || 'Desconhecido';
 
@@ -8227,30 +8240,28 @@ module.exports = function createPCPRoutes(deps) {
                 }
             }
 
-            // Verificar se colunas extras existem
-            let hasExtraColumns = false;
-            try {
-                await pool.query("SELECT pedido_id FROM apontamentos_producao LIMIT 0");
-                hasExtraColumns = true;
-            } catch (e) {
-                console.log('[API_APONTAMENTOS] Colunas extras não existem, usando INSERT básico');
-            }
+            // Verificar se colunas extras existem (com cache)
+            const hasExtraColumns = await checkHasExtraColumns();
 
             let result;
             if (hasExtraColumns) {
                 [result] = await pool.query(`
                     INSERT INTO apontamentos_producao
-                    (usuario_id, operador, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, pedido_id, produto_descricao, observacoes)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    (usuario_id, operador, maquina, turno, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, quantidade_produzida, quantidade_refugo, pedido_id, produto_descricao, observacoes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `, [
                     usuario_id,
                     operador,
+                    maquina || null,
+                    turno || null,
                     ordem_producao_id || null,
                     tipo_atividade,
                     nome_atividade,
                     horaInicioFormatada,
                     horaFimFormatada,
                     duracao_segundos || 0,
+                    quantidade_produzida || 0,
+                    quantidade_refugo || 0,
                     pedidoId,
                     produto_descricao || null,
                     observacoes || null
@@ -8287,6 +8298,13 @@ module.exports = function createPCPRoutes(deps) {
             const usuario_id = req.user?.id;
             const { data } = req.query;
 
+            // Verificar se a tabela existe
+            try {
+                await pool.query('SELECT 1 FROM apontamentos_producao LIMIT 1');
+            } catch (e) {
+                return res.json({ success: true, apontamentos: [] });
+            }
+
             let whereClause = 'WHERE usuario_id = ?';
             const params = [usuario_id];
 
@@ -8305,7 +8323,7 @@ module.exports = function createPCPRoutes(deps) {
                     TIME_FORMAT(ap.hora_fim, '%H:%i') as hora_fim,
                     ap.duracao_segundos as duracao,
                     ap.pedido_id,
-                    COALESCE(ped.numero, ap.pedido_id) as pedido_numero,
+                    COALESCE(ped.numero_pedido, ap.pedido_id) as pedido_numero,
                     ap.produto_descricao,
                     ap.observacoes
                 FROM apontamentos_producao ap
@@ -8693,7 +8711,8 @@ tr:nth-child(even){background:#f8fafc}
     // NOTIFICAR ATIVIDADE — Push notification de ações de apontamento (início, pausa, finalização)
     router.post('/notificar-atividade', async (req, res) => {
         try {
-            const { tipo_atividade, nome_atividade, operador, acao, duracao } = req.body;
+            const { tipo_atividade, nome_atividade, acao, duracao } = req.body;
+            const operador = req.user?.nome || req.body.operador || 'Operador';
 
             console.log(`[PCP/NOTIFICACAO] ${operador} ${acao} ${nome_atividade} (${tipo_atividade})${duracao ? ' — Duração: ' + duracao : ''}`);
 
@@ -8719,7 +8738,7 @@ tr:nth-child(even){background:#f8fafc}
     // APONTAMENTOS CHÃO DE FÁBRICA — Endpoint específico para salvar registros do chão de fábrica
     router.post('/apontamentos/chao', async (req, res) => {
         try {
-            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, ordem_producao_id, pedido_numero, produto_descricao, observacoes } = req.body;
+            const { tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, ordem_producao_id, pedido_numero, produto_descricao, observacoes, maquina, turno, quantidade_produzida, quantidade_refugo } = req.body;
             const usuario_id = req.user?.id;
             const operador = req.user?.nome || 'Operador';
 
@@ -8755,21 +8774,18 @@ tr:nth-child(even){background:#f8fafc}
                 } catch (e) { /* pedido não encontrado — ok */ }
             }
 
-            // Verificar colunas extras
-            let hasExtraColumns = false;
-            try {
-                await pool.query('SELECT pedido_id FROM apontamentos_producao LIMIT 0');
-                hasExtraColumns = true;
-            } catch (e) { /* sem colunas extras */ }
+            // Verificar colunas extras (com cache)
+            const hasExtraColumns = await checkHasExtraColumns();
 
             let result;
             if (hasExtraColumns) {
                 [result] = await pool.query(
                     `INSERT INTO apontamentos_producao
-                     (usuario_id, operador, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, pedido_id, produto_descricao, observacoes)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                    [usuario_id, operador, ordem_producao_id || null, tipo_atividade, nome_atividade,
+                     (usuario_id, operador, maquina, turno, ordem_producao_id, tipo_atividade, nome_atividade, hora_inicio, hora_fim, duracao_segundos, quantidade_produzida, quantidade_refugo, pedido_id, produto_descricao, observacoes)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [usuario_id, operador, maquina || null, turno || null, ordem_producao_id || null, tipo_atividade, nome_atividade,
                      horaInicioFormatada, horaFimFormatada, duracao_segundos || 0,
+                     quantidade_produzida || 0, quantidade_refugo || 0,
                      pedidoId, produto_descricao || null, observacoes || null]
                 );
             } else {

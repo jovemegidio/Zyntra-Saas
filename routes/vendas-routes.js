@@ -346,7 +346,13 @@ module.exports = function createVendasRoutes(deps) {
                     empresaFinalId = existing[0].id;
                 }
                 // AUDIT-FIX 2026-04-03: Removida auto-criação de empresa com CNPJ falso (TMP-...)
-                // Se empresa não encontrada, prossegue sem empresa_id (não bloqueia pedido)
+                // Se empresa não encontrada, buscar empresa padrão (id=1) para evitar NOT NULL
+                if (!empresaFinalId) {
+                    const [defaultEmp] = await connection.query('SELECT id FROM empresas ORDER BY id ASC LIMIT 1');
+                    if (defaultEmp.length > 0) {
+                        empresaFinalId = defaultEmp[0].id;
+                    }
+                }
             }
 
             if (!empresaFinalId && !nomeCliente) {
@@ -3739,6 +3745,73 @@ module.exports = function createVendasRoutes(deps) {
                 }
             });
         } catch (error) { next(error); }
+    });
+
+    // =============================================================
+    // =============================================================
+    // BAIXAR ESTOQUE — chamado ao aprovar pedido
+    // =============================================================
+    router.post('/pedidos/:id/baixar-estoque', async (req, res, next) => {
+        const connection = await pool.getConnection();
+        try {
+            const { id } = req.params;
+            const user = req.user || {};
+
+            await connection.beginTransaction();
+
+            const [pedidoRows] = await connection.query('SELECT * FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+            if (pedidoRows.length === 0) {
+                await connection.rollback();
+                return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+            }
+            const pedido = pedidoRows[0];
+            if (pedido.estoque_baixado === 1) {
+                await connection.rollback();
+                return res.status(400).json({ success: false, message: 'Estoque já foi baixado para este pedido.' });
+            }
+
+            const [itens] = await connection.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+            const baixados = [];
+
+            for (const item of itens) {
+                if (!item.produto_id || !item.quantidade) continue;
+
+                try {
+                    await connection.query(
+                        `INSERT INTO estoque_movimentos (produto_id, tipo, quantidade, referencia_tipo, referencia_id, observacoes, usuario_id)
+                         VALUES (?, 'saida', ?, 'aprovacao_pedido', ?, ?, ?)`,
+                        [item.produto_id, item.quantidade, id, `Aprovação do Pedido #${id}`, user.id || null]
+                    );
+                } catch (e) {
+                    // estoque_movimentos pode não existir — continuar
+                }
+
+                const [stockResult] = await connection.query(
+                    'UPDATE produtos SET estoque_atual = estoque_atual - ? WHERE id = ? AND estoque_atual >= ?',
+                    [item.quantidade, item.produto_id, item.quantidade]
+                );
+                baixados.push({ produto_id: item.produto_id, quantidade: item.quantidade, atualizado: stockResult.affectedRows > 0 });
+            }
+
+            await connection.query(
+                'UPDATE pedidos SET estoque_baixado = 1, data_baixa_estoque = NOW() WHERE id = ?', [id]
+            );
+
+            try {
+                await connection.query(
+                    'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao) VALUES (?, ?, ?, ?, ?)',
+                    [id, user.id || null, user.nome || 'Sistema', 'baixa_estoque', `Estoque baixado na aprovação do pedido #${id}`]
+                );
+            } catch (_) {}
+
+            await connection.commit();
+            res.json({ success: true, message: 'Estoque baixado com sucesso.', itens_baixados: baixados });
+        } catch (err) {
+            try { await connection.rollback(); } catch (_) {}
+            next(err);
+        } finally {
+            connection.release();
+        }
     });
 
     // =============================================================

@@ -13277,6 +13277,12 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     document.getElementById('edit-tipo-entrega').value = '';
                 }
 
+                // Sincronizar condição de pagamento padrão (À Vista)
+                if (document.getElementById('edit-condicao-pagamento-header')) {
+                    document.getElementById('edit-condicao-pagamento-header').value = 'a_vista';
+                }
+                syncCondicaoPagamento('edit');
+
                 // Atualizar alerta de status para novo
                 const statusAlert = document.getElementById('status-alert');
                 const statusAlertText = document.getElementById('status-alert-text');

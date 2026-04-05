@@ -2349,28 +2349,34 @@
             // Verificar se pode ver relatórios (admin ou Clemerson)
             const podeVerRelatorios = isAdmin || nomeUsuario.includes('clemerson');
 
-            const sidebarLinks = document.getElementById('sidebarLinks');
-            const btnHome = document.getElementById('btnHome');
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            const sidebarLogo = document.querySelector('.sidebar-logo');
             const sidebarBottom = document.querySelector('.sidebar-bottom');
 
             if (isAdmin) {
                 // Admin tem acesso completo
-                if (btnHome) btnHome.href = '/dashboard';
-                let linksHTML = `
+                if (sidebarLogo) sidebarLogo.href = '/dashboard';
+                if (sidebarNav) sidebarNav.innerHTML = `
                     <a href="index.html" class="sidebar-btn" title="Dashboard PCP">
                         <i class="fas fa-tachometer-alt"></i>
                     </a>
-                    <a href="index.html" class="sidebar-btn" title="Produtos e Estoque" onclick="localStorage.setItem('pcp-view','produtos')">
+                    <a href="pages/estoque.html" class="sidebar-btn" title="Estoque">
                         <i class="fas fa-boxes"></i>
                     </a>
-                    <a href="index.html" class="sidebar-btn" title="Ordem de Compra" onclick="localStorage.setItem('pcp-view','ordem-compra')">
+                    <a href="pages/materiais.html" class="sidebar-btn" title="Materiais">
+                        <i class="fas fa-layer-group"></i>
+                    </a>
+                    <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
                         <i class="fas fa-shopping-cart"></i>
                     </a>
                     <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
                         <i class="fas fa-clipboard-list"></i>
                     </a>
-                    <a href="index.html" class="sidebar-btn" title="Gestão de Produção" onclick="localStorage.setItem('pcp-view','gestao-producao')">
+                    <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
                         <i class="fas fa-industry"></i>
+                    </a>
+                    <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
+                        <i class="fas fa-file-invoice-dollar"></i>
                     </a>
                     <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                         <i class="fas fa-stopwatch"></i>
@@ -2379,7 +2385,6 @@
                         <i class="fas fa-chart-pie"></i>
                     </a>
                 `;
-                if (sidebarLinks) sidebarLinks.innerHTML = linksHTML;
                 if (sidebarBottom) {
                     sidebarBottom.innerHTML = `
                         <button class="sidebar-btn" title="Configurações" onclick="abrirModalEtapasPCP()">
@@ -2388,8 +2393,8 @@
                     `;
                 }
             } else {
-                // Usuário de produção - acesso limitado
-                if (btnHome) btnHome.href = 'ordens-producao.html';
+                // Operador: apenas Ordens de Produção e Apontamentos
+                if (sidebarLogo) sidebarLogo.href = 'ordens-producao.html';
                 let linksHTML = `
                     <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
                         <i class="fas fa-clipboard-list"></i>
@@ -2406,7 +2411,7 @@
                     </a>
                     `;
                 }
-                if (sidebarLinks) sidebarLinks.innerHTML = linksHTML;
+                if (sidebarNav) sidebarNav.innerHTML = linksHTML;
                 if (sidebarBottom) {
                     sidebarBottom.innerHTML = `
                         <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
@@ -2646,8 +2651,9 @@
                     const ordensLocal = getOrdensLocais();
 
                     // Mesclar ordens da API com locais (evitar duplicatas por ID)
+                    // Apenas manter ordens locais com ID de timestamp (criadas localmente)
                     const idsAPI = new Set(ordensAPI.map(o => o.id));
-                    const ordensLocalNovas = ordensLocal.filter(o => !idsAPI.has(o.id));
+                    const ordensLocalNovas = ordensLocal.filter(o => !idsAPI.has(o.id) && (o.id > 1000000000 || o.isLocal === true));
 
                     ordensProducao = [...ordensAPI, ...ordensLocalNovas];
 
