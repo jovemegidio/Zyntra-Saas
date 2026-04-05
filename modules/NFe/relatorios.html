@@ -490,71 +490,73 @@ function exportarPDF() {
         '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
         '<title>' + _escHtml(dados.título) + ' - ALUFORCE</title>' +
         '<style>' +
-            '@page { margin: 12mm 15mm; size: A4 landscape; }' +
-            '@media print { body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .print-bar { display: none !important; } }' +
-            '* { margin: 0; padding: 0; box-sizing: border-box; }' +
-            'body { font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif; color: #1e293b; font-size: 11px; line-height: 1.5; background: #fff; padding: 30px 40px; }' +
-            '.print-bar { position: sticky; top: 0; z-index: 100; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 10px; padding: 14px 24px; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 12px; }' +
-            '.print-bar button { border: none; padding: 10px 28px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; }' +
-            '.print-bar .btn-print { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; }' +
-            '.print-bar .btn-print:hover { background: linear-gradient(135deg, #1d4ed8, #1e40af); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,99,235,0.3); }' +
-            '.print-bar .btn-close { background: #f1f5f9; color: #475569; }' +
-            '.print-bar .btn-close:hover { background: #e2e8f0; }' +
-            '.rpt-header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 18px; border-bottom: 3px solid #2563eb; margin-bottom: 22px; }' +
-            '.brand-name { font-size: 24px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }' +
-            '.brand-sub { font-size: 11px; color: #64748b; font-weight: 400; margin-top: 3px; }' +
-            '.rpt-meta { text-align: right; }' +
-            '.doc-tag { font-size: 9px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 4px 12px; border-radius: 6px; display: inline-block; margin-bottom: 8px; letter-spacing: 1px; text-transform: uppercase; }' +
-            '.meta-line { font-size: 10px; color: #64748b; margin-top: 3px; }' +
-            '.rpt-title { margin-bottom: 20px; }' +
-            '.rpt-title h1 { font-size: 17px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }' +
-            '.rpt-title .subtitle { font-size: 11px; color: #64748b; }' +
-            '.summary-row { display: flex; gap: 14px; margin-bottom: 22px; }' +
-            '.summary-card { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; }' +
-            '.summary-card .s-value { font-size: 20px; font-weight: 700; color: #1e293b; }' +
-            '.summary-card .s-label { font-size: 9px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-top: 3px; }' +
-            '.data-section { margin-bottom: 22px; }' +
-            '.data-section h2 { font-size: 12px; font-weight: 700; color: #1e293b; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }' +
-            '.data-section h2::before { content: ""; width: 4px; height: 16px; background: #2563eb; border-radius: 2px; }' +
-            'table { width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; }' +
-            'thead th { background: #1e293b; color: #fff; padding: 9px 12px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }' +
-            'tbody td { padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-size: 10.5px; }' +
-            'tbody tr:nth-child(even) { background: #f8fafc; }' +
-            'tbody tr:hover { background: #f1f5f9; }' +
-            '.badge { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 9px; font-weight: 600; }' +
-            '.badge-success { background: #dcfce7; color: #166534; }' +
-            '.badge-warning { background: #fef3c7; color: #92400e; }' +
-            '.badge-danger { background: #fee2e2; color: #991b1b; }' +
-            '.badge-info { background: #dbeafe; color: #1e40af; }' +
-            '.rpt-footer { margin-top: 28px; padding-top: 14px; border-top: 2px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }' +
-            '.rpt-footer span { font-size: 9px; color: #94a3b8; }' +
-            '.confidential { font-size: 8px; color: #cbd5e1; text-align: center; margin-top: 10px; letter-spacing: 1px; text-transform: uppercase; }' +
+            ':root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}' +
+            '@page{margin:10mm;size:A4 landscape}' +
+            '@media print{body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.no-print{display:none!important}}' +
+            '*{margin:0;padding:0;box-sizing:border-box}' +
+            'body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--text);font-size:11px;line-height:1.5;background:#eef4f8;display:flex;justify-content:center}' +
+            '.shell{width:277mm;margin:11mm auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}' +
+            '.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:14px}' +
+            '.rpt-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}' +
+            '.brand-name{font-size:20px;font-weight:900;color:var(--brand);letter-spacing:.08em}' +
+            '.brand-sub{font-size:10px;color:var(--muted);font-weight:400;margin-top:3px}' +
+            '.rpt-meta{text-align:right}' +
+            '.doc-tag{font-size:9px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);padding:4px 14px;border-radius:10px;display:inline-block;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}' +
+            '.meta-line{font-size:10px;color:var(--muted);margin-top:3px}' +
+            '.doc-card{border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:12px 18px;margin-bottom:16px;text-align:center}' +
+            '.doc-card h1{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:.5px;margin:0}' +
+            '.doc-card .subtitle{font-size:10px;color:var(--accent);margin-top:3px;font-weight:600}' +
+            '.summary-row{display:flex;gap:12px;margin-bottom:16px}' +
+            '.summary-card{flex:1;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 18px}' +
+            '.summary-card .s-value{font-size:20px;font-weight:700;color:var(--ink)}' +
+            '.summary-card .s-label{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.5px;margin-top:3px}' +
+            '.section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}' +
+            '.s-head{background:var(--brand);color:#fff;padding:8px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}' +
+            '.s-head::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}' +
+            'table{width:100%;border-collapse:collapse}' +
+            'thead th{background:var(--brand);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}' +
+            'tbody td{padding:8px 12px;border-bottom:1px solid var(--line);font-size:10.5px}' +
+            'tbody tr:nth-child(even){background:var(--soft)}' +
+            'tbody tr:hover{background:var(--accent-soft)}' +
+            '.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:9px;font-weight:600}' +
+            '.badge-success{background:#dcfce7;color:#166534}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#991b1b}.badge-info{background:#dbeafe;color:#1e40af}' +
+            '.rpt-footer{margin-top:20px;padding-top:10px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center}' +
+            '.rpt-footer span{font-size:8px;color:var(--muted)}' +
+            '.confidential{font-size:7px;color:var(--line);text-align:center;margin-top:8px;letter-spacing:1.5px;text-transform:uppercase}' +
+            '.btn-bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:100}' +
+            '.btn-bar button{border:none;padding:10px 22px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s}' +
+            '.btn-print{background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);color:#fff;box-shadow:0 8px 20px rgba(11,40,66,.2)}' +
+            '.btn-print:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(11,40,66,.3)}' +
+            '.btn-close{background:var(--soft);color:var(--text);border:1px solid var(--line)}' +
+            '.btn-close:hover{background:#fff}' +
         '</style></head><body>' +
-        '<div class="print-bar">' +
-            '<button class="btn-print" onclick="window.print()">??? Imprimir / Salvar PDF</button>' +
-            '<button class="btn-close" onclick="window.close()">? Fechar</button>' +
+        '<div class="btn-bar no-print">' +
+            '<button class="btn-print" onclick="window.print()">Imprimir / Salvar PDF</button>' +
+            '<button class="btn-close" onclick="window.close()">Fechar</button>' +
         '</div>' +
+        '<div class="shell">' +
+        '<div class="top-rule"></div>' +
         '<div class="rpt-header">' +
-            '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra é Módulo NFe</div></div>' +
+            '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra &mdash; M\u00f3dulo NFe</div></div>' +
             '<div class="rpt-meta">' +
-                '<div class="doc-tag">Relatério</div>' +
+                '<div class="doc-tag">Relat\u00f3rio</div>' +
                 '<div class="meta-line">Emitido em: ' + dataGeracao + '</div>' +
-                (período ? '<div class="meta-line">Período: ' + período + '</div>' : '') +
+                (período ? '<div class="meta-line">Per\u00edodo: ' + período + '</div>' : '') +
             '</div>' +
         '</div>' +
-        '<div class="rpt-title"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">Módulo NFe é Sistema Integrado de Gestão Empresarial</div></div>' +
+        '<div class="doc-card"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">M\u00f3dulo NFe &mdash; Sistema Integrado de Gest\u00e3o Empresarial</div></div>' +
         summaryHtml +
-        '<div class="data-section"><h2>Dados do Relatério</h2>' +
+        '<div class="section-card"><div class="s-head">Dados do Relat\u00f3rio</div><div style="padding:0">' +
         tableHtml +
-        '<div style="text-align:right; margin-top:8px; font-size:10px; color:#94a3b8;">' + (dados.linhas ? dados.linhas.length : 0) + ' registro(s) encontrado(s)</div>' +
+        '</div></div>' +
+        '<div style="text-align:right;font-size:10px;color:var(--muted);margin-bottom:16px">' + (dados.linhas ? dados.linhas.length : 0) + ' registro(s) encontrado(s)</div>' +
+        '<div class="rpt-footer"><span>ALUFORCE &mdash; Sistema Integrado de Gest\u00e3o Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
+        '<div class="confidential">Documento Confidencial &mdash; Uso Interno</div>' +
         '</div>' +
-        '<div class="rpt-footer"><span>ALUFORCE é Sistema Integrado de Gestão Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
-        '<div class="confidential">Documento Confidencial é Uso Interno</div>' +
-        '    <script src="/js/user-dropdown.js?v=20260325" defer></script>
-</body></html>'
+        '</body></html>'
     );
     win.document.close();
-    showAlert('PDF gerado com sucesso é use "Salvar como PDF" na janela de impressão', 'success');
+    showAlert('PDF gerado com sucesso. Use "Salvar como PDF" na janela de impress\u00e3o', 'success');
 }
 
 function imprimirRelatorio() {

@@ -58,7 +58,7 @@ router.get('/folha/listar', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar folhas:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -190,7 +190,7 @@ router.post('/folha/processar', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('❌ Erro ao processar folha:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     } finally {
         connection.release();
     }
@@ -224,13 +224,13 @@ router.get('/folha/:id/holerites', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar holerites:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
 /**
  * GET /api/rh/holerite/:id/pdf
- * Gerar holerite em PDF
+ * Gerar holerite em PDF (PDFKit)
  */
 router.get('/holerite/:id/pdf', async (req, res) => {
     try {
@@ -257,26 +257,198 @@ router.get('/holerite/:id/pdf', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Holerite não encontrado' });
         }
         
+        const h = holerite[0];
+
         // Buscar itens detalhados
         const [itens] = await pool.query(
             `SELECT * FROM rh_holerite_itens 
              WHERE funcionario_id = ? AND mes = ? AND ano = ?
              ORDER BY categoria, tipo`,
-            [holerite[0].funcionario_id, holerite[0].mes, holerite[0].ano]
+            [h.funcionario_id, h.mes, h.ano]
         );
-        
-        res.json({
-            success: true,
-            data: {
-                holerite: holerite[0],
-                itens: itens
-            },
-            message: 'Implementar geração de PDF com PDFKit'
-        });
+
+        // Buscar dados da empresa
+        let empresa = { razao: 'ALUFORCE INDUSTRIA E COMERCIO', cnpj: '08.192.479/0001-60', end: 'Ferraz de Vasconcelos/SP' };
+        try {
+            const [emp] = await pool.query(`SELECT * FROM empresa_config LIMIT 1`);
+            if (emp.length) {
+                empresa.razao = emp[0].razao_social || empresa.razao;
+                empresa.cnpj = emp[0].cnpj || empresa.cnpj;
+                empresa.end = [emp[0].cidade, emp[0].estado].filter(Boolean).join('/') || empresa.end;
+            }
+        } catch (_) { /* usa default */ }
+
+        // ========== GERAR PDF COM PDFKIT ==========
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ size: 'A4', margin: 40 });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename=Holerite_${h.nome_completo.replace(/\s/g, '_')}_${String(h.mes).padStart(2, '0')}_${h.ano}.pdf`);
+        doc.pipe(res);
+
+        const brand = '#0b2842';
+        const accent = '#18b6c8';
+        const ink = '#0c1726';
+        const muted = '#6d8092';
+        const pageW = doc.page.width - 80; // 515
+
+        // --- Top gradient bar ---
+        doc.rect(40, 40, pageW, 5).fill(brand);
+        doc.rect(40 + pageW * 0.62, 40, pageW * 0.38, 5).fill(accent);
+
+        // --- Header ---
+        let y = 55;
+        doc.fontSize(18).font('Helvetica-Bold').fillColor(brand).text('ALUFORCE', 40, y);
+        doc.fontSize(7).font('Helvetica').fillColor(muted).text(empresa.razao, 40, y + 22);
+        doc.text(`CNPJ: ${empresa.cnpj}  |  ${empresa.end}`, 40, y + 32);
+
+        // Doc badge (right side)
+        const badgeW = 150;
+        const badgeX = 40 + pageW - badgeW;
+        doc.roundedRect(badgeX, y - 2, badgeW, 40, 8).fill(accent);
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#fff').text('HOLERITE', badgeX, y + 4, { width: badgeW, align: 'center' });
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const mesNome = meses[parseInt(h.mes)] || h.mes;
+        doc.fontSize(11).text(`${mesNome} / ${h.ano}`, badgeX, y + 18, { width: badgeW, align: 'center' });
+
+        // --- Separator ---
+        y = 102;
+        doc.moveTo(40, y).lineTo(40 + pageW, y).lineWidth(0.5).strokeColor('#d8e4ed').stroke();
+
+        // --- Employee data card ---
+        y = 112;
+        doc.roundedRect(40, y, pageW, 70, 10).lineWidth(1).strokeColor('#d8e4ed').stroke();
+        doc.roundedRect(40, y, pageW, 70, 10).fillOpacity(0.03).fill(accent).fillOpacity(1);
+
+        const col1 = 52;
+        const col2 = 300;
+        y += 10;
+        doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('FUNCIONÁRIO', col1, y);
+        doc.fontSize(10).font('Helvetica-Bold').fillColor(ink).text(h.nome_completo || '-', col1, y + 10);
+
+        doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('CPF', col2, y);
+        doc.fontSize(10).font('Helvetica').fillColor(ink).text(h.cpf || '-', col2, y + 10);
+
+        y += 30;
+        doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('CARGO', col1, y);
+        doc.fontSize(9).font('Helvetica').fillColor(ink).text(h.cargo || '-', col1, y + 10);
+
+        doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('DEPARTAMENTO', col2, y);
+        doc.fontSize(9).font('Helvetica').fillColor(ink).text(h.departamento || '-', col2, y + 10);
+
+        const col3 = 430;
+        doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('ADMISSÃO', col3, y);
+        const admissao = h.data_admissao ? new Date(h.data_admissao).toLocaleDateString('pt-BR') : '-';
+        doc.fontSize(9).font('Helvetica').fillColor(ink).text(admissao, col3, y + 10);
+
+        // --- Table: Proventos e Descontos ---
+        y = 200;
+
+        // Table header
+        const thH = 22;
+        doc.roundedRect(40, y, pageW, thH, 6).fill(brand);
+        doc.fontSize(8).font('Helvetica-Bold').fillColor('#fff');
+        doc.text('DESCRIÇÃO', 52, y + 7);
+        doc.text('REFERÊNCIA', 280, y + 7, { width: 80, align: 'center' });
+        doc.text('PROVENTOS (R$)', 360, y + 7, { width: 90, align: 'right' });
+        doc.text('DESCONTOS (R$)', 460, y + 7, { width: 90, align: 'right' });
+
+        y += thH;
+        const rowH = 18;
+        let rowIdx = 0;
+
+        function drawRow(desc, ref, provento, desconto) {
+            if (rowIdx % 2 === 0) {
+                doc.rect(40, y, pageW, rowH).fill('#f6fafc');
+            }
+            doc.fontSize(8).font('Helvetica').fillColor(ink);
+            doc.text(desc, 52, y + 5, { width: 220 });
+            doc.text(ref || '', 280, y + 5, { width: 80, align: 'center' });
+            if (provento > 0) {
+                doc.fillColor('#059669').text(provento.toLocaleString('pt-BR', { minimumFractionDigits: 2 }), 360, y + 5, { width: 90, align: 'right' });
+            }
+            if (desconto > 0) {
+                doc.fillColor('#dc2626').text(desconto.toLocaleString('pt-BR', { minimumFractionDigits: 2 }), 460, y + 5, { width: 90, align: 'right' });
+            }
+            doc.fillColor(ink);
+            y += rowH;
+            rowIdx++;
+        }
+
+        // Salário Base
+        const salBase = parseFloat(h.salario_base) || 0;
+        drawRow('Salário Base', '30 dias', salBase, 0);
+
+        // Proventos dos itens
+        const proventos = itens.filter(i => i.categoria === 'provento');
+        for (const p of proventos) {
+            drawRow(p.tipo || 'Provento', '', parseFloat(p.valor) || 0, 0);
+        }
+
+        // Descontos dos itens
+        const descontos = itens.filter(i => i.categoria === 'desconto');
+        for (const d of descontos) {
+            drawRow(d.tipo || 'Desconto', '', 0, parseFloat(d.valor) || 0);
+        }
+
+        // Encargos (INSS, IRRF)
+        const inssVal = parseFloat(h.inss_valor) || 0;
+        const irrfVal = parseFloat(h.irrf_valor) || 0;
+        if (inssVal > 0) drawRow('INSS', '', 0, inssVal);
+        if (irrfVal > 0) drawRow('IRRF', '', 0, irrfVal);
+
+        // Table bottom border
+        doc.moveTo(40, y).lineTo(40 + pageW, y).lineWidth(0.5).strokeColor('#d8e4ed').stroke();
+
+        // --- Totals row ---
+        y += 6;
+        const totalProventos = salBase + (parseFloat(h.total_proventos) || 0);
+        const totalDescontos = (parseFloat(h.total_descontos) || 0) + inssVal + irrfVal;
+        const salLiquido = parseFloat(h.salario_liquido) || (totalProventos - totalDescontos);
+
+        doc.roundedRect(40, y, pageW, 26, 6).fill('#f0fdfa');
+        doc.fontSize(8).font('Helvetica-Bold').fillColor(muted).text('TOTAIS', 52, y + 9);
+        doc.fillColor('#059669').text(`R$ ${totalProventos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 360, y + 9, { width: 90, align: 'right' });
+        doc.fillColor('#dc2626').text(`R$ ${totalDescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 460, y + 9, { width: 90, align: 'right' });
+
+        // --- Líquido box ---
+        y += 36;
+        const liqW = 240;
+        const liqX = 40 + pageW - liqW;
+        doc.roundedRect(liqX, y, liqW, 40, 10).fill(brand);
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff').text('SALÁRIO LÍQUIDO', liqX + 15, y + 8);
+        doc.fontSize(16).font('Helvetica-Bold').fillColor(accent).text(`R$ ${salLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, liqX + 15, y + 20, { width: liqW - 30, align: 'right' });
+
+        // --- FGTS info ---
+        const fgtsVal = parseFloat(h.fgts_valor) || 0;
+        if (fgtsVal > 0) {
+            doc.roundedRect(40, y, 200, 40, 10).lineWidth(1).strokeColor('#d8e4ed').stroke();
+            doc.fontSize(7).font('Helvetica-Bold').fillColor(muted).text('BASE FGTS / DEPÓSITO FGTS', 52, y + 8);
+            doc.fontSize(10).font('Helvetica').fillColor(ink).text(`R$ ${totalProventos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}  /  R$ ${fgtsVal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 52, y + 22);
+        }
+
+        // --- Footer ---
+        y += 60;
+        doc.moveTo(40, y).lineTo(40 + pageW, y).dash(3, { space: 3 }).lineWidth(0.5).strokeColor('#d8e4ed').stroke();
+        doc.undash();
+
+        y += 12;
+        doc.fontSize(7).font('Helvetica').fillColor(muted).text(
+            `Documento gerado em ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}  |  ${empresa.razao}  |  CNPJ: ${empresa.cnpj}`,
+            40, y, { width: pageW, align: 'center' }
+        );
+        doc.fontSize(6).fillColor('#cbd5e1').text(
+            'Este documento é confidencial e de uso exclusivo do colaborador.',
+            40, y + 12, { width: pageW, align: 'center' }
+        );
+
+        doc.end();
         
     } catch (error) {
-        console.error('❌ Erro ao gerar PDF:', error);
-        res.status(500).json({ success: false, error: error.message });
+        console.error('❌ Erro ao gerar PDF holerite:', error);
+        if (!res.headersSent) {
+            res.status(500).json({ success: false, error: 'Erro interno do servidor' });
+        }
     }
 });
 
@@ -302,7 +474,7 @@ router.get('/beneficios/tipos', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar tipos de benefícios:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -329,7 +501,7 @@ router.post('/beneficios/tipos', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao criar tipo de benefício:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -363,7 +535,7 @@ router.get('/beneficios/funcionario/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar benefícios:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -391,7 +563,7 @@ router.post('/beneficios/vincular', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao vincular benefício:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -419,7 +591,7 @@ router.put('/beneficios/:id/cancelar', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao cancelar benefício:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -448,7 +620,7 @@ router.get('/avaliacoes/periodos', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar períodos:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -518,7 +690,7 @@ router.post('/avaliacoes/criar', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error('❌ Erro ao criar avaliação:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     } finally {
         connection.release();
     }
@@ -551,7 +723,7 @@ router.get('/avaliacoes/funcionario/:id', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar avaliações:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -713,7 +885,7 @@ router.get('/atividades', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao buscar atividades RH:', error);
-        res.status(500).json({ success: false, error: error.message, atividades: [] });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor', atividades: [] });
     }
 });
 
@@ -772,7 +944,7 @@ router.get('/ferias/saldo/:funcionarioId', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao consultar saldo férias:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -816,7 +988,7 @@ router.get('/ferias/minhas/:funcionarioId', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Erro ao listar férias:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 
@@ -864,7 +1036,7 @@ router.post('/ferias/solicitar', async (req, res) => {
         }
     } catch (error) {
         console.error('❌ Erro ao solicitar férias:', error);
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({ success: false, error: 'Erro interno do servidor' });
     }
 });
 

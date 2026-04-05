@@ -11499,7 +11499,10 @@
                 const obs = document.getElementById('edit-observacoes')?.value || '';
                 const transportadora = document.getElementById('edit-transportadora')?.value || '';
                 const tipoFrete = document.getElementById('edit-tipo-frete')?.value || '';
-                const cenarioFiscal = document.getElementById('edit-cenario-fiscal')?.value || '';
+                const cenarioFiscal = document.getElementById('edit-cenario-fiscal')?.value ||
+                    document.getElementById('novo-cenario-fiscal')?.value ||
+                    document.getElementById('impostos-cenario-fiscal')?.value ||
+                    'venda_normal';
                 const condicaoPagamento = document.getElementById('edit-condicao-pagamento')?.value || '';
                 const origem = document.getElementById('edit-origem')?.value || 'Sistema';
 
@@ -11533,12 +11536,7 @@
                     camposFaltando.push('Condição de Pagamento');
                 }
 
-                // 6. Validar Cenário Fiscal
-                if (!cenarioFiscal || cenarioFiscal === '') {
-                    camposFaltando.push('Cenário Fiscal');
-                }
-
-                // 7. Validar Observações
+                // 6. Validar Observações
                 if (!obs || obs.trim() === '') {
                     camposFaltando.push('Observações');
                 }
@@ -11550,24 +11548,22 @@
 
                     // Focar no primeiro campo obrigatório vazio
                     if (!cliente || cliente.trim() === '') {
-                        document.getElementById('edit-cliente').focus();
+                        document.getElementById('edit-cliente')?.focus();
                     } else if (!itensPedidoAtual || itensPedidoAtual.length === 0) {
                         switchModalTab('itens');
                     } else if (!transportadora || transportadora.trim() === '') {
                         switchModalTab('frete');
-                        document.getElementById('edit-transportadora').focus();
+                        document.getElementById('edit-transportadora')?.focus();
                     } else if (!tipoFrete || tipoFrete === '') {
                         switchModalTab('frete');
-                        document.getElementById('edit-tipo-frete').focus();
+                        document.getElementById('edit-tipo-frete')?.focus();
                     } else if (!condicaoPagamento || condicaoPagamento === '') {
                         switchModalTab('frete');
                         const elCondPag = document.getElementById('edit-condicao-pagamento') || document.getElementById('edit-condicao-pagamento-header');
                         if (elCondPag) elCondPag.focus();
-                    } else if (!cenarioFiscal || cenarioFiscal === '') {
-                        document.getElementById('edit-cenario-fiscal').focus();
                     } else if (!obs || obs.trim() === '') {
                         switchModalTab('observacoes');
-                        document.getElementById('edit-observacoes').focus();
+                        document.getElementById('edit-observacoes')?.focus();
                     }
                     return;
                 }
@@ -12231,212 +12227,164 @@
 <meta charset="UTF-8">
 <title>${d.nomeArquivo}</title>
 <style>
-@page { margin: 10mm 12mm; size: A4; }
-@media print {
-    @page { margin: 10mm 12mm; }
-    html, body { margin: 0; padding: 0; }
-    body::before, body::after { display: none !important; }
-    body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .no-print { display: none !important; }
-}
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e293b; background: #fff; font-size: 10px; line-height: 1.35; }
-.page { padding: 0; }
-
-/* === HEADER === */
-.header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 12px; border-bottom: 3px solid #1e293b; }
-.header-left { display: flex; align-items: center; gap: 14px; }
-.header-left img { height: 52px; }
-.header-info { }
-.header-info .brand { font-size: 10px; color: #64748b; margin-top: 6px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
-.header-info .empresa-dados { font-size: 8.5px; color: #475569; line-height: 1.5; margin-top: 4px; }
-.header-right { text-align: right; }
-.doc-badge { background: #1e293b; color: #fff; padding: 14px 22px; text-align: center; min-width: 160px; }
-.doc-badge .tipo { font-size: 13px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
-.doc-badge .número { font-size: 20px; font-weight: 800; margin-top: 2px; letter-spacing: 1px; }
-
-/* === INFO BAR === */
-.info-bar { display: flex; border: 1.5px solid #cbd5e1; margin-top: 12px; }
-.info-bar .cell { flex: 1; padding: 8px 12px; border-right: 1.5px solid #cbd5e1; }
-.info-bar .cell:last-child { border-right: none; }
-.info-bar .cell-label { font-size: 7.5px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 2px; }
-.info-bar .cell-value { font-size: 10px; color: #0f172a; font-weight: 600; }
-
-/* === SECTIONS === */
-.section { margin-top: 14px; }
-.section-title { background: #1e293b; color: #fff; padding: 6px 14px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; display: flex; justify-content: space-between; align-items: center; }
-.section-title .badge { background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 3px; font-size: 8px; font-weight: 600; }
-.section-body { border: 1.5px solid #cbd5e1; border-top: none; padding: 12px 14px; }
-
-/* === CLIENTE === */
-.cliente-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 30px; }
-.cliente-field { display: flex; font-size: 9.5px; }
-.cliente-field .lbl { color: #64748b; font-weight: 700; min-width: 68px; text-transform: uppercase; font-size: 8.5px; }
-.cliente-field .val { color: #0f172a; font-weight: 500; }
-.cliente-nome-row { font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; padding-bottom: 8px; margin-bottom: 8px; border-bottom: 1px solid #e2e8f0; }
-
-/* === ITENS TABLE === */
-.items-table { width: 100%; border-collapse: collapse; }
-.items-table th { background: #1e293b; color: #fff; padding: 7px 8px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; text-align: left; border: 1px solid #1e293b; }
-.items-table td { padding: 6px 8px; font-size: 9px; border-bottom: 1px solid #e5e7eb; }
-.items-table .tc { text-align: center; }
-.items-table .tr { text-align: right; }
-
-/* === TOTAIS === */
-.totais-area { display: flex; justify-content: flex-end; margin-top: 0; }
-.totais-box { min-width: 260px; border: 1.5px solid #cbd5e1; border-top: none; }
-.totais-row { display: flex; justify-content: space-between; padding: 5px 14px; font-size: 9.5px; border-bottom: 1px solid #e5e7eb; }
-.totais-row .lbl { color: #475569; font-weight: 600; }
-.totais-row .val { color: #0f172a; font-weight: 600; }
-.totais-row.neg .val { color: #dc2626; }
-.totais-row.total-final { background: #059669; border-bottom: none; padding: 10px 14px; }
-.totais-row.total-final .lbl { color: #fff; font-size: 12px; font-weight: 800; }
-.totais-row.total-final .val { color: #fff; font-size: 14px; font-weight: 900; }
-
-/* === CONDIÇÕES === */
-.cond-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0; }
-.cond-item { padding: 8px 12px; border-right: 1px solid #e2e8f0; }
-.cond-item:last-child { border-right: none; }
-.cond-item .lbl { font-size: 7.5px; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; }
-.cond-item .val { font-size: 10px; color: #0f172a; font-weight: 600; }
-
-/* === OBSERVAÇÕES === */
-.obs-content { padding: 10px 14px; font-size: 9.5px; color: #374151; line-height: 1.5; background: #fefce8; border: 1.5px solid #cbd5e1; border-top: none; }
-
-/* === FOOTER === */
-.footer-bar { margin-top: 16px; padding-top: 8px; border-top: 2px solid #1e293b; font-size: 7.5px; color: #64748b; text-align: center; line-height: 1.6; }
-.footer-bar .sep { margin: 0 6px; color: #cbd5e1; }
+:root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}
+@page{margin:10mm;size:A4}
+@media print{@page{margin:10mm}html,body{margin:0;padding:0}body::before,body::after{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:10px;line-height:1.4}
+.a4{width:210mm;min-height:297mm;padding:11mm 0}
+.frame{width:184mm;margin:0 auto}
+.shell{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
+.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:12px}
+.doc{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
+.doc-head{padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%)}
+.head-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;align-items:start}
+.brand-wrap{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.logo-box{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 72%,var(--accent) 100%);flex:0 0 42px;overflow:hidden}
+.logo-box img{width:42px;height:42px;object-fit:contain}
+.brand-name{margin:0;color:var(--brand);font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.brand-sub{color:var(--muted);font-size:8px;letter-spacing:.12em;text-transform:uppercase}
+.headline{margin:0;color:var(--ink);font-size:16px;font-weight:900}
+.subtitle{color:var(--muted);font-size:9.5px;margin-top:4px}
+.doc-card{margin:10px 14px;border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:10px 14px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
+.meta-item{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+.meta-item .lbl{font-size:7px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.meta-item .val{font-size:10px;color:var(--ink);font-weight:600}
+.doc-body{padding:14px}
+.section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px}
+.s-head{background:var(--brand);color:#fff;padding:7px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;display:flex;justify-content:space-between;align-items:center}
+.s-head .badge{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:8px;font-size:8px}
+.s-body{padding:12px 14px}
+.cliente-nome{font-size:12px;font-weight:800;color:var(--ink);text-transform:uppercase;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line)}
+.cliente-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 28px}
+.cli-field{display:flex;font-size:9.5px}
+.cli-field .lbl{color:var(--muted);font-weight:700;min-width:68px;text-transform:uppercase;font-size:8.5px}
+.cli-field .val{color:var(--ink);font-weight:500}
+.items-table{width:100%;border-collapse:collapse}
+.items-table th{background:var(--brand);color:#fff;padding:7px 8px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:left}
+.items-table td{padding:6px 8px;font-size:9px;border-bottom:1px solid var(--line)}
+.items-table .tc{text-align:center}.items-table .tr{text-align:right}
+.totals-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:260px;margin-left:auto}
+.totals-row{display:flex;justify-content:space-between;padding:6px 14px;font-size:9.5px;border-bottom:1px solid var(--line)}
+.totals-row .lbl{color:var(--muted);font-weight:600}.totals-row .val{color:var(--ink);font-weight:600}
+.totals-row.neg .val{color:#dc2626}
+.totals-row.grand{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:10px 14px}
+.totals-row.grand .lbl{color:#fff;font-size:12px;font-weight:800}
+.totals-row.grand .val{color:#fff;font-size:14px;font-weight:900}
+.cond-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0}
+.cond-item{padding:8px 12px;border-right:1px solid var(--line)}
+.cond-item:last-child{border-right:none}
+.cond-item .lbl{font-size:7.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.cond-item .val{font-size:10px;color:var(--ink);font-weight:600}
+.obs-content{padding:10px 14px;font-size:9.5px;color:var(--text);line-height:1.5;background:var(--accent-soft)}
+.footer-band{margin-top:14px;padding-top:8px;border-top:1px dashed var(--line);font-size:7.5px;color:var(--muted);text-align:center;line-height:1.8}
+.footer-band .sep{margin:0 5px;color:var(--line)}
 </style>
 </head>
 <body>
-<div class="page">
-    <!-- HEADER -->
-    <div class="header">
-        <div class="header-left">
-            <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=\\'font-size:28px;font-weight:900;color:#1e293b;letter-spacing:-1px\\'>ALUFORCE</div>'">
-            <div class="header-info">
-                <div class="brand">Cabos de Alumínio</div>
-                <div class="empresa-dados">
-                    ${getEmpresaRazao()}<br>
-                    CNPJ: ${getEmpresaCnpj()} &nbsp;|&nbsp; IE: ${getEmpresaIe()}<br>
-                    ${getEmpresaEndereco()} - ${getEmpresaCidade()}<br>
-                    ${getEmpresaTel()} &nbsp;|&nbsp; contato@aluforce.ind.br
+<div class="a4"><div class="frame"><div class="shell">
+    <div class="top-rule"></div>
+    <div class="doc">
+        <div class="doc-head">
+            <div class="head-grid">
+                <div>
+                    <div class="brand-wrap">
+                        <div class="logo-box"><img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="A" onerror="this.outerHTML='<svg width=24 height=24 viewBox=\\'0 0 24 24\\' fill=\\'white\\'><text x=\\'4\\' y=\\'18\\' font-weight=\\'900\\' font-size=\\'16\\'>A</text></svg>'"></div>
+                        <div>
+                            <div class="brand-name">ALUFORCE</div>
+                            <div class="brand-sub">${getEmpresaRazao()}</div>
+                        </div>
+                    </div>
+                    <div style="font-size:8px;color:var(--muted);line-height:1.6;padding-left:52px;">
+                        CNPJ: ${getEmpresaCnpj()} &nbsp;|&nbsp; IE: ${getEmpresaIe()}<br>
+                        ${getEmpresaEndereco()} - ${getEmpresaCidade()}<br>
+                        ${getEmpresaTel()}
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <div class="headline">${d.tipoDocumento}</div>
+                    <div class="subtitle">Nº ${String(pedidoAtual.id).padStart(5, '0')}</div>
                 </div>
             </div>
         </div>
-        <div class="header-right">
-            <div class="doc-badge">
-                <div class="tipo">${d.tipoDocumento}</div>
-                <div class="número">N. ${pedidoAtual.id}</div>
+
+        <div class="doc-card">
+            <div class="meta-grid">
+                <div class="meta-item"><div class="lbl">Emissão</div><div class="val">${d.dataEmissao}</div></div>
+                <div class="meta-item"><div class="lbl">Vendedor</div><div class="val">${pedidoAtual.vendedor || '--'}</div></div>
+                <div class="meta-item"><div class="lbl">Validade</div><div class="val">${d.dataValidadeStr}</div></div>
+                <div class="meta-item"><div class="lbl">Status</div><div class="val">${statusLabel}</div></div>
             </div>
         </div>
-    </div>
 
-    <!-- INFO BAR -->
-    <div class="info-bar">
-        <div class="cell">
-            <div class="cell-label">Emissão</div>
-            <div class="cell-value">${d.dataEmissao}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Vendedor</div>
-            <div class="cell-value">${pedidoAtual.vendedor || '--'}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Validade</div>
-            <div class="cell-value">${d.dataValidadeStr}</div>
-        </div>
-        <div class="cell">
-            <div class="cell-label">Status</div>
-            <div class="cell-value">${statusLabel}</div>
-        </div>
-    </div>
-
-    <!-- DADOS DO CLIENTE -->
-    <div class="section">
-        <div class="section-title">Dados do Cliente</div>
-        <div class="section-body">
-            <div class="cliente-nome-row">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</div>
-            <div class="cliente-row">
-                <div class="cliente-field"><span class="lbl">CNPJ/CPF:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cnpj || pedidoAtual.cliente_cpf || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">IE:</span><span class="val">${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
-                <div class="cliente-field"><span class="lbl">Endereço:</span><span class="val">${escaparHTML(d.endCliente)}</span></div>
-                <div class="cliente-field"><span class="lbl">CEP:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cep || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">Telefone:</span><span class="val">${escaparHTML(pedidoAtual.cliente_telefone || '--')}</span></div>
-                <div class="cliente-field"><span class="lbl">Contato:</span><span class="val">${escaparHTML(pedidoAtual.cliente_contato || '--')}</span></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ITENS -->
-    <div class="section">
-        <div class="section-title">Itens do ${d.tipoDocumento}<span class="badge">${totalItens} Itens</span></div>
-        <table class="items-table">
-            <thead>
-                <tr>
-                    <th style="width:30px;" class="tc">#</th>
-                    <th style="width:75px;">Código</th>
-                    <th>Descrição</th>
-                    <th style="width:50px;" class="tr">Qtd</th>
-                    <th style="width:30px;" class="tc">Un</th>
-                    <th style="width:70px;" class="tr">Vlr. Unit.</th>
-                    <th style="width:50px;" class="tr">Desc.</th>
-                    <th style="width:75px;" class="tr">Total</th>
-                </tr>
-            </thead>
-            <tbody>${d.itensRows}</tbody>
-        </table>
-    </div>
-
-    <!-- TOTAIS -->
-    <div class="totais-area">
-        <div class="totais-box">
-            <div class="totais-row"><span class="lbl">Subtotal:</span><span class="val">R$ ${d.subtotalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-            ${d.totalDescontos > 0 ? `<div class="totais-row neg"><span class="lbl">Descontos:</span><span class="val">- R$ ${d.totalDescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.frete > 0 ? `<div class="totais-row"><span class="lbl">Frete:</span><span class="val">R$ ${d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.ipi > 0 ? `<div class="totais-row"><span class="lbl">IPI:</span><span class="val">R$ ${d.ipi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            ${d.icmsST > 0 ? `<div class="totais-row"><span class="lbl">ICMS ST:</span><span class="val">R$ ${d.icmsST.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
-            <div class="totais-row total-final"><span class="lbl">TOTAL:</span><span class="val">R$ ${d.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
-        </div>
-    </div>
-
-    <!-- CONDIÇÕES COMERCIAIS -->
-    <div class="section">
-        <div class="section-title">Condições Comerciais</div>
-        <div class="section-body" style="padding: 0;">
-            <div class="cond-grid">
-                <div class="cond-item">
-                    <div class="lbl">Pagamento</div>
-                    <div class="val">${d.condicao} dias</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Transportadora</div>
-                    <div class="val">${pedidoAtual.transportadora || '--'}</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Frete</div>
-                    <div class="val">${d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'}</div>
-                </div>
-                <div class="cond-item">
-                    <div class="lbl">Prazo</div>
-                    <div class="val">${pedidoAtual.prazo_entrega || 'A combinar'}</div>
+        <div class="doc-body">
+            <div class="section-card">
+                <div class="s-head">Dados do Cliente</div>
+                <div class="s-body">
+                    <div class="cliente-nome">${escaparHTML(pedidoAtual.cliente || 'Cliente não informado')}</div>
+                    <div class="cliente-grid">
+                        <div class="cli-field"><span class="lbl">CNPJ/CPF:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cnpj || pedidoAtual.cliente_cpf || '--')}</span></div>
+                        <div class="cli-field"><span class="lbl">IE:</span><span class="val">${escaparHTML(pedidoAtual.cliente_ie || 'Isento')}</span></div>
+                        <div class="cli-field"><span class="lbl">Endereço:</span><span class="val">${escaparHTML(d.endCliente)}</span></div>
+                        <div class="cli-field"><span class="lbl">CEP:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cep || '--')}</span></div>
+                        <div class="cli-field"><span class="lbl">Telefone:</span><span class="val">${escaparHTML(pedidoAtual.cliente_telefone || '--')}</span></div>
+                        <div class="cli-field"><span class="lbl">Contato:</span><span class="val">${escaparHTML(pedidoAtual.cliente_contato || '--')}</span></div>
+                    </div>
                 </div>
             </div>
+
+            <div class="section-card">
+                <div class="s-head">Itens do ${d.tipoDocumento}<span class="badge">${totalItens} Itens</span></div>
+                <table class="items-table">
+                    <thead><tr>
+                        <th style="width:30px" class="tc">#</th>
+                        <th style="width:75px">Código</th>
+                        <th>Descrição</th>
+                        <th style="width:50px" class="tr">Qtd</th>
+                        <th style="width:30px" class="tc">Un</th>
+                        <th style="width:70px" class="tr">Vlr. Unit.</th>
+                        <th style="width:50px" class="tr">Desc.</th>
+                        <th style="width:75px" class="tr">Total</th>
+                    </tr></thead>
+                    <tbody>${d.itensRows}</tbody>
+                </table>
+            </div>
+
+            <div style="display:flex;justify-content:flex-end;margin-bottom:12px">
+                <div class="totals-card">
+                    <div class="totals-row"><span class="lbl">Subtotal:</span><span class="val">R$ ${d.subtotalBruto.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                    ${d.totalDescontos > 0 ? `<div class="totals-row neg"><span class="lbl">Descontos:</span><span class="val">- R$ ${d.totalDescontos.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                    ${d.frete > 0 ? `<div class="totals-row"><span class="lbl">Frete:</span><span class="val">R$ ${d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                    ${d.ipi > 0 ? `<div class="totals-row"><span class="lbl">IPI:</span><span class="val">R$ ${d.ipi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                    ${d.icmsST > 0 ? `<div class="totals-row"><span class="lbl">ICMS ST:</span><span class="val">R$ ${d.icmsST.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                    <div class="totals-row grand"><span class="lbl">TOTAL:</span><span class="val">R$ ${d.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                </div>
+            </div>
+
+            <div class="section-card">
+                <div class="s-head">Condições Comerciais</div>
+                <div style="padding:0">
+                    <div class="cond-grid">
+                        <div class="cond-item"><div class="lbl">Pagamento</div><div class="val">${d.condicao} dias</div></div>
+                        <div class="cond-item"><div class="lbl">Transportadora</div><div class="val">${pedidoAtual.transportadora || '--'}</div></div>
+                        <div class="cond-item"><div class="lbl">Frete</div><div class="val">${d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'}</div></div>
+                        <div class="cond-item"><div class="lbl">Prazo</div><div class="val">${pedidoAtual.prazo_entrega || 'A combinar'}</div></div>
+                    </div>
+                </div>
+            </div>
+
+            ${pedidoAtual.observacoes ? `
+            <div class="section-card">
+                <div class="s-head">Observações</div>
+                <div class="obs-content">${pedidoAtual.observacoes}</div>
+            </div>` : ''}
         </div>
     </div>
-
-    <!-- OBSERVAÇÕES -->
-    ${pedidoAtual.observacoes ? `
-    <div class="section">
-        <div class="section-title">Observações</div>
-        <div class="obs-content">${pedidoAtual.observacoes}</div>
-    </div>` : ''}
-
-    <!-- FOOTER -->
-    <div class="footer-bar">
+    <div class="footer-band">
         Orçamento válido por 15 dias<span class="sep">|</span>Preços sujeitos a alteração após a validade<span class="sep">|</span>Prazo de entrega após confirmação do pedido<span class="sep">|</span>Documento sem valor fiscal
     </div>
-</div>
+</div></div></div>
 </body>
 </html>`;
         }
@@ -15132,6 +15080,20 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Atualizar o valor (string vazia se for 0 e não tinha nada)
             input.value = valor === '' ? '' : numero.toString();
+        }
+
+        // Sincronizar select visível de condição de pagamento com campo oculto
+        function syncCondicaoPagamento(context) {
+            if (context === 'edit') {
+                const headerSel = document.getElementById('edit-condicao-pagamento-header');
+                const hiddenInput = document.getElementById('edit-condicao-pagamento');
+                if (!headerSel || !hiddenInput) return;
+                const raw = headerSel.value;
+                const normalized = raw === 'a_vista' ? 'a vista' : raw.replace(/_/g, '/');
+                hiddenInput.value = normalized;
+                recalcularParcelasAutomatico();
+            }
+            // 'novo': #novo-condicao-pagamento é lido diretamente pelo salvar — sem hidden necessário
         }
 
         // Recalcular parcelas automaticamente baseado na condição de pagamento
@@ -20512,7 +20474,16 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
             carregarNotificacoes();
 
             // Atualizar notificações a cada 30 segundos
-            setInterval(carregarNotificacoes, 30000);
+            window._notifIntervalVendas = setInterval(carregarNotificacoes, 30000);
+            // Cleanup: pausar quando tab oculta, retomar quando visível
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(window._notifIntervalVendas);
+                } else {
+                    carregarNotificacoes();
+                    window._notifIntervalVendas = setInterval(carregarNotificacoes, 30000);
+                }
+            });
 
             // Fechar painel ao clicar fora
             document.addEventListener('click', function (e) {
@@ -21857,39 +21828,66 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     ...window.dadosVendas.faturado || []
                 ];
 
-                conteudo.push(`<h2>Relatório de Pedidos</h2>`);
-                conteudo.push(`<p>Período: ${dataInicio} a ${dataFim}</p>`);
-                conteudo.push(`<table border="1" cellpadding="8" cellspacing="0" style="width:100%; border-collapse: collapse;">`);
-                conteudo.push(`<tr style="background:#f5f5f5;"><th>ID</th><th>Cliente</th><th>Valor</th><th>Status</th></tr>`);
+                conteudo.push(`<div class="section-card"><div class="s-head">Relatório de Pedidos</div>`);
+                conteudo.push(`<table class="items-table">`);
+                conteudo.push(`<thead><tr><th>Nº</th><th>Cliente</th><th style="text-align:right">Valor</th><th>Status</th></tr></thead><tbody>`);
 
-                todosPedidos.forEach(p => {
-                    conteudo.push(`<tr><td>${escaparHTML(p.id)}</td><td>${escaparHTML(p.cliente)}</td><td>R$ ${(p.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>${escaparHTML(p.status) || '-'}</td></tr>`);
+                let totalValor = 0;
+                todosPedidos.forEach((p, idx) => {
+                    const val = parseFloat(p.valor) || 0;
+                    totalValor += val;
+                    conteudo.push(`<tr><td>${escaparHTML(String(p.id))}</td><td>${escaparHTML(p.cliente)}</td><td style="text-align:right;font-weight:700">R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td><td>${escaparHTML(p.status) || '-'}</td></tr>`);
                 });
 
-                conteudo.push(`</table>`);
+                conteudo.push(`</tbody></table></div>`);
+                conteudo.push(`<div style="display:flex;justify-content:flex-end;margin-top:14px"><div class="totals-card"><div class="totals-row"><label>Registros:</label><span>${todosPedidos.length}</span></div><div class="totals-row total"><label>TOTAL:</label><span>R$ ${totalValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div></div></div>`);
             }
 
             // Abrir janela de impressão
             const printWindow = window.open('', '_blank');
             printWindow.document.write(`
                 <!DOCTYPE html>
-                <html>
+                <html lang="pt-BR">
                 <head>
+                    <meta charset="UTF-8">
                     <title>Zyntra: Relatório de Vendas</title>
                     <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h1 { color: #f97316; }
-                        table { margin-top: 20px; }
-                        th { background: #f97316; color: white; }
+                        :root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}
+                        @page{margin:12mm;size:A4}
+                        @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}
+                        *{margin:0;padding:0;box-sizing:border-box}
+                        body{font-family:Inter,'Segoe UI',Arial,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:11px}
+                        .shell{width:184mm;margin:11mm auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
+                        .top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:14px}
+                        h1{color:var(--brand);font-size:18px;font-weight:900;letter-spacing:.08em;margin-bottom:4px}
+                        .meta{color:var(--muted);font-size:10px;margin-bottom:16px}
+                        h2{color:var(--ink);font-size:13px;font-weight:700;margin-bottom:10px}
+                        table{width:100%;border-collapse:collapse;border-radius:12px;overflow:hidden;margin-bottom:16px}
+                        .section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px}
+                        .s-head{background:var(--brand);color:#fff;padding:7px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+                        .items-table{width:100%;border-collapse:collapse}
+                        .items-table th{background:var(--brand);color:#fff;padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;text-align:left}
+                        .items-table td{padding:7px 12px;border-bottom:1px solid var(--line);font-size:10px}
+                        .items-table tr:nth-child(even){background:var(--soft)}
+                        th{background:var(--brand);color:#fff;padding:8px 12px;font-size:9px;font-weight:700;text-transform:uppercase;text-align:left}
+                        td{padding:7px 12px;border-bottom:1px solid var(--line);font-size:10px}
+                        tr:nth-child(even){background:var(--soft)}
+                        .totals-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:200px}
+                        .totals-row{display:flex;justify-content:space-between;padding:6px 14px;font-size:9px;border-bottom:1px solid var(--line)}
+                        .totals-row label{color:var(--muted);font-weight:600}.totals-row span{color:var(--ink);font-weight:600}
+                        .totals-row.total{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:10px 14px}
+                        .totals-row.total label{color:#fff;font-size:11px;font-weight:800}.totals-row.total span{color:#fff;font-size:12px;font-weight:900}
+                        .footer{margin-top:20px;padding-top:10px;border-top:1px dashed var(--line);font-size:8px;color:var(--muted);text-align:center}
                     </style>
-                    <scr` + `ipt src="/js/anti-copy-protection.js"></scr` + `ipt>
-                    <link rel="stylesheet" href="/css/popup-confirmacao.css">
                 </head>
                 <body>
-                    <h1>ALUFORCE - Vendas</h1>
-                    <p>Gerado em: ${new Date().toLocaleString('pt-BR')}</p>
-                    ${conteudo.join('')}
-                    <scr` + `ipt src="/js/popup-confirmacao.js"></scr` + `ipt>
+                    <div class="shell">
+                        <div class="top-rule"></div>
+                        <h1>ALUFORCE</h1>
+                        <div class="meta">Gerado em: ${new Date().toLocaleString('pt-BR')}</div>
+                        ${conteudo.join('')}
+                        <div class="footer">Documento gerado automaticamente pelo Zyntra ERP &nbsp;|&nbsp; Uso interno</div>
+                    </div>
                 </body>
                 </html>
             `);
@@ -22160,18 +22158,18 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
 
             // Resumo cards HTML
             const resumoHTML = opcoes.incluirResumo ? `
-                <div style="display: flex; gap: 10px; margin-top: 10px;">
-                    <div style="flex: 1; background: #f0f9ff; border: 1px solid #2c5282; padding: 10px; text-align: center;">
-                        <div style="font-size: 18px; font-weight: 700; color: #1a365d;">${dados.length}</div>
-                        <div style="font-size: 7px; color: #718096; text-transform: uppercase; margin-top: 2px;">Registros</div>
+                <div style="display:flex;gap:10px;margin-bottom:16px;">
+                    <div style="flex:1;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:var(--ink);">${dados.length}</div>
+                        <div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-top:3px;font-weight:700;letter-spacing:.5px;">Registros</div>
                     </div>
-                    <div style="flex: 1; background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); padding: 10px; text-align: center;">
-                        <div style="font-size: 18px; font-weight: 700; color: #fff;">R$ ${totais.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                        <div style="font-size: 7px; color: rgba(255,255,255,0.8); text-transform: uppercase; margin-top: 2px;">Valor Total</div>
+                    <div style="flex:1;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-radius:14px;padding:14px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:#fff;">R$ ${totais.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                        <div style="font-size:7px;color:rgba(255,255,255,.8);text-transform:uppercase;margin-top:3px;font-weight:700;">Valor Total</div>
                     </div>
-                    <div style="flex: 1; background: #f0f9ff; border: 1px solid #2c5282; padding: 10px; text-align: center;">
-                        <div style="font-size: 18px; font-weight: 700; color: #38a169;">R$ ${dados.length > 0 ? (totais.valor / dados.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
-                        <div style="font-size: 7px; color: #718096; text-transform: uppercase; margin-top: 2px;">Ticket Médio</div>
+                    <div style="flex:1;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center;">
+                        <div style="font-size:20px;font-weight:800;color:var(--accent);">R$ ${dados.length > 0 ? (totais.valor / dados.length).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00'}</div>
+                        <div style="font-size:7px;color:var(--muted);text-transform:uppercase;margin-top:3px;font-weight:700;letter-spacing:.5px;">Ticket Médio</div>
                     </div>
                 </div>
             ` : '';
@@ -22183,62 +22181,37 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                     <meta charset="UTF-8">
                     <title>Zyntra: ${título}</title>
                     <style>
-                        @page { margin: 10mm; size: A4; }
-                        @media print {
-                            @page { margin: 10mm; }
-                            html, body { margin: 0; padding: 0; }
-                            html { margin-top: 0 !important; }
-                            body::before, body::after { display: none !important; }
-                            .no-print { display: none !important; }
-                        }
-                        * { margin: 0; padding: 0; box-sizing: border-box; }
-                        body { font-family: Arial, Helvetica, sans-serif; color: #2d3748; background: #fff; font-size: 10px; }
-                        .container { padding: 15px; max-width: 100%; }
-
-                        /* Header */
-                        .header { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 8px; border-bottom: 2.5px solid #1a365d; }
-                        .header-line { height: 0.5px; background: #2c5282; margin-top: 3px; }
-                        .logo-area img { height: 40px; }
-                        .empresa-info { text-align: right; font-size: 7px; color: #718096; line-height: 1.4; }
-                        .empresa-info .razao { font-size: 8px; font-weight: 700; color: #1a365d; margin-bottom: 1px; }
-
-                        /* Título */
-                        .doc-title { background: linear-gradient(135deg, #1a365d 0%, #2c5282 100%); color: #fff; padding: 8px 15px; margin-top: 8px; text-align: center; }
-                        .doc-title h1 { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; margin: 0; }
-                        .doc-title .subtítulo { font-size: 9px; color: #90cdf4; margin-top: 2px; }
-
-                        /* Seções */
-                        .section { margin-top: 10px; }
-                        .section-header { background: #2c5282; color: #fff; padding: 5px 10px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-                        .section-content { border: 1px solid #e2e8f0; border-top: none; padding: 10px; background: #fff; }
-
-                        /* Tabela */
-                        .items-table { width: 100%; border-collapse: collapse; }
-                        .items-table th { background: #1a365d; color: #fff; padding: 6px 8px; font-size: 7px; font-weight: 700; text-transform: uppercase; text-align: left; }
-
-                        /* Totais Box */
-                        .totais-wrapper { display: flex; justify-content: flex-end; margin-top: 10px; }
-                        .totais-box { background: #f0f9ff; border: 1px solid #2c5282; padding: 10px 15px; min-width: 180px; box-shadow: 2px 2px 0 #e2e8f0; }
-                        .totais-row { display: flex; justify-content: space-between; font-size: 8px; padding: 3px 0; }
-                        .totais-row.total { border-top: 1px solid #2c5282; padding-top: 8px; margin-top: 5px; }
-                        .totais-row.total label { font-size: 10px; font-weight: 700; color: #1a365d; }
-                        .totais-row.total span { font-size: 11px; font-weight: 700; color: #38a169; }
-
-                        /* Info Box */
-                        .info-box { background: #fff; border: 1px solid #e2e8f0; padding: 8px 10px; font-size: 8px; margin-top: 10px; }
-                        .info-row { margin: 3px 0; }
-                        .info-row strong { color: #718096; }
-
-                        /* Footer */
-                        .footer { margin-top: 15px; padding-top: 8px; border-top: 1px solid #1a365d; font-size: 7px; color: #718096; text-align: center; }
-
-                        /* Botão Imprimir */
-                        .btn-imprimir { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: linear-gradient(135deg, #c53030 0%, #9b2c2c 100%); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3); z-index: 1000; }
-                        .btn-imprimir:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(197, 48, 48, 0.4); }
-
-                        @media print {
-                            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        }
+                        :root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}
+                        @page{margin:10mm;size:A4}
+                        @media print{@page{margin:10mm}html,body{margin:0;padding:0}html{margin-top:0!important}body::before,body::after{display:none!important}.no-print{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+                        *{margin:0;padding:0;box-sizing:border-box}
+                        body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:10px;line-height:1.4}
+                        .shell{width:184mm;margin:11mm auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
+                        .top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:14px}
+                        .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+                        .logo-area img{height:40px}
+                        .brand-name{font-size:18px;font-weight:900;color:var(--brand);letter-spacing:.08em}
+                        .empresa-info{text-align:right;font-size:7px;color:var(--muted);line-height:1.5}
+                        .empresa-info .razao{font-size:8px;font-weight:700;color:var(--brand);margin-bottom:1px}
+                        .doc-card{border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:12px 16px;margin-bottom:14px;text-align:center}
+                        .doc-card h1{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:.5px;margin:0}
+                        .doc-card .subtitle{font-size:9px;color:var(--accent);margin-top:3px;font-weight:600}
+                        .section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px}
+                        .s-head{background:var(--brand);color:#fff;padding:7px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px}
+                        .items-table{width:100%;border-collapse:collapse}
+                        .items-table th{background:var(--brand);color:#fff;padding:7px 10px;font-size:8px;font-weight:700;text-transform:uppercase;text-align:left}
+                        .items-table td{padding:6px 10px;border-bottom:1px solid var(--line);font-size:9px}
+                        .items-table tr:nth-child(even){background:var(--soft)}
+                        .totals-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:200px;margin-left:auto;margin-bottom:14px}
+                        .totals-row{display:flex;justify-content:space-between;padding:6px 14px;font-size:9px;border-bottom:1px solid var(--line)}
+                        .totals-row label{color:var(--muted);font-weight:600}.totals-row span{color:var(--ink);font-weight:600}
+                        .totals-row.total{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:10px 14px}
+                        .totals-row.total label{color:#fff;font-size:11px;font-weight:800}.totals-row.total span{color:#fff;font-size:12px;font-weight:900}
+                        .info-card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:8px;margin-bottom:14px}
+                        .info-card .info-row{margin:3px 0}.info-card .info-row strong{color:var(--muted)}
+                        .footer{padding-top:10px;border-top:1px dashed var(--line);font-size:7px;color:var(--muted);text-align:center;line-height:1.8}
+                        .btn-imprimir{position:fixed;top:20px;right:20px;padding:10px 20px;background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);color:#fff;border:none;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 8px 20px rgba(11,40,66,.2);z-index:1000}
+                        .btn-imprimir:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(11,40,66,.3)}
                     </style>
                 </head>
                 <body>
@@ -22247,11 +22220,14 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         Imprimir / Salvar PDF
                     </button>
 
-                    <div class="container">
+                    <div class="shell">
+                        <div class="top-rule"></div>
+
                         <!-- HEADER -->
                         <div class="header">
                             <div class="logo-area">
-                                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" onerror="this.outerHTML='<div style=font-size:20px;font-weight:700;color:#1a365d>ALUFORCE</div>'">
+                                <div class="brand-name">ALUFORCE</div>
+                                <div style="font-size:8px;color:var(--muted);margin-top:2px;">Zyntra ERP — Módulo Vendas</div>
                             </div>
                             <div class="empresa-info">
                                 <div class="razao">${getEmpresaRazao()}</div>
@@ -22261,20 +22237,19 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                                 <div>Tel: ${getEmpresaTel()}</div>
                             </div>
                         </div>
-                        <div class="header-line"></div>
 
                         <!-- TÍTULO -->
-                        <div class="doc-title">
+                        <div class="doc-card">
                             <h1>${título.toUpperCase()}</h1>
-                            <div class="subtitulo">Período: ${períodoTexto} | Gerado em ${dataAtual} às ${horaAtual}</div>
+                            <div class="subtitle">Período: ${períodoTexto} &nbsp;|&nbsp; Gerado em ${dataAtual} às ${horaAtual}</div>
                         </div>
 
                         <!-- RESUMO EXECUTIVO -->
                         ${resumoHTML}
 
                         <!-- DADOS DO RELATÓRIO -->
-                        <div class="section">
-                            <div class="section-header">Detalhamento</div>
+                        <div class="section-card">
+                            <div class="s-head">Detalhamento</div>
                             <table class="items-table">
                                 <thead>
                                     <tr>${headerTabela}</tr>
@@ -22286,15 +22261,15 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         </div>
 
                         <!-- TOTAIS -->
-                        <div class="totais-wrapper">
-                            <div class="totais-box">
-                                <div class="totais-row"><label>Qtd. Registros:</label><span>${dados.length}</span></div>
-                                <div class="totais-row total"><label>VALOR TOTAL:</label><span>R$ ${totais.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
+                        <div style="display:flex;justify-content:flex-end;">
+                            <div class="totals-card">
+                                <div class="totals-row"><label>Qtd. Registros:</label><span>${dados.length}</span></div>
+                                <div class="totals-row total"><label>VALOR TOTAL:</label><span>R$ ${totais.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                             </div>
                         </div>
 
                         <!-- INFORMAÇÕES ADICIONAIS -->
-                        <div class="info-box">
+                        <div class="info-card">
                             <div class="info-row"><strong>Relatório gerado em:</strong> ${dataAtual} às ${horaAtual}</div>
                             <div class="info-row"><strong>Período analisado:</strong> ${períodoTexto}</div>
                             <div class="info-row"><strong>Tipo de relatório:</strong> ${título}</div>
@@ -22303,15 +22278,10 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #1e2
                         <!-- FOOTER -->
                         <div class="footer">
                             <div>Documento gerado automaticamente pelo sistema ALUFORCE</div>
-                            <div style="margin-top: 2px;">${getEmpresaRazao()} | CNPJ: ${getEmpresaCnpj()}</div>
-                            <div style="margin-top: 4px; font-style: italic;">Este documento é válido apenas para fins de consulta interna.</div>
+                            <div>${getEmpresaRazao()} | CNPJ: ${getEmpresaCnpj()}</div>
+                            <div style="font-style:italic;margin-top:2px;">Este documento é válido apenas para fins de consulta interna.</div>
                         </div>
                     </div>
-
-                    <scr` + `ipt>
-                        // Auto-print após carregar
-                        // setTimeout(function() { window.print(); }, 800);
-                    <\/scr` + `ipt>
                 </body>
                 </html>
             `;
