@@ -8,6 +8,12 @@
 const path = require('path');
 const fs = require('fs');
 
+// HTML escape helper to prevent XSS in server-rendered HTML
+const escHtml = (str) => {
+    if (str == null) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
 module.exports = function mountPageRoutes(app, { authenticatePage, userPermissions }) {
     // ===== FACTORY: Rota protegida por módulo (DRY) =====
     function modulePageHandler(moduleName, filePath, opts = {}) {
@@ -26,7 +32,7 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
                     }
                     res.sendFile(path.join(__dirname, '..', filePath));
                 } else {
-                    res.status(403).send(`<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de ${moduleName}.</p>`);
+                    res.status(403).send(`<h1>Acesso Negado</h1><p>Voc\u00ea n\u00e3o tem permiss\u00e3o para acessar o m\u00f3dulo de ${escHtml(moduleName)}.</p>`);
                 }
             } else {
                 res.redirect('/login.html');

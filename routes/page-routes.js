@@ -8,6 +8,12 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+// HTML escape helper to prevent XSS in server-rendered HTML
+const escHtml = (str) => {
+    if (str == null) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+};
+
 function setupPageRoutes(app, baseDir, authenticatePage, userPermissions) {
     
     // Helper para verificar permissão e servir página
@@ -17,7 +23,7 @@ function setupPageRoutes(app, baseDir, authenticatePage, userPermissions) {
             if (userPermissions.hasAccess(firstName, module)) {
                 res.sendFile(path.join(baseDir, filePath));
             } else {
-                res.status(403).send(`<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de ${module.toUpperCase()}.</p>`);
+                res.status(403).send(`<h1>Acesso Negado</h1><p>Voc\u00ea n\u00e3o tem permiss\u00e3o para acessar o m\u00f3dulo de ${escHtml(module.toUpperCase())}.</p>`);
             }
         } else {
             res.redirect('/login.html');
