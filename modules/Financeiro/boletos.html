@@ -172,10 +172,6 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto" id="user-photo" style="display:none">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -312,6 +308,8 @@
 
         function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
         function formatarData(d) { if (!d) return '-'; try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; } }
+        // AUDIT-FIX S2.5: XSS protection
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
         function mostrarToast(msg, tipo) {
             const colors = { success: '#10b981', error: '#ef4444', warning: '#f59e0b', info: '#3b82f6' };
@@ -365,8 +363,8 @@
 
             tbody.innerHTML = boletos.map(b => `
                 <tr>
-                    <td><strong>${b.número_documento || '-'}</strong></td>
-                    <td>${b.sacado_nome}</td>
+                    <td><strong>${esc(b.número_documento || '-')}</strong></td>
+                    <td>${esc(b.sacado_nome)}</td>
                     <td>${formatarData(b.data_emissao)}</td>
                     <td>${formatarData(b.data_vencimento)}</td>
                     <td class="valor entrada">${formatarMoeda(b.valor)}</td>
@@ -385,11 +383,11 @@
             if (!b) return;
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="boleto-detail">
-                    <div class="linha-digitavel">${b.linha_digitavel || 'N/A'}</div>
-                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${b.número_documento}</span></div>
-                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${b.nosso_número}</span></div>
-                    <div class="info-row"><span class="label">Sacado</span><span class="value">${b.sacado_nome}</span></div>
-                    <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${b.sacado_cpf_cnpj || '-'}</span></div>
+                    <div class="linha-digitavel">${esc(b.linha_digitavel || 'N/A')}</div>
+                    <div class="info-row"><span class="label">Nº Documento</span><span class="value">${esc(b.número_documento)}</span></div>
+                    <div class="info-row"><span class="label">Nosso Número</span><span class="value">${esc(b.nosso_número)}</span></div>
+                    <div class="info-row"><span class="label">Sacado</span><span class="value">${esc(b.sacado_nome)}</span></div>
+                    <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${esc(b.sacado_cpf_cnpj || '-')}</span></div>
                     <div class="info-row"><span class="label">Valor</span><span class="value" style="color:var(--success)">${formatarMoeda(b.valor)}</span></div>
                     <div class="info-row"><span class="label">Multa</span><span class="value">${formatarMoeda(b.valor_multa)}</span></div>
                     <div class="info-row"><span class="label">Juros/dia</span><span class="value">${formatarMoeda(b.valor_juros_dia)}</span></div>
@@ -404,6 +402,7 @@
         }
 
         async function emitirBoleto() {
+            if (window._guardEmitirBoleto) return;
             const payload = {
                 sacado_nome: document.getElementById('bol-sacado-nome').value,
                 sacado_cpf_cnpj: document.getElementById('bol-sacado-cpf').value,
@@ -421,6 +420,7 @@
                 mostrarToast('Preencha nome, valor e vencimento', 'warning');
                 return;
             }
+            window._guardEmitirBoleto = true;
 
             try {
                 const r = await fetch(`${API}/emitir-boleto`, { method: 'POST', headers: headers(), body: JSON.stringify(payload) });
@@ -436,11 +436,13 @@
                 }
             } catch (e) {
                 mostrarToast('Erro de conexão', 'error');
-            }
+            } finally { window._guardEmitirBoleto = false; }
         }
 
         async function marcarPago(id) {
             if (!confirm('Confirmar baixa manual deste boleto?')) return;
+            if (window._guardMarcarPago) return;
+            window._guardMarcarPago = true;
             try {
                 const r = await fetch(`${API}/boletos/${id}`, {
                     method: 'PUT', headers: headers(),
@@ -448,16 +450,18 @@
                 });
                 const data = await r.json();
                 if (data.success) { mostrarToast('Boleto marcado como pago', 'success'); carregarBoletos(); }
-            } catch (e) { mostrarToast('Erro ao atualizar', 'error'); }
+            } catch (e) { mostrarToast('Erro ao atualizar', 'error'); } finally { window._guardMarcarPago = false; }
         }
 
         async function cancelarBoleto(id) {
             if (!confirm('Confirmar cancelamento deste boleto?')) return;
+            if (window._guardCancelarBoleto) return;
+            window._guardCancelarBoleto = true;
             try {
                 const r = await fetch(`${API}/boletos/${id}`, { method: 'DELETE', headers: headers() });
                 const data = await r.json();
                 if (data.success) { mostrarToast('Boleto cancelado', 'success'); carregarBoletos(); }
-            } catch (e) { mostrarToast('Erro ao cancelar', 'error'); }
+            } catch (e) { mostrarToast('Erro ao cancelar', 'error'); } finally { window._guardCancelarBoleto = false; }
         }
 
         function exportarBoletos() {

@@ -866,10 +866,6 @@
                     </button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -2538,7 +2534,7 @@
             if (mensagem) {
                 const alertDiv = document.createElement('div');
                 alertDiv.className = 'alert-info-relatório';
-                alertDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${mensagem}`;
+                alertDiv.innerHTML = `<i class="fas fa-info-circle"></i> ${mensagem.replace(/</g, '&lt;').replace(/>/g, '&gt;')}`;
                 alertDiv.style.cssText = 'background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af;padding:12px 16px;border-radius:8px;margin:8px 24px;font-size:14px;display:flex;align-items:center;gap:8px;';
                 
                 // Remover alerta anterior se existir

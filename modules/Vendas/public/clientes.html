@@ -778,10 +778,6 @@
                     </button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1365,6 +1361,9 @@
     </div>
 
     <script>
+        // FIX-100: XSS protection for innerHTML with API data
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         let todosClientes = [], clientesFiltrados = [], paginaAtual = 1, itensPorPagina = 25;
 
         async function carregarClientes() {
@@ -1445,10 +1444,10 @@
             }
             tbody.innerHTML = clientesPagina.map(c => `
                 <tr>
-                    <td><div class="client-info-cell"><div class="client-avatar">${getIniciais(c.nome)}</div><div><div class="client-name" title="${c.nome || ''}">${c.nome || 'Sem nome'}</div><div class="client-contact">${c.contato || '-'}</div></div></div></td>
+                    <td><div class="client-info-cell"><div class="client-avatar">${getIniciais(c.nome)}</div><div><div class="client-name" title="${esc(c.nome)}">${esc(c.nome) || 'Sem nome'}</div><div class="client-contact">${esc(c.contato) || '-'}</div></div></div></td>
                     <td>${formatarDocumento(c.cnpj || c.cnpj_cpf, c.cpf)}</td>
                     <td>${formatarTelefone(c.telefone)}</td>
-                    <td>${c.email || '-'}</td>
+                    <td>${esc(c.email) || '-'}</td>
                     <td><span class="client-status ${c.ativo ? 'ativo' : 'inativo'}">${c.ativo ? 'Ativo' : 'Inativo'}</span></td>
                     <td>
                         <button class="action-btn" title="Editar" onclick="editarCliente(${c.id})"><i class="fas fa-edit"></i></button>

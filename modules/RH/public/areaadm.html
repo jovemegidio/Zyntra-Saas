@@ -554,10 +554,6 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1160,9 +1156,18 @@
             carregarMarcacoesTempoReal();
 
             // Auto-refresh marcações a cada 60 segundos
-            setInterval(() => {
+            window._marcacoesIntervalRH = setInterval(() => {
                 carregarMarcacoesTempoReal();
             }, 60000);
+            // Cleanup: pausar quando tab oculta
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(window._marcacoesIntervalRH);
+                } else {
+                    carregarMarcacoesTempoReal();
+                    window._marcacoesIntervalRH = setInterval(() => { carregarMarcacoesTempoReal(); }, 60000);
+                }
+            });
         });
     </script>
 

@@ -156,7 +156,6 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar"><img alt="Foto" id="user-photo" style="display:none"><span id="user-initials">U</span></div>
                     </div>
                 </div>
             </header>
@@ -294,6 +293,8 @@
         function hdrs() { return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' }; }
         function fmtMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
         function fmtData(d) { if (!d) return '-'; try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; } }
+        // AUDIT-FIX S2.5: XSS protection
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
         let notas = [];
 
@@ -346,9 +347,9 @@
             }
             tb.innerHTML = notas.map(n => `
                 <tr>
-                    <td><strong>${n.número_nfse || '-'}</strong></td>
-                    <td>${n.tomador_nome}</td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${n.descrição_servico}</td>
+                    <td><strong>${esc(n.número_nfse || '-')}</strong></td>
+                    <td>${esc(n.tomador_nome)}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.descrição_servico)}</td>
                     <td>${fmtData(n.data_emissao)}</td>
                     <td class="valor">${fmtMoeda(n.valor_servico)}</td>
                     <td class="valor">${fmtMoeda(n.valor_iss)}</td>
@@ -368,14 +369,14 @@
             document.getElementById('detalhe-body').innerHTML = `
                 <div class="nfse-detail">
                     <div class="detail-header">
-                        <h3>NFS-e Nº ${n.número_nfse}</h3>
-                        <p>Protocolo: ${n.protocolo || '-'} é Verificação: ${n.codigo_verificacao || '-'}</p>
+                        <h3>NFS-e Nº ${esc(n.número_nfse)}</h3>
+                        <p>Protocolo: ${esc(n.protocolo || '-')} é Verificação: ${esc(n.codigo_verificacao || '-')}</p>
                     </div>
                     <div class="detail-body">
-                        <div class="info-row"><span class="label">Tomador</span><span class="value">${n.tomador_nome}</span></div>
-                        <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${n.tomador_cpf_cnpj || '-'}</span></div>
-                        <div class="info-row"><span class="label">E-mail</span><span class="value">${n.tomador_email || '-'}</span></div>
-                        <div class="info-row"><span class="label">Serviço</span><span class="value">${n.descrição_servico}</span></div>
+                        <div class="info-row"><span class="label">Tomador</span><span class="value">${esc(n.tomador_nome)}</span></div>
+                        <div class="info-row"><span class="label">CPF/CNPJ</span><span class="value">${esc(n.tomador_cpf_cnpj || '-')}</span></div>
+                        <div class="info-row"><span class="label">E-mail</span><span class="value">${esc(n.tomador_email || '-')}</span></div>
+                        <div class="info-row"><span class="label">Serviço</span><span class="value">${esc(n.descrição_servico)}</span></div>
                         <div class="info-row"><span class="label">Competência</span><span class="value">${fmtData(n.data_competencia)}</span></div>
                         <div class="info-row"><span class="label">Data Emissão</span><span class="value">${fmtData(n.data_emissao)}</span></div>
                         <div class="info-row"><span class="label">Valor do Serviço</span><span class="value" style="font-size:16px">${fmtMoeda(n.valor_servico)}</span></div>
@@ -402,6 +403,7 @@
         }
 
         async function emitirNfse() {
+            if (window._guardEmitirNfse) return;
             const payload = {
                 tomador_nome: document.getElementById('nf-tomador-nome').value,
                 tomador_cpf_cnpj: document.getElementById('nf-tomador-cpf').value,
@@ -420,6 +422,7 @@
             if (!payload.tomador_nome || !payload.descrição_servico || !payload.valor_servico) {
                 mostrarToast('Preencha tomador, descrição e valor', 'warning'); return;
             }
+            window._guardEmitirNfse = true;
             try {
                 const r = await fetch(`${API}/emitir-nfse`, { method: 'POST', headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
@@ -429,17 +432,19 @@
                     carregarNfse();
                     document.querySelectorAll('#modal-emitir input, #modal-emitir textarea').forEach(el => { if (el.type !== 'number' || !el.value) el.value = ''; });
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToast('Erro de conexão', 'error'); }
+            } catch (e) { mostrarToast('Erro de conexão', 'error'); } finally { window._guardEmitirNfse = false; }
         }
 
         async function cancelarNfse(id) {
             const motivo = prompt('Motivo do cancelamento:');
             if (motivo === null) return;
+            if (window._guardCancelarNfse) return;
+            window._guardCancelarNfse = true;
             try {
                 const r = await fetch(`${API}/nfse/${id}/cancelar`, { method: 'PUT', headers: hdrs(), body: JSON.stringify({ motivo }) });
                 const data = await r.json();
                 if (data.success) { mostrarToast('NFS-e cancelada', 'success'); carregarNfse(); }
-            } catch (e) { mostrarToast('Erro', 'error'); }
+            } catch (e) { mostrarToast('Erro', 'error'); } finally { window._guardCancelarNfse = false; }
         }
 
         function exportarNfse() {

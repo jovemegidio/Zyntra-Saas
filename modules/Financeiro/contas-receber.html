@@ -409,10 +409,6 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo" style="display:none;">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1496,16 +1492,20 @@
 
         async function confirmarRecebimento(event) {
             event.preventDefault();
+            if (window._guardConfirmarReceb) return;
+            window._guardConfirmarReceb = true;
             var id = document.getElementById('receber-conta-id').value;
             var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_pagamento: document.getElementById('receber-forma').value, observacoes: document.getElementById('receber-obs').value };
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id+'/receber', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { showToast('Recebimento confirmado com sucesso!'); fecharModalReceber(); await init(); } else { showToast('Erro ao confirmar recebimento', 'error'); }
-            } catch(e) { console.error(e); showToast('Erro ao confirmar recebimento', 'error'); }
+            } catch(e) { console.error(e); showToast('Erro ao confirmar recebimento', 'error'); } finally { window._guardConfirmarReceb = false; }
         }
 
         async function salvarConta(event) {
             event.preventDefault();
+            if (window._guardSalvarContaR) return;
+            window._guardSalvarContaR = true;
             var id = document.getElementById('conta-id').value;
             var statusVal = document.getElementById('cr-status').value;
             var pagoNoDia = document.getElementById('cr-pago-no-dia').value;
@@ -1535,26 +1535,30 @@
                     } catch(uploadErr) { console.error('Erro ao upload comprovante:', uploadErr); }
                 }
                 showToast('Conta salva com sucesso!'); fecharModal(); await init();
-            } catch(e) { console.error(e); showToast('Erro ao salvar conta', 'error'); }
+            } catch(e) { console.error(e); showToast('Erro ao salvar conta', 'error'); } finally { window._guardSalvarContaR = false; }
         }
 
         async function excluirConta(id) {
             if (!confirm('Tem certeza que deseja excluir esta conta?')) return;
+            if (window._guardExcluirContaR) return;
+            window._guardExcluirContaR = true;
             try {
                 var r = await fetch('/api/financeiro/contas-receber/'+id, { method:'DELETE', credentials:'include' });
                 if (r.ok) { showToast('Conta excluida com sucesso!'); await init(); } else { showToast('Erro ao excluir', 'error'); }
-            } catch(e) { console.error(e); showToast('Erro ao excluir', 'error'); }
+            } catch(e) { console.error(e); showToast('Erro ao excluir', 'error'); } finally { window._guardExcluirContaR = false; }
         }
 
         async function enviarCobrancas() {
             var pendentes = contas.filter(function(c){ return c.status === 'pendente' || c.status === 'vencido' || c.status === 'a_vencer' || c.status === 'vencida'; });
             if (pendentes.length === 0) { showToast('Nao ha contas pendentes para cobranca', 'warning'); return; }
             if (!confirm('Enviar cobranca para '+pendentes.length+' conta(s)?')) return;
+            if (window._guardEnviarCobrancas) return;
+            window._guardEnviarCobrancas = true;
             try {
                 var ids = pendentes.map(function(c){return c.id;});
                 var r = await fetch('/api/financeiro/enviar-cobranca-lote', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({ ids: ids }) });
                 if (r.ok) { showToast('Cobrancas enviadas para '+pendentes.length+' conta(s)!'); } else { showToast('Erro ao enviar cobrancas em lote', 'error'); }
-            } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); }
+            } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); } finally { window._guardEnviarCobrancas = false; }
         }
         function getFilteredContas() {
             var período = document.getElementById('filtro-período').value;
@@ -2092,7 +2096,7 @@
             var totVal = abertas.reduce(function(s,x){ return s+x.valor; }, 0);
             var totPrxV = abertas.reduce(function(s,x){ return s+x.prxValor; }, 0);
             var pmPond = totVal > 0 ? totPrxV / totVal : 0;
-            var pmMed = abertas.reduce(function(s,x){ return s+x.prazDplus; }, 0) / abertas.length;
+            var pmMed = abertas.length > 0 ? abertas.reduce(function(s,x){ return s+x.prazDplus; }, 0) / abertas.length : 0;
             if (kpis) {
                 var dtOpFormatted = dtOp.toLocaleDateString('pt-BR');
                 kpis.innerHTML = [

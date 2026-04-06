@@ -310,6 +310,8 @@
         }
         .toast.success { background: var(--success-green); }
         .toast.error { background: var(--danger-red); }
+        .toast.info { background: #3b82f6; }
+        .toast.warning { background: #f59e0b; }
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -392,10 +394,6 @@
                     </button>
                     <div class="user-greeting">
                         <span><span id="saudacao">Bom dia</span>, <strong id="userName">Operador</strong></span>
-                        <div class="user-avatar" id="userAvatar">
-                            <img src="" alt="Foto" id="user-photo" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:50%;">
-                            <span id="user-initials">O</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -453,21 +451,21 @@
                             <span class="atividade-nome">1A</span>
                             <span class="atividade-desc">Produção Irregular</span>
                         </div>
-                        <div class="atividade-card" data-atividade="PR" onclick="iniciarAtividade('PR', 'Parada Refeião', '#64748b')">
+                        <div class="atividade-card" data-atividade="PR" onclick="iniciarAtividade('PR', 'Parada Refeição', '#64748b')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #f1f5f9, #e2e8f0); color: #475569;">
                                 <i class="fas fa-utensils"></i>
                             </div>
                             <span class="atividade-nome">PR</span>
-                            <span class="atividade-desc">Parada Refeião</span>
+                            <span class="atividade-desc">Parada Refeição</span>
                         </div>
 
                         <!-- Linha 2: Manutenães -->
-                        <div class="atividade-card" data-atividade="PM" onclick="iniciarAtividade('PM', 'Parada de Manutenão', '#ef4444')">
+                        <div class="atividade-card" data-atividade="PM" onclick="iniciarAtividade('PM', 'Parada de Manutenção', '#ef4444')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fee2e2, #fecaca); color: #dc2626;">
                                 <i class="fas fa-pause-circle"></i>
                             </div>
                             <span class="atividade-nome">PM</span>
-                            <span class="atividade-desc">Parada Manutenão</span>
+                            <span class="atividade-desc">Parada Manutenção</span>
                         </div>
                         <div class="atividade-card" data-atividade="FM" onclick="iniciarAtividade('FM', 'Falta de Matéria Prima', '#f97316')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #ffedd5, #fed7aa); color: #ea580c;">
@@ -476,14 +474,14 @@
                             <span class="atividade-nome">FM</span>
                             <span class="atividade-desc">Falta Mat. Prima</span>
                         </div>
-                        <div class="atividade-card" data-atividade="ME" onclick="iniciarAtividade('ME', 'Manutenão Elétrica', '#eab308')">
+                        <div class="atividade-card" data-atividade="ME" onclick="iniciarAtividade('ME', 'Manutenção Elétrica', '#eab308')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #fef9c3, #fef08a); color: #ca8a04;">
                                 <i class="fas fa-bolt"></i>
                             </div>
                             <span class="atividade-nome">ME</span>
                             <span class="atividade-desc">Manut. Elétrica</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MM" onclick="iniciarAtividade('MM', 'Manutenão Mecânica', '#0ea5e9')">
+                        <div class="atividade-card" data-atividade="MM" onclick="iniciarAtividade('MM', 'Manutenção Mecânica', '#0ea5e9')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #e0f2fe, #bae6fd); color: #0284c7;">
                                 <i class="fas fa-cogs"></i>
                             </div>
@@ -506,14 +504,14 @@
                             <span class="atividade-nome">TT</span>
                             <span class="atividade-desc">Troca de Turno</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MP" onclick="iniciarAtividade('MP', 'Manutenão Preventiva', '#10b981')">
+                        <div class="atividade-card" data-atividade="MP" onclick="iniciarAtividade('MP', 'Manutenção Preventiva', '#10b981')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669;">
                                 <i class="fas fa-clipboard-check"></i>
                             </div>
                             <span class="atividade-nome">MP</span>
                             <span class="atividade-desc">Manut. Preventiva</span>
                         </div>
-                        <div class="atividade-card" data-atividade="MC" onclick="iniciarAtividade('MC', 'Manutenão Corretiva', '#f43f5e')">
+                        <div class="atividade-card" data-atividade="MC" onclick="iniciarAtividade('MC', 'Manutenção Corretiva', '#f43f5e')">
                             <div class="atividade-icon" style="background: linear-gradient(135deg, #ffe4e6, #fecdd3); color: #e11d48;">
                                 <i class="fas fa-wrench"></i>
                             </div>
@@ -582,6 +580,31 @@
                             <div class="contexto-field" style="margin-top:10px;">
                                 <label>Observações</label>
                                 <textarea id="inputObservacoes" rows="2" placeholder="Ex: Torcendo veia amarela do cabo PP 3x2.5mm"></textarea>
+                            </div>
+                            <div class="contexto-grid" style="margin-top:10px;">
+                                <div class="contexto-field">
+                                    <label>Máquina</label>
+                                    <input type="text" id="inputMaquina" placeholder="Ex: Extrusora 01" autocomplete="off">
+                                </div>
+                                <div class="contexto-field">
+                                    <label>Turno</label>
+                                    <select id="inputTurno">
+                                        <option value="">Selecione</option>
+                                        <option value="Manhã">Manhã</option>
+                                        <option value="Tarde">Tarde</option>
+                                        <option value="Noite">Noite</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="contexto-grid" style="margin-top:10px;">
+                                <div class="contexto-field">
+                                    <label>Qtd. Produzida</label>
+                                    <input type="number" id="inputQtdProduzida" placeholder="0" min="0" step="0.01">
+                                </div>
+                                <div class="contexto-field">
+                                    <label>Qtd. Refugo</label>
+                                    <input type="number" id="inputQtdRefugo" placeholder="0" min="0" step="0.01">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -748,14 +771,14 @@
             letter-spacing: 1px;
         }
 
-        /* Botões de Aão */
-        .ações-timer {
+        /* Botões de Ação */
+        .acoes-timer {
             display: flex;
             justify-content: center;
             gap: 16px;
             margin-bottom: 24px;
         }
-        .btn-ação {
+        .btn-acao {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -769,48 +792,48 @@
             text-transform: uppercase;
             letter-spacing: 1px;
         }
-        .btn-ação.pausar {
+        .btn-acao.pausar {
             background: linear-gradient(135deg, #f59e0b, #d97706);
             color: white;
             box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
         }
-        .btn-ação.pausar:hover {
+        .btn-acao.pausar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
         }
-        .btn-ação.continuar {
+        .btn-acao.continuar {
             background: linear-gradient(135deg, #22c55e, #16a34a);
             color: white;
             box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
         }
-        .btn-ação.finalizar {
+        .btn-acao.finalizar {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             color: white;
             box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
         }
-        .btn-ação.finalizar:hover {
+        .btn-acao.finalizar:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5);
         }
-        .btn-ação i {
+        .btn-acao i {
             font-size: 20px;
         }
 
         /* Histórico */
-        .histórico-section {
+        .historico-section {
             background: white;
             border-radius: 16px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
-        .histórico-header {
+        .historico-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .histórico-header h3 {
+        .historico-header h3 {
             font-size: 16px;
             font-weight: 600;
             display: flex;
@@ -818,15 +841,15 @@
             gap: 10px;
             margin: 0;
         }
-        .histórico-header h3 i {
+        .historico-header h3 i {
             color: var(--primary-color);
         }
-        .histórico-resumo {
+        .historico-resumo {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        .histórico-resumo span:first-child {
+        .historico-resumo span:first-child {
             font-size: 24px;
             font-weight: 700;
             color: var(--primary-color);
@@ -836,11 +859,11 @@
             font-size: 12px;
             color: var(--text-secondary);
         }
-        .histórico-lista {
+        .historico-lista {
             max-height: 400px;
             overflow-y: auto;
         }
-        .histórico-item {
+        .historico-item {
             display: flex;
             align-items: center;
             gap: 16px;
@@ -848,10 +871,10 @@
             border-bottom: 1px solid #f1f5f9;
             transition: background 0.2s;
         }
-        .histórico-item:hover {
+        .historico-item:hover {
             background: #f8fafc;
         }
-        .histórico-icon {
+        .historico-icon {
             width: 44px;
             height: 44px;
             border-radius: 12px;
@@ -860,20 +883,20 @@
             justify-content: center;
             font-size: 18px;
         }
-        .histórico-info {
+        .historico-info {
             flex: 1;
         }
-        .histórico-atividade {
+        .historico-atividade {
             font-weight: 600;
             font-size: 14px;
             color: var(--text-primary);
         }
-        .histórico-horarios {
+        .historico-horarios {
             font-size: 12px;
             color: var(--text-secondary);
             margin-top: 2px;
         }
-        .histórico-duracao {
+        .historico-duracao {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
@@ -909,7 +932,7 @@
             .timer-display-grande {
                 font-size: 48px;
             }
-            .btn-ação {
+            .btn-acao {
                 padding: 14px 24px;
                 font-size: 14px;
             }
@@ -983,6 +1006,7 @@
         let timerSeconds = 0;
         let timerRunning = false;
         let timerPausado = false;
+        let salvandoApontamento = false; // Anti-duplicidade
         let horaInicio = null;
         let históricoHoje = [];
 
@@ -991,8 +1015,8 @@
             'ST': { bg: '#f3e8ff', color: '#7c3aed', icon: 'fa-tools', nome: 'Setup' },
             '1': { bg: '#dcfce7', color: '#16a34a', icon: 'fa-play', nome: 'Início Produção' },
             '1A': { bg: '#fef3c7', color: '#d97706', icon: 'fa-exclamation-triangle', nome: 'Produção Irregular' },
-            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refeião' },
-            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manutenão' },
+            'PR': { bg: '#f1f5f9', color: '#475569', icon: 'fa-utensils', nome: 'Parada Refeição' },
+            'PM': { bg: '#fee2e2', color: '#dc2626', icon: 'fa-pause-circle', nome: 'Parada Manutenção' },
             'FM': { bg: '#ffedd5', color: '#ea580c', icon: 'fa-box-open', nome: 'Falta Mat. Prima' },
             'ME': { bg: '#fef9c3', color: '#ca8a04', icon: 'fa-bolt', nome: 'Manut. Elétrica' },
             'MM': { bg: '#e0f2fe', color: '#0284c7', icon: 'fa-cogs', nome: 'Manut. Mecânica' },
@@ -1116,7 +1140,12 @@
                     if (avatarPath && avatarPath !== '/avatars/default.webp' && avatarEl) {
                         const img = new Image();
                         img.onload = () => {
-                            avatarEl.innerHTML = `<img src="${avatarPath}" alt="${primeiroNome}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+                            const safeImg = document.createElement('img');
+                            safeImg.src = avatarPath;
+                            safeImg.alt = primeiroNome;
+                            safeImg.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;';
+                            avatarEl.innerHTML = '';
+                            avatarEl.appendChild(safeImg);
                         };
                         img.onerror = () => {
                             // Fallback: mostrar inicial com cor
@@ -1148,45 +1177,70 @@
         }
 
         // Configurar sidebar baseado na role do usuário
-        // NOTA: Todos os usuários veem todas as páginas do PCP na sidebar
-        // Apenas destacar o item ativo (Apontamentos)
+        // Operadores (role='operador') veem apenas Ordens de Produção e Apontamentos
         function configurarSidebarPorRole(user) {
-            // Garantir que todos os itens da sidebar estejam visveis
             const sidebarNav = document.querySelector('.sidebar-nav');
             if (!sidebarNav) return;
 
-            // Sidebar completa com todos os 9 itens
-            sidebarNav.innerHTML = `
-                <a href="index.html" class="sidebar-btn" title="Dashboard PCP">
-                    <i class="fas fa-tachometer-alt"></i>
-                </a>
-                <a href="pages/estoque.html" class="sidebar-btn" title="Estoque">
-                    <i class="fas fa-boxes"></i>
-                </a>
-                <a href="pages/materiais.html" class="sidebar-btn" title="Materiais">
-                    <i class="fas fa-layer-group"></i>
-                </a>
-                <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
-                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
-                    <i class="fas fa-clipboard-list"></i>
-                </a>
-                <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
-                    <i class="fas fa-industry"></i>
-                </a>
-                <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                </a>
-                <a href="apontamentos.html" class="sidebar-btn active" title="Apontamentos">
-                    <i class="fas fa-stopwatch"></i>
-                </a>
-                <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
-                    <i class="fas fa-chart-pie"></i>
-                </a>
-            `;
+            const role = (user.role || user.cargo || '').toLowerCase();
+            const roles = (user.roles || []).map(r => r.toLowerCase());
 
-            console.log('[SIDEBAR] Sidebar configurada com todos os 10 itens');
+            // Roles com acesso completo ao módulo PCP
+            const rolesFullAccess = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
+            const isFullAccess = rolesFullAccess.some(r => role.includes(r)) ||
+                                 roles.some(r => rolesFullAccess.some(a => r.includes(a)));
+
+            const sidebarBottom = document.querySelector('.sidebar-bottom');
+
+            if (isFullAccess) {
+                // Sidebar completa com todos os itens
+                sidebarNav.innerHTML = `
+                    <a href="index.html" class="sidebar-btn" title="Dashboard PCP">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </a>
+                    <a href="pages/estoque.html" class="sidebar-btn" title="Estoque">
+                        <i class="fas fa-boxes"></i>
+                    </a>
+                    <a href="pages/materiais.html" class="sidebar-btn" title="Materiais">
+                        <i class="fas fa-layer-group"></i>
+                    </a>
+                    <a href="pages/ordem-compra.html" class="sidebar-btn" title="Ordem de Compra">
+                        <i class="fas fa-shopping-cart"></i>
+                    </a>
+                    <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
+                        <i class="fas fa-clipboard-list"></i>
+                    </a>
+                    <a href="pages/gestao-producao.html" class="sidebar-btn" title="Gestão de Produção">
+                        <i class="fas fa-industry"></i>
+                    </a>
+                    <a href="pages/faturamento.html" class="sidebar-btn" title="Faturamento">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </a>
+                    <a href="apontamentos.html" class="sidebar-btn active" title="Apontamentos">
+                        <i class="fas fa-stopwatch"></i>
+                    </a>
+                    <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
+                        <i class="fas fa-chart-pie"></i>
+                    </a>
+                `;
+            } else {
+                // Operador: apenas Ordens de Produção e Apontamentos
+                sidebarNav.innerHTML = `
+                    <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
+                        <i class="fas fa-clipboard-list"></i>
+                    </a>
+                    <a href="apontamentos.html" class="sidebar-btn active" title="Apontamentos">
+                        <i class="fas fa-stopwatch"></i>
+                    </a>
+                `;
+                if (sidebarBottom) {
+                    sidebarBottom.innerHTML = `
+                        <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    `;
+                }
+            }
         }
 
         // Função de logout
@@ -1296,7 +1350,7 @@
             }
 
             try {
-                await fetch('/api/pcp/notificar-atividade', { credentials: 'include', method: 'POST',
+                await fetch('/api/pcp/notificar-atividade', { method: 'POST',
                     headers: headers,
                     credentials: 'include',
                     body: JSON.stringify(body)
@@ -1346,11 +1400,11 @@
             // Atualizar botão pausar/continuar
             const btnPausar = document.getElementById('btnPausar');
             if (timerPausado) {
-                btnPausar.className = 'btn-ação continuar';
+                btnPausar.className = 'btn-acao continuar';
                 btnPausar.innerHTML = '<i class="fas fa-play"></i><span>CONTINUAR</span>';
                 btnPausar.onclick = continuarAtividade;
             } else {
-                btnPausar.className = 'btn-ação pausar';
+                btnPausar.className = 'btn-acao pausar';
                 btnPausar.innerHTML = '<i class="fas fa-pause"></i><span>PAUSAR</span>';
                 btnPausar.onclick = pausarAtividade;
             }
@@ -1403,10 +1457,20 @@
 
         function finalizarAtividade() {
             if (!atividadeAtual) return;
+            // Anti-duplicidade: bloquear cliques múltiplos
+            if (salvandoApontamento) {
+                mostrarToast('Aguarde, salvando apontamento...', 'info');
+                return;
+            }
+            salvandoApontamento = true;
 
             const pedidoNumero = document.getElementById('inputPedidoNumero')?.value?.trim() || '';
             const produtoDescricao = document.getElementById('inputProdutoDescricao')?.value?.trim() || '';
             const observacoes = document.getElementById('inputObservacoes')?.value?.trim() || '';
+            const maquina = document.getElementById('inputMaquina')?.value?.trim() || '';
+            const turno = document.getElementById('inputTurno')?.value || '';
+            const qtdProduzida = parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0;
+            const qtdRefugo = parseFloat(document.getElementById('inputQtdRefugo')?.value) || 0;
 
             const registro = {
                 id: Date.now(),
@@ -1419,7 +1483,11 @@
                 data: new Date().toISOString().split('T')[0],
                 pedido_numero: pedidoNumero,
                 produto_descricao: produtoDescricao,
-                observacoes: observacoes
+                observacoes: observacoes,
+                maquina: maquina,
+                turno: turno,
+                quantidade_produzida: qtdProduzida,
+                quantidade_refugo: qtdRefugo
             };
 
             // Adicionar ao histórico
@@ -1440,6 +1508,18 @@
 
         function finalizarAtividadeAutomatica() {
             if (!atividadeAtual) return;
+            // Anti-duplicidade: bloquear se já estiver salvando
+            if (salvandoApontamento) return;
+            salvandoApontamento = true;
+
+            // Capturar campos de contexto antes de perder a referência
+            const pedidoNumero = document.getElementById('inputPedidoNumero')?.value?.trim() || '';
+            const produtoDescricao = document.getElementById('inputProdutoDescricao')?.value?.trim() || '';
+            const observacoes = document.getElementById('inputObservacoes')?.value?.trim() || '';
+            const maquina = document.getElementById('inputMaquina')?.value?.trim() || '';
+            const turno = document.getElementById('inputTurno')?.value || '';
+            const qtdProduzida = parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0;
+            const qtdRefugo = parseFloat(document.getElementById('inputQtdRefugo')?.value) || 0;
 
             const registro = {
                 id: Date.now(),
@@ -1449,12 +1529,21 @@
                 horaInicio: horaInicio.toISOString(),
                 horaFim: new Date().toISOString(),
                 duracao: timerSeconds,
-                data: new Date().toISOString().split('T')[0]
+                data: new Date().toISOString().split('T')[0],
+                pedido_numero: pedidoNumero,
+                produto_descricao: produtoDescricao,
+                observacoes: observacoes,
+                maquina: maquina,
+                turno: turno,
+                quantidade_produzida: qtdProduzida,
+                quantidade_refugo: qtdRefugo
             };
 
             históricoHoje.unshift(registro);
             salvarHistoricoLocal();
+            renderizarHistorico();
             salvarRegistroServidor(registro);
+            salvandoApontamento = false;
         }
 
         function resetarTimer() {
@@ -1464,6 +1553,7 @@
             timerRunning = false;
             timerPausado = false;
             horaInicio = null;
+            salvandoApontamento = false;
 
             // Limpar localStorage
             localStorage.removeItem('apontamento_em_andamento');
@@ -1479,6 +1569,10 @@
             if (document.getElementById('inputPedidoNumero')) document.getElementById('inputPedidoNumero').value = '';
             if (document.getElementById('inputProdutoDescricao')) document.getElementById('inputProdutoDescricao').value = '';
             if (document.getElementById('inputObservacoes')) document.getElementById('inputObservacoes').value = '';
+            if (document.getElementById('inputMaquina')) document.getElementById('inputMaquina').value = '';
+            if (document.getElementById('inputTurno')) document.getElementById('inputTurno').value = '';
+            if (document.getElementById('inputQtdProduzida')) document.getElementById('inputQtdProduzida').value = '';
+            if (document.getElementById('inputQtdRefugo')) document.getElementById('inputQtdRefugo').value = '';
 
             document.querySelectorAll('.atividade-card').forEach(card => {
                 card.classList.remove('ativo');
@@ -1498,7 +1592,11 @@
                 savedAt: new Date().toISOString(),
                 pedido_numero: document.getElementById('inputPedidoNumero')?.value?.trim() || '',
                 produto_descricao: document.getElementById('inputProdutoDescricao')?.value?.trim() || '',
-                observacoes: document.getElementById('inputObservacoes')?.value?.trim() || ''
+                observacoes: document.getElementById('inputObservacoes')?.value?.trim() || '',
+                maquina: document.getElementById('inputMaquina')?.value?.trim() || '',
+                turno: document.getElementById('inputTurno')?.value || '',
+                quantidade_produzida: parseFloat(document.getElementById('inputQtdProduzida')?.value) || 0,
+                quantidade_refugo: parseFloat(document.getElementById('inputQtdRefugo')?.value) || 0
             };
             localStorage.setItem('apontamento_em_andamento', JSON.stringify(dados));
         }
@@ -1545,6 +1643,10 @@
                 if (atividade.pedido_numero) document.getElementById('inputPedidoNumero').value = atividade.pedido_numero;
                 if (atividade.produto_descricao) document.getElementById('inputProdutoDescricao').value = atividade.produto_descricao;
                 if (atividade.observacoes) document.getElementById('inputObservacoes').value = atividade.observacoes;
+                if (atividade.maquina) document.getElementById('inputMaquina').value = atividade.maquina;
+                if (atividade.turno) document.getElementById('inputTurno').value = atividade.turno;
+                if (atividade.quantidade_produzida) document.getElementById('inputQtdProduzida').value = atividade.quantidade_produzida;
+                if (atividade.quantidade_refugo) document.getElementById('inputQtdRefugo').value = atividade.quantidade_refugo;
             } catch (e) {
                 localStorage.removeItem('apontamento_em_andamento');
             }
@@ -1589,7 +1691,10 @@
                                     horaInicio: sa.data + 'T' + (sa.hora_inicio || '00:00') + ':00',
                                     horaFim: sa.data + 'T' + (sa.hora_fim || '00:00') + ':00',
                                     duracao: sa.duracao || 0,
-                                    data: sa.data
+                                    data: sa.data,
+                                    pedido_numero: sa.pedido_numero || '',
+                                    produto_descricao: sa.produto_descricao || '',
+                                    observacoes: sa.observacoes || ''
                                 });
                             }
                         });
@@ -1614,7 +1719,12 @@
                 duracao_segundos: registro.duracao,
                 pedido_numero: registro.pedido_numero || '',
                 produto_descricao: registro.produto_descricao || '',
-                observacoes: registro.observacoes || ''
+                observacoes: registro.observacoes || '',
+                ordem_producao_id: registro.ordem_producao_id || null,
+                maquina: registro.maquina || '',
+                turno: registro.turno || '',
+                quantidade_produzida: registro.quantidade_produzida || 0,
+                quantidade_refugo: registro.quantidade_refugo || 0
             };
 
             // Se offline, enfileirar para sync posterior
@@ -1624,7 +1734,7 @@
                     description: 'Apontamento: ' + registro.nome,
                     priority: 1 // Alta prioridade
                 });
-                mostrarToast('Sem conexão é apontamento salvo localmente. Será sincronizado automaticamente!', 'warning');
+                mostrarToast('Sem conexão — apontamento salvo localmente. Será sincronizado automaticamente!', 'warning');
                 console.log('[APONTAMENTOS] Enfileirado para sync offline');
                 return;
             }
@@ -1643,7 +1753,7 @@
                             description: 'Apontamento (retry): ' + registro.nome,
                             priority: 1
                         });
-                        mostrarToast('Erro no servidor é apontamento salvo para retry automático', 'warning');
+                        mostrarToast('Erro no servidor — apontamento salvo para retry automático', 'warning');
                     }
                 } else {
                     console.log('[APONTAMENTOS] Salvo no servidor com sucesso');
@@ -1657,9 +1767,16 @@
                         description: 'Apontamento (offline): ' + registro.nome,
                         priority: 1
                     });
-                    mostrarToast('Conexão perdida é apontamento salvo localmente!', 'warning');
+                    mostrarToast('Conexão perdida — apontamento salvo localmente!', 'warning');
                 }
             }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
         }
 
         function renderizarHistorico() {
@@ -1691,13 +1808,13 @@
                             <i class="fas ${cores.icon}"></i>
                         </div>
                         <div class="historico-info">
-                            <div class="historico-atividade">${registro.nome}</div>
+                            <div class="historico-atividade">${escapeHtml(registro.nome)}</div>
                             <div class="historico-horarios">
                                 ${inicio.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})} -
                                 ${fim.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}
-                                ${registro.pedido_número ? ` é <span style="color:#4338ca;font-weight:600;">Pedido #${registro.pedido_número}</span>` : ''}
+                                ${registro.pedido_numero ? ` — <span style="color:#4338ca;font-weight:600;">Pedido #${escapeHtml(String(registro.pedido_numero))}</span>` : ''}
                             </div>
-                            ${registro.observacoes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${registro.observacoes}">${registro.observacoes}</div>` : ''}
+                            ${registro.observacoes ? `<div style="font-size:11px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:250px;" title="${escapeHtml(registro.observacoes)}">${escapeHtml(registro.observacoes)}</div>` : ''}
                         </div>
                         <div class="historico-duracao">${formatarDuracao(registro.duracao)}</div>
                     </div>

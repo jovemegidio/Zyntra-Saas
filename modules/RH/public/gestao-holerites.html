@@ -465,10 +465,6 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usurio</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usurio" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -880,6 +876,9 @@
     <div class="toast-container" id="toast-container"></div>
 
     <script>
+        // FIX-100: XSS protection for innerHTML with API data
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         // Helpers
         function getAuthHeaders() {
             return { 'Content-Type': 'application/json' }; /* Auth via httpOnly cookie */
@@ -1518,9 +1517,9 @@
                         <tbody>
                             ${consentimentos.map((c, i) => `
                                 <tr style="border-bottom:1px solid #f1f5f9;${i % 2 === 1 ? 'background:#fafbfc;' : ''}">
-                                    <td style="padding:10px 14px;font-size:0.85rem;font-weight:500;color:#1e293b;">${c.nome_completo || 'N/A'}</td>
-                                    <td style="padding:10px 14px;font-size:0.85rem;color:#64748b;font-family:monospace;">${c.cpf || 'N/A'}</td>
-                                    <td style="padding:10px 14px;font-size:0.85rem;color:#6366f1;font-style:italic;font-family:'Georgia',serif;">${c.assinatura_digital || ''}</td>
+                                    <td style="padding:10px 14px;font-size:0.85rem;font-weight:500;color:#1e293b;">${esc(c.nome_completo) || 'N/A'}</td>
+                                    <td style="padding:10px 14px;font-size:0.85rem;color:#64748b;font-family:monospace;">${esc(c.cpf) || 'N/A'}</td>
+                                    <td style="padding:10px 14px;font-size:0.85rem;color:#6366f1;font-style:italic;font-family:'Georgia',serif;">${esc(c.assinatura_digital) || ''}</td>
                                     <td style="padding:10px 14px;font-size:0.85rem;color:#64748b;">${c.data_aceite ? new Date(c.data_aceite).toLocaleString('pt-BR') : 'N/A'}</td>
                                     <td style="padding:10px 14px;text-align:center;">
                                         <span style="background:${c.status === 'ativo' ? '#dcfce7' : '#fef2f2'};color:${c.status === 'ativo' ? '#166534' : '#991b1b'};padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;">${c.status === 'ativo' ? 'Ativo' : 'Revogado'}</span>

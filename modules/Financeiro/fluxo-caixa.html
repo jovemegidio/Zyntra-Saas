@@ -218,10 +218,6 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usuário" id="user-photo" style="display:none">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -809,7 +805,7 @@
                     '"' + m.descrição.replace(/"/g, '""') + '"',
                     '"' + m.categoria.replace(/"/g, '""') + '"',
                     m.tipo,
-                    m.valor.toFixed(2).replace('.', ',')
+                    (m.valor || 0).toFixed(2).replace('.', ',')
                 ].join(sep));
             });
 

@@ -336,10 +336,10 @@
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="contas-receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
-                <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
-                <a href="fluxo-caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="contas_receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="contas_bancarias.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
+                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
@@ -369,10 +369,6 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuario" id="user-photo" style="display:none;">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -972,6 +968,9 @@
         </div>
     </div>
     <script>
+        // AUDIT-FIX CRIT-F01: XSS escape helper
+        function _escFin(s) { if (s == null) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('mobile-open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
         function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
         let contas = [];
@@ -1195,10 +1194,10 @@
         function popularFiltrosDinamicos() {
             var portadores = []; contas.forEach(function(c){ if(c.portador && portadores.indexOf(c.portador)===-1) portadores.push(c.portador); }); portadores.sort();
             var selPort = document.getElementById('filtro-portador');
-            if (selPort) { selPort.innerHTML = '<option value="">Todos</option>' + portadores.map(function(p){ return '<option value="'+p+'">'+p+'</option>'; }).join(''); }
+            if (selPort) { selPort.innerHTML = '<option value="">Todos</option>' + portadores.map(function(p){ return '<option value="'+_escFin(p)+'">'+_escFin(p)+'</option>'; }).join(''); }
             var clientes = []; contas.forEach(function(c){ if(c.cliente_nome && clientes.indexOf(c.cliente_nome)===-1) clientes.push(c.cliente_nome); }); clientes.sort();
             var selCli = document.getElementById('filtro-cliente-select');
-            if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(''); }
+            if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+_escFin(c)+'">'+_escFin(c)+'</option>'; }).join(''); }
         }
         function setTableView(view) {
             currentView = view;
@@ -1225,7 +1224,7 @@
             tbody.innerHTML = dados.map(function(c) {
                 var st = (c.status || 'pendente').toLowerCase();
                 var badges = { 'pendente':'<span class="badge badge-pending">Pendente</span>', 'a_vencer':'<span class="badge badge-pending"><i class="fas fa-clock"></i> A Vencer</span>', 'a vencer':'<span class="badge badge-pending"><i class="fas fa-clock"></i> A Vencer</span>', 'recebido':'<span class="badge badge-paid">Recebido</span>', 'pago':'<span class="badge badge-paid">Recebido</span>', 'liquidada':'<span class="badge badge-paid"><i class="fas fa-check"></i> Liquidada</span>', 'liquidado':'<span class="badge badge-paid"><i class="fas fa-check"></i> Liquidado</span>', 'vencida':'<span class="badge badge-overdue"><i class="fas fa-exclamation-circle"></i> Vencida</span>', 'vencido':'<span class="badge badge-overdue"><i class="fas fa-exclamation-circle"></i> Vencido</span>', 'cancelada':'<span class="badge" style="background:#f3f4f6;color:#6b7280;"><i class="fas fa-ban"></i> Cancelada</span>', 'parcial':'<span class="badge badge-partial">Parcial</span>' };
-                var hl = function(t) { if(!pesquisa||!t) return t||'-'; try{var e=pesquisa.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(new RegExp('('+e+')','gi'),'<span class="highlight">$1</span>');}catch(ex){return String(t);} };
+                var hl = function(t) { var safe=String(t||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); if(!pesquisa||!t) return safe; try{var e=pesquisa.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return safe.replace(new RegExp('('+e+')','gi'),'<span class="highlight">$1</span>');}catch(ex){return safe;} };
                 var dias = parseInt(c.dias_vencido) || 0;
                 var diasStyle = dias > 0 ? 'color:#dc2626;font-weight:700;' : '';
                 var acoes = '<td style="white-space:nowrap;"><button class="action-btn view" onclick="visualizarConta('+c.id+')" title="Visualizar"><i class="fas fa-eye"></i></button>';
@@ -1234,12 +1233,12 @@
                 acoes += '<button class="action-btn danger" onclick="excluirConta('+c.id+')" title="Excluir"><i class="fas fa-trash"></i></button></td>';
 
                 if (currentView === 'completa') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+(c.categoria||'-')+'</td><td>'+(c.centro_receita||'-')+'</td><td>'+(c.numero_documento||'-')+'</td><td>'+(c.numero_boleto||'-')+'</td><td>'+(c.vendedor||'-')+'</td><td>'+(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td style="font-size:10px;">'+hl(c.cnpj_empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:10px;">'+hl(c.cnpj_cpf||'-')+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.centro_receita||'-')+'</td><td>'+_escFin(c.numero_documento||'-')+'</td><td>'+_escFin(c.numero_boleto||'-')+'</td><td>'+_escFin(c.vendedor||'-')+'</td><td>'+_escFin(c.projeto||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_liquido)+'</td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td><td><span style="font-size:11px;font-weight:600;">'+_escFin(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+_escFin(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
                 }
                 if (currentView === 'impostos') {
-                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+acoes+'</tr>';
+                    return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtMoeda(c.valor_pis)+'</td><td>'+fmtMoeda(c.valor_cofins)+'</td><td>'+fmtMoeda(c.valor_csll)+'</td><td>'+fmtMoeda(c.valor_ir)+'</td><td>'+fmtMoeda(c.valor_iss)+'</td><td>'+fmtMoeda(c.valor_inss)+'</td><td><strong>'+fmtMoeda(c.valor_liquido)+'</strong></td><td style="color:#059669;">'+fmtMoeda(c.valor_recebido)+'</td><td><strong>'+fmtMoeda(c.a_receber)+'</strong></td>'+acoes+'</tr>';
                 }
-                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
+                return '<tr style="cursor:pointer;" ondblclick="visualizarConta('+c.id+')"><td>'+hl(c.empresa||'-')+'</td><td>'+hl(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td><strong>'+hl(c.cliente_nome||'-')+'</strong></td><td style="font-size:11px;">'+hl(c.cnpj_cpf||c.cnpj_cliente||'-')+'</td><td><strong>'+fmtMoeda(c.valor_total||c.valor)+'</strong></td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td><span style="font-size:11px;font-weight:600;">'+_escFin(c.situacao||'-')+'</span></td><td><span style="font-size:11px;">'+_escFin(c.portador||'-')+'</span></td><td style="font-size:11px;">'+(c.pago_no_dia?fmtData(c.pago_no_dia):'-')+'</td><td>'+(badges[st]||badges.pendente)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td>'+acoes+'</tr>';
             }).join('');
         }
 
@@ -1249,7 +1248,7 @@
                 if (response.ok) {
                     var rawClientes = await response.json();
                     clientesList = Array.isArray(rawClientes) ? rawClientes : (Array.isArray(rawClientes && rawClientes.data) ? rawClientes.data : []);
-                    var opts = clientesList.map(function(c){ return '<option value="'+c.id+'">'+(c.razao_social||c.nome)+'</option>'; }).join('');
+                    var opts = clientesList.map(function(c){ return '<option value="'+_escFin(c.id)+'">'+_escFin(c.razao_social||c.nome)+'</option>'; }).join('');
                     document.getElementById('cliente-id').innerHTML = '<option value="">Selecione o cliente...</option>' + opts;
                 }
             } catch(e) { console.error('Erro clientes:', e); }
@@ -1261,7 +1260,7 @@
                 if (response.ok) {
                     var rawCats = await response.json();
                     var cats = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats && rawCats.data) ? rawCats.data : []);
-                    document.getElementById('categoria-id').innerHTML = '<option value="">Selecione...</option>' + cats.filter(function(c){return c.tipo==='receita';}).map(function(c){return '<option value="'+c.id+'">'+c.nome+'</option>';}).join('');
+                    document.getElementById('categoria-id').innerHTML = '<option value="">Selecione...</option>' + cats.filter(function(c){return c.tipo==='receita';}).map(function(c){return '<option value="'+_escFin(c.id)+'">'+_escFin(c.nome)+'</option>';}).join('');
                 }
             } catch(e) { console.error('Erro categorias:', e); }
         }
@@ -1562,8 +1561,8 @@
                     await init();
                 } else {
                     document.getElementById('importar-resultado').style.display = 'block';
-                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+(data.error||'Erro na importação')+'</p></div>';
-                    showToast(data.error || 'Erro na importação', 'error');
+                    document.getElementById('importar-resultado').innerHTML = '<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:14px;text-align:center;"><i class="fas fa-exclamation-circle" style="font-size:28px;color:#dc2626;"></i><p style="font-size:13px;color:#991b1b;margin:8px 0 0;">'+_escFin(data.error||'Erro na importação')+'</p></div>';
+                    showToast(_escFin(data.error || 'Erro na importação'), 'error');
                     document.getElementById('btn-importar').disabled = false;
                 }
             } catch(e) {

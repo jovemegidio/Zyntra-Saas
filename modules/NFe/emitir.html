@@ -307,10 +307,6 @@
             <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
             <div class="user-greeting">
                 <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                <div class="user-avatar" id="user-avatar">
-                    <img alt="Foto" id="user-photo" style="display:none">
-                    <span id="user-initials">U</span>
-                </div>
             </div>
         </div>
     </header>
@@ -697,6 +693,8 @@
 
         // -- Itens Array --
         let itens = [];
+        // AUDIT-FIX S2.5: XSS protection for innerHTML/attribute injection
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
 
         function adicionarItem() {
             itens.push({
@@ -720,14 +718,14 @@
             itens.forEach((item, index) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><input type="text" value="${item.código}" onchange="atualizarItem(${index},'código',this.value)" placeholder="Código"></td>
-                    <td><input type="text" value="${item.descrição}" onchange="atualizarItem(${index},'descrição',this.value)" placeholder="Descrição do produto"></td>
-                    <td><input type="text" value="${item.ncm}" onchange="atualizarItem(${index},'ncm',this.value)" placeholder="00000000" style="width:100px;"></td>
-                    <td><input type="text" value="${item.cfop}" onchange="atualizarItem(${index},'cfop',this.value)" placeholder="5102" style="width:80px;"></td>
-                    <td><input type="text" value="${item.unidade}" onchange="atualizarItem(${index},'unidade',this.value)" placeholder="UN" style="width:60px;"></td>
+                    <td><input type="text" value="${esc(item.código)}" onchange="atualizarItem(${index},'código',this.value)" placeholder="Código"></td>
+                    <td><input type="text" value="${esc(item.descrição)}" onchange="atualizarItem(${index},'descrição',this.value)" placeholder="Descrição do produto"></td>
+                    <td><input type="text" value="${esc(item.ncm)}" onchange="atualizarItem(${index},'ncm',this.value)" placeholder="00000000" style="width:100px;"></td>
+                    <td><input type="text" value="${esc(item.cfop)}" onchange="atualizarItem(${index},'cfop',this.value)" placeholder="5102" style="width:80px;"></td>
+                    <td><input type="text" value="${esc(item.unidade)}" onchange="atualizarItem(${index},'unidade',this.value)" placeholder="UN" style="width:60px;"></td>
                     <td><input type="number" value="${item.quantidade}" onchange="atualizarItem(${index},'quantidade',this.value)" min="0" step="0.01" style="width:80px;"></td>
                     <td><input type="number" value="${item.valorUnitario}" onchange="atualizarItem(${index},'valorUnitario',this.value)" min="0" step="0.01" style="width:110px;"></td>
-                    <td style="font-weight:600;white-space:nowrap;">R$ ${item.total.toFixed(2)}</td>
+                    <td style="font-weight:600;white-space:nowrap;">R$ ${(item.total || 0).toFixed(2)}</td>
                     <td style="text-align:center;width:60px;">
                         <button type="button" class="btn btn-danger btn-sm" onclick="removerItem(${index})" title="Remover item">
                             <i class="fas fa-trash-alt"></i>

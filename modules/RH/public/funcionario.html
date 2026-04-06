@@ -553,10 +553,6 @@
                     </button>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do Usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -933,6 +929,15 @@
             carregarUltimoHolerite();
             // Atualizar notificações a cada 30 segundos
             _notifInterval = setInterval(carregarNotificacoes, 30000);
+            // Cleanup: pausar quando tab oculta
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(_notifInterval);
+                } else {
+                    carregarNotificacoes();
+                    _notifInterval = setInterval(carregarNotificacoes, 30000);
+                }
+            });
         });
 
         // ========================================

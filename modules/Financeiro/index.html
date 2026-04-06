@@ -1198,37 +1198,8 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usuário" id="user-photo" style="display:none">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1384,34 +1355,9 @@
             if (panel) panel.classList.toggle('active');
         }
 
-        // Fechar notificações ao clicar fora
-        document.addEventListener('click', function (e) {
-            const panel = document.getElementById('notification-panel');
-            const container = document.querySelector('.notification-container');
-            if (panel && panel.classList.contains('active') && container && !container.contains(e.target)) {
-                panel.classList.remove('active');
-            }
-        });
-
-        function marcarTodasLidas() {
-            const badge = document.getElementById('notification-count');
-            if (badge) {
-                badge.textContent = '0';
-                badge.style.display = 'none';
-            }
-        }
-
-        function limparNotificacoes() {
-            const lista = document.getElementById('notification-list');
-            if (!lista) return;
-            lista.innerHTML = `
-                <div class="notification-empty">
-                    <i class="fas fa-check-circle"></i>
-                    <p>Nenhuma notificação</p>
-                </div>
-            `;
-            marcarTodasLidas();
-        }
+        // Notificações removidas — funções stub para compatibilidade
+        function marcarTodasLidas() {}
+        function limparNotificacoes() {}
 
         // ======== Carregar usuário ========
         async function carregarUsuario() {
@@ -1965,7 +1911,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             carregarUsuario();
             atualizarDashboard();
-            setInterval(() => atualizarDashboard(true), 300000);
+            window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
+            // Cleanup: pausar quando tab oculta
+            document.addEventListener('visibilitychange', function() {
+                if (document.hidden) {
+                    clearInterval(window._dashIntervalFin);
+                } else {
+                    window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
+                }
+            });
         });
     </script>
 
@@ -2662,13 +2616,15 @@
         }
 
         async function salvarClienteFornecedor() {
+            if (window._guardSalvarCliFor) return;
             const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
             if (!dados.razao_social) { showToast('Informe a Razão Social / Nome', 'warning'); return; }
+            window._guardSalvarCliFor = true;
             try {
                 const response = await fetch('/api/financeiro/clientes-fornecedores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (response.ok) { showToast('Cliente/Fornecedor salvo com sucesso!', 'success'); fecharCadastroCompleto(); document.querySelectorAll('#modalCadastroCompleto input').forEach(i => i.value = ''); }
                 else { const err = await response.json(); showToast('Erro ao salvar. Tente novamente.', 'error'); }
-            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexão.', 'error'); }
+            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexão.', 'error'); } finally { window._guardSalvarCliFor = false; }
         }
 
         // Tab navigation

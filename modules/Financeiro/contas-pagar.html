@@ -325,10 +325,6 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usuário" id="user-photo" style="display:none">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -2401,10 +2397,10 @@
 
                 return `
                     <tr data-id="${c.id}">
-                        <td><strong>${documento}</strong></td>
-                        <td>${fornecedor}</td>
-                        <td>${descricao}</td>
-                        <td>${categoriaLabel}</td>
+                        <td><strong>${esc(documento)}</strong></td>
+                        <td>${esc(fornecedor)}</td>
+                        <td>${esc(descricao)}</td>
+                        <td>${esc(categoriaLabel)}</td>
                         <td>${formatarData(vencimentoOriginal)}</td>
                         <td>${formatarData(vencimentoAtualizado)}</td>
                         <td class="valor saida">${formatarMoeda(valorTotal)}</td>
@@ -2705,6 +2701,8 @@
             }
 
             if (!confirm(`Sero criadas ${qty} parcelas recorrentes. Deseja continuar?`)) return;
+            if (window._guardAplicarRep) return;
+            window._guardAplicarRep = true;
 
             const freqMap = { semanal: 7, quinzenal: 14, mensal: 1, bimestral: 2, trimestral: 3, semestral: 6, anual: 12 };
             const isMonthBased = !['semanal','quinzenal'].includes(freq);
@@ -2760,6 +2758,7 @@
 
             mostrarNotificacao(`${criadas} parcelas geradas com sucesso!${erros ? ` (${erros} erros)` : ''}`, erros ? 'warning' : 'success');
             await carregarContas();
+            window._guardAplicarRep = false;
         }
 
         function limparRepeticao() {
@@ -2927,6 +2926,8 @@
 
         async function excluirConta(id) {
             if (!confirm('Tem certeza que deseja excluir esta conta?')) return;
+            if (window._guardExcluirContaP) return;
+            window._guardExcluirContaP = true;
 
             try {
                 const response = await fetch(`/api/financeiro/contas-pagar/${id}`, {
@@ -2944,7 +2945,7 @@
             } catch (e) {
                 console.error('Erro ao excluir:', e);
                 mostrarNotificacao('Erro ao excluir conta', 'error');
-            }
+            } finally { window._guardExcluirContaP = false; }
         }
 
         let contaVisualizandoId = null;
@@ -3037,7 +3038,10 @@
             mostrarNotificacao('Arquivo exportado com sucesso!', 'success');
         }
 
-        // Funães de formatação
+        // Funões de formatação
+        // AUDIT-FIX S2.5: XSS protection for innerHTML with API data
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         function formatarMoeda(valor) {
             return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor || 0);
         }

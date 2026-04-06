@@ -239,10 +239,6 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto" id="user-photo" style="display:none;">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -454,6 +450,9 @@
     </div>
 
     <script>
+        // FIX-100: XSS protection for innerHTML with API data
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         function toggleMobileSidebar() { document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open'); document.getElementById('sidebar-overlay')?.classList.toggle('active'); }
         function toggleNotificacoes() { if (typeof window.NotificationsManager !== 'undefined') window.NotificationsManager.togglePanel(); }
 
@@ -522,15 +521,15 @@
                 return `<div class="bank-card">
                     <div class="bank-card-header">
                         ${getBankLogoHtml(c.banco_codigo || c.codigo_banco)}
-                        <div class="bank-info"><div class="bank-name">${c.nome || 'Conta'}</div><div class="bank-type">${bankNames[c.banco_codigo || c.codigo_banco] || c.banco_nome || 'Banco'} • ${tipoNames[c.tipo] || c.tipo || 'Corrente'}</div></div>
+                        <div class="bank-info"><div class="bank-name">${esc(c.nome) || 'Conta'}</div><div class="bank-type">${bankNames[c.banco_codigo || c.codigo_banco] || esc(c.banco_nome) || 'Banco'} • ${tipoNames[c.tipo] || esc(c.tipo) || 'Corrente'}</div></div>
                         <span class="bank-card-status ${statusClass}">${statusClass === 'ativa' ? 'Ativa' : 'Inativa'}</span>
                     </div>
                     <div class="bank-card-body">
                         <div class="bank-saldo-label">SALDO ATUAL</div>
                         <div class="bank-saldo-value ${saldoClass}">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                         <div class="bank-details">
-                            <div class="bank-detail-item"><div class="bank-detail-label">Agência</div><div class="bank-detail-value">${c.agencia || '-'}</div></div>
-                            <div class="bank-detail-item"><div class="bank-detail-label">Conta</div><div class="bank-detail-value">${c.numero_conta || '-'}</div></div>
+                            <div class="bank-detail-item"><div class="bank-detail-label">Agência</div><div class="bank-detail-value">${esc(c.agencia) || '-'}</div></div>
+                            <div class="bank-detail-item"><div class="bank-detail-label">Conta</div><div class="bank-detail-value">${esc(c.numero_conta) || '-'}</div></div>
                         </div>
                     </div>
                     <div class="bank-card-actions">
@@ -637,7 +636,7 @@
             if (tipo) dados = dados.filter(m => m.tipo === tipo);
             const lista = document.getElementById('extrato-lista');
             if (dados.length === 0) { lista.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:40px;">Nenhuma movimentação encontrada</p>'; } else {
-                lista.innerHTML = dados.map(m => `<div class="extrato-item"><div class="extrato-item-left"><div class="extrato-item-desc">${m.descricao || '-'}</div><div class="extrato-item-data">${new Date(m.data).toLocaleDateString('pt-BR')}</div></div><div class="extrato-item-valor ${m.tipo === 'entrada' ? 'entrada' : 'saida'}">${m.tipo === 'entrada' ? '+' : '-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>`).join('');
+                lista.innerHTML = dados.map(m => `<div class="extrato-item"><div class="extrato-item-left"><div class="extrato-item-desc">${esc(m.descricao) || '-'}</div><div class="extrato-item-data">${new Date(m.data).toLocaleDateString('pt-BR')}</div></div><div class="extrato-item-valor ${m.tipo === 'entrada' ? 'entrada' : 'saida'}">${m.tipo === 'entrada' ? '+' : '-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div></div>`).join('');
             }
             const entradas = dados.filter(m => m.tipo === 'entrada').reduce((s, m) => s + (parseFloat(m.valor)||0), 0);
             const saidas = dados.filter(m => m.tipo === 'saida').reduce((s, m) => s + (parseFloat(m.valor)||0), 0);
@@ -648,10 +647,10 @@
 
         function exportarExtratoPDF() {
             const w = window.open('', '_blank');
-            const nome = contaVisualizando?.nome || 'Conta';
+            const nome = esc(contaVisualizando?.nome || 'Conta');
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
-            w.document.write(`<html><head><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${extratoMovimentacoes.map(m=>`<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${m.descricao||'-'}</td><td>${m.tipo}</td><td class="${m.tipo}">${m.tipo==='entrada'?'+':'-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table>
+            w.document.write(`<html><head><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${extratoMovimentacoes.map(m=>`<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${esc(m.descricao)||'-'}</td><td>${esc(m.tipo)}</td><td class="${esc(m.tipo)}">${m.tipo==='entrada'?'+':'-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table>
 <!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260319"></script>
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260319" defer></script>
@@ -669,7 +668,7 @@
             document.getElementById('modal-transferencia').classList.add('active');
             document.getElementById('form-transferencia').reset();
             document.getElementById('transf-data').value = new Date().toISOString().split('T')[0];
-            const opts = contasBancarias.filter(c => c.status !== 'inativa').map(c => `<option value="${c.id}">${c.nome} (R$ ${(parseFloat(c.saldo)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})})</option>`).join('');
+            const opts = contasBancarias.filter(c => c.status !== 'inativa').map(c => `<option value="${c.id}">${esc(c.nome)} (R$ ${(parseFloat(c.saldo)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})})</option>`).join('');
             document.getElementById('transf-conta-origem').innerHTML = '<option value="">Selecione...</option>' + opts;
             document.getElementById('transf-conta-destino').innerHTML = '<option value="">Selecione...</option>' + opts;
             document.getElementById('saldo-origem-info').textContent = 'Saldo: -';
