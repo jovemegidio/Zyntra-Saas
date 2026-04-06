@@ -6250,10 +6250,8 @@
                             </div>
                             <div class="form-group">
                                 <label>Origem</label>
-                                <select id="edit-origem">
-                                    <option value="Sistema">Sistema</option>
-                                    <option value="Manual">Manual</option>
-                                </select>
+                                <input type="text" id="edit-origem" value="Sistema" readonly
+                                    style="background: #f3f4f6; cursor: not-allowed;">
                             </div>
                         </div>
                         <div class="form-group">
@@ -6915,7 +6913,8 @@
                             <label>Desconto %</label>
                             <div style="display: flex; align-items: center; gap: 4px;">
                                 <input type="number" id="novo-desconto" class="orcamento-valor-input" value="0" min="0"
-                                    max="100" step="0.5" style="text-align:right; padding-right:4px;">
+                                    max="100" step="0.5" style="text-align:right; padding-right:4px;"
+                                    oninput="validarDescontoNovoOrcamento(this)">
                                 <span style="font-size:13px; color:#666; font-weight:600;">%</span>
                             </div>
                             <script>
@@ -7556,14 +7555,8 @@
                                 </div>
                                 <div class="orcamento-field-group">
                                     <label>Origem do Pedido</label>
-                                    <select id="novo-origem-pedido" class="orcamento-input">
-                                        <option value="sistema">Sistema</option>
-                                        <option value="site">Site</option>
-                                        <option value="telefone">Telefone</option>
-                                        <option value="whatsapp">WhatsApp</option>
-                                        <option value="presencial">Presencial</option>
-                                        <option value="marketplace">Marketplace</option>
-                                    </select>
+                                    <input type="text" id="novo-origem-pedido" class="orcamento-input" value="Sistema" readonly
+                                        style="background: #f3f4f6; cursor: not-allowed;">
                                 </div>
                             </div>
 
@@ -7703,14 +7696,9 @@
             <div class="modal-body-item-omie">
                 <input type="hidden" id="item-pedido-id">
 
-                <!-- Seção Produto com Barcode -->
+                <!-- Seção Produto -->
                 <div class="produto-section-omie">
-                    <div class="barcode-icon">
-                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5">
-                            <path d="M3 5v14M7 5v14M11 5v14M15 5v14M19 5v14M5 5v14M9 5v14M13 5v14M17 5v14M21 5v14" />
-                        </svg>
-                    </div>
-                    <div class="produto-fields-omie">
+                    <div class="produto-fields-omie" style="width: 100%;">
                         <div class="produto-row">
                             <div class="field-group" style="flex: 2;">
                                 <label>Produto <i class="fas fa-link" style="font-size: 10px; color: #999;"></i></label>
@@ -7727,51 +7715,21 @@
                                     <i class="fas fa-search"></i> Pesquisar Produto
                                 </button>
                             </div>
-                            <div class="field-group" style="flex: 1;">
-                                <label>CFOP</label>
-                                <div class="input-with-search">
-                                    <input type="text" id="item-pedido-cfop"
-                                        placeholder="Preencha aqui a CFOP de Venda">
-                                    <button type="button" class="btn-input-search"><i
-                                            class="fas fa-search"></i></button>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Seção Movimentação de Estoque -->
+                <!-- Valores -->
                 <div class="section-omie">
-                    <h3 class="section-title-omie">Movimentação de Estoque</h3>
                     <div class="section-row">
                         <div class="field-group" style="flex: 0 0 100px;">
                             <label>Quantidade</label>
                             <input type="text" id="item-pedido-quantidade" value="1,0" class="input-number"
                                 oninput="formatarQuantidadeInput(this)" maxlength="10" placeholder="1,0">
                         </div>
-                        <div class="field-group" style="flex: 1;">
-                            <label>Local de Estoque</label>
-                            <select id="item-pedido-estoque" class="select-styled">
-                                <option value="PADRAO - Local de Estoque Padrão">PADRAO - Local de Estoque Padrão
-                                </option>
-                                <option value="SECUNDARIO - Estoque Secundário">SECUNDARIO - Estoque Secundário</option>
-                                <option value="EXPEDICAO - Expedição">EXPEDICAO - Expedição</option>
-                            </select>
-                        </div>
-                        <div class="field-group checkbox-field">
-                            <label class="toggle-label">
-                                <input type="checkbox" id="item-nao-gerar-saida">
-                                <span class="toggle-switch"></span>
-                                Não gerar a saída de estoque ao emitir a NF-e
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Seção Valores e Descontos -->
-                <div class="section-omie">
-                    <h3 class="section-title-omie">Valores e Descontos</h3>
-                    <div class="section-row">
+                        <input type="hidden" id="item-pedido-estoque" value="PADRAO - Local de Estoque Padrão">
+                        <input type="hidden" id="item-nao-gerar-saida" value="">
+                        <input type="hidden" id="item-pedido-cfop" value="">
                         <div class="field-group" style="flex: 0 0 160px;">
                             <label>Preço Unitário de Venda</label>
                             <div style="position: relative;">
@@ -7780,13 +7738,6 @@
                                 <input type="text" id="item-pedido-preco" value="0,00" class="input-number"
                                     style="padding-left: 32px; background: #f3f4f6; cursor: not-allowed;" oninput="formatarPreco(this)" placeholder="0,00"
                                     maxlength="15" readonly>
-                            </div>
-                        </div>
-                        <div class="field-group" style="flex: 1; display: none;">
-                            <label>Tabela de Preço</label>
-                            <div class="input-with-search">
-                                <input type="text" id="item-pedido-tabela-preco" placeholder="">
-                                <button type="button" class="btn-input-search"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
                         <div class="field-group desconto-item-field" style="flex: 0 0 130px;">
@@ -7799,35 +7750,30 @@
                                     style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 13px;">%</span>
                             </div>
                         </div>
-                        <div class="field-group checkbox-field">
-                            <label class="toggle-label">
-                                <input type="checkbox" id="item-nao-gerar-conta">
-                                <span class="toggle-switch"></span>
-                                Não gerar conta a receber para este item
-                            </label>
-                        </div>
+                        <input type="hidden" id="item-nao-gerar-conta" value="">
+                        <input type="hidden" id="item-pedido-tabela-preco" value="">
                     </div>
                 </div>
 
-                <!-- Tabela de Valores Calculados -->
-                <div class="valores-calculados-table">
-                    <div class="valor-calc-item">
+                <!-- Total do Item -->
+                <div class="valores-calculados-table" style="grid-template-columns: 1fr 1fr;">
+                    <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">Valor da Mercadoria</span>
                         <span class="valor-calc-value" id="calc-valor-mercadoria">R$ 0,00</span>
                     </div>
-                    <div class="valor-calc-item">
+                    <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">Valor do Desconto</span>
                         <span class="valor-calc-value" id="calc-valor-desconto">R$ 0,00</span>
                     </div>
-                    <div class="valor-calc-item">
+                    <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">IPI</span>
                         <span class="valor-calc-value" id="calc-ipi">R$ 0,00</span>
                     </div>
-                    <div class="valor-calc-item">
+                    <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">ICMS ST+FCP ST</span>
                         <span class="valor-calc-value" id="calc-icms-st">R$ 0,00</span>
                     </div>
-                    <div class="valor-calc-item">
+                    <div class="valor-calc-item destaque">
                         <span class="valor-calc-label">Total do Item</span>
                         <span class="valor-calc-value" id="calc-total-item">R$ 0,00</span>
                     </div>
@@ -7835,14 +7781,6 @@
                         <span class="valor-calc-label">Total do Pedido</span>
                         <span class="valor-calc-value" id="calc-total-pedido">R$ 0,00</span>
                     </div>
-                </div>
-
-                <!-- Link Observações -->
-                <div class="observacoes-link">
-                    <button type="button" class="btn-link-obs" onclick="toggleObservacoesItem()">
-                        <i class="fas fa-pen"></i> Clique aqui para alterar as observações e informações adicionais da
-                        NF-e
-                    </button>
                 </div>
 
                 <!-- Observações (oculto inicialmente) -->
@@ -11321,9 +11259,16 @@
                 }
                 // Auto-gerar assunto do e-mail
                 const assuntoField = document.getElementById('edit-email-assunto');
-                if (assuntoField && !assuntoField.value) {
+                if (assuntoField) {
                     const tipoDoc = gerarNomeDocumento(pedidoAtual);
-                    assuntoField.value = `${tipoDoc} #${pedidoAtual.numero_pedido || pedidoAtual.id} - ${getEmpresaNome ? getEmpresaNome() : 'Zyntra'}`;
+                    assuntoField.value = `${tipoDoc} #${pedidoAtual.numero_pedido || pedidoAtual.id} - ALUFORCE`;
+                }
+                // Auto-gerar mensagem padrão se vazia
+                const mensagemField = document.getElementById('edit-email-mensagem');
+                if (mensagemField && !mensagemField.value) {
+                    const tipoDoc = gerarNomeDocumento(pedidoAtual);
+                    const clienteNome = pedidoAtual.cliente_nome || pedidoAtual.cliente || 'Cliente';
+                    mensagemField.value = `Prezado(a) ${clienteNome},\n\nSegue em anexo o ${tipoDoc.toLowerCase()} nº ${pedidoAtual.numero_pedido || pedidoAtual.id}.\n\nQualquer dúvida, estamos à disposição.\n\nAtenciosamente,\nEquipe ALUFORCE`;
                 }
                 if (pedidoAtual.cliente_uf) {
                     const estadoField = document.getElementById('edit-estado-destino');
@@ -12349,8 +12294,8 @@
                 const bg = idx % 2 === 0 ? '#ffffff' : '#f4f6f8';
                 return `<tr style="background:${bg};">
                     <td class="tc" style="font-weight:600;color:#1e293b;">${String(idx + 1).padStart(2, '0')}</td>
-                    <td style="font-weight:700;color:#0f172a;">${item.código || '-'}</td>
-                    <td>${(item.descrição || '-').toUpperCase()}</td>
+                    <td style="font-weight:700;color:#0f172a;">${item.codigo || item.código || item.produto_codigo || '-'}</td>
+                    <td>${(item.descricao || item.descrição || item.produto_nome || item.nome || '-').toUpperCase()}</td>
                     <td class="tr">${qtd.toLocaleString('pt-BR')}</td>
                     <td class="tc">${item.unidade || 'M'}</td>
                     <td class="tr">${precoUnit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
@@ -12452,7 +12397,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     <div class="brand-wrap">
                         <img src="/images/Logo Monocromatico - Azul - Aluforce.webp" alt="Zyntra" style="height:42px;object-fit:contain;" onerror="this.outerHTML='<svg width=42 height=42 viewBox=\\'0 0 42 42\\' fill=\\'#0b2842\\'><rect width=\\'42\\' height=\\'42\\' rx=\\'14\\'/><text x=\\'11\\' y=\\'28\\' font-weight=\\'900\\' font-size=\\'20\\' fill=\\'white\\'>Z</text></svg>'">
                         <div>
-                            <div class="brand-name">${getEmpresaNome ? getEmpresaNome() : 'Zyntra'}</div>
+                            <div class="brand-name">ALUFORCE</div>
                             <div class="brand-sub">${getEmpresaRazao()}</div>
                         </div>
                     </div>
@@ -14936,7 +14881,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                             onchange="toggleItemParcial(${idx})">
                     </label>
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${item.código} - ${item.descrição}</div>
+                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${item.codigo || item.código || '-'} - ${item.descricao || item.descrição || '-'}</div>
                         <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">Qtd Original: ${item.qtdOriginal} | Disponível: ${item.qtdDisponivel}</div>
                     </div>
                     <input type="number" id="qtd-parcial-${idx}" value="${item.qtdDisponivel}" min="1" max="${item.qtdDisponivel}"
@@ -15186,6 +15131,13 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 precoInput.value = formatarDecimal(produto.preco_venda || produto.preco_custo || 0);
             }
 
+            // Auto-preencher quantidade com estoque disponível (mínimo 1)
+            const qtdInput = document.getElementById('item-pedido-quantidade');
+            if (qtdInput) {
+                const estoqueDisponivel = parseFloat(produto.estoque_atual) || 0;
+                qtdInput.value = estoqueDisponivel > 0 ? formatarDecimal(estoqueDisponivel) : '1,0';
+            }
+
             // Auto-preencher CFOP do produto
             const cfopInput = document.getElementById('item-pedido-cfop');
             if (cfopInput && produto.cfop) {
@@ -15325,7 +15277,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 if (pedidoAtual) pedidoAtual._descontoIrregular = false;
 
                 // Limpar visual do input
-                const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct');
+                const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct') || document.getElementById('novo-desconto');
                 if (descontoInput) {
                     descontoInput.style.border = '2px solid #059669';
                     descontoInput.style.background = '#f0fdf4';
@@ -15339,6 +15291,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 // Recalcular
                 atualizarCalculosItem();
                 if (typeof atualizarTotalModalEditar === 'function') atualizarTotalModalEditar();
+                if (typeof recalcularTotaisNovoOrcamento === 'function') recalcularTotaisNovoOrcamento();
             } else {
                 if (erroMsg) erroMsg.style.display = 'block';
                 if (senhaInput) {
@@ -15354,7 +15307,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (modal) modal.remove();
 
             // Reverter desconto para o limite
-            const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct');
+            const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct') || document.getElementById('novo-desconto');
             if (descontoInput) {
                 descontoInput.value = '33,88';
                 descontoInput.style.border = '';
@@ -15365,6 +15318,29 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (pedidoAtual) pedidoAtual._descontoIrregular = false;
             window._descontoAutorizado = false;
             atualizarCalculosItem();
+            if (typeof recalcularTotaisNovoOrcamento === 'function') recalcularTotaisNovoOrcamento();
+        }
+
+        // Validar desconto no novo orçamento (33.88% limit)
+        function validarDescontoNovoOrcamento(input) {
+            let numero = parseFloat(input.value) || 0;
+            if (numero < 0) { numero = 0; input.value = 0; }
+            if (numero > 100) { numero = 100; input.value = 100; }
+
+            const LIMITE_DESCONTO = 33.88;
+            if (numero > LIMITE_DESCONTO && !window._descontoAutorizado) {
+                validarDesconto(input);
+                return;
+            }
+
+            // Limpar visual se dentro do limite
+            input.style.border = '';
+            input.style.background = '';
+            input.style.color = '';
+            input.style.fontWeight = '';
+
+            // Recalcular totais do novo orçamento
+            if (typeof recalcularTotaisNovoOrcamento === 'function') recalcularTotaisNovoOrcamento();
         }
 
         // Formatar campo de quantidade input (apenas 1 casa decimal: 0 ou 5)
@@ -15761,6 +15737,13 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             produtoSelecionadoAutoComplete = produto;
             document.getElementById('item-pedido-produto').value = `${produto.codigo || ''} - ${produto.descricao || produto.nome || ''}`;
             document.getElementById('item-pedido-preco').value = formatarDecimal(produto.preco_venda || produto.preco || produto.preco_unitario || 0);
+
+            // Auto-preencher quantidade com estoque disponível (mínimo 1)
+            const qtdInput = document.getElementById('item-pedido-quantidade');
+            if (qtdInput) {
+                const estoqueDisponivel = parseFloat(produto.estoque_atual) || 0;
+                qtdInput.value = estoqueDisponivel > 0 ? formatarDecimal(estoqueDisponivel) : '1,0';
+            }
 
             // Auto-preencher CFOP do produto
             const cfopInput = document.getElementById('item-pedido-cfop');
@@ -16400,6 +16383,15 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             let descontoPct = parseFloat(input.value) || 0;
             if (descontoPct < 0) { descontoPct = 0; input.value = 0; }
             if (descontoPct > 100) { descontoPct = 100; input.value = 100; }
+
+            // ============================================================
+            // LIMITE DE DESCONTO: 33,88% — acima requer autorização
+            // ============================================================
+            const LIMITE_DESCONTO = 33.88;
+            if (descontoPct > LIMITE_DESCONTO && !window._descontoAutorizado) {
+                validarDesconto(input);
+                return;
+            }
 
             // Remover alerta anterior se existir
             const alertaAnterior = document.getElementById('alerta-margem-desconto');
@@ -18952,8 +18944,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
             // Gerar itens fictícios baseado no pedido (em produção viria da API)
             itensPedidoParcial = pedido.itens || [
-                { código: 'ITEM001', descrição: `${pedido.cliente} - Produto 1`, qtdOriginal: 5, qtdDisponivel: 5 },
-                { código: 'ITEM002', descrição: `${pedido.cliente} - Produto 2`, qtdOriginal: 3, qtdDisponivel: 3 }
+                { codigo: 'ITEM001', descricao: `${pedido.cliente} - Produto 1`, qtdOriginal: 5, qtdDisponivel: 5 },
+                { codigo: 'ITEM002', descricao: `${pedido.cliente} - Produto 2`, qtdOriginal: 3, qtdDisponivel: 3 }
             ];
 
             // Renderizar lista de itens
@@ -18966,7 +18958,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                             onchange="toggleItemParcial(${idx})">
                     </label>
                     <div style="flex: 1;">
-                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${item.código} - ${item.descrição}</div>
+                        <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${item.codigo || item.código || '-'} - ${item.descricao || item.descrição || '-'}</div>
                         <div style="font-size: 12px; color: #6b7280; margin-top: 2px;">Qtd Original: ${item.qtdOriginal} | Disponível: ${item.qtdDisponivel}</div>
                     </div>
                     <input type="number" id="qtd-parcial-${idx}" value="${item.qtdDisponivel}" min="1" max="${item.qtdDisponivel}"
