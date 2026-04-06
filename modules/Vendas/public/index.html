@@ -7722,10 +7722,10 @@
                 <!-- Valores -->
                 <div class="section-omie">
                     <div class="section-row">
-                        <div class="field-group" style="flex: 0 0 100px;">
-                            <label>Quantidade</label>
-                            <input type="text" id="item-pedido-quantidade" value="1,0" class="input-number"
-                                oninput="formatarQuantidadeInput(this)" maxlength="10" placeholder="1,0">
+                        <div class="field-group" style="flex: 0 0 140px;">
+                            <label>Quantidade (m)</label>
+                            <input type="text" id="item-pedido-quantidade" value="1,00" class="input-number"
+                                oninput="formatarQuantidadeInput(this)" maxlength="15" placeholder="0,00">
                         </div>
                         <input type="hidden" id="item-pedido-estoque" value="PADRAO - Local de Estoque Padrão">
                         <input type="hidden" id="item-nao-gerar-saida" value="">
@@ -7740,16 +7740,7 @@
                                     maxlength="15" readonly>
                             </div>
                         </div>
-                        <div class="field-group desconto-item-field" style="flex: 0 0 130px;">
-                            <label>Desconto %</label>
-                            <div style="position: relative;">
-                                <input type="text" id="item-pedido-desconto-pct" value="0" class="input-number"
-                                    style="padding-right: 28px;" oninput="validarDesconto(this)" maxlength="6"
-                                    placeholder="0">
-                                <span
-                                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 13px;">%</span>
-                            </div>
-                        </div>
+                        <input type="hidden" id="item-pedido-desconto-pct" value="0">
                         <input type="hidden" id="item-nao-gerar-conta" value="">
                         <input type="hidden" id="item-pedido-tabela-preco" value="">
                     </div>
@@ -15157,7 +15148,6 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             dropdown.classList.remove('active');
 
             // Focus no campo quantidade
-            const qtdInput = document.getElementById('item-pedido-quantidade');
             if (qtdInput) qtdInput.focus();
         }
 
@@ -15343,31 +15333,22 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (typeof recalcularTotaisNovoOrcamento === 'function') recalcularTotaisNovoOrcamento();
         }
 
-        // Formatar campo de quantidade input (apenas 1 casa decimal: 0 ou 5)
+        // Formatar campo de quantidade input (metros - até 2 casas decimais)
         function formatarQuantidadeInput(input) {
             // Remover caracteres não numéricos (exceto vírgula e ponto)
             let valor = input.value.replace(/[^0-9,\.]/g, '');
 
             // Substituir ponto por vírgula para padronizar
-            valor = valor.replace('.', ',');
+            valor = valor.replace(/\./g, ',');
 
-            // Verificar se tem vírgula
+            // Garantir apenas uma vírgula
             if (valor.includes(',')) {
                 let partes = valor.split(',');
                 let inteiro = partes[0];
                 let decimal = partes.slice(1).join('');
 
-                // Pegar apenas o primeiro caractere decimal
-                if (decimal.length > 0) {
-                    let primeiroDecimal = decimal.charAt(0);
-                    // Permitir apenas 0 ou 5
-                    if (primeiroDecimal !== '0' && primeiroDecimal !== '5') {
-                        // Arredondar para o mais próximo (0 ou 5)
-                        let num = parseInt(primeiroDecimal);
-                        primeiroDecimal = num < 3 ? '0' : (num < 8 ? '5' : '0');
-                    }
-                    decimal = primeiroDecimal;
-                }
+                // Limitar decimal a 2 caracteres
+                decimal = decimal.substring(0, 2);
 
                 valor = inteiro + ',' + decimal;
             }
@@ -15537,7 +15518,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
         // Atualizar valores calculados
         function atualizarCalculosItem() {
-            const quantidade = parseFloat(document.getElementById('item-pedido-quantidade')?.value) || 0;
+            const quantidadeRaw = document.getElementById('item-pedido-quantidade')?.value || '0';
+            const quantidade = parseFloat(quantidadeRaw.replace(/\./g, '').replace(',', '.')) || 0;
             const preco = parseDecimal(document.getElementById('item-pedido-preco')?.value);
             const descontoPct = parseFloat(document.getElementById('item-pedido-desconto-pct')?.value?.replace(',', '.')) || 0;
 
@@ -15983,10 +15965,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('item-pedido-produto').style.background = '#f3f4f6';
             document.getElementById('item-pedido-produto').style.cursor = 'not-allowed';
             document.getElementById('item-pedido-cfop').value = item.cfop || '';
-            document.getElementById('item-pedido-quantidade').value = item.quantidade || 1;
+            document.getElementById('item-pedido-quantidade').value = parseFloat(item.quantidade || 1).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('item-pedido-preco').value = formatarDecimal(item.preco_unitario);
             document.getElementById('item-pedido-tabela-preco').value = item.tabela_preco || '';
-            document.getElementById('item-pedido-desconto-pct').value = item.desconto_pct || '0';
+            document.getElementById('item-pedido-desconto-pct').value = '0';
             document.getElementById('item-pedido-estoque').value = item.local_estoque || 'PADRAO - Local de Estoque Padrão';
             document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = item.cenario_fiscal || 'Padrão');
             document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = item.numero_pedido_compra || '');
@@ -15997,11 +15979,6 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             atualizarCalculosItem();
 
             document.getElementById('modal-item-título').textContent = 'Editar Item de Pedido de Venda';
-            // Ocultar desconto para não-admins
-            const descontoField = document.querySelector('.desconto-item-field');
-            if (descontoField) {
-                descontoField.style.display = verificarPermissaoDesconto() ? 'block' : 'none';
-            }
             document.getElementById('modal-item-pedido').classList.add('active');
         }
 
@@ -16050,7 +16027,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     descrição = produtoInput;
                 }
 
-                const quantidade = parseFloat(document.getElementById('item-pedido-quantidade').value) || 1;
+                const quantidadeRaw = document.getElementById('item-pedido-quantidade').value || '1';
+                const quantidade = parseFloat(quantidadeRaw.replace(/\./g, '').replace(',', '.')) || 1;
                 const precoUnitario = parseDecimal(document.getElementById('item-pedido-preco').value);
                 const descontoPct = parseFloat(document.getElementById('item-pedido-desconto-pct')?.value?.replace(',', '.')) || 0;
                 const desconto = (quantidade * precoUnitario) * (descontoPct / 100); // Calcular valor do desconto
@@ -22700,11 +22678,14 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         // INIT
         // ========================================
         document.addEventListener('DOMContentLoaded', async () => {
-            // PRIMEIRO: Carregar dados do usuário logado e dados da empresa
-            await Promise.all([carregarUsuarioLogado(), carregarDadosEmpresa()]);
+            // Carregar dados do usuário, empresa E kanban em paralelo para reduzir tempo de espera
+            const [,] = await Promise.all([
+                Promise.all([carregarUsuarioLogado(), carregarDadosEmpresa()]),
+                carregarDadosKanban(filtrosState)
+            ]);
 
-            // Carregar configurações de impostos do sistema
-            await carregarConfigImpostosSistema();
+            // Carregar configurações de impostos (não bloqueia a renderização)
+            carregarConfigImpostosSistema();
 
             // Controlar visibilidade do campo Condições de Pagamento (apenas admin, hellen, tatiane)
             if (!verificarPermissaoParcelas()) {
@@ -22718,27 +22699,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 });
             }
 
-            // Carregar dados do Kanban FILTRADO pelo vendedor logado
-            // Todos os usuários veem apenas seus próprios pedidos por padrão
-            // Supervisores/Admins podem usar o filtro "Critério de Seleção" para ver outros
-            carregarDadosKanban(filtrosState);
-
             // Inicializar sistema de notificações
             inicializarNotificacoes();
 
-            // ATUALIZAÇÃO EM TEMPO REAL: Recarregar dados quando a janela receber foco
-            // Isso garante que valores editados em outras abas sejam atualizados
-            window.addEventListener('focus', async () => {
-                console.log('[Vendas] Janela recebeu foco - atualizando Kanban...');
-                await carregarDadosKanban(filtrosState);
-            });
-
-            // Também verificar quando a aba ficar visível novamente
-            document.addEventListener('visibilitychange', async () => {
-                if (document.visibilityState === 'visible') {
-                    console.log('[Vendas] Aba ficou visível - atualizando Kanban...');
-                    await carregarDadosKanban(filtrosState);
-                }
+            // ATUALIZAÇÃO EM TEMPO REAL com debounce para evitar chamadas excessivas
+            let _kanbanRefreshTimer = null;
+            function debouncedRefreshKanban() {
+                if (_kanbanRefreshTimer) clearTimeout(_kanbanRefreshTimer);
+                _kanbanRefreshTimer = setTimeout(() => carregarDadosKanban(filtrosState), 1500);
+            }
+            window.addEventListener('focus', debouncedRefreshKanban);
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') debouncedRefreshKanban();
             });
 
             // Verificar se deve abrir modal de novo orçamento (vindo de outra página)
