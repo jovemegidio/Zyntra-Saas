@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Relatórios RH | ALUFORCE ERP</title>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
+    <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
+    <script src="/js/anti-copy-protection.js" defer></script>
+    <style>
+        .content-area { padding: 24px 28px; }
+
+        .page-header {
+            display: flex; align-items: center; gap: 16px; margin-bottom: 28px;
+            padding: 20px 24px; background: #fff; border-radius: 12px;
+            border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        }
+        .page-header .icon-box {
+            width: 48px; height: 48px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; font-size: 1.3rem;
+        }
+        .page-header h1 { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
+        .page-header p { font-size: 0.85rem; color: #64748b; margin: 4px 0 0; }
+
+        .reports-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;
+        }
+        .report-card {
+            background: #fff; border-radius: 14px; padding: 24px;
+            border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            transition: all 0.2s ease; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .report-card:hover {
+            transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            border-color: #c7d2fe;
+        }
+        .report-card .card-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; margin-bottom: 16px;
+        }
+        .report-card .card-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .report-card .card-icon.green { background: #f0fdf4; color: #22c55e; }
+        .report-card .card-icon.purple { background: #faf5ff; color: #a855f7; }
+        .report-card .card-icon.orange { background: #fff7ed; color: #f97316; }
+        .report-card .card-icon.pink { background: #fdf2f8; color: #ec4899; }
+        .report-card .card-icon.teal { background: #f0fdfa; color: #14b8a6; }
+        .report-card h3 { font-size: 1.05rem; font-weight: 700; color: #1e293b; margin: 0 0 8px; }
+        .report-card p { font-size: 0.82rem; color: #64748b; line-height: 1.5; margin: 0; }
+        .report-card .card-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9;
+        }
+        .report-card .card-footer .tag {
+            font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+            padding: 4px 10px; border-radius: 6px; letter-spacing: 0.3px;
+        }
+        .tag.admin { background: #fef3c7; color: #92400e; }
+        .tag.todos { background: #dbeafe; color: #1e40af; }
+        .report-card .card-footer .arrow { color: #94a3b8; font-size: 0.9rem; }
+
+        .filter-bar {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 24px;
+            padding: 14px 20px; background: #fff; border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .filter-bar label { font-weight: 600; color: #334155; font-size: 0.85rem; }
+        .filter-bar select, .filter-bar input[type="month"] {
+            padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif; background: #f8fafc;
+            cursor: pointer; outline: none;
+        }
+        .filter-bar select:focus, .filter-bar input:focus { border-color: #6366f1; }
+
+        .btn-generate {
+            padding: 10px 20px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff; border: none; border-radius: 8px; font-weight: 600;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-generate:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .report-output {
+            background: #fff; border-radius: 14px; padding: 24px;
+            border: 1px solid #e2e8f0; margin-top: 24px; display: none;
+        }
+        .report-output h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0 0 16px; }
+        .report-output table {
+            width: 100%; border-collapse: collapse; font-size: 0.85rem;
+        }
+        .report-output th {
+            background: #f8fafc; padding: 12px 14px; text-align: left;
+            font-weight: 600; color: #475569; border-bottom: 2px solid #e2e8f0;
+            font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.3px;
+        }
+        .report-output td {
+            padding: 10px 14px; border-bottom: 1px solid #f1f5f9; color: #334155;
+        }
+        .report-output tr:hover td { background: #fafbfc; }
+
+        @media (max-width: 768px) {
+            .reports-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="content-area">
+        <div class="page-header">
+            <div class="icon-box"><i class="fas fa-chart-bar"></i></div>
+            <div>
+                <h1>Relatórios RH</h1>
+                <p>Central de relatórios do departamento de Recursos Humanos</p>
+            </div>
+        </div>
+
+        <div class="reports-grid">
+            <div class="report-card" onclick="openReport('ponto-mensal')">
+                <div class="card-icon blue"><i class="fas fa-clock"></i></div>
+                <h3>Relatório Mensal de Ponto</h3>
+                <p>Consolidado mensal com horas trabalhadas, extras, atrasos e faltas por funcionário e departamento.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="openReport('ferias-vencimentos')">
+                <div class="card-icon orange"><i class="fas fa-umbrella-beach"></i></div>
+                <h3>Vencimento de Férias</h3>
+                <p>Períodos de férias vencidos, críticos e próximos do vencimento. Controle por funcionário.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="openReport('folha-centro-custo')">
+                <div class="card-icon green"><i class="fas fa-money-check-alt"></i></div>
+                <h3>Folha por Centro de Custo</h3>
+                <p>Distribuição de custos da folha de pagamento agrupados por centro de custo.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="openReport('beneficios-custos')">
+                <div class="card-icon pink"><i class="fas fa-gift"></i></div>
+                <h3>Custos de Benefícios</h3>
+                <p>Custo total, por empresa e por funcionário de cada tipo de benefício ativo.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="openReport('historico-salarial')">
+                <div class="card-icon purple"><i class="fas fa-chart-line"></i></div>
+                <h3>Histórico Salarial</h3>
+                <p>Consulta de reajustes salariais por funcionário, com datas, percentuais e motivos.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+
+            <div class="report-card" onclick="openReport('historico-cargos')">
+                <div class="card-icon teal"><i class="fas fa-sitemap"></i></div>
+                <h3>Histórico de Cargos</h3>
+                <p>Movimentações de cargo e promoções de cada funcionário ao longo do tempo.</p>
+                <div class="card-footer">
+                    <span class="tag admin">Admin</span>
+                    <i class="fas fa-arrow-right arrow"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter bar (shown when a report is selected) -->
+        <div class="filter-bar" id="filter-bar" style="display: none;">
+            <label>Competência:</label>
+            <select id="filter-mes">
+                <option value="1">Janeiro</option><option value="2">Fevereiro</option>
+                <option value="3">Março</option><option value="4">Abril</option>
+                <option value="5">Maio</option><option value="6">Junho</option>
+                <option value="7">Julho</option><option value="8">Agosto</option>
+                <option value="9">Setembro</option><option value="10">Outubro</option>
+                <option value="11">Novembro</option><option value="12">Dezembro</option>
+            </select>
+            <select id="filter-ano"></select>
+            <span id="filter-extra"></span>
+            <button class="btn-generate" id="btn-generate" onclick="generateReport()">
+                <i class="fas fa-play"></i> Gerar Relatório
+            </button>
+        </div>
+
+        <!-- Report output area -->
+        <div class="report-output" id="report-output"></div>
+    </div>
+
+    <script>
+    (function() {
+        // Populate year dropdown
+        var anoSelect = document.getElementById('filter-ano');
+        var currentYear = new Date().getFullYear();
+        for (var y = currentYear; y >= currentYear - 3; y--) {
+            var opt = document.createElement('option');
+            opt.value = y; opt.textContent = y;
+            anoSelect.appendChild(opt);
+        }
+        // Set current month
+        document.getElementById('filter-mes').value = new Date().getMonth() + 1;
+
+        var activeReport = null;
+
+        window.openReport = function(type) {
+            activeReport = type;
+            var filterBar = document.getElementById('filter-bar');
+            var output = document.getElementById('report-output');
+            output.style.display = 'none';
+            output.innerHTML = '';
+
+            // Reports that need employee selection
+            if (type === 'historico-salarial' || type === 'historico-cargos') {
+                filterBar.style.display = 'flex';
+                document.getElementById('filter-extra').innerHTML =
+                    '<label style="margin-left:12px;">Funcionário:</label>' +
+                    '<select id="filter-funcionario" style="padding:8px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:0.85rem;font-family:Inter,sans-serif;background:#f8fafc;min-width:200px;">' +
+                    '<option value="">Carregando...</option></select>';
+                loadFuncionarios();
+            } else if (type === 'ferias-vencimentos') {
+                filterBar.style.display = 'flex';
+                document.getElementById('filter-extra').innerHTML =
+                    '<label style="margin-left:12px;">Filtro:</label>' +
+                    '<select id="filter-tipo" style="padding:8px 14px;border-radius:8px;border:1px solid #cbd5e1;font-size:0.85rem;font-family:Inter,sans-serif;background:#f8fafc;">' +
+                    '<option value="todos">Todos</option><option value="vencido">Vencidos</option><option value="critico">Críticos</option></select>';
+            } else {
+                filterBar.style.display = 'flex';
+                document.getElementById('filter-extra').innerHTML = '';
+            }
+
+            // Scroll to filter bar
+            filterBar.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        };
+
+        function loadFuncionarios() {
+            var token = getCookieValue('authToken') || localStorage.getItem('token');
+            fetch('/api/rh/funcionarios', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                var list = Array.isArray(data) ? data : (data.funcionarios || []);
+                var sel = document.getElementById('filter-funcionario');
+                if (!sel) return;
+                sel.innerHTML = '<option value="">Selecione...</option>';
+                list.forEach(function(f) {
+                    var opt = document.createElement('option');
+                    opt.value = f.id;
+                    opt.textContent = f.nome_completo || f.nome || ('ID ' + f.id);
+                    sel.appendChild(opt);
+                });
+            })
+            .catch(function() {
+                var sel = document.getElementById('filter-funcionario');
+                if (sel) sel.innerHTML = '<option value="">Erro ao carregar</option>';
+            });
+        }
+
+        window.generateReport = function() {
+            var token = getCookieValue('authToken') || localStorage.getItem('token');
+            var mes = document.getElementById('filter-mes').value;
+            var ano = document.getElementById('filter-ano').value;
+            var output = document.getElementById('report-output');
+            output.style.display = 'block';
+            output.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:24px;color:#6366f1;"></i><p style="color:#64748b;margin-top:12px;">Gerando relatório...</p></div>';
+
+            var url = '';
+            var title = '';
+
+            switch (activeReport) {
+                case 'ponto-mensal':
+                    url = '/api/rh/ponto/relatorio-mensal?mes=' + mes + '&ano=' + ano;
+                    title = 'Relatório Mensal de Ponto';
+                    break;
+                case 'ferias-vencimentos':
+                    var tipo = document.getElementById('filter-tipo');
+                    url = '/api/rh/ferias/relatorio-vencimentos' + (tipo ? '?tipo=' + tipo.value : '');
+                    title = 'Vencimento de Férias';
+                    break;
+                case 'folha-centro-custo':
+                    url = '/api/rh/folha/relatorio/centro-custo?mes=' + mes + '&ano=' + ano;
+                    title = 'Folha por Centro de Custo';
+                    break;
+                case 'beneficios-custos':
+                    url = '/api/rh/beneficios/relatorio/custos?mes=' + mes + '&ano=' + ano;
+                    title = 'Custos de Benefícios';
+                    break;
+                case 'historico-salarial':
+                    var funcId = document.getElementById('filter-funcionario');
+                    if (!funcId || !funcId.value) {
+                        output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
+                        return;
+                    }
+                    url = '/api/rh/historico-salarial/' + funcId.value;
+                    title = 'Histórico Salarial';
+                    break;
+                case 'historico-cargos':
+                    var funcId2 = document.getElementById('filter-funcionario');
+                    if (!funcId2 || !funcId2.value) {
+                        output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Selecione um funcionário.</div>';
+                        return;
+                    }
+                    url = '/api/rh/historico-cargos/' + funcId2.value;
+                    title = 'Histórico de Cargos';
+                    break;
+            }
+
+            fetch(url, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            })
+            .then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
+            .then(function(data) {
+                renderReport(title, data);
+            })
+            .catch(function(err) {
+                output.innerHTML = '<div style="text-align:center;padding:30px;color:#ef4444;">' +
+                    '<i class="fas fa-exclamation-circle" style="font-size:28px;margin-bottom:8px;display:block;"></i>' +
+                    '<strong>Erro ao gerar relatório</strong><br>' +
+                    '<span style="font-size:0.85rem;">' + err.message + '</span></div>';
+            });
+        };
+
+        function renderReport(title, data) {
+            var output = document.getElementById('report-output');
+            var rows = Array.isArray(data) ? data : (data.dados || data.registros || data.relatorio || [data]);
+
+            if (!rows || rows.length === 0) {
+                output.innerHTML = '<div style="text-align:center;padding:30px;color:#64748b;">' +
+                    '<i class="fas fa-inbox" style="font-size:28px;margin-bottom:8px;display:block;"></i>' +
+                    '<strong>Nenhum dado encontrado</strong><br>' +
+                    '<span style="font-size:0.85rem;">Tente alterar os filtros e gerar novamente.</span></div>';
+                return;
+            }
+
+            // Auto-detect columns from first row
+            var keys = Object.keys(rows[0]).filter(function(k) { return k !== 'id' && !k.endsWith('_id'); });
+            var html = '<h3><i class="fas fa-table" style="margin-right:8px;color:#6366f1;"></i>' + title + ' <span style="font-size:0.8rem;color:#94a3b8;font-weight:400;">(' + rows.length + ' registros)</span></h3>';
+            html += '<div style="overflow-x:auto;"><table><thead><tr>';
+            keys.forEach(function(k) {
+                html += '<th>' + formatColumnName(k) + '</th>';
+            });
+            html += '</tr></thead><tbody>';
+            rows.forEach(function(row) {
+                html += '<tr>';
+                keys.forEach(function(k) {
+                    var val = row[k];
+                    if (val === null || val === undefined) val = '—';
+                    else if (typeof val === 'number' && (k.includes('salario') || k.includes('valor') || k.includes('custo') || k.includes('total') || k.includes('liquido') || k.includes('bruto')))
+                        val = 'R$ ' + val.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    else if (typeof val === 'string' && val.match(/^\d{4}-\d{2}-\d{2}/))
+                        val = formatDate(val);
+                    html += '<td>' + val + '</td>';
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table></div>';
+            output.innerHTML = html;
+        }
+
+        function formatColumnName(key) {
+            return key.replace(/_/g, ' ').replace(/\b\w/g, function(l) { return l.toUpperCase(); });
+        }
+
+        function formatDate(dateStr) {
+            try {
+                var d = new Date(dateStr);
+                return d.toLocaleDateString('pt-BR');
+            } catch (e) { return dateStr; }
+        }
+
+        function getCookieValue(name) {
+            var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? match[2] : null;
+        }
+    })();
+    </script>
+</body>
+</html>

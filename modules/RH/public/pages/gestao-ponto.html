@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -317,7 +317,7 @@
                                             <th>Hora</th>
                                             <th>Tipo</th>
                                             <th>Origem</th>
-                                            <th>Observao</th>
+                                            <th>Observação</th>
                                             <th>Aes</th>
                                         </tr>
                                     </thead>
@@ -326,7 +326,7 @@
                             </div>
                             <div class="empty-state" id="empty-registros" style="display:none">
                                 <i class="fas fa-clock"></i>
-                                <h3>Nenhuma marcao encontrada</h3>
+                                <h3>Nenhuma marcação encontrada</h3>
                                 <p>Importe dados do Control iD ou adicione manualmente.</p>
                             </div>
                         </div>
@@ -419,7 +419,7 @@
                             <div class="audit-timeline" id="audit-timeline"></div>
                             <div class="empty-state" id="empty-alteracoes">
                                 <i class="fas fa-clipboard-check"></i>
-                                <h3>Nenhuma alterao registrada</h3>
+                                <h3>Nenhuma alteração registrada</h3>
                                 <p>As edições e excluses de marcações aparecero aqui com detalhes completos.</p>
                             </div>
                         </div>
@@ -492,7 +492,7 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                         <div>
                             <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
-                                <i class="fas fa-clock" style="color: #22c55e;"></i> Horrio
+                                <i class="fas fa-clock" style="color: #22c55e;"></i> Horário
                             </label>
                             <input type="time" id="ajuste-hora" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 16px; font-weight: 600; text-align: center; background: #f9fafb; box-sizing: border-box;">
                         </div>
@@ -502,23 +502,23 @@
                             </label>
                             <select class="form-select" id="ajuste-tipo" style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; background: #f9fafb;">
                                 <option value="entrada">Entrada</option>
-                                <option value="saida_almoco">Sada Almoo</option>
-                                <option value="retorno_almoco">Retorno Almoo</option>
-                                <option value="saida">Sada</option>
-                                <option value="marcacao">Marcao</option>
+                                <option value="saida_almoco">Saída Almoço</option>
+                                <option value="retorno_almoco">Retorno Almoço</option>
+                                <option value="saida">Saída</option>
+                                <option value="marcacao">Marcação</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e5e7eb; padding: 24px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
-                        <i class="fas fa-comment-alt" style="color: #f59e0b;"></i> Observao
+                        <i class="fas fa-comment-alt" style="color: #f59e0b;"></i> Observação
                     </label>
-                    <textarea id="ajuste-observação" placeholder="Observao sobre a marcao..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #f9fafb; box-sizing: border-box; font-family: inherit;"></textarea>
+                    <textarea id="ajuste-observação" placeholder="Observação sobre a marcação..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 80px; resize: vertical; background: #f9fafb; box-sizing: border-box; font-family: inherit;"></textarea>
                 </div>
                 <div id="motivo-section" style="display:none; background: #ffffff; border-radius: 16px; border: 2px solid #6366f1; padding: 24px; margin-top: 16px;">
                     <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 10px;">
-                        <i class="fas fa-gavel" style="color: #6366f1;"></i> Motivo da Alterao <span class="required-indicator">*</span>
+                        <i class="fas fa-gavel" style="color: #6366f1;"></i> Motivo da Alteração <span class="required-indicator">*</span>
                     </label>
                     <textarea id="ajuste-motivo" placeholder="Descreva o motivo da edição (obrigatório para edições)..." style="width: 100%; padding: 14px 16px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 15px; min-height: 60px; resize: vertical; background: #faf5ff; box-sizing: border-box; font-family: inherit;"></textarea>
                     <div class="motivo-warning" id="motivo-warning">
@@ -542,7 +542,7 @@
         <div class="modal-overlay" onclick="fecharModal('modal-excluir')"></div>
         <div class="modal-content" style="max-width: 520px;">
             <div class="modal-header">
-                <h2><i class="fas fa-trash-alt"></i> Excluir Marcao</h2>
+                <h2><i class="fas fa-trash-alt"></i> Excluir Marcação</h2>
                 <button class="modal-close" onclick="fecharModal('modal-excluir')"><i class="fas fa-times"></i></button>
             </div>
             <div style="padding: 32px; background: #f9fafb; overflow-y: auto; flex: 1; min-height: 0;">
@@ -718,8 +718,8 @@
             return timeStr.substring(0, 5);
         }
         function tipoLabel(tipo) {
-            var map = { entrada: 'Entrada', saida_almoco: 'Sada Almoo', retorno_almoco: 'Retorno Almoo', saida: 'Sada', marcacao: 'Marcao' };
-            return map[tipo] || tipo || 'Marcao';
+            var map = { entrada: 'Entrada', saida_almoco: 'Saída Almoço', retorno_almoco: 'Retorno Almoço', saida: 'Saída', marcacao: 'Marcação' };
+            return map[tipo] || tipo || 'Marcação';
         }
         function origemLabel(origem) {
             var map = { control_id: 'Control iD', rhid_cloud: 'RHiD Cloud', arquivo: 'Arquivo', manual: 'Manual' };
@@ -813,7 +813,7 @@
 
             tbody.innerHTML = marcacoes.map(function(m) {
                 var nome = m.funcionário_nome || getFuncName(m.funcionário_id);
-                // Fallback: extrair nome da observao (RHiD importa como "RHiD: NOME")
+                // Fallback: extrair nome da observação (RHiD importa como "RHiD: NOME")
                 if (!nome && m.observacao) {
                     var rhidMatch = m.observacao.match(/^RHi?D:\s*(.+)/i);
                     if (rhidMatch) nome = rhidMatch[1].trim();
@@ -847,7 +847,7 @@
             }).join('');
         }
 
-        // ============= LOAD HISTRICO =============
+        // ============= LOAD HISTÓRICO =============
         async function carregarHistorico() {
             var funcId = document.getElementById('filter-func-hist').value;
             var inicio = document.getElementById('filter-inicio').value;
@@ -918,7 +918,7 @@
                             '<div style="font-size:1.5rem;font-weight:700;color:#22c55e">' + (r.entradas || 0) + '</div>' +
                         '</div>' +
                         '<div style="text-align:center;padding:16px;background:#f8fafc;border-radius:12px">' +
-                            '<div style="font-size:0.8rem;color:#64748b">Sadas</div>' +
+                            '<div style="font-size:0.8rem;color:#64748b">Saídas</div>' +
                             '<div style="font-size:1.5rem;font-weight:700;color:#ef4444">' + (r.saidas || 0) + '</div>' +
                         '</div>' +
                     '</div>' +
@@ -946,7 +946,7 @@
                 if (resp.ok) {
                     var data = await resp.json();
                     var marcacoes = data.marcacoes || [];
-                    // Contar dias teis sem marcao para cada funcionário (simplificado)
+                    // Contar dias úúteis sem marcação para cada funcionário (simplificado)
                     var diasComMarcacao = new Set();
                     marcacoes.forEach(function(m) {
                         if (m.funcionário_id) diasComMarcacao.add(m.funcionário_id + '_' + m.data);
@@ -977,7 +977,7 @@
 
         function editarMarcacao(id) {
             var m = marcacoesCache.find(function(x) { return x.id === id; });
-            if (!m) { showToast('Marcao no encontrada', 'error'); return; }
+            if (!m) { showToast('Marcação no encontrada', 'error'); return; }
 
             document.getElementById('ajuste-id').value = m.id;
             document.getElementById('ajuste-funcionário').value = m.funcionário_id || '';
@@ -986,10 +986,10 @@
             document.getElementById('ajuste-tipo').value = m.tipo || 'marcacao';
             document.getElementById('ajuste-observação').value = m.observacao || '';
             document.getElementById('ajuste-motivo').value = '';
-            document.getElementById('modal-ajuste-title').textContent = 'Editar Marcao #' + m.id;
+            document.getElementById('modal-ajuste-title').textContent = 'Editar Marcação #' + m.id;
             document.getElementById('motivo-section').style.display = 'block';
             document.getElementById('motivo-warning').classList.remove('show');
-            document.title = 'Zyntra: Editar Marcao';
+            document.title = 'Zyntra: Editar Marcação';
             document.getElementById('modal-ajuste').classList.add('show');
             document.body.classList.add('modal-open');
         }
@@ -1004,7 +1004,7 @@
             var motivo = document.getElementById('ajuste-motivo').value.trim();
 
             if (!funcId || !data || !hora) {
-                showToast('Preencha funcionário, data e horrio', 'error');
+                showToast('Preencha funcionário, data e horário', 'error');
                 return;
             }
 
@@ -1012,7 +1012,7 @@
             if (id && !motivo) {
                 document.getElementById('motivo-warning').classList.add('show');
                 document.getElementById('ajuste-motivo').focus();
-                showToast('Informe o motivo da alterao', 'error');
+                showToast('Informe o motivo da alteração', 'error');
                 return;
             }
 
@@ -1036,8 +1036,8 @@
 
                 var result = await resp.json();
                 var changeCount = result.alteracoes_registradas || 0;
-                var msg = id ? 'Marcao atualizada!' : 'Marcao registrada!';
-                if (changeCount > 0) msg += ' (' + changeCount + ' alterao(es) registrada(s))';
+                var msg = id ? 'Marcação atualizada!' : 'Marcação registrada!';
+                if (changeCount > 0) msg += ' (' + changeCount + ' alteração(es) registrada(s))';
 
                 showToast(msg, 'success');
                 fecharModal('modal-ajuste');
@@ -1052,7 +1052,7 @@
 
         function excluirMarcacao(id) {
             var m = marcacoesCache.find(function(x) { return x.id === id; });
-            var info = m ? (getFuncName(m.funcionário_id) + ' - ' + formatDate(m.data) + ' ' + formatTime(m.hora)) : ('Marcao #' + id);
+            var info = m ? (getFuncName(m.funcionário_id) + ' - ' + formatDate(m.data) + ' ' + formatTime(m.hora)) : ('Marcação #' + id);
 
             excluirMarcacaoId = id;
             document.getElementById('excluir-info').textContent = info;
@@ -1081,7 +1081,7 @@
                     throw new Error(errData.error || 'HTTP ' + resp.status);
                 }
                 fecharModal('modal-excluir');
-                showToast('Marcao excluda! (registrado na auditoria)', 'success');
+                showToast('Marcação excluda! (registrado na auditoria)', 'success');
                 carregarRegistrosDia();
             } catch (e) {
                 console.error('Erro ao excluir:', e);
@@ -1093,7 +1093,7 @@
         function exportarRelatorio() {
             if (marcacoesCache.length === 0) { showToast('Nenhum dado para exportar', 'error'); return; }
 
-            var csv = 'Funcionário;Data;Hora;Tipo;Origem;Observao\n';
+            var csv = 'Funcionário;Data;Hora;Tipo;Origem;Observação\n';
             marcacoesCache.forEach(function(m) {
                 csv += '"' + (m.funcionário_nome || getFuncName(m.funcionário_id)) + '";"' + formatDate(m.data) + '";"' + formatTime(m.hora) + '";"' + tipoLabel(m.tipo) + '";"' + origemLabel(m.origem) + '";"' + (m.observação || '') + '"\n';
             });
@@ -1189,7 +1189,7 @@
             btn.innerHTML = '<i class="fas fa-cloud-download-alt"></i> Sincronizar RHiD';
         }
 
-        // ============= HISTRICO DE ALTERAES =============
+        // ============= HISTÓRICO DE ALTERAES =============
         async function carregarAlteracoes() {
             var funcId = document.getElementById('filter-func-alteracoes').value;
             var ação = document.getElementById('filter-ação-alteracoes').value;
@@ -1264,7 +1264,7 @@
                     var changesHtml = '';
                     if (item.changes.length > 0) {
                         changesHtml = '<div style="margin-top:6px">' + item.changes.map(function(c) {
-                            var campoLabel = { hora: 'Horrio', tipo: 'Tipo', observacao: 'Observao', data: 'Data', funcionário_id: 'Funcionário' };
+                            var campoLabel = { hora: 'Horário', tipo: 'Tipo', observacao: 'Observação', data: 'Data', funcionário_id: 'Funcionário' };
                             return '<div class="audit-change">' +
                                 '<strong>' + (campoLabel[c.campo] || c.campo) + ':</strong> ' +
                                 '<span class="old">' + (c.anterior || 'vazio') + '</span>' +
@@ -1281,7 +1281,7 @@
                         '<div class="audit-icon ' + iconClass + '"><i class="fas ' + icon + '"></i></div>' +
                         '<div class="audit-body">' +
                             '<div class="audit-header">' +
-                                '<span class="audit-action">' + (acaoMap[item.ação] || item.ação) + '  Marcao #' + item.marcacao_id + ' (' + funcName + ')</span>' +
+                                '<span class="audit-action">' + (acaoMap[item.ação] || item.ação) + '  Marcação #' + item.marcacao_id + ' (' + funcName + ')</span>' +
                                 '<span class="audit-time">' + dtStr + '</span>' +
                             '</div>' +
                             changesHtml +

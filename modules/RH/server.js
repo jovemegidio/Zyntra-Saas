@@ -842,7 +842,9 @@ const holeriteStorage = multer.diskStorage({
 })
 
 function pdfFileFilter (req, file, cb) {
-  if (file.mimetype !== 'application/pdf') return cb(new Error('Apenas ficheiros PDF são permitidos para holerites.'))
+  // AUDIT-FIX R3: Validar extensão além do mimetype (mimetype é facilmente forjável)
+  const ext = require('path').extname(file.originalname).toLowerCase();
+  if (file.mimetype !== 'application/pdf' || ext !== '.pdf') return cb(new Error('Apenas ficheiros PDF são permitidos para holerites.'))
   cb(null, true)
 }
 
@@ -856,17 +858,8 @@ app.post(['/api/funcionarios/:id/holerite', '/api/rh/funcionarios/:id/holerite']
   const arquivoUrl = `/uploads/holerites/${req.file.filename}`
   const competencia = req.body.competencia || null
   try {
-    // Ensure holerites table exists (defensive)
-    const ensureHolerites = `CREATE TABLE IF NOT EXISTS holerites (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            funcionario_id INT NOT NULL,
-            mes_referencia VARCHAR(7) DEFAULT NULL,
-            arquivo_url VARCHAR(255) NOT NULL,
-            data_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            competencia VARCHAR(10) DEFAULT NULL,
-            FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`
-    try { await dbQuery(ensureHolerites) } catch (ee) { logger.warn('Falha ao garantir tabela holerites (prosseguindo):', ee) }
+    // AUDIT-FIX R2: DDL removido do request handler (tabela já garantida no startup)
+    // A tabela holerites é criada no boot via IIFE async
 
     // Some schemas expect mes_referencia (YYYY-MM) NOT NULL; derive it from competencia or today
     const mesRef = competencia && String(competencia).trim() ? String(competencia).trim() : (new Date()).toISOString().slice(0, 7)
@@ -2118,7 +2111,7 @@ app.post('/api/rh/centro-custo', authMiddleware, requireRHAdmin, async (req, res
 });
 
 // GET /api/rh/histórico-salarial/:funcionarioId - Histórico salarial de um funcionário
-app.get('/api/rh/histórico-salarial/:funcionarioId', authMiddleware, async (req, res) => {
+app.get(['/api/rh/historico-salarial/:funcionarioId', '/api/rh/histórico-salarial/:funcionarioId'], authMiddleware, async (req, res) => {
   try {
     const { funcionarioId } = req.params;
     
@@ -2146,7 +2139,7 @@ app.get('/api/rh/histórico-salarial/:funcionarioId', authMiddleware, async (req
 });
 
 // POST /api/rh/histórico-salarial - Registrar reajuste salarial
-app.post('/api/rh/histórico-salarial', authMiddleware, async (req, res) => {
+app.post(['/api/rh/historico-salarial', '/api/rh/histórico-salarial'], authMiddleware, async (req, res) => {
   try {
     // AUDITORIA ENTERPRISE: Verificação obrigatória de admin para alteração de salário
     if (!isAdminUser(req.user)) {
@@ -2190,7 +2183,7 @@ app.post('/api/rh/histórico-salarial', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/histórico-cargos/:funcionarioId - Histórico de cargos de um funcionário
-app.get('/api/rh/histórico-cargos/:funcionarioId', authMiddleware, async (req, res) => {
+app.get(['/api/rh/historico-cargos/:funcionarioId', '/api/rh/histórico-cargos/:funcionarioId'], authMiddleware, async (req, res) => {
   try {
     const { funcionarioId } = req.params;
     
@@ -2217,7 +2210,7 @@ app.get('/api/rh/histórico-cargos/:funcionarioId', authMiddleware, async (req, 
 });
 
 // POST /api/rh/histórico-cargos - Registrar mudança de cargo (ADMIN ONLY)
-app.post('/api/rh/histórico-cargos', authMiddleware, async (req, res) => {
+app.post(['/api/rh/historico-cargos', '/api/rh/histórico-cargos'], authMiddleware, async (req, res) => {
   try {
     // Verificação de permissão de administrador
     if (!isAdminUser(req.user)) {
@@ -2383,7 +2376,7 @@ app.get('/api/rh/ponto/hoje/:funcionarioId', authMiddleware, async (req, res) =>
 });
 
 // GET /api/rh/ponto/histórico/:funcionarioId - Histórico de ponto
-app.get('/api/rh/ponto/histórico/:funcionarioId', authMiddleware, async (req, res) => {
+app.get(['/api/rh/ponto/historico/:funcionarioId', '/api/rh/ponto/histórico/:funcionarioId'], authMiddleware, async (req, res) => {
   try {
     const { funcionarioId } = req.params;
     
@@ -2430,7 +2423,7 @@ app.get('/api/rh/ponto/histórico/:funcionarioId', authMiddleware, async (req, r
 });
 
 // GET /api/rh/ponto/relatório-mensal - Relatório mensal consolidado
-app.get('/api/rh/ponto/relatório-mensal', authMiddleware, requireRHAdmin, async (req, res) => {
+app.get(['/api/rh/ponto/relatorio-mensal', '/api/rh/ponto/relatório-mensal'], authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { mes, ano, departamento } = req.query;
 
@@ -3108,7 +3101,7 @@ app.get('/api/rh/ferias/dashboard', authMiddleware, requireRHAdmin, async (req, 
 });
 
 // GET /api/rh/ferias/relatório-vencimentos - Relatório de vencimentos
-app.get('/api/rh/ferias/relatório-vencimentos', authMiddleware, requireRHAdmin, async (req, res) => {
+app.get(['/api/rh/ferias/relatorio-vencimentos', '/api/rh/ferias/relatório-vencimentos'], authMiddleware, requireRHAdmin, async (req, res) => {
   try {
     const { tipo } = req.query; // 'vencido', 'critico', 'todos'
 
@@ -3128,7 +3121,7 @@ app.get('/api/rh/ferias/relatório-vencimentos', authMiddleware, requireRHAdmin,
         CASE 
           WHEN fp.vencido = TRUE THEN 'VENCIDO'
           WHEN DATEDIFF(fp.data_limite_gozo, CURDATE()) <= 30 THEN 'CRÍTICO'
-          WHEN DATEDIFF(fp.data_limite_gozo, CURDATE()) <= 60 THEN 'ATENÇÉO'
+          WHEN DATEDIFF(fp.data_limite_gozo, CURDATE()) <= 60 THEN 'ATENÇÃO'
           ELSE 'NORMAL'
         END as alerta
       FROM ferias_periodos fp
@@ -3784,6 +3777,8 @@ app.put('/api/rh/holerite/:id', authMiddleware, async (req, res) => {
 
 // POST /api/rh/holerite/:id/item - Adicionar item ao holerite
 app.post('/api/rh/holerite/:id/item', authMiddleware, async (req, res) => {
+  // AUDIT-FIX R2: Somente admin pode adicionar itens a holerites
+  if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado. Somente administradores podem adicionar itens a holerites.' });
   const { tipo, referencia, valor } = req.body;
   const codigo = req.body.codigo ?? req.body['código'];
   const descricao = req.body.descricao ?? req.body['descrição'];
@@ -3807,38 +3802,39 @@ app.post('/api/rh/holerite/:id/item', authMiddleware, async (req, res) => {
 
 // ============ HOLERITES (plural) - ROTAS PARA GESTÃO DE HOLERITES ============
 
-// Ensure visualizacoes and confirmacao columns exist
-const ensureHoleritesColumns = `
-  ALTER TABLE rh_holerites
-    ADD COLUMN IF NOT EXISTS visualizado TINYINT(1) DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS total_visualizacoes INT DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS confirmado_recebimento TINYINT(1) DEFAULT 0,
-    ADD COLUMN IF NOT EXISTS data_confirmacao DATETIME NULL,
-    ADD COLUMN IF NOT EXISTS arquivo_pdf VARCHAR(255),
-    ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'rascunho',
-    ADD COLUMN IF NOT EXISTS tipo VARCHAR(30) DEFAULT 'salario'
-`;
-db.query(ensureHoleritesColumns, (e) => {
-  if (e && !e.message?.includes('Duplicate')) logger.warn('Aviso ao ajustar colunas rh_holerites:', e.message);
-});
+// AUDIT-FIX R3: DDLs holerites encapsuladas em IIFE
+(function initHoleritesTables() {
+  const ensureHoleritesColumns = `
+    ALTER TABLE rh_holerites
+      ADD COLUMN IF NOT EXISTS visualizado TINYINT(1) DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS total_visualizacoes INT DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS confirmado_recebimento TINYINT(1) DEFAULT 0,
+      ADD COLUMN IF NOT EXISTS data_confirmacao DATETIME NULL,
+      ADD COLUMN IF NOT EXISTS arquivo_pdf VARCHAR(255),
+      ADD COLUMN IF NOT EXISTS status VARCHAR(20) DEFAULT 'rascunho',
+      ADD COLUMN IF NOT EXISTS tipo VARCHAR(30) DEFAULT 'salario'
+  `;
+  db.query(ensureHoleritesColumns, (e) => {
+    if (e && !e.message?.includes('Duplicate')) logger.warn('Aviso ao ajustar colunas rh_holerites:', e.message);
+  });
 
-// Ensure table de consentimento digital para holerites
-const ensureHoleritesConsentTable = `
-  CREATE TABLE IF NOT EXISTS rh_holerites_consentimentos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    funcionario_id INT NOT NULL,
-    assinatura_digital VARCHAR(255) NOT NULL,
-    aceito TINYINT(1) DEFAULT 1,
-    ip_address VARCHAR(64) NULL,
-    user_agent VARCHAR(255) NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_holerites_consentimento_funcionario (funcionario_id)
-  )
-`;
-db.query(ensureHoleritesConsentTable, (e) => {
-  if (e) logger.warn('Aviso ao criar tabela rh_holerites_consentimentos:', e.message);
-});
+  const ensureHoleritesConsentTable = `
+    CREATE TABLE IF NOT EXISTS rh_holerites_consentimentos (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      funcionario_id INT NOT NULL,
+      assinatura_digital VARCHAR(255) NOT NULL,
+      aceito TINYINT(1) DEFAULT 1,
+      ip_address VARCHAR(64) NULL,
+      user_agent VARCHAR(255) NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY uq_holerites_consentimento_funcionario (funcionario_id)
+    )
+  `;
+  db.query(ensureHoleritesConsentTable, (e) => {
+    if (e) logger.warn('Aviso ao criar tabela rh_holerites_consentimentos:', e.message);
+  });
+})(); // AUDIT-FIX R3: Fim IIFE holerites
 
 function getUserFuncionarioId(user) {
   const id = Number(user?.funcionario_id || user?.id);
@@ -4138,12 +4134,13 @@ app.put('/api/rh/holerites/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// DELETE /api/rh/holerites/:id - Excluir holerite
+// DELETE /api/rh/holerites/:id - Excluir holerite (soft-delete)
 app.delete('/api/rh/holerites/:id', authMiddleware, async (req, res) => {
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado' });
   try {
-    await pool.query('DELETE FROM rh_holerite_itens WHERE holerite_id=?', [req.params.id]);
-    await pool.query('DELETE FROM rh_holerites WHERE id=?', [req.params.id]);
+    // AUDIT-FIX R2: Soft-delete — holerite é documento trabalhista obrigatório
+    await pool.query('UPDATE rh_holerite_itens SET deleted_at = NOW() WHERE holerite_id=?', [req.params.id]);
+    await pool.query('UPDATE rh_holerites SET status = "excluido", deleted_at = NOW(), deleted_by = ? WHERE id=?', [req.user?.id, req.params.id]);
     res.json({ success: true, message: 'Holerite excluído com sucesso!' });
   } catch (error) {
     logger.error('Erro ao excluir holerite:', error);
@@ -4709,7 +4706,7 @@ app.get('/api/rh/folha/dashboard', authMiddleware, async (req, res) => {
 });
 
 // GET /api/rh/folha/relatório/centro-custo - Relatório por centro de custo
-app.get('/api/rh/folha/relatório/centro-custo', authMiddleware, async (req, res) => {
+app.get(['/api/rh/folha/relatorio/centro-custo', '/api/rh/folha/relatório/centro-custo'], authMiddleware, async (req, res) => {
   const { mes, ano } = req.query;
   
   if (!mes || !ano) {
@@ -4952,28 +4949,30 @@ app.delete('/api/rh/dependentes/:id', authMiddleware, async (req, res) => {
 
 // ============ PENSÃO ALIMENTÍCIA ============
 
-// Criar tabela se não existir
-const ensurePensaoAlimenticia = `CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  funcionario_id INT NOT NULL,
-  valor DECIMAL(10,2) DEFAULT 0,
-  nome_recebedor VARCHAR(255),
-  cpf_recebedor VARCHAR(14),
-  banco_recebedor VARCHAR(100),
-  agencia_recebedor VARCHAR(20),
-  conta_recebedor VARCHAR(30),
-  observacoes TEXT,
-  ativo TINYINT(1) DEFAULT 1,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
-  INDEX idx_func_pensao (funcionario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+// AUDIT-FIX R3: DDL pensao_alimenticia encapsulada em IIFE
+(function initPensaoAlimenticiaTable() {
+  const ensurePensaoAlimenticia = `CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    funcionario_id INT NOT NULL,
+    valor DECIMAL(10,2) DEFAULT 0,
+    nome_recebedor VARCHAR(255),
+    cpf_recebedor VARCHAR(14),
+    banco_recebedor VARCHAR(100),
+    agencia_recebedor VARCHAR(20),
+    conta_recebedor VARCHAR(30),
+    observacoes TEXT,
+    ativo TINYINT(1) DEFAULT 1,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
+    INDEX idx_func_pensao (funcionario_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
-db.query(ensurePensaoAlimenticia, (e) => {
-  if (e) logger.error('Erro ao criar tabela rh_pensao_alimenticia:', e);
-  else logger.info('Tabela rh_pensao_alimenticia pronta.');
-});
+  db.query(ensurePensaoAlimenticia, (e) => {
+    if (e) logger.error('Erro ao criar tabela rh_pensao_alimenticia:', e);
+    else logger.info('Tabela rh_pensao_alimenticia pronta.');
+  });
+})(); // AUDIT-FIX R3: Fim IIFE pensao_alimenticia
 
 // GET - Listar pensões de um funcionário
 app.get('/api/rh/funcionarios/:id/pensao', authMiddleware, async (req, res) => {
@@ -5023,11 +5022,12 @@ app.put('/api/rh/funcionarios/:id/pensao/:pensaoId', authMiddleware, async (req,
   }
 });
 
-// DELETE - Remover pensão
+// DELETE - Remover pensão (soft-delete)
 app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authMiddleware, async (req, res) => {
   if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado' });
   try {
-    await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
+    // AUDIT-FIX R2: Soft-delete — pensão alimenticia é obrigação legal, não pode apagar
+    await pool.query('UPDATE rh_pensao_alimenticia SET status = "inativa", deleted_at = NOW(), deleted_by = ? WHERE id=? AND funcionario_id=?', [req.user?.id, req.params.pensaoId, req.params.id]);
     res.json({ success: true });
   } catch (error) {
     logger.error('Erro ao remover pensão:', error);
@@ -5037,40 +5037,42 @@ app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authMiddleware, async (r
 
 // ============ SALÁRIO FAMÍLIA ============
 
-// Criar tabela se não existir
-const ensureSalarioFamilia = `CREATE TABLE IF NOT EXISTS rh_salario_familia (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  funcionario_id INT NOT NULL UNIQUE,
-  recebe TINYINT(1) DEFAULT 0,
-  quantidade_dependentes INT DEFAULT 0,
-  observacoes TEXT,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
-  INDEX idx_func_sf (funcionario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+// AUDIT-FIX R3: DDLs salario_familia encapsuladas em IIFE
+(function initSalarioFamiliaTables() {
+  const ensureSalarioFamilia = `CREATE TABLE IF NOT EXISTS rh_salario_familia (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    funcionario_id INT NOT NULL UNIQUE,
+    recebe TINYINT(1) DEFAULT 0,
+    quantidade_dependentes INT DEFAULT 0,
+    observacoes TEXT,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
+    INDEX idx_func_sf (funcionario_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
-const ensureSfDependentes = `CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  funcionario_id INT NOT NULL,
-  nome VARCHAR(255) NOT NULL,
-  parentesco VARCHAR(50),
-  data_nascimento DATE,
-  cpf VARCHAR(14),
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
-  INDEX idx_func_sf_dep (funcionario_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+  const ensureSfDependentes = `CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    funcionario_id INT NOT NULL,
+    nome VARCHAR(255) NOT NULL,
+    parentesco VARCHAR(50),
+    data_nascimento DATE,
+    cpf VARCHAR(14),
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (funcionario_id) REFERENCES funcionarios(id) ON DELETE CASCADE,
+    INDEX idx_func_sf_dep (funcionario_id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
 
-db.query(ensureSalarioFamilia, (e) => {
-  if (e) logger.error('Erro ao criar tabela rh_salario_familia:', e);
-  else logger.info('Tabela rh_salario_familia pronta.');
-});
+  db.query(ensureSalarioFamilia, (e) => {
+    if (e) logger.error('Erro ao criar tabela rh_salario_familia:', e);
+    else logger.info('Tabela rh_salario_familia pronta.');
+  });
 
-db.query(ensureSfDependentes, (e) => {
-  if (e) logger.error('Erro ao criar tabela rh_sf_dependentes:', e);
-  else logger.info('Tabela rh_sf_dependentes pronta.');
-});
+  db.query(ensureSfDependentes, (e) => {
+    if (e) logger.error('Erro ao criar tabela rh_sf_dependentes:', e);
+    else logger.info('Tabela rh_sf_dependentes pronta.');
+  });
+})(); // AUDIT-FIX R3: Fim IIFE salario_familia
 
 // GET - Dados de salário família do funcionário
 app.get('/api/rh/funcionarios/:id/salario-familia', authMiddleware, async (req, res) => {
@@ -5133,7 +5135,7 @@ app.delete('/api/rh/funcionarios/:id/salario-familia/dependente/:depId', authMid
 });
 
 // GET /api/rh/beneficios/relatório/custos - Relatório de custos
-app.get('/api/rh/beneficios/relatório/custos', authMiddleware, async (req, res) => {
+app.get(['/api/rh/beneficios/relatorio/custos', '/api/rh/beneficios/relatório/custos'], authMiddleware, async (req, res) => {
   const { mes, ano } = req.query;
   
   try {
@@ -5770,6 +5772,8 @@ app.get('/api/rh/promocoes/funcionario/:id', authMiddleware, async (req, res) =>
 
 // ==================== GESTÍO DE TREINAMENTOS ====================
 
+// AUDIT-FIX R3: DDLs de treinamentos/requisicoes encapsulados em IIFE
+(function initTreinamentosTables() {
 // Garantir que as tabelas de treinamentos existam
 const ensureTreinamentos = `CREATE TABLE IF NOT EXISTS rh_treinamentos (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -5883,6 +5887,7 @@ db.query(ensureRequisicoesItens, (e) => {
   if (e) logger.error('Erro ao criar tabela rh_requisicoes_compra_itens:', e);
   else logger.info('Tabela rh_requisicoes_compra_itens pronta.');
 });
+})(); // AUDIT-FIX R3: Fim da IIFE de DDLs treinamentos/requisicoes
 
 // Listar treinamentos
 app.get('/api/rh/treinamentos', authMiddleware, async (req, res) => {
@@ -6120,6 +6125,8 @@ app.delete('/api/rh/treinamentos/:id/inscricao/:funcionarioId', authMiddleware, 
 
 // Registrar presença/conclusão
 app.put('/api/rh/treinamentos/:id/inscricao/:funcionarioId', authMiddleware, async (req, res) => {
+  // AUDIT-FIX R2: Somente admin pode alterar inscrições de treinamento
+  if (!isAdminUser(req.user)) return res.status(403).json({ message: 'Acesso negado. Somente administradores podem alterar inscrições.' });
   try {
     const { presenca, nota_avaliacao, status, feedback, certificado_emitido, certificado_url } = req.body;
     
@@ -6426,6 +6433,14 @@ app.use((err, req, res, next) => {
 })
 
 // --- INICIALIZAÇÃO DO SERVIDOR ---
+// FIX-100: Standalone RH server is DEPRECATED. All RH routes are now served
+// by the main server via routes/rh-routes.js. This standalone server should
+// only be used for isolated development/testing with STANDALONE_RH=true.
+if (process.env.STANDALONE_RH !== 'true' && require.main === module) {
+  console.warn('⚠️  [RH] Standalone mode is DEPRECATED. Use the main server (routes/rh-routes.js).');
+  console.warn('⚠️  [RH] Set STANDALONE_RH=true to force standalone mode.');
+  process.exit(0);
+}
 // Prefer binding to 0.0.0.0 so the server is reachable from other hosts/containers during tests.
 // Also add a listen error handler to log bind issues (useful on Windows if address is unavailable).
 const LISTEN_ADDR = process.env.LISTEN_ADDR || '0.0.0.0'

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -239,7 +239,7 @@
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
                 <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
@@ -275,7 +275,7 @@
                 <div class="page-header">
                     <div>
                         <h1 class="page-title"><i class="fas fa-clock"></i> Controle de Ponto</h1>
-                        <p class="page-subtitle">Registre suas entradas e sadas</p>
+                        <p class="page-subtitle">Registre suas entradas e saídas</p>
                     </div>
                 </div>
 
@@ -294,17 +294,17 @@
                         </div>
                         <div class="batida-card" id="batida-2">
                             <i class="fas fa-utensils"></i>
-                            <div class="batida-label">Sada Almoo</div>
+                            <div class="batida-label">Saída Almoço</div>
                             <div class="batida-hora" id="hora-almoco-saida">--:--</div>
                         </div>
                         <div class="batida-card" id="batida-3">
                             <i class="fas fa-utensils"></i>
-                            <div class="batida-label">Retorno Almoo</div>
+                            <div class="batida-label">Retorno Almoço</div>
                             <div class="batida-hora" id="hora-almoco-retorno">--:--</div>
                         </div>
                         <div class="batida-card" id="batida-4">
                             <i class="fas fa-sign-out-alt"></i>
-                            <div class="batida-label">Sada</div>
+                            <div class="batida-label">Saída</div>
                             <div class="batida-hora" id="hora-saida">--:--</div>
                         </div>
                     </div>
@@ -358,9 +358,9 @@
                                 <tr>
                                     <th>Data</th>
                                     <th>Entrada</th>
-                                    <th>Sada Almoo</th>
+                                    <th>Saída Almoço</th>
                                     <th>Retorno</th>
-                                    <th>Sada</th>
+                                    <th>Saída</th>
                                     <th>Total</th>
                                     <th>Status</th>
                                 </tr>
@@ -476,7 +476,7 @@
             
             const batidaCards = ['batida-1', 'batida-2', 'batida-3', 'batida-4'];
             const horaIds = ['hora-entrada', 'hora-almoco-saida', 'hora-almoco-retorno', 'hora-saida'];
-            const labels = ['Entrada', 'Sada Almoo', 'Retorno Almoo', 'Sada'];
+            const labels = ['Entrada', 'Saída Almoço', 'Retorno Almoço', 'Saída'];
             const tipos = ['entrada', 'saida_almoco', 'retorno_almoco', 'saida'];
             
             if (batidaAtual <= 4) {
@@ -514,7 +514,7 @@
                     statusEl.textContent = 'Trabalhando';
                     statusEl.className = 'status-ponto trabalhando';
                 } else if (batidaAtual === 2) {
-                    statusEl.textContent = 'Intervalo de Almoo';
+                    statusEl.textContent = 'Intervalo de Almoço';
                     statusEl.className = 'status-ponto intervalo';
                 } else if (batidaAtual === 3) {
                     statusEl.textContent = 'Trabalhando';

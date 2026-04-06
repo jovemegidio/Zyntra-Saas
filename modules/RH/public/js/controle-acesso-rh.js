@@ -32,7 +32,7 @@
             });
             
             if (!response.ok) {
-                console.log('[RH Access] Não foi possível verificar usuário');
+
                 return;
             }
             

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
@@ -1740,9 +1740,9 @@
                             </div>
 
                             <!-- Observações (somente leitura) -->
-                            <div id="sfObservacoesView" style="margin-top: 12px; display: none;">
+                            <div id="sfObservaçõesView" style="margin-top: 12px; display: none;">
                                 <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                                <div id="sfObservacoesDisplay" style="margin-top: 4px; color: #64748b; font-size: 13px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">-</div>
+                                <div id="sfObservaçõesDisplay" style="margin-top: 4px; color: #64748b; font-size: 13px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px;">-</div>
                             </div>
                         </div>
                     </div>
@@ -1751,7 +1751,7 @@
             <div class="modal-footer">
                 <div class="modal-footer-info">
                     <i class="fas fa-clock"></i>
-                    <span>ltima atualizao: Agora</span>
+                    <span>úúltima atualizao: Agora</span>
                 </div>
                 <div class="modal-footer-actions">
                     <button type="button" class="btn-secondary" onclick="fecharModal('modalVisualizar')">
@@ -2145,7 +2145,7 @@
                         <div class="vt-resumo vt-campos" id="vtResumoContainer" style="display: none; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); border-radius: 10px; padding: 15px; margin-top: 15px;">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div>
-                                    <span style="color: #1565c0; font-weight: 600;"><i class="fas fa-calculator"></i> Estimativa Mensal (22 dias teis):</span>
+                                    <span style="color: #1565c0; font-weight: 600;"><i class="fas fa-calculator"></i> Estimativa Mensal (22 dias úúteis):</span>
                                 </div>
                                 <div style="text-align: right;">
                                     <span id="vtEstimativaMensal" style="font-size: 20px; font-weight: 700; color: #0d47a1;">R$ 0,00</span>
@@ -2197,7 +2197,7 @@
                             </div>
                             <div class="form-group" style="margin-top: 8px;">
                                 <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                                <textarea id="pensaoObservacoesEdit" class="form-input" rows="2" placeholder="Observações..."></textarea>
+                                <textarea id="pensaoObservaçõesEdit" class="form-input" rows="2" placeholder="Observações..."></textarea>
                             </div>
                             <div style="display: flex; gap: 8px; margin-top: 12px; justify-content: flex-end;">
                                 <button type="button" class="btn-secondary" style="font-size: 12px; padding: 6px 14px;" onclick="fecharFormPensaoEdit()">Cancelar</button>
@@ -2278,7 +2278,7 @@
 
                         <div class="form-group" style="margin-top: 12px;">
                             <label style="font-size: 12px; font-weight: 600; color: #475569;">Observações</label>
-                            <textarea id="editSfObservacoes" class="form-input" rows="2" placeholder="Observações sobre salário família..." style="margin-top: 4px;"></textarea>
+                            <textarea id="editSfObservações" class="form-input" rows="2" placeholder="Observações sobre salário família..." style="margin-top: 4px;"></textarea>
                         </div>
 
                         <div style="display: flex; justify-content: flex-end; margin-top: 12px;">
@@ -3446,7 +3446,7 @@
                     } else if (statusNorm.includes('rejeit') || statusNorm.includes('recus')) {
                         statusClass = 'rejeitado'; statusLabel = 'Rejeitado';
                     } else if (statusNorm.includes('analis')) {
-                        statusClass = 'em-analise'; statusLabel = 'Em Anlise';
+                        statusClass = 'em-analise'; statusLabel = 'Em Análise';
                     }
 
                     return `
@@ -3481,7 +3481,7 @@
         }
 
         // ==== ATESTADOS ====
-        async function carregarAtestadosFuncionário(funcionarioId) {
+        async function carregarAtestadosFuncionario(funcionarioId) {
             const container = document.getElementById('atestadosContainer');
             container.innerHTML = '<div class="loading-placeholder" style="text-align: center; padding: 40px; color: #6b7280;"><i class="fas fa-spinner fa-spin fa-2x"></i><p style="margin-top: 12px;">Carregando atestados...</p></div>';
 
@@ -3546,7 +3546,7 @@
                     } else if (statusNorm.includes('rejeit') || statusNorm.includes('recus')) {
                         statusClass = 'rejeitado'; statusLabel = 'Rejeitado';
                     } else if (statusNorm.includes('analis')) {
-                        statusClass = 'em-analise'; statusLabel = 'Em Anlise';
+                        statusClass = 'em-analise'; statusLabel = 'Em Análise';
                     }
 
                     // Extrair motivo/tipo do atestado
@@ -3605,6 +3605,8 @@
                 `;
             }
         }
+
+        const carregarAtestadosFuncionário = carregarAtestadosFuncionario;
 
         async function aprovarAtestado(atestadoId) {
             // Modal de confirmao profissional
@@ -3758,7 +3760,7 @@
             document.getElementById('pensaoBanco').value = '';
             document.getElementById('pensaoAgencia').value = '';
             document.getElementById('pensaoConta').value = '';
-            document.getElementById('pensaoObservacoes').value = '';
+            document.getElementById('pensaoObservações').value = '';
             document.getElementById('formPensaoWrapper').style.display = 'block';
         }
 
@@ -3780,7 +3782,7 @@
                 document.getElementById('pensaoBanco').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgencia').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoConta').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservacoes').value = p.observacoes || '';
+                document.getElementById('pensaoObservações').value = p.observacoes || '';
                 document.getElementById('formPensaoWrapper').style.display = 'block';
             } catch (error) { console.error('Erro:', error); }
         }
@@ -3796,7 +3798,7 @@
                 banco_recebedor: document.getElementById('pensaoBanco').value,
                 agencia_recebedor: document.getElementById('pensaoAgencia').value,
                 conta_recebedor: document.getElementById('pensaoConta').value,
-                observacoes: document.getElementById('pensaoObservacoes').value
+                observacoes: document.getElementById('pensaoObservações').value
             };
             try {
                 const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
@@ -3865,10 +3867,10 @@
                 displayEl.style.background = recebe ? '#dcfce7' : '#fee2e2';
                 displayEl.style.color = recebe ? '#166534' : '#991b1b';
                 document.getElementById('sfDependentesSection').style.display = recebe ? 'block' : 'none';
-                const obsView = document.getElementById('sfObservacoesView');
+                const obsView = document.getElementById('sfObservaçõesView');
                 if (data.observacoes) {
                     obsView.style.display = 'block';
-                    document.getElementById('sfObservacoesDisplay').textContent = data.observacoes;
+                    document.getElementById('sfObservaçõesDisplay').textContent = data.observacoes;
                 } else {
                     obsView.style.display = 'none';
                 }
@@ -3953,7 +3955,7 @@
                     body: JSON.stringify({
                         recebe: document.getElementById('sfRecebe').checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentes > div[style*="border"]').length,
-                        observacoes: document.getElementById('sfObservacoes').value
+                        observacoes: document.getElementById('sfObservações').value
                     })
                 });
                 if (response.ok) {
@@ -4018,7 +4020,7 @@
             document.getElementById('pensaoBancoEdit').value = '';
             document.getElementById('pensaoAgenciaEdit').value = '';
             document.getElementById('pensaoContaEdit').value = '';
-            document.getElementById('pensaoObservacoesEdit').value = '';
+            document.getElementById('pensaoObservaçõesEdit').value = '';
             document.getElementById('formPensaoWrapperEdit').style.display = 'block';
         }
 
@@ -4041,7 +4043,7 @@
                 document.getElementById('pensaoBancoEdit').value = p.banco_recebedor || '';
                 document.getElementById('pensaoAgenciaEdit').value = p.agencia_recebedor || '';
                 document.getElementById('pensaoContaEdit').value = p.conta_recebedor || '';
-                document.getElementById('pensaoObservacoesEdit').value = p.observacoes || '';
+                document.getElementById('pensaoObservaçõesEdit').value = p.observacoes || '';
                 document.getElementById('formPensaoWrapperEdit').style.display = 'block';
             } catch (error) { showToast('error', 'Erro', 'Erro ao carregar pensão', 3000); }
         }
@@ -4057,7 +4059,7 @@
                 banco_recebedor: document.getElementById('pensaoBancoEdit').value,
                 agencia_recebedor: document.getElementById('pensaoAgenciaEdit').value,
                 conta_recebedor: document.getElementById('pensaoContaEdit').value,
-                observacoes: document.getElementById('pensaoObservacoesEdit').value
+                observacoes: document.getElementById('pensaoObservaçõesEdit').value
             };
             try {
                 const url = editId ? `/api/rh/funcionarios/${fid}/pensao/${editId}` : `/api/rh/funcionarios/${fid}/pensao`;
@@ -4092,7 +4094,7 @@
                 const recebe = data.recebe === 1;
                 document.getElementById('editSfRecebe').checked = recebe;
                 document.getElementById('editSfRecebeLabel').textContent = recebe ? 'Sim' : 'No';
-                document.getElementById('editSfObservacoes').value = data.observacoes || '';
+                document.getElementById('editSfObservações').value = data.observacoes || '';
                 document.getElementById('editSfDependentesSection').style.display = recebe ? 'block' : 'none';
                 renderizarDependentesEdit(data.dependentes || []);
             } catch (error) {
@@ -4178,7 +4180,7 @@
                     body: JSON.stringify({
                         recebe: document.getElementById('editSfRecebe').checked,
                         quantidade_dependentes: document.querySelectorAll('#listaDependentesEdit > div[style*="border"]').length,
-                        observacoes: document.getElementById('editSfObservacoes').value
+                        observacoes: document.getElementById('editSfObservações').value
                     })
                 });
                 if (response.ok) {
@@ -4296,9 +4298,9 @@
         function calcularEstimativaVt() {
             const valorDiario = parseMoedaToFloat(document.getElementById('editVtValorDiario').value) || 0;
             const qtdPassagens = parseInt(document.getElementById('editVtQtdPassagens').value) || 2;
-            const diasUteis = 22;
+            const diasUúúteis = 22;
 
-            const estimativaMensal = valorDiario * qtdPassagens * diasUteis;
+            const estimativaMensal = valorDiario * qtdPassagens * diasUúúteis;
             document.getElementById('vtEstimativaMensal').textContent = 'R$ ' + formatarValorMoeda(estimativaMensal);
         }
 
@@ -4439,7 +4441,7 @@
             const canvas = document.getElementById('cropCanvas');
             const size = canvas.width;
             // Extrair a regio circular (como quadrado) do canvas visível
-            const outSize = 400; // sada 400x400
+            const outSize = 400; // saída 400x400
             const outCanvas = document.createElement('canvas');
             outCanvas.width = outSize;
             outCanvas.height = outSize;

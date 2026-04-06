@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
@@ -556,7 +556,7 @@
                 <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
                 <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
                 <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
-                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+                <a href="autoavaliacao.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
                 <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
                 <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
             </nav>
@@ -962,7 +962,7 @@
         <div class="modal-overlay" onclick="fecharModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fas fa-edit"></i> Solicitar Alterao de Dados</h3>
+                <h3><i class="fas fa-edit"></i> Solicitar Alteração de Dados</h3>
                 <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -970,9 +970,9 @@
                     <div class="request-intro-icon"><i class="fas fa-clipboard-check"></i></div>
                     <div>
                         <h4>Solicitao de atualização cadastral</h4>
-                        <p>Descreva com objetividade o que precisa ser alterado. Se houver comprovante, anexe no formulrio para acelerar a anlise do RH.</p>
+                        <p>Descreva com objetividade o que precisa ser alterado. Se houver comprovante, anexe no formulário para acelerar a análise do RH.</p>
                         <div class="request-hints">
-                            <span class="request-hint"><i class="fas fa-bolt"></i> Anlise mais rápida</span>
+                            <span class="request-hint"><i class="fas fa-bolt"></i> Análise mais rápida</span>
                             <span class="request-hint"><i class="fas fa-shield-alt"></i> Dados tratados com sigilo</span>
                             <span class="request-hint"><i class="fas fa-paperclip"></i> Envie comprovantes quando houver</span>
                         </div>
@@ -981,7 +981,7 @@
                 <form id="formSolicitacao" class="request-form-shell">
                     <div class="request-grid">
                     <div class="form-group">
-                        <label for="tipoAlteracao">Tipo de Alterao <span style="color: #ef4444;">*</span></label>
+                        <label for="tipoAlteracao">Tipo de Alteração <span style="color: #ef4444;">*</span></label>
                         <span class="field-note">Escolha a categoria que mais se aproxima do ajuste solicitado.</span>
                         <select id="tipoAlteracao" class="form-input" required>
                             <option value="">Selecione o tipo...</option>
@@ -1001,9 +1001,9 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="descriçãoAlteracao">Descrição da Alterao <span style="color: #ef4444;">*</span></label>
-                        <span class="field-note">Informe o dado atual, o dado correto e, se possvel, o motivo da alterao.</span>
-                        <textarea id="descriçãoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereço para Rua X, número Y, bairro Z. Motivo: mudana de residncia." required></textarea>
+                        <label for="descriçãoAlteracao">Descrição da Alteração <span style="color: #ef4444;">*</span></label>
+                        <span class="field-note">Informe o dado atual, o dado correto e, se possvel, o motivo da alteração.</span>
+                        <textarea id="descriçãoAlteracao" class="form-input form-textarea" rows="5" placeholder="Ex.: alterar endereço para Rua X, número Y, bairro Z. Motivo: mudança de residncia." required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="anexoAlteracao">Anexo Comprobatrio</label>
@@ -1325,8 +1325,8 @@
                         carregarPensaoMeusDados(funcionárioDetalhado.id);
                         carregarSalarioFamiliaMeusDados(funcionárioDetalhado.id);
 
-                        // Atualizar tambm a foto do header com dados do funcionário
-                        const fotoFuncionário = funcionárioDetalhado.foto_perfil_url || funcionárioDetalhado.foto_thumb_url || funcionárioDetalhado.foto;
+                        // Atualizar também a foto do header com dados do funcionário
+                        const fotoFuncionario = funcionárioDetalhado.foto_perfil_url || funcionárioDetalhado.foto_thumb_url || funcionárioDetalhado.foto;
                         if (fotoFuncionario && userPhotoEl) {
                             userPhotoEl.src = fotoFuncionario;
                             userPhotoEl.classList.add('visible');
@@ -1370,7 +1370,7 @@
             const fotoEl = document.getElementById('funcionário-foto');
             const iniciaisEl = document.getElementById('funcionário-iniciais');
 
-            // Tentar obter foto do funcionário (mesma lgica usada no card de funcionários)
+            // Tentar obter foto do funcionário (mesma lgica usaída no card de funcionários)
             let fotoUrl = f.foto_perfil_url || f.foto_thumb_url || null;
 
             if (!fotoUrl && f.foto) {
@@ -1580,7 +1580,7 @@
 
             try {
                 const formData = new FormData();
-                formData.append('tipo', 'Alterao de Dados Cadastrais');
+                formData.append('tipo', 'Alteração de Dados Cadastrais');
                 formData.append('categoria', tipo);
                 formData.append('descrição', descrição);
                 formData.append('funcionário_id', funcionárioData?.id || null);
