@@ -1600,8 +1600,51 @@ app.get('/api/proxy/cnpj/:cnpj', authenticateToken, asyncHandler(async (req, res
         const { data } = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`, { timeout: 15000 });
         res.json(data);
     } catch (err) {
-        const status = err.response?.status || 502;
-        res.status(status).json({ error: 'Erro ao consultar CNPJ' });
+        // Fallback para ReceitaWS
+        try {
+            const { data: data2 } = await axios.get(`https://receitaws.com.br/v1/cnpj/${cnpj}`, { timeout: 15000 });
+            if (data2 && data2.status !== 'ERROR') {
+                res.json({ ...data2, _fonte: 'receitaws' });
+            } else {
+                res.status(404).json({ error: 'CNPJ não encontrado' });
+            }
+        } catch (err2) {
+            const status = err.response?.status || 502;
+            res.status(status).json({ error: 'Erro ao consultar CNPJ' });
+        }
+    }
+}));
+
+// Proxy IBGE Municípios
+app.get('/api/proxy/ibge/municipios/:uf', authenticateToken, asyncHandler(async (req, res) => {
+    const uf = req.params.uf;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}?providers=dados-abertos-br,gov,wikipedia`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar IBGE' });
+    }
+}));
+
+// Proxy CNAE
+app.get('/api/proxy/cnae/:codigo', authenticateToken, asyncHandler(async (req, res) => {
+    const codigo = req.params.codigo;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/cnae/v2/${codigo}`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar CNAE' });
+    }
+}));
+
+// Proxy DDD
+app.get('/api/proxy/ddd/:ddd', authenticateToken, asyncHandler(async (req, res) => {
+    const ddd = req.params.ddd;
+    try {
+        const { data } = await axios.get(`https://brasilapi.com.br/api/ddd/v1/${ddd}`, { timeout: 10000 });
+        res.json(data);
+    } catch (err) {
+        res.status(err.response?.status || 502).json({ error: 'Erro ao consultar DDD' });
     }
 }));
 

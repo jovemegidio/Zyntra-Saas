@@ -1982,34 +1982,25 @@ Aceita com ou sem formatação"></textarea>
             };
 
             try {
-                // ========== 1. RECEITA FEDERAL (BrasilAPI) ==========
+                // ========== 1. RECEITA FEDERAL (Proxy Backend) ==========
                 this.atualizarLoadingEtapa('receita', 'loading');
                 try {
-                    const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+                    const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { headers: this.getAuthHeaders(), credentials: 'include' });
                     if (response.ok) {
-                        dadosEnriquecidos.receita_federal = await response.json();
-                        dadosEnriquecidos.fontes_consultadas.push('Receita Federal');
+                        const data = await response.json();
+                        if (data._fonte === 'receitaws') {
+                            dadosEnriquecidos.receita_federal = this.converterReceitaWS(data);
+                            dadosEnriquecidos.fontes_consultadas.push('ReceitaWS');
+                        } else {
+                            dadosEnriquecidos.receita_federal = data;
+                            dadosEnriquecidos.fontes_consultadas.push('Receita Federal');
+                        }
                         this.atualizarLoadingEtapa('receita', 'success');
                     } else {
                         this.atualizarLoadingEtapa('receita', 'error');
                     }
                 } catch (e) {
                     this.atualizarLoadingEtapa('receita', 'error');
-                }
-
-                // Se não encontrou na Receita, tentar API alternativa
-                if (!dadosEnriquecidos.receita_federal) {
-                    try {
-                        const response2 = await fetch(`https://receitaws.com.br/v1/cnpj/${cnpj}`);
-                        if (response2.ok) {
-                            const data = await response2.json();
-                            if (data.status !== 'ERROR') {
-                                dadosEnriquecidos.receita_federal = this.converterReceitaWS(data);
-                                dadosEnriquecidos.fontes_consultadas.push('ReceitaWS');
-                                this.atualizarLoadingEtapa('receita', 'success');
-                            }
-                        }
-                    } catch (e) {}
                 }
 
                 if (!dadosEnriquecidos.receita_federal) {
@@ -2024,7 +2015,7 @@ Aceita com ou sem formatação"></textarea>
                     const uf = dadosEnriquecidos.receita_federal.uf;
                     const municipio = dadosEnriquecidos.receita_federal.municipio;
                     if (uf && municipio) {
-                        const responseIBGE = await fetch(`https://brasilapi.com.br/api/ibge/municipios/v1/${uf}?providers=dados-abertos-br,gov,wikipedia`);
+                        const responseIBGE = await fetch(`/api/proxy/ibge/municipios/${uf}`, { headers: this.getAuthHeaders(), credentials: 'include' });
                         if (responseIBGE.ok) {
                             const municipios = await responseIBGE.json();
                             const mun = municipios.find(m => 
@@ -2063,7 +2054,7 @@ Aceita com ou sem formatação"></textarea>
                 try {
                     const cnae = dadosEnriquecidos.receita_federal.cnae_fiscal;
                     if (cnae) {
-                        const responseCNAE = await fetch(`https://brasilapi.com.br/api/cnae/v2/${cnae}`);
+                        const responseCNAE = await fetch(`/api/proxy/cnae/${cnae}`, { headers: this.getAuthHeaders(), credentials: 'include' });
                         if (responseCNAE.ok) {
                             dadosEnriquecidos.cnae_detalhes = await responseCNAE.json();
                             dadosEnriquecidos.fontes_consultadas.push('CNAE/IBGE');
@@ -2079,7 +2070,7 @@ Aceita com ou sem formatação"></textarea>
                 try {
                     const ddd = dadosEnriquecidos.receita_federal.ddd_telefone_1?.substring(0, 2);
                     if (ddd) {
-                        const responseDDD = await fetch(`https://brasilapi.com.br/api/ddd/v1/${ddd}`);
+                        const responseDDD = await fetch(`/api/proxy/ddd/${ddd}`, { headers: this.getAuthHeaders(), credentials: 'include' });
                         if (responseDDD.ok) {
                             dadosEnriquecidos.ddd_info = await responseDDD.json();
                             dadosEnriquecidos.fontes_consultadas.push('ANATEL');
@@ -2951,7 +2942,7 @@ Aceita com ou sem formatação"></textarea>
                 document.getElementById('import-current').innerHTML = `<i class="fas fa-search"></i> Consultando CNPJ: <strong>${this.formatarCNPJ(cnpj)}</strong>`;
 
                 try {
-                    const response = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cnpj}`);
+                    const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { headers: this.getAuthHeaders(), credentials: 'include' });
                     if (response.ok) {
                         const dados = await response.json();
                         const lead = this.transformarDadosCNPJ(dados, cnpj);
