@@ -1496,7 +1496,7 @@ app.get('/templates/:file', (req, res) => {
 
 app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), { dotfiles: 'deny', index: false }));
 app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), { dotfiles: 'deny', index: false }));
-app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Logistica', 'public'), { dotfiles: 'deny', index: false }));
+app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Faturamento', 'public'), { dotfiles: 'deny', index: false }));
 app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
 app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
 
