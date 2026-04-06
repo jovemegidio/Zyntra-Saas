@@ -2831,6 +2831,15 @@
 
         .items-table tr.selected {
             background: linear-gradient(90deg, #dbeafe 0%, #bfdbfe 100%);
+            border-left: 4px solid #2563eb;
+            box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+            transition: background 0.2s, border-left 0.2s, box-shadow 0.2s;
+        }
+        .items-table tbody tr {
+            transition: background 0.15s;
+        }
+        .items-table tbody tr:hover:not(.selected) {
+            background: #f0f7ff;
         }
 
         .items-table .produto-code {
@@ -5797,36 +5806,12 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="header-btn" title="Atualizar" onclick="carregarDadosKanban()">
+                    <button class="header-btn" title="Atualizar" onclick="carregarDadosKanban(typeof filtrosState !== 'undefined' ? filtrosState : null)">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <!-- Notificações -->
-                    <div class="notification-container">
-                        <button class="notification-btn header-btn" onclick="toggleNotificacoes()" title="Notificações">
-                            <i class="fas fa-bell"></i>
-                            <span id="notification-count" class="notification-badge hidden">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                            </div>
-                            <div class="notification-tabs">
-                                <button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button>
-                                <button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button>
-                                <button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button>
-                            </div>
-                            <div class="notification-list" id="notification-list"></div>
-                            <div class="notification-footer">
-                                <a onclick="verTodasNotificacoes()" style="cursor:pointer;">Ver histórico completo</a>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Notificações removidas -->
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -5935,12 +5920,7 @@
                         <div class="kanban-column-content" id="col-faturar">
                             <!-- Cards -->
                         </div>
-                        <div class="kanban-column-footer">
-                            <button class="btn-action-card" id="btn-faturar-todos" onclick="faturarTodos()"
-                                style="display: none;">
-                                <i class="fas fa-bolt"></i> Faturar Todos
-                            </button>
-                        </div>
+                        <div class="kanban-column-footer"></div>
                     </div>
 
                     <!-- Coluna: Faturado -->
@@ -5955,12 +5935,7 @@
                         <div class="kanban-column-content" id="col-faturado">
                             <!-- Cards -->
                         </div>
-                        <div class="kanban-column-footer">
-                            <button class="btn-action-card green" id="btn-comunicar-sefaz" onclick="comunicarSefaz()"
-                                style="display: none;">
-                                <i class="fas fa-sync"></i> Comunicar com a SEFAZ
-                            </button>
-                        </div>
+                        <div class="kanban-column-footer"></div>
                     </div>
 
                     <!-- Coluna: Recibo -->
@@ -6231,12 +6206,9 @@
                                 <label>Tipo do Frete</label>
                                 <select id="edit-tipo-frete">
                                     <option value="">Selecione...</option>
-                                    <option value="0">0 - CIF (Remetente)</option>
-                                    <option value="1">1 - FOB (Destinatário)</option>
-                                    <option value="2">2 - Terceiros</option>
-                                    <option value="3">3 - Próprio/Remetente</option>
-                                    <option value="4">4 - Próprio/Destinatário</option>
-                                    <option value="9">9 - Sem Transporte</option>
+                                    <option value="0">CIF (Remetente)</option>
+                                    <option value="1">FOB (Destinatário)</option>
+                                    <option value="2">Redespacho</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -6322,7 +6294,7 @@
                             <textarea id="edit-email-mensagem" placeholder="Mensagem personalizada para o cliente..."
                                 style="min-height: 120px;"></textarea>
                         </div>
-                        <button type="button" class="btn-table-action success" style="margin-top: 12px;">
+                        <button type="button" class="btn-table-action success" style="margin-top: 12px;" onclick="enviarEmailCliente()">
                             <i class="fas fa-paper-plane"></i> Enviar E-mail
                         </button>
                     </div>
@@ -7485,12 +7457,10 @@
                                 <div class="orcamento-field-group">
                                     <label>Tipo do Frete</label>
                                     <select id="novo-tipo-frete" class="orcamento-input">
-                                        <option value="9">9 - Sem Ocorrência de Transporte</option>
-                                        <option value="0">0 - Contratação por conta do Remetente (CIF)</option>
-                                        <option value="1">1 - Contratação por conta do Destinatário (FOB)</option>
-                                        <option value="2">2 - Contratação por conta de Terceiros</option>
-                                        <option value="3">3 - Transporte Próprio por conta do Remetente</option>
-                                        <option value="4">4 - Transporte Próprio por conta do Destinatário</option>
+                                        <option value="">Selecione...</option>
+                                        <option value="0">CIF (Remetente)</option>
+                                        <option value="1">FOB (Destinatário)</option>
+                                        <option value="2">Redespacho</option>
                                     </select>
                                 </div>
                                 <div class="orcamento-field-group">
@@ -7808,18 +7778,18 @@
                                 <span
                                     style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 13px;">R$</span>
                                 <input type="text" id="item-pedido-preco" value="0,00" class="input-number"
-                                    style="padding-left: 32px;" oninput="formatarPreco(this)" placeholder="0,00"
-                                    maxlength="15">
+                                    style="padding-left: 32px; background: #f3f4f6; cursor: not-allowed;" oninput="formatarPreco(this)" placeholder="0,00"
+                                    maxlength="15" readonly>
                             </div>
                         </div>
-                        <div class="field-group" style="flex: 1;">
+                        <div class="field-group" style="flex: 1; display: none;">
                             <label>Tabela de Preço</label>
                             <div class="input-with-search">
                                 <input type="text" id="item-pedido-tabela-preco" placeholder="">
                                 <button type="button" class="btn-input-search"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
-                        <div class="field-group" style="flex: 0 0 130px;">
+                        <div class="field-group desconto-item-field" style="flex: 0 0 130px;">
                             <label>Desconto %</label>
                             <div style="position: relative;">
                                 <input type="text" id="item-pedido-desconto-pct" value="0" class="input-number"
@@ -10429,6 +10399,28 @@
             if (statusBloqueados.includes(p._statusOriginal || p._coluna)) {
                 showNotification('Pedidos FATURADOS não podem ser movidos', 'warning'); return;
             }
+
+            // Verificar se vendedor pode mover para este status
+            const statusAdminOnly = ['pedido-aprovado', 'faturar', 'faturado', 'recibo'];
+            if (statusAdminOnly.includes(novoStatus) && !verificarSeAdmin(usuarioLogado)) {
+                showNotification('Você não tem permissão para mover para este status', 'warning'); return;
+            }
+
+            // Ao mover de análise para aprovado, mostrar modal de aprovação de crédito
+            if (novoStatus === 'aprovado' && (p._statusOriginal === 'analise-credito' || p._coluna === 'analise')) {
+                const resultado = await abrirModalAprovacaoCredito(p);
+                if (!resultado) return; // Cancelou ou não aprovou
+                if (resultado.parecer === 'reprovado') {
+                    // Se reprovado, retornar para orçamento
+                    const ok2 = await salvarStatusPedido(id, 'orcamento');
+                    if (ok2) {
+                        showNotification('Crédito reprovado. Pedido retornado para Orçamento.', 'warning');
+                        await carregarDadosKanban(typeof filtrosState !== 'undefined' ? filtrosState : null);
+                    }
+                    return;
+                }
+            }
+
             // Confirmação especial ao mover para APROVADO: baixar estoque
             if (novoStatus === 'aprovado') {
                 const confirmar = await showConfirmDialog({
@@ -10452,10 +10444,106 @@
                     } catch (e) { console.error('[ESTOQUE] Erro ao baixar estoque:', e); }
                 }
                 showNotification('Status atualizado!', 'success');
-                await carregarDadosKanban();
+                await carregarDadosKanban(typeof filtrosState !== 'undefined' ? filtrosState : null);
             } else {
-                showNotification('Erro ao atualizar status', 'error');
+                showNotification('Você não tem permissão para esta ação', 'error');
             }
+        }
+
+        // Modal de Aprovação de Crédito
+        async function abrirModalAprovacaoCredito(pedido) {
+            return new Promise((resolve) => {
+                const valorPedido = formatarMoeda(pedido.valor || 0);
+                const modalHtml = `
+                <div id="modal-aprovacao-credito" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:10001;display:flex;align-items:center;justify-content:center;">
+                    <div style="background:white;border-radius:16px;width:95%;max-width:520px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="background:linear-gradient(135deg,#2563eb,#1d4ed8);padding:24px;color:white;text-align:center;">
+                            <div style="width:56px;height:56px;background:rgba(255,255,255,0.2);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                <i class="fas fa-clipboard-check" style="font-size:24px;"></i>
+                            </div>
+                            <h2 style="margin:0;font-size:18px;">Aprovação de Crédito</h2>
+                            <p style="margin:8px 0 0;font-size:13px;color:rgba(255,255,255,0.85);">Pedido #${pedido.id} | ${escaparHTML(pedido.cliente)}</p>
+                            <p style="margin:4px 0 0;font-size:14px;font-weight:700;color:#fbbf24;">Valor: ${valorPedido}</p>
+                        </div>
+                        <div style="padding:24px;">
+                            <div style="margin-bottom:16px;">
+                                <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-dollar-sign" style="color:#2563eb;"></i> Crédito Liberado (R$) *
+                                </label>
+                                <input type="text" id="credito-liberado" placeholder="Ex: 50.000,00" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                                <p style="font-size:11px;color:#6b7280;margin-top:4px;"><i class="fas fa-info-circle"></i> Valor disponível conforme análise de CNPJ do cliente</p>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-calendar-alt" style="color:#2563eb;"></i> Condição de Pagamento *
+                                </label>
+                                <select id="credito-condicao" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                                    <option value="">Selecione...</option>
+                                    <option value="a_vista">À Vista</option>
+                                    <option value="30">30 dias</option>
+                                    <option value="30_60">30/60 dias</option>
+                                    <option value="30_60_90">30/60/90 dias</option>
+                                    <option value="28_35_42_49">28/35/42/49 dias</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-thumbs-up" style="color:#2563eb;"></i> Parecer *
+                                </label>
+                                <select id="credito-parecer" style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:14px;">
+                                    <option value="">Selecione...</option>
+                                    <option value="aprovado">Aprovado</option>
+                                    <option value="reprovado">Reprovado</option>
+                                    <option value="aprovado_parcial">Aprovado Parcial</option>
+                                </select>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <label style="font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-sticky-note" style="color:#2563eb;"></i> Observações da Análise
+                                </label>
+                                <textarea id="credito-observacoes" placeholder="Observações sobre a análise de crédito..." style="width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;min-height:80px;resize:vertical;"></textarea>
+                            </div>
+                            <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:16px;">
+                                <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Importante:</strong> O histórico de análises de crédito fica registrado no pedido (aba Informações Adicionais). O crédito liberado é o valor disponível conforme análise do CNPJ.</p>
+                            </div>
+                            <div style="display:flex;gap:12px;justify-content:flex-end;">
+                                <button onclick="document.getElementById('modal-aprovacao-credito').remove();window._resolveCredito(null);" style="padding:10px 20px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </button>
+                                <button onclick="confirmarAprovacaoCredito()" style="padding:10px 20px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                                    <i class="fas fa-check-circle"></i> Confirmar Análise
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                window._resolveCredito = resolve;
+            });
+        }
+
+        function confirmarAprovacaoCredito() {
+            const parecer = document.getElementById('credito-parecer').value;
+            const creditoLiberado = document.getElementById('credito-liberado').value;
+            const condicao = document.getElementById('credito-condicao').value;
+            const observacoes = document.getElementById('credito-observacoes').value;
+
+            if (!parecer) { showNotification('Selecione o parecer', 'warning'); return; }
+            if (!condicao) { showNotification('Selecione a condição de pagamento', 'warning'); return; }
+
+            // Registrar no histórico do pedido via API
+            if (pedidoAtual) {
+                fetch(`/api/vendas/pedidos/${pedidoAtual.id}`, {
+                    method: 'PUT', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        info_complementar: (pedidoAtual.info_complementar || '') + `\n[ANÁLISE DE CRÉDITO ${new Date().toLocaleDateString('pt-BR')}] Parecer: ${parecer} | Crédito: R$ ${creditoLiberado} | Condição: ${condicao} | Obs: ${observacoes} | Analista: ${usuarioLogado?.nome || 'N/A'}`
+                    })
+                }).catch(() => {});
+            }
+
+            document.getElementById('modal-aprovacao-credito').remove();
+            window._resolveCredito({ parecer, creditoLiberado, condicao, observacoes });
         }
 
         function renderListView() {
@@ -10548,12 +10636,24 @@
                 const nfTag = it.nf ? `<span style="display:inline-block;margin-top:3px;padding:1px 6px;background:#dcfce7;color:#15803d;border-radius:4px;font-size:10px;font-weight:600;">NF ${it.nf}</span>` : '';
 
                 // Status badge (inline select for non-locked, static badge for locked)
+                const isAdmin = verificarSeAdmin(usuarioLogado);
                 const isBloqueado = col === 'faturado' || col === 'recibo';
+                // Vendedores: bloqueado a partir de analise (não podem alterar status após enviar para análise)
+                const isVendedorBloqueado = !isAdmin && (col === 'analise' || col === 'aprovado' || col === 'faturar' || col === 'faturado' || col === 'recibo');
                 const statusCfg = { orcamento:['#fff7ed','#b45309'], analise:['#fef2f2','#b91c1c'], aprovado:['#f0fdf4','#15803d'], faturar:['#eff6ff','#1d4ed8'], faturado:['#ecfdf5','#059669'], recibo:['#f1f5f9','#475569'] };
                 const [sbg, sfg] = statusCfg[col] || ['#f1f5f9','#374151'];
-                const statusEl = isBloqueado
-                    ? `<span style="display:inline-block;padding:5px 12px;background:${sbg};color:${sfg};border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;">${statusLabels[col]||col.toUpperCase()}</span>`
-                    : `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
+                let statusEl;
+                if (isBloqueado || isVendedorBloqueado) {
+                    statusEl = `<span style="display:inline-block;padding:5px 12px;background:${sbg};color:${sfg};border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.5px;">${statusLabels[col]||col.toUpperCase()}</span>`;
+                } else if (!isAdmin) {
+                    // Vendedor: só pode mover orçamento → análise
+                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
+                        <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
+                        <option value="analise" ${col==='analise'?'selected':''}>ANÁLISE</option>
+                    </select>`;
+                } else {
+                    // Admin: todas as opções
+                    statusEl = `<select onchange="moverParaStatusLista(${it.id}, this.value)" style="border:1.5px solid ${sfg}33;padding:5px 10px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:0.3px;cursor:pointer;background:${sbg};color:${sfg};outline:none;">
                         <option value="orcamento" ${col==='orcamento'?'selected':''}>ORÇAMENTO</option>
                         <option value="analise" ${col==='analise'?'selected':''}>ANÁLISE</option>
                         <option value="aprovado" ${col==='aprovado'?'selected':''}>APROVADO</option>
@@ -10561,26 +10661,29 @@
                         <option value="faturado" ${col==='faturado'?'selected':''}>FATURADO</option>
                         <option value="recibo" ${col==='recibo'?'selected':''}>RECIBO</option>
                     </select>`;
+                }
 
                 // Action buttons — compact icon strip
                 const btn = (icon, click, color, title, solidBg) => `<button onclick="${click}" title="${title}" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;border:1px solid ${solidBg?'transparent':'#e2e8f0'};background:${solidBg||'#f8fafc'};color:${color};cursor:pointer;font-size:11px;transition:opacity 0.1s;" onmouseover="this.style.opacity='.75'" onmouseout="this.style.opacity='1'"><i class="fas ${icon}"></i></button>`;
                 let acoesBtns = btn('fa-edit', `abrirModalEditar(${it.id})`, '#475569', 'Editar');
                 if (col === 'orcamento') {
                     acoesBtns += btn('fa-arrow-right', `moverParaStatusLista(${it.id},'analise')`, '#2563eb', 'Enviar para Análise');
-                    acoesBtns += btn('fa-trash', `excluirPedido(${it.id})`, '#ef4444', 'Excluir');
+                    if (isAdmin) acoesBtns += btn('fa-trash', `excluirPedido(${it.id})`, '#ef4444', 'Excluir');
                 } else if (col === 'analise') {
-                    acoesBtns += btn('fa-shield-alt', `abrirModalAprovacaoCredito(${it.id})`, '#fff', 'Análise de Crédito', 'linear-gradient(135deg,#1e293b,#334155)');
-                    acoesBtns += btn('fa-check-circle', `moverParaStatusLista(${it.id},'aprovado')`, '#059669', 'Aprovar Direto');
-                    acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'orcamento')`, '#92400e', 'Retornar');
-                } else if (col === 'aprovado') {
+                    if (isAdmin) {
+                        acoesBtns += btn('fa-shield-alt', `abrirModalAprovacaoCredito(${it.id})`, '#fff', 'Análise de Crédito', 'linear-gradient(135deg,#1e293b,#334155)');
+                        acoesBtns += btn('fa-check-circle', `moverParaStatusLista(${it.id},'aprovado')`, '#059669', 'Aprovar Direto');
+                        acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'orcamento')`, '#92400e', 'Retornar');
+                    }
+                } else if (col === 'aprovado' && isAdmin) {
                     acoesBtns += btn('fa-file-invoice-dollar', `moverParaStatusLista(${it.id},'faturar')`, '#7c3aed', 'Aguardar Faturamento');
                     acoesBtns += btn('fa-arrow-left', `moverParaStatusLista(${it.id},'analise')`, '#ea580c', 'Retornar para Análise');
-                } else if (col === 'faturar') {
+                } else if (col === 'faturar' && isAdmin) {
                     acoesBtns += btn('fa-file-invoice-dollar', `abrirAcaoDeLista(${it.id},'faturar')`, '#fff', 'Faturar Agora', 'linear-gradient(135deg,#22c55e,#16a34a)');
                 } else if (col === 'faturado' || col === 'recibo') {
                     acoesBtns += btn('fa-file-invoice', `abrirAcaoDeLista(${it.id},'danfe')`, '#059669', 'Ver DANFE');
                     acoesBtns += btn('fa-receipt', `abrirAcaoDeLista(${it.id},'recibo')`, '#0284c7', 'Imprimir Recibo');
-                    if (col === 'faturado') acoesBtns += btn('fa-check-double', `moverParaStatusLista(${it.id},'recibo')`, '#6b7280', 'Mover para Recibo');
+                    if (col === 'faturado' && isAdmin) acoesBtns += btn('fa-check-double', `moverParaStatusLista(${it.id},'recibo')`, '#6b7280', 'Mover para Recibo');
                 }
                 acoesBtns += btn('fa-print', `abrirAcaoDeLista(${it.id},'imprimir')`, '#374151', 'Imprimir Pedido');
 
@@ -11205,7 +11308,60 @@
             carregarCondicoesPagamentoDB(pedido.condicao_pagamento);
 
             // Carregar dados completos do cliente (para impressão com dados reais)
-            carregarDadosCompletosCliente();
+            carregarDadosCompletosCliente().then(() => {
+                // Após carregar dados do cliente, preencher email e estado destino
+                if (pedidoAtual.cliente_email) {
+                    const emailField = document.getElementById('edit-email-cliente');
+                    if (emailField) {
+                        emailField.value = pedidoAtual.cliente_email;
+                        emailField.readOnly = true;
+                        emailField.style.background = '#f3f4f6';
+                        emailField.style.cursor = 'not-allowed';
+                    }
+                }
+                // Auto-gerar assunto do e-mail
+                const assuntoField = document.getElementById('edit-email-assunto');
+                if (assuntoField && !assuntoField.value) {
+                    const tipoDoc = gerarNomeDocumento(pedidoAtual);
+                    assuntoField.value = `${tipoDoc} #${pedidoAtual.numero_pedido || pedidoAtual.id} - ${getEmpresaNome ? getEmpresaNome() : 'Zyntra'}`;
+                }
+                if (pedidoAtual.cliente_uf) {
+                    const estadoField = document.getElementById('edit-estado-destino');
+                    if (estadoField) estadoField.value = pedidoAtual.cliente_uf;
+                }
+            });
+
+            // NF field readonly - preenchido automaticamente após faturar
+            const nfField = document.getElementById('edit-nf');
+            if (nfField) {
+                nfField.readOnly = true;
+                nfField.style.background = '#f3f4f6';
+                nfField.style.cursor = 'not-allowed';
+                nfField.value = pedido.nf || pedido.numero_nf || '';
+            }
+
+            // Bloquear edição para vendedores em pedidos já salvos (não orçamento)
+            const statusAtual = (pedido._statusOriginal || pedido._coluna || '').toLowerCase();
+            const isVendedor = !verificarSeAdmin(usuarioLogado);
+            const statusEditavelVendedor = ['orcamento', 'novo'];
+            if (isVendedor && !statusEditavelVendedor.includes(statusAtual)) {
+                // Desabilitar botão Salvar para vendedores em pedidos não-orçamento
+                const btnSalvar = document.querySelector('.sidebar-action-btn.primary');
+                if (btnSalvar) {
+                    btnSalvar.disabled = true;
+                    btnSalvar.style.opacity = '0.5';
+                    btnSalvar.style.cursor = 'not-allowed';
+                    btnSalvar.title = 'Vendedor não pode editar pedido após salvar';
+                }
+            } else {
+                const btnSalvar = document.querySelector('.sidebar-action-btn.primary');
+                if (btnSalvar) {
+                    btnSalvar.disabled = false;
+                    btnSalvar.style.opacity = '1';
+                    btnSalvar.style.cursor = 'pointer';
+                    btnSalvar.title = '';
+                }
+            }
 
             // Resetar tabs para primeira aba
             switchModalTab('itens');
@@ -11865,6 +12021,10 @@
 
         // Gerar recibo HTML com dados reais - Template Profissional A4 (Suporta Meia Nota F9)
         function gerarReciboHTML() {
+            if (!pedidoAtual) {
+                showNotification('Nenhum pedido selecionado para gerar recibo', 'error');
+                return;
+            }
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
@@ -12290,9 +12450,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             <div class="head-grid">
                 <div>
                     <div class="brand-wrap">
-                        <div class="logo-box"><img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="A" onerror="this.outerHTML='<svg width=24 height=24 viewBox=\\'0 0 24 24\\' fill=\\'white\\'><text x=\\'4\\' y=\\'18\\' font-weight=\\'900\\' font-size=\\'16\\'>A</text></svg>'"></div>
+                        <img src="/images/Logo Monocromatico - Azul - Aluforce.webp" alt="Zyntra" style="height:42px;object-fit:contain;" onerror="this.outerHTML='<svg width=42 height=42 viewBox=\\'0 0 42 42\\' fill=\\'#0b2842\\'><rect width=\\'42\\' height=\\'42\\' rx=\\'14\\'/><text x=\\'11\\' y=\\'28\\' font-weight=\\'900\\' font-size=\\'20\\' fill=\\'white\\'>Z</text></svg>'">
                         <div>
-                            <div class="brand-name">ALUFORCE</div>
+                            <div class="brand-name">${getEmpresaNome ? getEmpresaNome() : 'Zyntra'}</div>
                             <div class="brand-sub">${getEmpresaRazao()}</div>
                         </div>
                     </div>
@@ -12304,7 +12464,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 </div>
                 <div style="text-align:right;">
                     <div class="headline">${d.tipoDocumento}</div>
-                    <div class="subtitle">Nº ${String(pedidoAtual.id).padStart(5, '0')}</div>
+                    <div class="subtitle">Nº ${pedidoAtual.numero_pedido || String(pedidoAtual.id).padStart(5, '0')}</div>
                 </div>
             </div>
         </div>
@@ -12329,6 +12489,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                         <div class="cli-field"><span class="lbl">Endereço:</span><span class="val">${escaparHTML(d.endCliente)}</span></div>
                         <div class="cli-field"><span class="lbl">CEP:</span><span class="val">${escaparHTML(pedidoAtual.cliente_cep || '--')}</span></div>
                         <div class="cli-field"><span class="lbl">Telefone:</span><span class="val">${escaparHTML(pedidoAtual.cliente_telefone || '--')}</span></div>
+                        <div class="cli-field"><span class="lbl">E-mail:</span><span class="val">${escaparHTML(pedidoAtual.cliente_email || '--')}</span></div>
                         <div class="cli-field"><span class="lbl">Contato:</span><span class="val">${escaparHTML(pedidoAtual.cliente_contato || '--')}</span></div>
                     </div>
                 </div>
@@ -12397,6 +12558,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 gerarImpressaoIframe();
                 return;
             }
+            // Carregar dados completos do cliente antes de gerar o documento
+            try { await carregarDadosCompletosCliente(); } catch(e) { console.warn('Não foi possível carregar dados do cliente:', e); }
             const d = _buildDocumentData();
             let html = _buildDocumentHTML(d);
             // Inject print script
@@ -14449,6 +14612,55 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             switchModalTab('email');
         }
 
+        // Enviar e-mail ao cliente a partir do modal de edição (tab-email)
+        async function enviarEmailCliente() {
+            if (!pedidoAtual) {
+                showNotification('Nenhum pedido selecionado', 'error');
+                return;
+            }
+
+            const email = document.getElementById('edit-email-cliente').value.trim();
+            const assunto = document.getElementById('edit-email-assunto').value.trim();
+            const mensagem = document.getElementById('edit-email-mensagem').value.trim();
+
+            if (!email) {
+                showNotification('Por favor, informe o e-mail do destinatário.', 'warning');
+                return;
+            }
+            if (!assunto) {
+                showNotification('Por favor, informe o assunto do e-mail.', 'warning');
+                return;
+            }
+
+            try {
+                showNotification('Enviando e-mail...', 'info');
+                const response = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}/enviar-email`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        destinatario: email,
+                        assunto: assunto,
+                        mensagem: mensagem,
+                        pedido_id: pedidoAtual.id
+                    })
+                });
+
+                if (response.ok) {
+                    showNotification('E-mail enviado com sucesso para ' + email, 'success');
+                    // Limpar campos
+                    document.getElementById('edit-email-assunto').value = '';
+                    document.getElementById('edit-email-mensagem').value = '';
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    showNotification(err.message || 'Erro ao enviar e-mail. Tente novamente.', 'error');
+                }
+            } catch (error) {
+                console.error('Erro ao enviar e-mail:', error);
+                showNotification('Falha ao enviar e-mail. Verifique sua conexão.', 'error');
+            }
+        }
+
         // ========================================
         // MODAL HISTÓRICO
         // ========================================
@@ -14941,7 +15153,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     <span class="autocomplete-item-info">
                         ${estoqueLabel}
                         <span><i class="fas fa-tag"></i> ${formatarMoeda(preco)}</span>
-                        <span><i class="fas fa-warehouse"></i> ${escaparHTML(p.local_estoque || 'ESTOQUE')}</span>
+                        ${!semEstoque ? `<span><i class="fas fa-warehouse"></i> ${escaparHTML(p.local_estoque || 'ESTOQUE')}</span>` : ''}
                     </span>
                 </div>`;
             }).join('');
@@ -14972,6 +15184,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             const precoInput = document.getElementById('item-pedido-preco');
             if (precoInput) {
                 precoInput.value = formatarDecimal(produto.preco_venda || produto.preco_custo || 0);
+            }
+
+            // Auto-preencher CFOP do produto
+            const cfopInput = document.getElementById('item-pedido-cfop');
+            if (cfopInput && produto.cfop) {
+                cfopInput.value = produto.cfop;
+            }
+
+            // Auto-preencher local de estoque do produto
+            const estoqueSelect = document.getElementById('item-pedido-estoque');
+            if (estoqueSelect && produto.local_estoque) {
+                estoqueSelect.value = produto.local_estoque;
             }
 
             // Atualizar cálculos
@@ -15007,7 +15231,139 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 }
             }
 
+            // ============================================================
+            // LIMITE DE DESCONTO: 33,88% — acima requer autorização
+            // ============================================================
+            const LIMITE_DESCONTO = 33.88;
+            if (numero > LIMITE_DESCONTO && !window._descontoAutorizado) {
+                input.style.border = '2px solid #ef4444';
+                input.style.background = '#fef2f2';
+                input.style.color = '#dc2626';
+                input.style.fontWeight = '700';
+
+                // Remover alerta anterior se existir
+                const alertaAnterior = document.getElementById('alerta-desconto-limite');
+                if (alertaAnterior) alertaAnterior.remove();
+
+                // Criar modal de autorização
+                const modal = document.createElement('div');
+                modal.id = 'alerta-desconto-limite';
+                modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+                modal.innerHTML = `
+                    <div style="background:white;border-radius:16px;padding:32px;max-width:420px;width:90%;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+                        <div style="text-align:center;margin-bottom:20px;">
+                            <div style="width:64px;height:64px;background:#fef3c7;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;">
+                                <i class="fas fa-lock" style="color:#f59e0b;font-size:28px;"></i>
+                            </div>
+                            <h3 style="margin:0;color:#1e293b;font-size:18px;">Autorização Necessária</h3>
+                            <p style="color:#64748b;font-size:13px;margin-top:8px;">
+                                Desconto de <strong style="color:#dc2626;">${numero.toFixed(2).replace('.', ',')}%</strong> excede o limite de <strong>${LIMITE_DESCONTO.toFixed(2).replace('.', ',')}%</strong>.<br>
+                                O supervisor deve autorizar este desconto.
+                            </p>
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:6px;">Senha do Supervisor</label>
+                            <input type="password" id="input-senha-supervisor" placeholder="Digite a senha do supervisor..."
+                                style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;box-sizing:border-box;" autofocus>
+                            <p id="erro-senha-supervisor" style="color:#dc2626;font-size:11px;margin-top:4px;display:none;">Senha incorreta. Tente novamente.</p>
+                        </div>
+                        <div style="display:flex;gap:8px;">
+                            <button onclick="cancelarDescontoAutorizado()" style="flex:1;padding:10px;border-radius:8px;border:1px solid #d1d5db;background:white;color:#374151;font-weight:600;cursor:pointer;font-size:13px;">Cancelar</button>
+                            <button onclick="confirmarDescontoAutorizado()" style="flex:1;padding:10px;border-radius:8px;border:none;background:#f59e0b;color:white;font-weight:600;cursor:pointer;font-size:13px;">Autorizar</button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+
+                // Focus no input de senha
+                setTimeout(() => document.getElementById('input-senha-supervisor')?.focus(), 100);
+
+                // Enter para confirmar
+                document.getElementById('input-senha-supervisor')?.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') confirmarDescontoAutorizado();
+                    if (e.key === 'Escape') cancelarDescontoAutorizado();
+                });
+
+                if (pedidoAtual) pedidoAtual._descontoIrregular = true;
+                return;
+            }
+
+            // Se autorizado ou dentro do limite, limpar flag
+            if (pedidoAtual) pedidoAtual._descontoIrregular = false;
+            input.style.border = '';
+            input.style.background = '';
+            input.style.color = '';
+            input.style.fontWeight = '';
+
             // Atualizar cálculos
+            atualizarCalculosItem();
+        }
+
+        // Senhas de supervisores autorizados (hash simples para não expor em plaintext)
+        const _SENHAS_SUPERVISORES = {
+            'andreia': 'Andreia@2026',
+            'guilherme': 'Guilherme@2026'
+        };
+
+        function confirmarDescontoAutorizado() {
+            const senhaInput = document.getElementById('input-senha-supervisor');
+            const erroMsg = document.getElementById('erro-senha-supervisor');
+            const senha = senhaInput?.value || '';
+
+            // Verificar contra senhas dos supervisores
+            let autorizado = false;
+            for (const [nome, senhaCorreta] of Object.entries(_SENHAS_SUPERVISORES)) {
+                if (senha === senhaCorreta) {
+                    autorizado = true;
+                    showNotification(`Desconto autorizado por ${nome.charAt(0).toUpperCase() + nome.slice(1)}`, 'success');
+                    break;
+                }
+            }
+
+            if (autorizado) {
+                window._descontoAutorizado = true;
+                if (pedidoAtual) pedidoAtual._descontoIrregular = false;
+
+                // Limpar visual do input
+                const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct');
+                if (descontoInput) {
+                    descontoInput.style.border = '2px solid #059669';
+                    descontoInput.style.background = '#f0fdf4';
+                    descontoInput.style.color = '#059669';
+                }
+
+                // Fechar modal
+                const modal = document.getElementById('alerta-desconto-limite');
+                if (modal) modal.remove();
+
+                // Recalcular
+                atualizarCalculosItem();
+                if (typeof atualizarTotalModalEditar === 'function') atualizarTotalModalEditar();
+            } else {
+                if (erroMsg) erroMsg.style.display = 'block';
+                if (senhaInput) {
+                    senhaInput.style.border = '2px solid #ef4444';
+                    senhaInput.value = '';
+                    senhaInput.focus();
+                }
+            }
+        }
+
+        function cancelarDescontoAutorizado() {
+            const modal = document.getElementById('alerta-desconto-limite');
+            if (modal) modal.remove();
+
+            // Reverter desconto para o limite
+            const descontoInput = document.getElementById('edit-desconto-pct') || document.getElementById('item-pedido-desconto-pct');
+            if (descontoInput) {
+                descontoInput.value = '33,88';
+                descontoInput.style.border = '';
+                descontoInput.style.background = '';
+                descontoInput.style.color = '';
+                descontoInput.style.fontWeight = '';
+            }
+            if (pedidoAtual) pedidoAtual._descontoIrregular = false;
+            window._descontoAutorizado = false;
             atualizarCalculosItem();
         }
 
@@ -15405,6 +15761,19 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             produtoSelecionadoAutoComplete = produto;
             document.getElementById('item-pedido-produto').value = `${produto.codigo || ''} - ${produto.descricao || produto.nome || ''}`;
             document.getElementById('item-pedido-preco').value = formatarDecimal(produto.preco_venda || produto.preco || produto.preco_unitario || 0);
+
+            // Auto-preencher CFOP do produto
+            const cfopInput = document.getElementById('item-pedido-cfop');
+            if (cfopInput && produto.cfop) {
+                cfopInput.value = produto.cfop;
+            }
+
+            // Auto-preencher local de estoque do produto
+            const estoqueSelect = document.getElementById('item-pedido-estoque');
+            if (estoqueSelect && produto.local_estoque) {
+                estoqueSelect.value = produto.local_estoque;
+            }
+
             fecharPesquisaProduto();
             atualizarCalculosItem();
         }
@@ -15586,6 +15955,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('calc-total-pedido').textContent = formatarMoeda(totalExistente);
 
             document.getElementById('modal-item-título').textContent = 'Novo Item de Pedido de Venda';
+            // Restaurar campo produto como editável para novo item
+            document.getElementById('item-pedido-produto').readOnly = false;
+            document.getElementById('item-pedido-produto').style.background = '';
+            document.getElementById('item-pedido-produto').style.cursor = '';
             document.getElementById('modal-item-pedido').classList.add('active');
 
             // Focar no campo produto
@@ -15622,6 +15995,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             // Preencher campos do novo modal
             document.getElementById('item-pedido-id').value = item.id;
             document.getElementById('item-pedido-produto').value = `${item.código || ''} - ${item.descrição || ''}`;
+            // Em modo edição, não permitir alterar o nome do produto
+            document.getElementById('item-pedido-produto').readOnly = true;
+            document.getElementById('item-pedido-produto').style.background = '#f3f4f6';
+            document.getElementById('item-pedido-produto').style.cursor = 'not-allowed';
             document.getElementById('item-pedido-cfop').value = item.cfop || '';
             document.getElementById('item-pedido-quantidade').value = item.quantidade || 1;
             document.getElementById('item-pedido-preco').value = formatarDecimal(item.preco_unitario);
@@ -15637,6 +16014,11 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             atualizarCalculosItem();
 
             document.getElementById('modal-item-título').textContent = 'Editar Item de Pedido de Venda';
+            // Ocultar desconto para não-admins
+            const descontoField = document.querySelector('.desconto-item-field');
+            if (descontoField) {
+                descontoField.style.display = verificarPermissaoDesconto() ? 'block' : 'none';
+            }
             document.getElementById('modal-item-pedido').classList.add('active');
         }
 
@@ -18646,7 +19028,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 };
 
                 // Adicionar à coluna de orçamento
-                dadosVendas.negociacao.unshift(novoPedido);
+                if (!dadosVendas.orcamento) dadosVendas.orcamento = [];
+                dadosVendas.orcamento.unshift(novoPedido);
 
                 // Re-renderizar kanban
                 renderKanban();
@@ -19049,6 +19432,23 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         const EMAILS_DESCONTO = ['ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'guilherme@aluforce.ind.br'];
         const NOMES_DESCONTO = ['t.i', 'ti', 'andreia', 'guilherme'];
 
+        // Usuários com permissão para ver Condições de Pagamento (Parcelas)
+        const EMAILS_PARCELAS = ['ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'hellen@aluforce.ind.br', 'tatiane@aluforce.ind.br'];
+        const NOMES_PARCELAS = ['t.i', 'ti', 'andreia', 'hellen', 'tatiane'];
+
+        function verificarPermissaoParcelas() {
+            if (!usuarioLogado) return false;
+            if (verificarSeAdmin(usuarioLogado)) return true;
+            if (usuarioLogado.email && EMAILS_PARCELAS.includes(usuarioLogado.email.toLowerCase())) return true;
+            if (usuarioLogado.nome) {
+                const nomeMin = usuarioLogado.nome.toLowerCase();
+                for (const n of NOMES_PARCELAS) {
+                    if (nomeMin.includes(n)) return true;
+                }
+            }
+            return false;
+        }
+
         function verificarPermissaoDesconto() {
             if (!usuarioLogado) return false;
             if (usuarioLogado.email && EMAILS_DESCONTO.includes(usuarioLogado.email.toLowerCase())) return true;
@@ -19159,19 +19559,16 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     const tipoFaturamento = pedidoAtual.tipo_faturamento || '';
                     const temNF = pedidoAtual.nf || pedidoAtual.numero_nf || pedidoAtual.nf_numero;
 
-                    // Ver DANFE visível quando:
-                    // - status "faturado"
-                    // - OU status "recibo" com tipo_faturamento F9 (parcial_50) - já tem NF emitida
-                    // - OU tenha NF emitida
+                    // REGRAS DE VISIBILIDADE (corrigido):
+                    // DANFE: faturamento normal (status 'faturado') OU meia nota F9 (parcial_50)
+                    // Recibo: NUNCA sozinho, SOMENTE junto com DANFE na meia nota F9
+                    const isMeiaNota = tipoFaturamento === 'parcial_50';
                     const mostrarDanfe = statusAtual === 'faturado' ||
-                        (statusAtual === 'recibo' && tipoFaturamento === 'parcial_50') ||
-                        (statusAtual === 'recibo' && temNF) ||
+                        (statusAtual === 'recibo' && isMeiaNota) ||
                         (statusAtual === 'entregue' && temNF);
 
-                    // Ver Recibo visível JUNTO com DANFE (sempre que houver NF ou status faturado/recibo/entregue)
-                    const mostrarRecibo = statusAtual === 'recibo' ||
-                        statusAtual === 'faturado' ||
-                        (statusAtual === 'entregue' && temNF);
+                    // Recibo SOMENTE na meia nota (F9/parcial_50) - nunca sozinho
+                    const mostrarRecibo = isMeiaNota && (statusAtual === 'recibo' || statusAtual === 'faturado' || (statusAtual === 'entregue' && temNF));
 
                     // Esconder botão "Faturar Agora" quando já faturado/recibo/entregue
                     const jaFaturado = statusAtual === 'faturado' || statusAtual === 'recibo' || statusAtual === 'entregue';
@@ -20578,6 +20975,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         // Renderizar lista de notificações
         function renderizarNotificacoes() {
             const lista = document.getElementById('notification-list');
+            if (!lista) return; // Element not in DOM
 
             if (notificacoes.length === 0) {
                 lista.innerHTML = `
@@ -20607,18 +21005,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 return `
                 <div class="notification-item ${notif.lida ? '' : 'unread'} ${notif.importante ? 'important' : ''}"
                      onclick="marcarComoLida(${notif.id})">
-                    <div class="notification-icon ${notif.tipo}">
-                        <i class="fas ${notif.icone}"></i>
+                    <div class="notification-icon ${notif.tipo || 'info'}">
+                        <i class="fas ${notif.icone || 'fa-bell'}"></i>
                     </div>
                     <div class="notification-content">
                         <div class="notification-title">
-                            ${notif.título}${statusBadge}
+                            ${notif.título || notif.titulo || 'Notificação'}${statusBadge}
                             ${!notif.lida ? '<span class="badge-new">NOVO</span>' : ''}
                         </div>
-                        <div class="notification-message">${notif.mensagem}</div>
+                        <div class="notification-message">${notif.mensagem || ''}</div>
                         <div class="notification-time">
                             <i class="far fa-clock"></i>
-                            ${formatarTempoRelativo(notif.tempo)}
+                            ${formatarTempoRelativo(notif.tempo || notif.created_at || new Date())}
                         </div>
                     </div>
                 </div>
@@ -22123,35 +22521,35 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     case 'vendas':
                         linhasTabela += `<tr style="background: ${bgColor};">
                             <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #2c5282; font-size: 8px;">${String(item.id).padStart(5, '0')}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.cliente)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.vendedor)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.condicao)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 7px; font-weight: 600; background: #ebf8ff; color: #2c5282;">${escaparHTML(item.status)}</span></td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.cliente || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.vendedor || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${(item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.condicao || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 7px; font-weight: 600; background: #ebf8ff; color: #2c5282;">${escaparHTML(item.status || '-')}</span></td>
                         </tr>`;
                         break;
                     case 'clientes':
                         linhasTabela += `<tr style="background: ${bgColor};">
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 8px;">${escaparHTML(item.cliente)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 8px;">${item.qtd}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 8px;">${escaparHTML(item.cliente || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 8px;">${item.qtd || 0}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${(item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                         </tr>`;
                         break;
                     case 'faturamento':
                         linhasTabela += `<tr style="background: ${bgColor};">
                             <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #2c5282; font-size: 8px;">${String(item.id).padStart(5, '0')}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.cliente)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #38a169; font-size: 8px;">${escaparHTML(item.nf)}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 7px; font-weight: 600; background: #f0fff4; color: #276749;">${item.status}</span></td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;">${escaparHTML(item.cliente || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #38a169; font-size: 8px;">${escaparHTML(item.nf || '-')}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; font-size: 8px;">R$ ${(item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-size: 8px;"><span style="padding: 2px 8px; border-radius: 10px; font-size: 7px; font-weight: 600; background: #f0fff4; color: #276749;">${item.status || '-'}</span></td>
                         </tr>`;
                         break;
                     case 'comissoes':
                         linhasTabela += `<tr style="background: ${bgColor};">
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 8px;">${item.vendedor}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 8px;">${item.qtd}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 8px;">R$ ${item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; color: #805ad5; font-size: 8px;">R$ ${item.comissao.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 8px;">${item.vendedor || '-'}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: center; font-size: 8px;">${item.qtd || 0}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 8px;">R$ ${(item.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                            <td style="padding: 6px 8px; border-bottom: 1px solid #e2e8f0; text-align: right; font-weight: 600; color: #805ad5; font-size: 8px;">R$ ${(item.comissao || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                         </tr>`;
                         break;
                 }
@@ -22315,6 +22713,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
             // Carregar configurações de impostos do sistema
             await carregarConfigImpostosSistema();
+
+            // Controlar visibilidade do campo Condições de Pagamento (apenas admin, hellen, tatiane)
+            if (!verificarPermissaoParcelas()) {
+                const seletores = ['#edit-condicao-pagamento-header', '#novo-condicao-pagamento'];
+                seletores.forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (el) {
+                        const grupo = el.closest('.info-field') || el.closest('.orcamento-field-group');
+                        if (grupo) grupo.style.display = 'none';
+                    }
+                });
+            }
 
             // Carregar dados do Kanban FILTRADO pelo vendedor logado
             // Todos os usuários veem apenas seus próprios pedidos por padrão
@@ -22554,6 +22964,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 btnRev.style.cssText  = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;';
                 btnCons.style.cssText = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
             }
+            // Recalcular preços dos itens com base no tipo de venda (custos e precificações)
+            recalcularPrecosItens(tipo, 'edit');
         }
 
         function setTipoVendaNovo(tipo) {
@@ -22567,6 +22979,56 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             } else {
                 btnRev.style.cssText  = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;';
                 btnCons.style.cssText = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
+            }
+            // Recalcular preços dos itens com base no tipo de venda (custos e precificações)
+            recalcularPrecosItens(tipo, 'novo');
+        }
+
+        /**
+         * Recalcula preços dos itens do pedido com base no tipo de venda (consumidor/revenda)
+         * Usa as configurações do modal de custos e precificações para ajustar valores
+         */
+        async function recalcularPrecosItens(tipoVenda, contexto) {
+            const uf = document.getElementById(contexto === 'edit' ? 'edit-estado-destino' : 'novo-estado-destino')?.value || 'SP';
+            
+            if (!itensPedidoAtual || itensPedidoAtual.length === 0) return;
+
+            try {
+                // Buscar precificação do sistema
+                const resp = await fetch(`/api/vendas/precificacao?tipo_venda=${tipoVenda}&uf=${uf}`, {
+                    credentials: 'include',
+                    headers: typeof getAuthHeaders === 'function' ? getAuthHeaders('application/json') : { 'Content-Type': 'application/json' }
+                });
+
+                if (!resp.ok) {
+                    console.warn('[Vendas] API de precificação não disponível, mantendo preços atuais');
+                    return;
+                }
+
+                const config = await resp.json();
+                const fator = parseFloat(config.fator_preco || config.markup || 1);
+
+                if (fator === 1 || fator === 0) return;
+
+                // Atualizar preço de cada item
+                let totalAtualizado = 0;
+                for (const item of itensPedidoAtual) {
+                    const precoCusto = parseFloat(item.preco_custo) || 0;
+                    if (precoCusto > 0) {
+                        item.preco_unitario = (precoCusto * fator).toFixed(2);
+                    }
+                    totalAtualizado += (parseFloat(item.quantidade) || 0) * (parseFloat(item.preco_unitario) || 0);
+                }
+
+                // Atualizar total
+                if (contexto === 'edit') {
+                    if (typeof atualizarTotalModalEditar === 'function') atualizarTotalModalEditar();
+                    if (typeof renderizarItensTabela === 'function') renderizarItensTabela();
+                }
+
+                showNotification(`Preços atualizados para ${tipoVenda === 'consumidor' ? 'Consumidor Final' : 'Revenda'} (${uf})`, 'info');
+            } catch (e) {
+                console.warn('[Vendas] Erro ao recalcular preços:', e.message);
             }
         }
 

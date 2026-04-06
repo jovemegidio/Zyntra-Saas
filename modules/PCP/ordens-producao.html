@@ -3086,6 +3086,16 @@
             const statusAntigo = ordem.status;
             ordem.status = novoStatus;
 
+            // Nomes amigáveis dos status
+            const statusNomes = {
+                'a_produzir': 'A Produzir',
+                'produzindo': 'Produzindo',
+                'qualidade': 'Qualidade',
+                'conferido': 'Conferido',
+                'concluido': 'Concluído',
+                'armazenado': 'Armazenado'
+            };
+
             // Atualizar status texto
             if (novoStatus === 'concluido' || novoStatus === 'armazenado') {
                 ordem.statusTexto = 'Conclu�da';
@@ -3120,6 +3130,13 @@
             // Sempre salvar localmente para manter sincronizado
             salvarOrdensLocais();
             renderizarKanban();
+
+            // Notificação visual da mudança
+            const nomeStatus = statusNomes[novoStatus] || novoStatus;
+            const nomeOrdem = ordem.numero || ordem.codigo || `#${ordemId}`;
+            if (typeof showNotification === 'function') {
+                showNotification(`${nomeOrdem} movida para "${nomeStatus}"`, 'success');
+            }
         }
 
         // ========================================
@@ -3456,39 +3473,47 @@
                 previsaoInput.value = data.toISOString().split('T')[0];
             }
 
-            // Atualizar �cone de alerta baseado no status
+            // Atualizar ícone de alerta baseado no status
             const alertaIcon = document.querySelector('.previsao-alerta');
-            if (ordem.statusTexto === 'Atrasada') {
-                alertaIcon.style.display = 'inline';
-            } else {
-                alertaIcon.style.display = 'none';
+            if (alertaIcon) {
+                alertaIcon.style.display = ordem.statusTexto === 'Atrasada' ? 'inline' : 'none';
             }
 
             // Quantidade
-            document.getElementById('modal-quantidade').value = ordem.quantidade.toLocaleString('pt-BR', { minimumFractionDigits: 6 });
-            document.getElementById('modal-unidade').textContent = ordem.unidade || 'UN';
+            const modalQtd = document.getElementById('modal-quantidade');
+            if (modalQtd) modalQtd.value = (ordem.quantidade || 0).toLocaleString('pt-BR', { minimumFractionDigits: 6 });
+            const modalUnid = document.getElementById('modal-unidade');
+            if (modalUnid) modalUnid.textContent = ordem.unidade || 'UN';
 
             const statusQtd = ordem.produzido > 0
-                ? `${ordem.produzido.toLocaleString('pt-BR')} ${ordem.unidade} j� produzidos`
+                ? `${ordem.produzido.toLocaleString('pt-BR')} ${ordem.unidade} j\u00e1 produzidos`
                 : 'mas nenhum ainda produzido';
-            document.getElementById('modal-quantidade-status').textContent = statusQtd;
+            const modalQtdStatus = document.getElementById('modal-quantidade-status');
+            if (modalQtdStatus) modalQtdStatus.textContent = statusQtd;
 
             // Carregar itens da ordem
             carregarItensOrdem(ordem);
 
-            // Preencher aba de informa��es adicionais
-            document.getElementById('modal-info-codigo').value = codigo;
-            document.getElementById('modal-info-setor').value = ordem.setor || 'Produ��o';
-            document.getElementById('modal-info-criacao').value = new Date(ordem.dataCriacao || new Date()).toLocaleDateString('pt-BR');
-            document.getElementById('modal-info-responsavel').value = ordem.responsavel || 'Sistema';
+            // Preencher aba de informações adicionais
+            const infoFields = {
+                'modal-info-codigo': codigo,
+                'modal-info-setor': ordem.setor || 'Produção',
+                'modal-info-criacao': new Date(ordem.dataCriacao || new Date()).toLocaleDateString('pt-BR'),
+                'modal-info-responsavel': ordem.responsavel || 'Sistema'
+            };
+            for (const [id, val] of Object.entries(infoFields)) {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            }
 
-            // Preencher observa��es
-            document.getElementById('modal-observacoes').value = ordem.observacoes || '';
+            // Preencher observações
+            const obsEl = document.getElementById('modal-observacoes');
+            if (obsEl) obsEl.value = ordem.observacoes || '';
 
             // Atualizar status no footer
             const statusFooter = document.getElementById('modal-status-footer');
             const statusText = document.getElementById('modal-status-text');
-            statusText.textContent = ordem.statusTexto || 'Em andamento';
+            if (statusText) statusText.textContent = ordem.statusTexto || 'Em andamento';
 
             if (ordem.statusTexto === 'Atrasada') {
                 statusFooter.style.background = 'linear-gradient(135deg, #dc2626, #f87171)';

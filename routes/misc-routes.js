@@ -657,8 +657,16 @@ module.exports = function createMiscRoutes(deps) {
             let whereConditions = [];
             let params = [];
     
-            // Filtro por vendedor
-            if (vendedor && vendedor !== 'todos') {
+            // Verificar se é admin
+            const user = req.user || {};
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+    
+            // Para vendedores (não-admin), filtrar apenas seus próprios pedidos
+            if (!isAdmin && user.id) {
+                whereConditions.push('p.vendedor_id = ?');
+                params.push(user.id);
+            } else if (vendedor && vendedor !== 'todos') {
+                // Admin pode filtrar por vendedor específico
                 whereConditions.push('p.vendedor_id = ?');
                 params.push(vendedor);
             }

@@ -67,6 +67,74 @@ module.exports = function createVendasRoutes(deps) {
         )
     `).catch(e => console.error('Erro ao criar tabela notificacoes:', e.message));
 
+    // Precificação: retorna fatores de preço por tipo de venda e UF
+    router.get('/precificacao', async (req, res) => {
+        try {
+            const tipoVenda = req.query.tipo_venda || 'consumidor';
+            const uf = (req.query.uf || 'SP').toUpperCase();
+
+            // Buscar configuração de precificação do banco se existir
+            let config = null;
+            try {
+                const [rows] = await pool.query(
+                    'SELECT * FROM configuracoes_custos_precificacao WHERE ativo = 1 ORDER BY id DESC LIMIT 1'
+                );
+                if (rows.length > 0) config = rows[0];
+            } catch (e) {
+                // Tabela pode não existir
+            }
+
+            // Tabela de ICMS interestadual por UF (alíquota destino)
+            const icmsEstados = {
+                'AC': { icms: 12, difal: 5, st: 0 }, 'AL': { icms: 12, difal: 6, st: 0 },
+                'AM': { icms: 12, difal: 6, st: 0 }, 'AP': { icms: 12, difal: 6, st: 0 },
+                'BA': { icms: 12, difal: 7.5, st: 0 }, 'CE': { icms: 12, difal: 6, st: 0 },
+                'DF': { icms: 12, difal: 6, st: 0 }, 'ES': { icms: 12, difal: 5, st: 0 },
+                'GO': { icms: 12, difal: 5, st: 0 }, 'MA': { icms: 12, difal: 6, st: 0 },
+                'MG': { icms: 12, difal: 6, st: 10 }, 'MS': { icms: 12, difal: 5, st: 0 },
+                'MT': { icms: 12, difal: 5, st: 0 }, 'PA': { icms: 12, difal: 5, st: 0 },
+                'PB': { icms: 12, difal: 6, st: 0 }, 'PE': { icms: 12, difal: 6, st: 0 },
+                'PI': { icms: 12, difal: 9, st: 0 }, 'PR': { icms: 12, difal: 7, st: 10 },
+                'RJ': { icms: 12, difal: 8, st: 10 }, 'RN': { icms: 12, difal: 6, st: 0 },
+                'RO': { icms: 12, difal: 5.5, st: 0 }, 'RR': { icms: 12, difal: 5, st: 0 },
+                'RS': { icms: 12, difal: 5, st: 10 }, 'SC': { icms: 12, difal: 5, st: 10 },
+                'SE': { icms: 12, difal: 6, st: 0 }, 'SP': { icms: 18, difal: 0, st: 10 },
+                'TO': { icms: 12, difal: 6, st: 0 }
+            };
+
+            const ufData = icmsEstados[uf] || { icms: 12, difal: 5, st: 0 };
+
+            // Calcular fator de preço baseado no tipo de venda
+            let markup = config ? parseFloat(config.markup_padrao || 1.3) : 1.3;
+            let icms = ufData.icms;
+            let difal = 0;
+            let icms_st = 0;
+
+            if (tipoVenda === 'consumidor' || tipoVenda === 'consumidor_final') {
+                difal = ufData.difal;
+                icms_st = 0;
+            } else {
+                // revenda
+                difal = 0;
+                icms_st = ufData.st;
+            }
+
+            res.json({
+                tipo_venda: tipoVenda,
+                uf: uf,
+                markup: markup,
+                fator_preco: markup,
+                icms: icms,
+                difal: difal,
+                icms_st: icms_st,
+                pis_cofins: 3.65
+            });
+        } catch (error) {
+            console.error('Erro ao buscar precificação:', error);
+            res.status(500).json({ message: 'Erro ao buscar precificação' });
+        }
+    });
+
     // Endpoint de KPIs para o módulo de Vendas — AUDIT-FIX PERF-001: Add cache
     router.get('/kpis', cacheMiddleware('vendas_kpis', CACHE_CONFIG.dashboardKPIs || 300000), async (req, res) => {
         try {
@@ -3652,7 +3720,7 @@ module.exports = function createVendasRoutes(deps) {
             // AUDIT-FIX ARCH-002: Removed duplicate CREATE TABLE pedido_historico (already in apiVendasRouter)
 
             await pool.query(
-                'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
                 [id, null, usuario || 'Sistema', action || 'manual', descricao || '', meta ? JSON.stringify(meta) : null]
             );
 
@@ -3713,7 +3781,7 @@ module.exports = function createVendasRoutes(deps) {
     async function registrarHistoricoPedido(pedidoId, userId, userName, action, descricao, meta) {
         try {
             await pool.query(
-                'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
+                'INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, meta) VALUES (?, ?, ?, ?, ?, ?)',
                 [pedidoId, userId || null, userName || 'Sistema', action, descricao, meta ? JSON.stringify(meta) : null]
             );
         } catch (e) {
@@ -3795,11 +3863,14 @@ module.exports = function createVendasRoutes(deps) {
 
             await connection.query(
                 'UPDATE pedidos SET estoque_baixado = 1, data_baixa_estoque = NOW() WHERE id = ?', [id]
-            );
+            ).catch(colErr => {
+                // Colunas estoque_baixado/data_baixa_estoque podem não existir
+                console.warn('⚠️ Não foi possível marcar estoque_baixado no pedido:', colErr.message);
+            });
 
             try {
                 await connection.query(
-                    'INSERT INTO pedido_historico (pedido_id, user_id, user_name, action, descricao) VALUES (?, ?, ?, ?, ?)',
+                    'INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao) VALUES (?, ?, ?, ?, ?)',
                     [id, user.id || null, user.nome || 'Sistema', 'baixa_estoque', `Estoque baixado na aprovação do pedido #${id}`]
                 );
             } catch (_) {}
@@ -4614,6 +4685,78 @@ module.exports = function createVendasRoutes(deps) {
             next(error);
         } finally {
             connection.release();
+        }
+    });
+
+    // =============================================================
+    // ENVIAR EMAIL AO CLIENTE
+    // =============================================================
+    router.post('/pedidos/:id/enviar-email', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { destinatario, assunto, mensagem } = req.body;
+            const user = req.user || {};
+
+            if (!destinatario || !assunto) {
+                return res.status(400).json({ message: 'Destinatário e assunto são obrigatórios' });
+            }
+
+            // Buscar dados do pedido
+            const [pedidos] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+            if (!pedidos || pedidos.length === 0) {
+                return res.status(404).json({ message: 'Pedido não encontrado' });
+            }
+            const pedido = pedidos[0];
+
+            // Tentar enviar via nodemailer
+            let nodemailer;
+            try { nodemailer = require('nodemailer'); } catch(e) {
+                return res.status(500).json({ message: 'Serviço de e-mail não disponível' });
+            }
+
+            const transporter = nodemailer.createTransport({
+                host: 'mail.aluforce.ind.br',
+                port: 465,
+                secure: true,
+                auth: {
+                    user: process.env.SMTP_USER || 'noreply@aluforce.ind.br',
+                    pass: process.env.SMTP_PASS || 'noreplyalu'
+                },
+                tls: { rejectUnauthorized: false }
+            });
+
+            const pedidoNum = String(pedido.id).padStart(5, '0');
+            const htmlBody = `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background: #0b2842; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                        <h2 style="margin: 0;">ALUFORCE</h2>
+                        <p style="margin: 4px 0 0; font-size: 12px; opacity: 0.8;">Esquadrias de Alumínio</p>
+                    </div>
+                    <div style="padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+                        <h3 style="color: #1e293b; margin: 0 0 16px;">${assunto}</h3>
+                        <p style="color: #475569; line-height: 1.6; white-space: pre-wrap;">${mensagem || ''}</p>
+                        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+                        <p style="font-size: 12px; color: #94a3b8;">Pedido Nº ${pedidoNum} | Cliente: ${pedido.cliente || '-'}</p>
+                    </div>
+                </div>
+            `;
+
+            await transporter.sendMail({
+                from: `"Aluforce ERP" <${process.env.SMTP_USER || 'noreply@aluforce.ind.br'}>`,
+                to: destinatario,
+                subject: assunto,
+                html: htmlBody
+            });
+
+            // Salvar no pedido que email foi enviado
+            await pool.query('UPDATE pedidos SET email_cliente = ?, email_assunto = ?, email_mensagem = ? WHERE id = ?',
+                [destinatario, assunto, mensagem || '', id]);
+
+            res.json({ success: true, message: 'E-mail enviado com sucesso' });
+
+        } catch (error) {
+            console.error('Erro ao enviar e-mail:', error);
+            res.status(500).json({ message: 'Erro ao enviar e-mail: ' + (error.message || 'Erro desconhecido') });
         }
     });
 

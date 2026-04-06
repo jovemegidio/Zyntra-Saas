@@ -5000,37 +5000,9 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Notificações removidas -->
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -8916,6 +8888,9 @@
         // Auth via httpOnly cookie — token legado mantido vazio para compatibilidade
         const token = '';
 
+        // S5.4 FIX: XSS protection — sanitiza strings antes de innerHTML
+        function esc(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         // ============================================
         // SISTEMA DE CONFIRMAÇÃO PROFISSIONAL
         // ============================================
@@ -9015,18 +8990,22 @@
         // ============================================
         function navigateTo(viewName) {
             // Mapeamento de views para páginas separadas
+            // FIX: nomes SEM acento para coincidir com os arquivos reais no servidor
             const pageMap = {
                 'dashboard': 'index.html',
                 'estoque': 'pages/estoque.html',
                 'produtos': 'pages/estoque.html',
                 'materiais': 'pages/materiais.html',
                 'ordem-compra': 'pages/ordem-compra.html',
-                'ordens': 'ordens-produção.html',
-                'produção': 'pages/gestão-produção.html',
-                'gestão-produção': 'pages/gestão-produção.html',
+                'ordens': 'ordens-producao.html',
+                'produção': 'pages/gestao-producao.html',
+                'producao': 'pages/gestao-producao.html',
+                'gestão-produção': 'pages/gestao-producao.html',
+                'gestao-producao': 'pages/gestao-producao.html',
                 'faturamento': 'pages/faturamento.html',
                 'apontamentos': 'apontamentos.html',
-                'relatórios': 'pages/relatórios.html'
+                'relatórios': 'pages/relatorios.html',
+                'relatorios': 'pages/relatorios.html'
             };
 
             // Redirecionar para a página correspondente
@@ -9092,7 +9071,7 @@
         // ============================================
         // NOTIFICAÇÕES - SISTEMA FUNCIONAL
         // ============================================
-        let notificaçõesCarregadas = false;
+        let notificacoesCarregadas = false;
 
         async function carregarNotificacoesBell() {
             const list = document.getElementById('notification-list');
@@ -9100,7 +9079,7 @@
             if (!list) return;
 
             // Mostrar loading na primeira vez
-            if (!notificaçõesCarregadas) {
+            if (!notificacoesCarregadas) {
                 list.innerHTML = `
                     <div style="text-align: center; padding: 24px;">
                         <div class="loading-spinner" style="margin: 0 auto; width: 24px; height: 24px;"></div>
@@ -9120,7 +9099,7 @@
 
                 const data = await response.json();
                 const alertas = data.alertas || [];
-                notificaçõesCarregadas = true;
+                notificacoesCarregadas = true;
 
                 // Atualizar badge
                 if (badge) {
@@ -9162,7 +9141,7 @@
                         </div>
                         <div style="flex: 1; min-width: 0;">
                             <div style="font-weight: 600; font-size: 12px; color: var(--gray-800); margin-bottom: 2px;">
-                                ${alerta.titulo}
+                                ${esc(alerta.titulo)}
                                 <span style="
                                     background: ${alerta.cor};
                                     color: white;
@@ -9174,11 +9153,11 @@
                                 ">${alerta.total}</span>
                             </div>
                             <div style="color: var(--gray-500); font-size: 11px; line-height: 1.4;">
-                                ${alerta.descrição}
+                                ${esc(alerta.descrição)}
                             </div>
                             ${alerta.detalhes ? `
                                 <div style="color: var(--gray-400); font-size: 10px; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                    ${alerta.detalhes}
+                                    ${esc(alerta.detalhes)}
                                 </div>
                             ` : ''}
                         </div>
@@ -9554,7 +9533,7 @@
                 document.getElementById('cp-footer-info').innerHTML = '<i class="fas fa-cube" style="margin-right:4px;"></i>' + _cpCache.length + ' produtos no sistema';
             } catch (err) {
                 console.error('Erro cpCarregarDados:', err);
-                document.getElementById('cp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:24px;"></i><p>Erro: ' + err.message + '</p></div>';
+                document.getElementById('cp-content').innerHTML = '<div style="text-align:center;padding:40px;color:#ef4444;"><i class="fas fa-exclamation-triangle" style="font-size:24px;"></i><p>Erro: ' + esc(err.message) + '</p></div>';
             }
         }
 
@@ -9851,11 +9830,11 @@
                 tbody += `<tr style="background:${bgColor};" onmouseover="this.style.background='#f0f0ff'" onmouseout="this.style.background='${bgColor}'">
                     <td style="padding:8px 12px;font-weight:600;color:#7c3aed;font-size:12px;">${p.codigo}</td>
                     <td style="padding:8px 12px;font-size:12px;color:#374151;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${p.descricao}">${p.descricao}</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${p._cmp.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${p._preco.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${p._mb_pct.toFixed(2)}%</td>
-                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:${mlColor};">R$ ${p._ml.toFixed(4)}</td>
-                    <td style="padding:8px 12px;text-align:center;"><span style="background:${mlColor}15;color:${mlColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">${p._ml_pct.toFixed(2)}%</span></td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${(p._cmp || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:700;color:#1e40af;">R$ ${(p._preco || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:center;font-size:12px;font-weight:600;color:#059669;">${(p._mb_pct || 0).toFixed(2)}%</td>
+                    <td style="padding:8px 12px;text-align:right;font-family:monospace;font-size:12px;font-weight:600;color:${mlColor};">R$ ${(p._ml || 0).toFixed(4)}</td>
+                    <td style="padding:8px 12px;text-align:center;"><span style="background:${mlColor}15;color:${mlColor};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;">${(p._ml_pct || 0).toFixed(2)}%</span></td>
                     <td style="padding:8px 10px;text-align:center;">
                         <button onclick="_cpSimProduto=_cpCache.find(x=>x.codigo==='${p.codigo}');cpSwitchTab('simulador')" style="background:#f3f4f6;border:1px solid #e5e7eb;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:10px;color:#6b7280;" title="Simular"><i class="fas fa-calculator"></i></button>
                     </td>
@@ -9934,7 +9913,7 @@
                 Object.keys(r.matCosts).forEach(mat => {
                     if (r.matCosts[mat] > 0) {
                         const kgm = p.kg_m[mat] || 0;
-                        const prkg = _cpParâmetros.precos_kg[mat];
+                        const prkg = _cpParâmetros.precos_kg[mat] || 0;
                         const pct = r.cmp > 0 ? (r.matCosts[mat] / r.cmp * 100) : 0;
                         matRows += `<tr>
                             <td style="padding:6px 10px;font-size:12px;"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${matColors[mat] || '#6b7280'};margin-right:6px;"></span>${matNames[mat] || mat}</td>
@@ -9953,7 +9932,7 @@
                 const despIcons = { bobina: 'fa-circle-notch', comissao: 'fa-handshake', custo_fixo: 'fa-building', financeira: 'fa-credit-card', icms: 'fa-landmark', difal: 'fa-balance-scale', pis_cofins: 'fa-file-invoice-dollar', icms_st: 'fa-file-contract', redespacho: 'fa-shipping-fast', frete: 'fa-truck' };
                 let despRows = '';
                 Object.keys(r.despTotal).forEach(d => {
-                    const pct = _cpParâmetros.despesas[d];
+                    const pct = _cpParâmetros.despesas[d] || 0;
                     despRows += `<tr>
                         <td style="padding:5px 10px;font-size:12px;"><i class="fas ${despIcons[d] || 'fa-minus'}" style="color:#7c3aed;margin-right:6px;font-size:10px;"></i>${despNames[d] || d}</td>
                         <td style="padding:5px 10px;text-align:right;font-size:12px;color:#6b7280;">${pct.toFixed(2)}%</td>
@@ -9981,7 +9960,7 @@
                             <tbody>${matRows}</tbody>
                             <tfoot><tr style="border-top:2px solid #e5e7eb;background:#fef3c7;">
                                 <td colspan="5" style="padding:8px 10px;font-size:12px;font-weight:700;color:#92400e;"><i class="fas fa-equals" style="margin-right:4px;"></i>CMP Total</td>
-                                <td style="padding:8px 10px;text-align:right;font-family:monospace;font-size:13px;font-weight:800;color:#ea580c;">R$ ${r.cmp.toFixed(4)}</td>
+                                <td style="padding:8px 10px;text-align:right;font-family:monospace;font-size:13px;font-weight:800;color:#ea580c;">R$ ${(r.cmp || 0).toFixed(4)}</td>
                                 <td style="padding:8px 10px;text-align:right;font-size:11px;font-weight:600;">100%</td>
                             </tr></tfoot>
                         </table>
@@ -9995,17 +9974,17 @@
                             <!-- CMP -->
                             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #e5e7eb;">
                                 <span style="font-size:12px;color:#374151;"><i class="fas fa-box" style="color:#ea580c;margin-right:6px;"></i>Custo MP (CMP)</span>
-                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${r.cmp.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#ea580c;">R$ ${(r.cmp || 0).toFixed(4)}</span>
                             </div>
                             <!-- Markup -->
                             <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e5e7eb;">
                                 <span style="font-size:12px;color:#374151;"><i class="fas fa-plus-circle" style="color:#3b82f6;margin-right:6px;"></i>Markup (${_cpParâmetros.markup_pct}%)</span>
-                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${r.mb.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:12px;font-weight:600;color:#3b82f6;">R$ ${(r.mb || 0).toFixed(4)}</span>
                             </div>
                             <!-- Preço -->
                             <div style="display:flex;justify-content:space-between;padding:8px 12px;margin:6px 0;background:#eff6ff;border-radius:8px;">
                                 <span style="font-size:13px;font-weight:700;color:#1e40af;"><i class="fas fa-tag" style="margin-right:6px;"></i>Preço Sugerido</span>
-                                <span style="font-family:monospace;font-size:15px;font-weight:800;color:#1e40af;">R$ ${r.preco.toFixed(4)}</span>
+                                <span style="font-family:monospace;font-size:15px;font-weight:800;color:#1e40af;">R$ ${(r.preco || 0).toFixed(4)}</span>
                             </div>
                             <!-- Despesas -->
                             <div style="font-size:11px;font-weight:600;color:#9ca3af;text-transform:uppercase;margin:8px 0 4px;">Despesas:</div>
@@ -10577,7 +10556,7 @@
 
             notification.innerHTML = `
                 <i class="fas ${icons[type] || icons.info}"></i>
-                <span>${message}</span>
+                <span>${esc(message)}</span>
                 <button onclick="this.parentElement.remove()" style="background:none;border:none;color:inherit;cursor:pointer;margin-left:auto;">
                     <i class="fas fa-times"></i>
                 </button>
@@ -10773,6 +10752,9 @@
                 return;
             }
 
+            if (window._guardSalvarOP) return;
+            window._guardSalvarOP = true;
+
             console.log('?? Salvando OP Enterprise:', dados);
             console.log('?? Produtos:', dados.produtos?.length || 0);
 
@@ -10875,7 +10857,7 @@
             // ========== ENVIO UNIFICADO ==========
             try {
                 const response = await fetch('/api/pcp/ordens-kanban', {
-                    credentials: 'include', method: 'POST',
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify(payload)
@@ -10903,6 +10885,8 @@
                 console.error('Erro de conexão:', error);
                 showNotification('Erro de conexão. Tentando salvar localmente...', 'warning');
                 salvarOPLocal(dados);
+            } finally {
+                window._guardSalvarOP = false;
             }
         }
 
@@ -11180,9 +11164,9 @@
 
                         if (produtos && produtos.length > 0) {
                             dropdown.innerHTML = produtos.map(p => `
-                                <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${(p.descrição || '').replace(/'/g, "\\'")}')">
-                                    <strong>${p.codigo}</strong>
-                                    <span>${p.descrição || ''}</span>
+                                <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${esc(p.codigo)}', '${esc((p.descrição || '').replace(/'/g, "\\'"))}')">
+                                    <strong>${esc(p.codigo)}</strong>
+                                    <span>${esc(p.descrição || '')}</span>
                                 </div>
                             `).join('');
                             dropdown.style.display = 'block';
@@ -11204,9 +11188,9 @@
                     }
 
                     dropdown.innerHTML = resultados.map(p => `
-                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${p.codigo}', '${p.descrição.replace(/'/g, "\\'")}')">
-                            <strong>${p.codigo}</strong>
-                            <span>${p.descrição}</span>
+                        <div class="autocomplete-item" onclick="selecionarProdutoCatalogo('${esc(p.codigo)}', '${esc(p.descrição.replace(/'/g, "\\'"))}')">
+                            <strong>${esc(p.codigo)}</strong>
+                            <span>${esc(p.descrição)}</span>
                         </div>
                     `).join('');
                     dropdown.style.display = 'block';
@@ -12756,7 +12740,7 @@
             }
 
             try {
-                const response = await fetch(`/api/pcp/produtos?${params.toString()}`);
+                const response = await fetch(`/api/pcp/produtos?${params.toString()}`, { credentials: 'include' });
                 const body = await response.json();
                 const produtos = body.produtos || body.rows || (Array.isArray(body) ? body : []);
                 const total = Number(body.total || produtos.length);
@@ -13327,6 +13311,9 @@
                 return;
             }
 
+            if (window._guardSalvarMaterial) return;
+            window._guardSalvarMaterial = true;
+
             // Converter valores para formato numérico
             const custoStr = document.getElementById('material-custo').value.replace(',', '.');
             const precoStr = document.getElementById('material-preco').value.replace(',', '.');
@@ -13369,6 +13356,8 @@
             } catch (error) {
                 console.error('Erro ao salvar material:', error);
                 showNotification('Erro ao salvar material', 'error');
+            } finally {
+                window._guardSalvarMaterial = false;
             }
         }
 
@@ -13381,6 +13370,9 @@
             );
 
             if (!confirmado) return;
+
+            if (window._guardExcluirMaterial) return;
+            window._guardExcluirMaterial = true;
 
             try {
                 const response = await fetch(`/api/pcp/materiais/${id}`, {
@@ -13396,6 +13388,8 @@
             } catch (error) {
                 console.error('Erro ao excluir material:', error);
                 showNotification('Erro ao excluir material', 'error');
+            } finally {
+                window._guardExcluirMaterial = false;
             }
         }
 
@@ -13595,6 +13589,9 @@
                 return;
             }
 
+            if (window._guardMovMaterial) return;
+            window._guardMovMaterial = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipoMovimentacaoMaterialAtual === 'entrada') {
@@ -13638,6 +13635,8 @@
             } catch (error) {
                 console.log('?? Erro na API, salvando localmente:', error);
                 salvarMovimentacaoMaterialLocal(movimentacao);
+            } finally {
+                window._guardMovMaterial = false;
             }
 
             // Atualizar estoque no campo
@@ -13729,6 +13728,10 @@
         // Abrir modal de baixa de material
         async function abrirBaixaMaterial(id) {
             try {
+                // AUDIT-FIX S6.2b: Remover modal anterior se existir (evita duplicatas)
+                const modalExistente = document.getElementById('modal-baixa-pcp');
+                if (modalExistente) modalExistente.remove();
+
                 const response = await fetch(`/api/pcp/materias-primas/${id}`, { credentials: 'include' });
                 if (!response.ok) {
                     showNotification('Material não encontrado', 'error');
@@ -13985,6 +13988,9 @@
                 return;
             }
 
+            if (window._guardBaixaPCP) return;
+            window._guardBaixaPCP = true;
+
             // Montar observação com detalhes dos recortes
             let obsUsuario = document.getElementById('baixa-obs').value || '';
             let recortesDetalhe = '';
@@ -14027,6 +14033,8 @@
             } catch (error) {
                 console.error('Erro:', error);
                 showNotification('Erro ao registrar baixa', 'error');
+            } finally {
+                window._guardBaixaPCP = false;
             }
         }
 
@@ -14555,6 +14563,9 @@
                 return;
             }
 
+            if (window._guardSalvarProduto) return;
+            window._guardSalvarProduto = true;
+
             // Pegar valores de estoque
             const estoqueInput = document.getElementById('pcp-produto-estoque');
             const estoqueMinimoInput = document.getElementById('pcp-produto-estoque-minimo');
@@ -14609,6 +14620,8 @@
             } catch (error) {
                 console.error('Erro ao salvar produto:', error);
                 showNotification('Erro ao salvar produto', 'error');
+            } finally {
+                window._guardSalvarProduto = false;
             }
         }
 
@@ -14702,6 +14715,10 @@
             }
             const confirmado = await mostrarConfirmacaoPCP('Excluir Produto', 'Deseja realmente excluir este produto? Esta ação não pode ser desfeita.', 'danger');
             if (!confirmado) return;
+
+            if (window._guardExcluirProduto) return;
+            window._guardExcluirProduto = true;
+
             try {
                 const response = await fetch(`/api/pcp/produtos/${produtoId}`, {
                     credentials: 'include', method: 'DELETE',
@@ -14717,6 +14734,8 @@
             } catch (error) {
                 console.error('Erro ao excluir:', error);
                 showNotification('Erro ao excluir produto', 'error');
+            } finally {
+                window._guardExcluirProduto = false;
             }
         }
 
@@ -15144,6 +15163,9 @@
                 return;
             }
 
+            if (window._guardConfirmarMov) return;
+            window._guardConfirmarMov = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipoMovimentacaoAtual === 'entrada') {
@@ -15186,6 +15208,8 @@
             } catch (error) {
                 console.log('?? Erro na API, salvando localmente:', error);
                 salvarMovimentacaoLocal(movimentacao);
+            } finally {
+                window._guardConfirmarMov = false;
             }
 
             // Atualizar estoque no campo
@@ -16126,6 +16150,9 @@
                 return;
             }
 
+            if (window._guardMovRapida) return;
+            window._guardMovRapida = true;
+
             // Calcular novo estoque
             let novoEstoque = estoqueAtual;
             if (tipo === 'entrada') novoEstoque = estoqueAtual + quantidade;
@@ -16158,6 +16185,8 @@
             } catch (error) {
                 console.error('Erro ao salvar movimentação:', error);
                 mostrarNotificacao('Movimentação registrada localmente', 'info');
+            } finally {
+                window._guardMovRapida = false;
             }
 
             fecharModalQuantidadeRapida();
@@ -16499,6 +16528,10 @@
         window.lancesEntrada = [];
 
         function abrirModalEntradaLances(id, codigo, nome, estoque) {
+            // AUDIT-FIX S6.2b: Remover modal anterior se existir (evita duplicatas)
+            const modalExistente = document.getElementById('modal-entrada-lances');
+            if (modalExistente) modalExistente.remove();
+
             const estoqueAtual = parseFloat(estoque || 0);
 
             const modalHtml = `
@@ -18056,11 +18089,11 @@
                         userPhotoEl.onerror = function () {
                             // Se a imagem falhar, mostrar iniciais
                             this.style.display = 'none';
-                            mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
+                            if (userAvatarDiv) mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
                         };
                         if (userInitialsEl) userInitialsEl.style.display = 'none';
                         console.log('Avatar carregado:', fotoUrl);
-                    } else {
+                    } else if (userAvatarDiv) {
                         // Sem foto - gerar avatar com iniciais
                         mostrarIniciaisAvatar(nomeCompleto, userAvatarDiv, userInitialsEl);
                         if (userPhotoEl) userPhotoEl.style.display = 'none';
@@ -18076,6 +18109,8 @@
 
                     console.log('Usuário carregado:', primeiroNome, 'Avatar:', fotoUrl ? fotoUrl : 'Iniciais');
 
+                    // === RESTRIÇÃO: Sidebar por perfil ===
+                    configurarSidebarPorRole(user);
                     // === RESTRIÇÃO: Usuários somente leitura no PCP ===
                     aplicarModoPCPSomenteLeitura(user);
                 } else {
@@ -18086,6 +18121,49 @@
                 console.error('Erro ao carregar dados do usuário:', error);
                 carregarUsuarioLocalStorage();
             }
+        }
+
+        // ============================================
+        // RESTRIÇÃO DE SIDEBAR POR ROLE (PCP operador → apenas 2 itens)
+        // ============================================
+        function configurarSidebarPorRole(user) {
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (!sidebarNav) return;
+
+            const role = (user.role || user.cargo || '').toLowerCase();
+            const roles = (user.roles || []).map(r => r.toLowerCase());
+
+            // Roles com acesso completo ao módulo PCP
+            const rolesFullAccess = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
+            const isFullAccess = user.is_admin === true || user.is_admin === 1 ||
+                                 rolesFullAccess.some(r => role.includes(r)) ||
+                                 roles.some(r => rolesFullAccess.some(a => r.includes(a)));
+
+            // Acesso completo → não altera a sidebar
+            if (isFullAccess) return;
+
+            // Operador: substitui sidebar por apenas Ordens de Produção e Apontamentos
+            sidebarNav.innerHTML = `
+                <a href="ordens-producao.html" class="sidebar-btn" title="Ordens de Produção">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+                <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
+                    <i class="fas fa-stopwatch"></i>
+                </a>
+            `;
+
+            const sidebarBottom = document.querySelector('.sidebar-bottom');
+            if (sidebarBottom) {
+                sidebarBottom.innerHTML = `
+                    <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                `;
+            }
+
+            // Ocultar botões de ação que não fazem sentido para operadores
+            const btnNovaOrdem = document.getElementById('btn-nova-ordem');
+            if (btnNovaOrdem) btnNovaOrdem.style.setProperty('display', 'none', 'important');
         }
 
         // ============================================
@@ -19335,6 +19413,9 @@
         async function criarOrdemProducao(event) {
             event.preventDefault();
 
+            if (window._guardCriarOP) return;
+            window._guardCriarOP = true;
+
             const dados = {
                 número: document.getElementById('op-número')?.value,
                 dataConclusao: document.getElementById('op-data-conclusao')?.value,
@@ -19379,6 +19460,8 @@
                 hideModal('modal-nova-ordem');
                 document.getElementById('form-nova-ordem')?.reset();
                 gerarNumeroOP();
+            } finally {
+                window._guardCriarOP = false;
             }
         }
 
@@ -21415,6 +21498,9 @@
                 return;
             }
 
+            if (window._guardSalvarManut) return;
+            window._guardSalvarManut = true;
+
             try {
                 const url = isEdit
                     ? `/api/pcp/manutencoes/${manutencaoId}`
@@ -21439,6 +21525,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarManut = false;
             }
         }
 
@@ -21452,6 +21540,9 @@
             });
 
             if (!confirmado) return;
+
+            if (window._guardExcluirManut) return;
+            window._guardExcluirManut = true;
 
             try {
                 const response = await fetch(`/api/pcp/manutencoes/${manutencaoId}`, {
@@ -21467,6 +21558,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardExcluirManut = false;
             }
         }
 
@@ -21505,6 +21598,9 @@
                 return;
             }
 
+            if (window._guardSalvarMaquina) return;
+            window._guardSalvarMaquina = true;
+
             try {
                 const url = id ? `/api/pcp/maquinas/${id}` : '/api/pcp/maquinas';
                 const method = id ? 'PUT' : 'POST';
@@ -21526,6 +21622,8 @@
                 }
             } catch (error) {
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarMaquina = false;
             }
         }
 
@@ -21543,6 +21641,9 @@
             });
 
             if (!confirmado) return;
+
+            if (window._guardExcluirMaquina) return;
+            window._guardExcluirMaquina = true;
 
             try {
                 const response = await fetch(`/api/pcp/maquinas/${id}`, {
@@ -21565,6 +21666,8 @@
             } catch (error) {
                 console.error('Erro ao excluir máquina:', error);
                 showNotification('Erro: ' + error.message, 'error');
+            } finally {
+                window._guardExcluirMaquina = false;
             }
         }
 
@@ -23309,6 +23412,9 @@
                 return;
             }
 
+            if (window._guardSalvarOC) return;
+            window._guardSalvarOC = true;
+
             const dados = {
                 material_id: parseInt(materialId),
                 quantidade: parseFloat(quantidade),
@@ -23343,6 +23449,8 @@
                 }
             } catch (error) {
                 showNotification('Erro ao salvar: ' + error.message, 'error');
+            } finally {
+                window._guardSalvarOC = false;
             }
         }
 
