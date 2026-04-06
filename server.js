@@ -206,16 +206,20 @@ let emailTransporter = null;
 // Função para inicializar o transporter de email
 function initEmailTransporter() {
     try {
+        if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+            logger.warn('[EMAIL] ⚠️  SMTP_USER/SMTP_PASS não definidos — emails desabilitados');
+            return;
+        }
         emailTransporter = nodemailer.createTransport({
             host: process.env.SMTP_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.SMTP_PORT || '587'),
-            secure: process.env.SMTP_SECURE === 'true', // true para 465, false para outras portas
+            secure: process.env.SMTP_SECURE === 'true',
             auth: {
-                user: process.env.SMTP_USER || 'sistema@aluforce.ind.br',
-                pass: process.env.SMTP_PASS || '' // Deixe vazio se não configurado
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
             },
             tls: {
-                rejectUnauthorized: process.env.NODE_ENV === 'production' // Validar certificado em produção
+                rejectUnauthorized: process.env.NODE_ENV === 'production'
             }
         });
 
@@ -343,9 +347,9 @@ if (!process.env.DB_PASSWORD) {
 
 if (process.env.NODE_ENV === 'production') {
     const dbPass = process.env.DB_PASSWORD || '';
-    if (dbPass === 'aluvendas01' || dbPass.length < 8) {
+    if (dbPass.length < 12 || !/[A-Z]/.test(dbPass) || !/[a-z]/.test(dbPass) || !/[0-9]/.test(dbPass)) {
         logger.error('❌ ERRO CRÍTICO: Senha do banco insegura para produção');
-        logger.error('💡 Use uma senha forte com pelo menos 12 caracteres');
+        logger.error('💡 Use uma senha forte com pelo menos 12 caracteres, incluindo maiúsculas, minúsculas e números');
         process.exit(1);
     }
 }
@@ -644,17 +648,20 @@ if (reportInterceptorMiddleware) {
 // CORS configurado para permitir cookies e acesso do app mobile/desktop
 // AUDITORIA 02/02/2026: Restrito a origens autorizadas para segurança
 const allowedOrigins = [
-    'http://localhost:3000',
-    'http://localhost:5000',
-    'http://127.0.0.1:3000',
-    'http://127.0.0.1:5000',
+    // Origens de desenvolvimento (apenas em dev)
+    ...(process.env.NODE_ENV !== 'production' ? [
+        'http://localhost:3000',
+        'http://localhost:5000',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:5000',
+    ] : []),
     'https://aluforce.api.br',      // Domínio principal de produção
     'https://www.aluforce.api.br',  // WWW do domínio principal
     'https://aluforce.ind.br',
     'https://erp.aluforce.ind.br',
     'https://www.aluforce.ind.br',
-    'http://31.97.64.102:3000',     // VPS IP (HTTP — only for internal/dev access)
-    'http://31.97.64.102',            // VPS IP (HTTP — only for internal/dev access)
+    // AUDIT-FIX R2: VPS IP movido para env var (não expor IP no código-fonte)
+    process.env.VPS_CORS_ORIGIN,     // Ex: 'https://31.97.64.102'
     'http://tauri.localhost',        // App Desktop Tauri (ALUFORCE ERP Desktop)
     'https://tauri.localhost',       // App Desktop Tauri (HTTPS variant)
     'tauri://localhost',             // App Desktop Tauri (custom scheme)
@@ -1261,30 +1268,120 @@ function safeSendModuleHtml(req, res, next, moduleDir) {
     }
 }
 
+// =================================================================
+// CLEAN URL ROUTING — Mascarar .html nas URLs para todos os módulos
+// /Modulo/pagina → serve /Modulo/pagina.html automaticamente
+// =================================================================
+
+// Helper: serve HTML sem extensão (clean URLs)
+function serveCleanUrl(req, res, next, moduleDir) {
+    const rawParam = req.params[0];
+    if (!rawParam || rawParam.includes('..') || rawParam.includes('\\') || /^[/\\]/.test(rawParam)) {
+        return res.status(400).json({ error: 'Caminho inválido' });
+    }
+    const safeName = path.basename(rawParam);
+    // Tentar com underscore e com hyphen (contas-pagar → contas_pagar.html)
+    const variations = [
+        safeName + '.html',
+        safeName.replace(/-/g, '_') + '.html',
+        safeName.replace(/_/g, '-') + '.html'
+    ];
+    for (const htmlFile of variations) {
+        const htmlPath = path.join(moduleDir, htmlFile);
+        const resolvedPath = path.resolve(htmlPath);
+        const resolvedDir = path.resolve(moduleDir);
+        if (!resolvedPath.startsWith(resolvedDir + path.sep) && resolvedPath !== resolvedDir) continue;
+        if (fs.existsSync(htmlPath)) {
+            // Reutilizar a lógica de injeção de scripts
+            req.params[0] = htmlFile;
+            return safeSendModuleHtml(req, res, next, moduleDir);
+        }
+    }
+    next();
+}
+
+// PCP
 app.get('/PCP/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
+});
+app.get('/PCP/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next(); // skip static assets
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
 app.get('/modules/PCP/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'PCP'));
 });
+
+// NFe
 app.get('/NFe/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+});
+app.get('/NFe/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
 app.get('/e-Nf-e/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'NFe'));
 });
+app.get('/e-Nf-e/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'NFe'));
+});
+
+// Financeiro — com clean URLs e aliases root-level
 app.get('/Financeiro/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
+app.get('/Financeiro/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+});
+// Financeiro: Dashboard alias
+app.get('/Financeiro', (req, res, next) => {
+    req.params = { 0: 'index.html' };
+    safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+});
+
+// Aliases root-level para páginas do Financeiro (fix 404s)
+const finRootAliases = {
+    'contas-pagar': 'contas_pagar', 'contas-receber': 'contas_receber',
+    'fluxo-caixa': 'fluxo_caixa', 'bancos': 'contas_bancarias',
+    'plano-contas': 'plano_contas', 'orcamentos': 'orcamentos',
+    'conciliacao': 'conciliacao', 'relatorios': 'relatorios', 'impostos': 'impostos'
+};
+Object.entries(finRootAliases).forEach(([alias, file]) => {
+    app.get(`/${alias}`, (req, res, next) => {
+        req.params = { 0: `${file}.html` };
+        safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
+    });
+});
+
+// Compras
 app.get('/Compras/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Compras'));
 });
+app.get('/Compras/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Compras'));
+});
+
+// RH
 app.get('/RecursosHumanos/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+});
+app.get('/RecursosHumanos/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
 app.get('/RH/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
 });
+app.get('/RH/*', (req, res, next) => {
+    if (req.params[0].includes('.')) return next();
+    serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'RH', 'public'));
+});
+
+// Catch-all modules
 app.get('/modules/*.html', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules'));
 });
@@ -1496,7 +1593,7 @@ const authorizeAdminOrComercial = (req, res, next) => {
 // =================================================================
 const axios = require('axios');
 
-app.get('/api/proxy/cnpj/:cnpj', authenticateToken, async (req, res) => {
+app.get('/api/proxy/cnpj/:cnpj', authenticateToken, asyncHandler(async (req, res) => {
     const cnpj = req.params.cnpj.replace(/\D/g, '');
     if (cnpj.length !== 14) return res.status(400).json({ error: 'CNPJ inválido' });
     try {
@@ -1506,9 +1603,9 @@ app.get('/api/proxy/cnpj/:cnpj', authenticateToken, async (req, res) => {
         const status = err.response?.status || 502;
         res.status(status).json({ error: 'Erro ao consultar CNPJ' });
     }
-});
+}));
 
-app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
+app.get('/api/proxy/cep/:cep', authenticateToken, asyncHandler(async (req, res) => {
     const cep = req.params.cep.replace(/\D/g, '');
     if (cep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
     try {
@@ -1518,13 +1615,14 @@ app.get('/api/proxy/cep/:cep', authenticateToken, async (req, res) => {
         const status = err.response?.status || 502;
         res.status(status).json({ error: 'Erro ao consultar CEP' });
     }
-});
+}));
 
 // =================================================================
 // 📄 NFe API — Extracted to routes/nfe-api.js
 // =================================================================
 const nfeApiRouter = require('./routes/nfe-api')({ authenticateToken, pool });
-app.use('/api/nfe', nfeApiRouter);
+// AUDIT-FIX: Adicionado authorizeArea('nfe') — antes qualquer usuário autenticado acessava
+app.use('/api/nfe', authenticateToken, authorizeArea('nfe'), nfeApiRouter);
 console.log('✅ Rotas NFe API carregadas (modular): /api/nfe/*');
 
 // =================================================================
@@ -1691,7 +1789,9 @@ app.use('/uploads', express.static(path.join(__dirname, 'modules', 'RH', 'public
 // ============================================================
 // PAGE AUTHENTICATION MIDDLEWARE
 // ============================================================
-const REFRESH_SECRET = process.env.REFRESH_SECRET || JWT_SECRET + '_refresh';
+// AUDIT-FIX R2: REFRESH_SECRET não deve derivar do JWT_SECRET
+const crypto = require('crypto');
+const REFRESH_SECRET = process.env.REFRESH_SECRET || crypto.createHash('sha256').update(JWT_SECRET + 'refresh_salt_zyntra_2026').digest('hex');
 
 function authenticatePage(req, res, next) {
     // SECURITY FIX: Exige token válido para servir páginas protegidas
@@ -1794,7 +1894,7 @@ const initCronJobs = () => {
 // ENDPOINT PÚBLICO DE FOTO/AVATAR - Usado na tela de login (sem auth)
 // Retorna apenas foto, nome e apelido — dados não sensíveis
 // =================================================================
-app.get('/api/public/usuarios/foto/:email', async (req, res) => {
+app.get('/api/public/usuarios/foto/:email', asyncHandler(async (req, res) => {
     try {
         const email = decodeURIComponent(req.params.email).toLowerCase();
         if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
@@ -1838,13 +1938,13 @@ app.get('/api/public/usuarios/foto/:email', async (req, res) => {
     } catch (error) {
         return res.status(500).json({ success: false, error: 'Erro interno' });
     }
-});
+}));
 
 // =================================================================
 // ENDPOINT DE FOTO DO USUÁRIO - Busca foto pelo email (autenticado)
 // [REFACTORED 10/03/2026] Extraído de dentro do authorizeACL para evitar side-effect
 // =================================================================
-app.get('/api/usuarios/foto/:email', authenticateToken, async (req, res) => {
+app.get('/api/usuarios/foto/:email', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const email = decodeURIComponent(req.params.email).toLowerCase();
         let nome = null, apelido = null, foto = null;
@@ -1887,7 +1987,7 @@ app.get('/api/usuarios/foto/:email', authenticateToken, async (req, res) => {
         console.error('Erro ao buscar foto do usuário:', error);
         return res.status(500).json({ success: false, error: 'Erro interno ao buscar foto' });
     }
-});
+}));
 
 // ACL: Controle de acesso detalhado por nível de usuário
 // [REFACTORED 10/03/2026] Simplificado — usa permission.service para verificação
@@ -2040,7 +2140,7 @@ console.log('✅ Health/Status endpoints carregados (modular)');
 // ─── FOLHA DE PAGAMENTO MANUAL (RH) ───────────────────────────────
 
 // GET /api/rh/folha-manual/competencia - Buscar folhas por mês/ano
-app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const mes = parseInt(req.query.mes);
     const ano = parseInt(req.query.ano);
     if (!mes || !ano) return res.status(400).json({ error: 'mes e ano são obrigatórios' });
@@ -2058,10 +2158,10 @@ app.get('/api/rh/folha-manual/competencia', authenticateToken, authorizeArea('rh
         logger.error('Erro ao buscar folha manual:', error);
         res.status(500).json({ error: 'Erro interno no servidor.' });
     }
-});
+}));
 
 // GET /api/rh/folha-manual/listar - Listar todas as folhas manuais
-app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const { ano } = req.query;
     try {
         let sql = 'SELECT fm.*, (SELECT COUNT(*) FROM rh_folha_manual_itens WHERE folha_id = fm.id) as qtd_itens FROM rh_folha_manual fm';
@@ -2074,10 +2174,10 @@ app.get('/api/rh/folha-manual/listar', authenticateToken, authorizeArea('rh'), a
         logger.error('Erro ao listar folhas manuais:', error);
         res.status(500).json({ error: 'Erro ao listar folhas' });
     }
-});
+}));
 
 // POST /api/rh/folha-manual/salvar - Criar ou atualizar folha com todos os itens
-app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async (req, res) => {
+app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     const mes = parseInt(req.body.mes);
     const ano = parseInt(req.body.ano);
     const tipo = req.body.tipo;
@@ -2141,10 +2241,10 @@ app.post('/api/rh/folha-manual/salvar', authenticateToken, authorizeAdmin, async
     } finally {
         conn.release();
     }
-});
+}));
 
 // PUT /api/rh/folha-manual/:id/fechar - Fechar folha manual e enviar ao Contas a Pagar
-app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, async (req, res) => {
+app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     const folhaId = parseInt(req.params.id);
     try {
         const [folhaRows] = await pool.query('SELECT * FROM rh_folha_manual WHERE id = ?', [folhaId]);
@@ -2182,10 +2282,10 @@ app.put('/api/rh/folha-manual/:id/fechar', authenticateToken, authorizeAdmin, as
         logger.error('Erro ao fechar folha manual:', error);
         res.status(500).json({ error: 'Erro ao fechar folha manual' });
     }
-});
+}));
 
 // PUT /api/rh/folha-manual/:id/reabrir - Reabrir folha fechada
-app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, async (req, res) => {
+app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, asyncHandler(async (req, res) => {
     try {
         const [result] = await pool.query("UPDATE rh_folha_manual SET status = 'rascunho', fechado_em = NULL WHERE id = ? AND status = 'fechada'", [parseInt(req.params.id)]);
         if (result.affectedRows === 0) {
@@ -2196,10 +2296,10 @@ app.put('/api/rh/folha-manual/:id/reabrir', authenticateToken, authorizeAdmin, a
         logger.error('Erro ao reabrir folha:', error);
         res.status(500).json({ error: 'Erro ao reabrir folha' });
     }
-});
+}));
 
 // GET /api/rh/funcionarios-empresas - Listar funcionários agrupados por empresa
-app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [rows] = await pool.query(`
       SELECT f.id, f.nome_completo as nome, f.cargo, f.departamento, f.salario,
@@ -2213,7 +2313,7 @@ app.get('/api/rh/funcionarios-empresas', authenticateToken, authorizeArea('rh'),
         logger.error('Erro ao buscar funcionários:', error);
         res.status(500).json({ error: 'Erro ao buscar funcionários' });
     }
-});
+}));
 
 // =====================================================
 // HOLERITES (COLABORADOR) - CONSENTIMENTO E VISUALIZAÇÃO
@@ -2248,7 +2348,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_pensao_alimenticia (
     if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_pensao_alimenticia:', e.message);
 });
 
-app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM rh_pensao_alimenticia WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
         res.json(rows);
@@ -2256,9 +2356,9 @@ app.get('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'
         logger.error('Erro ao listar pensões:', error);
         res.status(500).json({ error: 'Erro ao listar pensões' });
     }
-});
+}));
 
-app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const { valor, nome_recebedor, cpf_recebedor, banco_recebedor, agencia_recebedor, conta_recebedor, observacoes } = req.body;
     try {
         const [result] = await pool.query(
@@ -2270,9 +2370,9 @@ app.post('/api/rh/funcionarios/:id/pensao', authenticateToken, authorizeArea('rh
         logger.error('Erro ao criar pensão:', error);
         res.status(500).json({ error: 'Erro ao criar pensão' });
     }
-});
+}));
 
-app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         await pool.query('DELETE FROM rh_pensao_alimenticia WHERE id=? AND funcionario_id=?', [req.params.pensaoId, req.params.id]);
         res.json({ success: true });
@@ -2280,7 +2380,7 @@ app.delete('/api/rh/funcionarios/:id/pensao/:pensaoId', authenticateToken, autho
         logger.error('Erro ao remover pensão:', error);
         res.status(500).json({ error: 'Erro ao remover pensão' });
     }
-});
+}));
 
 // ─── SALÁRIO FAMÍLIA (RH) ──────────────────────────────────────────────
 
@@ -2310,7 +2410,7 @@ pool.query(`CREATE TABLE IF NOT EXISTS rh_sf_dependentes (
     if (e && !String(e.message || '').includes('already exists')) logger.warn('rh_sf_dependentes:', e.message);
 });
 
-app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     try {
         const [sfRows] = await pool.query('SELECT * FROM rh_salario_familia WHERE funcionario_id = ?', [req.params.id]);
         const [depRows] = await pool.query('SELECT * FROM rh_sf_dependentes WHERE funcionario_id = ? ORDER BY criado_em DESC', [req.params.id]);
@@ -2320,9 +2420,9 @@ app.get('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorize
         logger.error('Erro ao carregar salário família:', error);
         res.status(500).json({ error: 'Erro ao carregar salário família' });
     }
-});
+}));
 
-app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), async (req, res) => {
+app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authorizeArea('rh'), asyncHandler(async (req, res) => {
     const { recebe, observacoes, dependentes } = req.body;
     try {
         await pool.query(
@@ -2343,7 +2443,7 @@ app.post('/api/rh/funcionarios/:id/salario-familia', authenticateToken, authoriz
         logger.error('Erro ao salvar salário família:', error);
         res.status(500).json({ error: 'Erro ao salvar salário família' });
     }
-});
+}));
 
 const ensureHoleritesColumns = `
     ALTER TABLE rh_holerites
@@ -2379,7 +2479,7 @@ pool.query(ensureHoleritesConsentTable).catch((e) => {
 });
 
 // GET /api/rh/holerites/consentimento - Verificar consentimento digital do usuário logado
-app.get('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+app.get('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async (req, res) => {
     try {
         if (isAdminRHUser(req.user)) {
             return res.json({ consentimento: true, admin: true });
@@ -2405,10 +2505,10 @@ app.get('/api/rh/holerites/consentimento', authenticateToken, async (req, res) =
         logger.error('Erro ao verificar consentimento digital de holerites:', error);
         res.status(500).json({ error: 'Erro ao verificar consentimento digital' });
     }
-});
+}));
 
 // POST /api/rh/holerites/consentimento - Registrar/atualizar consentimento digital
-app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/consentimento', authenticateToken, asyncHandler(async (req, res) => {
     try {
         if (isAdminRHUser(req.user)) {
             return res.json({ success: true, admin: true, message: 'Usuário admin não precisa de consentimento.' });
@@ -2445,10 +2545,10 @@ app.post('/api/rh/holerites/consentimento', authenticateToken, async (req, res) 
         logger.error('Erro ao registrar consentimento digital de holerites:', error);
         res.status(500).json({ error: 'Erro ao registrar consentimento digital' });
     }
-});
+}));
 
 // GET /api/rh/holerites/meus - Listar holerites publicados do funcionário logado
-app.get('/api/rh/holerites/meus', authenticateToken, async (req, res) => {
+app.get('/api/rh/holerites/meus', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const funcionarioId = getUserFuncionarioId(req.user);
         if (!funcionarioId) {
@@ -2477,10 +2577,10 @@ app.get('/api/rh/holerites/meus', authenticateToken, async (req, res) => {
         logger.error('Erro ao listar holerites do funcionário:', error);
         res.status(500).json({ error: 'Erro ao listar holerites' });
     }
-});
+}));
 
 // GET /api/rh/holerites/:id - Buscar holerite por id (restrito ao dono/admin)
-app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
+app.get('/api/rh/holerites/:id', authenticateToken, asyncHandler(async (req, res, next) => {
     if (!/^\d+$/.test(req.params.id)) return next();
     try {
         const [holerite] = await pool.query(`
@@ -2508,10 +2608,10 @@ app.get('/api/rh/holerites/:id', authenticateToken, async (req, res, next) => {
         logger.error('Erro ao buscar holerite:', error);
         res.status(500).json({ error: 'Erro ao buscar holerite' });
     }
-});
+}));
 
 // POST /api/rh/holerites/:id/visualizar - Registrar visualização
-app.post('/api/rh/holerites/:id/visualizar', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/:id/visualizar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
         const userFuncId = getUserFuncionarioId(req.user);
@@ -2532,10 +2632,10 @@ app.post('/api/rh/holerites/:id/visualizar', authenticateToken, async (req, res)
         logger.error('Erro ao registrar visualização:', error);
         res.status(500).json({ error: 'Erro ao registrar visualização' });
     }
-});
+}));
 
 // POST /api/rh/holerites/:id/confirmar - Confirmar recebimento
-app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) => {
+app.post('/api/rh/holerites/:id/confirmar', authenticateToken, asyncHandler(async (req, res) => {
     try {
         const holeriteId = req.params.id;
         const userFuncId = getUserFuncionarioId(req.user);
@@ -2556,7 +2656,7 @@ app.post('/api/rh/holerites/:id/confirmar', authenticateToken, async (req, res) 
         logger.error('Erro ao confirmar recebimento:', error);
         res.status(500).json({ error: 'Erro ao confirmar recebimento' });
     }
-});
+}));
 
 console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 
@@ -2567,7 +2667,7 @@ console.log('✅ Rotas Folha de Pagamento Manual (RH) carregadas');
 app.use((req, res, next) => {
     // API routes return JSON
     if (req.path.startsWith('/api/')) {
-        return res.status(404).json({ error: 'Rota não encontrada', path: req.path });
+        return res.status(404).json({ error: 'Rota não encontrada' }); // AUDIT-FIX: removido path leak
     }
     // All others: serve branded 404 page
     const page404 = path.join(__dirname, 'public', '404.html');

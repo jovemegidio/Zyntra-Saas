@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const returnTo = urlParams.get('returnTo');
   if (returnTo) {
-    console.log('[LOGIN/SSO] 🔄 ReturnTo detectado:', decodeURIComponent(returnTo));
+    // returnTo detectado — será aplicado após login bem-sucedido
   }
 
   // Limpeza preventiva ao abrir a tela de login
@@ -108,6 +108,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const existingModal = document.getElementById('terminated-account-modal');
     if (existingModal) existingModal.remove();
 
+    // SECURITY FIX: Sanitizar message para evitar XSS via innerHTML
+    const safeMessage = String(message).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
     const modal = document.createElement('div');
     modal.id = 'terminated-account-modal';
     modal.innerHTML = `
@@ -117,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="18" y1="8" x2="23" y2="13"/><line x1="23" y1="8" x2="18" y2="13"/></svg>
           </div>
           <h2 style="color:hsl(210,40%,98%);margin:0 0 15px;font-size:1.5rem;font-weight:600;">Acesso Negado</h2>
-          <p style="color:hsl(0,84%,70%);font-size:1rem;margin:0 0 15px;font-weight:500;">${message}</p>
+          <p style="color:hsl(0,84%,70%);font-size:1rem;margin:0 0 15px;font-weight:500;">${safeMessage}</p>
           <p style="color:hsl(215,20%,65%);font-size:0.875rem;margin:0 0 25px;line-height:1.5;">Se você acredita que isso é um erro, entre em contato com o departamento de Recursos Humanos.</p>
           <div style="margin-bottom:20px;">
             <a href="mailto:rh@aluforce.ind.br" style="display:inline-flex;align-items:center;gap:8px;background:hsl(234,89%,64%);color:white;padding:12px 24px;border-radius:0.75rem;text-decoration:none;font-weight:500;transition:all 0.3s ease;">
@@ -630,7 +633,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('logout') || urlParams.has('switch') || urlParams.has('force')) {
-        console.log('[LOGIN/REMEMBER] ⏭️ Auto-login ignorado');
         try {
           await fetch('/api/auth/remove-remember-token', { method: 'POST', credentials: 'include' });
         } catch (e) {}
@@ -759,7 +761,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       // LIMPEZA COMPLETA ANTES DO LOGIN
-      console.log('[LOGIN] 🧹 Limpando dados de sessão anteriores...');
       try {
         ['token', 'authToken', 'userData', 'user', 'user_data', 'userName',
          'chatSupportUser', 'chatSupportConversations', 'chatSupportTickets',
@@ -775,20 +776,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const timeoutId = setTimeout(() => abortCtrl.abort(), 3000);
         await fetch('/api/auth/remove-remember-token', { method: 'POST', credentials: 'include', signal: abortCtrl.signal });
         clearTimeout(timeoutId);
-      } catch (e) {
-        console.warn('[LOGIN] remove-remember-token ignorado:', e.message);
-      }
+      } catch (e) {}
 
       try { if (window.AluforceAuth && typeof AluforceAuth.clearAuth === 'function') AluforceAuth.clearAuth(); } catch {}
 
-      console.log('[LOGIN] 📡 Enviando credenciais para /api/login...');
       // 🔐 Recuperar token de dispositivo confiável do localStorage (backup do cookie httpOnly)
       let savedTrustedToken = null;
       try {
         savedTrustedToken = localStorage.getItem('trusted_device_2fa') || null;
-        if (savedTrustedToken) {
-          console.log('[LOGIN] 🔒 Token de dispositivo confiável encontrado no localStorage');
-        }
       } catch (e) {}
       // API LOGIN CALL
       const loginPayload = { password, trustedDeviceToken: savedTrustedToken };
@@ -804,10 +799,8 @@ document.addEventListener('DOMContentLoaded', () => {
         body: JSON.stringify(loginPayload)
       });
 
-      console.log('[LOGIN] 📡 Resposta recebida:', response.status);
       let data = {};
-      try { data = await response.json(); } catch (e) { console.warn('[LOGIN] Erro ao parsear JSON:', e.message); data = {}; }
-      console.log('[LOGIN] 📦 Dados:', JSON.stringify(data).substring(0, 200));
+      try { data = await response.json(); } catch (e) { data = {}; }
 
       if (!response.ok) {
         if (data && data.code === 'ACCOUNT_TERMINATED') {
@@ -823,10 +816,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // 🔐 2FA - Se o servidor pedir verificação de dois fatores
       // ═══════════════════════════════════════════════════════════
       if (data && data.requires2FA) {
-        console.log('[LOGIN] 🔐 2FA requerido - exibindo modal...');
         setLoading(false);
         show2FAModal(data.pendingToken, data.maskedEmail);
-        console.log('[LOGIN] 🔐 Modal 2FA exibido com sucesso');
         return; // Para aqui - o modal 2FA continua o fluxo
       }
 
@@ -834,7 +825,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // 🔑 TROCA OBRIGATÓRIA - Senha temporária (esqueci-senha)
       // ═══════════════════════════════════════════════════════════
       if (data && data.forcePasswordChange) {
-        console.log('[LOGIN] 🔑 Senha temporária detectada - exibindo modal de troca...');
         setLoading(false);
         showForceChangePasswordModal(data.user, data.deviceId, data.redirectTo);
         return; // Para aqui - o modal de troca continua o fluxo
@@ -964,7 +954,6 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage(msg, 'error');
       emailInput?.focus();
     } finally {
-      console.log('[LOGIN] 🏁 finally - setLoading(false)');
       setLoading(false);
     }
   });
@@ -1531,7 +1520,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    console.log('[FORCE-PW] 🔑 Modal de troca obrigatória exibido');
   }
 
 });

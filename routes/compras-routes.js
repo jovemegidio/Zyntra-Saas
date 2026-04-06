@@ -1,6 +1,6 @@
 /**
- * COMPRAS ROUTES (PART 1) - Rotas complementares (recebimento, relat??rios, centros de custo)
- * NOTA: Dashboard, fornecedores e pedidos CRUD est??o em compras-extended.js
+ * COMPRAS ROUTES (PART 1) - Rotas complementares (recebimento, relatórios, centros de custo)
+ * NOTA: Dashboard, fornecedores e pedidos CRUD estão em compras-extended.js
  * @module routes/compras-routes
  */
 const express = require('express');
@@ -12,9 +12,9 @@ module.exports = function createComprasRoutes(deps) {
     router.use(authenticateToken);
     router.use(authorizeArea('compras'));
 
-    // ===================== RELAT??RIOS DE COMPRAS =====================
+    // ===================== RELATÓRIOS DE COMPRAS =====================
 
-    // Relat??rio de gastos por per??odo
+    // Relatório de gastos por período
     router.get('/relatorios/gastos-periodo', async (req, res, next) => {
         try {
             const { data_inicio, data_fim, fornecedor_id } = req.query;
@@ -56,7 +56,7 @@ module.exports = function createComprasRoutes(deps) {
 
     // ===================== ROTAS DE RECEBIMENTO =====================
 
-    // Estat??sticas de Recebimento
+    // Estatísticas de Recebimento
     router.get('/recebimento/stats', async (req, res, next) => {
         try {
             const hoje = new Date().toISOString().split('T')[0];
@@ -92,7 +92,7 @@ module.exports = function createComprasRoutes(deps) {
                 valor_pendente: valorPendente[0].total || 0
             });
         } catch (error) {
-            console.error('Erro ao buscar estat??sticas de recebimento:', error);
+            console.error('Erro ao buscar estatísticas de recebimento:', error);
             next(error);
         }
     });
@@ -166,7 +166,7 @@ module.exports = function createComprasRoutes(deps) {
             const [rows] = await pool.query('SELECT id, nome FROM centros_custo WHERE ativo = 1 ORDER BY nome');
             res.json(rows);
         } catch (error) {
-            res.json([{ id: 1, nome: 'Vendas' }, { id: 2, nome: 'Marketing' }, { id: 3, nome: 'Produ????o' }, { id: 4, nome: 'Administrativo' }]);
+            res.json([{ id: 1, nome: 'Vendas' }, { id: 2, nome: 'Marketing' }, { id: 3, nome: 'Produção' }, { id: 4, nome: 'Administrativo' }]);
         }
     });
 

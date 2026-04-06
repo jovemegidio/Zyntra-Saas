@@ -46,10 +46,10 @@ const authMiddleware = async (req, res, next) => {
         logToFile('[AUTH-RBAC] Headers auth: ' + (req.headers['authorization'] ? 'PRESENTE' : 'AUSENTE'));
         
         // Tentar pegar token de várias fontes
+        // SECURITY: Não aceitar token via query string (expõe em logs/histórico/Referer)
         const token = 
             req.cookies?.authToken ||
-            req.headers['authorization']?.replace('Bearer ', '') ||
-            req.query?.token;
+            req.headers['authorization']?.replace('Bearer ', '');
 
         logToFile('[AUTH-RBAC] Token encontrado: ' + (token ? token.substring(0, 30) + '...' : 'NENHUM'));
 
@@ -184,10 +184,11 @@ const generateToken = (user) => {
             email: user.email, 
             nome: user.nome,
             role: user.role,
-            is_admin: user.is_admin 
+            is_admin: user.is_admin,
+            jti: crypto.randomUUID() // SEC-021: Permite revogação via blacklist
         },
         JWT_SECRET,
-        { expiresIn: JWT_EXPIRES }
+        { expiresIn: JWT_EXPIRES, algorithm: 'HS256' }
     );
 };
 
@@ -241,6 +242,9 @@ router.post('/login', async (req, res) => {
             });
         }
 
+        // Bloqueio de contas agora utiliza o campo status='bloqueado' no banco de dados
+        // Lista hardcoded removida — gerenciar via painel Admin
+
         // Buscar usuário - SECURITY FIX H-10: Apenas colunas necessárias (CWE-200)
         // NOTA: Usar apenas colunas que existem na tabela usuarios (cargo, tentativas_login,
         // bloqueado_ate, dois_fatores_ativo, dois_fatores_secret NÃO existem)
@@ -265,9 +269,7 @@ router.post('/login', async (req, res) => {
         }
 
         const user = users[0];
-        console.log('[RBAC LOGIN] Usuário:', user.nome, '- Status:', user.status, '- Admin:', user.is_admin);
-        console.log('[RBAC LOGIN] Tem password_hash:', !!user.password_hash);
-        console.log('[RBAC LOGIN] Tem senha_hash:', !!user.senha_hash);
+        // SECURITY FIX: Removidos logs de hash de senha (CWE-532)
 
         // Verificar status
         if (user.status === 'bloqueado') {
@@ -290,8 +292,6 @@ router.post('/login', async (req, res) => {
         // Verificar senha
         const senhaHash = user.password_hash || user.senha_hash || user.senha;
         
-        console.log('[RBAC LOGIN] Hash para comparar:', senhaHash ? senhaHash.substring(0, 20) + '...' : 'NULL');
-        
         if (!senhaHash) {
             await logAccess(pool, user.id, 'login_falha', null, req, { motivo: 'sem_senha_configurada' });
             return res.status(401).json({ 
@@ -303,7 +303,6 @@ router.post('/login', async (req, res) => {
         let isValid = false;
         try {
             isValid = await bcrypt.compare(password, senhaHash);
-            console.log('[RBAC LOGIN] Resultado bcrypt.compare:', isValid);
         } catch (e) {
             console.error('[RBAC LOGIN] Erro no bcrypt:', e.message);
         }
@@ -316,8 +315,6 @@ router.post('/login', async (req, res) => {
             });
         }
         
-        console.log('[RBAC LOGIN] ✅ Senha válida!');
-
         // Gerar tokens
         const token = generateToken(user);
         const refreshToken = generateRefreshToken();

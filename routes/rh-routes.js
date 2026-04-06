@@ -16,9 +16,6 @@ module.exports = function createRHRoutes(deps) {
 
     // --- Standard requires for extracted routes ---
     const { body, param, query, validationResult } = require('express-validator');
-    const path = require('path');
-    const multer = require('multer');
-    const fs = require('fs');
 
     // Upload dir: em produção (VPS) salvar em /var/www/uploads/RH, em dev em public/uploads/RH
     const uploadDir = process.platform !== 'win32'
@@ -44,7 +41,9 @@ module.exports = function createRHRoutes(deps) {
             cb(null, unique);
         }
     });
-    const upload = multer({ storage: rhStorage, limits: { fileSize: 10 * 1024 * 1024 } });
+    const RH_SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const rhFileFilter = (req, file, cb) => RH_SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ storage: rhStorage, limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: rhFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
     // HTML escape helper to prevent XSS in server-rendered HTML
     const escHtml = (str) => {
@@ -399,38 +398,16 @@ module.exports = function createRHRoutes(deps) {
             }
 
             // AUDIT-FIX HIGH-003: Use explicit cascade list + transaction instead of dynamic FK lookup
+            // FIX-100: Soft-delete instead of hard DELETE (preserves historical data)
             const connection = await pool.getConnection();
             try {
                 await connection.beginTransaction();
 
-                // Explicit list of known FK tables for funcionarios (avoids dynamic table name injection)
-                const fkCascadeTables = [
-                    { table: 'ponto_registros', column: 'funcionario_id' },
-                    { table: 'ponto_alteracoes', column: 'funcionario_id' },
-                    { table: 'rh_holerites_gestao', column: 'funcionario_id' },
-                    { table: 'folha_pagamento', column: 'funcionario_id' },
-                    { table: 'ferias', column: 'funcionario_id' },
-                    { table: 'afastamentos', column: 'funcionario_id' },
-                    { table: 'advertencias', column: 'funcionario_id' },
-                    { table: 'documentos_funcionario', column: 'funcionario_id' },
-                    { table: 'historico_cargos', column: 'funcionario_id' },
-                    { table: 'treinamentos_participantes', column: 'funcionario_id' },
-                    { table: 'beneficios_funcionario', column: 'funcionario_id' },
-                    { table: 'avaliacoes_desempenho', column: 'funcionario_id' },
-                    { table: 'esocial_eventos', column: 'funcionario_id' }
-                ];
-
-                for (const fk of fkCascadeTables) {
-                    try {
-                        await connection.query(`DELETE FROM \`${fk.table}\` WHERE \`${fk.column}\` = ?`, [id]);
-                    } catch (err) {
-                        // Ignore table-not-found errors (1146), fail on anything else
-                        if (err.errno !== 1146) throw err;
-                    }
-                }
-
-                // Agora deleta o funcionário
-                const [result] = await connection.query('DELETE FROM funcionarios WHERE id = ?', [id]);
+                // Soft-delete: mark employee as inactive instead of destroying data
+                const [result] = await connection.query(
+                    'UPDATE funcionarios SET ativo = 0, status = ?, data_desligamento = NOW(), updated_at = NOW() WHERE id = ?',
+                    ['desligado', id]
+                );
                 if (result.affectedRows === 0) {
                     await connection.rollback();
                     connection.release();
@@ -2144,7 +2121,7 @@ module.exports = function createRHRoutes(deps) {
                     resultados.erros.push({
                         funcionario: group.funcionarioNome,
                         paginas: group.pages.map(p => p + 1),
-                        erro: groupErr.message
+                        erro: 'Erro ao processar holerite'
                     });
                 }
             }
@@ -2166,7 +2143,7 @@ module.exports = function createRHRoutes(deps) {
             if (req.file && req.file.path && fs.existsSync(req.file.path)) {
                 try { fs.unlinkSync(req.file.path); } catch(e) {}
             }
-            res.status(500).json({ message: 'Erro ao importar PDF: ' + error.message });
+            res.status(500).json({ message: 'Erro ao importar PDF' });
         }
     });
 
