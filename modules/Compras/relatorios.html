@@ -319,8 +319,8 @@
             }
             tbody.innerHTML = pedidos.slice(0, 10).map(p =>
                 `<tr>
-                    <td><strong>${p.número || p.id}</strong></td>
-                    <td>${p.fornecedor || p.fornecedor_nome || '-'}</td>
+                    <td><strong>${p.numero || p.número || p.numero_pedido || p.id}</strong></td>
+                    <td>${p.fornecedor || p.fornecedor_nome || p.nome_fornecedor || p.razao_social || '-'}</td>
                     <td>${this.formatarMoeda(p.valor_total)}</td>
                     <td><span class="badge badge-${this.getStatusClass(p.status)}">${this.formatarStatus(p.status)}</span></td>
                 </tr>`
@@ -348,7 +348,7 @@
                     const min = m.estoque_minimo || m.minimo || 0;
                     const pct = min > 0 ? (atual / min * 100) : 0;
                     return `<tr>
-                        <td>${m.nome || m.descrição}</td>
+                        <td>${m.descricao || m.nome || m.descrição || m.codigo_material || '-'}</td>
                         <td style="font-weight:600; color:var(--danger-500);">${atual}</td>
                         <td>${min}</td>
                         <td><span class="badge badge-${pct <= 50 ? 'urgent' : 'pending'}">${pct <= 50 ? 'Crítico' : 'Baixo'}</span></td>

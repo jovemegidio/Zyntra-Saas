@@ -1106,6 +1106,9 @@
     </div>
 
     <script>
+        // FIX-100: XSS protection for innerHTML with API data
+        function esc(s) { return String(s || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+
         // ===== TOGGLE MOBILE SIDEBAR =====
         function toggleMobileSidebar() {
             document.getElementById('mobile-sidebar')?.classList.toggle('mobile-open');
@@ -1208,7 +1211,7 @@
             tbody.innerHTML = dados.map(conta => {
                 const status = conta.status || 'pendente';
                 const badges = { 'pendente': '<span class="badge badge-pending">Pendente</span>', 'pago': '<span class="badge badge-paid">Pago</span>', 'vencido': '<span class="badge badge-overdue">Vencido</span>', 'liquidada': '<span class="badge badge-paid">Liquidada</span>', 'parcial': '<span class="badge badge-pending">Parcial</span>' };
-                const hl = (text) => { if (!pesquisa || !text) return text || '-'; try { const escaped = pesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const regex = new RegExp(`(${escaped})`, 'gi'); const safe = String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); return safe.replace(regex, '<span class="highlight">$1</span>'); } catch(e) { return String(text) || '-'; } };
+                const hl = (text) => { const safe = String(text||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); if (!pesquisa || !text) return safe; try { const escaped = pesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); const regex = new RegExp(`(${escaped})`, 'gi'); return safe.replace(regex, '<span class="highlight">$1</span>'); } catch(e) { return safe; } };
                 const checked = contasSelecionadas.has(conta.id) ? 'checked' : '';
                 const isPendente = status === 'pendente' || status === 'vencido' || status === 'parcial';
                 return `<tr style="cursor:pointer;" ondblclick="visualizarConta(${conta.id})">
@@ -1238,7 +1241,7 @@
                     fornecedoresList = Array.isArray(rawFornecedores) ? rawFornecedores : (Array.isArray(rawFornecedores?.data) ? rawFornecedores.data : []);
                     const select = document.getElementById('fornecedor-id');
                     const selectFiltro = document.getElementById('filtro-fornecedor-select');
-                    const options = fornecedoresList.map(f => `<option value="${f.id}">${f.razao_social || f.nome}</option>`).join('');
+                    const options = fornecedoresList.map(f => `<option value="${f.id}">${esc(f.razao_social || f.nome)}</option>`).join('');
                     select.innerHTML = '<option value="">Selecione o fornecedor...</option>' + options;
                     selectFiltro.innerHTML = '<option value="">Todos</option>' + options;
                 }
@@ -1248,14 +1251,14 @@
         async function carregarCentrosCusto() {
             try {
                 const response = await fetch('/api/financeiro/centros-custo', { credentials: 'include' });
-                if (response.ok) { const rawCentros = await response.json(); const centros = Array.isArray(rawCentros) ? rawCentros : (Array.isArray(rawCentros?.data) ? rawCentros.data : []); const select = document.getElementById('centro-custo'); if (select) select.innerHTML = '<option value="">Selecione (opcional)</option>' + centros.map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); }
+                if (response.ok) { const rawCentros = await response.json(); const centros = Array.isArray(rawCentros) ? rawCentros : (Array.isArray(rawCentros?.data) ? rawCentros.data : []); const select = document.getElementById('centro-custo'); if (select) select.innerHTML = '<option value="">Selecione (opcional)</option>' + centros.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); }
             } catch (error) { console.error('Erro ao carregar centros de custo:', error); }
         }
 
         async function carregarCategorias() {
             try {
                 const response = await fetch('/api/financeiro/categorias', { credentials: 'include' });
-                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const despesas = categorias.filter(c => c.tipo === 'despesa'); const select = document.getElementById('categoria-id'); select.innerHTML = '<option value="">Selecione...</option>' + despesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); const selectFiltro = document.getElementById('filtro-categoria-select'); if (selectFiltro) selectFiltro.innerHTML = '<option value="">Todas</option>' + despesas.map(c => `<option value="${c.id}">${c.nome}</option>`).join(''); }
+                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const despesas = categorias.filter(c => c.tipo === 'despesa'); const select = document.getElementById('categoria-id'); if (select) select.innerHTML = '<option value="">Selecione...</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); const selectFiltro = document.getElementById('filtro-categoria-select'); if (selectFiltro) selectFiltro.innerHTML = '<option value="">Todas</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); }
             } catch (error) { console.error('Erro ao carregar categorias:', error); }
         }
 

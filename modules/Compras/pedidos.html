@@ -334,9 +334,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Fornecedor <span class="required">*</span></label>
-                            <select id="fornecedorId" class="form-control" required>
-                                <option value="">Selecione o fornecedor...</option>
-                            </select>
+                            <div style="position:relative;">
+                                <input type="text" id="fornecedorBusca" class="form-control" placeholder="Digite para buscar fornecedor..." autocomplete="off" oninput="filtrarFornecedoresAutocomplete(this.value)">
+                                <input type="hidden" id="fornecedorId" required>
+                                <div id="fornecedorDropdown" class="autocomplete-dropdown" style="display:none; position:absolute; top:100%; left:0; right:0; z-index:999; max-height:200px; overflow-y:auto; background:#fff; border:1px solid #e2e8f0; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,0.12);"></div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label>Status</label>

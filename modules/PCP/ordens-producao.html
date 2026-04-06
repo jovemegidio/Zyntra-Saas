@@ -3455,7 +3455,7 @@
             document.getElementById('modal-ordem-titulo').textContent = `Ordem de Produção ${ordem.numero}`;
 
             // Preencher dados do produto
-            const codigo = ordem.codigo || ordem.produto.substring(0, 6).toUpperCase();
+            const codigo = ordem.codigo || (ordem.produto ? ordem.produto.substring(0, 6).toUpperCase() : 'N/A');
             document.getElementById('modal-produto-badge').textContent = codigo;
             document.getElementById('modal-produto-link').textContent = ordem.produto;
 

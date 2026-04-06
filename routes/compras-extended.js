@@ -16,13 +16,30 @@ module.exports = function createComprasExtendedRoutes(deps) {
     // --- Standard requires for extracted routes ---
     const { body, param, query, validationResult } = require('express-validator');
     const fs = require('fs');
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+    // AUDIT-FIX R2: Middleware RBAC para operações de escrita em Compras
+    const requireComprasWrite = (req, res, next) => {
+        const rolesPermitidas = ['admin', 'administrador', 'gerente', 'gerente_compras', 'comprador', 'diretor'];
+        const userRole = (req.user?.role || req.user?.papel || '').toLowerCase();
+        if (rolesPermitidas.includes(userRole) || req.user?.is_admin) {
+            return next();
+        }
+        return res.status(403).json({ error: 'Permissão insuficiente para operações de escrita em Compras.' });
+    };
     const validate = (req, res, next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return res.status(400).json({ message: 'Dados inválidos', errors: errors.array() });
         next();
     };
+
+    // AUDIT-FIX R3: Middleware global de área — só usuários com acesso a 'compras' podem acessar
+    router.use(authenticateToken);
+    router.use(authorizeArea('compras'));
+
     // ============================================================
     // ROTAS DO MÓDULO DE COMPRAS
     // ============================================================
@@ -76,7 +93,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Criar novo fornecedor
-    router.post('/fornecedores', authenticateToken, async (req, res) => {
+    router.post('/fornecedores', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
                 razao_social, nome_fantasia, cnpj, ie, endereco, cidade,
@@ -116,7 +133,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Atualizar fornecedor
-    router.put('/fornecedores/:id', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite
+    router.put('/fornecedores/:id', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
                 razao_social, nome_fantasia, cnpj, ie, endereco, cidade,
@@ -147,7 +165,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Desativar fornecedor
-    router.delete('/fornecedores/:id', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite
+    router.delete('/fornecedores/:id', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             await pool.query('UPDATE fornecedores SET ativo = 0 WHERE id = ?', [req.params.id]);
             res.json({ success: true, message: 'Fornecedor desativado com sucesso' });
@@ -196,6 +215,12 @@ module.exports = function createComprasExtendedRoutes(deps) {
             }
 
             query += ' ORDER BY m.descricao ASC';
+
+            // AUDIT-FIX S9.4: Cap results to prevent unbounded queries
+            const safeLimit = Math.min(Math.max(1, parseInt(req.query.limit) || 500), 1000);
+            const safePage = Math.max(1, parseInt(req.query.page) || 1);
+            query += ' LIMIT ? OFFSET ?';
+            params.push(safeLimit, (safePage - 1) * safeLimit);
 
             const [materiais] = await pool.query(query, params);
 
@@ -293,7 +318,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Atualizar material
-    router.put('/materiais/:id', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite
+    router.put('/materiais/:id', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
                 codigo, descricao, categoria, unidade, especificacoes, ncm, cest,
@@ -323,7 +349,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Desativar material
-    router.delete('/materiais/:id', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite
+    router.delete('/materiais/:id', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             await pool.query('UPDATE compras_materiais SET ativo = 0 WHERE id = ?', [req.params.id]);
             res.json({ success: true, message: 'Material desativado com sucesso' });
@@ -449,24 +476,40 @@ module.exports = function createComprasExtendedRoutes(deps) {
             if (!ids || !Array.isArray(ids) || ids.length === 0) {
                 return res.status(400).json({ message: 'IDs são obrigatórios' });
             }
-            const placeholders = ids.map(() => '?').join(',');
-            await pool.query(`UPDATE materiais SET ativo = ? WHERE id IN (${placeholders})`, [ativo ? 1 : 0, ...ids]);
-            res.json({ success: true, message: `${ids.length} materiais atualizados`, affected: ids.length });
+            // AUDIT-FIX S7.2: Validar limite + tipo inteiro
+            if (ids.length > 500) return res.status(400).json({ message: 'Máximo 500 itens por operação' });
+            const safeIds = ids.map(id => parseInt(id)).filter(id => Number.isInteger(id) && id > 0);
+            if (safeIds.length === 0) return res.status(400).json({ message: 'IDs inválidos' });
+            const placeholders = safeIds.map(() => '?').join(',');
+            await pool.query(`UPDATE materiais SET ativo = ? WHERE id IN (${placeholders})`, [ativo ? 1 : 0, ...safeIds]);
+            res.json({ success: true, message: `${safeIds.length} materiais atualizados`, affected: safeIds.length });
         } catch (err) {
             console.error('[COMPRAS] Erro bulk toggle:', err);
             res.status(500).json({ message: 'Erro ao atualizar em lote' });
         }
     });
 
-    // Deletar materiais em lote
+    // Deletar materiais em lote — AUDIT-FIX: Requer admin/gerente + soft-delete
     router.post('/estoque/materiais-pcp/bulk-delete', authenticateToken, async (req, res) => {
         try {
+            // AUDIT-FIX: RBAC — apenas admin ou gerente podem deletar materiais em lote
+            const userRole = (req.user.role || req.user.papel || '').toLowerCase();
+            const isPrivileged = req.user.is_admin === true || req.user.is_admin === 1 ||
+                ['admin', 'administrador', 'gerente', 'gerente_compras'].includes(userRole);
+            if (!isPrivileged) {
+                return res.status(403).json({ error: 'Apenas administradores ou gerentes podem deletar materiais em lote' });
+            }
+
             const { ids } = req.body;
             if (!ids || !Array.isArray(ids) || ids.length === 0) {
                 return res.status(400).json({ message: 'IDs são obrigatórios' });
             }
-            const placeholders = ids.map(() => '?').join(',');
-            const [result] = await pool.query(`DELETE FROM materiais WHERE id IN (${placeholders})`, ids);
+            // AUDIT-FIX S7.2: Validar limite + tipo inteiro
+            if (ids.length > 500) return res.status(400).json({ message: 'Máximo 500 itens por operação' });
+            const safeIds = ids.map(id => parseInt(id)).filter(id => Number.isInteger(id) && id > 0);
+            if (safeIds.length === 0) return res.status(400).json({ message: 'IDs inválidos' });
+            const placeholders = safeIds.map(() => '?').join(',');
+            const [result] = await pool.query(`DELETE FROM materiais WHERE id IN (${placeholders})`, safeIds);
             res.json({ success: true, message: `${result.affectedRows} materiais removidos`, affected: result.affectedRows });
         } catch (err) {
             console.error('[COMPRAS] Erro bulk delete:', err);
@@ -494,26 +537,43 @@ module.exports = function createComprasExtendedRoutes(deps) {
             res.json({ success: true, id: result.insertId, message: 'Material criado com sucesso' });
         } catch (err) {
             console.error('[COMPRAS] Erro ao criar material:', err);
-            res.status(500).json({ error: 'Erro ao criar material', details: err.message });
+            res.status(500).json({ error: 'Erro ao criar material' });
         }
     });
 
     // Importar materiais selecionados para estoque_materias_primas
     router.post('/estoque/materiais-pcp/importar', authenticateToken, async (req, res) => {
+        const conn = await pool.getConnection();
         try {
             const { ids } = req.body;
             if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                conn.release();
                 return res.status(400).json({ message: 'IDs são obrigatórios' });
             }
-            const placeholders = ids.map(() => '?').join(',');
-            const [materiais] = await pool.query(`SELECT * FROM materiais WHERE id IN (${placeholders})`, ids);
+            // AUDIT-FIX S7.4: Validar IDs + transaction + batch lookup
+            if (ids.length > 500) { conn.release(); return res.status(400).json({ message: 'Máximo 500 itens por operação' }); }
+            const safeIds = ids.map(id => parseInt(id)).filter(id => Number.isInteger(id) && id > 0);
+            if (safeIds.length === 0) { conn.release(); return res.status(400).json({ message: 'IDs inválidos' }); }
+
+            const placeholders = safeIds.map(() => '?').join(',');
+            const [materiais] = await conn.query(`SELECT * FROM materiais WHERE id IN (${placeholders})`, safeIds);
+
+            // Batch: buscar todos os códigos existentes de uma vez
+            const codigos = materiais.map(m => m.codigo_material || `MAT-${m.id}`);
+            let existingSet = new Set();
+            if (codigos.length > 0) {
+                const codPlaceholders = codigos.map(() => '?').join(',');
+                const [existingRows] = await conn.query(`SELECT codigo FROM estoque_materias_primas WHERE codigo IN (${codPlaceholders})`, codigos);
+                existingSet = new Set(existingRows.map(r => r.codigo));
+            }
 
             let importados = 0;
             let jaExistem = 0;
+
+            await conn.beginTransaction();
             for (const m of materiais) {
                 const codigo = m.codigo_material || `MAT-${m.id}`;
-                const [existing] = await pool.query('SELECT id FROM estoque_materias_primas WHERE codigo = ?', [codigo]);
-                if (existing.length > 0) { jaExistem++; continue; }
+                if (existingSet.has(codigo)) { jaExistem++; continue; }
 
                 // Mapear tipo
                 const tipoMap = { 'pvc': 'PVC', 'polietileno': 'PE', 'aluminio': 'ALUMINIO', 'cobre': 'COBRE', 'pigmento': 'PIGMENTO' };
@@ -521,17 +581,21 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 const unidadeMap = { 'kg': 'KG', 'un': 'UN', 'm': 'M', 'l': 'L', 'pc': 'UN' };
                 const unidade = unidadeMap[(m.unidade_medida || 'un').toLowerCase()] || 'UN';
 
-                await pool.query(`
+                await conn.query(`
                     INSERT INTO estoque_materias_primas (codigo, nome, tipo, unidade, quantidade_minima, preco_medio, ativo)
                     VALUES (?, ?, ?, ?, ?, ?, 1)
                 `, [codigo, m.descricao, tipoMapeado, unidade, m.estoque_minimo || 0, m.custo_unitario || 0]);
                 importados++;
             }
+            await conn.commit();
 
             res.json({ success: true, message: `${importados} materiais importados, ${jaExistem} já existiam`, importados, jaExistem });
         } catch (err) {
+            await conn.rollback().catch(() => {});
             console.error('[COMPRAS] Erro ao importar materiais:', err);
             res.status(500).json({ message: 'Erro ao importar materiais', error: 'Erro interno no servidor. Tente novamente.' });
+        } finally {
+            conn.release();
         }
     });
 
@@ -709,86 +773,122 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Entrada de estoque
-    router.post('/estoque/entrada', authenticateToken, async (req, res) => {
+    router.post('/estoque/entrada', authenticateToken, requireComprasWrite, async (req, res) => {
+        const connection = await pool.getConnection();
         try {
             const { material_id, quantidade, observacao, documento, fornecedor_id } = req.body;
-            if (!material_id || !quantidade) {
-                return res.status(400).json({ message: 'Material e quantidade são obrigatórios' });
+            const qtd = parseFloat(quantidade);
+            if (!material_id || !Number.isFinite(qtd) || qtd <= 0) {
+                connection.release();
+                return res.status(400).json({ message: 'Material e quantidade positiva são obrigatórios' });
             }
+            await connection.beginTransaction();
+            // Lock row to prevent concurrent updates
+            await connection.query('SELECT id FROM materias_primas WHERE id = ? FOR UPDATE', [material_id]);
             // Registrar movimentação
-            await pool.query(
+            await connection.query(
                 `INSERT INTO movimentacao_materias_primas (material_id, tipo_movimentacao, quantidade, observacao, documento, usuario_id, created_at)
                  VALUES (?, 'ENTRADA', ?, ?, ?, ?, NOW())`,
-                [material_id, quantidade, observacao || '', documento || '', req.user?.id || null]
+                [material_id, qtd, observacao || '', documento || '', req.user?.id || null]
             );
             // Atualizar estoque atual
-            await pool.query(
+            await connection.query(
                 'UPDATE materias_primas SET estoque_atual = COALESCE(estoque_atual, 0) + ? WHERE id = ?',
-                [quantidade, material_id]
+                [qtd, material_id]
             );
+            await connection.commit();
             res.json({ success: true, message: 'Entrada registrada com sucesso' });
         } catch (err) {
+            await connection.rollback();
             console.error('[COMPRAS] Erro ao registrar entrada:', err);
             res.status(500).json({ message: 'Erro ao registrar entrada de estoque' });
+        } finally {
+            connection.release();
         }
     });
 
     // Saída de estoque
-    router.post('/estoque/saida', authenticateToken, async (req, res) => {
+    router.post('/estoque/saida', authenticateToken, requireComprasWrite, async (req, res) => {
+        const connection = await pool.getConnection();
         try {
             const { material_id, quantidade, observacao, documento, destino } = req.body;
-            if (!material_id || !quantidade) {
-                return res.status(400).json({ message: 'Material e quantidade são obrigatórios' });
+            const qtd = parseFloat(quantidade);
+            if (!material_id || !Number.isFinite(qtd) || qtd <= 0) {
+                connection.release();
+                return res.status(400).json({ message: 'Material e quantidade positiva são obrigatórios' });
             }
-            // Verificar estoque disponível
-            const [mat] = await pool.query('SELECT estoque_atual FROM materias_primas WHERE id = ?', [material_id]);
-            if (!mat.length || (mat[0].estoque_atual || 0) < quantidade) {
+            await connection.beginTransaction();
+            // Lock + verify stock
+            const [mat] = await connection.query('SELECT estoque_atual FROM materias_primas WHERE id = ? FOR UPDATE', [material_id]);
+            if (!mat.length || (mat[0].estoque_atual || 0) < qtd) {
+                await connection.rollback();
+                connection.release();
                 return res.status(400).json({ message: 'Estoque insuficiente' });
             }
             // Registrar movimentação
-            await pool.query(
+            await connection.query(
                 `INSERT INTO movimentacao_materias_primas (material_id, tipo_movimentacao, quantidade, observacao, documento, usuario_id, created_at)
                  VALUES (?, 'SAIDA', ?, ?, ?, ?, NOW())`,
-                [material_id, quantidade, observacao || '', documento || '', req.user?.id || null]
+                [material_id, qtd, observacao || '', documento || '', req.user?.id || null]
             );
             // Atualizar estoque atual
-            await pool.query(
+            await connection.query(
                 'UPDATE materias_primas SET estoque_atual = COALESCE(estoque_atual, 0) - ? WHERE id = ?',
-                [quantidade, material_id]
+                [qtd, material_id]
             );
+            await connection.commit();
             res.json({ success: true, message: 'Saída registrada com sucesso' });
         } catch (err) {
+            await connection.rollback();
             console.error('[COMPRAS] Erro ao registrar saída:', err);
             res.status(500).json({ message: 'Erro ao registrar saída de estoque' });
+        } finally {
+            connection.release();
         }
     });
 
-    // Ajuste de estoque
-    router.post('/estoque/ajuste', authenticateToken, async (req, res) => {
+    // Ajuste de estoque — AUDIT-FIX: Requer role admin/gerente
+    router.post('/estoque/ajuste', authenticateToken, requireComprasWrite, async (req, res) => {
+        // AUDIT-FIX: RBAC — apenas admin ou gerente podem ajustar estoque diretamente
+        const userRole = (req.user.role || req.user.papel || '').toLowerCase();
+        const isPrivileged = req.user.is_admin === true || req.user.is_admin === 1 ||
+            ['admin', 'administrador', 'gerente', 'gerente_compras', 'supervisor_compras'].includes(userRole);
+        if (!isPrivileged) {
+            return res.status(403).json({ error: 'Apenas administradores ou gerentes podem ajustar estoque' });
+        }
+
+        const connection = await pool.getConnection();
         try {
             const { material_id, quantidade_nova, motivo } = req.body;
-            if (!material_id || quantidade_nova === undefined) {
-                return res.status(400).json({ message: 'Material e quantidade são obrigatórios' });
+            const qtdNova = parseFloat(quantidade_nova);
+            if (!material_id || !Number.isFinite(qtdNova) || qtdNova < 0) {
+                connection.release();
+                return res.status(400).json({ message: 'Material e quantidade válida são obrigatórios' });
             }
-            // Buscar quantidade atual
-            const [mat] = await pool.query('SELECT estoque_atual FROM materias_primas WHERE id = ?', [material_id]);
+            await connection.beginTransaction();
+            // Lock + read current
+            const [mat] = await connection.query('SELECT estoque_atual FROM materias_primas WHERE id = ? FOR UPDATE', [material_id]);
             const qtdAtual = mat.length ? (mat[0].estoque_atual || 0) : 0;
-            const diferenca = quantidade_nova - qtdAtual;
+            const diferenca = qtdNova - qtdAtual;
             // Registrar movimentação
-            await pool.query(
+            await connection.query(
                 `INSERT INTO movimentacao_materias_primas (material_id, tipo_movimentacao, quantidade, observacao, usuario_id, created_at)
                  VALUES (?, 'AJUSTE', ?, ?, ?, NOW())`,
-                [material_id, Math.abs(diferenca), motivo || `Ajuste: ${qtdAtual} → ${quantidade_nova}`, req.user?.id || null]
+                [material_id, Math.abs(diferenca), motivo || `Ajuste: ${qtdAtual} → ${qtdNova}`, req.user?.id || null]
             );
             // Atualizar estoque
-            await pool.query(
+            await connection.query(
                 'UPDATE materias_primas SET estoque_atual = ? WHERE id = ?',
-                [quantidade_nova, material_id]
+                [qtdNova, material_id]
             );
+            await connection.commit();
             res.json({ success: true, message: 'Ajuste registrado com sucesso', diferenca });
         } catch (err) {
+            await connection.rollback();
             console.error('[COMPRAS] Erro ao ajustar estoque:', err);
             res.status(500).json({ message: 'Erro ao ajustar estoque' });
+        } finally {
+            connection.release();
         }
     });
 
@@ -866,7 +966,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Criar novo pedido de compra
-    router.post('/pedidos', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite
+    router.post('/pedidos', authenticateToken, requireComprasWrite, async (req, res) => {
         const connection = await pool.getConnection();
 
         try {
@@ -1195,15 +1296,17 @@ module.exports = function createComprasExtendedRoutes(deps) {
         } catch (err) {
             await connection.rollback();
             console.error('[COMPRAS] Erro ao aprovar pedido:', err);
-            res.status(500).json({ message: 'Erro ao aprovar pedido: ' + err.message });
+            res.status(500).json({ message: 'Erro ao aprovar pedido. Tente novamente.' });
         } finally {
             connection.release();
         }
     });
 
-    // Cancelar pedido
+    // Cancelar pedido — AUDIT-FIX: Agora usa transação para atomicidade
     router.post('/pedidos/:id/cancelar', authenticateToken, async (req, res) => {
+        const connection = await pool.getConnection();
         try {
+            await connection.beginTransaction();
             const { motivo } = req.body;
 
             // AUDITORIA ENTERPRISE: Validar ID do pedido
@@ -1218,8 +1321,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
             }
 
             // AUDITORIA ENTERPRISE: Verificar se pedido existe e pode ser cancelado
-            const [pedidoCheck] = await pool.query(
-                'SELECT id, status, valor_total FROM pedidos_compra WHERE id = ?',
+            const [pedidoCheck] = await connection.query(
+                'SELECT id, status, valor_total FROM pedidos_compra WHERE id = ? FOR UPDATE',
                 [pedidoId]
             );
 
@@ -1229,13 +1332,10 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             const pedidoInfo = pedidoCheck[0];
 
-            // AUDITORIA ENTERPRISE: Impedir cancelamento de pedidos já recebidos ou cancelados
-            if (pedidoInfo.status === 'recebido') {
-                return res.status(400).json({ error: 'Pedidos já recebidos não podem ser cancelados' });
-            }
-
+            // Se já cancelado, retornar sucesso (idempotente)
             if (pedidoInfo.status === 'cancelado') {
-                return res.status(400).json({ error: 'Este pedido já está cancelado' });
+                await connection.commit();
+                return res.json({ success: true, message: 'Pedido já estava cancelado' });
             }
 
             // AUDITORIA ENTERPRISE: RBAC - Verificar permissão para cancelar pedidos aprovados
@@ -1255,13 +1355,13 @@ module.exports = function createComprasExtendedRoutes(deps) {
 
             console.log(`[COMPRAS-AUDIT] Pedido ${pedidoId} CANCELADO por usuário ${req.user.id} (${req.user.nome || req.user.email}) - Motivo: ${motivo} - Valor: R$ ${parseFloat(pedidoInfo.valor_total || 0).toFixed(2)}`);
 
-            await pool.query(
+            await connection.query(
                 'UPDATE pedidos_compra SET status = \'cancelado\', motivo_cancelamento = ? WHERE id = ?',
                 [motivo.trim(), pedidoId]
             );
 
             try {
-                await pool.query(
+                await connection.query(
                     `INSERT INTO historico_aprovacoes (pedido_id, usuario_id, acao, observacoes)
                      VALUES (?, ?, 'rejeitado', ?)`,
                     [pedidoId, req.user.id, motivo.trim()]
@@ -1270,10 +1370,36 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 console.log('[COMPRAS] Tabela historico_aprovacoes não disponível, pulando registro:', histErr.code);
             }
 
+            await connection.commit();
             res.json({ success: true, message: 'Pedido cancelado com sucesso' });
         } catch (err) {
+            await connection.rollback();
             console.error('[COMPRAS] Erro ao cancelar pedido:', err);
             res.status(500).json({ message: 'Erro ao cancelar pedido' });
+        } finally {
+            connection.release();
+        }
+    });
+
+    // Excluir pedido (soft-delete para qualquer status)
+    router.delete('/pedidos/:id', authenticateToken, async (req, res) => {
+        try {
+            const pedidoId = parseInt(req.params.id, 10);
+            if (!Number.isInteger(pedidoId) || pedidoId <= 0) {
+                return res.status(400).json({ error: 'ID de pedido inválido' });
+            }
+
+            const [pedidoCheck] = await pool.query('SELECT id, status FROM pedidos_compra WHERE id = ?', [pedidoId]);
+            if (pedidoCheck.length === 0) {
+                return res.status(404).json({ error: 'Pedido não encontrado' });
+            }
+
+            await pool.query('UPDATE pedidos_compra SET status = ? WHERE id = ?', ['cancelado', pedidoId]);
+
+            res.json({ success: true, message: 'Pedido excluído com sucesso' });
+        } catch (err) {
+            console.error('[COMPRAS] Erro ao excluir pedido:', err);
+            res.status(500).json({ error: 'Erro ao excluir pedido' });
         }
     });
 
@@ -2004,7 +2130,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 return res.status(409).json({ message: 'Número de requisição já existe. Feche o formulário e tente novamente.' });
             }
 
-            res.status(500).json({ message: 'Erro ao criar requisição: ' + (err.sqlMessage || err.message) });
+            console.error('[COMPRAS] Erro ao criar requisição:', err);
+            res.status(500).json({ message: 'Erro ao criar requisição. Tente novamente.' });
         } finally {
             if (connection) connection.release();
         }
@@ -2075,9 +2202,13 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Excluir requisição
+    // AUDIT-FIX R3: Soft delete (status = 'cancelado') em vez de hard DELETE
     router.delete('/requisicoes/:id', authenticateToken, async (req, res) => {
         try {
-            const [existing] = await pool.query('SELECT * FROM requisicoes_compra WHERE id = ?', [req.params.id]);
+            const reqId = parseInt(req.params.id, 10);
+            if (!Number.isFinite(reqId)) return res.status(400).json({ message: 'ID inválido' });
+
+            const [existing] = await pool.query('SELECT status FROM requisicoes_compra WHERE id = ?', [reqId]);
             if (existing.length === 0) {
                 return res.status(404).json({ message: 'Requisição não encontrada' });
             }
@@ -2087,7 +2218,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 return res.status(400).json({ message: 'Apenas requisições pendentes ou em rascunho podem ser excluídas' });
             }
 
-            await pool.query('DELETE FROM requisicoes_compra WHERE id = ?', [req.params.id]);
+            await pool.query('UPDATE requisicoes_compra SET status = ? WHERE id = ?', ['cancelado', reqId]);
 
             res.json({ message: 'Requisição excluída com sucesso' });
         } catch (err) {
@@ -2451,16 +2582,17 @@ module.exports = function createComprasExtendedRoutes(deps) {
     // Excluir cotação
     router.delete('/cotacoes/:id', authenticateToken, async (req, res) => {
         try {
-            const [existing] = await pool.query('SELECT * FROM cotacoes_compra WHERE id = ?', [req.params.id]);
+            const cotId = parseInt(req.params.id, 10);
+            if (!Number.isFinite(cotId)) return res.status(400).json({ message: 'ID inválido' });
+
+            const [existing] = await pool.query('SELECT status FROM cotacoes_compra WHERE id = ?', [cotId]);
             if (existing.length === 0) {
                 return res.status(404).json({ message: 'Cotação não encontrada' });
             }
 
-            if (existing[0].status === 'finalizada') {
-                return res.status(400).json({ message: 'Cotações finalizadas não podem ser excluídas' });
-            }
+            // Soft delete - marca como cancelado independente do status atual
+            await pool.query('UPDATE cotacoes_compra SET status = ? WHERE id = ?', ['cancelado', cotId]);
 
-            await pool.query('DELETE FROM cotacoes_compra WHERE id = ?', [req.params.id]);
             res.json({ message: 'Cotação excluída com sucesso' });
         } catch (err) {
             console.error('[COMPRAS] Erro ao excluir cotação:', err);
@@ -2571,7 +2703,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                         results.push({ email, status: 'not_found' });
                     }
                 } catch (err) {
-                    results.push({ email, status: 'error', message: err.message });
+                    results.push({ email, status: 'error', message: 'Erro ao processar' });
                 }
             }
 
@@ -2646,7 +2778,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                                 results.push({
                                     name: nomeBase,
                                     status: 'error',
-                                    message: err.message
+                                    message: 'Erro ao atualizar'
                                 });
                             }
                         }
@@ -2663,7 +2795,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                     results.push({
                         name: nomeBase,
                         status: 'error',
-                        message: err.message
+                        message: 'Erro ao buscar'
                     });
                 }
             }
@@ -2788,7 +2920,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                     results.push({
                         status: 'error',
                         id: id,
-                        message: err.message
+                        message: 'Erro ao corrigir'
                     });
                 }
             }

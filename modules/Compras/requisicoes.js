@@ -583,7 +583,7 @@ function visualizarRequisicao(requisicaoId) {
                 </tr>
             </thead>
             <tbody>
-                ${req.itens.map(item => `
+                ${(req.itens || []).map(item => `
                     <tr style="border-bottom: 1px solid #e5e7eb;">
                         <td style="padding: 12px;">${item.descricao}</td>
                         <td style="padding: 12px; text-align: center;">${item.quantidade}</td>

@@ -4,6 +4,49 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.4.0] — 2026-04-06
+
+### Adicionado
+- **Autocomplete Fornecedores (Compras)**: Select estático de fornecedores substituído por campo de busca com dropdown filtrável em tempo real — digitação filtra por nome/razão social, seleção preenche campo hidden
+- **DELETE Pedidos de Compra**: Nova rota DELETE /api/compras/pedidos/:id para exclusão direta de pedidos independente do status
+- **Precificação — Endpoint API**: Rota GET /api/vendas/precificacao para consulta de tabela de preços
+
+### Corrigido
+- **Compras — Exclusão de Pedidos**: Corrigido erro 409 Conflict ao excluir/cancelar pedidos — cancelamento agora é idempotente (pedido já cancelado retorna sucesso), frontend usa método DELETE
+- **Compras — Exclusão de Cotações**: Removida restrição que impedia exclusão de cotações finalizadas — agora permite deletar cotações em qualquer status
+- **Compras — Relatórios undefined**: Corrigidos campos exibindo "undefined" em relatórios de pedidos e materiais — adicionadas cadeias de fallback para campos acentuados/não-acentuados (numero/número, descricao/descrição, nome/razao_social)
+- **Compras — Curva ABC undefined**: Corrigidos campos codigo e descricao na análise ABC e desempenho de fornecedores com fallbacks seguros
+- **Gestão de Estoque — Modal Novo Material**: Corrigido erro null em `abrirModalNovoMaterial` — IDs HTML com acentos (código, descrição, mínimo) normalizados para IDs sem acento matching o JS
+- **Gestão de Estoque — Modal Editar/Histórico**: Corrigidos IDs acentuados nos modais de edição e histórico de materiais
+- **Cotações — Null Guards**: Adicionadas proteções contra null em itens de propostas, totais e melhorProposta em cotacoes.js
+- **Requisições — Array Guard**: Corrigido crash quando `req.itens` é null/undefined em requisicoes.js
+- **PCP — Ordens de Produção**: Adicionado optional chaining para `ordem.produto.substring()` evitando crash quando produto é null
+- **Financeiro — Contas a Pagar**: Adicionado null check no select de categoria-id antes de popular innerHTML
+- **Vendas — Restrição por Vendedor**: Vendedores só visualizam seus próprios pedidos/orçamentos; gerentes veem todos
+- **Vendas — Notificações Null Guard**: Corrigido crash no carregamento de notificações quando resposta da API é null
+- **Vendas — Template Orçamento**: Logotipo e informações da empresa corrigidos no template de orçamento/proposta
+- **Vendas — Remoção de Avatares**: Avatar removido de 8+ páginas (Vendas, Compras, Financeiro, PCP) — layout simplificado
+- **Vendas — Email Auto-Subject**: Assunto e mensagem preenchidos automaticamente ao enviar orçamento por email
+- **Vendas — Exclusão em Massa**: Botão "Excluir Todos" funcional para limpar pedidos de venda
+- **PCP — Sidebar Unificada**: Links duplicados de relatórios consolidados em link único
+- **PCP — Modal Null Fix**: Corrigido crash em modal de detalhes quando campos são null
+- **PCP — Encoding Fix**: Corrigidos 661 caracteres com encoding quebrado em ordens-producao.html
+- **Kanban — Filtro Vendedor**: Filtro de vendedor aplicado ao quadro Kanban de vendas
+- **Kanban — Notificação OP**: Notificação ao mover ordem de produção no Kanban
+- **Vendas — Desconto 33.88%**: Validação de desconto corrigida para aceitar percentuais com decimais
+- **Vendas — Origem Fixa**: Campo origem fixado como "Sistema" para novos pedidos
+- **Vendas — Auto-Fill Produto**: Preenchimento automático de dados do produto ao selecionar item
+- **Vendas — Modal Simplificado**: Modal de item de venda simplificado removendo campos desnecessários
+- **Faturamento+Logística — Header**: Header e branding corrigidos nas páginas de Faturamento e Logística
+- **Vendas — Undefined Values**: Fallbacks adicionados para campos exibindo undefined em listagens
+
+### Implantação
+- 10+ arquivos deployados na VPS via SCP
+- PM2 reiniciado (aluforce-v2-production)
+- Commits: 84ddb0b (sessão 1), 647c0b8 (sessão 2), sessão 3 atual
+
+---
+
 ## [2.3.0] — 2026-03-27
 
 ### Adicionado

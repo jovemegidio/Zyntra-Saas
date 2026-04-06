@@ -239,6 +239,10 @@ function abrirModalNovoPedido() {
     document.getElementById('formPedido').reset();
     document.getElementById('modalPedidoTitle').textContent = 'Novo Pedido de Compra';
     document.getElementById('dataPedido').valueAsDate = new Date();
+    // Clear autocomplete fields
+    const fornBusca = document.getElementById('fornecedorBusca');
+    if (fornBusca) fornBusca.value = '';
+    document.getElementById('fornecedorId').value = '';
     gerarNumeroPedido();
     limparItens();
     adicionarItem(); // Adiciona primeira linha
@@ -271,6 +275,10 @@ async function abrirModalEditarPedido(pedidoId) {
     document.getElementById('numeroPedido').value = pedido.numero_pedido || '';
     document.getElementById('dataPedido').value = pedido.data_pedido ? pedido.data_pedido.split('T')[0] : '';
     document.getElementById('fornecedorId').value = pedido.fornecedor_id || '';
+    // Set the fornecedor search input text
+    const forn = fornecedores.find(f => f.id == pedido.fornecedor_id);
+    const fornBusca = document.getElementById('fornecedorBusca');
+    if (fornBusca) fornBusca.value = forn ? (forn.razao_social || forn.nome) : (pedido.fornecedor || pedido.fornecedor_nome || '');
     document.getElementById('compradorId').value = pedido.comprador_id || '';
     document.getElementById('dataEntregaPrevista').value = pedido.data_entrega_prevista ? pedido.data_entrega_prevista.split('T')[0] : '';
     document.getElementById('statusPedido').value = pedido.status || 'pendente';
@@ -789,18 +797,17 @@ async function excluirPedido(pedidoId) {
     if (!confirm('Deseja realmente excluir este pedido?')) return;
 
     try {
-        const response = await fetch(`/api/compras/pedidos/${pedidoId}/cancelar`, {
-            method: 'POST',
-            credentials: 'include', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ motivo: 'Cancelado pelo usuário' })
+        const response = await fetch(`/api/compras/pedidos/${pedidoId}`, {
+            method: 'DELETE',
+            credentials: 'include', headers: getAuthHeaders()
         });
         if (response.ok) {
-            mostrarNotificacao('Pedido cancelado com sucesso!', 'success');
+            mostrarNotificacao('Pedido excluído com sucesso!', 'success');
             await carregarPedidos();
             return;
         }
     } catch (error) {
-        console.error('Erro ao cancelar pedido:', error);
+        console.error('Erro ao excluir pedido:', error);
     }
 
     // Fallback local
@@ -894,10 +901,9 @@ async function excluirSelecionados() {
 
     for (const id of ids) {
         try {
-            const response = await fetch(`/api/compras/pedidos/${id}/cancelar`, {
-                method: 'POST',
-                credentials: 'include', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ motivo: 'Exclusão em massa pelo usuário' })
+            const response = await fetch(`/api/compras/pedidos/${id}`, {
+                method: 'DELETE',
+                credentials: 'include', headers: getAuthHeaders()
             });
             if (response.ok) {
                 sucesso++;
@@ -905,7 +911,7 @@ async function excluirSelecionados() {
                 erros++;
             }
         } catch (error) {
-            console.error(`Erro ao cancelar pedido ${id}:`, error);
+            console.error(`Erro ao excluir pedido ${id}:`, error);
             erros++;
         }
     }
@@ -966,16 +972,61 @@ function gerarNumeroPedido() {
 }
 
 function preencherSelectFornecedores() {
-    const select = document.getElementById('fornecedorId');
-    select.innerHTML = '<option value="">Selecione...</option>';
-
-    fornecedores.forEach(f => {
-        const option = document.createElement('option');
-        option.value = f.id;
-        option.textContent = f.razao_social || f.nome;
-        select.appendChild(option);
-    });
+    // Fornecedores loaded - autocomplete ready
+    const input = document.getElementById('fornecedorBusca');
+    if (input) input.placeholder = `Digite para buscar (${fornecedores.length} fornecedores)...`;
 }
+
+function filtrarFornecedoresAutocomplete(termo) {
+    const dropdown = document.getElementById('fornecedorDropdown');
+    if (!dropdown) return;
+
+    if (!termo || termo.length < 1) {
+        dropdown.style.display = 'none';
+        return;
+    }
+
+    const termoLower = termo.toLowerCase();
+    const filtrados = fornecedores.filter(f => {
+        const nome = (f.razao_social || f.nome || '').toLowerCase();
+        const cnpj = (f.cnpj || '').toLowerCase();
+        return nome.includes(termoLower) || cnpj.includes(termoLower);
+    }).slice(0, 10);
+
+    if (filtrados.length === 0) {
+        dropdown.innerHTML = '<div style="padding:12px;color:#94a3b8;font-size:0.85rem;text-align:center;">Nenhum fornecedor encontrado</div>';
+        dropdown.style.display = 'block';
+        return;
+    }
+
+    dropdown.innerHTML = filtrados.map(f => `
+        <div style="padding:10px 14px;cursor:pointer;border-bottom:1px solid #f1f5f9;font-size:0.85rem;display:flex;align-items:center;gap:10px;"
+             onmouseover="this.style.background='#f0f9ff'" onmouseout="this.style.background='#fff'"
+             onclick="selecionarFornecedor(${f.id}, '${(f.razao_social || f.nome || '').replace(/'/g, "\\'")}')">
+            <i class="fas fa-building" style="color:#6366f1;"></i>
+            <div>
+                <div style="font-weight:600;color:#1e293b;">${f.razao_social || f.nome}</div>
+                ${f.cnpj ? '<div style="font-size:0.75rem;color:#94a3b8;">' + f.cnpj + '</div>' : ''}
+            </div>
+        </div>
+    `).join('');
+    dropdown.style.display = 'block';
+}
+
+function selecionarFornecedor(id, nome) {
+    document.getElementById('fornecedorId').value = id;
+    document.getElementById('fornecedorBusca').value = nome;
+    document.getElementById('fornecedorDropdown').style.display = 'none';
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('fornecedorDropdown');
+    const input = document.getElementById('fornecedorBusca');
+    if (dropdown && input && !input.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.style.display = 'none';
+    }
+});
 
 function preencherSelectCompradores() {
     const select = document.getElementById('compradorId');
