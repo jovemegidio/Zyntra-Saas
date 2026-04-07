@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -13,7 +13,7 @@
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/faturamento-layout.css?v=20260220">
+    <link rel="stylesheet" href="css/faturamento-layout.css?v=20260220">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
@@ -53,7 +53,7 @@
                             style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
+                        <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento & Logística</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -250,7 +250,7 @@
                     <div class="form-group"><label>Expiração (segundos)</label><input type="number" class="form-control"
                             id="cob-expiracao" value="3600" placeholder="3600"></div>
                 </div>
-                <div class="form-group"><label>Descrição</label><textarea class="form-control" id="cob-descrição"
+                <div class="form-group"><label>Descrição</label><textarea class="form-control" id="cob-descricao"
                         rows="2" placeholder="Descrição da cobrança..."></textarea></div>
                 <div class="form-group">
                     <label><input type="checkbox" id="cob-enviar-email"> Enviar e-mail com QR Code ao cliente</label>
@@ -311,9 +311,9 @@
             setTimeout(function () { toast.remove(); }, 4000);
         }
 
-        function toggleMobileSidebar() { document.getElementById('mobile-sidebar').classList.toggle('open'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
-        function openModal(id) { document.getElementById(id).classList.add('active'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+        function toggleMobileSidebar() { const ms = document.getElementById('mobile-sidebar'); if (ms) ms.classList.toggle('open'); const so = document.getElementById('sidebar-overlay'); if (so) so.classList.toggle('active'); }
+        function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('active'); }
+        function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('active'); }
 
         let provedorSelecionado = '';
 
@@ -321,7 +321,7 @@
             provedorSelecionado = provedor;
             document.querySelectorAll('.provider-card').forEach(c => c.classList.remove('selected'));
             document.querySelector(`.provider-card[data-provider="${provedor}"]`)?.classList.add('selected');
-            document.getElementById('config-section').style.display = 'block';
+            const elConfigSection = document.getElementById('config-section'); if (elConfigSection) elConfigSection.style.display = 'block';
             carregarConfigProvedor(provedor);
         }
 
@@ -360,17 +360,17 @@
                 const r = await fetch('/api/faturamento/pix/dashboard', { credentials: 'include' });
                 if (r.ok) {
                     const d = await r.json();
-                    document.getElementById('stat-recebidos').textContent = d.recebidos || 0;
-                    document.getElementById('stat-pendentes').textContent = d.pendentes || 0;
-                    document.getElementById('stat-valor-total').textContent = (d.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    document.getElementById('stat-expirados').textContent = d.expirados || 0;
+                    const elRecebidos = document.getElementById('stat-recebidos'); if (elRecebidos) elRecebidos.textContent = d.recebidos || 0;
+                    const elPendentes = document.getElementById('stat-pendentes'); if (elPendentes) elPendentes.textContent = d.pendentes || 0;
+                    const elValorTotal = document.getElementById('stat-valor-total'); if (elValorTotal) elValorTotal.textContent = (d.valor_total || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const elExpirados = document.getElementById('stat-expirados'); if (elExpirados) elExpirados.textContent = d.expirados || 0;
                 }
             } catch (e) { console.error(e); }
         }
 
         async function carregarCobrancas() {
             try {
-                const status = document.getElementById('filtro-cobranca-status').value;
+                const status = (document.getElementById('filtro-cobranca-status') || {}).value || '';
                 const url = '/api/faturamento/pix/cobrancas' + (status ? `?status=${status}` : '');
                 const r = await fetch(url, { credentials: 'include' });
                 if (r.ok) {
@@ -402,13 +402,13 @@
             try {
                 const r = await fetch('/api/faturamento/pix/cobranca', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({
-                        cliente: document.getElementById('cob-cliente').value,
-                        documento: document.getElementById('cob-documento').value,
-                        valor: parseFloat(document.getElementById('cob-valor').value),
-                        vencimento: document.getElementById('cob-vencimento').value,
-                        expiracao: parseInt(document.getElementById('cob-expiracao').value),
-                        descricao: document.getElementById('cob-descrição').value,
-                        enviar_email: document.getElementById('cob-enviar-email').checked
+                        cliente: (document.getElementById('cob-cliente') || {}).value || '',
+                        documento: (document.getElementById('cob-documento') || {}).value || '',
+                        valor: parseFloat((document.getElementById('cob-valor') || {}).value) || 0,
+                        vencimento: (document.getElementById('cob-vencimento') || {}).value || '',
+                        expiracao: parseInt((document.getElementById('cob-expiracao') || {}).value) || 3600,
+                        descricao: (document.getElementById('cob-descricao') || {}).value || '',
+                        enviar_email: (document.getElementById('cob-enviar-email') || {}).checked || false
                     })
                 });
                 if (r.ok) {

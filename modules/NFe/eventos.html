@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <!-- Favicon -->
@@ -77,6 +77,9 @@
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="eventos.html" class="sidebar-btn active" title="Eventos"><i class="fas fa-history"></i></a>
                 <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+                <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
+                <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
+                <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
             </nav>
 
         </aside>
@@ -88,7 +91,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">&#8212;</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Eventos Faturamento</span>
                     </div>
                 </div>
@@ -242,9 +245,9 @@
             .then(user => {
                 const d = user.dados || user;
                 const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
-                document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
+                const elUserName = document.getElementById('user-name'); if (elUserName) elUserName.textContent = (nome || '').split(' ')[0];
                 const h = new Date().getHours();
-                document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+                const elGreeting = document.getElementById('greeting-text'); if (elGreeting) elGreeting.textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                 const el = document.getElementById('user-initials');
                 const photo = document.getElementById('user-photo');
                 if (d.foto || d.avatar) {
@@ -275,15 +278,15 @@
             })
             .then(data => {
                 nfeCarregada = data.nfe || data.data || data;
-                document.getElementById('infoNumero').textContent = nfeCarregada.numero || nfeCarregada.id || '-';
-                document.getElementById('infoSerie').textContent = nfeCarregada.serie || '1';
-                document.getElementById('infoChave').textContent = nfeCarregada.chave || nfeCarregada.chave_acesso || '-';
-                document.getElementById('infoDestinatario').textContent = nfeCarregada.destinatario || nfeCarregada.cliente || '-';
-                document.getElementById('infoValor').textContent = (nfeCarregada.valor || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
-                document.getElementById('infoStatus').textContent = (nfeCarregada.status || 'pendente').toUpperCase();
-                document.getElementById('nfeInfoDisplay').style.display = 'grid';
-                document.getElementById('cancelamentoCard').style.display = 'block';
-                document.getElementById('cceCard').style.display = 'block';
+                const elNum = document.getElementById('infoNumero'); if (elNum) elNum.textContent = nfeCarregada.numero || nfeCarregada.id || '-';
+                const elSerie = document.getElementById('infoSerie'); if (elSerie) elSerie.textContent = nfeCarregada.serie || '1';
+                const elChave = document.getElementById('infoChave'); if (elChave) elChave.textContent = nfeCarregada.chave || nfeCarregada.chave_acesso || '-';
+                const elDest = document.getElementById('infoDestinatario'); if (elDest) elDest.textContent = nfeCarregada.destinatario || nfeCarregada.cliente || '-';
+                const elValor = document.getElementById('infoValor'); if (elValor) elValor.textContent = (nfeCarregada.valor || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+                const elStatus = document.getElementById('infoStatus'); if (elStatus) elStatus.textContent = (nfeCarregada.status || 'pendente').toUpperCase();
+                const elInfoDisp = document.getElementById('nfeInfoDisplay'); if (elInfoDisp) elInfoDisp.style.display = 'grid';
+                const elCancel = document.getElementById('cancelamentoCard'); if (elCancel) elCancel.style.display = 'block';
+                const elCce = document.getElementById('cceCard'); if (elCce) elCce.style.display = 'block';
                 carregarEventos(id);
                 showAlert('NFe carregada com sucesso', 'success');
             })
