@@ -1,0 +1,47 @@
+name: Integration Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s --health-timeout=5s --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install MySQL client
+        run: sudo apt-get update && sudo apt-get install -y default-mysql-client
+
+      - name: Wait for MySQL
+        run: |
+          for i in {1..30}; do mysqladmin ping -h 127.0.0.1 -P 3306 -u root -p'${{ secrets.DB_PASSWORD }}' && break || sleep 2; done
+
+      - name: Create database
+        run: mysql -h 127.0.0.1 -P 3306 -u root -p'${{ secrets.DB_PASSWORD }}' -e "CREATE DATABASE IF NOT EXISTS aluforce_vendas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run migrations
+        run: node migrations/run_migration.js || true
+
+      - name: Run integration inventory test
+        run: node scripts/integration_inventory_test.js

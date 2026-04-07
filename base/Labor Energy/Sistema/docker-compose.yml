@@ -1,0 +1,283 @@
+# =================================================================
+# ALUFORCE ERP — Docker Compose (Production)
+# App + MySQL + Redis + Nginx
+# =================================================================
+version: '3.8'
+
+services:
+  # ── Nginx Reverse Proxy ──────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+
+  # ── ALUFORCE Application ────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      DB_HOST: mysql
+      DB_USER: ${DB_USER:-aluforce}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME:-aluforce_vendas}
+      DB_PORT: 3306
+      DB_CONN_LIMIT: 200
+      DB_QUERY_TIMEOUT: 15000
+      REQUEST_TIMEOUT: 30000
+      JWT_SECRET: ${JWT_SECRET}
+      PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY}
+      REDIS_URL: redis://redis:6379
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-aluforce}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-aluforce2024secret}
+      MINIO_BUCKET: ${MINIO_BUCKET:-aluforce-uploads}
+      SKIP_MIGRATIONS: ${SKIP_MIGRATIONS:-0}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    volumes:
+      - uploads-data:/var/www/uploads
+      - app-logs:/app/logs
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+
+  # ── MySQL Database ──────────────────────────────
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME:-aluforce_vendas}
+      MYSQL_USER: ${DB_USER:-aluforce}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d:ro
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --max-connections=300
+      - --innodb-buffer-pool-size=512M
+      - --innodb-log-file-size=128M
+      - --slow-query-log=1
+      - --slow-query-log-file=/var/lib/mysql/slow-queries.log
+      - --long-query-time=2
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+  # ── Redis Cache ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ── Prometheus Metrics ──────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=30d
+      - --web.enable-lifecycle
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # ── Grafana Dashboards ─────────────────────────
+  grafana:
+    image: grafana/grafana:10.4.0
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-aluforce2024}
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/aluforce-overview.json
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # ── n8n Workflow Automation ──────────────────────
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "127.0.0.1:5678:5678"  # Apenas localhost — Nginx faz proxy externo
+    environment:
+      # ── Configurações Gerais ──
+      N8N_HOST: ${N8N_HOST:-n8n.aluforce.api.br}
+      N8N_PORT: 5678
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-https}
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-https://n8n.aluforce.api.br/}
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      # ── Banco de dados do n8n (usa MySQL compartilhado) ──
+      DB_TYPE: mysqldb
+      DB_MYSQLDB_HOST: mysql
+      DB_MYSQLDB_PORT: 3306
+      DB_MYSQLDB_DATABASE: ${N8N_DB_NAME:-n8n}
+      DB_MYSQLDB_USER: ${DB_USER:-aluforce}
+      DB_MYSQLDB_PASSWORD: ${DB_PASSWORD}
+      # ── Segurança ──
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_AUTH_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_AUTH_PASSWORD:-aluforce2024}
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:-aluforce-n8n-encryption-key-2026}
+      # ── Conexão com o ALUFORCE (disponível como variáveis nos workflows) ──
+      ALUFORCE_API_URL: http://app:3000
+      ALUFORCE_API_KEY: ${N8N_API_KEY:-n8n-internal-key-2026}
+      ALUFORCE_DB_HOST: mysql
+      ALUFORCE_DB_NAME: ${DB_NAME:-aluforce_vendas}
+      ALUFORCE_DB_USER: ${DB_USER:-aluforce}
+      ALUFORCE_DB_PASSWORD: ${DB_PASSWORD}
+      # ── Email (para workflows) ──
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: ${SMTP_HOST:-mail.aluforce.ind.br}
+      N8N_SMTP_PORT: ${SMTP_PORT:-465}
+      N8N_SMTP_USER: ${SMTP_USER:-}
+      N8N_SMTP_PASS: ${SMTP_PASS:-}
+      N8N_SMTP_SSL: "true"
+      # ── Redis (para execuções em fila) ──
+      EXECUTIONS_MODE: regular
+      QUEUE_BULL_REDIS_HOST: redis
+      QUEUE_BULL_REDIS_PORT: 6379
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - ./n8n/workflows:/home/node/.n8n/workflows
+      - app-logs:/app/logs:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1'
+        reservations:
+          memory: 256M
+
+  # ── MinIO Object Storage ───────────────────────
+  minio:
+    image: minio/minio:RELEASE.2024-03-30T09-41-56Z
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-aluforce}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-aluforce2024secret}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - aluforce-net
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+volumes:
+  mysql-data:
+    driver: local
+  redis-data:
+    driver: local
+  uploads-data:
+    driver: local
+  app-logs:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+  minio-data:
+    driver: local
+  n8n-data:
+    driver: local
+
+networks:
+  aluforce-net:
+    driver: bridge

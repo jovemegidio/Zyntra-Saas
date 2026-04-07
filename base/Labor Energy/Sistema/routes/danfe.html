@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DANFE - Documento Auxiliar da Nota Fiscal Eletrônica</title>
+  <style>
+    :root{
+      --ink:#111;
+      --line:#1b1b1b;
+      --paper:#fff;
+      --bg:#e9e9e9;
+      --thin:0.22mm solid var(--line);
+    }
+    *{box-sizing:border-box;}
+    html,body{margin:0;padding:0;background:var(--bg);font-family:Arial,Helvetica,sans-serif;color:var(--ink);}
+    body{padding:14px;}
+    .page{
+      width:210mm;
+      min-height:297mm;
+      margin:0 auto;
+      background:var(--paper);
+      box-shadow:0 8px 32px rgba(0,0,0,.12);
+      padding:4.8mm 5mm 5.8mm;
+      position:relative;
+      overflow:hidden;
+    }
+    .watermark{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+      user-select:none;
+      z-index:0;
+    }
+    .watermark.hidden{display:none;}
+    .watermark img{
+      max-width:50%;
+      max-height:50%;
+      opacity:0.07;
+      pointer-events:none;
+      user-select:none;
+    }
+    .top-note{
+      font-size:6pt;
+      line-height:1.2;
+      min-height:3.5mm;
+      margin:0 0 2.3mm;
+      color:#444;
+    }
+    .doc-title{
+      text-align:center;
+      font-size:10pt;
+      font-weight:700;
+      margin:0 0 2mm;
+      text-transform:uppercase;
+      letter-spacing:.15px;
+    }
+    .box{border:var(--thin); margin-bottom:1.35mm; background:#fff;}
+    .section-label{
+      border-bottom:var(--thin);
+      font-size:6.8pt;
+      font-weight:700;
+      text-transform:uppercase;
+      padding:0.7mm 1.1mm;
+      line-height:1;
+      background:#fafafa;
+      letter-spacing:.12px;
+    }
+    .row{display:grid; width:100%;}
+    .row > .cell:last-child{border-right:none;}
+    .cell{
+      min-height:7.2mm;
+      border-right:var(--thin);
+      border-bottom:var(--thin);
+      padding:0.72mm 1.05mm 0.68mm;
+      overflow:hidden;
+    }
+    .row:last-child .cell{border-bottom:none;}
+    .label{
+      display:block;
+      font-size:4.9pt;
+      text-transform:uppercase;
+      line-height:1.05;
+      margin-bottom:0.55mm;
+      color:#222;
+    }
+    .value{
+      display:block;
+      font-size:6.1pt;
+      line-height:1.18;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+    .value.lg{font-size:7pt;}
+    .value.strong{font-weight:700;}
+    .center{text-align:center;}
+    .right{text-align:right;}
+    .header-main{
+      display:grid;
+      grid-template-columns:36% 16% 48%;
+      border-bottom:var(--thin);
+    }
+    .header-main > div{min-height:33mm;}
+    .issuer{
+      border-right:var(--thin);
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+    }
+    .logo-band{
+      min-height:13.5mm;
+      border-bottom:var(--thin);
+      display:flex;
+      align-items:center;
+      gap:2.4mm;
+      padding:1.2mm 2mm;
+      background:#fff;
+      overflow:hidden;
+    }
+    .logo-band img.logo-img{
+      display:block;
+      max-width:28mm;
+      max-height:9mm;
+      object-fit:contain;
+      flex:0 0 auto;
+    }
+    .logo-fallback{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:14mm;
+      height:8.5mm;
+      padding:0 2mm;
+      border:var(--thin);
+      font-size:7pt;
+      font-weight:700;
+      flex:0 0 auto;
+      background:#fff;
+    }
+    .brand-name{flex:1 1 auto; min-width:0;}
+    .issuer-body{
+      padding:1.15mm 2mm 1.25mm;
+      font-size:5.8pt;
+      line-height:1.28;
+      white-space:pre-line;
+      flex:1;
+      overflow-wrap:anywhere;
+    }
+    .danfe-core{
+      border-right:var(--thin);
+      padding:1.15mm 1.5mm;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-width:0;
+    }
+    .danfe-title{
+      text-align:center;
+      font-weight:700;
+      font-size:9.3pt;
+      line-height:1;
+      margin-bottom:0.65mm;
+    }
+    .danfe-sub{
+      text-align:center;
+      font-size:5.1pt;
+      line-height:1.12;
+      margin-bottom:1.1mm;
+    }
+    .entry-exit{
+      display:grid;
+      grid-template-columns:1fr 8.5mm;
+      gap:1mm;
+      align-items:end;
+      margin-bottom:0.9mm;
+    }
+    .entry-exit .mini-block{
+      font-size:5.7pt;
+      line-height:1.25;
+    }
+    .entry-exit .indicator{
+      width:8.5mm;
+      height:8.5mm;
+      border:var(--thin);
+      font-size:7.3pt;
+      font-weight:700;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 auto;
+    }
+    .number-block{
+      font-size:5.7pt;
+      line-height:1.28;
+      margin-top:0.6mm;
+    }
+    .number-block .nfe-no{
+      font-size:7pt;
+      font-weight:700;
+      line-height:1.14;
+    }
+    .pages{
+      margin-top:1.4mm;
+      font-size:5.4pt;
+      text-align:right;
+    }
+    .access{
+      padding:1.15mm 1.5mm;
+      display:flex;
+      flex-direction:column;
+      gap:0.85mm;
+      min-width:0;
+    }
+    .consult-note{
+      font-size:5pt;
+      line-height:1.18;
+      text-align:center;
+      min-height:6.5mm;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0 0.6mm;
+      overflow-wrap:anywhere;
+    }
+    .barcode-box{
+      border:var(--thin);
+      min-height:12.5mm;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0.8mm;
+      background:#fff;
+      overflow:hidden;
+    }
+    .barcode-box img.barcode-img{
+      display:block;
+      width:100%;
+      max-height:10mm;
+      object-fit:contain;
+      margin-bottom:0.8mm;
+    }
+    .barcode-fallback{
+      display:block;
+      width:100%;
+      font-size:6pt;
+      font-weight:700;
+      letter-spacing:.25px;
+      font-family:"Courier New", monospace;
+      text-align:center;
+      line-height:1.15;
+      overflow-wrap:anywhere;
+      word-break:break-all;
+    }
+    .key-box{
+      border:var(--thin);
+      padding:0.8mm 1mm;
+      text-align:center;
+      min-height:8.3mm;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:6.15pt;
+      font-weight:700;
+      letter-spacing:.18px;
+      line-height:1.14;
+      font-family:"Courier New", monospace;
+      overflow-wrap:anywhere;
+      word-break:break-word;
+    }
+    .auth-box{
+      border:var(--thin);
+      min-height:8.8mm;
+      padding:0.75mm 0.95mm;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      text-align:center;
+      font-size:5.05pt;
+      line-height:1.14;
+      overflow-wrap:anywhere;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      table-layout:fixed;
+    }
+    th, td{
+      border-right:var(--thin);
+      border-bottom:var(--thin);
+      padding:0.8mm 0.95mm;
+      font-size:5.85pt;
+      line-height:1.18;
+      vertical-align:top;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+    th:last-child, td:last-child{border-right:none;}
+    thead th{
+      font-size:4.95pt;
+      text-transform:uppercase;
+      font-weight:400;
+      background:#fafafa;
+      text-align:left;
+    }
+    tbody tr:last-child td{border-bottom:none;}
+    .products tbody td{min-height:6.5mm;}
+    .totals-note{
+      font-size:5.45pt;
+      line-height:1.2;
+      padding-top:0.75mm;
+      white-space:pre-line;
+      overflow-wrap:anywhere;
+    }
+    .additional{
+      display:grid;
+      grid-template-columns:1fr 38%;
+      min-height:40mm;
+    }
+    .additional > div:first-child{border-right:var(--thin);}
+    .fill-box{
+      padding:1.05mm 1.25mm;
+      font-size:5.85pt;
+      line-height:1.28;
+      white-space:pre-line;
+      overflow-wrap:anywhere;
+    }
+    .footer-note{
+      margin-top:0.9mm;
+      font-size:5pt;
+      color:#333;
+      text-align:right;
+    }
+    .canhoto{
+      display:grid;
+      grid-template-columns:1fr 22mm;
+      border:var(--thin);
+      margin-bottom:0;
+      font-size:5.5pt;
+      line-height:1.25;
+    }
+    .canhoto-body{padding:1mm 1.5mm;}
+    .canhoto-text{margin-bottom:1mm;}
+    .canhoto-fields{
+      display:grid;
+      grid-template-columns:30% 1fr;
+      border-top:var(--thin);
+      min-height:7mm;
+    }
+    .canhoto-fields > div{
+      padding:0.8mm 1.2mm;
+    }
+    .canhoto-fields > div:first-child{border-right:var(--thin);}
+    .canhoto-nfe{
+      border-left:var(--thin);
+      padding:2mm 2mm;
+      text-align:center;
+      font-size:8pt;
+      font-weight:700;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      line-height:1.5;
+    }
+    .canhoto-nfe .nfe-label{font-size:10pt;}
+    .canhoto-separator{
+      border-bottom:0.5mm dashed #555;
+      margin:1.5mm 0 2mm;
+    }
+    .mapping-note{
+      display:none;
+    }
+    @media print{
+      .mapping-note{display:none;}
+      html,body{background:#fff; padding:0;}
+      .page{
+        margin:0;
+        box-shadow:none;
+        width:210mm;
+        min-height:297mm;
+        padding:4.8mm 5mm 5.8mm;
+      }
+      @page{size:A4 portrait; margin:0;}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div style="text-align:center;margin:0 0 8px;font-family:sans-serif;display:none">
+      <button onclick="window.print()" style="padding:8px 16px;font-size:12px;cursor:pointer;background:#2563eb;color:#fff;border:none;border-radius:4px;font-weight:600;">🖨️ Imprimir</button>
+    </div>
+    <div class="mapping-note">ROOT ESPERADA PARA O TEMPLATE:
+- XML autorizado parseado como objeto com ramos NFe.infNFe e protNFe.infProt
+- campos extras de backend: paginaAtual, paginaTotal, portalConsultaUrl, codigoBarrasUrl, marcaAguaTexto, marcaAguaClasse, avisoTopo
+- para itens, mantenha det como coleção do XML
+- para duplicatas, mantenha cobr.dup como coleção do XML
+- campos _danfe_* são derivados do XML para exibição quando o grupo do imposto varia por CST/CSOSN</div>
+
+    <div class="watermark {{marcaAguaClasse}}"><img src="{{emitenteLogoUrl}}" alt="" onerror="this.parentElement.style.display='none'"></div>
+
+    <p class="top-note">{{avisoTopo}}</p>
+
+    <section class="canhoto">
+      <div class="canhoto-body">
+        <div class="canhoto-text">RECEBEMOS DE <strong>{{NFe.infNFe.emit.xNome}}</strong> OS PRODUTOS E/OU SERVIÇOS CONSTANTES DA NOTA FISCAL ELETRÔNICA INDICADA ABAIXO. EMISSÃO: {{NFe.infNFe.ide.dhEmi}} VALOR TOTAL: R$ {{NFe.infNFe.total.ICMSTot.vNF}} DESTINATÁRIO: {{NFe.infNFe.dest.xNome}}</div>
+        <div class="canhoto-fields">
+          <div><span class="label">Data de recebimento</span></div>
+          <div><span class="label">Identificação e assinatura do recebedor</span></div>
+        </div>
+      </div>
+      <div class="canhoto-nfe">
+        <div class="nfe-label">NF-e</div>
+        <div>Nº {{NFe.infNFe.ide.nNF}}</div>
+        <div style="font-size:7pt;">Série {{NFe.infNFe.ide.serie}}</div>
+      </div>
+    </section>
+    <div class="canhoto-separator"></div>
+
+    <section class="box">
+      <div class="header-main">
+        <div class="issuer">
+          <div class="logo-band">
+            <img class="logo-img" src="{{emitenteLogoUrl}}" alt="Logo do emitente" onerror="this.style.display='none';this.nextElementSibling.style.display='inline-flex'" />
+            <span class="logo-fallback" style="display:none;">{{NFe.infNFe.emit.xFant}}</span>
+          </div>
+          <div class="issuer-body">{{NFe.infNFe.emit.xNome}}
+{{NFe.infNFe.emit.enderEmit.xLgr}}, {{NFe.infNFe.emit.enderEmit.nro}} {{NFe.infNFe.emit.enderEmit.xCpl}}
+{{NFe.infNFe.emit.enderEmit.xBairro}} - {{NFe.infNFe.emit.enderEmit.xMun}} - {{NFe.infNFe.emit.enderEmit.UF}} - CEP {{NFe.infNFe.emit.enderEmit.CEP}}
+{{NFe.infNFe.emit.enderEmit.fone}}
+{{NFe.infNFe.emit.email}}</div>
+        </div>
+
+        <div class="danfe-core">
+          <div>
+            <div class="danfe-title">DANFE</div>
+            <div class="danfe-sub">Documento Auxiliar da<br>Nota Fiscal Eletrônica</div>
+          </div>
+
+          <div class="entry-exit">
+            <div class="mini-block">
+              <div>0 - Entrada</div>
+              <div>1 - Saída</div>
+            </div>
+            <div class="indicator">{{NFe.infNFe.ide.tpNF}}</div>
+          </div>
+
+          <div class="number-block">
+            <div class="nfe-no">Nº {{NFe.infNFe.ide.nNF}}</div>
+            <div>Série {{NFe.infNFe.ide.serie}}</div>
+          </div>
+
+          <div class="pages">Folha {{paginaAtual}}/{{paginaTotal}}</div>
+        </div>
+
+        <div class="access">
+          <div class="consult-note">
+            Consulta de autenticidade no portal nacional da NF-e<br>
+            {{portalConsultaUrl}}<br>
+            ou no site da Sefaz autorizadora
+          </div>
+
+          <div class="barcode-box">
+            <img class="barcode-img" src="{{codigoBarrasUrl}}" alt="Código de barras da chave de acesso" onerror="this.style.display='none'">
+            <span class="barcode-fallback">{{protNFe.infProt.chNFe}}</span>
+          </div>
+
+          <div class="key-box">{{protNFe.infProt.chNFe}}</div>
+
+          <div class="auth-box">
+            <div class="value strong">Protocolo de Autorização de Uso</div>
+            <div>{{protNFe.infProt.nProt}}</div>
+            <div>{{protNFe.infProt.dhRecbto}}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 56% 22% 22%;">
+        <div class="cell">
+          <span class="label">Natureza da operação</span>
+          <span class="value">{{NFe.infNFe.ide.natOp}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Inscrição Estadual</span>
+          <span class="value">{{NFe.infNFe.emit.IE}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">CNPJ / CPF</span>
+          <span class="value">{{NFe.infNFe.emit.CNPJ}}{{NFe.infNFe.emit.CPF}}</span>
+        </div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 56% 44%;">
+        <div class="cell">
+          <span class="label">Inscrição Estadual do Subst. Tributário</span>
+          <span class="value">{{NFe.infNFe.emit.IEST}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Código de Regime Tributário</span>
+          <span class="value">{{NFe.infNFe.emit.CRT}}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Destinatário / Remetente</div>
+
+      <div class="row" style="grid-template-columns: 58% 18% 12% 12%;">
+        <div class="cell">
+          <span class="label">Nome / Razão Social</span>
+          <span class="value">{{NFe.infNFe.dest.xNome}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">CNPJ / CPF</span>
+          <span class="value">{{NFe.infNFe.dest.CNPJ}}{{NFe.infNFe.dest.CPF}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Data da emissão</span>
+          <span class="value">{{NFe.infNFe.ide.dhEmi}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Data da saída / entrada</span>
+          <span class="value">{{NFe.infNFe.ide.dhSaiEnt}}</span>
+        </div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 46% 18% 16% 8% 12%;">
+        <div class="cell">
+          <span class="label">Endereço</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.xLgr}}, {{NFe.infNFe.dest.enderDest.nro}} {{NFe.infNFe.dest.enderDest.xCpl}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Bairro / Distrito</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.xBairro}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">CEP</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.CEP}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">UF</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.UF}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Hora da saída</span>
+          <span class="value">{{NFe.infNFe.ide._danfeHoraSaida}}</span>
+        </div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 34% 18% 18% 12% 18%;">
+        <div class="cell">
+          <span class="label">Município</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.xMun}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Fone / Fax</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.fone}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Inscrição Estadual</span>
+          <span class="value">{{NFe.infNFe.dest.IE}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">UF</span>
+          <span class="value">{{NFe.infNFe.dest.enderDest.UF}}</span>
+        </div>
+        <div class="cell">
+          <span class="label">Indicador IE</span>
+          <span class="value">{{NFe.infNFe.dest.indIEDest}}</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Fatura / Duplicatas</div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:25%;">Número</th>
+            <th style="width:35%;">Vencimento</th>
+            <th style="width:40%;">Valor</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#NFe.infNFe.cobr.dup}}
+          <tr>
+            <td>{{nDup}}</td>
+            <td>{{dVenc}}</td>
+            <td class="right">{{vDup}}</td>
+          </tr>
+          {{/NFe.infNFe.cobr.dup}}
+          {{^NFe.infNFe.cobr.dup}}
+          <tr>
+            <td>{{NFe.infNFe.cobr.fat.nFat}}</td>
+            <td>{{NFe.infNFe.cobr.fat.dVenc}}</td>
+            <td class="right">{{NFe.infNFe.cobr.fat.vLiq}}</td>
+          </tr>
+          {{/NFe.infNFe.cobr.dup}}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Cálculo do imposto</div>
+      <div class="row" style="grid-template-columns: 14% 14% 14% 14% 14% 15% 15%;">
+        <div class="cell"><span class="label">Base de cálculo do ICMS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vBC}}</span></div>
+        <div class="cell"><span class="label">Valor do ICMS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vICMS}}</span></div>
+        <div class="cell"><span class="label">Base de cálculo ICMS ST</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vBCST}}</span></div>
+        <div class="cell"><span class="label">Valor do ICMS ST</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vST}}</span></div>
+        <div class="cell"><span class="label">Valor imp. importação</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vII}}</span></div>
+        <div class="cell"><span class="label">Valor do PIS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vPIS}}</span></div>
+        <div class="cell"><span class="label">Valor total dos produtos</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vProd}}</span></div>
+      </div>
+      <div class="row" style="grid-template-columns: 14% 14% 14% 14% 14% 15% 15%;">
+        <div class="cell"><span class="label">Valor do frete</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vFrete}}</span></div>
+        <div class="cell"><span class="label">Valor do seguro</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vSeg}}</span></div>
+        <div class="cell"><span class="label">Desconto</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vDesc}}</span></div>
+        <div class="cell"><span class="label">Outras despesas acessórias</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vOutro}}</span></div>
+        <div class="cell"><span class="label">Valor total do IPI</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vIPI}}</span></div>
+        <div class="cell"><span class="label">Valor da COFINS</span><span class="value right">{{NFe.infNFe.total.ICMSTot.vCOFINS}}</span></div>
+        <div class="cell"><span class="label">Valor total da nota</span><span class="value right strong">{{NFe.infNFe.total.ICMSTot.vNF}}</span></div>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Transportador / Volumes transportados</div>
+
+      <div class="row" style="grid-template-columns: 38% 12% 18% 10% 10% 12%;">
+        <div class="cell"><span class="label">Razão Social</span><span class="value">{{NFe.infNFe.transp.transporta.xNome}}</span></div>
+        <div class="cell"><span class="label">CNPJ / CPF</span><span class="value">{{NFe.infNFe.transp.transporta.CNPJ}}{{NFe.infNFe.transp.transporta.CPF}}</span></div>
+        <div class="cell"><span class="label">Código ANTT</span><span class="value">{{NFe.infNFe.transp.veicTransp.RNTC}}</span></div>
+        <div class="cell"><span class="label">Placa do veículo</span><span class="value">{{NFe.infNFe.transp.veicTransp.placa}}</span></div>
+        <div class="cell"><span class="label">UF</span><span class="value">{{NFe.infNFe.transp.veicTransp.UF}}</span></div>
+        <div class="cell"><span class="label">Frete por conta</span><span class="value">{{NFe.infNFe.transp.modFrete}}</span></div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 52% 18% 12% 18%;">
+        <div class="cell"><span class="label">Endereço</span><span class="value">{{NFe.infNFe.transp.transporta.xEnder}}</span></div>
+        <div class="cell"><span class="label">Município</span><span class="value">{{NFe.infNFe.transp.transporta.xMun}}</span></div>
+        <div class="cell"><span class="label">UF</span><span class="value">{{NFe.infNFe.transp.transporta.UF}}</span></div>
+        <div class="cell"><span class="label">Inscrição Estadual</span><span class="value">{{NFe.infNFe.transp.transporta.IE}}</span></div>
+      </div>
+
+      <div class="row" style="grid-template-columns: 12% 18% 18% 18% 17% 17%;">
+        <div class="cell"><span class="label">Quantidade</span><span class="value">{{NFe.infNFe.transp._danfeQVol}}</span></div>
+        <div class="cell"><span class="label">Espécie</span><span class="value">{{NFe.infNFe.transp._danfeEsp}}</span></div>
+        <div class="cell"><span class="label">Marca</span><span class="value">{{NFe.infNFe.transp._danfeMarca}}</span></div>
+        <div class="cell"><span class="label">Numeração</span><span class="value">{{NFe.infNFe.transp._danfeNVol}}</span></div>
+        <div class="cell"><span class="label">Peso bruto (Kg)</span><span class="value right">{{NFe.infNFe.transp._danfePesoB}}</span></div>
+        <div class="cell"><span class="label">Peso líquido (Kg)</span><span class="value right">{{NFe.infNFe.transp._danfePesoL}}</span></div>
+      </div>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Dados dos produtos / serviços</div>
+      <table class="products">
+        <thead>
+          <tr>
+            <th style="width:6%;">Cód. produto</th>
+            <th style="width:26%;">Descrição do produto / serviço</th>
+            <th style="width:6%;">NCM/SH</th>
+            <th style="width:4%;">O/CST</th>
+            <th style="width:4%;">CFOP</th>
+            <th style="width:4%;">UN</th>
+            <th style="width:7%;">Qtde.</th>
+            <th style="width:8%;">Vlr. unit.</th>
+            <th style="width:8%;">Vlr. total</th>
+            <th style="width:7%;">BC ICMS</th>
+            <th style="width:6%;">Vlr. ICMS</th>
+            <th style="width:6%;">Vlr. IPI</th>
+            <th style="width:4%;">Alíq. ICMS</th>
+            <th style="width:4%;">Alíq. IPI</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#NFe.infNFe.det}}
+          <tr>
+            <td>{{prod.cProd}}</td>
+            <td>{{prod.xProd}}</td>
+            <td>{{prod.NCM}}</td>
+            <td class="center">{{_danfeCstCsosn}}</td>
+            <td class="center">{{prod.CFOP}}</td>
+            <td class="center">{{prod.uCom}}</td>
+            <td class="right">{{prod.qCom}}</td>
+            <td class="right">{{prod.vUnCom}}</td>
+            <td class="right">{{prod.vProd}}</td>
+            <td class="right">{{_danfeBcIcms}}</td>
+            <td class="right">{{_danfeVIcms}}</td>
+            <td class="right">{{_danfeVIpi}}</td>
+            <td class="right">{{_danfePIcms}}</td>
+            <td class="right">{{_danfePIpi}}</td>
+          </tr>
+          {{/NFe.infNFe.det}}
+        </tbody>
+      </table>
+      <div class="fill-box totals-note">{{NFe.infNFe.infAdProd}}</div>
+    </section>
+
+    <section class="box">
+      <div class="section-label">Dados adicionais</div>
+      <div class="additional">
+        <div>
+          <div class="fill-box">{{NFe.infNFe.infAdic.infCpl}}</div>
+        </div>
+        <div>
+          <div class="fill-box">{{NFe.infNFe.infAdic.infAdFisco}}</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</body>
+</html>

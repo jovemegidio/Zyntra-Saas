@@ -1,0 +1,429 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Zyntra: Eventos Faturamento</title>
+
+    <!-- Sistema de Autenticação Unificado é DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260325" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260325" defer></script>
+
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSP Fix - Converter onclick inline para addEventListener -->
+    <script src="/js/csp-fix.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Design System é Faturamento Layout -->
+    <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
+
+    <!-- Global Header & Sidebar é Padrão Institucional -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+
+    <!-- Performance: Skeleton Loaders -->
+    <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
+
+    <!-- Popup Confirmação -->
+    <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260325">
+
+    <!-- Anti-Copy Protection -->
+    <script src="/js/anti-copy-protection.js" defer></script>
+
+    <!-- Zyntra Chat Teams -->
+    <link rel="stylesheet" href="/chat-teams/chat-widget.css?v=20260325">
+    <style>
+        /* Page-specific styles not covered by design system */
+        .nfe-info-display { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; padding:16px; background:var(--bg-secondary,#f9fafb); border-radius:var(--radius-md,6px); margin-top:4px; }
+        .nfe-info-item .lbl { font-size:10px; font-weight:600; color:var(--text-muted,#6b7280); text-transform:uppercase; letter-spacing:0.5px; }
+        .nfe-info-item .val { font-size:13px; font-weight:500; color:var(--text-primary,#111827); margin-top:2px; }
+        .danger-banner { background:var(--danger-bg,#fef2f2); border:1px solid #fca5a5; border-radius:var(--radius-md,6px); padding:12px 16px; display:flex; align-items:center; gap:10px; margin-bottom:14px; font-size:13px; color:#991b1b; }
+        .danger-banner i { font-size:16px; }
+        .warning-banner { background:var(--warning-bg,#fef3c7); border:1px solid #fbbf24; border-radius:var(--radius-md,6px); padding:12px 16px; display:flex; align-items:center; gap:10px; margin-bottom:14px; font-size:13px; color:#92400e; }
+        .warning-banner i { font-size:16px; }
+        .char-count { font-size:11px; color:var(--text-muted,#9ca3af); margin-top:4px; }
+        .actions { display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+        .btn-warning { background:#f59e0b; color:#fff; border-color:#f59e0b; }
+        .btn-warning:hover { background:#d97706; border-color:#d97706; transform:translateY(-1px); }
+        @media(max-width:768px) {
+            .nfe-info-display { grid-template-columns:1fr 1fr; }
+        }
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260325">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="eventos.html" class="sidebar-btn active" title="Eventos"><i class="fas fa-history"></i></a>
+                <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+            </nav>
+
+        </aside>
+        <main class="main-area">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Eventos Faturamento</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img alt="Foto" id="user-photo" style="display:none">
+                            <span id="user-initials">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div class="main-content">
+                <div class="page-content">
+                    <div id="alertContainer"></div>
+
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <div class="page-header-top">
+                            <div class="page-title-wrapper">
+                                <div class="page-icon cyan"><i class="fas fa-history"></i></div>
+                                <div>
+                                    <h2 class="page-title">Eventos da NFe</h2>
+                                    <p class="page-subtitle">Consulte, cancele e registre correães em notas fiscais</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Informações da NFe -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-info-circle"></i> Informações da NFe</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>ID / Número da NFe</label>
+                                    <input type="text" class="form-control" id="nfeId" placeholder="Ex: 12345">
+                                </div>
+                                <div class="form-group" style="align-self:end;">
+                                    <button class="btn btn-primary" onclick="carregarNFe()"><i class="fas fa-search"></i> Carregar NFe</button>
+                                </div>
+                            </div>
+                            <div id="nfeInfoDisplay" class="nfe-info-display" style="display:none;">
+                                <div class="nfe-info-item"><div class="lbl">Número</div><div class="val" id="infoNumero">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Série</div><div class="val" id="infoSerie">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Chave de Acesso</div><div class="val" id="infoChave" style="word-break:break-all;">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Destinatério</div><div class="val" id="infoDestinatario">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Valor</div><div class="val" id="infoValor">-</div></div>
+                                <div class="nfe-info-item"><div class="lbl">Status</div><div class="val" id="infoStatus">-</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Cancelamento -->
+                    <div class="card" id="cancelamentoCard" style="display:none;margin-bottom:20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-times-circle"></i> Cancelamento de NFe</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="danger-banner">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span><strong>Atenão:</strong> O cancelamento é irreversível e deve ser feito em até 24 horas após a autorização.</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Justificativa do Cancelamento <span style="color:#ef4444;">*</span></label>
+                                <textarea class="form-control" id="justificativaCancelamento" rows="3" placeholder="Mínimo 15 caracteres, máximo 255" minlength="15" maxlength="255" oninput="atualizarContadorCancel()"></textarea>
+                                <div class="char-count"><span id="charCountCancel">0</span>/255 caracteres (mínimo 15)</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-danger" onclick="cancelarNFe()"><i class="fas fa-times-circle"></i> Cancelar NFe</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Carta de Correção -->
+                    <div class="card" id="cceCard" style="display:none;margin-bottom:20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-edit"></i> Carta de Correção Eletrônica (CC-e)</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="warning-banner">
+                                <i class="fas fa-info-circle"></i>
+                                <span>A CC-e não permite alterar valores, impostos, dados do emitente/destinatério ou a descrição da mercadoria.</span>
+                            </div>
+                            <div class="form-group">
+                                <label>Texto da Correção <span style="color:#ef4444;">*</span></label>
+                                <textarea class="form-control" id="textoCCe" rows="4" placeholder="Mínimo 15 caracteres, máximo 1000" minlength="15" maxlength="1000" oninput="atualizarContadorCCe()"></textarea>
+                                <div class="char-count"><span id="charCountCCe">0</span>/1000 caracteres (mínimo 15)</div>
+                            </div>
+                            <div class="actions">
+                                <button class="btn btn-warning" onclick="registrarCCe()"><i class="fas fa-edit"></i> Registrar CC-e</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card: Histórico de Eventos -->
+                    <div class="card" style="margin-bottom:20px;">
+                        <div class="card-header">
+                            <span class="card-title"><i class="fas fa-list"></i> Histórico de Eventos</span>
+                        </div>
+                        <div class="card-body">
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="eventosTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Data/Hora</th>
+                                            <th>Protocolo</th>
+                                            <th>Descrição</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="eventosTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="eventosEmpty" class="empty-state">
+                                <i class="fas fa-history"></i>
+                                <p>Carregue uma NFe para visualizar seus eventos</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+    <script>
+        // == Toggle mobile sidebar ==
+        function toggleMobileSidebar() {
+            const s = document.getElementById('mobile-sidebar');
+            const o = document.getElementById('sidebar-overlay');
+            s.classList.toggle('open');
+            o.classList.toggle('active');
+        }
+        function toggleNotificacoes() {}
+
+        // == Avatar map ==
+        const avatarNameMap = {
+            'clemerson':'CM','isabela':'IB','thaina':'TH','thiago':'TG','nicolas':'NC',
+            'nicolasdaniel':'ND','rh':'RH','admin':'AD','ti':'TI','tialuforce':'TI',
+            'antonio':'AT','andreia':'AN','guilherme':'GH','marcelo':'MC','financeiro':'FN',
+            'douglas':'DG','hellen':'HL','helen':'HL','marcia':'MR','augusto':'AG',
+            'renata':'RN','fabiano':'FB','fabiola':'FL'
+        };
+
+        function carregarUsuario() {
+            fetch('/api/me', { credentials:'include' })
+            .then(r => r.json())
+            .then(user => {
+                const d = user.dados || user;
+                const nome = (d.nome || d.name || 'Usuário').split(' ')[0];
+                document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
+                const h = new Date().getHours();
+                document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+                const el = document.getElementById('user-initials');
+                const photo = document.getElementById('user-photo');
+                if (d.foto || d.avatar) {
+                    photo.src = d.foto || d.avatar;
+                    photo.style.display = 'block';
+                    photo.style.width = '100%';
+                    photo.style.height = '100%';
+                    photo.style.borderRadius = '50%';
+                    photo.style.objectFit = 'cover';
+                    el.style.display = 'none';
+                } else {
+                    const key = nome.toLowerCase().replace(/\s/g,'');
+                    el.textContent = avatarNameMap[key] || nome.substring(0,2).toUpperCase();
+                }
+            }).catch(() => {});
+        }
+
+        let nfeCarregada = null;
+
+        function carregarNFe() {
+            const id = document.getElementById('nfeId').value.trim();
+            if (!id) return showAlert('Informe o ID ou número da NFe', 'warning');
+
+            fetch('/api/nfe/' + id, { credentials:'include' })
+            .then(r => {
+                if (!r.ok) throw new Error('NFe não encontrada');
+                return r.json();
+            })
+            .then(data => {
+                nfeCarregada = data.nfe || data.data || data;
+                document.getElementById('infoNumero').textContent = nfeCarregada.numero || nfeCarregada.id || '-';
+                document.getElementById('infoSerie').textContent = nfeCarregada.serie || '1';
+                document.getElementById('infoChave').textContent = nfeCarregada.chave || nfeCarregada.chave_acesso || '-';
+                document.getElementById('infoDestinatario').textContent = nfeCarregada.destinatario || nfeCarregada.cliente || '-';
+                document.getElementById('infoValor').textContent = (nfeCarregada.valor || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+                document.getElementById('infoStatus').textContent = (nfeCarregada.status || 'pendente').toUpperCase();
+                document.getElementById('nfeInfoDisplay').style.display = 'grid';
+                document.getElementById('cancelamentoCard').style.display = 'block';
+                document.getElementById('cceCard').style.display = 'block';
+                carregarEventos(id);
+                showAlert('NFe carregada com sucesso', 'success');
+            })
+            .catch(e => {
+                showAlert(e.message || 'Erro ao carregar NFe', 'danger');
+            });
+        }
+
+        function cancelarNFe() {
+            if (!nfeCarregada) return showAlert('Carregue uma NFe primeiro', 'warning');
+            const just = document.getElementById('justificativaCancelamento').value.trim();
+            if (just.length < 15) return showAlert('Justificativa deve ter no mínimo 15 caracteres', 'warning');
+            if (!confirm('ATENº O: Esta ação é IRREVERSÍVEL. Deseja realmente cancelar esta NFe?')) return;
+
+            const id = nfeCarregada.id || nfeCarregada.numero || document.getElementById('nfeId').value;
+            fetch('/api/nfe/' + id + '/cancelar', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                credentials:'include',
+                body: JSON.stringify({ justificativa: just })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Erro ao cancelar NFe');
+                return r.json();
+            })
+            .then(data => {
+                showAlert('NFe cancelada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
+                document.getElementById('infoStatus').textContent = 'CANCELADA';
+                carregarEventos(id);
+            })
+            .catch(e => showAlert(e.message, 'danger'));
+        }
+
+        function registrarCCe() {
+            if (!nfeCarregada) return showAlert('Carregue uma NFe primeiro', 'warning');
+            const texto = document.getElementById('textoCCe').value.trim();
+            if (texto.length < 15) return showAlert('Texto da correção deve ter no mínimo 15 caracteres', 'warning');
+
+            const id = nfeCarregada.id || nfeCarregada.numero || document.getElementById('nfeId').value;
+            fetch('/api/nfe/' + id + '/cce', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                credentials:'include',
+                body: JSON.stringify({ correcao: texto })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error('Erro ao registrar CC-e');
+                return r.json();
+            })
+            .then(data => {
+                showAlert('Carta de Correção registrada com sucesso! Protocolo: ' + (data.protocolo || '-'), 'success');
+                document.getElementById('textoCCe').value = '';
+                atualizarContadorCCe();
+                carregarEventos(id);
+            })
+            .catch(e => showAlert(e.message, 'danger'));
+        }
+
+        function carregarEventos(nfeId) {
+            fetch('/api/nfe/' + nfeId + '/eventos', { credentials:'include' })
+            .then(r => r.json())
+            .then(data => {
+                const eventos = data.eventos || data.data || data || [];
+                const tbody = document.getElementById('eventosTableBody');
+                const empty = document.getElementById('eventosEmpty');
+                if (!Array.isArray(eventos) || eventos.length === 0) {
+                    tbody.innerHTML = '';
+                    empty.style.display = 'block';
+                    return;
+                }
+                empty.style.display = 'none';
+                tbody.innerHTML = eventos.map(ev => {
+                    const dt = ev.data ? new Date(ev.data).toLocaleString('pt-BR') : '-';
+                    const statusClass = (ev.status||'').toLowerCase().includes('sucesso') || (ev.status||'').toLowerCase().includes('autoriza') ? 'success' : (ev.status||'').toLowerCase().includes('erro') || (ev.status||'').toLowerCase().includes('rejeit') ? 'danger' : 'info';
+                    return `<tr>
+                        <td><strong>${ev.tipo || '-'}</strong></td>
+                        <td>${dt}</td>
+                        <td class="code">${ev.protocolo || '-'}</td>
+                        <td>${ev.descrição || ev.texto || '-'}</td>
+                        <td><span class="badge ${statusClass}">${ev.status || '-'}</span></td>
+                    </tr>`;
+                }).join('');
+            })
+            .catch(() => {
+                document.getElementById('eventosTableBody').innerHTML = '';
+                document.getElementById('eventosEmpty').style.display = 'block';
+            });
+        }
+
+        function atualizarContadorCancel() {
+            document.getElementById('charCountCancel').textContent = document.getElementById('justificativaCancelamento').value.length;
+        }
+        function atualizarContadorCCe() {
+            document.getElementById('charCountCCe').textContent = document.getElementById('textoCCe').value.length;
+        }
+
+        function showAlert(msg, type) {
+            const c = document.getElementById('alertContainer');
+            const div = document.createElement('div');
+            div.className = 'alert ' + type;
+            div.innerHTML = '<i class="fas fa-' + (type==='success'?'check-circle':type==='danger'?'times-circle':'exclamation-triangle') + '"></i> ' + msg;
+            c.prepend(div);
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function abrirModalConfiguracoes() {
+            alert('Configurações - Em desenvolvimento');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarUsuario();
+            // Check URL params
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('nfe')) {
+                document.getElementById('nfeId').value = params.get('nfe');
+                carregarNFe();
+            }
+        });
+    </script>
+
+    <!-- Sistema de Notificações Global -->
+    <script src="/js/notification-manager.js?v=20260325"></script>
+    <script src="/_shared/connection-monitor.js?v=20260325"></script>
+    <script src="/js/popup-confirmacao.js?v=20260325"></script>
+
+    <!-- Utilitários Compartilhados -->
+    <script src="/_shared/confirm-dialog.js?v=20260325"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
+
+    <!-- Zyntra Chat Teams -->    <script src="/socket.io/socket.io.js"></script>
+
+    <script src="/chat-teams/chat-widget.js?v=20260325" defer></script>
+
+    <!-- Enterprise Shared -->
+    <script src="/js/sidebar-click-animation.js?v=20260325"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260325"></script>
+    <script src="/js/user-dropdown.js?v=20260325" defer></script>
+</body>
+</html>

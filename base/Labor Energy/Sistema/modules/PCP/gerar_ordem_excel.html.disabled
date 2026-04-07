@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Aluforce: Gerar Ordem Excel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Mobile Enhancement CSS -->
+    <link rel="stylesheet" href="/css/design-system-mobile.css?v=20260202">
+    <link rel="stylesheet" href="/css/responsive-global.css?v=20260202">
+    <link rel="stylesheet" href="/css/mobile-master-2026.css?v=20260202">
+    <link rel="stylesheet" href="/css/mobile-enterprise-enhancements.css?v=20260202">
+    <link rel="stylesheet" href="css/gerar-ordem-mobile.css?v=20260201">
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        .btn.large {
+            padding: 20px 40px;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .btn.success { background: #4CAF50; }
+        .btn.primary { background: #2196F3; }
+        .btn.warning { background: #ff9800; }
+        .log {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success-box {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .interface-frame {
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+    </style>
+
+
+</head>
+<body>
+    <div style="position: fixed; top: 20px; left: 20px; z-index: 1000;">
+        <a href="index.html" style="display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.2); padding: 10px 16px; border-radius: 8px; color: white; text-decoration: none; font-weight: 600; transition: all 0.2s;">
+            <i class="fas fa-arrow-left"></i> Voltar ao PCP
+        </a>
+    </div>
+    <!-- Mobile Enterprise CSS carregado no head -->
+    <div class="container">
+        <h1>ð¯ Gerador de Ordem de ProduÃ§Ã£o Excel</h1>
+
+        <div class="success-box">
+            <h3>ð Ordem Preparada</h3>
+            <ul>
+                <li>â <strong>Cliente:</strong> ENERGIZE MATERIAIS ELETRICOS</li>
+                <li>â <strong>Contato:</strong> Evandro (energizefinanceiro@gmail.com)</li>
+                <li>â <strong>Itens:</strong> 4 produtos diferentes (2.000 metros total)</li>
+                <li>â <strong>Valor:</strong> R$ 18.025,00</li>
+                <li>â <strong>Transportadora:</strong> Transportes RÃ¡pidos Express</li>
+                <li>â <strong>Entrega:</strong> 15 dias Ãºteis</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn large success" onclick="gerarOrdemCompleta()">
+                ð GERAR ORDEM EXCEL AUTOMATICAMENTE
+            </button>
+            <button class="btn primary" onclick="abrirModalTeste()">
+                ð Testar no Modal
+            </button>
+            <button class="btn" onclick="verificarServidor()">
+                ð Verificar Servidor
+            </button>
+            <button class="btn warning" onclick="limparLog()">
+                ðï¸ Limpar Log
+            </button>
+        </div>
+
+        <div id="log" class="log" style="display: none;"></div>
+
+        <!-- FormulÃ¡rio oculto para submissÃ£o -->
+        <form id="ordem-form" action="http://localhost:3001/api/pcp/ordens-producao" method="POST" style="display: none;" target="_blank">
+            <!-- Dados do cliente -->
+            <input name="cliente" value="ENERGIZE MATERIAIS ELETRICOS â 50.160.305/0001-39 (Evandro)">
+            <input name="cliente_id" value="73">
+            <input name="contato" value="Evandro">
+            <input name="email" value="energizefinanceiro@gmail.com">
+            <input name="telefone" value="(44) 98432-1786">
+
+            <!-- Dados comerciais -->
+            <input name="vendedor" value="Carlos Santos">
+            <input name="frete" value="FOB">
+            <input name="numero_orcamento" value="">
+            <input name="revisao" value="1.0">
+            <input name="pedido_referencia" value="">
+            <input name="data_liberacao" value="">
+
+            <!-- Datas -->
+            <input name="data_previsao_entrega" value="">
+
+            <!-- ObservaÃ§Ãµes -->
+            <textarea name="observacoes">Ordem de ProduÃ§Ã£o para cabos especiais - Teste completo do sistema Excel. Seguir especificaÃ§Ãµes tÃ©cnicas ABNT NBR 247. Embalagem cuidadosa para transporte. Produtos de alta qualidade Aluforce.</textarea>
+
+            <!-- ConfiguraÃ§Ãµes -->
+            <input name="variacao" value="Cor: Preto, Azul, Verde; Bitola: 10mmÂ², 6mmÂ², 4mmÂ², 2.5mmÂ²">
+            <input name="embalagem" value="Bobina">
+            <input name="lances" value="100,120,150,200">
+
+            <!-- Transportadora -->
+            <input name="transportadora_nome" value="Transportes RÃ¡pidos Express Ltda">
+            <input name="transportadora_fone" value="(11) 3333-4444">
+            <input name="transportadora_cep" value="01234-567">
+            <input name="transportadora_endereco" value="Rua das Transportadoras, 123 - Distrito Industrial, SÃ£o Paulo - SP">
+            <input name="transportadora_cpf_cnpj" value="12.345.678/0001-90">
+            <input name="transportadora_email_nfe" value="nfe@transportesrapidos.com.br">
+
+            <!-- Itens (JSON) -->
+            <input name="items_json" value="">
+        </form>
+    </div>
+
+    <div class="container">
+        <h2>ð¥ï¸ Interface para Teste Manual</h2>
+        <div class="interface-frame">
+            <iframe id="interface" src="http://localhost:3001" width="100%" height="700"></iframe>
+        </div>
+    </div>
+
+    <script>
+        let logDiv = document.getElementById('log');
+
+        function log(msg, type = 'info') {
+            const time = new Date().toLocaleTimeString();
+            const emoji = type === 'success' ? 'â' : type === 'error' ? 'â' : type === 'warning' ? 'â ï¸' : 'â¹ï¸';
+            logDiv.innerHTML += `[${time}] ${emoji} ${msg}`;
+            logDiv.style.display = 'block';
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function limparLog() {
+            logDiv.innerHTML = '';
+            logDiv.style.display = 'none';
+        }
+
+        function verificarServidor() {
+            log('ð Verificando servidor...', 'info');
+
+            fetch('http://localhost:3001/api/pcp/clientes?q=test')
+                .then(response => {
+                    if (response.ok) {
+                        log('â Servidor estÃ¡ funcionando!', 'success');
+                        return response.json();
+                    } else {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                })
+                .then(data => {
+                    log(`ð API respondeu com ${data.length} resultados`, 'success');
+                })
+                .catch(error => {
+                    log(`â Erro: ${error.message}`, 'error');
+                    log('ð¡ Certifique-se de que o servidor estÃ¡ rodando', 'warning');
+                });
+        }
+
+        function gerarOrdemCompleta() {
+            log('ð === GERANDO ORDEM DE PRODUÃÃO EXCEL ===', 'success');
+
+            // Preparar dados dinÃ¢micos
+            const timestamp = Date.now();
+            const hoje = new Date();
+            const entrega = new Date(hoje.getTime() + 15 * 24 * 60 * 60 * 1000); // 15 dias
+
+            const form = document.getElementById('ordem-form');
+
+            // Preencher campos dinÃ¢micos
+            form.querySelector('[name="numero_orcamento"]').value = `ORC-2025-${String(timestamp).slice(-6)}`;
+            form.querySelector('[name="pedido_referencia"]').value = `PED-TESTE-${hoje.getFullYear()}`;
+            form.querySelector('[name="data_liberacao"]').value = hoje.toISOString().split('T')[0];
+            form.querySelector('[name="data_previsao_entrega"]').value = entrega.toISOString().split('T')[0];
+
+            // Preparar itens
+            const itens = [
+                {
+                    codigo: 'TRI10_ALU',
+                    descricao: 'CABO TRIPLEX 10mmÂ² NEUTRO ALUFORCE - ISOLAÃÃO PVC 450/750V',
+                    quantidade: 500,
+                    valor_unitario: 15.50
+                },
+                {
+                    codigo: 'DUP6_ALU',
+                    descricao: 'CABO DUPLEX 6mmÂ² NEUTRO ALUFORCE - ISOLAÃÃO PVC 450/750V',
+                    quantidade: 300,
+                    valor_unitario: 12.75
+                },
+                {
+                    codigo: 'FLEX4_ALU',
+                    descricao: 'CABO FLEXÃVEL 4mmÂ² AZUL ALUFORCE - ISOLAÃÃO PVC 450/750V',
+                    quantidade: 200,
+                    valor_unitario: 8.90
+                },
+                {
+                    codigo: 'RIGIDO25_ALU',
+                    descricao: 'CABO RÃGIDO 2,5mmÂ² PRETO ALUFORCE - ISOLAÃÃO PVC 450/750V',
+                    quantidade: 1000,
+                    valor_unitario: 5.25
+                }
+            ];
+
+            form.querySelector('[name="items_json"]').value = JSON.stringify(itens);
+
+            // Calcular total
+            const total = itens.reduce((sum, item) => sum + (item.quantidade * item.valor_unitario), 0);
+
+            log(`ð Dados preparados:`, 'info');
+            log(`   Cliente: ENERGIZE MATERIAIS ELETRICOS`, 'info');
+            log(`   OrÃ§amento: ${form.querySelector('[name="numero_orcamento"]').value}`, 'info');
+            log(`   Entrega: ${form.querySelector('[name="data_previsao_entrega"]').value}`, 'info');
+            log(`   Itens: ${itens.length} produtos`, 'info');
+            log(`   Total: R$ ${total.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`, 'info');
+
+            log('ð Submetendo formulÃ¡rio...', 'success');
+            log('ð O arquivo Excel serÃ¡ gerado em nova aba', 'warning');
+
+            // Submeter formulÃ¡rio
+            form.submit();
+
+            setTimeout(() => {
+                log('â FormulÃ¡rio submetido!', 'success');
+                log('ð Verifique se uma nova aba foi aberta com o Excel', 'info');
+                log('ð¾ O arquivo deve fazer download automaticamente', 'info');
+            }, 1000);
+        }
+
+        function abrirModalTeste() {
+            log('ð Abrindo modal para teste manual...', 'info');
+
+            try {
+                const frame = document.getElementById('interface');
+                const doc = frame.contentDocument || frame.contentWindow.document;
+
+                // Buscar e clicar no botÃ£o Nova Ordem
+                const btnNova = doc.querySelector('#btn-nova-ordem') ||
+                               doc.querySelector('[onclick*="nova-ordem"]') ||
+                               doc.querySelector('[onclick*="showOrderModal"]');
+
+                if (btnNova) {
+                    btnNova.click();
+                    log('â Modal aberto! Agora preencha manualmente e submeta', 'success');
+                    log('ð¡ Dica: Digite "ENERGIZE" no campo cliente', 'info');
+                } else {
+                    log('â botÃ£o Nova Ordem nÃ£o encontrado', 'error');
+                }
+
+            } catch (error) {
+                log(`â Erro: ${error.message}`, 'error');
+            }
+        }
+
+        // Verificar servidor ao carregar
+        window.onload = function() {
+            setTimeout(verificarServidor, 1000);
+        };
+    </script>
+
+    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>
+</body>
+</html>
+
+

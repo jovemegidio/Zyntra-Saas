@@ -1,0 +1,78 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: aluforce_vendas
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    # Note: for real repositories set `DB_PASS` (and related) as repository secrets.
+    # The workflow uses a default `root` password for the ephemeral MySQL service so
+    # it works out-of-the-box for CI on this repo, but you should set secrets.DB_PASS
+    # for better security and parity with your environments.
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASS: root
+      DB_NAME: aluforce_vendas
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: |
+          npm ci
+
+      - name: Wait for MySQL
+        run: |
+          for i in `seq 1 20`; do
+            mysql -h127.0.0.1 -uroot -proot -e 'select 1' && break || sleep 1
+          done
+
+      - name: Verify CI secrets (optional)
+        run: |
+          if [ -z "${{ secrets.DB_PASS }}" ]; then
+            echo "Warning: DB_PASS secret not set — using default 'root' for CI.\nTo secure CI, set a secret named DB_PASS in repo Settings -> Secrets." >&2
+          else
+            echo "DB_PASS secret detected — CI will use repository secret for DB password." >&2
+          fi
+
+      - name: Prepare schema
+        run: |
+          # apply schema needed for tests (products + users)
+          mysql -h127.0.0.1 -uroot -proot aluforce_vendas < schema_produtos.sql || true
+          mysql -h127.0.0.1 -uroot -proot aluforce_vendas < schema_materiais.sql || true
+
+      - name: Run migrations
+        run: |
+          node migrations/run_migration.js
+
+      - name: Create test user
+        run: |
+          node scripts/create_user.js clemerson.silva@aluforce.ind.br admin123
+
+      - name: Run login test
+        run: |
+          node scripts/login_test_node.js

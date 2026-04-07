@@ -1,0 +1,55 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: aluforce-n8n
+    ports:
+      - '127.0.0.1:5678:5678'
+    environment:
+      # n8n Core
+      N8N_HOST: n8n.aluforce.api.br
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      N8N_TRUST_PROXY: 'true'
+      WEBHOOK_URL: https://n8n.aluforce.api.br/
+      GENERIC_TIMEZONE: America/Sao_Paulo
+      TZ: America/Sao_Paulo
+      N8N_ENCRYPTION_KEY: aluforce-n8n-encryption-key-2026
+      EXECUTIONS_MODE: regular
+
+      # ALUFORCE API (interno via Docker bridge)
+      ALUFORCE_API_URL: http://172.17.0.1:3000
+      ALUFORCE_API_KEY: 2d6e45d6-cdd2-468b-b79a-fda468674113
+
+      # SMTP para envio de emails pelos workflows
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: mail.aluforce.ind.br
+      N8N_SMTP_PORT: '465'
+      N8N_SMTP_SSL: 'true'
+      N8N_SMTP_USER: sistema@aluforce.ind.br
+      N8N_SMTP_PASS: apialuforce
+      N8N_SMTP_SENDER: sistema@aluforce.ind.br
+
+      # Destinatários padrão
+      EMAIL_RELATORIO_DIARIO: diretoria@aluforce.ind.br
+      EMAIL_RELATORIOS: diretoria@aluforce.ind.br
+      EMAIL_ALERTAS: diretoria@aluforce.ind.br
+
+      # WhatsApp API (WhatsApp service na porta 3002 do host)
+      WHATSAPP_API_URL: http://172.17.0.1:3002
+      WHATSAPP_ENABLED: 'true'
+
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    volumes:
+      - n8n-data:/home/node/.n8n
+      - /var/www/aluforce/n8n/workflows:/home/node/.n8n/workflows:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:5678/healthz || exit 1']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  n8n-data:

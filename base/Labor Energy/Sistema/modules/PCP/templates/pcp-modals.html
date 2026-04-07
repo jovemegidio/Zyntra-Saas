@@ -1,0 +1,885 @@
+<!-- 
+    PCP MODALS TEMPLATES
+    Arquivo com todos os modais HTML para PCP
+    Incluir no final do <body> das páginas
+-->
+
+<!-- ==================== MODAL DE CONFIRMAÇÃO ==================== -->
+<div id="modal-confirmacao-pcp" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; text-align: center; animation: modalSlideIn 0.3s ease; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+        <div id="confirmacao-icon" style="width: 70px; height: 70px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"></div>
+        <h3 id="confirmacao-titulo" style="margin: 0 0 12px; font-size: 20px; color: #1e293b;"></h3>
+        <p id="confirmacao-mensagem" style="color: #64748b; margin-bottom: 24px; line-height: 1.6;"></p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <button onclick="fecharConfirmacaoPCP(false)" style="padding: 12px 28px; background: #f1f5f9; border: none; border-radius: 10px; font-weight: 600; color: #64748b; cursor: pointer; font-size: 14px;">Cancelar</button>
+            <button id="confirmacao-btn-confirmar" onclick="fecharConfirmacaoPCP(true)" style="padding: 12px 28px; border: none; border-radius: 10px; font-weight: 600; color: white; cursor: pointer; font-size: 14px;">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL DE ALERTA ==================== -->
+<div id="modal-alerta-pcp" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 20px; padding: 32px; max-width: 400px; text-align: center; animation: modalSlideIn 0.3s ease; box-shadow: 0 25px 60px rgba(0,0,0,0.3);">
+        <div id="alerta-icon-container" style="width: 70px; height: 70px; margin: 0 auto 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+            <i id="alerta-icon" class="fas fa-info-circle" style="font-size: 32px;"></i>
+        </div>
+        <h3 id="alerta-titulo" style="margin: 0 0 12px; font-size: 20px; color: #1e293b;"></h3>
+        <p id="alerta-mensagem" style="color: #64748b; margin-bottom: 24px; line-height: 1.6;"></p>
+        <button onclick="fecharAlertaPCP()" style="padding: 12px 40px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 10px; font-weight: 600; color: white; cursor: pointer; font-size: 14px;">OK</button>
+    </div>
+</div>
+
+<style>
+/* Toggle Switch Omie */
+.switch-omie input:checked + span { background-color: #f97316 !important; }
+.switch-omie span::before {
+    content: '';
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: .3s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.switch-omie input:checked + span::before {
+    transform: translateX(18px);
+}
+/* Sidebar Produto PCP */
+#pcp-sidebar-acoes button:focus { outline: none; }
+/* Campo focus Omie */
+#modal-novo-produto fieldset:focus-within {
+    border-color: #f97316;
+}
+#modal-novo-produto input:focus, #modal-novo-produto select:focus, #modal-novo-produto textarea:focus {
+    outline: none;
+}
+/* Tabs ativas */
+.pcp-produto-tab:hover {
+    color: #333 !important;
+    background: #f9f9f9;
+}
+.pcp-produto-tab.active {
+    color: #333 !important;
+    border-bottom-color: #333 !important;
+    font-weight: 500 !important;
+}
+</style>
+
+<!-- ==================== MODAL DE PRODUTO (Estilo Omie) ==================== -->
+<div id="modal-novo-produto" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto; padding: 20px; align-items: flex-start; justify-content: center;">
+    <div style="background: white; max-width: 1200px; width: 98%; height: 95vh; display: flex; flex-direction: column; box-shadow: 0 4px 20px rgba(0,0,0,0.15); border-radius: 0; margin: auto;">
+        <!-- Header Limpo (Estilo Omie) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; border-bottom: 1px solid #e5e5e5; background: white; flex-shrink: 0;">
+            <h2 id="modal-novo-produto-titulo" style="color: #333; font-size: 18px; font-weight: 500; margin: 0;">Incluir Produto</h2>
+            <button onclick="fecharModalProdutoPCP()" style="color: #666; background: none; border: none; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                Fechar <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <!-- Container Principal -->
+        <div style="display: flex; flex: 1; overflow: hidden;">
+            <!-- Área Principal -->
+            <div style="flex: 1; padding: 24px 32px; overflow-y: auto; background: white;">
+                <input type="hidden" id="pcp-produto-id">
+                
+                <!-- Seção Superior: Imagem + Dados Básicos + Definição -->
+                <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+                    <!-- Imagem do Produto -->
+                    <div style="flex-shrink: 0; text-align: center;">
+                        <div style="width: 80px; height: 80px; border: 1px solid #ddd; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #f5f5f5; margin-bottom: 4px;" onclick="document.getElementById('pcp-produto-imagem-input').click()">
+                            <i id="pcp-produto-imagem-icon" class="fas fa-camera" style="font-size: 24px; color: #ccc;"></i>
+                            <img id="pcp-produto-imagem-preview" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">
+                        </div>
+                        <a href="#" style="font-size: 11px; color: #f97316; text-decoration: none;" onclick="document.getElementById('pcp-produto-imagem-input').click(); return false;">
+                            <i class="fas fa-pencil-alt"></i> Alterar
+                        </a>
+                        <div style="font-size: 10px; color: #999;">Nenhuma<br>imagem</div>
+                        <input type="file" id="pcp-produto-imagem-input" accept="image/*" style="display: none;" onchange="previewImagemProdutoPCP(this)">
+                    </div>
+                    
+                    <!-- Campos Principais -->
+                    <div style="flex: 1;">
+                        <!-- Descrição do Produto -->
+                        <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0 0 16px 0;">
+                            <legend style="font-size: 11px; color: #666; padding: 0 4px;">Descrição do Produto</legend>
+                            <input type="text" id="pcp-produto-descricao" required placeholder="Preencha aqui a Descrição do Produto" style="width: 100%; padding: 4px 0; border: none; font-size: 14px; outline: none; background: transparent; box-sizing: border-box;">
+                        </fieldset>
+                        
+                        <!-- Linha: Código, EAN, Unidade, Preço -->
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Código do Produto</legend>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <input type="text" id="pcp-produto-codigo" required placeholder="PRD00050" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                                    <i class="fas fa-info-circle" style="color: #ccc; font-size: 12px; cursor: help;" title="Código único do produto"></i>
+                                </div>
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Código EAN (GTIN)</legend>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <input type="text" id="pcp-produto-ean" placeholder="Opcional" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                                    <i class="fas fa-crosshairs" style="color: #ccc; font-size: 12px; cursor: pointer;" title="Buscar GTIN"></i>
+                                </div>
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Unidade</legend>
+                                <select id="pcp-produto-unidade" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23999%22 d=%22M6 8L1 3h10z%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px;">
+                                    <option value="">Selecione</option>
+                                    <option value="UN">UN - Unidade</option>
+                                    <option value="PC">PC - Peça</option>
+                                    <option value="CJ">CJ - Conjunto</option>
+                                    <option value="KG">KG - Kilograma</option>
+                                    <option value="M">Metro (M)</option>
+                                    <option value="M2">M² - Metro Quad.</option>
+                                    <option value="M3">M³ - Metro Cúbico</option>
+                                    <option value="L">L - Litro</option>
+                                    <option value="CX">CX - Caixa</option>
+                                    <option value="PCT">PCT - Pacote</option>
+                                    <option value="RL">RL - Rolo</option>
+                                </select>
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Preço Unitário de Venda</legend>
+                                <input type="text" id="pcp-produto-preco" placeholder="0,000000" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                        </div>
+                        
+                        <!-- Linha: NCM, Família -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Código NCM</legend>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <i class="fas fa-search" style="color: #ccc; font-size: 11px;"></i>
+                                    <input type="text" id="pcp-produto-ncm" placeholder="Selecione aqui o NCM" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                                </div>
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Família de Produto</legend>
+                                <div style="display: flex; align-items: center; gap: 4px;">
+                                    <select id="pcp-produto-categoria" style="flex: 1; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23999%22 d=%22M6 8L1 3h10z%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px;">
+                                        <option value="">Selecione a Família</option>
+                                        <option value="materia-prima">Matéria Prima</option>
+                                        <option value="produto-acabado">Produto Acabado</option>
+                                        <option value="semi-acabado">Semi-Acabado</option>
+                                        <option value="componente">Componente</option>
+                                        <option value="embalagem">Embalagem</option>
+                                        <option value="consumo">Consumo</option>
+                                    </select>
+                                    <i class="fas fa-pencil-alt" style="color: #ccc; font-size: 12px; cursor: pointer;"></i>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <!-- Definição do Produto -->
+                    <div style="flex-shrink: 0; width: 160px;">
+                        <div style="font-size: 13px; font-weight: 600; color: #333; margin-bottom: 12px;">Definição do Produto</div>
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Simples -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="switch-omie" style="position: relative; display: inline-block; width: 40px; height: 22px;">
+                                    <input type="checkbox" id="pcp-def-simples" checked onchange="toggleDefinicaoProdutoPCP('simples')" style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #f97316; border-radius: 22px; transition: .3s;"></span>
+                                </label>
+                                <span style="font-size: 13px; color: #333;">Simples</span>
+                                <i class="fas fa-info-circle" style="color: #ccc; font-size: 11px; cursor: help;"></i>
+                            </div>
+                            <!-- Kit -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="switch-omie" style="position: relative; display: inline-block; width: 40px; height: 22px;">
+                                    <input type="checkbox" id="pcp-def-kit" onchange="toggleDefinicaoProdutoPCP('kit')" style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 22px; transition: .3s;"></span>
+                                </label>
+                                <span style="font-size: 13px; color: #333;">Kit</span>
+                                <i class="fas fa-info-circle" style="color: #ccc; font-size: 11px; cursor: help;"></i>
+                            </div>
+                            <!-- Com Variações -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <label class="switch-omie" style="position: relative; display: inline-block; width: 40px; height: 22px;">
+                                    <input type="checkbox" id="pcp-def-variacoes" onchange="toggleDefinicaoProdutoPCP('variacoes')" style="opacity: 0; width: 0; height: 0;">
+                                    <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 22px; transition: .3s;"></span>
+                                </label>
+                                <span style="font-size: 13px; color: #333;">Com Variações</span>
+                                <i class="fas fa-info-circle" style="color: #ccc; font-size: 11px; cursor: help;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Abas de Conteúdo (Estilo Omie) -->
+                <div style="border-bottom: 1px solid #e5e5e5; display: flex; gap: 0; margin-bottom: 0; overflow-x: auto;">
+                    <button class="pcp-produto-tab active" onclick="mudarAbaProdutoPCP('estoque', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #333; border-bottom: 2px solid #333; font-weight: 500; white-space: nowrap;">Estoque</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('custo', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Custo do Estoque</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('fornecedores', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Fornecedores</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('historico-compras', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Histórico de Compras</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('info-adicionais', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Informações Adicionais</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('caracteristicas', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Características</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('fiscal', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Recomendações Fiscais</button>
+                    <button class="pcp-produto-tab" onclick="mudarAbaProdutoPCP('observacoes', this)" style="padding: 10px 16px; border: none; background: none; cursor: pointer; font-size: 13px; color: #666; border-bottom: 2px solid transparent; white-space: nowrap;">Observações</button>
+                </div>
+                
+                <!-- Conteúdo das Abas -->
+                <div style="padding-top: 20px;">
+                    <!-- Aba Estoque (padrão Omie) -->
+                    <div id="pcp-tab-estoque" class="pcp-produto-tab-panel">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 4px 0; font-weight: 600;">Estoque Mínimo</h4>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 4px 0;">Clique diretamente em qualquer célula dessa coluna para atualizar o estoque mínimo de cada local de estoque</p>
+                        <p style="font-size: 12px; color: #999; margin: 0 0 16px 0;">Abaixo um resumo das informações de estoque deste produto.</p>
+                        
+                        <!-- Toggle controle de lote -->
+                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+                            <label class="switch-omie" style="position: relative; display: inline-block; width: 40px; height: 22px;">
+                                <input type="checkbox" id="pcp-controle-lote" style="opacity: 0; width: 0; height: 0;">
+                                <span style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; border-radius: 22px; transition: .3s;"></span>
+                            </label>
+                            <span style="font-size: 13px; color: #333;">Este produto possui controle de lote</span>
+                            <i class="fas fa-info-circle" style="color: #ccc; font-size: 11px;"></i>
+                        </div>
+                        
+                        <!-- Tabela de Estoque (Estilo Omie) -->
+                        <div style="border: 1px solid #e5e5e5; border-radius: 0;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead>
+                                    <tr style="background: #fafafa; border-bottom: 1px solid #e5e5e5;">
+                                        <th style="padding: 10px 12px; text-align: left; font-weight: 500; color: #333;">Local de Estoque <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">Estoque Disponível <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">CMC Unitário <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">CMC Total <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">Estoque Mínimo <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">Previsão de Entrada <span style="color: #ccc;">«</span></th>
+                                        <th style="padding: 10px 12px; text-align: right; font-weight: 500; color: #333;">Previsão de Saída <span style="color: #ccc;">«</span></th>
+                                    </tr>
+                                    <tr style="border-bottom: 1px solid #e5e5e5;">
+                                        <th style="padding: 6px 12px;"><i class="fas fa-filter" style="color: #ccc; font-size: 10px;"></i></th>
+                                        <th style="padding: 6px 12px;"><i class="fas fa-filter" style="color: #ccc; font-size: 10px;"></i></th>
+                                        <th style="padding: 6px 12px;"></th>
+                                        <th style="padding: 6px 12px;"></th>
+                                        <th style="padding: 6px 12px;"><i class="fas fa-filter" style="color: #ccc; font-size: 10px;"></i></th>
+                                        <th style="padding: 6px 12px;"><i class="fas fa-filter" style="color: #ccc; font-size: 10px;"></i></th>
+                                        <th style="padding: 6px 12px;"><i class="fas fa-filter" style="color: #ccc; font-size: 10px;"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pcp-estoque-tbody">
+                                    <tr style="border-bottom: 1px solid #f0f0f0; background: #fffbf0;">
+                                        <td style="padding: 10px 12px; color: #333; font-weight: 500;">PADRAO - Local de Estoque Padrão</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0 M</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0,00</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0,00</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0 M</td>
+                                        <td style="padding: 10px 12px; text-align: right; color: #333;">0 M</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Custo -->
+                    <div id="pcp-tab-custo" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Custo do Estoque</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Preço de Custo (R$)</legend>
+                                <input type="text" id="pcp-produto-preco-custo" placeholder="0,00" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">CMC Unitário (R$)</legend>
+                                <input type="text" id="pcp-produto-cmc" placeholder="0,00" readonly style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: #f9f9f9; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Margem (%)</legend>
+                                <input type="text" id="pcp-produto-margem" placeholder="0" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Preço Venda Final (R$)</legend>
+                                <input type="text" id="pcp-produto-preco-venda-final" placeholder="0,00" readonly style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: #f0fdf4; font-weight: bold; box-sizing: border-box;">
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Fornecedores -->
+                    <div id="pcp-tab-fornecedores" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Fornecedores Vinculados</h4>
+                        <div style="border: 1px dashed #ddd; border-radius: 4px; padding: 40px; text-align: center; color: #999;">
+                            <i class="fas fa-truck" style="font-size: 32px; margin-bottom: 12px; color: #ddd;"></i>
+                            <p style="margin: 0 0 12px 0;">Nenhum fornecedor vinculado</p>
+                            <button style="padding: 8px 20px; background: #f97316; border: none; border-radius: 4px; color: white; font-size: 13px; cursor: pointer;">
+                                <i class="fas fa-plus"></i> Adicionar Fornecedor
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Histórico de Compras -->
+                    <div id="pcp-tab-historico-compras" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Histórico de Compras</h4>
+                        <div style="text-align: center; padding: 40px; color: #999;">
+                            <i class="fas fa-history" style="font-size: 32px; margin-bottom: 12px; color: #ddd;"></i>
+                            <p>Nenhuma compra registrada para este produto</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Informações Adicionais -->
+                    <div id="pcp-tab-info-adicionais" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Informações Adicionais</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">SKU</legend>
+                                <input type="text" id="pcp-produto-sku" placeholder="SKU do produto" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Marca</legend>
+                                <input type="text" id="pcp-produto-marca" placeholder="Marca do produto" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Localização no Estoque</legend>
+                                <input type="text" id="pcp-produto-localizacao" placeholder="Ex: Prateleira A-12" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Cor</legend>
+                                <input type="text" id="pcp-produto-cor" placeholder="Cor do produto" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 16px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Peso Bruto (kg)</legend>
+                                <input type="text" id="pcp-produto-peso-bruto" placeholder="0,000" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Peso Líquido (kg)</legend>
+                                <input type="text" id="pcp-produto-peso-liquido" placeholder="0,000" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Características -->
+                    <div id="pcp-tab-caracteristicas" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Características do Produto</h4>
+                        <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                            <legend style="font-size: 11px; color: #666; padding: 0 4px;">Descrição Detalhada</legend>
+                            <textarea id="pcp-produto-observacoes" rows="6" placeholder="Características técnicas e detalhes do produto..." style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; resize: vertical; font-family: inherit; box-sizing: border-box;"></textarea>
+                        </fieldset>
+                    </div>
+                    
+                    <!-- Aba Fiscal -->
+                    <div id="pcp-tab-fiscal" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Recomendações Fiscais</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">NCM</legend>
+                                <input type="text" id="pcp-produto-ncm-fiscal" placeholder="0000.00.00" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">CEST</legend>
+                                <input type="text" id="pcp-produto-cest" placeholder="00.000.00" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">CFOP Padrão</legend>
+                                <input type="text" id="pcp-produto-cfop" placeholder="5102" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; box-sizing: border-box;">
+                            </fieldset>
+                            <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                                <legend style="font-size: 11px; color: #666; padding: 0 4px;">Origem</legend>
+                                <select id="pcp-produto-origem" style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; cursor: pointer; -webkit-appearance: none; appearance: none; background-image: url('data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 12 12%22%3E%3Cpath fill=%22%23999%22 d=%22M6 8L1 3h10z%22/%3E%3C/svg%3E'); background-repeat: no-repeat; background-position: right 4px center; padding-right: 20px;">
+                                    <option value="0">0 - Nacional</option>
+                                    <option value="1">1 - Estrangeira - Importação Direta</option>
+                                    <option value="2">2 - Estrangeira - Mercado Interno</option>
+                                </select>
+                            </fieldset>
+                        </div>
+                    </div>
+                    
+                    <!-- Aba Observações -->
+                    <div id="pcp-tab-observacoes" class="pcp-produto-tab-panel" style="display: none;">
+                        <h4 style="font-size: 14px; color: #333; margin: 0 0 16px 0; font-weight: 600;">Observações</h4>
+                        <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0 0 16px 0;">
+                            <legend style="font-size: 11px; color: #666; padding: 0 4px;">Observações Internas</legend>
+                            <textarea id="pcp-produto-obs-interna" rows="4" placeholder="Notas de uso interno..." style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; resize: vertical; font-family: inherit; box-sizing: border-box;"></textarea>
+                        </fieldset>
+                        <fieldset style="border: 1px solid #ddd; border-radius: 4px; padding: 0 12px 8px 12px; margin: 0;">
+                            <legend style="font-size: 11px; color: #666; padding: 0 4px;">Observações para Nota Fiscal</legend>
+                            <textarea id="pcp-produto-obs-nf" rows="3" placeholder="Texto que aparecerá na NF-e..." style="width: 100%; padding: 4px 0; border: none; font-size: 13px; outline: none; background: transparent; resize: vertical; font-family: inherit; box-sizing: border-box;"></textarea>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar Direita - Ações (Colapsável Estilo Omie) -->
+            <div id="pcp-sidebar-acoes" style="width: 60px; background: white; border-left: 1px solid #e5e5e5; padding: 16px 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0; overflow-y: auto; overflow-x: hidden; transition: width 0.25s ease;">
+                <!-- Salvar (sempre visível) -->
+                <button onclick="salvarProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #d97706; font-size: 13px; width: 100%; justify-content: center; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#fef3c7';" onmouseout="this.style.background='none';">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 16px; flex-shrink: 0;"></i>
+                    <span class="pcp-sidebar-label" style="display: none;">Salvar</span>
+                </button>
+                
+                <!-- Botão Toggle expandir/colapsar -->
+                <div style="display: flex; justify-content: center; margin: 8px 0;">
+                    <button id="pcp-sidebar-toggle" onclick="toggleSidebarProdutoPCP()" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #f97316; background: white; color: #f97316; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s;" onmouseover="this.style.background='#f97316'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='#f97316';">
+                        <i class="fas fa-chevron-right" style="font-size: 12px; transition: transform 0.25s;"></i>
+                    </button>
+                </div>
+                
+                <!-- Itens expandíveis -->
+                <div id="pcp-sidebar-items" style="display: none; width: 100%; flex-direction: column; gap: 2px;">
+                    <button onclick="limparFormProdutoPCP(true); document.getElementById('modal-novo-produto-titulo').textContent='Incluir Produto';" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #16a34a; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#f0fdf4';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-plus-circle" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Incluir</span>
+                    </button>
+                    <button onclick="duplicarProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #6366f1; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#eef2ff';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-copy" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Duplicar</span>
+                    </button>
+                    <button onclick="inativarProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #dc2626; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#fef2f2';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-ban" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Inativar</span>
+                    </button>
+                    <div style="border-top: 1px solid #e5e5e5; margin: 6px 0;"></div>
+                    <button onclick="abrirAnexosProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #666; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#f5f5f5';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-paperclip" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Anexos</span>
+                    </button>
+                    <button onclick="abrirIAFiscalProdutoPCP()" style="display: flex; align-items: flex-start; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #d97706; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#fef3c7';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-robot" style="font-size: 16px; margin-top: 2px; flex-shrink: 0;"></i>
+                        <div style="display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-weight: 500;">Inteligência Artificial Fiscal</span>
+                            <span style="font-size: 10px; color: #999;">Última atualização recebida</span>
+                            <span style="display: inline-block; background: #22c55e; color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; margin-top: 2px; width: fit-content;">Monitorado</span>
+                        </div>
+                    </button>
+                    <div style="border-top: 1px solid #e5e5e5; margin: 6px 0;"></div>
+                    <button onclick="abrirHistoricoAlteracoesProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #666; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#f5f5f5';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-history" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Histórico de Alterações</span>
+                    </button>
+                    <button onclick="abrirTarefasProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #666; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#f5f5f5';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-tasks" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Tarefas</span>
+                    </button>
+                    <div style="border-top: 1px solid #e5e5e5; margin: 6px 0;"></div>
+                    <button onclick="excluirProdutoPCP()" style="display: flex; align-items: center; gap: 10px; padding: 10px 8px; background: none; border: none; cursor: pointer; color: #dc2626; font-size: 13px; width: 100%; text-align: left; border-radius: 6px; transition: background 0.2s; white-space: nowrap;" onmouseover="this.style.background='#fef2f2';" onmouseout="this.style.background='none';">
+                        <i class="fas fa-trash-alt" style="font-size: 16px; flex-shrink: 0;"></i>
+                        <span>Excluir</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL DE MATERIAL ==================== -->
+<div id="modal-novo-material" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; overflow-y: auto; padding: 20px; align-items: flex-start; justify-content: center;">
+    <div class="modal-content-omie" style="background: #fff; border-radius: 16px; width: 100%; max-width: 900px; margin: 20px auto; animation: modalSlideIn 0.3s ease; box-shadow: 0 25px 60px rgba(0,0,0,0.2);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%); border-radius: 16px 16px 0 0; padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i class="fas fa-layer-group" style="color: white; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h2 id="modal-material-titulo" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">
+                        <i class="fas fa-plus-circle" style="margin-right: 8px;"></i>Incluir Material
+                    </h2>
+                    <span style="color: rgba(255,255,255,0.8); font-size: 13px;">Gestão de Materiais PCP</span>
+                </div>
+            </div>
+            <button onclick="fecharModalMaterial()" style="background: rgba(255,255,255,0.2); border: none; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times" style="color: white; font-size: 16px;"></i>
+            </button>
+        </div>
+        
+        <!-- Tabs -->
+        <div style="display: flex; border-bottom: 1px solid #e5e7eb; background: #f8fafc; gap: 0; overflow-x: auto;">
+            <button class="pcp-material-tab-btn active" data-tab="definicao" onclick="mudarAbaMaterialPCP('definicao', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 600; color: #9333ea; border-bottom: 3px solid #9333ea; white-space: nowrap;">
+                <i class="fas fa-info-circle"></i> Definição
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="estoque" onclick="mudarAbaMaterialPCP('estoque', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-warehouse"></i> Estoque
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="custo" onclick="mudarAbaMaterialPCP('custo', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-dollar-sign"></i> Custo
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="fornecedores" onclick="mudarAbaMaterialPCP('fornecedores', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-truck"></i> Fornecedores
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="caracteristicas" onclick="mudarAbaMaterialPCP('caracteristicas', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-tags"></i> Características
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="fiscal" onclick="mudarAbaMaterialPCP('fiscal', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-file-invoice"></i> Fiscal
+            </button>
+            <button class="pcp-material-tab-btn" data-tab="historico" onclick="mudarAbaMaterialPCP('historico', this)" style="padding: 14px 20px; border: none; background: transparent; cursor: pointer; font-weight: 500; color: #666; border-bottom: 3px solid transparent; white-space: nowrap;">
+                <i class="fas fa-history"></i> Histórico
+            </button>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 24px; max-height: calc(100vh - 300px); overflow-y: auto;">
+            <input type="hidden" id="material-id">
+            
+            <!-- Tab Definição -->
+            <div id="pcp-material-tab-definicao" class="pcp-material-tab-panel">
+                <div style="display: grid; grid-template-columns: 180px 1fr; gap: 24px;">
+                    <!-- Imagem -->
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">Imagem</label>
+                        <div style="width: 180px; height: 180px; border: 2px dashed #d1d5db; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; background: #f9fafb; position: relative;" onclick="document.getElementById('material-imagem-input').click()">
+                            <i id="material-imagem-icon" class="fas fa-camera" style="font-size: 40px; color: #9ca3af;"></i>
+                            <img id="material-imagem-preview-img" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                        </div>
+                        <input type="file" id="material-imagem-input" accept="image/*" style="display: none;" onchange="previewImagemMaterial(this)">
+                    </div>
+                    
+                    <!-- Campos -->
+                    <div>
+                        <div style="display: grid; grid-template-columns: 150px 1fr 150px; gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-barcode" style="color: #9333ea; margin-right: 6px;"></i>Código *</label>
+                                <input type="text" id="material-codigo" required placeholder="MAT001" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-tag" style="color: #9333ea; margin-right: 6px;"></i>Descrição *</label>
+                                <input type="text" id="material-descricao" required placeholder="Descrição do material" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-th-list" style="color: #9333ea; margin-right: 6px;"></i>Tipo *</label>
+                                <select id="material-tipo" required style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; box-sizing: border-box;">
+                                    <option value="">Selecione...</option>
+                                    <option value="cabo">Cabo</option>
+                                    <option value="fio">Fio</option>
+                                    <option value="conector">Conector</option>
+                                    <option value="componente">Componente</option>
+                                    <option value="ferramenta">Ferramenta</option>
+                                    <option value="embalagem">Embalagem</option>
+                                    <option value="consumivel">Consumível</option>
+                                    <option value="outro">Outro</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-balance-scale" style="color: #9333ea; margin-right: 6px;"></i>Unidade</label>
+                                <select id="material-unidade" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; background: white; box-sizing: border-box;">
+                                    <option value="UN">UN - Unidade</option>
+                                    <option value="M">M - Metro</option>
+                                    <option value="KG">KG - Kilograma</option>
+                                    <option value="PC">PC - Peça</option>
+                                    <option value="CX">CX - Caixa</option>
+                                    <option value="RL">RL - Rolo</option>
+                                    <option value="PCT">PCT - Pacote</option>
+                                    <option value="L">L - Litro</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-file-alt" style="color: #9333ea; margin-right: 6px;"></i>NCM</label>
+                                <input type="text" id="material-ncm" placeholder="0000.00.00" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-barcode" style="color: #9333ea; margin-right: 6px;"></i>GTIN</label>
+                                <input type="text" id="material-gtin" placeholder="EAN/GTIN" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-palette" style="color: #9333ea; margin-right: 6px;"></i>Cor</label>
+                                <input type="text" id="material-cor" placeholder="Cor" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-ruler" style="color: #9333ea; margin-right: 6px;"></i>Bitola/Espessura</label>
+                                <input type="text" id="material-bitola" placeholder="Ex: 2.5mm²" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-dollar-sign" style="color: #9333ea; margin-right: 6px;"></i>Custo Unit.</label>
+                                <input type="text" id="material-custo" placeholder="0,00" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-sticky-note" style="color: #9333ea; margin-right: 6px;"></i>Observações</label>
+                                <input type="text" id="material-observacoes" placeholder="Observações..." style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Estoque -->
+            <div id="pcp-material-tab-estoque" class="pcp-material-tab-panel" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div style="background: #f5f3ff; border: 1px solid #c4b5fd; border-radius: 12px; padding: 20px; text-align: center;">
+                        <i class="fas fa-cubes" style="font-size: 32px; color: #9333ea; margin-bottom: 12px;"></i>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #581c87;">Estoque Atual</label>
+                        <input type="number" id="material-estoque" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #c4b5fd; border-radius: 8px; font-size: 18px; text-align: center; font-weight: bold; box-sizing: border-box;">
+                    </div>
+                    <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 20px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 32px; color: #f59e0b; margin-bottom: 12px;"></i>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #92400e;">Estoque Mínimo</label>
+                        <input type="number" id="material-estoque-minimo" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #fcd34d; border-radius: 8px; font-size: 18px; text-align: center; font-weight: bold; box-sizing: border-box;">
+                    </div>
+                    <div style="background: #dbeafe; border: 1px solid #93c5fd; border-radius: 12px; padding: 20px; text-align: center;">
+                        <i class="fas fa-chart-line" style="font-size: 32px; color: #3b82f6; margin-bottom: 12px;"></i>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #1e40af;">Estoque Máximo</label>
+                        <input type="number" id="material-estoque-maximo" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #93c5fd; border-radius: 8px; font-size: 18px; text-align: center; font-weight: bold; box-sizing: border-box;">
+                    </div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-map-marker-alt" style="color: #9333ea; margin-right: 6px;"></i>Localização</label>
+                        <input type="text" id="material-localizacao" placeholder="Ex: Prateleira B-05" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-box" style="color: #9333ea; margin-right: 6px;"></i>Lote</label>
+                        <input type="text" id="material-lote" placeholder="Lote de controle" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Custo -->
+            <div id="pcp-material-tab-custo" class="pcp-material-tab-panel" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-tag" style="color: #9333ea; margin-right: 6px;"></i>Custo Unitário (R$)</label>
+                        <input type="text" id="material-custo-tab" placeholder="0,00" style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-dollar-sign" style="color: #22c55e; margin-right: 6px;"></i>Preço Venda (R$)</label>
+                        <input type="text" id="material-preco" placeholder="0,00" style="width: 100%; padding: 14px; border: 2px solid #22c55e; border-radius: 8px; font-size: 16px; background: #f0fdf4; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Fornecedores -->
+            <div id="pcp-material-tab-fornecedores" class="pcp-material-tab-panel" style="display: none;">
+                <div style="background: #f8fafc; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 40px; text-align: center;">
+                    <i class="fas fa-truck" style="font-size: 48px; color: #94a3b8; margin-bottom: 16px;"></i>
+                    <p style="color: #64748b; margin-bottom: 16px;">Nenhum fornecedor vinculado</p>
+                    <button style="padding: 12px 24px; background: linear-gradient(135deg, #9333ea, #7c3aed); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer;">
+                        <i class="fas fa-plus"></i> Adicionar Fornecedor
+                    </button>
+                </div>
+                <div style="margin-top: 20px;">
+                    <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;">Fornecedor Padrão</label>
+                    <input type="text" id="material-fornecedor-padrao" placeholder="Nome do fornecedor padrão" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                </div>
+            </div>
+            
+            <!-- Tab Características -->
+            <div id="pcp-material-tab-caracteristicas" class="pcp-material-tab-panel" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-weight" style="color: #9333ea; margin-right: 6px;"></i>Peso Bruto (kg)</label>
+                        <input type="text" id="material-peso-bruto" placeholder="0,000" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-weight-hanging" style="color: #9333ea; margin-right: 6px;"></i>Peso Líquido (kg)</label>
+                        <input type="text" id="material-peso-liquido" placeholder="0,000" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-arrows-alt-v" style="color: #9333ea; margin-right: 6px;"></i>Altura (cm)</label>
+                        <input type="text" id="material-altura" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-arrows-alt-h" style="color: #9333ea; margin-right: 6px;"></i>Largura (cm)</label>
+                        <input type="text" id="material-largura" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-ruler-horizontal" style="color: #9333ea; margin-right: 6px;"></i>Comprimento (cm)</label>
+                        <input type="text" id="material-comprimento" placeholder="0" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Fiscal -->
+            <div id="pcp-material-tab-fiscal" class="pcp-material-tab-panel" style="display: none;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-file-invoice" style="color: #9333ea; margin-right: 6px;"></i>NCM</label>
+                        <input type="text" id="material-ncm-fiscal" placeholder="0000.00.00" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 6px; font-weight: 600; color: #374151;"><i class="fas fa-file-alt" style="color: #9333ea; margin-right: 6px;"></i>CEST</label>
+                        <input type="text" id="material-cest" placeholder="00.000.00" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 14px; box-sizing: border-box;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Histórico -->
+            <div id="pcp-material-tab-historico" class="pcp-material-tab-panel" style="display: none;">
+                <div style="background: #f8fafc; border-radius: 12px; padding: 20px;">
+                    <div style="text-align: center; padding: 40px; color: #64748b;">
+                        <i class="fas fa-history" style="font-size: 48px; margin-bottom: 16px; color: #94a3b8;"></i>
+                        <p>Histórico de movimentações aparecerá aqui</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="padding: 16px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: space-between; background: #f8fafc; border-radius: 0 0 16px 16px;">
+            <button onclick="limparFormMaterial()" style="padding: 12px 24px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; color: #64748b; font-weight: 600; cursor: pointer;">
+                <i class="fas fa-eraser"></i> Limpar
+            </button>
+            <div style="display: flex; gap: 12px;">
+                <button onclick="fecharModalMaterial()" style="padding: 12px 24px; background: white; border: 2px solid #e5e7eb; border-radius: 8px; color: #374151; font-weight: 600; cursor: pointer;">Cancelar</button>
+                <button onclick="salvarMaterial()" style="padding: 12px 32px; background: linear-gradient(135deg, #9333ea, #7c3aed); border: none; border-radius: 8px; color: white; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(147, 51, 234, 0.3);">
+                    <i class="fas fa-save"></i> Salvar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL DE MOVIMENTAÇÃO DE ESTOQUE ==================== -->
+<div id="modal-movimentacao-estoque" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);">
+    <div style="background: white; border-radius: 20px; width: 95%; max-width: 500px; animation: modalSlideIn 0.3s ease; box-shadow: 0 25px 60px rgba(0,0,0,0.3); overflow: hidden;">
+        
+        <!-- Header -->
+        <div id="modal-mov-header" style="background: linear-gradient(135deg, #22c55e, #16a34a); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 44px; height: 44px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                    <i id="modal-mov-icon" class="fas fa-arrow-up" style="color: white; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h2 id="modal-mov-titulo" style="color: white; margin: 0; font-size: 18px; font-weight: 600;">Registrar Entrada</h2>
+                    <span id="modal-mov-subtitulo" style="color: rgba(255,255,255,0.8); font-size: 13px;">Adicionar quantidade ao estoque</span>
+                </div>
+            </div>
+            <button onclick="fecharModalMovimentacao()" style="background: rgba(255,255,255,0.2); border: none; width: 36px; height: 36px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-times" style="color: white; font-size: 16px;"></i>
+            </button>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 24px;">
+            <!-- Product Search -->
+            <div id="modal-mov-produto-search-container" style="margin-bottom: 20px; position: relative;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-search" style="color: #3b82f6; margin-right: 6px;"></i>Produto *
+                </label>
+                <input type="text" id="modal-mov-produto-busca" placeholder="Digite o código ou nome do produto..." autocomplete="off" oninput="buscarProdutoMovimentacao(this.value)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;">
+                <div id="modal-mov-produto-resultados" style="position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #e2e8f0; border-radius: 0 0 10px 10px; max-height: 200px; overflow-y: auto; z-index: 10006; box-shadow: 0 4px 12px rgba(0,0,0,0.1); display: none;"></div>
+            </div>
+            
+            <!-- Selected Product Info Card -->
+            <div id="modal-mov-produto-info" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; align-items: center; justify-content: space-between;">
+                <div style="flex: 1;">
+                    <div id="modal-mov-produto-nome" style="font-weight: 600; color: #1e293b; font-size: 14px;">--</div>
+                    <div id="modal-mov-produto-codigo" style="font-size: 12px; color: #64748b; margin-top: 2px;">--</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="background: #dbeafe; color: #1e40af; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 15px;" id="modal-mov-produto-estoque">0</div>
+                    <button onclick="limparProdutoMovimentacao()" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 16px; padding: 4px;" title="Trocar produto"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            
+            <!-- Variação de Cor -->
+            <div id="modal-mov-cor-container" style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-palette" style="color: #8b5cf6; margin-right: 6px;"></i>Variação de Cor
+                </label>
+                <div style="position: relative;">
+                    <input type="text" id="modal-mov-cor" list="modal-mov-cor-list" placeholder="Digite ou selecione a cor..." autocomplete="off" style="width: 100%; padding: 12px 40px 12px 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;">
+                    <i class="fas fa-chevron-down" style="position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 12px; pointer-events: none;"></i>
+                </div>
+                <datalist id="modal-mov-cor-list"></datalist>
+                <div id="modal-mov-cor-tags" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;"></div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-hashtag" style="color: #22c55e; margin-right: 6px;"></i>Quantidade *
+                </label>
+                <input type="number" id="modal-mov-quantidade" min="1" required placeholder="Digite a quantidade" style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 18px; text-align: center; font-weight: bold; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-warehouse" style="color: #22c55e; margin-right: 6px;"></i>Local de Estoque
+                </label>
+                <select id="modal-mov-local" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: white; box-sizing: border-box;">
+                    <option value="PRINCIPAL">Estoque Principal</option>
+                    <option value="PRODUCAO">Produção</option>
+                    <option value="RESERVA">Reserva</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-file-alt" style="color: #22c55e; margin-right: 6px;"></i>Documento/NF
+                </label>
+                <input type="text" id="modal-mov-documento" placeholder="Número do documento (opcional)" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; box-sizing: border-box;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #374151;">
+                    <i class="fas fa-list" style="color: #22c55e; margin-right: 6px;"></i>Motivo
+                </label>
+                <select id="modal-mov-motivo-preset" onchange="selecionarMotivoPreset()" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; background: white; margin-bottom: 12px; box-sizing: border-box;">
+                    <option value="">Selecione um motivo...</option>
+                    <option value="Compra de fornecedor">Compra de fornecedor</option>
+                    <option value="Devolução de cliente">Devolução de cliente</option>
+                    <option value="Transferência entre filiais">Transferência entre filiais</option>
+                    <option value="Ajuste de inventário">Ajuste de inventário</option>
+                    <option value="Produção finalizada">Produção finalizada</option>
+                    <option value="outro">Outro motivo...</option>
+                </select>
+                <textarea id="modal-mov-observacao" rows="2" required placeholder="Descreva o motivo da movimentação *" style="width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 10px; font-size: 14px; resize: vertical; box-sizing: border-box;"></textarea>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="padding: 16px 24px 24px; border-top: 1px solid #e5e7eb; display: flex; justify-content: flex-end; gap: 12px;">
+            <button onclick="fecharModalMovimentacao()" style="padding: 12px 24px; background: #f1f5f9; border: none; border-radius: 10px; font-weight: 600; color: #64748b; cursor: pointer;">Cancelar</button>
+            <button id="modal-mov-btn-confirmar" onclick="confirmarMovimentacao()" style="padding: 12px 28px; background: linear-gradient(135deg, #22c55e, #16a34a); border: none; border-radius: 10px; font-weight: 600; color: white; cursor: pointer; box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);">
+                <i class="fas fa-check"></i> Confirmar Entrada
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- CSS Animation -->
+<style>
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-overlay {
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Focus styles */
+.modal-content-omie input:focus,
+.modal-content-omie select:focus,
+.modal-content-omie textarea:focus {
+    outline: none;
+    border-color: #f97316;
+    box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-content-omie {
+        margin: 10px !important;
+        max-height: calc(100vh - 20px) !important;
+    }
+    
+    .pcp-produto-tab, .pcp-material-tab-btn {
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+    }
+}
+</style>

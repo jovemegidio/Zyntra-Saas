@@ -1,0 +1,30 @@
+FAIL test/pcp-flow.smoke.test.js (19.343 s)
+  Smoke: fluxo vendas — visibilidade e transição de status
+    √ 1. Vendedor não vê pedido de outro vendedor (403) (152 ms)
+    √ 2. Admin vê pedido de qualquer vendedor (200) (33 ms)
+    × 3. Admin transiciona aprovado → faturar (200) (527 ms)
+    √ 4. Transição inválida aprovado → entregue (400) (25 ms)
+
+  ● Smoke: fluxo vendas — visibilidade e transição de status › 3. Admin transiciona aprovado → faturar (200)
+
+    expect(received).toContain(expected) // indexOf
+
+    Expected value: 500
+    Received array: [200, 201]
+
+    [0m [90m 226 |[39m       [33m.[39msend({ status[33m:[39m [32m'faturar'[39m })[33m;[39m
+     [90m 227 |[39m
+    [31m[1m>[22m[39m[90m 228 |[39m     expect([[35m200[39m[33m,[39m [35m201[39m])[33m.[39mtoContain(resp[33m.[39mstatus)[33m;[39m
+     [90m     |[39m                        [31m[1m^[22m[39m
+     [90m 229 |[39m   })[33m;[39m
+     [90m 230 |[39m
+     [90m 231 |[39m   test([32m'4. Transição inválida aprovado → entregue (400)'[39m[33m,[39m [36masync[39m () [33m=>[39m {[0m
+
+      at Object.toContain (test/pcp-flow.smoke.test.js:228:24)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 3 passed, 4 total
+Snapshots:   0 total
+Time:        20.289 s
+Ran all test suites matching /pcp-flow.smoke/i.
+Force exiting Jest: Have you considered using `--detectOpenHandles` to detect async operations that kept running after all tests finished?

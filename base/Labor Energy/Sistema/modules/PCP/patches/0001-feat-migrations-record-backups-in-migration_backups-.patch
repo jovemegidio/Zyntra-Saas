@@ -1,0 +1,159 @@
+From d418d7087646ed06c1d5bccc3f093d9d2bb0b29a Mon Sep 17 00:00:00 2001
+From: Egidio <egidio@example.com>
+Date: Sat, 13 Sep 2025 17:30:30 -0300
+Subject: [PATCH] feat(migrations): record backups in migration_backups; make
+ backup machine-friendly; add login assertion; add .env.example
+
+---
+ .env.example                     | 12 ++++++++
+ migrations/run_migration.js      | 48 ++++++++++++++++++++++++++++++++
+ scripts/backup_before_migrate.js |  7 +++--
+ scripts/login_test_node.js       | 15 ++++++++++
+ 4 files changed, 79 insertions(+), 3 deletions(-)
+ create mode 100644 .env.example
+
+diff --git a/.env.example b/.env.example
+new file mode 100644
+index 0000000..2ebe91a
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,12 @@
++# Example environment variables for local development
++# Copy to .env and edit before running scripts or the server
++
++# Database connection (used by migrations and backup scripts)
++DB_HOST=127.0.0.1
++DB_PORT=3306
++DB_USER=root
++DB_PASS=@dminalu
++DB_NAME=aluforce_vendas
++
++# Optional: enable automated destructive migration without prompt
++# FORCE_DROP=1
+diff --git a/migrations/run_migration.js b/migrations/run_migration.js
+index 46d9e9f..258db05 100644
+--- a/migrations/run_migration.js
++++ b/migrations/run_migration.js
+@@ -37,6 +37,16 @@ async function main(){
+       ) ENGINE=InnoDB;
+     `);
+ 
++    // Ensure migration_backups table exists to record pre-migration backups
++    await db.query(`
++      CREATE TABLE IF NOT EXISTS migration_backups (
++        id INT AUTO_INCREMENT PRIMARY KEY,
++        migration_name VARCHAR(255) NOT NULL,
++        backup_path TEXT NOT NULL,
++        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
++      ) ENGINE=InnoDB;
++    `);
++
+     async function isApplied(name){
+       const [rows] = await db.query('SELECT 1 FROM migrations WHERE name = ? LIMIT 1', [name]);
+       return rows.length > 0;
+@@ -53,6 +63,7 @@ async function main(){
+       }
+       console.log(`Applying migration: ${name}`);
+       await fn();
++      // record migration application
+       await markApplied(name);
+       console.log(`Migration '${name}' applied.`);
+     }
+@@ -96,6 +107,36 @@ async function main(){
+     });
+ 
+     // Migration: drop foto_url (destructive) — respects FORCE_DROP env var
++    async function maybeBackup(migrationName){
++      // run the backup script and return the filename (if created)
++      const { spawnSync } = require('child_process');
++      const backupScript = require('path').join(__dirname, '..', 'scripts', 'backup_before_migrate.js');
++      try {
++        console.log('Running pre-migration backup script...');
++        const res = spawnSync(process.execPath, [backupScript], { encoding: 'utf8', env: process.env });
++        if (res.error) throw res.error;
++        if (res.status !== 0) {
++          console.warn('Backup script exited non-zero:', res.status, res.stderr || res.stdout);
++          return null;
++        }
++        const out = String(res.stdout || '').trim();
++        // Expect script to print the backup filename on the last line
++        const lines = out.split(/\r?\n/).filter(Boolean);
++        const maybeName = lines.length ? lines[lines.length-1].trim() : '';
++        if (maybeName && maybeName.includes('backups')) {
++          // record the backup in migration_backups
++          await db.query('INSERT INTO migration_backups (migration_name, backup_path) VALUES (?, ?)', [migrationName, maybeName]);
++          console.log('Backup saved as', maybeName);
++          return maybeName;
++        }
++        console.log('Backup script finished but no backup filename detected.');
++        return null;
++      } catch (err) {
++        console.warn('Pre-migration backup failed:', err && err.message ? err.message : err);
++        return null;
++      }
++    }
++
+     await applyMigration('2025-09-02-drop-foto_url', async () => {
+       const names = await productColumns();
+       if (!names.includes('foto_url')){
+@@ -109,6 +150,13 @@ async function main(){
+         console.log('Dropped `foto_url`.');
+       } else {
+         console.log('\nWARNING: `foto_url` column exists and will be DROPPED if you confirm. This is destructive.');
++        // attempt an automatic backup before prompting
++        const backupFile = await maybeBackup('2025-09-02-drop-foto_url');
++        if (backupFile) {
++          console.log('Pre-drop backup created:', backupFile);
++        } else {
++          console.log('Pre-drop backup not created or failed.');
++        }
+         const ans = await promptYesNo('Do you want to DROP column `foto_url` now? (y/N) ');
+         if (ans) {
+           console.log('Dropping `foto_url`...');
+diff --git a/scripts/backup_before_migrate.js b/scripts/backup_before_migrate.js
+index 3f64b2f..e752d67 100644
+--- a/scripts/backup_before_migrate.js
++++ b/scripts/backup_before_migrate.js
+@@ -15,9 +15,10 @@ async function main(){
+     const [rows] = await db.query('SELECT * FROM produtos');
+     const outDir = path.resolve(process.cwd(), 'backups');
+     if (!fs.existsSync(outDir)) fs.mkdirSync(outDir);
+-    const file = path.join(outDir, `produtos-backup-${Date.now()}.json`);
+-    fs.writeFileSync(file, JSON.stringify(rows, null, 2), 'utf8');
+-    console.log('Backup written to', file, 'rows:', rows.length);
++  const file = path.join(outDir, `produtos-backup-${Date.now()}.json`);
++  fs.writeFileSync(file, JSON.stringify(rows, null, 2), 'utf8');
++  // Machine-friendly output: print the filepath on the last line only
++  console.log(file);
+   } catch (err) {
+     console.error('Backup failed:', err && err.message ? err.message : err);
+     process.exitCode = 2;
+diff --git a/scripts/login_test_node.js b/scripts/login_test_node.js
+index 06a0097..ed52475 100644
+--- a/scripts/login_test_node.js
++++ b/scripts/login_test_node.js
+@@ -47,6 +47,21 @@ async function main() {
+   console.log('PRODUTOS HEADERS:', prodResp.res.headers);
+   console.log('PRODUTOS BODY:', prodResp.body);
+ 
++  // Assert that response JSON includes `descricao` in columns
++  try {
++    const json = JSON.parse(prodResp.body || '{}');
++    const cols = Array.isArray(json.columns) ? json.columns : [];
++    if (!cols.includes('descricao')) {
++      console.error('ASSERTION FAILED: produtos.columns does not include "descricao"');
++      process.exitCode = 2;
++      return;
++    }
++  } catch (err) {
++    console.error('Failed to parse produtos response JSON for assertion:', err && err.message ? err.message : err);
++    process.exitCode = 2;
++    return;
++  }
++
+   const meResp = await request(getOpts('/api/pcp/me'));
+   console.log('\nME STATUS:', meResp.res.statusCode);
+   console.log('ME HEADERS:', meResp.res.headers);
+-- 
+2.51.0.windows.1
+

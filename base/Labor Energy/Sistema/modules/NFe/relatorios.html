@@ -1,0 +1,599 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <!-- Favicon -->
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="theme-color" content="#1e1e1e">
+    <meta name="format-detection" content="telephone=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Zyntra: Relatórios Faturamento</title>
+
+    <!-- Sistema de Autenticação Unificado é DEVE ser carregado primeiro -->
+    <script src="/js/auth-unified.js?v=20260325" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260325" defer></script>
+
+    <!-- Fonte Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSP Fix - Converter onclick inline para addEventListener -->
+    <script src="/js/csp-fix.js" defer></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+
+    <!-- Design System é Faturamento Layout -->
+    <link rel="stylesheet" href="/modules/Faturamento/css/faturamento-layout.css?v=20260325">
+
+    <!-- Global Header & Sidebar é Padrão Institucional -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260325">
+
+    <!-- Performance: Skeleton Loaders -->
+    <link rel="stylesheet" href="/css/skeleton-loader.css?v=20260325">
+
+    <!-- Popup Confirmação -->
+    <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260325">
+
+    <!-- Anti-Copy Protection -->
+    <script src="/js/anti-copy-protection.js" defer></script>
+
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260325">
+    <style>
+        .quick-action { text-align: left; flex-direction: row; gap: 14px; padding: 18px; }
+        .quick-action .action-icon { width: 38px; height: 38px; border-radius: 8px; font-size: 15px; flex-shrink: 0; }
+        .quick-action .action-text { display: flex; flex-direction: column; gap: 3px; }
+        .quick-action .action-text span:first-child { font-size: 13px; font-weight: 600; color: #111827; }
+        .quick-action .action-desc { font-size: 11px; color: #6b7280; line-height: 1.4; font-weight: 400; }
+        .modal-overlay { display: none; }
+        .modal-overlay.active { display: flex; }
+        .report-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
+        .summary-card { background: #f9fafb; border-radius: 6px; padding: 14px; text-align: center; }
+        .summary-card .label { font-size: 11px; color: #6b7280; text-transform: uppercase; }
+        .summary-card .value { font-size: 20px; font-weight: 700; color: var(--fat-primary, #10b981); margin-top: 4px; }
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260325">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260325">
+</head>
+<body>
+
+<div class="app-container">
+
+<div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+<aside class="sidebar" id="mobile-sidebar">
+    <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+    <nav class="sidebar-nav">
+        <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+        <a href="consultar.html" class="sidebar-btn" title="Consultar NFe"><i class="fas fa-search"></i></a>
+        <a href="relatorios.html" class="sidebar-btn active" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+        <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-history"></i></a>
+        <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
+    </nav>
+    <div class="sidebar-bottom">
+        <button class="sidebar-btn" title="Configurações" onclick="abrirModalConfiguracoes()"><i class="fas fa-cog"></i></button>
+    </div>
+</aside>
+
+<main class="main-area">
+    <header class="header">
+        <div class="header-left">
+            <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+            <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Relatórios</span>
+            </div>
+        </div>
+        <div class="header-right">
+            <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+            <button class="header-btn" title="Notificações" onclick="toggleNotificacoes()"><i class="fas fa-bell"></i></button>
+            <div class="user-greeting">
+                <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                <div class="user-avatar" id="user-avatar">
+                    <img alt="Foto" id="user-photo" style="display:none">
+                    <span id="user-initials">U</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="page-content">
+
+            <input type="hidden" id="currentReportType" value="">
+
+            <div id="alertContainer"></div>
+
+            <div class="page-header fade-in">
+                <div class="page-header-top">
+                    <div class="page-title-wrapper">
+                        <div class="page-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div>
+                            <h1 class="page-title">Relatórios Faturamento</h1>
+                            <p class="page-subtitle">Gere e exporte relatórios profissionais em PDF</p>
+                        </div>
+                    </div>
+                    <div class="page-actions">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);">Período:</label>
+                            <input type="date" class="form-control" id="reportDataInicio" style="width:140px;padding:6px 10px;font-size:12px;">
+                            <span style="color:var(--text-muted);font-size:12px;">até</span>
+                            <input type="date" class="form-control" id="reportDataFim" style="width:140px;padding:6px 10px;font-size:12px;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 1: Ordens de Serviço -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-clipboard-list"></i> Ordens de Serviço
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('os_abertas')">
+                            <div class="action-icon"><i class="fas fa-clipboard"></i></div>
+                            <div class="action-text">
+                                <span>OS Abertas</span>
+                                <span class="action-desc">Ordens de serviço em aberto</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_periodo')">
+                            <div class="action-icon"><i class="fas fa-calendar"></i></div>
+                            <div class="action-text">
+                                <span>OS por Período</span>
+                                <span class="action-desc">Filtrar por data de abertura</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_tecnico')">
+                            <div class="action-icon"><i class="fas fa-user-cog"></i></div>
+                            <div class="action-text">
+                                <span>OS por Técnico</span>
+                                <span class="action-desc">Agrupado por técnico responsável</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('os_status')">
+                            <div class="action-icon"><i class="fas fa-tasks"></i></div>
+                            <div class="action-text">
+                                <span>OS por Status</span>
+                                <span class="action-desc">Distribuião por status atual</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Contratos de Serviço -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-file-contract"></i> Contratos de Serviço
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_ativos')">
+                            <div class="action-icon"><i class="fas fa-file-signature"></i></div>
+                            <div class="action-text">
+                                <span>Contratos Ativos</span>
+                                <span class="action-desc">Contratos vigentes</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_vencimento')">
+                            <div class="action-icon"><i class="fas fa-clock"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Vencimento</span>
+                                <span class="action-desc">Próximos a vencer</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_valor')">
+                            <div class="action-icon"><i class="fas fa-dollar-sign"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Valor</span>
+                                <span class="action-desc">Ordenados por valor mensal</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_cliente')">
+                            <div class="action-icon"><i class="fas fa-users"></i></div>
+                            <div class="action-text">
+                                <span>Contratos por Cliente</span>
+                                <span class="action-desc">Agrupado por cliente</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('renovacoes')">
+                            <div class="action-icon"><i class="fas fa-redo"></i></div>
+                            <div class="action-text">
+                                <span>Renovações Pendentes</span>
+                                <span class="action-desc">Contratos para renovação</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('contratos_cancelados')">
+                            <div class="action-icon"><i class="fas fa-times-circle"></i></div>
+                            <div class="action-text">
+                                <span>Contratos Cancelados</span>
+                                <span class="action-desc">Histórico de cancelamentos</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('receita_recorrente')">
+                            <div class="action-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="action-text">
+                                <span>Receita Recorrente</span>
+                                <span class="action-desc">MRR e evoluão mensal</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Faturamento -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i> Faturamento
+                </div>
+                <div class="card-body">
+                    <div class="quick-actions" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));">
+                        <button class="quick-action" onclick="gerarRelatorio('faturamento_mensal')">
+                            <div class="action-icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div class="action-text">
+                                <span>Faturamento Mensal</span>
+                                <span class="action-desc">Total faturado por mês</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('nfe_status')">
+                            <div class="action-icon"><i class="fas fa-check-circle"></i></div>
+                            <div class="action-text">
+                                <span>NFe por Status</span>
+                                <span class="action-desc">Autorizadas, canceladas, etc</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('top_clientes')">
+                            <div class="action-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="action-text">
+                                <span>Top Clientes</span>
+                                <span class="action-desc">Maiores compradores</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('produtos_vendidos')">
+                            <div class="action-icon"><i class="fas fa-box"></i></div>
+                            <div class="action-text">
+                                <span>Produtos Mais Vendidos</span>
+                                <span class="action-desc">Ranking de produtos</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('impostos')">
+                            <div class="action-icon"><i class="fas fa-percentage"></i></div>
+                            <div class="action-text">
+                                <span>Impostos Recolhidos</span>
+                                <span class="action-desc">ICMS, IPI, PIS, COFINS</span>
+                            </div>
+                        </button>
+                        <button class="quick-action" onclick="gerarRelatorio('comparativo_anual')">
+                            <div class="action-icon"><i class="fas fa-chart-area"></i></div>
+                            <div class="action-text">
+                                <span>Comparativo Anual</span>
+                                <span class="action-desc">Ano atual vs anterior</span>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewSection">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3><i class="fas fa-chart-bar"></i> <span id="previewTitle">Relatério</span></h3>
+            <button class="modal-close" onclick="fecharPreview()" title="Fechar"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body" id="previewContent"></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="fecharPreview()">Fechar</button>
+            <button class="btn btn-secondary" onclick="imprimirRelatorio()"><i class="fas fa-print"></i> Imprimir</button>
+            <button class="btn btn-primary" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> Exportar PDF</button>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleMobileSidebar() {
+    document.getElementById('mobile-sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+}
+function toggleNotificacoes() {}
+
+var _relOriginalTitle = document.title;
+
+var avatarNameMap = {
+    'clemerson':'CM','isabela':'IB','thaina':'TH','thiago':'TG','nicolas':'NC',
+    'nicolasdaniel':'ND','rh':'RH','admin':'AD','ti':'TI','tialuforce':'TI',
+    'antonio':'AT','andreia':'AN','guilherme':'GH','marcelo':'MC','financeiro':'FN',
+    'douglas':'DG','hellen':'HL','helen':'HL','marcia':'MR','augusto':'AG',
+    'renata':'RN','fabiano':'FB','fabiola':'FL'
+};
+
+function carregarUsuario() {
+    fetch('/api/me', { credentials:'include' })
+    .then(function(r) { return r.json(); })
+    .then(function(user) {
+        var d = user.dados || user;
+        var nome = (d.nome || d.name || 'Usuário').split(' ')[0];
+        document.getElementById('user-name').textContent = (nome || '').split(' ')[0];
+        var h = new Date().getHours();
+        document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+        var el = document.getElementById('user-initials');
+        var photo = document.getElementById('user-photo');
+        if (d.foto || d.avatar) {
+            photo.src = d.foto || d.avatar; photo.style.display = 'block'; photo.style.width = '100%'; photo.style.height = '100%'; photo.style.borderRadius = '50%'; photo.style.objectFit = 'cover'; el.style.display = 'none';
+        } else {
+            var key = nome.toLowerCase().replace(/\s/g,'');
+            el.textContent = avatarNameMap[key] || nome.substring(0,2).toUpperCase();
+        }
+    }).catch(function() {});
+}
+
+function _escHtml(text) {
+    var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return String(text || '').replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function showAlert(msg, type) {
+    var c = document.getElementById('alertContainer');
+    var d = document.createElement('div');
+    d.className = 'alert ' + (type || 'info');
+    var iconMap = { 'success': 'check-circle', 'danger': 'times-circle', 'warning': 'exclamation-triangle', 'info': 'info-circle' };
+    d.innerHTML = '<i class="fas fa-' + (iconMap[type] || 'info-circle') + '"></i> ' + _escHtml(msg);
+    c.prepend(d);
+    setTimeout(function() { if (d.parentNode) d.remove(); }, 5000);
+}
+
+var dadosRelatorioAtual = null;
+
+function gerarRelatorio(tipo) {
+    var di = document.getElementById('reportDataInicio').value;
+    var df = document.getElementById('reportDataFim').value;
+    var params = new URLSearchParams();
+    params.append('tipo', tipo);
+    if (di) params.append('dataInicio', di);
+    if (df) params.append('dataFim', df);
+
+    document.getElementById('previewTitle').textContent = 'Carregando...';
+    document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin" style="font-size:32px;color:var(--primary-500);"></i><p style="margin-top:12px;color:var(--text-secondary);font-size:13px;">Carregando relatério...</p></div>';
+    document.getElementById('previewSection').classList.add('active');
+    document.getElementById('currentReportType').value = tipo;
+
+    fetch('/api/nfe/relatorios/' + encodeURIComponent(tipo) + '?' + params.toString(), { credentials:'include' })
+    .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+    })
+    .then(function(dados) {
+        if (!dados || (!dados.colunas && !dados.resumo)) throw new Error('Dados vazios');
+        dadosRelatorioAtual = dados;
+        renderizarRelatorio(dados);
+    })
+    .catch(function(err) {
+        dadosRelatorioAtual = null;
+        document.getElementById('previewTitle').textContent = 'Relatério Indisponível';
+        document.getElementById('previewContent').innerHTML = '<div style="text-align:center;padding:48px 24px;">' +
+            '<i class="fas fa-database" style="font-size:48px;color:var(--text-muted);margin-bottom:16px;"></i>' +
+            '<h3 style="color:var(--text-primary);font-size:16px;margin-bottom:8px;">Dados não disponíveis</h3>' +
+            '<p style="color:var(--text-secondary);font-size:13px;max-width:400px;margin:0 auto;">Este relatério requer dados do servidor. Verifique se o endpoint da API está configurado ou tente novamente mais tarde.</p>' +
+            '</div>';
+    });
+}
+
+function renderizarRelatorio(dados) {
+    document.getElementById('previewTitle').textContent = dados.título || 'Relatério';
+    document.title = 'Zyntra: ' + (dados.titulo || 'Relatério');
+
+    var período = '';
+    var di = document.getElementById('reportDataInicio').value;
+    var df = document.getElementById('reportDataFim').value;
+    if (di && df) {
+        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+    } else if (di) {
+        período = 'A partir de ' + new Date(di + 'T00:00:00').toLocaleDateString('pt-BR');
+    }
+
+    var html = '';
+    if (dados.resumo) {
+        html += '<div class="report-summary">';
+        dados.resumo.forEach(function(r) {
+            html += '<div class="summary-card"><div class="label">' + _escHtml(r.label) + '</div><div class="value">' + _escHtml(r.value) + '</div></div>';
+        });
+        html += '</div>';
+    }
+    if (período) {
+        html += '<div style="padding:8px 14px;background:var(--bg-secondary);border-radius:var(--radius-md);margin-bottom:16px;font-size:12px;color:var(--text-secondary);display:flex;align-items:center;gap:8px;"><i class="fas fa-calendar-alt" style="color:var(--primary-500);"></i> Período: <strong>' + período + '</strong></div>';
+    }
+    if (dados.colunas && dados.linhas) {
+        html += '<div style="overflow-x:auto;"><table class="data-table"><thead><tr>';
+        dados.colunas.forEach(function(c) { html += '<th>' + _escHtml(c) + '</th>'; });
+        html += '</tr></thead><tbody>';
+        if (dados.linhas.length === 0) {
+            html += '<tr><td colspan="' + dados.colunas.length + '" style="text-align:center;padding:24px;color:var(--text-muted);">Nenhum registro encontrado para o período selecionado</td></tr>';
+        } else {
+            dados.linhas.forEach(function(l) {
+                html += '<tr>';
+                l.forEach(function(v) { html += '<td>' + _escHtml(v) + '</td>'; });
+                html += '</tr>';
+            });
+        }
+        html += '</tbody></table></div>';
+    }
+
+    document.getElementById('previewContent').innerHTML = html;
+}
+
+function fecharPreview() {
+    document.getElementById('previewSection').classList.remove('active');
+    document.title = _relOriginalTitle;
+}
+
+// Close on overlay click
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('active')) {
+        e.target.classList.remove('active');
+        document.title = _relOriginalTitle;
+    }
+});
+
+function exportarPDF() {
+    var dados = dadosRelatorioAtual;
+    if (!dados) { showAlert('Nenhum relatério carregado para exportar', 'warning'); return; }
+
+    var período = '';
+    var di = document.getElementById('reportDataInicio').value;
+    var df = document.getElementById('reportDataFim').value;
+    if (di && df) {
+        período = new Date(di + 'T00:00:00').toLocaleDateString('pt-BR') + ' a ' + new Date(df + 'T00:00:00').toLocaleDateString('pt-BR');
+    }
+    var dataGeracao = new Date().toLocaleString('pt-BR');
+
+    var win = window.open('', '_blank', 'width=900,height=700');
+    var tableHtml = '';
+    if (dados.colunas && dados.linhas) {
+        tableHtml = '<table><thead><tr>';
+        dados.colunas.forEach(function(c) { tableHtml += '<th>' + _escHtml(c) + '</th>'; });
+        tableHtml += '</tr></thead><tbody>';
+        dados.linhas.forEach(function(l, idx) {
+            tableHtml += '<tr class="' + (idx % 2 === 0 ? 'even' : '') + '">';
+            l.forEach(function(v) { tableHtml += '<td>' + _escHtml(v) + '</td>'; });
+            tableHtml += '</tr>';
+        });
+        tableHtml += '</tbody></table>';
+    }
+
+    var summaryHtml = '';
+    if (dados.resumo) {
+        summaryHtml = '<div class="summary-row">';
+        dados.resumo.forEach(function(r) {
+            summaryHtml += '<div class="summary-card"><div class="s-value">' + _escHtml(r.value) + '</div><div class="s-label">' + _escHtml(r.label) + '</div></div>';
+        });
+        summaryHtml += '</div>';
+    }
+
+    win.document.write(
+        '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">' +
+        '<title>' + _escHtml(dados.título) + ' - ALUFORCE</title>' +
+        '<style>' +
+            ':root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}' +
+            '@page{margin:10mm;size:A4 landscape}' +
+            '@media print{body{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}.no-print{display:none!important}}' +
+            '*{margin:0;padding:0;box-sizing:border-box}' +
+            'body{font-family:Inter,"Segoe UI",Arial,sans-serif;color:var(--text);font-size:11px;line-height:1.5;background:#eef4f8;display:flex;justify-content:center}' +
+            '.shell{width:277mm;margin:11mm auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}' +
+            '.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:14px}' +
+            '.rpt-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:16px}' +
+            '.brand-name{font-size:20px;font-weight:900;color:var(--brand);letter-spacing:.08em}' +
+            '.brand-sub{font-size:10px;color:var(--muted);font-weight:400;margin-top:3px}' +
+            '.rpt-meta{text-align:right}' +
+            '.doc-tag{font-size:9px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);padding:4px 14px;border-radius:10px;display:inline-block;margin-bottom:8px;letter-spacing:1px;text-transform:uppercase}' +
+            '.meta-line{font-size:10px;color:var(--muted);margin-top:3px}' +
+            '.doc-card{border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:12px 18px;margin-bottom:16px;text-align:center}' +
+            '.doc-card h1{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:.5px;margin:0}' +
+            '.doc-card .subtitle{font-size:10px;color:var(--accent);margin-top:3px;font-weight:600}' +
+            '.summary-row{display:flex;gap:12px;margin-bottom:16px}' +
+            '.summary-card{flex:1;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:14px 18px}' +
+            '.summary-card .s-value{font-size:20px;font-weight:700;color:var(--ink)}' +
+            '.summary-card .s-label{font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:600;letter-spacing:.5px;margin-top:3px}' +
+            '.section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:16px}' +
+            '.s-head{background:var(--brand);color:#fff;padding:8px 14px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;display:flex;align-items:center;gap:8px}' +
+            '.s-head::before{content:"";width:4px;height:14px;background:var(--accent);border-radius:2px}' +
+            'table{width:100%;border-collapse:collapse}' +
+            'thead th{background:var(--brand);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.4px}' +
+            'tbody td{padding:8px 12px;border-bottom:1px solid var(--line);font-size:10.5px}' +
+            'tbody tr:nth-child(even){background:var(--soft)}' +
+            'tbody tr:hover{background:var(--accent-soft)}' +
+            '.badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:9px;font-weight:600}' +
+            '.badge-success{background:#dcfce7;color:#166534}.badge-warning{background:#fef3c7;color:#92400e}.badge-danger{background:#fee2e2;color:#991b1b}.badge-info{background:#dbeafe;color:#1e40af}' +
+            '.rpt-footer{margin-top:20px;padding-top:10px;border-top:1px dashed var(--line);display:flex;justify-content:space-between;align-items:center}' +
+            '.rpt-footer span{font-size:8px;color:var(--muted)}' +
+            '.confidential{font-size:7px;color:var(--line);text-align:center;margin-top:8px;letter-spacing:1.5px;text-transform:uppercase}' +
+            '.btn-bar{position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:100}' +
+            '.btn-bar button{border:none;padding:10px 22px;border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .2s}' +
+            '.btn-print{background:linear-gradient(135deg,var(--brand) 0%,var(--accent) 100%);color:#fff;box-shadow:0 8px 20px rgba(11,40,66,.2)}' +
+            '.btn-print:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(11,40,66,.3)}' +
+            '.btn-close{background:var(--soft);color:var(--text);border:1px solid var(--line)}' +
+            '.btn-close:hover{background:#fff}' +
+        '</style></head><body>' +
+        '<div class="btn-bar no-print">' +
+            '<button class="btn-print" onclick="window.print()">Imprimir / Salvar PDF</button>' +
+            '<button class="btn-close" onclick="window.close()">Fechar</button>' +
+        '</div>' +
+        '<div class="shell">' +
+        '<div class="top-rule"></div>' +
+        '<div class="rpt-header">' +
+            '<div><div class="brand-name">ALUFORCE</div><div class="brand-sub">Zyntra &mdash; M\u00f3dulo NFe</div></div>' +
+            '<div class="rpt-meta">' +
+                '<div class="doc-tag">Relat\u00f3rio</div>' +
+                '<div class="meta-line">Emitido em: ' + dataGeracao + '</div>' +
+                (período ? '<div class="meta-line">Per\u00edodo: ' + período + '</div>' : '') +
+            '</div>' +
+        '</div>' +
+        '<div class="doc-card"><h1>' + _escHtml(dados.título) + '</h1><div class="subtitle">M\u00f3dulo NFe &mdash; Sistema Integrado de Gest\u00e3o Empresarial</div></div>' +
+        summaryHtml +
+        '<div class="section-card"><div class="s-head">Dados do Relat\u00f3rio</div><div style="padding:0">' +
+        tableHtml +
+        '</div></div>' +
+        '<div style="text-align:right;font-size:10px;color:var(--muted);margin-bottom:16px">' + (dados.linhas ? dados.linhas.length : 0) + ' registro(s) encontrado(s)</div>' +
+        '<div class="rpt-footer"><span>ALUFORCE &mdash; Sistema Integrado de Gest\u00e3o Empresarial</span><span>Documento gerado automaticamente pelo Zyntra ERP</span></div>' +
+        '<div class="confidential">Documento Confidencial &mdash; Uso Interno</div>' +
+        '</div>' +
+        '</body></html>'
+    );
+    win.document.close();
+    showAlert('PDF gerado com sucesso. Use "Salvar como PDF" na janela de impress\u00e3o', 'success');
+}
+
+function imprimirRelatorio() {
+    exportarPDF();
+}
+
+function abrirModalConfiguracoes() { showAlert('Configurações é Em desenvolvimento', 'info'); }
+
+document.addEventListener('DOMContentLoaded', function() {
+    carregarUsuario();
+    // Set default date range to current month
+    var now = new Date();
+    var firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    document.getElementById('reportDataInicio').value = firstDay.toISOString().slice(0, 10);
+    document.getElementById('reportDataFim').value = now.toISOString().slice(0, 10);
+});
+</script>
+
+<!-- Sistema de Notificações Global -->
+<script src="/js/notification-manager.js?v=20260325"></script>
+<script src="/_shared/connection-monitor.js?v=20260325"></script>
+<script src="/js/popup-confirmacao.js?v=20260325"></script>
+
+<!-- Utilitários Compartilhados -->
+<script src="/_shared/confirm-dialog.js?v=20260325"></script>
+<script src="/js/mobile-auto-enhance.js?v=20260325" defer></script>
+
+<!-- Chat Widget BOB AI -->
+<script src="/chat/widget.js?v=20260325" defer></script>
+
+<!-- Zyntra Chat Teams -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/chat-teams/chat-widget.js?v=20260325" defer></script>
+
+<!-- Enterprise Shared -->
+<script src="/js/sidebar-click-animation.js?v=20260325"></script>
+<script src="/_shared/accessibility-widget.js?v=20260325"></script>
+    <script src="/js/user-dropdown.js?v=20260325" defer></script>
+</body>
+</html>

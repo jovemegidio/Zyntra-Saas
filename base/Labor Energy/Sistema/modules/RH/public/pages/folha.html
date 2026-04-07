@@ -1,0 +1,1107 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Folha de Pagamento | ALUFORCE ERP</title>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
+    <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
+    <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <script src="/js/anti-copy-protection.js" defer></script>
+    <style>
+        /* === Folha Manual - Estilo Planilha === */
+        .content-area { padding: 24px 28px; }
+
+        /* Barra de Competência */
+        .competencia-bar {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+            padding: 16px 20px; background: #fff; border-radius: 12px;
+            border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            flex-wrap: wrap;
+        }
+        .competencia-bar label { font-weight: 600; color: #334155; font-size: 0.9rem; }
+        .competencia-bar select {
+            padding: 8px 14px; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 0.9rem; font-family: 'Inter', sans-serif; background: #f8fafc;
+            cursor: pointer; outline: none; transition: border-color 0.2s;
+        }
+        .competencia-bar select:focus { border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+        .competencia-spacer { flex: 1; }
+        .competencia-bar .btn { white-space: nowrap; }
+
+        /* KPI resumo */
+        .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
+        .kpi-card {
+            background: #fff; border-radius: 12px; padding: 18px 20px;
+            border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+            position: relative; overflow: hidden;
+        }
+        .kpi-label { font-size: 0.78rem; color: #64748b; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 1.6rem; font-weight: 800; color: #1e293b; margin: 4px 0 2px; }
+        .kpi-sub { font-size: 0.75rem; color: #94a3b8; }
+        .kpi-icon {
+            position: absolute; top: 16px; right: 18px; width: 40px; height: 40px;
+            border-radius: 10px; display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+        .kpi-icon.indigo { background: #eef2ff; color: #6366f1; }
+        .kpi-icon.green { background: #ecfdf5; color: #059669; }
+        .kpi-icon.amber { background: #fffbeb; color: #d97706; }
+        .kpi-icon.red { background: #fef2f2; color: #dc2626; }
+
+        /* Tabs */
+        .tabs-container { display: flex; gap: 0; margin-bottom: 0; }
+        .tab-btn {
+            padding: 12px 28px; font-size: 0.9rem; font-weight: 600;
+            border: 1px solid #e2e8f0; border-bottom: none;
+            background: #f1f5f9; color: #64748b; cursor: pointer;
+            border-radius: 10px 10px 0 0; transition: all 0.2s;
+            font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 8px;
+        }
+        .tab-btn:hover { background: #e2e8f0; color: #334155; }
+        .tab-btn.active {
+            background: #fff; color: #6366f1; border-color: #e2e8f0;
+            box-shadow: 0 -2px 0 #6366f1 inset; position: relative; z-index: 1;
+        }
+        .tab-btn .tab-badge {
+            background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px;
+            border-radius: 10px; font-weight: 700;
+        }
+        .tab-btn.active .tab-badge { background: #6366f1; color: #fff; }
+
+        /* Tabela Editvel (card) */
+        .table-card {
+            background: #fff; border-radius: 0 12px 12px 12px;
+            border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+        .table-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 20px; border-bottom: 1px solid #e2e8f0; background: #fafbfd;
+        }
+        .table-card-title { font-weight: 700; color: #1e293b; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
+        .table-card-actions { display: flex; gap: 8px; }
+
+        /* Tabela de dados */
+        .folha-table { width: 100%; border-collapse: collapse; }
+        .folha-table thead th {
+            padding: 10px 8px; text-align: center; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; color: #475569; background: #f1f5f9;
+            border-bottom: 2px solid #e2e8f0; letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        .folha-table thead th:first-child,
+        .folha-table thead th:nth-child(2) { text-align: left; }
+        .folha-table tbody td {
+            padding: 4px 4px; border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle; font-size: 0.85rem;
+        }
+        .folha-table tbody tr:hover { background: #f8fafc; }
+        .folha-table tbody tr.total-row {
+            background: #f0fdf4; font-weight: 700; border-top: 2px solid #059669;
+        }
+        .folha-table tbody tr.total-row td { padding: 12px 8px; font-size: 0.9rem; color: #065f46; }
+
+        /* Inputs dentro da tabela */
+        .cell-input {
+            width: 100%; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px;
+            font-size: 0.85rem; font-family: 'Inter', sans-serif; text-align: right;
+            background: transparent; transition: all 0.15s; color: #334155;
+        }
+        .cell-input:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .cell-input:focus { border-color: #6366f1; background: #fff; box-shadow: 0 0 0 2px rgba(99,102,241,0.12); outline: none; }
+        .cell-input.text-left { text-align: left; }
+        .cell-input.empresa { text-transform: uppercase; font-weight: 600; font-size: 0.78rem; color: #6366f1; }
+        .cell-total { text-align: right; font-weight: 700; color: #059669; padding: 6px 8px; font-size: 0.85rem; }
+
+        /* Botão remover linha */
+        .btn-remove-row {
+            width: 28px; height: 28px; border: none; border-radius: 6px;
+            background: transparent; color: #94a3b8; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; transition: all 0.2s; font-size: 0.8rem;
+        }
+        .btn-remove-row:hover { background: #fef2f2; color: #ef4444; }
+
+        /* Botes */
+        .btn {
+            padding: 9px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'Inter', sans-serif; transition: all 0.2s;
+        }
+        .btn-primary { background: #6366f1; color: #fff; }
+        .btn-primary:hover { background: #4f46e5; }
+        .btn-success { background: #059669; color: #fff; }
+        .btn-success:hover { background: #047857; }
+        .btn-outline { background: transparent; color: #475569; border: 1px solid #cbd5e1; }
+        .btn-outline:hover { background: #f1f5f9; }
+        .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+        .btn-danger { background: #ef4444; color: #fff; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Barra de ações inferior */
+        .actions-footer {
+            display: flex; align-items: center; gap: 12px; padding: 16px 20px;
+            border-top: 1px solid #e2e8f0; background: #fafbfd; flex-wrap: wrap;
+        }
+        .actions-footer .total-display {
+            font-size: 1.1rem; font-weight: 800; color: #1e293b;
+            display: flex; align-items: center; gap: 8px; margin-right: auto;
+        }
+        .actions-footer .total-display .valor { color: #059669; }
+        .badge-status {
+            padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .badge-rascunho { background: #fef3c7; color: #92400e; }
+        .badge-fechada { background: #dcfce7; color: #166534; }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center; padding: 50px 20px; color: #94a3b8;
+        }
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; }
+        .empty-state h3 { color: #64748b; margin: 8px 0 4px; font-size: 1rem; }
+        .empty-state p { font-size: 0.85rem; }
+
+        /* Modal */
+        .modal {
+            position: fixed; inset: 0; z-index: 9000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-overlay {
+            position: absolute; inset: 0; background: rgba(15,23,42,0.5);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content {
+            position: relative; background: #fff; border-radius: 16px;
+            width: 95%; max-width: 600px; max-height: 85vh; overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 24px; border-bottom: 1px solid #e2e8f0;
+        }
+        .modal-header h2 { font-size: 1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+        .modal-close {
+            width: 32px; height: 32px; border: none; border-radius: 8px;
+            background: transparent; cursor: pointer; color: #94a3b8; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .modal-close:hover { background: #f1f5f9; color: #ef4444; }
+        .modal-body { padding: 20px 24px; }
+        .modal-footer {
+            display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+            padding: 16px 24px; border-top: 1px solid #e2e8f0;
+        }
+
+        /* Lista de funcionários no modal */
+        .func-list { max-height: 400px; overflow-y: auto; }
+        .func-item {
+            display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+            border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.15s;
+        }
+        .func-item:hover { background: #f8fafc; }
+        .func-item input[type="checkbox"] { width: 16px; height: 16px; accent-color: #6366f1; cursor: pointer; }
+        .func-item .func-nome { font-weight: 600; color: #1e293b; font-size: 0.9rem; }
+        .func-item .func-info { font-size: 0.78rem; color: #64748b; }
+        .func-filter { width: 100%; padding: 10px 14px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; font-size: 0.9rem; font-family: 'Inter'; }
+        .func-filter:focus { outline: none; border-color: #6366f1; }
+
+        /* Loading spinner */
+        .loading-spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Histórico */
+        .histórico-list { margin-top: 20px; }
+        .hist-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px; background: #fff; border: 1px solid #e2e8f0;
+            border-radius: 10px; margin-bottom: 8px;
+        }
+        .hist-item .hist-label { font-weight: 600; color: #334155; }
+        .hist-item .hist-valor { font-weight: 800; color: #059669; }
+        .hist-item .hist-status { font-size: 0.75rem; }
+
+        /* Responsive */
+        @media (max-width: 1100px) { .kpi-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .content-area { padding: 16px 12px; }
+            .kpi-row { grid-template-columns: 1fr; }
+            .competencia-bar { flex-direction: column; align-items: stretch; }
+            .competencia-spacer { display: none; }
+            .table-card { border-radius: 10px; }
+            .folha-table { font-size: 0.78rem; }
+            .cell-input { font-size: 0.78rem; padding: 5px 4px; }
+            .tab-btn { padding: 10px 16px; font-size: 0.82rem; }
+        }
+
+        /* Scroll horizontal da tabela */
+        .table-scroll { overflow-x: auto; }
+    
+    /* ===== COMPRAS STANDARD — STAT CARDS ===== */
+
+
+    </style>
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- Sidebar Admin -->
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="../areaadm.html" class="sidebar-btn" title="Dashboard RH"><i class="fas fa-chart-pie"></i></a>
+                <a href="funcionarios.html" class="sidebar-btn" title="Funcionários"><i class="fas fa-users"></i></a>
+                <a href="../gestão-holerites.html" class="sidebar-btn" title="Gestão de Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="folha.html" class="sidebar-btn active" title="Folha de Pagamento"><i class="fas fa-money-check-alt"></i></a>
+                <a href="gestão-ponto.html" class="sidebar-btn" title="Gestão do Ponto"><i class="fas fa-clock"></i></a>
+                <a href="importar-ponto.html" class="sidebar-btn" title="Importar Ponto (Control iD)"><i class="fas fa-upload"></i></a>
+                <a href="ferias.html" class="sidebar-btn" title="Gestão de Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="gestão-solicitacoes.html" class="sidebar-btn" title="Gestão de Solicitações"><i class="fas fa-tasks"></i></a>
+                <a href="calendario-rh.html" class="sidebar-btn" title="Calendário RH"><i class="fas fa-calendar-alt"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <a href="avaliacoes.html" class="sidebar-btn" title="Avaliações"><i class="fas fa-star"></i></a>
+                <a href="aplicar-avaliacoes.html" class="sidebar-btn" title="Aplicar Avaliações"><i class="fas fa-clipboard-check"></i></a>
+                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-user"></i></a>
+            </div>
+        </aside>
+
+        <main class="main-area">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;margin:0;display:inline;gap:0;">Folha de Pagamento</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
+                            <span id="user-initials">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content-area">
+                <!-- Barra de Competência -->
+                <div class="competencia-bar">
+                    <i class="fas fa-money-check-alt" style="font-size:1.2rem;color:#6366f1;"></i>
+                    <label>Folha de Pagamento</label>
+                    <select id="sel-mes"></select>
+                    <select id="sel-ano"></select>
+                    <button class="btn btn-primary btn-sm" onclick="carregarCompetencia()">
+                        <i class="fas fa-search"></i> Carregar
+                    </button>
+                    <div class="competencia-spacer"></div>
+                    <button class="btn btn-outline btn-sm" onclick="abrirModalImportar()" title="Importar funcionários do sistema">
+                        <i class="fas fa-user-plus"></i> Importar Funcionários
+                    </button>
+                    <button class="btn btn-outline btn-sm" onclick="abrirHistorico()" title="Ver folhas anteriores">
+                        <i class="fas fa-history"></i> Histórico
+                    </button>
+                </div>
+
+                <!-- KPI Cards resumo -->
+            <div class="metrics-grid">
+                <div class="metric-card blue">
+                    <div class="metric-header">
+                        <div class="metric-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-salário">--</div>
+                    <div class="metric-label">Total Salário</div>
+                </div>
+                <div class="metric-card orange">
+                    <div class="metric-header">
+                        <div class="metric-icon orange"><i class="fas fa-hand-holding-usd"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-adiantamento">--</div>
+                    <div class="metric-label">Total Adiantamento</div>
+                </div>
+                <div class="metric-card green">
+                    <div class="metric-header">
+                        <div class="metric-icon green"><i class="fas fa-calculator"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-total-geral">--</div>
+                    <div class="metric-label">Total Geral (Contas a Pagar)</div>
+                </div>
+                <div class="metric-card red">
+                    <div class="metric-header">
+                        <div class="metric-icon red"><i class="fas fa-users"></i></div>
+                        <span class="metric-trend">&mdash;</span>
+                    </div>
+                    <div class="metric-value" id="kpi-colaboradores">--</div>
+                    <div class="metric-label">Colaboradores</div>
+                </div>
+            </div>
+
+                <!-- Tabs -->
+                <div class="tabs-container">
+                    <button class="tab-btn active" id="tab-salário" onclick="trocarTab('SALARIO')">
+                        <i class="fas fa-money-bill-wave"></i> SALÁRIO
+                        <span class="tab-badge" id="badge-sal">0</span>
+                    </button>
+                    <button class="tab-btn" id="tab-adiantamento" onclick="trocarTab('ADIANTAMENTO')">
+                        <i class="fas fa-hand-holding-usd"></i> ADIANTAMENTO
+                        <span class="tab-badge" id="badge-adto">0</span>
+                    </button>
+                </div>
+
+                <!-- Tabela SALÁRIO -->
+                <div class="table-card" id="card-SALARIO">
+                    <div class="table-card-header">
+                        <div class="table-card-title">
+                            <i class="fas fa-table"></i>
+                            <span id="titulo-SALARIO">SALÁRIO, POR FORA E HORA EXTRAS</span>
+                        </div>
+                        <div class="table-card-actions">
+                            <span class="badge-status badge-rascunho" id="status-SALARIO">RASCUNHO</span>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="folha-table" id="tabela-SALARIO">
+                            <thead>
+                                <tr>
+                                    <th style="width:30px;">#</th>
+                                    <th style="min-width:110px;text-align:left;">EMPRESA</th>
+                                    <th style="min-width:180px;text-align:left;">COLABORADOR</th>
+                                    <th style="min-width:110px;">SALÁRIO</th>
+                                    <th style="min-width:110px;">SAL. POR FORA</th>
+                                    <th style="min-width:100px;">HE 50%</th>
+                                    <th style="min-width:100px;">HE 100%</th>
+                                    <th style="min-width:120px;">DESC. EMPRSTIMO</th>
+                                    <th style="min-width:110px;">TOTAL</th>
+                                    <th style="width:40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-SALARIO"></tbody>
+                        </table>
+                    </div>
+                    <div class="actions-footer">
+                        <button class="btn btn-outline btn-sm" onclick="adicionarLinha('SALARIO')">
+                            <i class="fas fa-plus"></i> Adicionar Linha
+                        </button>
+                        <div class="total-display">
+                            TOTAL: <span class="valor" id="total-display-SALARIO">R$ 0,00</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="btn-salvar-SALARIO" onclick="salvarFolha('SALARIO')">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                        <button class="btn btn-success btn-sm" id="btn-fechar-SALARIO" onclick="fecharFolha('SALARIO')">
+                            <i class="fas fa-paper-plane"></i> Fechar e Enviar ao C.P.
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabela ADIANTAMENTO -->
+                <div class="table-card" id="card-ADIANTAMENTO" style="display:none;">
+                    <div class="table-card-header">
+                        <div class="table-card-title">
+                            <i class="fas fa-table"></i>
+                            <span id="titulo-ADIANTAMENTO">ADIANTAMENTO</span>
+                        </div>
+                        <div class="table-card-actions">
+                            <span class="badge-status badge-rascunho" id="status-ADIANTAMENTO">RASCUNHO</span>
+                        </div>
+                    </div>
+                    <div class="table-scroll">
+                        <table class="folha-table" id="tabela-ADIANTAMENTO">
+                            <thead>
+                                <tr>
+                                    <th style="width:30px;">#</th>
+                                    <th style="min-width:110px;text-align:left;">EMPRESA</th>
+                                    <th style="min-width:180px;text-align:left;">COLABORADOR</th>
+                                    <th style="min-width:120px;">ADIANTAMENTO</th>
+                                    <th style="min-width:120px;">SAL. POR FORA</th>
+                                    <th style="min-width:130px;">DESC. EMPRSTIMO</th>
+                                    <th style="min-width:110px;">TOTAL</th>
+                                    <th style="width:40px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-ADIANTAMENTO"></tbody>
+                        </table>
+                    </div>
+                    <div class="actions-footer">
+                        <button class="btn btn-outline btn-sm" onclick="adicionarLinha('ADIANTAMENTO')">
+                            <i class="fas fa-plus"></i> Adicionar Linha
+                        </button>
+                        <div class="total-display">
+                            TOTAL: <span class="valor" id="total-display-ADIANTAMENTO">R$ 0,00</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="btn-salvar-ADIANTAMENTO" onclick="salvarFolha('ADIANTAMENTO')">
+                            <i class="fas fa-save"></i> Salvar
+                        </button>
+                        <button class="btn btn-success btn-sm" id="btn-fechar-ADIANTAMENTO" onclick="fecharFolha('ADIANTAMENTO')">
+                            <i class="fas fa-paper-plane"></i> Fechar e Enviar ao C.P.
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal: Importar Funcionários -->
+    <div class="modal" id="modalImportar">
+        <div class="modal-overlay" onclick="fecharModal('modalImportar')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Importar Funcionários</h2>
+                <button class="modal-close" onclick="fecharModal('modalImportar')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:#64748b;margin-bottom:12px;">Selecione os funcionários para adicionar  folha atual. J cadastrados sero mantidos.</p>
+                <input type="text" class="func-filter" id="func-filter" placeholder="Buscar por nome ou empresa..." oninput="filtrarFuncionarios()">
+                <div class="func-list" id="func-list">
+                    <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModal('modalImportar')">Cancelar</button>
+                <button class="btn btn-primary" onclick="confirmarImportacao()">
+                    <i class="fas fa-check"></i> Importar Selecionados
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Histórico -->
+    <div class="modal" id="modalHistorico">
+        <div class="modal-overlay" onclick="fecharModal('modalHistorico')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-history"></i> Histórico de Folhas</h2>
+                <button class="modal-close" onclick="fecharModal('modalHistorico')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="histórico-body">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    // STATE
+    // ============================================================
+    const MESES = ['','Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    let tabAtiva = 'SALARIO';
+    let dadosFolha = { SALARIO: { id: null, status: 'rascunho', itens: [] }, ADIANTAMENTO: { id: null, status: 'rascunho', itens: [] } };
+    let funcionáriosDisponiveis = [];
+
+    const avatarNameMap = { 'clemerson': '/avatars/Clemerson.webp', 'isabela': '/avatars/Isabela.webp', 'thaina': '/avatars/Thaina.webp', 'thiago': '/avatars/Thiago.webp', 'nicolas': '/avatars/NicolasDaniel.webp', 'rh': '/avatars/Rh.webp', 'admin': '/avatars/admin.webp', 'ti': '/avatars/TI.webp', 'antonio': '/avatars/Antonio.webp', 'andreia': '/avatars/Andreia.webp', 'guilherme': '/avatars/Guilherme.webp' };
+    function getAvatarFromEmail(email, nome) {
+        if (!email) return null;
+        const u = email.split('@')[0].split('.')[0].toLowerCase();
+        if (avatarNameMap[u]) return avatarNameMap[u];
+        if (nome) { const f = nome.split(' ')[0].toLowerCase(); if (avatarNameMap[f]) return avatarNameMap[f]; }
+        return null;
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function getAuthHeaders(extra = {}) {
+        return { 'Content-Type': 'application/json', ...extra }; /* Auth via httpOnly cookie */
+    }
+    function fmt(v) { return parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); }
+    function parseNum(v) { return parseFloat(v) || 0; }
+
+    function showToast(msg, type) {
+        type = type || 'info';
+        const t = document.createElement('div');
+        t.style.cssText = 'position:fixed;top:20px;right:20px;padding:14px 22px;border-radius:10px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);max-width:420px;font-weight:500;';
+        const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', warning: 'fa-exclamation-triangle', info: 'fa-info-circle' };
+        const colors = { success: '#059669', error: '#dc2626', warning: '#d97706', info: '#4338ca' };
+        t.style.background = colors[type] || colors.info;
+        t.innerHTML = `<i class="fas ${icons[type]||icons.info}"></i><span>${msg}</span>`;
+        document.body.appendChild(t);
+        setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 4000);
+    }
+
+    function fecharModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    function initSelects() {
+        const hoje = new Date();
+        const mesAtual = hoje.getMonth() + 1;
+        const anoAtual = hoje.getFullYear();
+        const selMes = document.getElementById('sel-mes');
+        const selAno = document.getElementById('sel-ano');
+        for (let m = 1; m <= 12; m++) {
+            const opt = document.createElement('option');
+            opt.value = m; opt.textContent = MESES[m];
+            if (m === mesAtual) opt.selected = true;
+            selMes.appendChild(opt);
+        }
+        for (let a = anoAtual + 1; a >= anoAtual - 2; a--) {
+            const opt = document.createElement('option');
+            opt.value = a; opt.textContent = a;
+            if (a === anoAtual) opt.selected = true;
+            selAno.appendChild(opt);
+        }
+    }
+
+    // ============================================================
+    // TABS
+    // ============================================================
+    function trocarTab(tipo) {
+        tabAtiva = tipo;
+        document.getElementById('tab-salário').classList.toggle('active', tipo === 'SALARIO');
+        document.getElementById('tab-adiantamento').classList.toggle('active', tipo === 'ADIANTAMENTO');
+        document.getElementById('card-SALARIO').style.display = tipo === 'SALARIO' ? '' : 'none';
+        document.getElementById('card-ADIANTAMENTO').style.display = tipo === 'ADIANTAMENTO' ? '' : 'none';
+    }
+
+    // ============================================================
+    // RENDER TABLE
+    // ============================================================
+    function renderTabela(tipo) {
+        const tbody = document.getElementById('tbody-' + tipo);
+        const itens = dadosFolha[tipo].itens;
+        const isSalario = tipo === 'SALARIO';
+        const fechada = dadosFolha[tipo].status === 'fechada';
+
+        if (itens.length === 0) {
+            const cols = isSalario ? 10 : 8;
+            tbody.innerHTML = `<tr><td colspan="${cols}" style="text-align:center;padding:40px;color:#94a3b8;">
+                <i class="fas fa-table" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i>
+                Nenhum colaborador adicionado.<br>Use "Importar Funcionários" ou "Adicionar Linha".
+            </td></tr>`;
+            atualizarTotais();
+            return;
+        }
+
+        let html = '';
+        itens.forEach((item, idx) => {
+            const total = calcularTotalItem(tipo, item);
+            item.total = total;
+            if (isSalario) {
+                html += `<tr>
+                    <td style="text-align:center;color:#94a3b8;font-size:0.78rem;">${idx + 1}</td>
+                    <td><input class="cell-input text-left empresa" value="${esc(item.empresa)}" ${fechada?'disabled':''} onchange="atualizarItem('${tipo}',${idx},'empresa',this.value)" placeholder="EMPRESA"></td>
+                    <td><input class="cell-input text-left" value="${esc(item.colaborador_nome)}" ${fechada?'disabled':''} onchange="atualizarItem('${tipo}',${idx},'colaborador_nome',this.value)" placeholder="Nome do colaborador"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.valor_base)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'valor_base',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.salario_por_fora)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'salario_por_fora',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.he_50)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'he_50',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.he_100)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'he_100',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.desconto_emprestimo)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'desconto_emprestimo',this.value)" placeholder="0,00"></td>
+                    <td class="cell-total" id="total-${tipo}-${idx}">${fmt(total)}</td>
+                    <td>${fechada ? '' : `<button class="btn-remove-row" onclick="removerLinha('${tipo}',${idx})" title="Remover"><i class="fas fa-trash-alt"></i></button>`}</td>
+                </tr>`;
+            } else {
+                html += `<tr>
+                    <td style="text-align:center;color:#94a3b8;font-size:0.78rem;">${idx + 1}</td>
+                    <td><input class="cell-input text-left empresa" value="${esc(item.empresa)}" ${fechada?'disabled':''} onchange="atualizarItem('${tipo}',${idx},'empresa',this.value)" placeholder="EMPRESA"></td>
+                    <td><input class="cell-input text-left" value="${esc(item.colaborador_nome)}" ${fechada?'disabled':''} onchange="atualizarItem('${tipo}',${idx},'colaborador_nome',this.value)" placeholder="Nome do colaborador"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.valor_base)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'valor_base',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.salario_por_fora)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'salario_por_fora',this.value)" placeholder="0,00"></td>
+                    <td><input class="cell-input" type="number" step="0.01" value="${numVal(item.desconto_emprestimo)}" ${fechada?'disabled':''} oninput="atualizarItemNum('${tipo}',${idx},'desconto_emprestimo',this.value)" placeholder="0,00"></td>
+                    <td class="cell-total" id="total-${tipo}-${idx}">${fmt(total)}</td>
+                    <td>${fechada ? '' : `<button class="btn-remove-row" onclick="removerLinha('${tipo}',${idx})" title="Remover"><i class="fas fa-trash-alt"></i></button>`}</td>
+                </tr>`;
+            }
+        });
+
+        // Linha TOTAL
+        const totalGeral = itens.reduce((s, i) => s + parseNum(i.total), 0);
+        const cols = isSalario ? 10 : 8;
+        html += `<tr class="total-row">
+            <td></td><td></td><td style="text-align:right;font-weight:800;">TOTAL</td>`;
+        if (isSalario) {
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.valor_base), 0))}</td>`;
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.salario_por_fora), 0))}</td>`;
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.he_50), 0))}</td>`;
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.he_100), 0))}</td>`;
+            html += `<td style="text-align:right;color:#dc2626;">${fmt(itens.reduce((s,i) => s + parseNum(i.desconto_emprestimo), 0))}</td>`;
+        } else {
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.valor_base), 0))}</td>`;
+            html += `<td style="text-align:right;">${fmt(itens.reduce((s,i) => s + parseNum(i.salario_por_fora), 0))}</td>`;
+            html += `<td style="text-align:right;color:#dc2626;">${fmt(itens.reduce((s,i) => s + parseNum(i.desconto_emprestimo), 0))}</td>`;
+        }
+        html += `<td style="text-align:right;font-size:1rem;font-weight:900;color:#059669;">${fmt(totalGeral)}</td><td></td></tr>`;
+
+        tbody.innerHTML = html;
+        atualizarTotais();
+        atualizarStatusUI(tipo);
+    }
+
+    function calcularTotalItem(tipo, item) {
+        const vb = parseNum(item.valor_base);
+        const spf = parseNum(item.salario_por_fora);
+        const h50 = tipo === 'SALARIO' ? parseNum(item.he_50) : 0;
+        const h100 = tipo === 'SALARIO' ? parseNum(item.he_100) : 0;
+        const desc = parseNum(item.desconto_emprestimo);
+        return vb + spf + h50 + h100 - desc;
+    }
+
+    function esc(s) { return (s || '').replace(/"/g, '&quot;').replace(/</g, '&lt;'); }
+    function numVal(v) { const n = parseFloat(v); return isNaN(n) || n === 0 ? '' : n; }
+
+    // ============================================================
+    // ITEM UPDATES
+    // ============================================================
+    function atualizarItem(tipo, idx, campo, valor) {
+        dadosFolha[tipo].itens[idx][campo] = valor;
+    }
+    function atualizarItemNum(tipo, idx, campo, valor) {
+        dadosFolha[tipo].itens[idx][campo] = parseFloat(valor) || 0;
+        const item = dadosFolha[tipo].itens[idx];
+        const total = calcularTotalItem(tipo, item);
+        item.total = total;
+        const el = document.getElementById(`total-${tipo}-${idx}`);
+        if (el) el.textContent = fmt(total);
+        atualizarTotais();
+    }
+
+    function atualizarTotais() {
+        const totalSal = dadosFolha.SALARIO.itens.reduce((s, i) => s + parseNum(i.total || calcularTotalItem('SALARIO', i)), 0);
+        const totalAdto = dadosFolha.ADIANTAMENTO.itens.reduce((s, i) => s + parseNum(i.total || calcularTotalItem('ADIANTAMENTO', i)), 0);
+        const totalGeral = totalSal + totalAdto;
+
+        document.getElementById('kpi-salário').textContent = fmt(totalSal);
+        document.getElementById('kpi-adiantamento').textContent = fmt(totalAdto);
+        document.getElementById('kpi-total-geral').textContent = fmt(totalGeral);
+
+        const colabSet = new Set();
+        dadosFolha.SALARIO.itens.forEach(i => { if (i.colaborador_nome) colabSet.add(i.colaborador_nome.trim().toUpperCase()); });
+        dadosFolha.ADIANTAMENTO.itens.forEach(i => { if (i.colaborador_nome) colabSet.add(i.colaborador_nome.trim().toUpperCase()); });
+        document.getElementById('kpi-colaboradores').textContent = colabSet.size;
+
+        document.getElementById('total-display-SALARIO').textContent = fmt(totalSal);
+        document.getElementById('total-display-ADIANTAMENTO').textContent = fmt(totalAdto);
+        document.getElementById('badge-sal').textContent = dadosFolha.SALARIO.itens.length;
+        document.getElementById('badge-adto').textContent = dadosFolha.ADIANTAMENTO.itens.length;
+    }
+
+    function atualizarStatusUI(tipo) {
+        const st = dadosFolha[tipo].status;
+        const el = document.getElementById('status-' + tipo);
+        if (st === 'fechada') {
+            el.className = 'badge-status badge-fechada';
+            el.textContent = 'FECHADA';
+            document.getElementById('btn-salvar-' + tipo).style.display = 'none';
+            document.getElementById('btn-fechar-' + tipo).style.display = 'none';
+        } else {
+            el.className = 'badge-status badge-rascunho';
+            el.textContent = 'RASCUNHO';
+            document.getElementById('btn-salvar-' + tipo).style.display = '';
+            document.getElementById('btn-fechar-' + tipo).style.display = '';
+        }
+    }
+
+    // ============================================================
+    // ADD / REMOVE LINES
+    // ============================================================
+    function adicionarLinha(tipo, dados) {
+        dadosFolha[tipo].itens.push({
+            empresa: (dados && dados.empresa) || '',
+            colaborador_nome: (dados && dados.colaborador_nome) || '',
+            funcionário_id: (dados && dados.funcionário_id) || null,
+            valor_base: (dados && dados.valor_base) || 0,
+            salario_por_fora: (dados && dados.salario_por_fora) || 0,
+            he_50: (dados && dados.he_50) || 0,
+            he_100: (dados && dados.he_100) || 0,
+            desconto_emprestimo: (dados && dados.desconto_emprestimo) || 0,
+            total: 0
+        });
+        renderTabela(tipo);
+    }
+
+    function removerLinha(tipo, idx) {
+        dadosFolha[tipo].itens.splice(idx, 1);
+        renderTabela(tipo);
+    }
+
+    // ============================================================
+    // API: CARREGAR Competência
+    // ============================================================
+    async function carregarCompetencia() {
+        const mes = document.getElementById('sel-mes').value;
+        const ano = document.getElementById('sel-ano').value;
+
+        // Reset
+        dadosFolha.SALARIO = { id: null, status: 'rascunho', itens: [] };
+        dadosFolha.ADIANTAMENTO = { id: null, status: 'rascunho', itens: [] };
+
+        try {
+            const resp = await fetch(`/api/rh/folha-manual/competencia?mes=${mes}&ano=${ano}`, {
+                headers: getAuthHeaders(), credentials: 'include'
+            });
+            if (!resp.ok) throw new Error('Erro ao carregar');
+            const folhas = await resp.json();
+
+            for (const f of folhas) {
+                const tipo = f.tipo;
+                dadosFolha[tipo].id = f.id;
+                dadosFolha[tipo].status = f.status;
+                dadosFolha[tipo].itens = (f.itens || []).map(i => ({
+                    empresa: i.empresa || '',
+                    colaborador_nome: i.colaborador_nome || '',
+                    funcionário_id: i.funcionário_id,
+                    valor_base: parseNum(i.valor_base),
+                    salario_por_fora: parseNum(i.salario_por_fora),
+                    he_50: parseNum(i.he_50),
+                    he_100: parseNum(i.he_100),
+                    desconto_emprestimo: parseNum(i.desconto_emprestimo),
+                    total: parseNum(i.total)
+                }));
+            }
+        } catch (e) {
+            // Sem dados = folha nova - OK
+        }
+
+        const mesNome = MESES[parseInt(mes)];
+        document.getElementById('titulo-SALARIO').textContent = `${mesNome.toUpperCase()} - SALÁRIO, POR FORA E HORA EXTRAS`;
+        document.getElementById('titulo-ADIANTAMENTO').textContent = `${mesNome.toUpperCase()} - ADIANTAMENTO`;
+        document.getElementById('kpi-sub-sal').textContent = `${mesNome} ${ano}`;
+        document.getElementById('kpi-sub-adto').textContent = `${mesNome} ${ano}`;
+        document.getElementById('kpi-sub-colab').textContent = `${mesNome} ${ano}`;
+
+        renderTabela('SALARIO');
+        renderTabela('ADIANTAMENTO');
+    }
+
+    // ============================================================
+    // API: SALVAR FOLHA
+    // ============================================================
+    async function salvarFolha(tipo) {
+        const mes = document.getElementById('sel-mes').value;
+        const ano = document.getElementById('sel-ano').value;
+        const itens = dadosFolha[tipo].itens.filter(i => i.colaborador_nome && i.colaborador_nome.trim());
+
+        if (itens.length === 0) {
+            showToast('Adicione pelo menos um colaborador antes de salvar.', 'warning');
+            return;
+        }
+
+        const btn = document.getElementById('btn-salvar-' + tipo);
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Salvando...';
+
+        try {
+            const resp = await fetch('/api/rh/folha-manual/salvar', { credentials: 'include', method: 'POST',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify({ mes: parseInt(mes), ano: parseInt(ano), tipo, itens })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.error || 'Erro ao salvar');
+
+            dadosFolha[tipo].id = data.folha_id;
+            showToast(`Folha ${tipo === 'SALARIO' ? 'Salário' : 'Adiantamento'} salva com sucesso! Total: ${fmt(data.total_geral)}`, 'success');
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-save"></i> Salvar`;
+        }
+    }
+
+    // ============================================================
+    // API: FECHAR E ENVIAR AO CONTAS A PAGAR
+    // ============================================================
+    async function fecharFolha(tipo) {
+        const mes = document.getElementById('sel-mes').value;
+        const ano = document.getElementById('sel-ano').value;
+        const tipoLabel = tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
+        const totalAtual = dadosFolha[tipo].itens.reduce((s, i) => s + calcularTotalItem(tipo, i), 0);
+
+        if (totalAtual <= 0) {
+            showToast('Total deve ser maior que zero para fechar.', 'warning');
+            return;
+        }
+
+        if (!confirm(`Deseja fechar a folha de ${tipoLabel} (${MESES[parseInt(mes)]} ${ano}) e enviar ao Contas a Pagar?\n\nTotal: ${fmt(totalAtual)}\n\nEsta ao no pode ser desfeita facilmente.`)) return;
+
+        // Salvar antes de fechar
+        const btn = document.getElementById('btn-fechar-' + tipo);
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading-spinner"></span> Processando...';
+
+        try {
+            // Primeiro salvar
+            const itens = dadosFolha[tipo].itens.filter(i => i.colaborador_nome && i.colaborador_nome.trim());
+            const saveResp = await fetch('/api/rh/folha-manual/salvar', { credentials: 'include', method: 'POST',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify({ mes: parseInt(mes), ano: parseInt(ano), tipo, itens })
+            });
+            const saveData = await saveResp.json();
+            if (!saveResp.ok) throw new Error(saveData.error || 'Erro ao salvar');
+
+            const folhaId = saveData.folha_id;
+            dadosFolha[tipo].id = folhaId;
+
+            // Agora fechar
+            const fechaResp = await fetch(`/api/rh/folha-manual/${folhaId}/fechar`, { credentials: 'include', method: 'PUT',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include'
+            });
+            const fechaData = await fechaResp.json();
+            if (!fechaResp.ok) throw new Error(fechaData.error || 'Erro ao fechar');
+
+            dadosFolha[tipo].status = 'fechada';
+            showToast(`Folha ${tipoLabel} fechada! Conta a pagar criada: ${fmt(fechaData.valor_total)}`, 'success');
+            renderTabela(tipo);
+        } catch (e) {
+            showToast(e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-paper-plane"></i> Fechar e Enviar ao C.P.`;
+        }
+    }
+
+    // ============================================================
+    // IMPORTAR FUNCIONÁRIOS
+    // ============================================================
+    // Lista base de funcionários extrada da planilha de Folha de Pagamento
+    const FUNCIONARIOS_EXCEL = [
+        { nome: 'AUGUSTO', empresa: 'ENERGY', salário: 2539.72, cargo: '' },
+        { nome: 'ANTNIO EGIDIO', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'ANGLICA', empresa: 'ENERGY', salário: 2200.00, cargo: '' },
+        { nome: 'BRUNO', empresa: 'ENERGY', salário: 1900.00, cargo: '' },
+        { nome: 'CLAYTON', empresa: 'ENERGY', salário: 4500.00, cargo: '' },
+        { nome: 'CLEMERSON', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'ELDIR', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'FABIANO', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'FABOLA', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'FELIPE SIMES', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'HELEN', empresa: 'ENERGY', salário: 2900.00, cargo: '' },
+        { nome: 'ISABELA', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'JOO VICTOR', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'LUCAS', empresa: 'ENERGY', salário: 2200.00, cargo: '' },
+        { nome: 'LCIO', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'LUIZ HENRIQUE', empresa: 'ENERGY', salário: 2800.00, cargo: '' },
+        { nome: 'MRCIA', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'MRCIO', empresa: 'ENERGY', salário: 3650.00, cargo: '' },
+        { nome: 'MIQUIAS', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'RAMON', empresa: 'ENERGY', salário: 2539.72, cargo: '' },
+        { nome: 'REGINA', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'ROBSON', empresa: 'ENERGY', salário: 1900.00, cargo: '' },
+        { nome: 'RONALDO TORRES', empresa: 'ENERGY', salário: 2600.00, cargo: '' },
+        { nome: 'SRGIO RICARDO', empresa: 'ENERGY', salário: 3100.00, cargo: '' },
+        { nome: 'SILVIO', empresa: 'ENERGY', salário: 2100.00, cargo: '' },
+        { nome: 'TATIANE', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'THIAGO', empresa: 'ENERGY', salário: 2350.00, cargo: '' },
+        { nome: 'GUILHERME DANTAS BASTOS', empresa: 'ALUFORCE', salário: 6500.00, cargo: '' },
+        { nome: 'ANA PAULA', empresa: 'LABOR', salário: 2100.00, cargo: '' },
+        { nome: 'CHRISTIAN', empresa: 'LABOR', salário: 3200.00, cargo: '' },
+        { nome: 'RENATA', empresa: 'LABOR', salário: 2100.00, cargo: '' },
+        { nome: 'RONALDO SANTANA', empresa: 'LABOR', salário: 2350.00, cargo: '' }
+    ];
+
+    async function abrirModalImportar() {
+        document.getElementById('modalImportar').classList.add('show');
+        document.getElementById('func-filter').value = '';
+        const listEl = document.getElementById('func-list');
+        listEl.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>';
+
+        // Mescla funcionários do Excel com os do banco (prioridade: Excel + extras do banco)
+        const mapa = new Map();
+        FUNCIONARIOS_EXCEL.forEach(f => mapa.set(f.nome.trim().toUpperCase(), { id: null, ...f }));
+        try {
+            const resp = await fetch('/api/rh/funcionarios-empresas', { headers: getAuthHeaders(), credentials: 'include' });
+            if (resp.ok) {
+                const db = await resp.json();
+                db.forEach(f => {
+                    const key = (f.nome || '').trim().toUpperCase();
+                    if (mapa.has(key)) {
+                        const ex = mapa.get(key);
+                        ex.id = f.id;
+                        if (f.cargo) ex.cargo = f.cargo;
+                    } else {
+                        mapa.set(key, { id: f.id, nome: f.nome, empresa: f.empresa || 'SEM EMPRESA', salário: f.salário || 0, cargo: f.cargo || '' });
+                    }
+                });
+            }
+        } catch (_) { /* Usa apenas Excel se API falhar */ }
+
+        funcionáriosDisponiveis = Array.from(mapa.values());
+        renderFuncionáriosList();
+    }
+
+    function renderFuncionáriosList() {
+        const filter = (document.getElementById('func-filter').value || '').toLowerCase();
+        const listEl = document.getElementById('func-list');
+        const existentes = new Set();
+        dadosFolha[tabAtiva].itens.forEach(i => {
+            if (i.colaborador_nome) existentes.add(i.colaborador_nome.trim().toUpperCase());
+        });
+
+        const filtered = funcionáriosDisponiveis.filter(f => {
+            if (filter && !f.nome.toLowerCase().includes(filter) && !(f.empresa || '').toLowerCase().includes(filter)) return false;
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>Nenhum funcionário encontrado.</p></div>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(f => {
+            const jaExiste = existentes.has(f.nome.trim().toUpperCase());
+            html += `<label class="func-item" style="${jaExiste ? 'opacity:0.5' : ''}">
+                <input type="checkbox" value="${f.id}" data-nome="${esc(f.nome)}" data-empresa="${esc(f.empresa || '')}" data-salário="${f.salário || 0}" ${jaExiste ? 'disabled checked' : ''}>
+                <div>
+                    <div class="func-nome">${esc(f.nome)}</div>
+                    <div class="func-info">${esc(f.empresa || 'Sem empresa')} &bull; ${esc(f.cargo || '')} &bull; ${fmt(f.salário)}</div>
+                </div>
+            </label>`;
+        });
+        listEl.innerHTML = html;
+    }
+
+    function filtrarFuncionários() { renderFuncionáriosList(); }
+
+    function confirmarImportacao() {
+        const checkboxes = document.querySelectorAll('#func-list input[type="checkbox"]:checked:not([disabled])');
+        if (checkboxes.length === 0) {
+            showToast('Selecione pelo menos um funcionário.', 'warning');
+            return;
+        }
+        checkboxes.forEach(cb => {
+            adicionarLinha(tabAtiva, {
+                empresa: cb.dataset.empresa,
+                colaborador_nome: cb.dataset.nome,
+                funcionário_id: parseInt(cb.value),
+                valor_base: parseFloat(cb.dataset.salário) || 0
+            });
+        });
+        fecharModal('modalImportar');
+        showToast(`${checkboxes.length} funcionário(s) importado(s)!`, 'success');
+    }
+
+    // ============================================================
+    // HISTÓRICO
+    // ============================================================
+    async function abrirHistorico() {
+        document.getElementById('modalHistorico').classList.add('show');
+        const body = document.getElementById('histórico-body');
+        body.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Carregando...</p></div>';
+
+        try {
+            const resp = await fetch('/api/rh/folha-manual/listar', { headers: getAuthHeaders(), credentials: 'include' });
+            if (!resp.ok) throw new Error('Erro');
+            const folhas = await resp.json();
+
+            if (folhas.length === 0) {
+                body.innerHTML = '<div class="empty-state"><i class="fas fa-folder-open"></i><h3>Nenhuma folha encontrada</h3></div>';
+                return;
+            }
+
+            let html = '<div class="historico-list">';
+            folhas.forEach(f => {
+                const mesNome = MESES[f.mes] || f.mes;
+                const tipoLabel = f.tipo === 'SALARIO' ? 'Salário' : 'Adiantamento';
+                const statusClass = f.status === 'fechada' ? 'badge-fechada' : 'badge-rascunho';
+                const statusLabel = f.status === 'fechada' ? 'Fechada' : 'Rascunho';
+                html += `<div class="hist-item" style="cursor:pointer;" onclick="carregarDoHistorico(${f.mes},${f.ano})">
+                    <div>
+                        <div class="hist-label">${mesNome} ${f.ano} - ${tipoLabel}</div>
+                        <div style="font-size:0.78rem;color:#94a3b8;">${f.qtd_itens || 0} colaboradores</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="hist-valor">${fmt(f.total_geral)}</div>
+                        <span class="badge-status ${statusClass} hist-status">${statusLabel}</span>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+            body.innerHTML = html;
+        } catch (e) {
+            body.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i><p>Erro ao carregar histórico</p></div>`;
+        }
+    }
+
+    function carregarDoHistorico(mes, ano) {
+        document.getElementById('sel-mes').value = mes;
+        document.getElementById('sel-ano').value = ano;
+        fecharModal('modalHistorico');
+        carregarCompetencia();
+    }
+
+    // ============================================================
+    // CARREGAR Usuário
+    // ============================================================
+    async function carregarUsuarioLogado() {
+        try {
+            const response = await fetch('/api/me', { headers: getAuthHeaders(), credentials: 'include' });
+            if (response.ok) {
+                const user = await response.json();
+                const greetingTextEl = document.getElementById('greeting-text');
+                if (greetingTextEl) {
+                    const hour = new Date().getHours();
+                    greetingTextEl.textContent = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+                }
+                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                const userNameEl = document.getElementById('user-name');
+                if (userNameEl) userNameEl.textContent = primeiroNome;
+                const userAvatar = user.avatar && user.avatar !== '/avatars/default.webp' ? user.avatar : getAvatarFromEmail(user.email, user.nome);
+                const userPhotoEl = document.getElementById('user-photo');
+                const userInitialEl = document.getElementById('user-initials');
+                if (userAvatar && userPhotoEl) { userPhotoEl.src = userAvatar; userPhotoEl.style.display = 'block'; if (userInitialEl) userInitialEl.style.display = 'none'; }
+                else if (userInitialEl) { userInitialEl.textContent = primeiroNome.charAt(0).toUpperCase(); userInitialEl.style.display = 'flex'; if (userPhotoEl) userPhotoEl.style.display = 'none'; }
+            }
+        } catch (error) { console.error('Erro ao carregar Usuário:', error); }
+    }
+
+    // ============================================================
+    // ESCAPE KEY
+    // ============================================================
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+    });
+
+    // ============================================================
+    // INIT ON LOAD
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initSelects();
+        carregarUsuarioLogado();
+        carregarCompetencia();
+    });
+    </script>
+
+    <!-- Sistema de Monitoramento de Conexo -->
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
+    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
+    <!-- Chat Widget BOB AI -->
+    <script src="/chat/widget.js?v=20260218" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+</body>
+</html>

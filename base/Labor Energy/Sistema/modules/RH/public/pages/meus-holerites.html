@@ -1,0 +1,1462 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <title>Zyntra: Meus Holerites</title>
+    
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/modern-saas.css?v=20260209">
+    <link rel="stylesheet" href="/modules/RH/public/css/rh-pages.css?v=20260209">
+    
+    <style>
+        /* === MEUS HOLERITES - CSS ESPECFICO === */
+
+        /* CONTENT AREA */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f8fafc;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .page-title i {
+            color: #6366f1;
+        }
+
+        .page-subtitle {
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #f1f5f9;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            color: #6366f1;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        /* Controls */
+        .controls-bar {
+            display: flex;
+            gap: 16px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            background: white;
+            padding: 20px 24px;
+            border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .controls-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+        }
+
+        .form-select {
+            padding: 10px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            color: #1e293b;
+            background: white;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #64748b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-outline:hover {
+            background: #f8fafc;
+            color: #1e293b;
+        }
+
+        /* Holerites Grid */
+        .holerites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .holerite-card {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .holerite-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #4338ca 0%, #6366f1 100%);
+            border-radius: 4px 0 0 4px;
+        }
+
+        .holerite-card:hover {
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.12);
+            transform: translateY(-2px);
+            border-color: #c7d2fe;
+        }
+
+        .holerite-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .holerite-month {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .holerite-status {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .holerite-status.disponivel {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .holerite-status.pendente {
+            background: rgba(234, 179, 8, 0.1);
+            color: #eab308;
+        }
+
+        .holerite-details {
+            margin-bottom: 16px;
+        }
+
+        .holerite-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #6366f1;
+        }
+
+        .holerite-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .holerite-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .btn-download {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-download:hover {
+            box-shadow: 0 4px 12px rgba(99,102,241,0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 24px;
+            color: #64748b;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #e2e8f0;
+            margin-bottom: 16px;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        /* Coming Soon Notice */
+        .coming-soon-notice {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px dashed #94a3b8;
+            border-radius: 20px;
+            padding: 48px;
+            text-align: center;
+            margin: 24px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .notice-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            animation: pulse-icon 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-icon {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(99, 102, 241, 0); }
+        }
+
+        .notice-content h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+
+        .notice-content p {
+            font-size: 1rem;
+            color: #64748b;
+            max-width: 500px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .notice-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 10px;
+            color: #4f46e5;
+            font-size: 0.875rem;
+        }
+
+        .notice-info i {
+            font-size: 1rem;
+        }
+
+        /* ========================================
+           MODAL SAAS EMPRESARIAL - PADRO UNIFICADO
+           ======================================== */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.show { display: flex; }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            position: relative;
+            z-index: 1001;
+            transform: scale(0.95) translateY(10px);
+            opacity: 0;
+            transition: all 0.25s ease-out;
+        }
+        .modal.show .modal-content {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-header h3 i {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-close:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: calc(90vh - 80px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            background: #f9fafb;
+        }
+
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: transparent; }
+        .modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        .modal-body::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .modal-section {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .modal-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .modal-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4338ca;
+            margin-bottom: 16px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-section-title i {
+            width: 28px;
+            height: 28px;
+            background: #eef2ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6366f1;
+            font-size: 12px;
+        }
+
+        /* Empresa Info no Modal */
+        .empresa-info-section {
+            background: linear-gradient(135deg, #4338ca 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .empresa-info-section h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .empresa-info-section p {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        /* Consent Form Styles */
+        .consent-icon-wrap {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1, #4338ca);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .consent-icon-wrap i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .consent-text-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #475569;
+        }
+
+        .signature-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-family: 'Dancing Script', cursive, Inter, sans-serif;
+            font-style: italic;
+            color: #1e293b;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            background: white;
+        }
+
+        .signature-input:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .consent-checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .consent-checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #6366f1;
+            cursor: pointer;
+        }
+
+        .consent-checkbox-row label {
+            font-size: 0.8rem;
+            color: #475569;
+            cursor: pointer;
+        }
+
+        .btn-assinar {
+            width: 100%;
+            padding: 14px;
+            background: #94a3b8;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: not-allowed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-assinar.active {
+            background: #6366f1;
+            cursor: pointer;
+        }
+
+        .btn-assinar.active:hover {
+            background: #4f46e5;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .func-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .func-info-item {
+            background: #f8fafc;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .func-info-label {
+            font-size: 0.65rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .func-info-value {
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 0.85rem;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .section-title .bar {
+            width: 4px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        .section-title h4 {
+            color: #1e293b;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .demonstrativo-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .demonstrativo-table th,
+        .demonstrativo-table td {
+            padding: 10px 14px;
+            text-align: left;
+            font-size: 0.8rem;
+        }
+
+        .demonstrativo-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
+        }
+
+        .demonstrativo-table tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .demonstrativo-table tbody tr:nth-child(even) {
+            background: #fafbfc;
+        }
+
+        .demonstrativo-table .provento {
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .demonstrativo-table .desconto {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .demonstrativo-table td:first-child {
+            font-family: monospace;
+            color: #64748b;
+        }
+
+        .totais-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            padding: 0;
+        }
+
+        .total-item {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .total-label {
+            font-size: 0.65rem;
+            color: #64748b;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .total-value {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .total-value.provento {
+            color: #10b981;
+        }
+
+        .total-value.desconto {
+            color: #ef4444;
+        }
+
+        .total-value.liquido {
+            color: #6366f1;
+        }
+    </style>
+    <script src="/js/anti-copy-protection.js" defer></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+
+
+
+    <!-- Tooltips Profissionais -->
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <script src="/js/tooltips-professional.js?v=20260209" defer></script>
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <!-- Chat Widget BOB AI -->
+    <link rel="stylesheet" href="/chat/widget.css?v=20260218">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+        <!-- Sidebar - Portal do Funcionário -->
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel de Controle"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="../funcionario.html" class="sidebar-btn" title="Portal do Funcionário"><i class="fas fa-home"></i></a>
+                <a href="meus-holerites.html" class="sidebar-btn active" title="Meus Holerites"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="dados-cadastrais.html" class="sidebar-btn" title="Dados Cadastrais"><i class="fas fa-id-card"></i></a>
+                <a href="beneficios.html" class="sidebar-btn" title="Meus Benefícios"><i class="fas fa-gift"></i></a>
+                <a href="minhas-ferias.html" class="sidebar-btn" title="Minhas Férias"><i class="fas fa-umbrella-beach"></i></a>
+                <a href="espelho-ponto.html" class="sidebar-btn" title="Espelho de Ponto"><i class="fas fa-list-check"></i></a>
+                <a href="enviar-atestado.html" class="sidebar-btn" title="Enviar Atestado"><i class="fas fa-file-medical"></i></a>
+                <a href="autoavaliação.html" class="sidebar-btn" title="Autoavaliação"><i class="fas fa-user-check"></i></a>
+                <a href="avaliacoes-recebidas.html" class="sidebar-btn" title="Avaliações Recebidas"><i class="fas fa-inbox"></i></a>
+                <a href="manual-colaborador.html" class="sidebar-btn" title="Manual do Colaborador"><i class="fas fa-book"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <a href="/ajuda/index.html" class="sidebar-btn" title="Ajuda"><i class="fas fa-question-circle"></i></a>
+                <a href="../areaadm.html" class="sidebar-btn" id="btn-voltar-admin" title="Voltar  rea Admin" style="display:none;"><i class="fas fa-shield-alt"></i></a>
+            </div>
+        </aside>
+
+        <!-- Main Area -->
+        <main class="main-area">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-left">
+                        <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Meus Holerites</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img src="" alt="Foto do Usuário" id="user-photo">
+                            <span id="user-initials">U</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content-area">
+                <div class="page-header">
+                    <h1 class="page-title">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        Meus Holerites
+                    </h1>
+                    <p class="page-subtitle">Consulte e baixe seus contracheques</p>
+                </div>
+
+                <div class="controls-bar">
+                    <div class="form-group">
+                        <label class="form-label">Ano</label>
+                        <select class="form-select" id="select-ano">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ms</label>
+                        <select class="form-select" id="select-mes">
+                            <option value="">Todos os meses</option>
+                            <option value="12">Dezembro</option>
+                            <option value="11">Novembro</option>
+                            <option value="10">Outubro</option>
+                            <option value="09">Setembro</option>
+                            <option value="08">Agosto</option>
+                            <option value="07">Julho</option>
+                            <option value="06">Junho</option>
+                            <option value="05">Maio</option>
+                            <option value="04">Abril</option>
+                            <option value="03">Março</option>
+                            <option value="02">Fevereiro</option>
+                            <option value="01">Janeiro</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" onclick="filtrarHolerites()" id="btn-buscar">
+                        <i class="fas fa-search"></i>
+                        Buscar
+                    </button>
+                    <a href="../funcionario.html" class="btn btn-outline">
+                        <i class="fas fa-arrow-left"></i>
+                        Voltar
+                    </a>
+                </div>
+
+                <!-- Aviso de Holerites Indisponveis (mostrado quando no h holerites) -->
+                <div class="coming-soon-notice" id="coming-soon-notice" style="display: none;">
+                    <div class="notice-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="notice-content">
+                        <h3>Em breve seus holerites estaro disponveis!</h3>
+                        <p>Estamos trabalhando para disponibilizar seus contracheques nesta plataforma. 
+                           Em breve voc poder consultar e baixar todos os seus holerites diretamente aqui.</p>
+                        <div class="notice-info">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Por enquanto, consulte o departamento de RH para informações sobre seu pagamento.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="holerites-grid" id="holerites-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Demonstrativo -->
+    <div class="modal" id="holerite-modal">
+        <div class="modal-overlay" onclick="fecharModal()"></div>
+        <div class="modal-content" style="max-width:700px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice-dollar"></i> Demonstrativo de Pagamento</h3>
+                <button class="modal-close" onclick="fecharModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="empresa-info-section">
+                    <h2>ALUFORCE INDSTRIA E COMRCIO LTDA</h2>
+                    <p>CNPJ: 00.000.000/0001-00</p>
+                    <p>Endereço: Rua da Empresa, 123 - Cidade/Estado</p>
+                </div>
+                <div id="viewer-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Consentimento Digital -->
+    <div class="modal" id="modal-consentimento">
+        <div class="modal-overlay"></div>
+        <div class="modal-content" style="max-width:560px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-signature"></i> Autorizao Digital</h3>
+                <div></div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section" style="text-align:center;border:none;background:transparent;padding-bottom:0;">
+                    <div class="consent-icon-wrap">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 style="color:#1e293b;font-size:1.1rem;font-weight:700;margin:0 0 4px 0;">Holerite Digital</h3>
+                    <p style="color:#64748b;font-size:0.85rem;margin:0;">Autorizao para recebimento eletrnico</p>
+                </div>
+
+                <div class="modal-section" style="padding:0;border:none;background:transparent;">
+                    <div class="consent-text-box">
+                        <p style="margin-bottom:12px;">Eu, <strong id="consent-nome">___</strong>, portador(a) do CPF <strong id="consent-cpf">___</strong>, declaro que <strong>autorizo</strong> o recebimento dos meus demonstrativos de pagamento (holerites) exclusivamente em <strong>formato digital</strong>, por meio da plataforma Zyntra/Aluforce.</p>
+                        <p style="margin-bottom:8px;font-weight:600;">Estou ciente de que:</p>
+                        <ol style="padding-left:20px;">
+                            <li style="margin-bottom:6px;">Os holerites digitais tero a <strong>mesma validade</strong> dos documentos impressos;</li>
+                            <li style="margin-bottom:6px;">Poderei acess-los a <strong>qualquer momento</strong> pela plataforma;</li>
+                            <li style="margin-bottom:6px;">Poderei <strong>revogar</strong> esta autorizao a qualquer momento, solicitando ao departamento de RH;</li>
+                            <li>A empresa garantir a <strong>segurana e confidencialidade</strong> das informações.</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="modal-section">
+                    <label style="display:block;font-size:0.75rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">
+                        <i class="fas fa-pen-nib" style="color:#6366f1;"></i> Assine digitalmente (digite seu nome completo)
+                    </label>
+                    <input type="text" id="input-assinatura" class="signature-input" placeholder="Digite seu nome completo">
+                    <p style="font-size:0.7rem;color:#94a3b8;margin-top:6px;"><i class="fas fa-info-circle"></i> Sua assinatura ser registrada com data, hora e IP para fins jurdicos.</p>
+                </div>
+
+                <div style="padding:0 20px 20px 20px;">
+                    <div class="consent-checkbox-row">
+                        <input type="checkbox" id="check-aceite">
+                        <label for="check-aceite">Li e concordo com os termos acima</label>
+                    </div>
+
+                    <button id="btn-assinar" class="btn-assinar" onclick="assinarConsentimento()" disabled>
+                        <i class="fas fa-file-signature"></i> Assinar e Autorizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const avatarNameMap = {
+            'clemerson': '/avatars/Clemerson.webp',
+            'isabela': '/avatars/Isabela.webp',
+            'thaina': '/avatars/Thaina.webp',
+            'thiago': '/avatars/Thiago.webp',
+            'nicolas': '/avatars/NicolasDaniel.webp',
+            'nicolasdaniel': '/avatars/NicolasDaniel.webp',
+            'rh': '/avatars/Rh.webp',
+            'admin': '/avatars/admin.webp',
+            'ti': '/avatars/TI.webp',
+            'tialuforce': '/avatars/TI.webp',
+            'antonio': '/avatars/Antonio.webp',
+            'antnio': '/avatars/Antonio.webp',
+            'andreia': '/avatars/Andreia.webp',
+            'guilherme': '/avatars/Guilherme.webp',
+            'marcelo': '/avatars/Marcelo.webp',
+            'financeiro': '/avatars/Financeiro.webp',
+            'douglas': '/avatars/Douglas.webp',
+            'hellen': '/avatars/Hellen.webp',
+            'helen': '/avatars/Hellen.webp'
+        };
+
+        function getAvatarFromEmail(email, nome) {
+            if (!email) return null;
+            const username = email.split('@')[0].split('.')[0].toLowerCase();
+            if (avatarNameMap[username]) return avatarNameMap[username];
+            if (nome) {
+                const firstName = nome.split(' ')[0].toLowerCase();
+                if (avatarNameMap[firstName]) return avatarNameMap[firstName];
+            }
+            return null;
+        }
+
+        // Helper: Obtm headers de Autenticação com o token
+        function getAuthHeaders(additionalHeaders = {}) {
+            return {
+                'Content-Type': 'application/json',
+                ...additionalHeaders
+            };
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0);
+        }
+
+        const meses = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
+                      'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        let holeritesData = [];
+        let currentUser = null;
+
+        async function carregarUsuarioLogado() {
+            try {
+                const response = await fetch('/api/me', { 
+                    headers: getAuthHeaders(),
+                    credentials: 'include' 
+                });
+                if (response.ok) {
+                    currentUser = await response.json();
+                    
+                    // Atualizar saudao dinmica baseada na hora
+                    const greetingTextEl = document.getElementById('greeting-text');
+                    if (greetingTextEl) {
+                        const hour = new Date().getHours();
+                        let greeting = 'Bom dia';
+                        if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+                        else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
+                        greetingTextEl.textContent = greeting;
+                    }
+                    
+                    // Usar apelido se disponvel, seno primeiro nome
+                    const userName = currentUser.apelido || currentUser.nome || 'Usuário';
+                    const primeiroNome = currentUser.apelido || (currentUser.nome ? currentUser.nome.split(' ')[0] : 'Usuário');
+                    let userAvatar = currentUser.avatar && currentUser.avatar !== '/avatars/default.webp' ? currentUser.avatar : null;
+                    if (!userAvatar) userAvatar = getAvatarFromEmail(currentUser.email, userName);
+                    
+                    const userNameEl = document.getElementById('user-name');
+                    if (userNameEl) userNameEl.textContent = primeiroNome;
+                    
+                    const userPhotoEl = document.getElementById('user-photo');
+                    const userInitialEl = document.getElementById('user-initial');
+                    
+                    if (userAvatar && userPhotoEl) {
+                        userPhotoEl.src = userAvatar;
+                        userPhotoEl.classList.add('visible');
+                        userPhotoEl.style.display = 'block';
+                        if (userInitialEl) userInitialEl.style.display = 'none';
+                    } else if (userInitialEl) {
+                        userInitialEl.textContent = userName.charAt(0).toUpperCase();
+                        userInitialEl.style.display = 'flex';
+                        if (userPhotoEl) userPhotoEl.style.display = 'none';
+                    }
+                    
+                    // Mostrar boto admin apenas para Usuários ESPECÍFICOS
+                    const adminEmails = ['rh@aluforce.ind.br', 'ti@aluforce.ind.br', 'andreia@aluforce.ind.br', 'douglas@aluforce.ind.br', 'fernando@aluforce.ind.br', 'adm@aluforce.ind.br'];
+                    const btnAdmin = document.getElementById('btn-admin');
+                    if (btnAdmin && currentUser.email && adminEmails.includes(currentUser.email.toLowerCase())) {
+                        btnAdmin.style.display = 'flex';
+                    }
+                    // Mostrar boto voltar  rea admin na sidebar
+                    const btnVoltarAdmin = document.getElementById('btn-voltar-admin');
+                    if (btnVoltarAdmin && currentUser.email && adminEmails.includes(currentUser.email.toLowerCase())) {
+                        btnVoltarAdmin.style.display = 'flex';
+                    }
+                    
+                    // Carregar holerites do funcionário (com verificao de consentimento)
+                    await verificarConsentimentoECarregar();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar Usuário:', error);
+            }
+        }
+
+        async function carregarHolerites() {
+            try {
+                const ano = document.getElementById('select-ano').value;
+                const mes = document.getElementById('select-mes').value;
+                
+                let url = `/api/rh/holerites/meus?ano=${ano}`;
+                if (mes) url += `&mes=${parseInt(mes)}`;
+                
+                const response = await fetch(url, { headers: getAuthHeaders() });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    holeritesData = data.holerites || [];
+                    
+                    if (holeritesData.length === 0) {
+                        // Mostrar aviso "em breve"
+                        document.getElementById('coming-soon-notice').style.display = 'flex';
+                        document.getElementById('holerites-grid').style.display = 'none';
+                    } else {
+                        document.getElementById('coming-soon-notice').style.display = 'none';
+                        document.getElementById('holerites-grid').style.display = 'grid';
+                        renderHolerites(holeritesData);
+                    }
+                } else {
+                    // Se no encontrou holerites, mostrar aviso
+                    document.getElementById('coming-soon-notice').style.display = 'flex';
+                    document.getElementById('holerites-grid').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro ao carregar holerites:', error);
+                document.getElementById('coming-soon-notice').style.display = 'flex';
+                document.getElementById('holerites-grid').style.display = 'none';
+            }
+        }
+
+        function renderHolerites(data) {
+            const grid = document.getElementById('holerites-grid');
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <i class="fas fa-file-invoice"></i>
+                        <h3>Nenhum holerite encontrado</h3>
+                        <p>No h holerites disponveis para o período selecionado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = data.map((h, i) => {
+                const tipoLabel = h.tipo === 'adiantamento' ? 'Adiantamento' : 'Salário';
+                const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
+                const tipoIcon = h.tipo === 'adiantamento' ? 'fa-hand-holding-usd' : 'fa-money-bill-wave';
+                return `
+                <div class="holerite-card">
+                    <div class="holerite-header">
+                        <span class="holerite-month">${meses[h.mes]}/${h.ano}</span>
+                        <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:12px;font-size:0.7rem;font-weight:600;background:${tipoColor}20;color:${tipoColor};"><i class="fas ${tipoIcon}"></i> ${tipoLabel}</span>
+                        <span class="holerite-status disponivel">
+                            ${h.visualizado ? '<i class="fas fa-check"></i> Visualizado' : 'Novo'}
+                        </span>
+                    </div>
+                    <div class="holerite-details">
+                        <div class="holerite-value">${formatCurrency(h.salario_liquido)}</div>
+                        <div class="holerite-label">Valor líquido</div>
+                    </div>
+                    <div class="holerite-info">
+                        <span>Proventos: ${formatCurrency(h.total_proventos)}</span>
+                        <span>Descontos: ${formatCurrency(h.total_descontos)}</span>
+                    </div>
+                    <button class="btn-download" onclick="visualizarHolerite(${h.id})">
+                        <i class="fas fa-eye"></i> Ver Detalhes
+                    </button>
+                </div>
+            `; }).join('');
+        }
+
+        function filtrarHolerites() {
+            carregarHolerites();
+        }
+
+        async function visualizarHolerite(id) {
+            try {
+                // Registrar visualização
+                await fetch(`/api/rh/holerites/${id}/visualizar`, { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                
+                // Buscar detalhes do holerite
+                const response = await fetch(`/api/rh/holerites/${id}`, { headers: getAuthHeaders() });
+                
+                if (response.ok) {
+                    const h = await response.json();
+                    const modal = document.getElementById('holerite-modal');
+                    const content = document.getElementById('viewer-content');
+                    const tipoLabel = h.tipo === 'adiantamento' ? 'ADIANTAMENTO' : 'SALÁRIO';
+                    const tipoColor = h.tipo === 'adiantamento' ? '#f59e0b' : '#10b981';
+                    
+                    content.innerHTML = `
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                            <div>
+                                <span style="font-size:0.65rem;color:#94a3b8;text-transform:uppercase;font-weight:600;letter-spacing:0.5px;">Referncia</span>
+                                <div style="font-size:1.1rem;font-weight:700;color:#1e293b;">${meses[h.mes]}/${h.ano}</div>
+                            </div>
+                            <span style="background:${tipoColor};color:white;padding:4px 14px;border-radius:20px;font-size:0.7rem;font-weight:700;letter-spacing:0.5px;">${tipoLabel}</span>
+                        </div>
+
+                        <div class="func-info-grid">
+                            <div class="func-info-item">
+                                <div class="func-info-label">Funcionário</div>
+                                <div class="func-info-value">${h.funcionário_nome || currentUser?.nome || ''}</div>
+                            </div>
+                            <div class="func-info-item">
+                                <div class="func-info-label">CPF</div>
+                                <div class="func-info-value">${h.cpf || 'N/A'}</div>
+                            </div>
+                            <div class="func-info-item">
+                                <div class="func-info-label">Cargo</div>
+                                <div class="func-info-value">${h.cargo || 'N/A'}</div>
+                            </div>
+                            <div class="func-info-item">
+                                <div class="func-info-label">Departamento</div>
+                                <div class="func-info-value">${h.departamento || 'N/A'}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="section-title">
+                            <div class="bar" style="background:#10b981;"></div>
+                            <h4>Proventos</h4>
+                        </div>
+                        <table class="demonstrativo-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">Código</th>
+                                    <th>Descrição</th>
+                                    <th style="width:70px;">Ref.</th>
+                                    <th style="width:100px;text-align:right;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(h.proventos || []).map(p => `
+                                    <tr>
+                                        <td>${p.codigo || '-'}</td>
+                                        <td style="color:#1e293b;font-weight:500;">${p.descrição || '-'}</td>
+                                        <td>${p.referencia || '-'}</td>
+                                        <td class="provento" style="text-align:right;">${formatCurrency(p.valor)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+
+                        <div class="section-title">
+                            <div class="bar" style="background:#ef4444;"></div>
+                            <h4>Descontos</h4>
+                        </div>
+                        <table class="demonstrativo-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:60px;">Código</th>
+                                    <th>Descrição</th>
+                                    <th style="width:70px;">Ref.</th>
+                                    <th style="width:100px;text-align:right;">Valor</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(h.descontos || []).map(d => `
+                                    <tr>
+                                        <td>${d.codigo || '-'}</td>
+                                        <td style="color:#1e293b;font-weight:500;">${d.descrição || '-'}</td>
+                                        <td>${d.referencia || '-'}</td>
+                                        <td class="desconto" style="text-align:right;">${formatCurrency(d.valor)}</td>
+                                    </tr>
+                                `).join('')}
+                                ${(!h.descontos || h.descontos.length === 0) ? '<tr><td colspan="4" style="padding:14px;text-align:center;color:#94a3b8;font-size:0.8rem;">Nenhum desconto registrado</td></tr>' : ''}
+                            </tbody>
+                        </table>
+                        
+                        <div class="totais-row">
+                            <div class="total-item">
+                                <div class="total-label">Total Proventos</div>
+                                <div class="total-value provento">${formatCurrency(h.total_proventos)}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Total Descontos</div>
+                                <div class="total-value desconto">${formatCurrency(h.total_descontos)}</div>
+                            </div>
+                            <div class="total-item">
+                                <div class="total-label">Líquido a Receber</div>
+                                <div class="total-value liquido">${formatCurrency(h.salario_liquido)}</div>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+                            ${!h.confirmado_recebimento ? `
+                                <button class="btn btn-primary" style="flex:1;background:#10b981;border-radius:12px;padding:14px;" onclick="confirmarRecebimento(${h.id})">
+                                    <i class="fas fa-check-double"></i> Confirmar Recebimento
+                                </button>
+                            ` : `
+                                <div style="flex:1;padding:14px;background:#f0fdf4;border-radius:12px;text-align:center;color:#166534;border:1px solid #bbf7d0;font-size:0.85rem;">
+                                    <i class="fas fa-check-double"></i> Recebimento confirmado em ${(function(){ const s=String(h.data_confirmacao||'').substring(0,10); const p=s.split('-'); return p.length===3 ? p[2]+'/'+p[1]+'/'+p[0] : s; })()}
+                                </div>
+                            `}
+                            <button class="btn btn-outline" onclick="fecharModal()" style="border-radius:12px;padding:14px;">
+                                <i class="fas fa-times"></i> Fechar
+                            </button>
+                        </div>
+                    `;
+                    
+                    modal.classList.add('show');
+                }
+            } catch (error) {
+                console.error('Erro ao visualizar holerite:', error);
+                showToast('Erro ao carregar detalhes do holerite', 'error');
+            }
+        }
+
+        async function confirmarRecebimento(id) {
+            if (!confirm('Deseja confirmar o recebimento deste holerite?\n\nEsta ao registrar que voc visualizou e est ciente das informações do seu pagamento.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/rh/holerites/${id}/confirmar`, { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders()
+                });
+                
+                if (response.ok) {
+                    showToast('Recebimento confirmado com sucesso!', 'success');
+                    fecharModal();
+                    carregarHolerites();
+                } else {
+                    const result = await response.json();
+                    showToast(result.message || 'Erro ao confirmar recebimento', 'error');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                showToast('Erro ao confirmar recebimento', 'error');
+            }
+        }
+
+        function fecharModal() { 
+            document.getElementById('holerite-modal').classList.remove('show'); 
+        }
+
+        // ============================================================
+        // CONSENTIMENTO DIGITAL
+        // ============================================================
+        let consentimentoVerificado = false;
+
+        async function verificarConsentimentoECarregar() {
+            try {
+                const resp = await fetch('/api/rh/holerites/consentimento', { headers: getAuthHeaders() });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    if (data.consentimento || data.admin) {
+                        consentimentoVerificado = true;
+                        await carregarHolerites();
+                    } else {
+                        // Mostrar modal de consentimento
+                        mostrarModalConsentimento();
+                    }
+                } else if (resp.status === 401) {
+                    // No autenticado - carregar normalmente (auth-unified vai redirecionar)
+                    await carregarHolerites();
+                } else {
+                    // Erro no servidor - mostrar modal de consentimento por segurana
+                    console.warn('Erro ao verificar consentimento, exibindo modal:', resp.status);
+                    mostrarModalConsentimento();
+                }
+            } catch (e) {
+                console.error('Erro ao verificar consentimento:', e);
+                // Em caso de erro de rede, mostrar modal de consentimento
+                mostrarModalConsentimento();
+            }
+        }
+
+        function mostrarModalConsentimento() {
+            const nomeEl = document.getElementById('consent-nome');
+            const cpfEl = document.getElementById('consent-cpf');
+            if (nomeEl && currentUser) nomeEl.textContent = currentUser.nome || '___';
+            if (cpfEl && currentUser) cpfEl.textContent = currentUser.cpf || 'no informado';
+
+            document.getElementById('modal-consentimento').classList.add('show');
+
+            // Habilitar/desabilitar boto de assinar
+            const inputAssinatura = document.getElementById('input-assinatura');
+            const checkAceite = document.getElementById('check-aceite');
+            const btnAssinar = document.getElementById('btn-assinar');
+
+            function atualizarBotao() {
+                const valido = inputAssinatura.value.trim().length >= 3 && checkAceite.checked;
+                btnAssinar.disabled = !valido;
+                if (valido) { btnAssinar.classList.add('active'); } else { btnAssinar.classList.remove('active'); }
+            }
+
+            inputAssinatura.addEventListener('input', atualizarBotao);
+            checkAceite.addEventListener('change', atualizarBotao);
+        }
+
+        async function assinarConsentimento() {
+            const assinatura = document.getElementById('input-assinatura').value.trim();
+            if (assinatura.length < 3) return;
+
+            const btnAssinar = document.getElementById('btn-assinar');
+            btnAssinar.disabled = true;
+            btnAssinar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+
+            try {
+                const resp = await fetch('/api/rh/holerites/consentimento', { credentials: 'include', method: 'POST',
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ assinatura_digital: assinatura })
+                });
+
+                if (resp.ok) {
+                    document.getElementById('modal-consentimento').classList.remove('show');
+                    showToast('Autorizao registrada com sucesso!', 'success');
+                    consentimentoVerificado = true;
+                    await carregarHolerites();
+                } else {
+                    const err = await resp.json();
+                    showToast('Erro ao registrar autorizao', 'error');
+                    btnAssinar.disabled = false;
+                    btnAssinar.innerHTML = '<i class="fas fa-file-signature"></i> Assinar e Autorizar';
+                }
+            } catch (e) {
+                console.error('Erro:', e);
+                showToast('Erro ao registrar autorizao', 'error');
+                btnAssinar.disabled = false;
+                btnAssinar.innerHTML = '<i class="fas fa-file-signature"></i> Assinar e Autorizar';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarUsuarioLogado();
+        });
+
+        // Click no overlay j fecha via onclick no modal-overlay
+
+        function showToast(message, type) {
+            type = type || 'info';
+            var toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:99999;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:400px;';
+            toast.style.background = type==='success'?'#10b981':type==='error'?'#ef4444':type==='warning'?'#f59e0b':'#3b82f6';
+            var span = document.createElement('span');
+            span.textContent = message;
+            toast.appendChild(span);
+            document.body.appendChild(toast);
+            setTimeout(function() { toast.remove(); }, 4000);
+        }
+    </script>
+    <!-- Sistema de Monitoramento de Conexo -->
+    <script src="/modules/_shared/connection-monitor.js?v=20260111" defer></script>
+    <script src="/js/popup-confirmacao.js" defer></script>
+    <script src="/js/auth-unified.js?v=20260214" defer></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/modules/RH/public/js/controle-acesso-rh.js?v=20260319" defer></script>
+    <script src="/modules/RH/public/js/rh-ui-common.js" defer></script>
+    
+<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260217" defer></script>
+    <!-- Chat Widget BOB AI -->
+    <script src="/chat/widget.js?v=20260218" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260226" defer></script>
+
+    <!-- Chat Corporativo (Teams) -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260615" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+</body>
+</html>
+
+
+
+
