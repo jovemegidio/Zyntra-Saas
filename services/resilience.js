@@ -184,6 +184,7 @@ function createPoolMonitor(pool, interval = 60000) {
 // ── Enhanced Health Check ──────────────────────────────────
 function createHealthEndpoint(pool, cacheService) {
     return async (req, res) => {
+        try {
         const health = {
             status: 'ok',
             timestamp: new Date().toISOString(),
@@ -227,11 +228,18 @@ function createHealthEndpoint(pool, cacheService) {
 
         // Cache check
         if (cacheService) {
-            health.cache = cacheService.cacheStats();
+            try {
+                health.cache = cacheService.cacheStats();
+            } catch (e) {
+                health.cache = { status: 'error', error: e.message };
+            }
         }
 
         const statusCode = health.status === 'ok' ? 200 : 503;
         res.status(statusCode).json(health);
+        } catch (err) {
+            res.status(500).json({ status: 'error', error: 'Health check failed', message: err.message });
+        }
     };
 }
 
