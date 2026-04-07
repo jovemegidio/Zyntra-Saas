@@ -1,0 +1,1929 @@
+/**
+ * VENDAS EXTENDED ROUTES - Extracted from server.js (Lines 25776-27054)
+ * Dashboard admin/vendedor, top-vendedores, pedidos, relatorios
+ * NOTE: Uses separate vendasPool connecting to aluforce_vendas database
+ * @module routes/vendas-extended
+ */
+const express = require('express');
+const mysql = require('mysql2/promise');
+
+module.exports = function createVendasExtendedRoutes(deps) {
+    const { pool, authenticateToken, authorizeArea, authorizeAdmin, writeAuditLog, cacheMiddleware, CACHE_CONFIG, VENDAS_DB_CONFIG } = deps;
+    const router = express.Router();
+
+    // --- Standard requires for extracted routes ---
+    const { body, param, query, validationResult } = require('express-validator');
+    const path = require('path');
+    const multer = require('multer');
+    const fs = require('fs');
+    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
+    const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+    const validate = (req, res, next) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) return res.status(400).json({ message: 'Dados inválidos', errors: errors.array() });
+        next();
+    };
+
+    const safeParseJSON = (str, fallback = []) => { try { return JSON.parse(str); } catch (_) { return fallback; } };
+
+    // Separate pool for vendas database
+    let vendasPool;
+    try {
+        vendasPool = mysql.createPool(VENDAS_DB_CONFIG || {
+            host: process.env.DB_HOST || 'localhost',
+            port: parseInt(process.env.DB_PORT) || 3306,
+            user: process.env.DB_USER || 'aluforce',
+            password: process.env.DB_PASSWORD || '',
+            database: 'aluforce_vendas',
+            waitForConnections: true,
+            connectionLimit: 10,
+            charset: 'utf8mb4'
+        });
+    } catch (e) {
+        console.error('[VENDAS-EXT] Erro ao criar vendasPool:', e.message);
+        vendasPool = pool; // fallback to main pool
+    }
+    // ======================================
+
+
+    // === DASHBOARD VENDAS ===
+
+    // Dashboard Admin: métricas completas e avançadas
+    router.get('/dashboard/admin', authorizeArea('vendas'), cacheMiddleware('vendas_dash_admin', CACHE_CONFIG.dashboardVendas, true), async (req, res) => {
+        try {
+            const user = req.user;
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) return res.status(403).json({ message: 'Acesso negado: apenas administradores.' });
+
+            const periodo = req.query.periodo || req.query.período || '30';
+            const dias = parseInt(periodo) || 30;
+
+            // Métricas gerais
+            const [metricsRows] = await pool.query(`
+                SELECT
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as total_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado,
+                    COUNT(CASE WHEN status = 'orcamento' THEN 1 END) as total_orcamentos,
+                    SUM(CASE WHEN status = 'orcamento' THEN valor ELSE 0 END) as valor_orcamentos,
+                    COUNT(CASE WHEN status = 'analise' THEN 1 END) as total_analise,
+                    SUM(CASE WHEN status = 'analise' THEN valor ELSE 0 END) as valor_analise,
+                    COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
+                    COUNT(*) as total_pedidos,
+                    AVG(valor) as ticket_medio
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL ? DAY
+            `, [dias]);
+
+            // Top vendedores (faturamento)
+            const [topVendedores] = await pool.query(`
+                SELECT
+                    u.id, u.nome, u.email,
+                    COUNT(p.id) as total_vendas,
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado,
+                    SUM(p.valor) as valor_total
+                FROM usuarios u
+                LEFT JOIN pedidos p ON u.id = p.vendedor_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                WHERE u.role = 'comercial'
+                GROUP BY u.id, u.nome, u.email
+                ORDER BY valor_faturado DESC
+                LIMIT 10
+            `, [dias]);
+
+            // Faturamento mensal (últimos 12 meses)
+            const [faturamentoMensal] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(created_at, '%Y-%m') as mes,
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as qtd_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL 12 MONTH
+                GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                ORDER BY mes ASC
+            `);
+
+            // Conversão por status
+            const [conversao] = await pool.query(`
+                SELECT
+                    status,
+                    COUNT(*) as quantidade,
+                    SUM(valor) as valor_total
+                FROM pedidos
+                WHERE created_at >= CURDATE() - INTERVAL ? DAY
+                GROUP BY status
+            `, [dias]);
+
+            // Pedidos por empresa (top 10)
+            const [topEmpresas] = await pool.query(`
+                SELECT
+                    e.id, e.nome_fantasia, e.cnpj,
+                    COUNT(p.id) as total_pedidos,
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado
+                FROM empresas e
+                LEFT JOIN pedidos p ON e.id = p.empresa_id AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                GROUP BY e.id, e.nome_fantasia, e.cnpj
+                ORDER BY valor_faturado DESC
+                LIMIT 10
+            `, [dias]);
+
+            // Taxa de conversão
+            const totalOrcamentos = metricsRows[0].total_orcamentos || 0;
+            const totalFaturado = metricsRows[0].total_faturado || 0;
+            const taxaConversao = totalOrcamentos > 0 ? ((totalFaturado / totalOrcamentos) * 100).toFixed(2) : 0;
+
+            res.json({
+                periodo: dias,
+                metricas: metricsRows[0],
+                taxaConversao: parseFloat(taxaConversao),
+                topVendedores,
+                faturamentoMensal,
+                conversaoPorStatus: conversao,
+                topEmpresas
+            });
+        } catch (error) {
+            console.error('Erro dashboard admin:', error);
+            res.status(500).json({ error: 'Erro ao carregar dashboard admin' });
+        }
+    });
+
+    router.get('/dashboard/vendedor', authorizeArea('vendas'), cacheMiddleware('vendas_dash_vend', CACHE_CONFIG.dashboardVendas, true), async (req, res) => {
+        try {
+            const vendedorId = req.user.id;
+            const período = req.query.período || '30'; // dias
+
+            // Métricas pessoais do vendedor
+            const [metricsRows] = await pool.query(`
+                SELECT
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as total_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado,
+                    COUNT(CASE WHEN status = 'orcamento' THEN 1 END) as total_orcamentos,
+                    SUM(CASE WHEN status = 'orcamento' THEN valor ELSE 0 END) as valor_orcamentos,
+                    COUNT(CASE WHEN status = 'analise' THEN 1 END) as total_analise,
+                    COUNT(CASE WHEN status = 'cancelado' THEN 1 END) as total_cancelado,
+                    COUNT(*) as total_pedidos,
+                    AVG(valor) as ticket_medio
+                FROM pedidos
+                WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL ? DAY
+            `, [vendedorId, parseInt(período)]);
+
+            // Pipeline do vendedor (valor por status)
+            const [pipeline] = await pool.query(`
+                SELECT
+                    status,
+                    COUNT(*) as quantidade,
+                    SUM(valor) as valor_total
+                FROM pedidos
+                WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL ? DAY
+                GROUP BY status
+            `, [vendedorId, parseInt(período)]);
+
+            // Histórico mensal do vendedor (últimos 6 meses)
+            const [históricoMensal] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(created_at, '%Y-%m') as mes,
+                    COUNT(CASE WHEN status IN ('faturado', 'recibo') THEN 1 END) as qtd_faturado,
+                    SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END) as valor_faturado
+                FROM pedidos
+                WHERE vendedor_id = ? AND created_at >= CURDATE() - INTERVAL 6 MONTH
+                GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                ORDER BY mes ASC
+            `, [vendedorId]);
+
+            // Meus clientes (empresas com mais pedidos)
+            // AUDIT-FIX HIGH-001: Fixed broken SQL — added FROM/JOIN/WHERE, removed trailing comma
+            const [meusClientes] = await pool.query(`
+                SELECT
+                    e.id, e.nome_fantasia,
+                    COUNT(p.id) as total_pedidos,
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as valor_faturado
+                FROM empresas e
+                JOIN pedidos p ON p.empresa_id = e.id
+                WHERE p.vendedor_id = ? AND p.created_at >= CURDATE() - INTERVAL ? MONTH
+                GROUP BY e.id, e.nome_fantasia
+                ORDER BY valor_faturado DESC
+                LIMIT 10
+            `, [vendedorId, parseInt(período) || 6]);
+
+            // Taxa de conversão pessoal
+            const totalOrcamentos = metricsRows[0]?.total_orcamentos || 0;
+            const totalFaturado = metricsRows[0]?.total_faturado || 0;
+            const taxaConversao = totalOrcamentos > 0 ? ((totalFaturado / totalOrcamentos) * 100).toFixed(2) : 0;
+
+            // Buscar meta do vendedor
+            let metaAtual = { valor: 32500, atingido: 0, percentual: 0 };
+            try {
+                const [metaRows] = await pool.query(`
+                    SELECT valor, atingido
+                    FROM metas_vendas
+                    WHERE vendedor_id = ? AND MONTH(mes) = MONTH(CURDATE()) AND YEAR(mes) = YEAR(CURDATE())
+                    LIMIT 1
+                `, [vendedorId]);
+                if (metaRows && metaRows.length > 0) {
+                    metaAtual.valor = metaRows[0].valor || 32500;
+                    metaAtual.atingido = metricsRows[0]?.valor_faturado || 0;
+                    metaAtual.percentual = metaAtual.valor > 0 ? ((metaAtual.atingido / metaAtual.valor) * 100).toFixed(1) : 0;
+                } else {
+                    metaAtual.atingido = metricsRows[0]?.valor_faturado || 0;
+                    metaAtual.percentual = metaAtual.valor > 0 ? ((metaAtual.atingido / metaAtual.valor) * 100).toFixed(1) : 0;
+                }
+            } catch (err) {
+                metaAtual.atingido = metricsRows[0]?.valor_faturado || 0;
+                metaAtual.percentual = metaAtual.valor > 0 ? ((metaAtual.atingido / metaAtual.valor) * 100).toFixed(1) : 0;
+            }
+
+            res.json({
+                metricas: metricsRows[0] || {},
+                pipeline,
+                históricoMensal,
+                meusClientes,
+                taxaConversao,
+                meta: metaAtual
+            });
+        } catch (error) {
+            console.error('Erro dashboard vendedor:', error);
+            res.status(500).json({ error: 'Erro ao carregar dashboard do vendedor' });
+        }
+    });
+
+    // GET: top vendedores by faturamento
+    router.get('/dashboard/top-vendedores', authenticateToken, cacheMiddleware('vendas_top_vend', CACHE_CONFIG.dashboardVendas), async (req, res) => {
+        try {
+            const limit = Math.max(parseInt(req.query.limit || '10'), 1);
+            const periodDays = Math.max(parseInt(req.query.period || req.query.days || '365'), 1);
+
+            // Buscar vendedores que REALMENTE têm pedidos, unificando com lista de vendedores cadastrados
+            const [rows] = await pool.query(
+                `SELECT
+                    u.id,
+                    u.nome,
+                    COALESCE(f.foto_perfil_url, u.foto, u.avatar) AS foto,
+                    COUNT(CASE WHEN p.status NOT IN ('cancelado', 'excluido') THEN p.id END) as vendas,
+                    COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'excluido', 'orcamento') THEN p.valor ELSE 0 END), 0) AS valor
+                 FROM usuarios u
+                 LEFT JOIN funcionarios f ON f.email = u.email
+                 LEFT JOIN pedidos p ON p.vendedor_id = u.id
+                    AND p.created_at >= CURDATE() - INTERVAL ? DAY
+                    AND p.status NOT IN ('cancelado', 'excluido')
+                 WHERE u.role IN ('comercial', 'vendedor', 'admin')
+                    OR JSON_CONTAINS(COALESCE(u.areas, '[]'), '"vendas"')
+                    OR u.id IN (SELECT DISTINCT vendedor_id FROM pedidos WHERE vendedor_id IS NOT NULL)
+                 GROUP BY u.id, u.nome, f.foto_perfil_url, u.foto, u.avatar
+                 ORDER BY valor DESC, vendas DESC
+                 LIMIT ?`,
+                 [periodDays, limit]
+            );
+            res.json(rows.map(r => ({
+                id: r.id,
+                nome: r.nome,
+                foto: r.foto || null,
+                vendas: Number(r.vendas || 0),
+                valor: Number(r.valor || 0)
+            })));
+        } catch (error) {
+            console.error('Erro ao buscar top vendedores:', error);
+            res.json([]);
+        }
+    });
+
+    // GET: top produtos mais vendidos
+    router.get('/dashboard/top-produtos', authenticateToken, cacheMiddleware('vendas_top_prod', CACHE_CONFIG.dashboardVendas), async (req, res) => {
+        try {
+            const limit = Math.max(parseInt(req.query.limit || '5'), 1);
+            const periodDays = Math.max(parseInt(req.query.period || req.query.days || '30'), 1);
+
+            try {
+                const [rows] = await pool.query(
+                    `SELECT
+                        COALESCE(pi.descricao, pi.codigo, 'Produto') as nome,
+                        pi.codigo,
+                        SUM(pi.quantidade) as quantidade,
+                        SUM(pi.quantidade * pi.preco_unitario) as valor
+                     FROM pedido_itens pi
+                     JOIN pedidos p ON pi.pedido_id = p.id
+                     WHERE p.created_at >= CURDATE() - INTERVAL ? DAY
+                     GROUP BY pi.codigo, pi.descricao
+                     ORDER BY quantidade DESC
+                     LIMIT ?`,
+                     [periodDays, limit]
+                );
+                return res.json(rows.map(r => ({
+                    nome: r.nome || 'Produto',
+                    codigo: r.codigo,
+                    quantidade: Number(r.quantidade || 0),
+                    valor: Number(r.valor || 0)
+                })));
+            } catch (err) {
+                // Fallback se tabela não existir
+                return res.json([]);
+            }
+        } catch (error) {
+            console.error('Erro ao buscar top produtos:', error);
+            res.json([]);
+        }
+    });
+
+    // AUDIT-FIX R3: GET /pedidos REMOVIDO (dead code — existe em vendas-routes.js)
+
+    // ========================================
+    // PDF GENERATION - ORÇAMENTO PROFISSIONAL INSTITUCIONAL
+    // ========================================
+    const PDFDocument = require('pdfkit');
+
+    // Rota alternativa para /imprimir (redireciona para /pdf)
+    router.get('/pedidos/:id/imprimir', authenticateToken, authorizeArea('vendas'), (req, res, next) => {
+        req.url = `/api/vendas/pedidos/${req.params.id}/pdf`;
+        next('route');
+    });
+
+    router.get('/pedidos/:id/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        console.log('[PDF] Gerando documento para pedido:', req.params.id);
+        try {
+            const { id } = req.params;
+
+            const [pedidos] = await vendasPool.query(`
+                SELECT p.*,
+                       p.valor as valor_total,
+                       p.descricao as observacoes_internas,
+                       p.observacao as observacoes,
+                       p.created_at as data_criacao,
+                       c.nome as cliente_nome_real,
+                       c.razao_social as cliente_razao_social,
+                       c.nome_fantasia as cliente_nome_fantasia,
+                       COALESCE(c.cnpj, c.cnpj_cpf) as cliente_cnpj,
+                       c.inscricao_estadual as cliente_ie,
+                       c.contato as cliente_contato,
+                       c.email as cliente_email,
+                       c.telefone as cliente_telefone,
+                       c.endereco as cliente_endereco,
+                       c.bairro as cliente_bairro,
+                       c.cidade as cliente_cidade,
+                       c.estado as cliente_estado,
+                       c.cep as cliente_cep,
+                       c.contribuinte_icms as cliente_contribuinte,
+                       c.transportadora as cliente_transportadora,
+                       u.nome as vendedor_nome,
+                       u.email as vendedor_email,
+                       t.razao_social as transp_razao_social,
+                       t.cnpj_cpf as transp_cnpj
+                FROM pedidos p
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                LEFT JOIN usuarios u ON p.vendedor_id = u.id
+                LEFT JOIN transportadoras t ON p.transportadora_id = t.id
+                WHERE p.id = ?
+            `, [id]);
+
+            if (pedidos.length === 0) return res.status(404).json({ error: 'Pedido não encontrado' });
+
+            const pedido = pedidos[0];
+
+            // Verificar ownership: vendedor só pode gerar PDF dos seus pedidos
+            const isAdmin = req.user && (req.user.role === 'admin' || req.user.cargo === 'admin');
+            if (!isAdmin && pedido.vendedor_id && req.user && pedido.vendedor_id !== req.user.id) {
+                return res.status(403).json({ error: 'Acesso negado: este pedido pertence a outro vendedor' });
+            }
+
+            let [itens] = await vendasPool.query(`SELECT * FROM pedido_itens WHERE pedido_id = ? ORDER BY id ASC`, [id]);
+
+            if (itens.length === 0 && pedido.produtos_preview) {
+                try {
+                    const preview = JSON.parse(pedido.produtos_preview);
+                    if (Array.isArray(preview) && preview.length > 0) {
+                        itens = preview.map(item => ({
+                            codigo: item.codigo || '',
+                            descricao: item.descricao || item.nome || '',
+                            quantidade: parseFloat(item.quantidade) || 0,
+                            unidade: item.unidade || 'UN',
+                            preco_unitario: parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0,
+                            desconto: parseFloat(item.desconto) || 0,
+                            subtotal: parseFloat(item.total || item.subtotal) || 0
+                        }));
+                    }
+                } catch(e) {}
+            }
+
+            const emp = {
+                razao: 'I. M. DOS REIS - ALUFORCE INDUSTRIA E COMERCIO DE CONDUTORES',
+                cnpj: '08.192.479/0001-60', ie: '103.385.861-110',
+                end: 'Rua Ernestina, 270 - Vila Sao Joao',
+                cidUf: 'Ferraz de Vasconcelos/SP', cep: '08527-400',
+                tel: '(11) 94723-8729', email: 'contato@aluforce.com.br'
+            };
+
+            let geradoPor = 'Sistema';
+            if (req.user?.id) {
+                const [u] = await vendasPool.query('SELECT nome FROM usuarios WHERE id = ?', [req.user.id]);
+                if (u.length > 0) geradoPor = u[0].nome;
+            }
+
+            // ========== MAPEAR STATUS PARA NOME AMIGAVEL ==========
+            const statusMap = {
+                'orcamento': 'Orcamento', 'em-analise': 'Em Analise', 'negociacao': 'Negociacao',
+                'pedido-aprovado': 'Pedido Aprovado', 'em-producao': 'Em Producao',
+                'faturado': 'Faturado', 'cancelado': 'Cancelado', 'recibo': 'Recibo',
+                'entregue': 'Entregue', 'finalizado': 'Finalizado'
+            };
+            const statusRaw = (pedido.status || 'orcamento').toLowerCase().trim();
+            const statusNome = statusMap[statusRaw] || statusRaw.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const nomeCliente = pedido.cliente_razao_social || pedido.cliente_nome_fantasia || pedido.cliente_nome_real || pedido.cliente_nome || 'Cliente';
+
+            // ========== NOME DO ARQUIVO ==========
+            const nomeArquivoCliente = nomeCliente.replace(/[^a-zA-Z0-9\s\-]/g, '').trim();
+            const nomeArquivo = `${statusNome} - ${nomeArquivoCliente} - N${pedido.id}`;
+            const nomeArquivoSafe = nomeArquivo.replace(/[\\/:*?"<>|]/g, '_');
+
+            // ========== HELPERS ==========
+            function moeda(v) { return 'R$ ' + (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+            function fmtData(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '--'; }
+
+            // ========== CRIAR PDF - DOCUMENTO PROFISSIONAL A4 ==========
+            const doc = new PDFDocument({
+                size: 'A4',
+                margins: { top: 28, bottom: 28, left: 42, right: 42 },
+                autoFirstPage: true,
+                bufferPages: false,
+                info: { Title: nomeArquivo, Author: 'Zyntra', Creator: 'Zyntra ERP V.2', Producer: 'Zyntra', Subject: 'Proposta Comercial / Orcamento' }
+            });
+
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(nomeArquivoSafe)}.pdf"`);
+            doc.pipe(res);
+
+            // ===== PALETA CORPORATIVA ZYNTRA =====
+            const C = {
+                navy:       '#0b2842',    // azul marinho institucional (brand)
+                navyMid:    '#103758',    // azul médio
+                navyLight:  '#1a5585',    // azul claro
+                gold:       '#18b6c8',    // ciano/teal destaque (accent)
+                goldDark:   '#139bab',    // ciano escuro
+                goldLight:  '#a5e8ef',    // ciano claro
+                text:       '#1A202C',    // texto principal
+                textMid:    '#4A5568',    // texto secundário
+                textLight:  '#A0AEC0',    // texto suave
+                bg:         '#F8F9FB',    // fundo alternado
+                border:     '#CBD5E0',    // borda
+                borderLight:'#E2E8F0',    // borda suave
+                white:      '#FFFFFF',
+                red:        '#C53030',
+                green:      '#276749'
+            };
+
+            const ML = 42;          // margem esquerda
+            const MR = 553;         // margem direita
+            const MW = MR - ML;     // largura util
+            const PW = 595;         // largura pagina
+            const PH = 842;         // altura pagina
+            let y = 0;
+
+            // ================================================================
+            //  HEADER BAND - faixa topo premium
+            // ================================================================
+            // Faixa azul marinho grossa
+            doc.rect(0, 0, PW, 8).fillColor(C.navy).fill();
+            // Filete dourado elegante
+            doc.rect(0, 8, PW, 1.5).fillColor(C.gold).fill();
+
+            y = 20;
+
+            // ================================================================
+            //  CABECALHO - Logo | Empresa | Documento
+            // ================================================================
+            const logoPath = path.join(__dirname, '..', 'public', 'images', 'Logo Monocromatico - Azul - Aluforce.png');
+            if (fs.existsSync(logoPath)) {
+                try { doc.image(logoPath, ML, y, { width: 70 }); } catch(e) {}
+            }
+
+            // Dados da empresa
+            const exL = ML + 78;
+            doc.fontSize(6.8).fillColor(C.navy).font('Helvetica-Bold')
+               .text(emp.razao, exL, y + 2, { width: 260 });
+            doc.fontSize(5.5).fillColor(C.textMid).font('Helvetica')
+               .text(`CNPJ: ${emp.cnpj}  |  IE: ${emp.ie}`, exL, y + 18)
+               .text(`${emp.end} - ${emp.cidUf} - CEP: ${emp.cep}`, exL, y + 26)
+               .text(`${emp.tel}  |  ${emp.email}`, exL, y + 34);
+
+            // ---- Caixa tipo documento (lado direito) ----
+            const dbW = 138;
+            const dbX = MR - dbW;
+            const dbH = 44;
+            // Sombra sutil
+            doc.roundedRect(dbX + 1, y, dbW, dbH, 4).fillColor('#E2E8F0').fill();
+            // Caixa principal
+            doc.roundedRect(dbX, y - 1, dbW, dbH, 4).fillColor(C.navy).fill();
+            // Borda dourada superior da caixa
+            doc.roundedRect(dbX, y - 1, dbW, 4, 4).fillColor(C.gold).fill();
+            doc.rect(dbX, y + 1, dbW, 2).fillColor(C.gold).fill();
+
+            doc.fontSize(9.5).fillColor(C.white).font('Helvetica-Bold')
+               .text('ORCAMENTO', dbX, y + 8, { width: dbW, align: 'center' });
+            doc.fontSize(18).fillColor(C.gold).font('Helvetica-Bold')
+               .text(`N. ${pedido.id}`, dbX, y + 21, { width: dbW, align: 'center' });
+
+            y += 52;
+
+            // Separador dourado duplo
+            doc.moveTo(ML, y).lineTo(MR, y).strokeColor(C.gold).lineWidth(1.5).stroke();
+            doc.moveTo(ML, y + 3).lineTo(MR, y + 3).strokeColor(C.borderLight).lineWidth(0.3).stroke();
+            y += 9;
+
+            // ================================================================
+            //  BARRA DE METADADOS
+            // ================================================================
+            const metaH = 24;
+            // Fundo com borda
+            doc.rect(ML, y, MW, metaH).fillColor(C.bg).fill();
+            doc.rect(ML, y, MW, metaH).strokeColor(C.border).lineWidth(0.3).stroke();
+
+            const dataValidade = new Date(pedido.created_at);
+            dataValidade.setDate(dataValidade.getDate() + 15);
+
+            const metaFields = [
+                { label: 'EMISSAO',   value: fmtData(pedido.created_at) },
+                { label: 'VENDEDOR',  value: pedido.vendedor_nome || '--' },
+                { label: 'VALIDADE',  value: fmtData(dataValidade) },
+                { label: 'STATUS',    value: statusNome.toUpperCase() }
+            ];
+
+            const mColW = MW / 4;
+            metaFields.forEach((f, i) => {
+                const fx = ML + mColW * i + 12;
+                doc.fontSize(5).fillColor(C.textLight).font('Helvetica-Bold')
+                   .text(f.label, fx, y + 4);
+                doc.fontSize(7).fillColor(C.text).font('Helvetica')
+                   .text(f.value, fx, y + 13);
+                // Divisor vertical
+                if (i > 0) {
+                    doc.moveTo(ML + mColW * i, y + 5)
+                       .lineTo(ML + mColW * i, y + metaH - 5)
+                       .strokeColor(C.border).lineWidth(0.3).stroke();
+                }
+            });
+            y += metaH + 7;
+
+            // ================================================================
+            //  DADOS DO CLIENTE
+            // ================================================================
+            // Titulo com icone visual (barra lateral dourada)
+            doc.rect(ML, y, 3, 15).fillColor(C.gold).fill();
+            doc.rect(ML + 3, y, MW - 3, 15).fillColor(C.navyMid).fill();
+            doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
+               .text('DADOS DO CLIENTE', ML + 14, y + 4);
+            y += 15;
+
+            // Montar endereco completo
+            const endParts = [pedido.cliente_endereco, pedido.cliente_bairro].filter(Boolean);
+            const cidParts = [pedido.cliente_cidade, pedido.cliente_estado].filter(Boolean);
+            let endCompleto = endParts.join(', ');
+            if (cidParts.length > 0) endCompleto += (endCompleto ? ' - ' : '') + cidParts.join('/');
+
+            // Box cliente com borda esquerda dourada sutil
+            const cliH = 50;
+            doc.rect(ML, y, MW, cliH).fillColor(C.white).fill();
+            doc.rect(ML, y, MW, cliH).strokeColor(C.border).lineWidth(0.4).stroke();
+            doc.rect(ML, y, 2, cliH).fillColor(C.goldLight).fill();
+
+            // Razao Social em destaque
+            doc.fontSize(8.5).fillColor(C.navy).font('Helvetica-Bold')
+               .text(nomeCliente, ML + 12, y + 5, { width: MW - 24 });
+
+            // Linha divisoria elegante
+            doc.moveTo(ML + 12, y + 16).lineTo(MR - 12, y + 16)
+               .strokeColor(C.borderLight).lineWidth(0.3).stroke();
+
+            // Campos em grid 2 colunas
+            const c1 = ML + 12;
+            const c2 = ML + MW / 2 + 8;
+            const lbW = 60;
+            const v1W = MW / 2 - lbW - 20;
+            const v2W = MW / 2 - lbW - 16;
+
+            function campo(label, valor, cx, cy, vw) {
+                doc.fontSize(5.8).fillColor(C.textMid).font('Helvetica-Bold')
+                   .text(label, cx, cy, { width: lbW });
+                doc.fontSize(6.2).fillColor(C.text).font('Helvetica')
+                   .text(valor || '--', cx + lbW, cy, { width: vw || v1W, lineBreak: false });
+            }
+
+            campo('CNPJ/CPF:', pedido.cliente_cnpj, c1, y + 21);
+            campo('IE:', pedido.cliente_ie || 'Isento', c2, y + 21, v2W);
+            campo('Endereco:', endCompleto || '--', c1, y + 30, MW - lbW - 24);
+            campo('Telefone:', pedido.cliente_telefone, c1, y + 39);
+            campo('CEP:', pedido.cliente_cep, c2, y + 39, v2W);
+
+            y += cliH + 6;
+
+            // ================================================================
+            //  TABELA DE ITENS
+            // ================================================================
+            // Titulo
+            doc.rect(ML, y, 3, 15).fillColor(C.gold).fill();
+            doc.rect(ML + 3, y, MW - 3, 15).fillColor(C.navyMid).fill();
+            doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
+               .text('ITENS DO ORCAMENTO', ML + 14, y + 4);
+            doc.fontSize(6.5).fillColor(C.goldLight).font('Helvetica-Bold')
+               .text(`${itens.length} ${itens.length === 1 ? 'item' : 'itens'}`, MR - 70, y + 4, { width: 58, align: 'right' });
+            y += 15;
+
+            // ---- Cabecalho da tabela ----
+            const thH = 15;
+            doc.rect(ML, y, MW, thH).fillColor(C.navy).fill();
+
+            const col = {
+                n:    { x: ML,        w: 22 },
+                cod:  { x: ML + 22,   w: 70 },
+                desc: { x: ML + 92,   w: 195 },
+                qtd:  { x: ML + 287,  w: 44 },
+                un:   { x: ML + 331,  w: 28 },
+                vlr:  { x: ML + 359,  w: 62 },
+                dsc:  { x: ML + 421,  w: 48 },
+                tot:  { x: ML + 469,  w: 42 }
+            };
+
+            const thY = y + 4.5;
+            doc.fontSize(5.8).fillColor(C.white).font('Helvetica-Bold');
+            doc.text('#',          col.n.x + 2,   thY, { width: col.n.w,    align: 'center' });
+            doc.text('CODIGO',     col.cod.x + 4,  thY, { width: col.cod.w });
+            doc.text('DESCRICAO',  col.desc.x + 4, thY, { width: col.desc.w });
+            doc.text('QTD',        col.qtd.x,       thY, { width: col.qtd.w,  align: 'center' });
+            doc.text('UN',         col.un.x,        thY, { width: col.un.w,   align: 'center' });
+            doc.text('VLR. UNIT.', col.vlr.x,       thY, { width: col.vlr.w,  align: 'right' });
+            doc.text('DESC.',      col.dsc.x,       thY, { width: col.dsc.w,  align: 'right' });
+            doc.text('TOTAL',      col.tot.x,       thY, { width: col.tot.w,  align: 'right' });
+            y += thH;
+
+            // ---- Linhas dos itens ----
+            let totalProdutos = 0, totalDescontos = 0;
+            const rowH = itens.length > 20 ? 10 : itens.length > 12 ? 11 : 13;
+
+            if (itens.length > 0) {
+                itens.forEach((item, idx) => {
+                    const isEven = idx % 2 === 0;
+                    doc.rect(ML, y, MW, rowH).fillColor(isEven ? C.white : C.bg).fill();
+                    // Linhas horizontais suaves
+                    doc.moveTo(ML, y + rowH).lineTo(MR, y + rowH).strokeColor(C.borderLight).lineWidth(0.15).stroke();
+
+                    const qtd = parseFloat(item.quantidade) || 0;
+                    const unit = parseFloat(item.preco_unitario) || 0;
+                    const desc = parseFloat(item.desconto) || 0;
+                    const tot = (qtd * unit) - desc;
+                    totalProdutos += (qtd * unit);
+                    totalDescontos += desc;
+
+                    const fs = rowH <= 10 ? 5.2 : rowH <= 11 ? 5.5 : 6;
+                    const ty = y + (rowH - 6) / 2;
+
+                    doc.fontSize(fs).fillColor(C.textLight).font('Helvetica')
+                       .text(String(idx + 1).padStart(2, '0'), col.n.x + 2, ty, { width: col.n.w, align: 'center' });
+                    doc.fillColor(C.navy).font('Helvetica-Bold')
+                       .text(item.codigo || '--', col.cod.x + 4, ty, { width: col.cod.w - 4, lineBreak: false });
+                    doc.fillColor(C.text).font('Helvetica')
+                       .text((item.descricao || '').substring(0, 50), col.desc.x + 4, ty, { width: col.desc.w - 4, lineBreak: false });
+                    doc.text(qtd.toLocaleString('pt-BR'), col.qtd.x, ty, { width: col.qtd.w, align: 'center' });
+                    doc.fillColor(C.textLight).text(item.unidade || 'UN', col.un.x, ty, { width: col.un.w, align: 'center' });
+                    doc.fillColor(C.text).text(moeda(unit).replace('R$ ', ''), col.vlr.x, ty, { width: col.vlr.w, align: 'right' });
+                    doc.fillColor(desc > 0 ? C.red : C.textLight)
+                       .text(desc > 0 ? moeda(desc).replace('R$ ', '') : '\u2014', col.dsc.x, ty, { width: col.dsc.w, align: 'right' });
+                    doc.fillColor(C.navy).font('Helvetica-Bold')
+                       .text(moeda(tot).replace('R$ ', ''), col.tot.x, ty, { width: col.tot.w, align: 'right' });
+
+                    y += rowH;
+                });
+            } else {
+                doc.rect(ML, y, MW, 20).fillColor(C.white).fill();
+                doc.rect(ML, y, MW, 20).strokeColor(C.border).lineWidth(0.3).stroke();
+                doc.fontSize(6.5).fillColor(C.textLight).font('Helvetica')
+                   .text('Nenhum item adicionado a este orcamento.', ML + 12, y + 7);
+                y += 20;
+            }
+
+            // Borda inferior da tabela
+            doc.moveTo(ML, y).lineTo(MR, y).strokeColor(C.navy).lineWidth(0.8).stroke();
+            y += 2;
+
+            // ================================================================
+            //  RESUMO FINANCEIRO
+            // ================================================================
+            const frete = parseFloat(pedido.frete) || 0;
+            const ipi = parseFloat(pedido.total_ipi) || 0;
+            const totalGeral = totalProdutos - totalDescontos + frete + ipi;
+            const valorFinal = totalGeral > 0 ? totalGeral : (parseFloat(pedido.valor_total) || 0);
+
+            // Resumo de valores lado a lado com box total
+            const resumoW = 210;
+            const resumoX = MR - resumoW;
+            let rY = y + 2;
+
+            // Subtotal
+            doc.fontSize(6).fillColor(C.textMid).font('Helvetica')
+               .text('Subtotal:', resumoX, rY, { width: 80, align: 'right' });
+            doc.fillColor(C.text).font('Helvetica')
+               .text(moeda(totalProdutos), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
+            rY += 9;
+
+            if (totalDescontos > 0) {
+                doc.fillColor(C.textMid).font('Helvetica').text('Descontos:', resumoX, rY, { width: 80, align: 'right' });
+                doc.fillColor(C.red).font('Helvetica').text('- ' + moeda(totalDescontos), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
+                rY += 9;
+            }
+            if (frete > 0) {
+                doc.fillColor(C.textMid).font('Helvetica').text('Frete:', resumoX, rY, { width: 80, align: 'right' });
+                doc.fillColor(C.text).font('Helvetica').text(moeda(frete), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
+                rY += 9;
+            }
+            if (ipi > 0) {
+                doc.fillColor(C.textMid).font('Helvetica').text('IPI:', resumoX, rY, { width: 80, align: 'right' });
+                doc.fillColor(C.text).font('Helvetica').text(moeda(ipi), resumoX + 85, rY, { width: resumoW - 85, align: 'right' });
+                rY += 9;
+            }
+
+            // Linha separadora
+            rY += 1;
+            doc.moveTo(resumoX, rY).lineTo(MR, rY).strokeColor(C.gold).lineWidth(1).stroke();
+            rY += 4;
+
+            // TOTAL em destaque
+            doc.rect(resumoX - 5, rY - 2, resumoW + 5, 22).fillColor(C.navy).fill();
+            // Barra dourada lateral
+            doc.rect(resumoX - 5, rY - 2, 3, 22).fillColor(C.gold).fill();
+
+            doc.fontSize(9).fillColor(C.white).font('Helvetica-Bold')
+               .text('TOTAL:', resumoX + 8, rY + 4, { width: 55 });
+            doc.fontSize(12).fillColor(C.gold).font('Helvetica-Bold')
+               .text(moeda(valorFinal), resumoX + 60, rY + 2, { width: resumoW - 65, align: 'right' });
+
+            y = rY + 28;
+
+            // ================================================================
+            //  CONDICOES COMERCIAIS
+            // ================================================================
+            doc.rect(ML, y, 3, 15).fillColor(C.gold).fill();
+            doc.rect(ML + 3, y, MW - 3, 15).fillColor(C.navyMid).fill();
+            doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
+               .text('CONDICOES COMERCIAIS', ML + 14, y + 4);
+            y += 15;
+
+            const condicaoPag = pedido.condicao_pagamento || pedido.condicoes_pagamento || '--';
+            const transportadora = pedido.transportadora_nome || pedido.transp_razao_social || pedido.cliente_transportadora || '--';
+            const freteMapPdf = { '0': 'CIF (Remetente)', '1': 'FOB (Destinatario)', 'CIF': 'CIF (Remetente)', 'FOB': 'FOB (Destinatario)' };
+            const tipoFrete = freteMapPdf[String(pedido.tipo_frete)] || pedido.tipo_frete || '--';
+
+            const condH = 24;
+            doc.rect(ML, y, MW, condH).fillColor(C.white).fill();
+            doc.rect(ML, y, MW, condH).strokeColor(C.border).lineWidth(0.4).stroke();
+            doc.rect(ML, y, 2, condH).fillColor(C.goldLight).fill();
+
+            campo('Pagamento:', condicaoPag, c1, y + 4);
+            campo('Frete:', tipoFrete, c2, y + 4, v2W);
+            campo('Transportadora:', transportadora, c1, y + 14);
+            campo('Prazo:', pedido.prazo_entrega || 'A combinar', c2, y + 14, v2W);
+
+            y += condH + 5;
+
+            // ================================================================
+            //  OBSERVACOES (condicional)
+            // ================================================================
+            const obsTexto = pedido.observacoes || pedido.observacoes_internas || '';
+            if (obsTexto.trim()) {
+                doc.rect(ML, y, 3, 15).fillColor(C.gold).fill();
+                doc.rect(ML + 3, y, MW - 3, 15).fillColor(C.navyMid).fill();
+                doc.fontSize(7).fillColor(C.white).font('Helvetica-Bold')
+                   .text('OBSERVACOES', ML + 14, y + 4);
+                y += 15;
+
+                const obsH = Math.min(32, Math.max(16, Math.ceil(obsTexto.length / 110) * 9 + 8));
+                doc.rect(ML, y, MW, obsH).fillColor(C.white).fill();
+                doc.rect(ML, y, MW, obsH).strokeColor(C.border).lineWidth(0.4).stroke();
+                doc.rect(ML, y, 2, obsH).fillColor(C.goldLight).fill();
+                doc.fontSize(6).fillColor(C.text).font('Helvetica')
+                   .text(obsTexto, ML + 12, y + 5, { width: MW - 24, lineBreak: true });
+                y += obsH + 5;
+            }
+
+            // ================================================================
+            //  TERMOS E CONDICOES
+            // ================================================================
+            // Caixa cinza com termos
+            const termosH = 16;
+            doc.rect(ML, y, MW, termosH).fillColor(C.bg).fill();
+            doc.rect(ML, y, MW, termosH).strokeColor(C.borderLight).lineWidth(0.3).stroke();
+            doc.fontSize(4.8).fillColor(C.textLight).font('Helvetica')
+               .text('Orcamento valido por 15 dias  |  Precos sujeitos a alteracao apos a validade  |  Prazo de entrega apos confirmacao do pedido  |  Documento sem valor fiscal',
+                     ML + 8, y + 5, { width: MW - 16, align: 'center' });
+            y += termosH + 6;
+
+            // ================================================================
+            //  ASSINATURAS
+            // ================================================================
+            // Posicionar inteligentemente - minimo depois do conteudo, maximo antes do footer
+            const footerStart = 790;
+            const assSpace = 35;
+            const assY = Math.min(Math.max(y + 8, 690), footerStart - assSpace - 10);
+
+            // Assinatura Cliente (esquerda)
+            doc.moveTo(ML + 15, assY).lineTo(ML + 230, assY)
+               .strokeColor(C.navy).lineWidth(0.6).stroke();
+            doc.fontSize(5.5).fillColor(C.textMid).font('Helvetica')
+               .text('Assinatura / Carimbo do Cliente', ML + 15, assY + 4, { width: 215, align: 'center' });
+
+            // Assinatura Vendedor (direita)
+            doc.moveTo(MR - 230, assY).lineTo(MR - 15, assY)
+               .strokeColor(C.navy).lineWidth(0.6).stroke();
+            doc.fontSize(5.5).fillColor(C.textMid).font('Helvetica')
+               .text('Assinatura do Vendedor', MR - 230, assY + 4, { width: 215, align: 'center' });
+
+            // ================================================================
+            //  RODAPE INSTITUCIONAL
+            // ================================================================
+            const fY = footerStart;
+            // Filete dourado
+            doc.rect(0, fY, PW, 2).fillColor(C.gold).fill();
+            // Barra navy
+            doc.rect(0, fY + 2, PW, 50).fillColor(C.navy).fill();
+
+            doc.fontSize(5.2).fillColor('#7A8FA3').font('Helvetica')
+               .text(`Documento gerado em ${new Date().toLocaleString('pt-BR')} por ${geradoPor}`, ML, fY + 8, { width: MW, align: 'center' });
+            doc.fontSize(4.5).fillColor('#5B6E82')
+               .text(`${nomeArquivo}`, ML, fY + 17, { width: MW, align: 'center' });
+            doc.fontSize(4.2).fillColor('#4A5D71')
+               .text('Zyntra ERP  |  Sistema de Gestão Empresarial V.2  |  Documento sem valor fiscal', ML, fY + 25, { width: MW, align: 'center' });
+
+            doc.end();
+            console.log('[PDF] Documento gerado: ' + nomeArquivo);
+
+        } catch (error) {
+            console.error('[PDF] Erro:', error);
+            res.status(500).json({ success: false, message: 'Erro ao gerar PDF', error: 'Erro interno no servidor. Tente novamente.' });
+        }
+    });
+
+    // AUDIT-FIX R3: GET /pedidos/:id REMOVIDO (dead code — existe em vendas-routes.js)
+    // A versão canônica já inclui auto-repair e ownership check
+
+    // AUDIT-FIX R3: POST /pedidos REMOVIDO (dead code — existe em vendas-routes.js)
+    // A rota canônica POST /pedidos/novo abaixo continua ativa
+    if (false) { // dead code block start — POST /pedidos
+    router.post('/pedidos__disabled', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        const connection = await vendasPool.getConnection();
+        try {
+            await connection.beginTransaction();
+            const {
+                cliente_id, empresa_id, produtos, valor, descricao,
+                status = 'orcamento', frete = 0, prioridade = 'normal',
+                prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio
+            } = req.body;
+            const vendedor_id = req.user.id;
+
+            // AUDIT-FIX: Validar valor, frete, quantidade — rejeitar negativos
+            const valorNum = parseFloat(valor) || 0;
+            const freteNum = parseFloat(frete) || 0;
+            if (valorNum < 0 || freteNum < 0) {
+                await connection.rollback();
+                return res.status(400).json({ error: 'Valor e frete não podem ser negativos' });
+            }
+
+            // empresa_id padrão = 1 (ALUFORCE) se não fornecido
+            const empresaIdFinal = empresa_id || 1;
+
+            // Buscar nomes do cliente e vendedor
+            let clienteNome = null;
+            let vendedorNome = null;
+            try {
+                if (cliente_id) {
+                    const [cRows] = await connection.query('SELECT COALESCE(nome_fantasia, razao_social, nome) as nome FROM clientes WHERE id = ?', [cliente_id]);
+                    if (cRows.length > 0) clienteNome = cRows[0].nome;
+                }
+                const [vRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [vendedor_id]);
+                if (vRows.length > 0) vendedorNome = vRows[0].nome;
+            } catch (e) { /* nomes opcionais */ }
+
+            // Gerar numero_pedido sequencial (AUDIT-FIX: FOR UPDATE previne race condition)
+            const [[npRow]] = await connection.query('SELECT COALESCE(MAX(numero_pedido), 0) + 1 AS next_num FROM pedidos FOR UPDATE');
+            const numeroPedido = npRow.next_num || 1;
+
+            const [result] = await connection.query(`
+                INSERT INTO pedidos
+                (cliente_id, empresa_id, vendedor_id, valor, descricao, status,
+                 numero_pedido, frete, prioridade, produtos_preview, prazo_entrega, endereco_entrega,
+                 municipio_entrega, metodo_envio, cliente_nome, vendedor_nome, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            `, [
+                cliente_id, empresaIdFinal, vendedor_id, valor || 0, descricao || '',
+                status, numeroPedido, frete, prioridade, JSON.stringify(produtos || []),
+                prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio,
+                clienteNome, vendedorNome
+            ]);
+
+            const pedidoId = result.insertId;
+
+            // Inserir itens na tabela pedido_itens (dentro da mesma transação)
+            const itensArray = produtos || [];
+            if (itensArray.length > 0) {
+                for (const item of itensArray) {
+                    const qty = parseFloat(item.quantidade) || 1;
+                    const preco = parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0;
+                    const desc = parseFloat(item.desconto) || 0;
+                    // AUDIT-FIX: Validar valores e limitar desconto ao subtotal
+                    if (qty <= 0 || preco < 0) {
+                        await connection.rollback();
+                        return res.status(400).json({ error: `Item inválido: quantidade deve ser > 0 e preço >= 0` });
+                    }
+                    const descCapped = Math.min(Math.max(desc, 0), qty * preco);
+                    const subtotal = (qty * preco) - descCapped;
+                    await connection.query(
+                        `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto, subtotal)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [pedidoId, item.codigo || '', item.descricao || item.nome || '', qty, parseFloat(item.quantidade_parcial) || 0,
+                         item.unidade || 'UN', item.local_estoque || 'PADRAO - Local de Estoque Padrão', preco, descCapped, subtotal]
+                    );
+                }
+            }
+
+            await connection.commit();
+            res.json({ success: true, id: pedidoId, message: 'Pedido criado com sucesso' });
+        } catch (error) {
+            await connection.rollback();
+            console.error('Erro ao criar pedido:', error);
+            res.status(500).json({ error: 'Erro ao criar pedido' });
+        } finally {
+            connection.release();
+        }
+    });
+    } // dead code block end — POST /pedidos
+
+    // Alias para /api/vendas/pedidos/novo -> cria novo pedido com itens (TODOS OS CAMPOS)
+    router.post('/pedidos/novo', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        const connection = await pool.getConnection();
+        try {
+            await connection.beginTransaction();
+
+            const sanitize = (val) => (val === 'null' || val === 'undefined' || val === '' ? null : val);
+            const sanitizeNum = (val) => {
+                if (val === 'null' || val === 'undefined' || val === '' || val === null || val === undefined) return null;
+                const num = parseFloat(val);
+                return isNaN(num) ? null : num;
+            };
+
+            const {
+                cliente_id, empresa_id, produtos, valor, descricao, cliente,
+                status = 'orcamento', frete = 0, prioridade = 'normal',
+                prazo_entrega, endereco_entrega, municipio_entrega, metodo_envio,
+                parcelas, condicao_pagamento, cenario_fiscal, observacao, itens,
+                // Campos de transporte e entrega
+                transportadora, tipo_frete, placa_veiculo, veiculo_uf, rntrc,
+                qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                peso_liquido, peso_bruto, valor_seguro, outras_despesas, tipo_entrega,
+                // Campos adicionais
+                desconto_pct, vendedor_nome: vendedorNomeBody, origem, observacao_cliente,
+                nf
+            } = req.body;
+            const vendedor_id = req.user.id;
+
+            // Usar itens se disponivel, senao produtos
+            const produtosData = itens || produtos || [];
+
+            // empresa_id padrão = 1 (ALUFORCE) se não fornecido
+            const empresaIdFinal = empresa_id || 1;
+
+            // Buscar nomes do cliente e vendedor
+            let clienteNome = sanitize(cliente) || null;
+            let vendedorNome = sanitize(vendedorNomeBody) || null;
+            try {
+                if (cliente_id) {
+                    const [cRows] = await connection.query('SELECT COALESCE(nome_fantasia, razao_social, nome) as nome FROM clientes WHERE id = ?', [cliente_id]);
+                    if (cRows.length > 0) clienteNome = cRows[0].nome;
+                }
+                const [vRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [vendedor_id]);
+                if (vRows.length > 0) vendedorNome = vRows[0].nome;
+            } catch (e) { /* nomes opcionais */ }
+
+            const [result] = await connection.query(`
+                INSERT INTO pedidos
+                (cliente_id, empresa_id, vendedor_id, valor, descricao, status,
+                 frete, prioridade, produtos_preview, prazo_entrega, endereco_entrega,
+                 municipio_entrega, metodo_envio, parcelas, condicao_pagamento,
+                 cenario_fiscal, observacao, cliente_nome, vendedor_nome,
+                 transportadora_nome, transportadora, tipo_frete, placa_veiculo, veiculo_uf, rntrc,
+                 qtd_volumes, especie_volumes, marca_volumes, numeracao_volumes,
+                 peso_liquido, peso_bruto, valor_seguro, outras_despesas,
+                 desconto_pct, origem, observacao_cliente, nf, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            `, [
+                cliente_id || null, empresaIdFinal, vendedor_id, valor || 0, descricao || 'Novo Orçamento',
+                status, sanitizeNum(frete) || 0, prioridade, JSON.stringify(produtosData),
+                sanitize(prazo_entrega), sanitize(endereco_entrega), sanitize(municipio_entrega), sanitize(metodo_envio),
+                parcelas ? (typeof parcelas === 'string' ? parcelas : JSON.stringify(parcelas)) : null,
+                sanitize(condicao_pagamento), sanitize(cenario_fiscal), sanitize(observacao),
+                clienteNome, vendedorNome,
+                sanitize(transportadora), sanitize(transportadora), sanitize(tipo_frete),
+                sanitize(placa_veiculo), sanitize(veiculo_uf), sanitize(rntrc),
+                sanitizeNum(qtd_volumes), sanitize(especie_volumes), sanitize(marca_volumes), sanitize(numeracao_volumes),
+                sanitizeNum(peso_liquido), sanitizeNum(peso_bruto), sanitizeNum(valor_seguro), sanitizeNum(outras_despesas),
+                sanitizeNum(desconto_pct) || 0, sanitize(origem), sanitize(observacao_cliente), sanitize(nf)
+            ]);
+
+            const pedidoId = result.insertId;
+
+            // Inserir itens na tabela pedido_itens (dentro da mesma transação)
+            if (produtosData.length > 0) {
+                for (const item of produtosData) {
+                    const qty = parseFloat(item.quantidade) || 1;
+                    const preco = parseFloat(item.preco_unitario || item.valor_unitario || item.preco) || 0;
+                    const desc = parseFloat(item.desconto) || 0;
+                    const subtotal = (qty * preco) - desc;
+                    await connection.query(
+                        `INSERT INTO pedido_itens (pedido_id, codigo, descricao, quantidade, quantidade_parcial, unidade, local_estoque, preco_unitario, desconto, subtotal)
+                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                        [pedidoId, item.codigo || '', item.descricao || item.nome || '', qty, parseFloat(item.quantidade_parcial) || 0,
+                         item.unidade || 'UN', item.local_estoque || 'PADRAO - Local de Estoque Padrão', preco, desc, subtotal]
+                    );
+                }
+            }
+
+            await connection.commit();
+            res.json({ success: true, id: pedidoId, message: 'Pedido criado com sucesso' });
+        } catch (error) {
+            await connection.rollback();
+            console.error('Erro ao criar pedido /novo:', error);
+            res.status(500).json({ error: 'Erro ao criar pedido' });
+        } finally {
+            connection.release();
+        }
+    });
+
+    // AUDIT-FIX R3: PUT /pedidos/:id REMOVIDO (dead code — existe em vendas-routes.js com mesmas validações)
+
+    // ROTA DUPLICADA REMOVIDA - /api/vendas/pedidos/:id/status já existe no apiVendasRouter
+
+    // AUDIT-FIX: REMOVED dangerous duplicate DELETE route that did NOT clean up child tables
+    // (pedido_itens, pedido_anexos, pedido_historico) and had no transaction.
+    // The correct DELETE handler is in apiVendasRouter at /pedidos/:id which uses proper
+    // transaction, cascading deletes, and linked order/financial validation.
+    // router.delete('/pedidos/:id', ...) — REMOVED
+
+    // AUDIT-FIX R3: 6 rotas duplicadas de clientes/empresas REMOVIDAS (dead code — existem em vendas-routes.js)
+    // Removidas: GET /clientes, GET /clientes/:id, POST /clientes, GET /empresas, GET /empresas/:id, POST /empresas
+
+    // === API para reativar cliente inativo (permite outro vendedor "conquistar") ===
+    router.post('/empresas/:id/reativar', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { id } = req.params;
+            const vendedor_id = req.user?.id;
+
+            // Verificar se empresa está inativa
+            const [empresa] = await vendasPool.query('SELECT status_cliente, vendedor_id FROM empresas WHERE id = ?', [id]);
+
+            if (!empresa || empresa.length === 0) {
+                return res.status(404).json({ error: 'Empresa não encontrada' });
+            }
+
+            // Se está ativa e pertence a outro vendedor, não pode reativar
+            if (empresa[0].status_cliente === 'ativo' && empresa[0].vendedor_id && empresa[0].vendedor_id !== vendedor_id) {
+                return res.status(403).json({ error: 'Esta empresa pertence a outro vendedor' });
+            }
+
+            // Reativar empresa e atribuir ao novo vendedor
+            await vendasPool.query(`
+                UPDATE empresas
+                SET status_cliente = 'ativo',
+                    vendedor_id = ?,
+                    ultima_movimentacao = NOW(),
+                    data_inativacao = NULL
+                WHERE id = ?
+            `, [vendedor_id, id]);
+
+            res.json({ success: true, message: 'Cliente reativado com sucesso' });
+        } catch (error) {
+            console.error('Erro ao reativar empresa:', error);
+            res.status(500).json({ error: 'Erro ao reativar empresa' });
+        }
+    });
+
+    // === NOTIFICAÇÕES ===
+    router.get('/notificacoes', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const userId = req.user.id;
+
+            // Verificar estrutura da tabela e usar coluna correta de data
+            let orderColumn = 'criado_em';
+            try {
+                const [cols] = await pool.query(`SHOW COLUMNS FROM notificacoes LIKE 'created_at'`);
+                if (cols.length > 0) orderColumn = 'created_at';
+            } catch(e) { /* usa criado_em como fallback */ }
+
+            const [notificacoes] = await pool.query(`
+                SELECT id, titulo, mensagem, tipo, lida, usuario_id, ${orderColumn}
+                FROM notificacoes
+                WHERE usuario_id = ?
+                ORDER BY ${orderColumn} DESC
+                LIMIT 20
+            `, [userId]);
+
+            res.json(notificacoes);
+        } catch (error) {
+            console.error('Erro ao listar notificações:', error);
+            // Se a tabela não existir ou outro erro, retornar array vazio
+            res.json([]);
+        }
+    });
+
+    // === DASHBOARD GRÁFICOS ===
+    router.get('/dashboard/graficos', authorizeArea('vendas'), cacheMiddleware('vendas_graficos', CACHE_CONFIG.dashboardVendas), async (req, res) => {
+        try {
+            const { periodo } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            // Vendas por status
+            const [vendasPorStatus] = await pool.query(`
+                SELECT status, COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor
+                FROM pedidos
+                WHERE DATE_FORMAT(created_at, '%Y-%m') = ?
+                GROUP BY status
+            `, [periodoAtual]);
+
+            // Vendas por vendedor
+            const [vendasPorVendedor] = await pool.query(`
+                SELECT u.nome as vendedor, COUNT(*) as quantidade, COALESCE(SUM(p.valor), 0) as valor
+                FROM pedidos p
+                LEFT JOIN usuarios u ON p.vendedor_id = u.id
+                WHERE DATE_FORMAT(p.created_at, '%Y-%m') = ?
+                GROUP BY p.vendedor_id, u.nome
+                ORDER BY valor DESC
+                LIMIT 10
+            `, [periodoAtual]);
+
+            // Evolução mensal (últimos 6 meses)
+            const [evolucaoMensal] = await pool.query(`
+                SELECT
+                    DATE_FORMAT(created_at, '%Y-%m') as mes,
+                    COUNT(*) as quantidade,
+                    COALESCE(SUM(valor), 0) as valor
+                FROM pedidos
+                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+                GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+                ORDER BY mes
+            `);
+
+            res.json({
+                vendasPorStatus,
+                vendasPorVendedor,
+                evolucaoMensal,
+                periodo: periodoAtual
+            });
+        } catch (error) {
+            console.error('Erro ao carregar gráficos:', error);
+            res.status(500).json({ error: 'Erro ao carregar gráficos' });
+        }
+    });
+
+    console.log('✅ Rotas do módulo Vendas carregadas com sucesso');
+
+    // ======================================
+    // ROTAS ADICIONAIS — Migradas do legacy server.js
+    // ======================================
+
+    // ========================================
+    // PROXY CEP (evita CORS no client)
+    // ========================================
+    router.get('/proxy/cep/:cep', authenticateToken, async (req, res) => {
+        try {
+            const { cep } = req.params;
+            const cleanCep = cep.replace(/\D/g, '');
+            if (cleanCep.length !== 8) return res.status(400).json({ error: 'CEP inválido' });
+
+            const https = require('https');
+            const data = await new Promise((resolve, reject) => {
+                https.get(`https://brasilapi.com.br/api/cep/v2/${cleanCep}`, (resp) => {
+                    let body = '';
+                    resp.on('data', chunk => body += chunk);
+                    resp.on('end', () => {
+                        try { resolve(JSON.parse(body)); } catch(e) { reject(e); }
+                    });
+                }).on('error', reject);
+            });
+            res.json(data);
+        } catch (err) {
+            console.error('Erro proxy CEP:', err.message);
+            res.status(500).json({ error: 'Erro ao consultar CEP' });
+        }
+    });
+
+    // ========================================
+    // DASHBOARD MONTHLY (evolução mensal)
+    // ========================================
+    router.get('/dashboard/monthly', authorizeArea('vendas'), async (req, res, next) => {
+        try {
+            const months = Math.max(parseInt(req.query.months || '12'), 1);
+            const now = new Date();
+            const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
+            const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
+
+            const [rows] = await vendasPool.query(
+                `SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym,
+                 COALESCE(SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END), 0) AS total
+                 FROM pedidos
+                 WHERE created_at >= ?
+                 GROUP BY ym
+                 ORDER BY ym ASC`,
+                [startStr]
+            );
+
+            const map = new Map();
+            for (const r of rows) map.set(r.ym, Number(r.total || 0));
+
+            const labels = [];
+            const values = [];
+            for (let i = 0; i < months; i++) {
+                const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
+                const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                labels.push(d.toLocaleString('pt-BR', { month: 'short', year: 'numeric' }));
+                values.push(map.has(ym) ? map.get(ym) : 0);
+            }
+            res.json({ labels, values });
+        } catch (err) { next(err); }
+    });
+
+    // ========================================
+    // RELATÓRIOS PDF - Template Profissional
+    // ========================================
+
+    // Categorias de comissão por tipo de produto
+    const COMISSAO_CATEGORIAS = {
+        'POTENCIA': { nome: 'Cabos de Potência (Power)', percentual: 2.0, keywords: ['POTENCIA', 'POWER', 'NBR 7285', 'NBR 7286', '0,6/1KV', '1KV'] },
+        'MULTIPLEX': { nome: 'Cabos Multiplexados', percentual: 1.0, keywords: ['TRIPLEX', 'DUPLEX', 'QUADRUPLEX', 'MULTIPLEX', 'NEUTRO ISOLADO'] },
+        'OUTROS': { nome: 'Outros Produtos', percentual: 1.0, keywords: [] }
+    };
+
+    function classificarProdutoComissao(descricao) {
+        if (!descricao) return COMISSAO_CATEGORIAS['OUTROS'];
+        const desc = descricao.toUpperCase();
+        if (COMISSAO_CATEGORIAS['POTENCIA'].keywords.some(k => desc.includes(k)) &&
+            !COMISSAO_CATEGORIAS['MULTIPLEX'].keywords.some(k => desc.includes(k))) {
+            return COMISSAO_CATEGORIAS['POTENCIA'];
+        }
+        if (COMISSAO_CATEGORIAS['MULTIPLEX'].keywords.some(k => desc.includes(k))) {
+            return COMISSAO_CATEGORIAS['MULTIPLEX'];
+        }
+        return COMISSAO_CATEGORIAS['OUTROS'];
+    }
+
+    function criarPdfRelatorio(titulo, colunas, linhas, filtrosTexto, opcoes = {}) {
+        const PDFDocument = require('pdfkit');
+        const doc = new PDFDocument({ size: 'A4', layout: 'landscape', margin: 40, bufferPages: true });
+        const buffers = [];
+        doc.on('data', b => buffers.push(b));
+
+        const pageW = doc.page.width - 80;
+        const margin = 40;
+
+        function desenharHeader(isFirstPage) {
+            // Barra superior com gradiente simulado
+            doc.rect(0, 0, doc.page.width, 6).fill('#1e40af');
+
+            // Logo e nome
+            doc.fontSize(22).font('Helvetica-Bold').fillColor('#1e293b').text('Zyntra', margin, 18);
+            doc.fontSize(9).font('Helvetica').fillColor('#94a3b8').text('Sistema de Gestão Empresarial', margin, 44);
+
+            // Data de geração no canto direito
+            doc.fontSize(8).fillColor('#94a3b8')
+               .text(`Gerado em: ${new Date().toLocaleString('pt-BR')}`, margin, 20, { align: 'right', width: pageW });
+
+            // Linha separadora
+            doc.moveTo(margin, 60).lineTo(doc.page.width - margin, 60).strokeColor('#e2e8f0').lineWidth(1).stroke();
+
+            if (isFirstPage) {
+                // Título centralizado
+                doc.fontSize(16).font('Helvetica-Bold').fillColor('#1e293b').text(titulo, margin, 70, { align: 'center', width: pageW });
+                if (filtrosTexto) {
+                    doc.fontSize(9).font('Helvetica').fillColor('#64748b').text(filtrosTexto, margin, 90, { align: 'center', width: pageW });
+                }
+
+                // Resumo cards se fornecidos
+                if (opcoes.resumo && opcoes.resumo.length > 0) {
+                    const cardY = filtrosTexto ? 110 : 95;
+                    const cardW = Math.min(160, (pageW - (opcoes.resumo.length - 1) * 12) / opcoes.resumo.length);
+                    const totalCardsW = cardW * opcoes.resumo.length + (opcoes.resumo.length - 1) * 12;
+                    const startX = margin + (pageW - totalCardsW) / 2;
+
+                    opcoes.resumo.forEach((card, i) => {
+                        const cx = startX + i * (cardW + 12);
+                        doc.roundedRect(cx, cardY, cardW, 48, 6).fill(card.cor || '#f0f9ff');
+                        doc.roundedRect(cx, cardY, cardW, 48, 6).strokeColor(card.borda || '#bfdbfe').lineWidth(0.5).stroke();
+                        doc.fontSize(8).font('Helvetica').fillColor('#64748b').text(card.label, cx + 12, cardY + 10, { width: cardW - 24 });
+                        doc.fontSize(13).font('Helvetica-Bold').fillColor(card.corTexto || '#1e40af').text(card.valor, cx + 12, cardY + 24, { width: cardW - 24 });
+                    });
+                    return cardY + 62;
+                }
+                return filtrosTexto ? 108 : 95;
+            }
+            return 70;
+        }
+
+        function desenharFooter(pageNum, totalPages) {
+            const y = doc.page.height - 30;
+            doc.moveTo(margin, y - 8).lineTo(doc.page.width - margin, y - 8).strokeColor('#e2e8f0').lineWidth(0.5).stroke();
+            doc.fontSize(7).font('Helvetica').fillColor('#94a3b8')
+               .text('Zyntra - Relatório Confidencial', margin, y, { width: pageW / 2 })
+               .text(`Página ${pageNum} de ${totalPages}`, margin, y, { align: 'right', width: pageW });
+        }
+
+        // Calcular larguras de coluna proporcionais
+        const colWidths = opcoes.colWidths || colunas.map(() => pageW / colunas.length);
+        const colAligns = opcoes.colAligns || colunas.map(() => 'left');
+
+        // Primeira página: header + título
+        let tableStart = desenharHeader(true);
+
+        // Cabeçalho da tabela
+        function desenharCabecalhoTabela(y) {
+            doc.rect(margin, y, pageW, 26).fill('#1e293b');
+            let x = margin;
+            colunas.forEach((col, i) => {
+                doc.fontSize(9).font('Helvetica-Bold').fillColor('#ffffff')
+                   .text(col, x + 8, y + 8, { width: colWidths[i] - 16, align: colAligns[i] });
+                x += colWidths[i];
+            });
+            return y + 26;
+        }
+
+        let y = desenharCabecalhoTabela(tableStart);
+        const rowH = 22;
+
+        // Seções agrupadas ou linhas simples
+        if (opcoes.secoes) {
+            opcoes.secoes.forEach((secao) => {
+                // Verificar espaço para header de seção + pelo menos 1 linha
+                if (y + 30 + rowH > doc.page.height - 50) {
+                    doc.addPage();
+                    tableStart = desenharHeader(false);
+                    y = desenharCabecalhoTabela(tableStart);
+                }
+                // Header de seção
+                doc.rect(margin, y, pageW, 24).fill(secao.cor || '#eff6ff');
+                doc.fontSize(9).font('Helvetica-Bold').fillColor(secao.corTexto || '#1e40af')
+                   .text(secao.titulo, margin + 10, y + 7, { width: pageW - 20 });
+                if (secao.info) {
+                    doc.fontSize(8).font('Helvetica').fillColor('#64748b')
+                       .text(secao.info, margin + 10, y + 7, { align: 'right', width: pageW - 20 });
+                }
+                y += 24;
+
+                secao.linhas.forEach((linha, idx) => {
+                    if (y + rowH > doc.page.height - 50) {
+                        doc.addPage();
+                        tableStart = desenharHeader(false);
+                        y = desenharCabecalhoTabela(tableStart);
+                    }
+                    if (idx % 2 === 0) doc.rect(margin, y, pageW, rowH).fill('#f8fafc');
+                    let x = margin;
+                    linha.forEach((val, i) => {
+                        const isMoney = String(val).startsWith('R$');
+                        doc.fontSize(8).font(isMoney ? 'Helvetica-Bold' : 'Helvetica').fillColor('#334155')
+                           .text(String(val || '-'), x + 8, y + 6, { width: colWidths[i] - 16, align: colAligns[i] });
+                        x += colWidths[i];
+                    });
+                    y += rowH;
+                });
+
+                // Subtotal da seção
+                if (secao.subtotal) {
+                    doc.rect(margin, y, pageW, 22).fill('#e0e7ff');
+                    doc.fontSize(8).font('Helvetica-Bold').fillColor('#3730a3')
+                       .text(secao.subtotal, margin + 10, y + 6, { width: pageW - 20, align: 'right' });
+                    y += 24;
+                }
+            });
+        } else {
+            linhas.forEach((linha, idx) => {
+                if (y + rowH > doc.page.height - 50) {
+                    doc.addPage();
+                    tableStart = desenharHeader(false);
+                    y = desenharCabecalhoTabela(tableStart);
+                }
+                if (idx % 2 === 0) doc.rect(margin, y, pageW, rowH).fill('#f8fafc');
+                // Linha de separação suave
+                doc.moveTo(margin, y + rowH).lineTo(margin + pageW, y + rowH).strokeColor('#f1f5f9').lineWidth(0.3).stroke();
+
+                let x = margin;
+                linha.forEach((val, i) => {
+                    const isMoney = String(val).startsWith('R$');
+                    doc.fontSize(8).font(isMoney ? 'Helvetica-Bold' : 'Helvetica').fillColor('#334155')
+                       .text(String(val || '-'), x + 8, y + 6, { width: colWidths[i] - 16, align: colAligns[i] });
+                    x += colWidths[i];
+                });
+                y += rowH;
+            });
+        }
+
+        // Rodapé com total
+        y += 8;
+        doc.rect(margin, y, pageW, 1).fill('#e2e8f0');
+        doc.fontSize(9).font('Helvetica-Bold').fillColor('#1e40af')
+           .text(`Total de registros: ${opcoes.totalRegistros || linhas.length}`, margin + 8, y + 8);
+
+        // Totalizadores gerais
+        if (opcoes.totais) {
+            doc.fontSize(9).font('Helvetica-Bold').fillColor('#1e293b')
+               .text(opcoes.totais, margin + 8, y + 8, { align: 'right', width: pageW - 16 });
+        }
+
+        // Adicionar footer em todas as páginas
+        const totalPages = doc.bufferedPageRange().count;
+        for (let i = 0; i < totalPages; i++) {
+            doc.switchToPage(i);
+            desenharFooter(i + 1, totalPages);
+        }
+
+        doc.end();
+        return new Promise(resolve => doc.on('end', () => resolve(Buffer.concat(buffers))));
+    }
+
+    function formatarMoedaPdf(valor) {
+        return 'R$ ' + (parseFloat(valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function formatarDataPdf(data) {
+        if (!data) return '-';
+        return new Date(data).toLocaleDateString('pt-BR');
+    }
+
+    function formatarQtd(valor) {
+        const num = parseFloat(valor) || 0;
+        return num % 1 === 0 ? num.toString() : num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    }
+
+    // PDF: Vendas por Período
+    router.get('/relatorios/vendas-periodo/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim, vendedor_id, status } = req.query;
+            let query = `SELECT p.id, COALESCE(p.omie_numero_pedido, p.id) as numero, p.cliente_nome, p.vendedor_nome, p.valor, p.status, p.created_at
+                         FROM pedidos p WHERE 1=1`;
+            const params = [];
+            if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
+            if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
+            if (vendedor_id) { query += ' AND p.vendedor_id = ?'; params.push(vendedor_id); }
+            if (status && status !== 'todos') { query += ' AND p.status = ?'; params.push(status); }
+            query += ' ORDER BY p.created_at DESC';
+
+            const [rows] = await vendasPool.query(query, params);
+
+            const totalValor = rows.reduce((s, r) => s + (parseFloat(r.valor) || 0), 0);
+            const statusMap = {};
+            rows.forEach(r => { statusMap[r.status || 'N/A'] = (statusMap[r.status || 'N/A'] || 0) + 1; });
+            const statusResumo = Object.entries(statusMap).map(([k, v]) => `${k}: ${v}`).join(' | ');
+
+            const filtro = `Período: ${data_inicio || 'início'} a ${data_fim || 'hoje'}${vendedor_id ? ' | Vendedor filtrado' : ''}${status && status !== 'todos' ? ` | Status: ${status}` : ''}`;
+            const colunas = ['Nº Pedido', 'Cliente', 'Vendedor', 'Valor', 'Status', 'Data'];
+            const pageW = 842 - 80; // A4 landscape
+            const colWidths = [pageW * 0.10, pageW * 0.28, pageW * 0.20, pageW * 0.14, pageW * 0.13, pageW * 0.15];
+            const colAligns = ['center', 'left', 'left', 'right', 'center', 'center'];
+
+            const linhas = rows.map(r => [
+                String(r.numero || r.id), r.cliente_nome || '-', r.vendedor_nome || '-',
+                formatarMoedaPdf(r.valor), (r.status || '-').charAt(0).toUpperCase() + (r.status || '-').slice(1),
+                formatarDataPdf(r.created_at)
+            ]);
+
+            const resumo = [
+                { label: 'Total de Pedidos', valor: String(rows.length), cor: '#f0f9ff', borda: '#bfdbfe', corTexto: '#1e40af' },
+                { label: 'Valor Total', valor: formatarMoedaPdf(totalValor), cor: '#f0fdf4', borda: '#bbf7d0', corTexto: '#166534' },
+                { label: 'Ticket Médio', valor: formatarMoedaPdf(rows.length ? totalValor / rows.length : 0), cor: '#fefce8', borda: '#fde68a', corTexto: '#92400e' }
+            ];
+
+            const pdfBuffer = await criarPdfRelatorio('Relatório de Vendas por Período', colunas, linhas, filtro, {
+                colWidths, colAligns, resumo, totais: `Valor Total: ${formatarMoedaPdf(totalValor)}`
+            });
+            res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename=relatorio-vendas.pdf' });
+            res.send(pdfBuffer);
+        } catch (err) {
+            console.error('Erro ao gerar PDF vendas-periodo:', err);
+            res.status(500).json({ error: 'Erro ao gerar PDF' });
+        }
+    });
+
+    // PDF: Comissões (com categorias: 2% cabos power, 1% multiplexado)
+    router.get('/relatorios/comissoes/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim, vendedor_id } = req.query;
+
+            // Buscar itens dos pedidos com informação do vendedor
+            let query = `SELECT p.vendedor_nome, p.vendedor_id, pi.descricao, pi.codigo,
+                         pi.quantidade, pi.preco_unitario, pi.subtotal
+                         FROM pedido_itens pi
+                         INNER JOIN pedidos p ON pi.pedido_id = p.id
+                         WHERE p.status IN ('faturado','entregue','aprovado','recibo')`;
+            const params = [];
+            if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
+            if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
+            if (vendedor_id) { query += ' AND p.vendedor_id = ?'; params.push(vendedor_id); }
+            query += ' ORDER BY p.vendedor_nome, pi.descricao';
+
+            const [rows] = await vendasPool.query(query, params);
+
+            // Agrupar por vendedor e categoria
+            const vendedores = {};
+            rows.forEach(r => {
+                const vend = r.vendedor_nome || 'Sem vendedor';
+                if (!vendedores[vend]) vendedores[vend] = { power: [], multiplex: [], outros: [], totalVendas: 0, totalComissao: 0 };
+                const cat = classificarProdutoComissao(r.descricao);
+                const subtotal = parseFloat(r.subtotal) || (parseFloat(r.preco_unitario) * parseFloat(r.quantidade)) || 0;
+                const comissao = subtotal * cat.percentual / 100;
+                const item = { descricao: r.descricao, codigo: r.codigo, qtd: parseFloat(r.quantidade), subtotal, comissao, percentual: cat.percentual };
+                vendedores[vend].totalVendas += subtotal;
+                vendedores[vend].totalComissao += comissao;
+
+                if (cat === COMISSAO_CATEGORIAS['POTENCIA']) vendedores[vend].power.push(item);
+                else if (cat === COMISSAO_CATEGORIAS['MULTIPLEX']) vendedores[vend].multiplex.push(item);
+                else vendedores[vend].outros.push(item);
+            });
+
+            const filtro = `Período: ${data_inicio || 'início'} a ${data_fim || 'hoje'} | Cabos Power: 2% | Multiplexado: 1% | Outros: 1%`;
+            const colunas = ['Vendedor', 'Produto', 'Código', 'Qtd', 'Valor Venda', '% Com.', 'Comissão'];
+            const pageW = 842 - 80;
+            const colWidths = [pageW * 0.16, pageW * 0.26, pageW * 0.10, pageW * 0.08, pageW * 0.15, pageW * 0.09, pageW * 0.16];
+            const colAligns = ['left', 'left', 'center', 'right', 'right', 'center', 'right'];
+
+            const secoes = [];
+            let grandTotalVendas = 0;
+            let grandTotalComissao = 0;
+            let totalRegistros = 0;
+
+            Object.entries(vendedores).sort((a, b) => b[1].totalComissao - a[1].totalComissao).forEach(([vendNome, vend]) => {
+                grandTotalVendas += vend.totalVendas;
+                grandTotalComissao += vend.totalComissao;
+
+                const secaoLinhas = [];
+                const addItems = (items, catNome) => {
+                    items.forEach(item => {
+                        secaoLinhas.push([
+                            vendNome, item.descricao || '-', item.codigo || '-',
+                            formatarQtd(item.qtd), formatarMoedaPdf(item.subtotal),
+                            `${item.percentual}%`, formatarMoedaPdf(item.comissao)
+                        ]);
+                        totalRegistros++;
+                    });
+                };
+                addItems(vend.power, 'Power');
+                addItems(vend.multiplex, 'Multiplex');
+                addItems(vend.outros, 'Outros');
+
+                if (secaoLinhas.length > 0) {
+                    const powerTotal = vend.power.reduce((s, i) => s + i.comissao, 0);
+                    const muxTotal = vend.multiplex.reduce((s, i) => s + i.comissao, 0);
+                    const outrosTotal = vend.outros.reduce((s, i) => s + i.comissao, 0);
+                    let detalhes = [];
+                    if (vend.power.length) detalhes.push(`Power 2%: ${formatarMoedaPdf(powerTotal)}`);
+                    if (vend.multiplex.length) detalhes.push(`Multiplex 1%: ${formatarMoedaPdf(muxTotal)}`);
+                    if (vend.outros.length) detalhes.push(`Outros 1%: ${formatarMoedaPdf(outrosTotal)}`);
+
+                    secoes.push({
+                        titulo: `${vendNome}`,
+                        info: `Vendas: ${formatarMoedaPdf(vend.totalVendas)}`,
+                        cor: '#eff6ff',
+                        corTexto: '#1e40af',
+                        linhas: secaoLinhas,
+                        subtotal: `${detalhes.join('  •  ')}  │  Total Comissão: ${formatarMoedaPdf(vend.totalComissao)}`
+                    });
+                }
+            });
+
+            const resumo = [
+                { label: 'Vendedores', valor: String(Object.keys(vendedores).length), cor: '#f0f9ff', borda: '#bfdbfe', corTexto: '#1e40af' },
+                { label: 'Total Vendido', valor: formatarMoedaPdf(grandTotalVendas), cor: '#f0fdf4', borda: '#bbf7d0', corTexto: '#166534' },
+                { label: 'Total Comissões', valor: formatarMoedaPdf(grandTotalComissao), cor: '#fef3c7', borda: '#fde68a', corTexto: '#92400e' }
+            ];
+
+            const pdfBuffer = await criarPdfRelatorio('Relatório de Comissões por Categoria', colunas, [], filtro, {
+                colWidths, colAligns, resumo, secoes, totalRegistros,
+                totais: `Total Comissões: ${formatarMoedaPdf(grandTotalComissao)}`
+            });
+            res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename=relatorio-comissoes.pdf' });
+            res.send(pdfBuffer);
+        } catch (err) {
+            console.error('Erro ao gerar PDF comissoes:', err);
+            res.status(500).json({ error: 'Erro ao gerar PDF' });
+        }
+    });
+
+    // PDF: Clientes
+    router.get('/relatorios/clientes/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { cliente_id, status, cidade, estado, ordenar_por } = req.query;
+            let query = `SELECT c.nome, c.email, c.telefone, c.cidade, c.estado, c.ativo,
+                         (SELECT COUNT(*) FROM pedidos p WHERE p.cliente_id = c.id) as qtd_pedidos,
+                         (SELECT COALESCE(SUM(p.valor), 0) FROM pedidos p WHERE p.cliente_id = c.id) as total_compras
+                         FROM clientes c WHERE 1=1`;
+            const params = [];
+            if (cliente_id) { query += ' AND c.id = ?'; params.push(cliente_id); }
+            if (status === 'ativo') { query += ' AND c.ativo = 1'; }
+            else if (status === 'inativo') { query += ' AND c.ativo = 0'; }
+            if (cidade) { query += ' AND c.cidade LIKE ?'; params.push(`%${cidade}%`); }
+            if (estado) { query += ' AND c.estado = ?'; params.push(estado); }
+            const orderMap = { nome: 'c.nome ASC', pedidos: 'qtd_pedidos DESC', valor: 'total_compras DESC' };
+            query += ` ORDER BY ${orderMap[ordenar_por] || 'c.nome ASC'}`;
+
+            const [rows] = await vendasPool.query(query, params);
+
+            const totalClientes = rows.length;
+            const totalCompras = rows.reduce((s, r) => s + (parseFloat(r.total_compras) || 0), 0);
+            const totalPedidos = rows.reduce((s, r) => s + (parseInt(r.qtd_pedidos) || 0), 0);
+            const clientesComPedido = rows.filter(r => parseInt(r.qtd_pedidos) > 0).length;
+
+            const filtro = `${cidade ? `Cidade: ${cidade} | ` : ''}${estado ? `Estado: ${estado} | ` : ''}Ordenado por: ${ordenar_por || 'nome'}`;
+            const colunas = ['Nome', 'Email', 'Telefone', 'Cidade', 'UF', 'Pedidos', 'Total Compras'];
+            const pageW = 842 - 80;
+            const colWidths = [pageW * 0.20, pageW * 0.22, pageW * 0.13, pageW * 0.16, pageW * 0.06, pageW * 0.08, pageW * 0.15];
+            const colAligns = ['left', 'left', 'center', 'left', 'center', 'center', 'right'];
+
+            const linhas = rows.map(r => [
+                r.nome || '-', r.email || '-', r.telefone || '-',
+                r.cidade || '-', r.estado || '-', String(r.qtd_pedidos || 0), formatarMoedaPdf(r.total_compras)
+            ]);
+
+            const resumo = [
+                { label: 'Total Clientes', valor: String(totalClientes), cor: '#f0f9ff', borda: '#bfdbfe', corTexto: '#1e40af' },
+                { label: 'Clientes Ativos', valor: String(clientesComPedido), cor: '#f0fdf4', borda: '#bbf7d0', corTexto: '#166534' },
+                { label: 'Total em Pedidos', valor: String(totalPedidos), cor: '#fefce8', borda: '#fde68a', corTexto: '#92400e' },
+                { label: 'Valor Total', valor: formatarMoedaPdf(totalCompras), cor: '#fdf2f8', borda: '#fbcfe8', corTexto: '#9d174d' }
+            ];
+
+            const pdfBuffer = await criarPdfRelatorio('Relatório de Clientes', colunas, linhas, filtro, {
+                colWidths, colAligns, resumo, totais: `${totalClientes} clientes | ${totalPedidos} pedidos | ${formatarMoedaPdf(totalCompras)}`
+            });
+            res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename=relatorio-clientes.pdf' });
+            res.send(pdfBuffer);
+        } catch (err) {
+            console.error('Erro ao gerar PDF clientes:', err);
+            res.status(500).json({ error: 'Erro ao gerar PDF' });
+        }
+    });
+
+    // PDF: Produtos Mais Vendidos
+    router.get('/relatorios/produtos/pdf', authenticateToken, authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim, ordenar_por } = req.query;
+            let query = `SELECT pi.descricao, pi.codigo, SUM(pi.quantidade) as qtd_total,
+                         SUM(pi.subtotal) as valor_total,
+                         COUNT(DISTINCT pi.pedido_id) as qtd_pedidos
+                         FROM pedido_itens pi
+                         INNER JOIN pedidos p ON pi.pedido_id = p.id
+                         WHERE 1=1`;
+            const params = [];
+            if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
+            if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
+            query += ' GROUP BY pi.descricao, pi.codigo';
+            const orderMap = { quantidade: 'qtd_total DESC', valor: 'valor_total DESC', nome: 'pi.descricao ASC' };
+            query += ` ORDER BY ${orderMap[ordenar_por] || 'valor_total DESC'}`;
+
+            const [rows] = await vendasPool.query(query, params);
+
+            const totalQtd = rows.reduce((s, r) => s + (parseFloat(r.qtd_total) || 0), 0);
+            const totalValor = rows.reduce((s, r) => s + (parseFloat(r.valor_total) || 0), 0);
+
+            const filtro = `Período: ${data_inicio || 'início'} a ${data_fim || 'hoje'} | Ordenado por: ${ordenar_por || 'valor'}`;
+            const colunas = ['Código', 'Descrição', 'Qtd Vendida', 'Nº Pedidos', 'Valor Total'];
+            const pageW = 842 - 80;
+            const colWidths = [pageW * 0.12, pageW * 0.38, pageW * 0.15, pageW * 0.12, pageW * 0.23];
+            const colAligns = ['center', 'left', 'right', 'center', 'right'];
+
+            const linhas = rows.map(r => [
+                r.codigo || '-', r.descricao || '-', formatarQtd(r.qtd_total),
+                String(r.qtd_pedidos || 0), formatarMoedaPdf(r.valor_total)
+            ]);
+
+            const resumo = [
+                { label: 'Produtos Únicos', valor: String(rows.length), cor: '#f0f9ff', borda: '#bfdbfe', corTexto: '#1e40af' },
+                { label: 'Qtd Total Vendida', valor: formatarQtd(totalQtd), cor: '#f0fdf4', borda: '#bbf7d0', corTexto: '#166534' },
+                { label: 'Valor Total', valor: formatarMoedaPdf(totalValor), cor: '#fef3c7', borda: '#fde68a', corTexto: '#92400e' }
+            ];
+
+            const pdfBuffer = await criarPdfRelatorio('Relatório de Produtos Mais Vendidos', colunas, linhas, filtro, {
+                colWidths, colAligns, resumo, totais: `${rows.length} produtos | Qtd: ${formatarQtd(totalQtd)} | ${formatarMoedaPdf(totalValor)}`
+            });
+            res.set({ 'Content-Type': 'application/pdf', 'Content-Disposition': 'inline; filename=relatorio-produtos.pdf' });
+            res.send(pdfBuffer);
+        } catch (err) {
+            console.error('Erro ao gerar PDF produtos:', err);
+            res.status(500).json({ error: 'Erro ao gerar PDF' });
+        }
+    });
+
+    // ========================================
+    // COMISSÕES EXPORTAR (CSV)
+    // ========================================
+    router.get('/comissoes/exportar', authorizeArea('vendas'), async (req, res, next) => {
+        try {
+            const { periodo, formato } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            const [rows] = await vendasPool.query(`
+                SELECT
+                    u.nome as 'Vendedor',
+                    u.email as 'Email',
+                    COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as 'Qtd Vendas',
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as 'Valor Total',
+                    COALESCE(u.comissao_percentual, 1.0) as 'Percentual',
+                    SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END) as 'Comissao'
+                FROM usuarios u
+                LEFT JOIN departamentos d ON u.departamento_id = d.id
+                LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
+                WHERE d.nome = 'Comercial' AND u.status = 'ativo'
+                GROUP BY u.id, u.nome, u.email, u.comissao_percentual
+                ORDER BY u.nome
+            `, [periodoAtual]);
+
+            if (formato === 'csv') {
+                const headers = Object.keys(rows[0] || {}).join(';');
+                const csvRows = rows.map(r => Object.values(r).join(';'));
+                const csv = [headers, ...csvRows].join('\n');
+
+                res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+                res.setHeader('Content-Disposition', `attachment; filename=comissoes_${periodoAtual}.csv`);
+                return res.send('\uFEFF' + csv);
+            }
+
+            res.json(rows);
+        } catch (error) { next(error); }
+    });
+
+    // ========================================
+    // METAS EM LOTE
+    // ========================================
+    router.post('/metas/lote', authenticateToken, authorizeArea('vendas'), async (req, res, next) => {
+        try {
+            const user = req.user;
+            const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+            if (!isAdmin) {
+                return res.status(403).json({ message: 'Apenas administradores podem definir metas.' });
+            }
+
+            const { periodo, valor_meta_padrao, metas_individuais } = req.body;
+
+            if (!periodo) {
+                return res.status(400).json({ message: 'Período é obrigatório' });
+            }
+
+            const [vendedores] = await vendasPool.query(`
+                SELECT u.id, u.nome FROM usuarios u
+                LEFT JOIN departamentos d ON u.departamento_id = d.id
+                WHERE d.nome = 'Comercial' AND u.status = 'ativo'
+            `);
+
+            let criadas = 0;
+            let atualizadas = 0;
+
+            for (const vendedor of vendedores) {
+                const metaIndividual = metas_individuais?.find(m => m.vendedor_id === vendedor.id);
+                const valorMeta = metaIndividual ? metaIndividual.valor_meta : valor_meta_padrao;
+
+                if (!valorMeta) continue;
+
+                const [existing] = await vendasPool.query(
+                    'SELECT id FROM metas_vendas WHERE vendedor_id = ? AND periodo = ?',
+                    [vendedor.id, periodo]
+                );
+
+                if (existing.length > 0) {
+                    await vendasPool.query('UPDATE metas_vendas SET valor_meta = ? WHERE id = ?', [parseFloat(valorMeta), existing[0].id]);
+                    atualizadas++;
+                } else {
+                    await vendasPool.query(
+                        'INSERT INTO metas_vendas (vendedor_id, periodo, tipo, valor_meta) VALUES (?, ?, ?, ?)',
+                        [vendedor.id, periodo, 'mensal', parseFloat(valorMeta)]
+                    );
+                    criadas++;
+                }
+            }
+
+            res.json({
+                message: `Metas processadas: ${criadas} criadas, ${atualizadas} atualizadas`,
+                total_vendedores: vendedores.length,
+                criadas,
+                atualizadas
+            });
+        } catch (error) { next(error); }
+    });
+
+    // AUDIT-FIX R3: REMOVIDO — GET /empresas/buscar duplicado (existe em vendas-routes.js)
+
+    // ========================================
+    // LIGAÇÕES - CDR Scraper via Puppeteer
+    // ========================================
+    const cdrScraper = require('../services/cdr-scraper');
+
+    // GET /ligacoes/status
+    router.get('/ligacoes/status', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const status = cdrScraper.getStatus();
+            res.json(status);
+        } catch (error) {
+            res.json({ configurado: false, erro: 'Serviço indisponível' });
+        }
+    });
+
+    // GET /ligacoes/dispositivos
+    router.get('/ligacoes/dispositivos', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim } = req.query;
+            const ramais = await cdrScraper.listarRamais(data_inicio, data_fim);
+            return res.json(ramais);
+        } catch (error) {
+            console.error('Erro ao listar ramais CDR:', error.message);
+            // Fallback: retornar lista estática de ramais quando scraper falha
+            const RAMAL_NOMES = cdrScraper.RAMAL_NOMES || {};
+            const fallback = Object.entries(RAMAL_NOMES).map(([id, name]) => ({
+                username: id, name, callerid: `${name} (${id})`, id
+            }));
+            return res.json(fallback);
+        }
+    });
+
+    // GET /ligacoes/cdr
+    router.get('/ligacoes/cdr', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim, ramal, tipo } = req.query;
+
+            const hoje = new Date().toISOString().split('T')[0];
+            const di = data_inicio || hoje;
+            const df = data_fim || hoje;
+
+            let chamadas = await cdrScraper.fetchCDRData(di, df);
+
+            if (ramal) {
+                chamadas = chamadas.filter(c => c.ramal === ramal || c.origem === ramal);
+            }
+            if (tipo === 'movel') {
+                chamadas = chamadas.filter(c => c.subtipo === 'movel');
+            } else if (tipo === 'fixo') {
+                chamadas = chamadas.filter(c => c.subtipo === 'fixo');
+            }
+
+            res.json({
+                total: chamadas.length,
+                chamadas,
+                periodo: { inicio: di, fim: df }
+            });
+        } catch (error) {
+            console.error('Erro ao buscar CDR:', error.message);
+            const hoje = new Date().toISOString().split('T')[0];
+            res.json({
+                total: 0, chamadas: [],
+                periodo: { inicio: req.query.data_inicio || hoje, fim: req.query.data_fim || hoje },
+                erro: 'Serviço temporariamente indisponível'
+            });
+        }
+    });
+
+    // GET /ligacoes/online
+    router.get('/ligacoes/online', authorizeArea('vendas'), async (req, res) => {
+        res.json({ total: 0, chamadas: [] });
+    });
+
+    // GET /ligacoes/resumo
+    router.get('/ligacoes/resumo', authorizeArea('vendas'), async (req, res) => {
+        try {
+            const { data_inicio, data_fim } = req.query;
+
+            const hoje = new Date().toISOString().split('T')[0];
+            const di = data_inicio || hoje;
+            const df = data_fim || hoje;
+
+            const chamadas = await cdrScraper.fetchCDRData(di, df);
+            const resumo = cdrScraper.gerarResumo(chamadas);
+            resumo.periodo = { inicio: di, fim: df };
+
+            // Buscar meta mensal de ligações (se existir)
+            try {
+                const periodo = new Date().toISOString().substring(0, 7);
+                const [metaRows] = await pool.query(
+                    "SELECT valor_meta FROM metas_vendas WHERE tipo = 'ligacoes' AND periodo = ? AND vendedor_id IS NULL LIMIT 1",
+                    [periodo]
+                );
+                resumo.meta_mensal = metaRows.length > 0 ? Number(metaRows[0].valor_meta) : 0;
+            } catch (_) { resumo.meta_mensal = 0; }
+
+            res.json(resumo);
+        } catch (error) {
+            console.error('Erro ao gerar resumo de ligações:', error.message);
+            // Fallback: retornar resumo vazio em vez de 500
+            // NOTE: di/df are scoped to try block — use req.query here
+            const hoje = new Date().toISOString().split('T')[0];
+            res.json({
+                total: 0, realizadas: 0, atendidas: 0, nao_atendidas: 0,
+                duracao_total: '00:00:00', por_ramal: [],
+                periodo: {
+                    inicio: req.query.data_inicio || hoje,
+                    fim: req.query.data_fim || hoje
+                },
+                erro: 'Serviço temporariamente indisponível'
+            });
+        }
+    });
+
+    // ======================================
+    // FIM DAS ROTAS DO MÓDULO VENDAS
+    // ======================================
+
+
+    return router;
+};

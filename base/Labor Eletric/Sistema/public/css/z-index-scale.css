@@ -1,0 +1,39 @@
+/* ============================================================
+   ZYNTRA — Z-INDEX GLOBAL SCALE
+   Escala centralizada de camadas do sistema
+   Versão: 1.0 — Abril 2026
+   ============================================================
+   
+   USO: @import url('z-index-scale.css');
+   
+   ⚠️  É PROIBIDO usar z-index inline nos componentes.
+       Utilize APENAS as variáveis abaixo.
+   
+   CAMADAS (ordem crescente):
+   ─────────────────────────────────────────
+   base       (1)     → Páginas normais, conteúdo
+   header     (100)   → Cabeçalho global e Sidebar
+   dropdown   (200)   → Menus suspensos, tooltips
+   backdrop   (1000)  → Fundo escuro do modal pai
+   modal      (1010)  → Modal principal (pai)
+   backdrop-2 (1020)  → Fundo escuro do modal filho
+   modal-2    (1030)  → Modal filho (edição/config)
+   toast      (9999)  → Notificações de erro/sucesso
+   ============================================================ */
+
+:root {
+    /* ── Z-Index Scale ── */
+    --z-base:           1;
+    --z-header:         100;
+    --z-dropdown:       200;
+    --z-backdrop:       1000;
+    --z-modal-parent:   1010;
+    --z-backdrop-child: 1020;
+    --z-modal-child:    1030;
+    --z-toast:          9999;
+
+    /* Aliases para retrocompatibilidade */
+    --z-sidebar:        var(--z-header);
+    --z-modal:          var(--z-modal-parent);
+    --z-notification:   var(--z-toast);
+}

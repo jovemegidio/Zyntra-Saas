@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 — Acesso Negado | Zyntra</title>
+    <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #0f1117;
+            --bg-card: #1a1d27;
+            --danger: #ef4444;
+            --danger-glow: rgba(239, 68, 68, 0.15);
+            --danger-dark: #dc2626;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: rgba(255,255,255,0.06);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 0;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: floatGlow 12s ease-in-out infinite;
+        }
+
+        .bg-glow-1 {
+            top: -200px;
+            right: -100px;
+            background: radial-gradient(circle, rgba(239,68,68,0.2), transparent 70%);
+        }
+
+        .bg-glow-2 {
+            bottom: -200px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(245,158,11,0.15), transparent 70%);
+            animation-delay: -6s;
+        }
+
+        @keyframes floatGlow {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.1); }
+        }
+
+        .container-403 {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 40px 24px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .logo-403 {
+            margin-bottom: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            opacity: 0;
+            animation: fadeInDown 0.6s ease forwards;
+        }
+
+        .logo-403 img {
+            height: 28px;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+            opacity: 0.85;
+        }
+
+        .logo-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .number-403 {
+            font-size: clamp(100px, 18vw, 180px);
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -6px;
+            background: linear-gradient(135deg, var(--danger) 0%, #f59e0b 50%, var(--danger) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInUp 0.7s ease forwards, shimmer 4s ease-in-out infinite;
+            opacity: 0;
+            animation-delay: 0.15s;
+            position: relative;
+            user-select: none;
+        }
+
+        .number-403::after {
+            content: '403';
+            position: absolute;
+            inset: 0;
+            font-size: inherit;
+            font-weight: inherit;
+            letter-spacing: inherit;
+            background: linear-gradient(135deg, var(--danger) 0%, #f59e0b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(40px);
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .icon-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0 24px;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: 0.3s;
+        }
+
+        .icon-row .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--text-muted);
+        }
+
+        .icon-row i {
+            font-size: 18px;
+            color: var(--danger);
+            opacity: 0.7;
+        }
+
+        .title-403 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: 0.4s;
+        }
+
+        .desc-403 {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-width: 440px;
+            margin: 0 auto 40px;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: 0.5s;
+        }
+
+        .actions-403 {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: 0.6s;
+        }
+
+        .btn-403 {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+        }
+
+        .btn-primary-403 {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+        }
+
+        .btn-primary-403:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(59,130,246,0.4), 0 0 0 3px rgba(59,130,246,0.15);
+        }
+
+        .footer-403 {
+            position: fixed;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 1;
+            opacity: 0;
+            animation: fadeInUp 0.7s ease forwards;
+            animation-delay: 0.8s;
+        }
+
+        .footer-403 p {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 480px) {
+            .number-403 { letter-spacing: -3px; }
+            .actions-403 { flex-direction: column; }
+            .btn-403 { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="container-403">
+        <div class="logo-403">
+            <img src="/images/logo-zyntra-white.png" alt="Zyntra" onerror="this.style.display='none'">
+            <div class="logo-divider"></div>
+            <span style="font-size: 13px; color: var(--text-muted); font-weight: 500; letter-spacing: 2px; text-transform: uppercase;">Acesso Negado</span>
+        </div>
+
+        <div class="number-403">403</div>
+
+        <div class="icon-row">
+            <span class="dot"></span>
+            <i class="fas fa-shield-halved"></i>
+            <span class="dot"></span>
+        </div>
+
+        <h1 class="title-403">Você não tem permissão para acessar esta página</h1>
+        <p class="desc-403">
+            Seu perfil de acesso não possui as permissões necessárias para visualizar este recurso.
+            Se você acredita que deveria ter acesso, entre em contato com o administrador do sistema.
+        </p>
+
+        <div class="actions-403">
+            <a href="/index.html" class="btn-403 btn-primary-403">
+                <i class="fas fa-th-large"></i>
+                Ir para o Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="footer-403">
+        <p>Zyntra ERP &copy; <script>document.write(new Date().getFullYear())</script></p>
+    </div>
+</body>
+</html>
