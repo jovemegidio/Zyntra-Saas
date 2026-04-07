@@ -8,14 +8,14 @@ class ClienteRepository extends BaseRepository {
     /**
      * List clientes with optional admin/vendedor filtering and pagination.
      */
-    async list({ page = 1, limit = 2000, isAdmin = false, vendedorId = null } = {}) {
+    async list({ page = 1, limit = 2000, isAdmin = false, isComercial = false, vendedorId = null, vendedorNome = null } = {}) {
         const offset = (parseInt(page) - 1) * parseInt(limit);
         let where = '';
         const params = [];
 
-        if (!isAdmin && vendedorId) {
-            where = 'WHERE (e.vendedor_id = ? OR e.vendedor_id IS NULL)';
-            params.push(vendedorId);
+        if (isComercial && vendedorNome) {
+            where = 'WHERE (c.vendedor_proprietario = ? OR c.vendedor_responsavel = ?)';
+            params.push(vendedorNome, vendedorNome);
         }
 
         params.push(parseInt(limit), offset);
@@ -37,14 +37,14 @@ class ClienteRepository extends BaseRepository {
         return this.queryOne('SELECT * FROM clientes WHERE id = ?', [id]);
     }
 
-    async search(q, { isAdmin = false, vendedorId = null } = {}) {
+    async search(q, { isAdmin = false, isComercial = false, vendedorId = null, vendedorNome = null } = {}) {
         const like = `%${q}%`;
         let where = 'WHERE (c.nome LIKE ? OR c.nome_fantasia LIKE ? OR c.razao_social LIKE ? OR c.cnpj LIKE ? OR c.email LIKE ?)';
         const params = [like, like, like, like, like];
 
-        if (!isAdmin && vendedorId) {
-            where += ' AND (e.vendedor_id = ? OR e.vendedor_id IS NULL)';
-            params.push(vendedorId);
+        if (isComercial && vendedorNome) {
+            where += ' AND (c.vendedor_proprietario = ? OR c.vendedor_responsavel = ?)';
+            params.push(vendedorNome, vendedorNome);
         }
 
         return this.query(

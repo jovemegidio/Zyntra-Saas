@@ -17,12 +17,32 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
             const termoBusca = termo || busca;
             const limiteResultados = parseInt(limite) || 50;
             
+            // Filtro de vendedor: comerciais veem apenas seus clientes
+            const isComercial = req.user?.role === 'comercial';
+            const vendedorNome = req.user?.nome || '';
+            
             // Modo gestão: retorna todos os campos
             if (gestao === 'true' || gestao === '1') {
                 console.log('✅ Buscando clientes para gestão...');
                 
-                let query = `SELECT * FROM clientes ORDER BY nome`;
-                const [clientes] = await pool.query(query);
+                // AUDIT-FIX S10.7: Add LIMIT + explicit columns for gestão mode
+                const gestaoLimit = Math.min(Math.max(1, parseInt(limite) || 500), 2000);
+                const gestaoPage = Math.max(1, parseInt(req.query.page) || 1);
+                let query = `SELECT id, nome, razao_social, nome_fantasia, contato, nome_contato,
+                    cnpj, cnpj_cpf, cpf, inscricao_estadual, ie, telefone, fone, celular,
+                    email, email_nfe, cep, endereco, logradouro, numero, bairro, cidade,
+                    uf, estado, ativo, data_criacao, data_atualizacao
+                    FROM clientes`;
+                const gestaoParams = [];
+                
+                if (isComercial && vendedorNome) {
+                    query += ` WHERE (vendedor_proprietario = ? OR vendedor_responsavel = ?)`;
+                    gestaoParams.push(vendedorNome, vendedorNome);
+                }
+                
+                query += ` ORDER BY nome LIMIT ? OFFSET ?`;
+                gestaoParams.push(gestaoLimit, (gestaoPage - 1) * gestaoLimit);
+                const [clientes] = await pool.query(query, gestaoParams);
                 
                 const clientesFormatados = clientes.map(cliente => ({
                     id: cliente.id,
@@ -62,6 +82,11 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 FROM clientes WHERE (ativo = 1 OR ativo IS NULL)`;
             let params = [];
             
+            if (isComercial && vendedorNome) {
+                query += ` AND (vendedor_proprietario = ? OR vendedor_responsavel = ?)`;
+                params.push(vendedorNome, vendedorNome);
+            }
+            
             if (termoBusca && termoBusca.length >= 2) {
                 query += ` AND (
                     razao_social LIKE ? OR 
@@ -74,7 +99,10 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 params = [termoLike, termoLike, termoLike, termoLike, termoLike];
             }
             
-            query += ` ORDER BY COALESCE(razao_social, nome) LIMIT ${limiteResultados}`;
+            // AUDIT-FIX S10.2: Parametrize LIMIT to prevent template-literal SQL injection
+            const safeLimite = Math.min(Math.max(1, limiteResultados), 200);
+            query += ' ORDER BY COALESCE(razao_social, nome) LIMIT ?';
+            params.push(safeLimite);
             
             const [clientes] = await pool.query(query, params);
             
@@ -114,13 +142,15 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 INSERT INTO clientes (
                     nome, razao_social, nome_fantasia, contato, cnpj, cpf, inscricao_estadual, inscricao_municipal,
                     telefone, celular, email, email_nfe, website, limite_credito,
-                    cep, endereco, logradouro, numero, complemento, bairro, cidade, estado, ativo
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    cep, endereco, logradouro, numero, complemento, bairro, cidade, estado, ativo,
+                    vendedor_responsavel, vendedor_proprietario, data_cadastro_vendedor, incluido_por, empresa_id
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, 71)
             `, [
                 nome, nome, nome_fantasia || null, contato || null, cnpj || null, cpf || null, inscricao_estadual || null, inscricao_municipal || null,
                 telefone || null, celular || null, email || null, email_nfe || null, website || null, limite_credito || null,
                 cep || null, endereco || null, endereco || null, numero || null, complemento || null, bairro || null, cidade || null, uf || null,
-                ativo !== undefined ? (ativo ? 1 : 0) : 1
+                ativo !== undefined ? (ativo ? 1 : 0) : 1,
+                req.user?.nome || null, req.user?.nome || null, req.user?.nome || null
             ]);
             
             // Audit log
@@ -202,7 +232,8 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
         try {
             const { id } = req.params;
             
-            const [result] = await pool.query('DELETE FROM clientes WHERE id = ?', [id]);
+            // FIX-100: Soft-delete instead of hard DELETE (preserves historical data)
+            const [result] = await pool.query('UPDATE clientes SET status = \'inativo\', updated_at = NOW() WHERE id = ?', [id]);
             
             if (result.affectedRows === 0) {
                 return res.status(404).json({ error: 'Cliente não encontrado' });

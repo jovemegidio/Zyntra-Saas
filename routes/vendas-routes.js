@@ -18,6 +18,9 @@ module.exports = function createVendasRoutes(deps) {
     const createRepositories = require('../repositories');
     const repos = createRepositories(pool);
 
+    // Payment conditions validation
+    const { validarCondicaoPagamento, getFaixaPagamento, gerarParcelasAutomaticas, formatarCondicaoPagamento } = require('../utils/condicoes-pagamento');
+
     // Serviço compartilhado de faturamento (configuração centralizada, CFOP, numeração, admin check)
     const { getFaturamentoSharedService } = require('../services/faturamento-shared.service');
     const faturamentoShared = getFaturamentoSharedService(pool);
@@ -1381,13 +1384,14 @@ module.exports = function createVendasRoutes(deps) {
     const userPermissions = {
         // Mapa de permissões por role do banco (usuarios.role)
         statusPermissions: {
-            // Vendedores (role=user/comercial) podem mover até analise-credito e cancelar
-            'default': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
-            'user': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
-            'comercial': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
-            // Supervisores podem aprovar e faturar
-            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
-            'aprovador': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'cancelado'],
+            // Vendedores (role=user/comercial) podem mover até análise de crédito e cancelar antes de aprovação final
+            'default': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
+            'user': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
+            'comercial': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'cancelado'],
+            // Supervisores podem aprovar, mas não faturar diretamente
+            'supervisor': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'cancelado'],
+            // Aprovadores podem encaminhar para faturamento, mas não marcar como faturado diretamente
+            'aprovador': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'cancelado'],
             // Admin tem acesso total (redundante pois admin bypassa, mas documenta)
             'admin': ['orcamento', 'orçamento', 'analise', 'analise-credito', 'aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'entregue', 'recibo', 'cancelado']
         },
@@ -2128,11 +2132,12 @@ module.exports = function createVendasRoutes(deps) {
             res.json(rows);
         } catch (error) { next(error); }
     });
-    router.get('/clientes', cacheMiddleware('vendas_clientes', 120000), async (req, res, next) => {
+    router.get('/clientes', cacheMiddleware('vendas_clientes', 120000, true), async (req, res, next) => {
         try {
             const { page = 1, limit = 2000 } = req.query;
             const isAdmin = req.user && (req.user.is_admin || req.user.role === 'admin' || req.user.role === 'administrador');
-            const rows = await repos.cliente.list({ page, limit, isAdmin, vendedorId: req.user?.id });
+            const isComercial = req.user?.role === 'comercial';
+            const rows = await repos.cliente.list({ page, limit, isAdmin, isComercial, vendedorId: req.user?.id, vendedorNome: req.user?.nome });
             res.json(rows);
         } catch (error) { next(error); }
     });
@@ -2228,9 +2233,11 @@ module.exports = function createVendasRoutes(deps) {
             const endereco = b.endereco || b.logradouro || null;
             const numero = b.numero || b.número || null;
             const inscricao_estadual = b.inscricao_estadual || b.ie || null;
-            const { nome_fantasia, contato, telefone, celular, email, website,
+            const contato = b.contato || b.contato_nome || null;
+            const { nome_fantasia, telefone, celular, email, website,
                     complemento, bairro, cidade, uf, cep,
                     inscricao_municipal, limite_credito, ativo, empresa_id,
+                    contato_nome, contato_cargo, observacoes,
                     fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
                     suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
                     obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
@@ -2245,32 +2252,104 @@ module.exports = function createVendasRoutes(deps) {
                 return res.status(400).json({ message: 'Email inválido.' });
             }
 
+            const [cols] = await pool.query('SHOW COLUMNS FROM clientes');
+            const availableColumns = new Set(cols.map(col => col.Field));
+
+            // Resolver empresa_id: body > user token > buscar primeira empresa
+            let empresaIdFinal = empresa_id || req.user?.empresa_id || null;
+            if (!empresaIdFinal && availableColumns.has('empresa_id')) {
+                try {
+                    const [empRows] = await pool.query('SELECT id FROM empresas ORDER BY id LIMIT 1');
+                    empresaIdFinal = empRows.length > 0 ? empRows[0].id : null;
+                } catch (_) { /* tabela empresas pode não existir */ }
+            }
+
+            const payload = {
+                nome,
+                nome_fantasia: nome_fantasia || null,
+                razao_social: nome || null,
+                cnpj: cnpj || null,
+                cnpj_cpf: cnpj || null,
+                contato: contato || null,
+                nome_contato: contato_nome || contato || null,
+                contato_cargo: contato_cargo || null,
+                telefone: telefone || null,
+                celular: celular || null,
+                email: email || null,
+                website: website || null,
+                endereco: endereco || null,
+                logradouro: endereco || null,
+                numero: numero || null,
+                complemento: complemento || null,
+                bairro: bairro || null,
+                cidade: cidade || null,
+                estado: uf || null,
+                uf: uf || null,
+                cep: cep || null,
+                inscricao_estadual: inscricao_estadual || null,
+                ie: inscricao_estadual || null,
+                inscricao_municipal: inscricao_municipal || null,
+                credito_total: limite_credito ? parseFloat(limite_credito) : 0,
+                ativo: ativo !== undefined ? (ativo ? 1 : 0) : 1,
+                empresa_id: empresaIdFinal,
+                observacoes: observacoes || null,
+                data_cadastro: new Date(),
+                incluido_por: req.user?.nome || 'Sistema',
+                fax: fax || null,
+                ddd_fax: ddd_fax || null,
+                enviar_anexos: enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
+                banco: banco || null,
+                agencia: agencia || null,
+                conta: conta || null,
+                conta_corrente: conta || null,
+                pix: pix || null,
+                titular_doc: titular_doc || null,
+                titular_nome: titular_nome || null,
+                suframa: suframa || null,
+                simples_nacional: simples_nacional ? 1 : 0,
+                produtor_rural: produtor_rural ? 1 : 0,
+                tipo_atividade: tipo_atividade || null,
+                cnae: cnae || null,
+                obs_internas: obs_internas || null,
+                obs_detalhadas: obs_detalhadas || null,
+                parcelas_padrao: parcelas_padrao || null,
+                vendedor_padrao: vendedor_padrao || null,
+                email_nfe: email_nfe || null,
+                transportadora: transportadora || null,
+                codigo_receita: codigo_receita || null,
+                bloquear_faturamento: bloquear_faturamento ? 1 : 0
+            };
+
+            const insertColumns = [];
+            const insertValues = [];
+            const placeholders = [];
+
+            Object.entries(payload).forEach(([field, value]) => {
+                if (availableColumns.has(field)) {
+                    insertColumns.push(field);
+                    insertValues.push(value);
+                    placeholders.push('?');
+                }
+            });
+
             const [result] = await pool.query(
-                `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
-                 endereco, numero, complemento, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal,
-                 credito_total, ativo, empresa_id, data_cadastro, incluido_por,
-                 fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
-                 suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
-                 obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
-                 email_nfe, transportadora, codigo_receita, bloquear_faturamento)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?,
-                         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-                [nome, nome_fantasia || null, nome || null, cnpj || null, contato || null,
-                 telefone || null, celular || null, email || null, website || null,
-                 endereco || null, numero || null, complemento || null, bairro || null,
-                 cidade || null, uf || null, cep || null, inscricao_estadual || null,
-                 inscricao_municipal || null, limite_credito ? parseFloat(limite_credito) : 0,
-                 ativo !== undefined ? (ativo ? 1 : 0) : 1,
-                 req.user.empresa_id, req.user ? req.user.nome : 'Sistema',
-                 fax || null, ddd_fax || null, enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
-                 banco || null, agencia || null, conta || null, pix || null, titular_doc || null, titular_nome || null,
-                 suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
-                 tipo_atividade || null, cnae || null,
-                 obs_internas || null, obs_detalhadas || null, parcelas_padrao || null, vendedor_padrao || null,
-                 email_nfe || null, transportadora || null, codigo_receita || null, bloquear_faturamento ? 1 : 0]
+                `INSERT INTO clientes (${insertColumns.join(', ')}) VALUES (${placeholders.join(', ')})`,
+                insertValues
             );
             res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
-        } catch (error) { next(error); }
+        } catch (error) {
+            console.error('[VENDAS] Erro ao cadastrar cliente:', error.code, error.message);
+            if (error.code === 'ER_NO_SUCH_TABLE') {
+                return res.status(500).json({ message: 'Tabela de clientes não encontrada. Execute as migrações do sistema.' });
+            }
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ message: 'Já existe um cliente com este CNPJ/CPF cadastrado.' });
+            }
+            if (error.code === 'ER_NO_REFERENCED_ROW' || error.code === 'ER_NO_REFERENCED_ROW_2') {
+                return res.status(400).json({ message: 'Empresa vinculada não encontrada. Verifique as configurações.' });
+            }
+            next(error);
+        }
     });
     router.put('/clientes/:id', authenticateToken, async (req, res, next) => {
         try {
@@ -2293,9 +2372,11 @@ module.exports = function createVendasRoutes(deps) {
             const endereco = body.endereco || body.logradouro || null;
             const numero = body.numero || body.número || null;
             const inscricao_estadual = body.inscricao_estadual || body.ie || null;
-            const { nome_fantasia, contato, telefone, celular, email, website,
+            const contato = body.contato || body.contato_nome || null;
+            const { nome_fantasia, telefone, celular, email, website,
                     complemento, bairro, cidade, uf, cep,
                     inscricao_municipal, limite_credito, empresa_id,
+                    contato_nome, contato_cargo, observacoes,
                     fax, ddd_fax, enviar_anexos, banco, agencia, conta, pix, titular_doc, titular_nome,
                     suframa, simples_nacional, produtor_rural, tipo_atividade, cnae,
                     obs_internas, obs_detalhadas, parcelas_padrao, vendedor_padrao,
@@ -2303,38 +2384,94 @@ module.exports = function createVendasRoutes(deps) {
 
             if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
+            const [cols] = await pool.query('SHOW COLUMNS FROM clientes');
+            const availableColumns = new Set(cols.map(col => col.Field));
+
+            const payload = {
+                nome,
+                nome_fantasia: nome_fantasia || null,
+                razao_social: nome,
+                cnpj: cnpj || null,
+                cnpj_cpf: cnpj || null,
+                contato: contato || null,
+                nome_contato: contato_nome || contato || null,
+                contato_cargo: contato_cargo || null,
+                telefone: telefone || null,
+                celular: celular || null,
+                email: email || null,
+                website: website || null,
+                endereco: endereco || null,
+                logradouro: endereco || null,
+                numero: numero || null,
+                complemento: complemento || null,
+                bairro: bairro || null,
+                cidade: cidade || null,
+                estado: uf || null,
+                uf: uf || null,
+                cep: cep || null,
+                inscricao_estadual: inscricao_estadual || null,
+                ie: inscricao_estadual || null,
+                inscricao_municipal: inscricao_municipal || null,
+                credito_total: limite_credito ? parseFloat(limite_credito) : 0,
+                ativo: body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
+                observacoes: observacoes || null,
+                fax: fax || null,
+                ddd_fax: ddd_fax || null,
+                enviar_anexos: enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
+                banco: banco || null,
+                agencia: agencia || null,
+                conta: conta || null,
+                conta_corrente: conta || null,
+                pix: pix || null,
+                titular_doc: titular_doc || null,
+                titular_nome: titular_nome || null,
+                suframa: suframa || null,
+                simples_nacional: simples_nacional ? 1 : 0,
+                produtor_rural: produtor_rural ? 1 : 0,
+                tipo_atividade: tipo_atividade || null,
+                cnae: cnae || null,
+                obs_internas: obs_internas || null,
+                obs_detalhadas: obs_detalhadas || null,
+                parcelas_padrao: parcelas_padrao || null,
+                vendedor_padrao: vendedor_padrao || null,
+                email_nfe: email_nfe || null,
+                transportadora: transportadora || null,
+                codigo_receita: codigo_receita || null,
+                bloquear_faturamento: bloquear_faturamento ? 1 : 0
+            };
+
+            // Só incluir empresa_id se tiver valor válido (coluna NOT NULL)
+            const empresaIdUpdate = empresa_id || req.user?.empresa_id;
+            if (empresaIdUpdate) {
+                payload.empresa_id = empresaIdUpdate;
+            }
+
+            const fields = [];
+            const values = [];
+            Object.entries(payload).forEach(([field, value]) => {
+                if (availableColumns.has(field)) {
+                    fields.push(`${field} = ?`);
+                    values.push(value);
+                }
+            });
+            values.push(id);
+
             const [result] = await pool.query(
-                `UPDATE clientes SET nome = ?, nome_fantasia = ?, razao_social = ?, cnpj = ?, contato = ?,
-                 telefone = ?, celular = ?, email = ?, website = ?,
-                 endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?,
-                 estado = ?, cep = ?, inscricao_estadual = ?, inscricao_municipal = ?,
-                 credito_total = ?, ativo = ?, empresa_id = ?,
-                 fax = ?, ddd_fax = ?, enviar_anexos = ?, banco = ?, agencia = ?, conta = ?,
-                 pix = ?, titular_doc = ?, titular_nome = ?,
-                 suframa = ?, simples_nacional = ?, produtor_rural = ?, tipo_atividade = ?, cnae = ?,
-                 obs_internas = ?, obs_detalhadas = ?, parcelas_padrao = ?, vendedor_padrao = ?,
-                 email_nfe = ?, transportadora = ?, codigo_receita = ?, bloquear_faturamento = ?
-                 WHERE id = ?`,
-                [nome, nome_fantasia || null, nome, cnpj || null, contato || null,
-                 telefone || null, celular || null, email || null, website || null,
-                 endereco || null, numero || null, complemento || null, bairro || null,
-                 cidade || null, uf || null, cep || null, inscricao_estadual || null,
-                 inscricao_municipal || null,
-                 limite_credito ? parseFloat(limite_credito) : 0,
-                 body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
-                 empresa_id || req.user.empresa_id,
-                 fax || null, ddd_fax || null, enviar_anexos !== undefined ? (enviar_anexos ? 1 : 0) : 1,
-                 banco || null, agencia || null, conta || null,
-                 pix || null, titular_doc || null, titular_nome || null,
-                 suframa || null, simples_nacional ? 1 : 0, produtor_rural ? 1 : 0,
-                 tipo_atividade || null, cnae || null,
-                 obs_internas || null, obs_detalhadas || null, parcelas_padrao || null, vendedor_padrao || null,
-                 email_nfe || null, transportadora || null, codigo_receita || null,
-                 bloquear_faturamento ? 1 : 0, id]
+                `UPDATE clientes SET ${fields.join(', ')} WHERE id = ?`,
+                values
             );
             if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
             res.json({ message: 'Cliente atualizado com sucesso.' });
-        } catch (error) { next(error); }
+        } catch (error) {
+            console.error('[VENDAS] Erro ao atualizar cliente:', error.code, error.message);
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ message: 'Já existe um cliente com este CNPJ/CPF cadastrado.' });
+            }
+            if (error.code === 'ER_NO_REFERENCED_ROW' || error.code === 'ER_NO_REFERENCED_ROW_2') {
+                return res.status(400).json({ message: 'Empresa vinculada não encontrada. Verifique as configurações.' });
+            }
+            next(error);
+        }
     });
     router.delete('/clientes/:id', authenticateToken, authorizeAdmin, async (req, res, next) => {
         const connection = await pool.getConnection();
@@ -3584,6 +3721,101 @@ module.exports = function createVendasRoutes(deps) {
         }
     });
 
+    // ======================================================
+    // REGIÕES DE VENDA - CRUD de configurações comerciais
+    // ======================================================
+    async function ensureRegioesVendaTable() {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS vendas_regioes (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                nome VARCHAR(120) NOT NULL,
+                estados VARCHAR(255) NULL,
+                descricao TEXT NULL,
+                vendedor_responsavel VARCHAR(255) NULL,
+                ativo TINYINT(1) DEFAULT 1,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `);
+    }
+
+    router.get('/regioes', async (req, res, next) => {
+        try {
+            await ensureRegioesVendaTable();
+            const [rows] = await pool.query(`
+                SELECT id, nome, estados, descricao, vendedor_responsavel,
+                       0 AS total_clientes,
+                       COALESCE(ativo, 1) AS ativo,
+                       created_at, updated_at
+                FROM vendas_regioes
+                WHERE ativo = 1 OR ativo IS NULL
+                ORDER BY nome
+            `);
+            res.json({ success: true, data: rows });
+        } catch (error) {
+            console.error('❌ Erro ao listar regiões de venda:', error);
+            res.json({ success: true, data: [] });
+        }
+    });
+
+    router.post('/regioes', authenticateToken, async (req, res, next) => {
+        try {
+            await ensureRegioesVendaTable();
+            const { nome, estados, descricao, vendedor_responsavel } = req.body || {};
+            if (!nome || !String(nome).trim()) {
+                return res.status(400).json({ message: 'Nome da região é obrigatório.' });
+            }
+
+            const [result] = await pool.query(`
+                INSERT INTO vendas_regioes (nome, estados, descricao, vendedor_responsavel, ativo)
+                VALUES (?, ?, ?, ?, 1)
+            `, [String(nome).trim(), estados || null, descricao || null, vendedor_responsavel || null]);
+
+            res.status(201).json({ success: true, id: result.insertId, message: 'Região criada com sucesso.' });
+        } catch (error) {
+            console.error('❌ Erro ao criar região de venda:', error);
+            next(error);
+        }
+    });
+
+    router.put('/regioes/:id', authenticateToken, async (req, res, next) => {
+        try {
+            await ensureRegioesVendaTable();
+            const { id } = req.params;
+            const { nome, estados, descricao, vendedor_responsavel, ativo } = req.body || {};
+
+            const [result] = await pool.query(`
+                UPDATE vendas_regioes
+                SET nome = ?, estados = ?, descricao = ?, vendedor_responsavel = ?, ativo = COALESCE(?, ativo), updated_at = NOW()
+                WHERE id = ?
+            `, [String(nome || '').trim(), estados || null, descricao || null, vendedor_responsavel || null, ativo, id]);
+
+            if (!result.affectedRows) {
+                return res.status(404).json({ message: 'Região não encontrada.' });
+            }
+
+            res.json({ success: true, message: 'Região atualizada com sucesso.' });
+        } catch (error) {
+            console.error('❌ Erro ao atualizar região de venda:', error);
+            next(error);
+        }
+    });
+
+    router.delete('/regioes/:id', authenticateToken, async (req, res, next) => {
+        try {
+            await ensureRegioesVendaTable();
+            const { id } = req.params;
+            const [result] = await pool.query('UPDATE vendas_regioes SET ativo = 0, updated_at = NOW() WHERE id = ?', [id]);
+            if (!result.affectedRows) {
+                return res.status(404).json({ message: 'Região não encontrada.' });
+            }
+            res.json({ success: true, message: 'Região excluída com sucesso.' });
+        } catch (error) {
+            console.error('❌ Erro ao excluir região de venda:', error);
+            next(error);
+        }
+    });
+
     // GET /condicoes-pagamento - Listar condições de pagamento
     router.get('/condicoes-pagamento', async (req, res, next) => {
         try {
@@ -3907,11 +4139,26 @@ module.exports = function createVendasRoutes(deps) {
             await connection.beginTransaction();
 
             // 1. Buscar pedido com dados do cliente via JOIN + FOR UPDATE lock
+            // Compatibilidade de schema: alguns ambientes usam `cnpj`, outros `cpf_cnpj`
+            const [clienteColumns] = await connection.query('SHOW COLUMNS FROM clientes');
+            const clienteFields = new Set(clienteColumns.map(col => col.Field));
+            const clienteSelectParts = [
+                'c.nome as cliente_nome_join',
+                clienteFields.has('cpf_cnpj') ? 'c.cpf_cnpj' : (clienteFields.has('cnpj') ? 'c.cnpj as cpf_cnpj' : 'NULL as cpf_cnpj'),
+                clienteFields.has('cnpj') ? 'c.cnpj' : (clienteFields.has('cpf_cnpj') ? 'c.cpf_cnpj as cnpj' : 'NULL as cnpj'),
+                clienteFields.has('email') ? 'c.email as cliente_email' : 'NULL as cliente_email',
+                clienteFields.has('telefone') ? 'c.telefone as cliente_telefone' : 'NULL as cliente_telefone',
+                clienteFields.has('endereco') ? 'c.endereco' : 'NULL as endereco',
+                clienteFields.has('numero') ? 'c.numero as num_endereco' : 'NULL as num_endereco',
+                clienteFields.has('complemento') ? 'c.complemento' : 'NULL as complemento',
+                clienteFields.has('bairro') ? 'c.bairro' : 'NULL as bairro',
+                clienteFields.has('cidade') ? 'c.cidade' : 'NULL as cidade',
+                clienteFields.has('estado') ? 'c.estado as uf' : 'NULL as uf',
+                clienteFields.has('cep') ? 'c.cep' : 'NULL as cep'
+            ];
+
             const [pedidoRows] = await connection.query(
-                `SELECT p.*, c.nome as cliente_nome_join, c.cpf_cnpj, c.cnpj,
-                        c.email as cliente_email, c.telefone as cliente_telefone,
-                        c.endereco, c.numero as num_endereco, c.complemento,
-                        c.bairro, c.cidade, c.estado AS uf, c.cep
+                `SELECT p.*, ${clienteSelectParts.join(', ')}
                  FROM pedidos p
                  LEFT JOIN clientes c ON c.id = p.cliente_id
                  WHERE p.id = ? FOR UPDATE`,
@@ -4758,6 +5005,47 @@ module.exports = function createVendasRoutes(deps) {
             console.error('Erro ao enviar e-mail:', error);
             res.status(500).json({ message: 'Erro ao enviar e-mail: ' + (error.message || 'Erro desconhecido') });
         }
+    });
+
+    // =================================================================
+    // CONDIÇÕES DE PAGAMENTO — API
+    // =================================================================
+
+    // GET /api/vendas/condicoes-pagamento?valor=5000
+    router.get('/condicoes-pagamento', authenticateToken, (req, res) => {
+        const valor = parseFloat(req.query.valor) || 0;
+        const faixa = getFaixaPagamento(valor);
+        res.json({
+            faixa: faixa.label,
+            condicao: faixa.condicao,
+            prazo_medio: faixa.prazo_medio,
+            prazo_maximo: faixa.prazo_maximo,
+            parcelas_max: faixa.parcelas_max,
+            parcelas_padrao: faixa.parcelas_padrao,
+            parcelas_alternativas: faixa.parcelas_alternativas || null,
+            requer_aprovacao_financeiro: faixa.requer_aprovacao_financeiro,
+            condicao_texto: formatarCondicaoPagamento(valor)
+        });
+    });
+
+    // POST /api/vendas/condicoes-pagamento/validar
+    router.post('/condicoes-pagamento/validar', authenticateToken, (req, res) => {
+        const { valor, prazos, num_parcelas } = req.body;
+        const resultado = validarCondicaoPagamento(valor, prazos, num_parcelas);
+        res.json(resultado);
+    });
+
+    // POST /api/vendas/condicoes-pagamento/gerar-parcelas
+    router.post('/condicoes-pagamento/gerar-parcelas', authenticateToken, (req, res) => {
+        const { valor, data_base } = req.body;
+        const parcelas = gerarParcelasAutomaticas(valor, data_base);
+        const faixa = getFaixaPagamento(valor);
+        res.json({
+            parcelas,
+            faixa: faixa.label,
+            condicao: faixa.condicao,
+            requer_aprovacao: faixa.requer_aprovacao_financeiro
+        });
     });
 
     return router;

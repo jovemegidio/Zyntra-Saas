@@ -390,16 +390,19 @@
 
         .modal-omie-tabs {
             display: flex; gap: 0; border-bottom: 2px solid #e5e7eb;
-            background: #fafafa; padding: 0 20px; flex-shrink: 0;
+            background: #fafafa; padding: 0 16px; flex-shrink: 0;
+            overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
         }
+        .modal-omie-tabs::-webkit-scrollbar { display: none; }
         .modal-omie-tab {
-            padding: 12px 16px; border: none; background: transparent;
-            font-size: 13px; color: #6b7280; cursor: pointer;
-            border-bottom: 2px solid transparent; margin-bottom: -2px;
-            transition: all 0.2s; white-space: nowrap;
+            padding: 10px 14px; border: none; background: transparent;
+            font-size: 12.5px; color: #6b7280; cursor: pointer;
+            border-bottom: 2.5px solid transparent; margin-bottom: -2px;
+            transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
         }
-        .modal-omie-tab:hover { color: #225cfa; }
-        .modal-omie-tab.active { color: #225cfa; border-bottom-color: #225cfa; font-weight: 600; }
+        .modal-omie-tab:hover { color: #225cfa; background: rgba(34,92,250,0.04); }
+        .modal-omie-tab.active { color: #225cfa; border-bottom-color: #225cfa; font-weight: 600; background: rgba(34,92,250,0.06); }
 
         .modal-omie-tab-content {
             flex: 1; overflow-y: auto; padding: 24px;
@@ -408,16 +411,16 @@
         .modal-omie-tab-pane.active { display: block; }
 
         .modal-omie-sidebar {
-            width: 170px; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border-left: 1px solid #e2e8f0;
-            padding: 14px 10px; display: flex; flex-direction: column; gap: 6px;
+            width: 160px; background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%); border-left: 1px solid #e2e8f0;
+            padding: 12px 8px; display: flex; flex-direction: column; gap: 4px;
             flex-shrink: 0; overflow-y: auto;
         }
 
         .modal-omie-action {
-            display: flex; align-items: center; gap: 10px;
-            padding: 9px 12px; border: none; background: transparent;
-            font-size: 12.5px; color: #475569; cursor: pointer;
-            border-radius: 8px; transition: all 0.2s; text-align: left;
+            display: flex; align-items: center; gap: 8px;
+            padding: 8px 10px; border: none; background: transparent;
+            font-size: 12px; color: #475569; cursor: pointer;
+            border-radius: 8px; transition: all 0.15s; text-align: left;
             font-weight: 500; line-height: 1.3;
         }
         .modal-omie-action:hover { background: #e2e8f0; color: #1e293b; transform: translateX(2px); }
@@ -773,9 +776,7 @@
                     </div>
                 </div>
                 <div class="header-right">
-                    <button class="header-btn" title="Notificações">
-                        <i class="fas fa-bell"></i>
-                    </button>
+
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -1385,10 +1386,14 @@
         function atualizarEstatisticas() {
             const total = todosClientes.length;
             const ativos = todosClientes.filter(c => c.ativo === 1 || c.ativo === true).length;
-            document.getElementById('totalClientes').textContent = total;
-            document.getElementById('clientesAtivos').textContent = ativos;
-            document.getElementById('clientesInativos').textContent = total - ativos;
-            document.getElementById('clientesPJ').textContent = todosClientes.filter(c => (c.cnpj && c.cnpj.length > 0) || (c.cnpj_cpf && c.cnpj_cpf.length >= 14)).length;
+            const elTotal = document.getElementById('totalClientes');
+            if (elTotal) elTotal.textContent = total;
+            const elAtivos = document.getElementById('clientesAtivos');
+            if (elAtivos) elAtivos.textContent = ativos;
+            const elInativos = document.getElementById('clientesInativos');
+            if (elInativos) elInativos.textContent = total - ativos;
+            const elPJ = document.getElementById('clientesPJ');
+            if (elPJ) elPJ.textContent = todosClientes.filter(c => (c.cnpj && c.cnpj.length > 0) || (c.cnpj_cpf && c.cnpj_cpf.length >= 14)).length;
         }
 
         function getIniciais(nome) {
@@ -1419,9 +1424,12 @@
         }
 
         function filtrarClientes() {
-            const busca = document.getElementById('searchInput').value.toLowerCase();
-            const statusFiltro = document.getElementById('filterStatus').value;
-            const limitSelect = document.getElementById('filterLimit').value;
+            const elSearch = document.getElementById('searchInput');
+            const elStatus = document.getElementById('filterStatus');
+            const elLimit = document.getElementById('filterLimit');
+            const busca = elSearch ? elSearch.value.toLowerCase() : '';
+            const statusFiltro = elStatus ? elStatus.value : '';
+            const limitSelect = elLimit ? elLimit.value : '25';
             itensPorPagina = limitSelect === 'all' ? 9999 : parseInt(limitSelect);
             paginaAtual = 1;
             clientesFiltrados = todosClientes.filter(cliente => {
@@ -1434,12 +1442,13 @@
 
         function renderizarTabela() {
             const tbody = document.getElementById('clientesTableBody');
+            if (!tbody) return;
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = Math.min(inicio + itensPorPagina, clientesFiltrados.length);
             const clientesPagina = clientesFiltrados.slice(inicio, fim);
             if (!clientesPagina.length) {
                 tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><i class="fas fa-users-slash"></i><h3>Nenhum cliente encontrado</h3><p>Tente alterar os filtros</p></div></td></tr>`;
-                document.getElementById('paginationContainer').style.display = 'none';
+                const pagC = document.getElementById('paginationContainer'); if (pagC) pagC.style.display = 'none';
                 return;
             }
             tbody.innerHTML = clientesPagina.map(c => `
@@ -1460,16 +1469,18 @@
 
         function atualizarPaginacao(inicio, fim) {
             const container = document.getElementById('paginationContainer');
+            if (!container) return;
             container.style.display = 'flex';
-            document.getElementById('paginationInfo').textContent = `Exibindo ${inicio + 1}-${fim} de ${clientesFiltrados.length} clientes`;
+            const elPagInfo = document.getElementById('paginationInfo');
+            if (elPagInfo) elPagInfo.textContent = `Exibindo ${inicio + 1}-${fim} de ${clientesFiltrados.length} clientes`;
             const totalPaginas = Math.ceil(clientesFiltrados.length / itensPorPagina);
-            if (totalPaginas <= 1) { document.getElementById('paginationButtons').innerHTML = ''; return; }
+            if (totalPaginas <= 1) { const pb = document.getElementById('paginationButtons'); if (pb) pb.innerHTML = ''; return; }
             let html = `<button class="page-btn" onclick="mudarPagina(${paginaAtual - 1})" ${paginaAtual === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
             for (let i = Math.max(1, paginaAtual - 2); i <= Math.min(totalPaginas, paginaAtual + 2); i++) {
                 html += `<button class="page-btn ${i === paginaAtual ? 'active' : ''}" onclick="mudarPagina(${i})">${i}</button>`;
             }
             html += `<button class="page-btn" onclick="mudarPagina(${paginaAtual + 1})" ${paginaAtual === totalPaginas ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
-            document.getElementById('paginationButtons').innerHTML = html;
+            const elPaginationBtns = document.getElementById('paginationButtons'); if (elPaginationBtns) elPaginationBtns.innerHTML = html;
         }
 
         function mudarPagina(p) { const t = Math.ceil(clientesFiltrados.length / itensPorPagina); if (p >= 1 && p <= t) { paginaAtual = p; renderizarTabela(); } }
@@ -1524,25 +1535,7 @@
             // Reset resumo
             resumoCarregado = false;
             // Limpar todos os campos
-            document.getElementById('clienteId').value = '';
-            document.getElementById('clienteNome').value = '';
-            document.getElementById('clienteFantasia').value = '';
-            document.getElementById('clienteCnpj').value = '';
-            document.getElementById('clienteDDD').value = '';
-            document.getElementById('clienteTelefone').value = '';
-            document.getElementById('clienteContato').value = '';
-            document.getElementById('clienteEndereco').value = '';
-            document.getElementById('clienteNumero').value = '';
-            document.getElementById('clienteComplemento').value = '';
-            document.getElementById('clienteBairro').value = '';
-            document.getElementById('clienteCidade').value = '';
-            document.getElementById('clienteUF').value = '';
-            document.getElementById('clienteCep').value = '';
-            document.getElementById('clienteEmail').value = '';
-            document.getElementById('clienteWebsite').value = '';
-            document.getElementById('clienteIE').value = '';
-            document.getElementById('clienteIM').value = '';
-            document.getElementById('clienteLimiteCredito').value = '';
+            ['clienteId','clienteNome','clienteFantasia','clienteCnpj','clienteDDD','clienteTelefone','clienteContato','clienteEndereco','clienteNumero','clienteComplemento','clienteBairro','clienteCidade','clienteUF','clienteCep','clienteEmail','clienteWebsite','clienteIE','clienteIM','clienteLimiteCredito'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
             
             // Reset avatar
             atualizarAvatarModal('Novo Cliente');
@@ -1579,7 +1572,7 @@
             document.getElementById('clienteId').value = cliente.id;
             document.getElementById('clienteNome').value = cliente.nome || '';
             document.getElementById('clienteFantasia').value = cliente.nome_fantasia || cliente.fantasia || '';
-            document.getElementById('clienteCnpj').value = cliente.cnpj || '';
+            document.getElementById('clienteCnpj').value = cliente.cnpj || cliente.cnpj_cpf || '';
             
             // Separar DDD do telefone se necessário
             const telefone = cliente.telefone || '';
@@ -1618,7 +1611,7 @@
             document.getElementById('clienteIM').value = cliente.inscricao_municipal || '';
             
             // Aba Faturamento
-            document.getElementById('clienteLimiteCredito').value = cliente.limite_credito || '';
+            document.getElementById('clienteLimiteCredito').value = cliente.credito_total || cliente.limite_credito || '';
             
             // Dados Bancários
             if (document.getElementById('clienteFax')) document.getElementById('clienteFax').value = cliente.fax || '';
@@ -1626,7 +1619,7 @@
             if (document.getElementById('clienteEnviarAnexos')) document.getElementById('clienteEnviarAnexos').checked = cliente.enviar_anexos !== 0;
             if (document.getElementById('clienteBanco')) document.getElementById('clienteBanco').value = cliente.banco || '';
             if (document.getElementById('clienteAgencia')) document.getElementById('clienteAgencia').value = cliente.agencia || '';
-            if (document.getElementById('clienteConta')) document.getElementById('clienteConta').value = cliente.conta || '';
+            if (document.getElementById('clienteConta')) document.getElementById('clienteConta').value = cliente.conta || cliente.conta_corrente || '';
             if (document.getElementById('clientePix')) document.getElementById('clientePix').value = cliente.pix || '';
             if (document.getElementById('clienteTitularDoc')) document.getElementById('clienteTitularDoc').value = cliente.titular_doc || '';
             if (document.getElementById('clienteTitularNome')) document.getElementById('clienteTitularNome').value = cliente.titular_nome || '';
@@ -2515,10 +2508,10 @@
                 const response = await fetch('/api/me', { credentials: 'include' });
                 if (response.ok) {
                     const user = await response.json();
-                    // Usar apelido se disponível, senão primeiro+último nome
+                    // Usar apelido se disponível, senão primeiro nome
                     const userName = user.apelido || user.nome || 'Usuário';
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
-                    const primeiroNome = user.apelido || (_partesNome.length > 1 ? _partesNome[0] + ' ' + _partesNome[_partesNome.length - 1] : (_partesNome[0] || 'Usuário'));
+                    const primeiroNome = user.apelido || (_partesNome[0] || 'Usuário');
                     // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;
