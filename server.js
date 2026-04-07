@@ -1074,13 +1074,6 @@ app.get('/chat/suporte', (req, res) => {
 
 console.log('💬 Chat BOB AI: Rotas de upload e arquivos estáticos configuradas');
 
-// ============================================================
-// AI PROXY — /api/ai (OPENAI_API_KEY nunca exposta ao frontend)
-// ============================================================
-const aiProxyRouter = require('./routes/ai-proxy');
-app.use('/api/ai', (req, res, next) => authenticateToken(req, res, next), aiProxyRouter);
-console.log('🤖 AI Proxy: Rota /api/ai/chat montada');
-
 // 🔄 CHAT WIDGET: No-cache para widget.css e widget.js (mudanças frequentes)
 app.use('/chat', (req, res, next) => {
     const lp = req.path.toLowerCase();
@@ -1439,24 +1432,10 @@ app.use('/modules/PCP', express.static(path.join(__dirname, 'modules', 'PCP'), {
     }
 }));
 
-// FRENTE-4 FIX: setHeaders para MIME types explícitos em todos os módulos
-const moduleStaticOpts = (res, filePath) => {
-    if (filePath.endsWith('.css'))       res.setHeader('Content-Type', 'text/css; charset=utf-8');
-    else if (filePath.endsWith('.js'))   res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-    else if (filePath.endsWith('.html')) res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    else if (filePath.endsWith('.png'))  res.setHeader('Content-Type', 'image/png');
-    else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) res.setHeader('Content-Type', 'image/jpeg');
-    else if (filePath.endsWith('.svg'))  res.setHeader('Content-Type', 'image/svg+xml');
-    else if (filePath.endsWith('.woff2')) res.setHeader('Content-Type', 'font/woff2');
-    else if (filePath.endsWith('.woff')) res.setHeader('Content-Type', 'font/woff');
-};
-const mso = { dotfiles: 'deny', index: false, setHeaders: moduleStaticOpts };
-
 const nfeStaticOptions = {
     dotfiles: 'deny',
     index: false,
     setHeaders: (res, filePath) => {
-        moduleStaticOpts(res, filePath);
         if (filePath.endsWith('.html')) {
             res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
             res.setHeader('Pragma', 'no-cache');
@@ -1515,14 +1494,11 @@ app.get('/templates/:file', (req, res) => {
     });
 });
 
-app.use('/Financeiro/js', express.static(path.join(__dirname, 'modules', 'Financeiro', 'js'), mso));
-app.use('/Financeiro/css', express.static(path.join(__dirname, 'modules', 'Financeiro', 'css'), mso));
-app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), mso));
-app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), mso));
-app.use('/Logistica/css', express.static(path.join(__dirname, 'modules', 'Faturamento', 'css'), mso));
-app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Faturamento', 'public'), mso));
-app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
-app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), mso));
+app.use('/Financeiro', express.static(path.join(__dirname, 'modules', 'Financeiro', 'public'), { dotfiles: 'deny', index: false }));
+app.use('/Compras', express.static(path.join(__dirname, 'modules', 'Compras'), { dotfiles: 'deny', index: false }));
+app.use('/Logistica', express.static(path.join(__dirname, 'modules', 'Faturamento', 'public'), { dotfiles: 'deny', index: false }));
+app.use('/RecursosHumanos', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
+app.use('/RH', express.static(path.join(__dirname, 'modules', 'RH', 'public'), { dotfiles: 'deny', index: false }));
 
 // Servir arquivos compartilhados dos módulos
 app.use('/_shared', express.static(path.join(__dirname, 'modules', '_shared'), { dotfiles: 'deny', index: false }));
