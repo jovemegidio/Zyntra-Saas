@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="../css/faturamento-layout.css?v=20260220">
+    <link rel="stylesheet" href="css/faturamento-layout.css?v=20260220">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
     <link rel="stylesheet" href="/css/skeleton-loader.css">
@@ -41,7 +41,6 @@
                 <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
                 <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
                 <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
-                <a href="logistica.html" class="sidebar-btn" title="Logística & Expedição"><i class="fas fa-truck"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
@@ -58,7 +57,7 @@
                             style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento & Logística</span>
+                        <span style="color:rgba(255,255,255,0.3);font-size:12px;margin-left:4px;">— Faturamento</span>
                     </div>
                 </div>
                 <div class="header-right">
@@ -242,13 +241,27 @@
             try {
                 const r = await fetch('/api/faturamento/estatisticas', { credentials: 'include' });
                 if (r.ok) {
-                    const d = await r.json();
-                    document.getElementById('statTotal').textContent = d.total || 0;
-                    document.getElementById('statAutorizadas').textContent = d.autorizadas || 0;
-                    document.getElementById('statPendentes').textContent = d.pendentes || 0;
-                    document.getElementById('statValor').textContent = formatarMoeda(d.valor_total);
+                    const resp = await r.json();
+                    // Suporte ao formato { success: true, data: {...} } e formato direto
+                    const d = resp.data || resp;
+                    document.getElementById('statTotal').textContent = d.total_nfes ?? d.total ?? 0;
+                    document.getElementById('statAutorizadas').textContent = d.autorizadas ?? 0;
+                    document.getElementById('statPendentes').textContent = d.pendentes ?? 0;
+                    document.getElementById('statValor').textContent = formatarMoeda(d.valor_total_faturado ?? d.valor_total ?? 0);
+                } else {
+                    console.warn('Estatísticas indisponíveis (HTTP ' + r.status + ')');
+                    document.getElementById('statTotal').textContent = '-';
+                    document.getElementById('statAutorizadas').textContent = '-';
+                    document.getElementById('statPendentes').textContent = '-';
+                    document.getElementById('statValor').textContent = '-';
                 }
-            } catch (e) { console.error('Erro ao carregar estatísticas:', e); }
+            } catch (e) {
+                console.error('Erro ao carregar estatísticas:', e);
+                document.getElementById('statTotal').textContent = '-';
+                document.getElementById('statAutorizadas').textContent = '-';
+                document.getElementById('statPendentes').textContent = '-';
+                document.getElementById('statValor').textContent = '-';
+            }
         }
 
         async function carregarNFes() {
@@ -256,12 +269,21 @@
                 const status = document.getElementById('filtroStatus').value;
                 const inicio = document.getElementById('filtroDataInicio').value;
                 const fim = document.getElementById('filtroDataFim').value;
-                const r = await fetch(`/api/faturamento/nfes?status=${status}&data_inicio=${inicio}&data_fim=${fim}`, { credentials: 'include' });
+                const r = await fetch(`/api/faturamento/nfes?status=${encodeURIComponent(status)}&data_inicio=${encodeURIComponent(inicio)}&data_fim=${encodeURIComponent(fim)}`, { credentials: 'include' });
                 if (r.ok) {
-                    const nfes = await r.json();
-                    renderizarNFes(Array.isArray(nfes) ? nfes : nfes.data || []);
+                    const resp = await r.json();
+                    const nfes = Array.isArray(resp) ? resp : (resp.data || resp.nfes || []);
+                    renderizarNFes(nfes);
+                } else {
+                    console.warn('NF-es indisponíveis (HTTP ' + r.status + ')');
+                    const tbody = document.getElementById('nfesList');
+                    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Dados indisponíveis</h3><p>Não foi possível carregar as NF-es no momento.</p></div></td></tr>';
                 }
-            } catch (e) { console.error('Erro:', e); }
+            } catch (e) {
+                console.error('Erro ao carregar NF-es:', e);
+                const tbody = document.getElementById('nfesList');
+                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><h3>Erro de conexão</h3><p>Não foi possível carregar as NF-es.</p></div></td></tr>';
+            }
         }
 
         function renderizarNFes(nfes) {

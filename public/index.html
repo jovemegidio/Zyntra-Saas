@@ -1983,12 +1983,21 @@
                 </div>
             </a>
 
-            <a href="/modules/NFe/index.html" class="module-card nfe" data-area="nfe">
+            <a href="/modules/Faturamento/public/index.html" class="module-card nfe" data-area="nfe">
                 <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
                 <div class="module-icon"><i class="fas fa-file-invoice"></i></div>
                 <div class="module-info">
-                    <div class="module-title">Faturamento & Logística</div>
-                    <div class="module-desc">NF-e, expedição e rastreio de entregas</div>
+                    <div class="module-title">Faturamento</div>
+                    <div class="module-desc">NF-e, emissão e gestão fiscal</div>
+                </div>
+            </a>
+
+            <a href="/modules/Logistica/public/index.html" class="module-card logistica" data-area="logistica">
+                <div class="module-arrow"><i class="fas fa-arrow-right"></i></div>
+                <div class="module-icon"><i class="fas fa-truck"></i></div>
+                <div class="module-info">
+                    <div class="module-title">Logística</div>
+                    <div class="module-desc">Expedição, rastreio e entregas</div>
                 </div>
             </a>
 
@@ -2256,10 +2265,6 @@
             window._userAllowedAreas = allowedAreas;
 
             // Aplicar permissões (usa setProperty com !important para vencer CSS)
-            // Mapear 'logistica' -> 'nfe' (módulo unificado Faturamento & Logística)
-            if (allowedAreas.includes('logistica') && !allowedAreas.includes('nfe')) {
-                allowedAreas.push('nfe');
-            }
             document.querySelectorAll('.module-card').forEach(card => {
                 const area = card.dataset.area;
                 if (area && !allowedAreas.includes(area.toLowerCase())) {
