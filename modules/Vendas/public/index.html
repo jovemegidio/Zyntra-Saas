@@ -6199,7 +6199,11 @@
                                 <label><i class="fas fa-truck" style="color: #f97316;"></i> Transportadora</label>
                                 <div style="display: flex; gap: 6px; align-items: center;">
                                     <input type="text" id="edit-transportadora"
-                                        placeholder="Digite para buscar transportadora..." autocomplete="off" style="flex:1;">
+                                        placeholder="Digite para buscar transportadora..." autocomplete="off" style="flex:1;"
+                                        list="transportadora-presets">
+                                    <datalist id="transportadora-presets">
+                                        <option value="A definir">
+                                    </datalist>
                                     <button type="button" onclick="abrirModalNovaTransportadora()" title="Cadastrar nova transportadora"
                                         style="width:36px;height:36px;border-radius:8px;border:1.5px solid #3b82f6;background:#eff6ff;color:#3b82f6;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                         <i class="fas fa-plus"></i>
@@ -7456,7 +7460,11 @@
                                     <div class="input-with-btn">
                                         <input type="text" id="novo-transportadora" placeholder=""
                                             class="orcamento-input" autocomplete="off"
-                                            oninput="buscarTransportadoraAutocompleteNovo(this.value)">
+                                            oninput="buscarTransportadoraAutocompleteNovo(this.value)"
+                                            list="novo-transportadora-presets" value="A definir">
+                                        <datalist id="novo-transportadora-presets">
+                                            <option value="A definir">
+                                        </datalist>
                                         <button type="button" class="btn-input-action"><i
                                                 class="fas fa-search"></i></button>
                                     </div>
@@ -12325,58 +12333,58 @@
 <title>${d.nomeArquivo}</title>
 <style>
 :root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}
-@page{margin:10mm;size:A4}
-@media print{@page{margin:10mm}html,body{margin:0;padding:0}body::before,body::after{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}
+@page{margin:6mm;size:A4}
+@media print{@page{margin:6mm}html,body{margin:0;padding:0}body::before,body::after{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.no-print{display:none!important}}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:10px;line-height:1.4}
-.a4{width:210mm;min-height:297mm;padding:11mm 0}
-.frame{width:184mm;margin:0 auto}
-.shell{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
-.top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:12px}
-.doc{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff}
-.doc-head{padding:12px 14px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%)}
-.head-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;align-items:start}
-.brand-wrap{display:flex;align-items:center;gap:10px;margin-bottom:6px}
-.logo-box{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 72%,var(--accent) 100%);flex:0 0 42px;overflow:hidden}
-.logo-box img{width:42px;height:42px;object-fit:contain}
-.brand-name{margin:0;color:var(--brand);font-size:17px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
-.brand-sub{color:var(--muted);font-size:8px;letter-spacing:.12em;text-transform:uppercase}
-.headline{margin:0;color:var(--ink);font-size:16px;font-weight:900}
-.subtitle{color:var(--muted);font-size:9.5px;margin-top:4px}
-.doc-card{margin:10px 14px;border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:10px 14px}
-.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px}
-.meta-item{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
-.meta-item .lbl{font-size:7px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
-.meta-item .val{font-size:10px;color:var(--ink);font-weight:600}
-.doc-body{padding:14px}
-.section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:12px}
-.s-head{background:var(--brand);color:#fff;padding:7px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;display:flex;justify-content:space-between;align-items:center}
-.s-head .badge{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:8px;font-size:8px}
-.s-body{padding:12px 14px}
-.cliente-nome{font-size:12px;font-weight:800;color:var(--ink);text-transform:uppercase;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--line)}
-.cliente-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 28px}
-.cli-field{display:flex;font-size:9.5px}
-.cli-field .lbl{color:var(--muted);font-weight:700;min-width:68px;text-transform:uppercase;font-size:8.5px}
+body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:9px;line-height:1.35}
+.a4{width:210mm;max-height:297mm;padding:6mm 0;overflow:hidden}
+.frame{width:194mm;margin:0 auto}
+.shell{background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:5mm}
+.top-rule{height:4px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:8px}
+.doc{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.doc-head{padding:10px 12px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,#fff 0%,#f8fcfe 100%)}
+.head-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:10px;align-items:start}
+.brand-wrap{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.logo-box{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 72%,var(--accent) 100%);flex:0 0 36px;overflow:hidden}
+.logo-box img{width:36px;height:36px;object-fit:contain}
+.brand-name{margin:0;color:var(--brand);font-size:15px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.brand-sub{color:var(--muted);font-size:7.5px;letter-spacing:.12em;text-transform:uppercase}
+.headline{margin:0;color:var(--ink);font-size:14px;font-weight:900}
+.subtitle{color:var(--muted);font-size:9px;margin-top:3px}
+.doc-card{margin:8px 12px;border:1px solid var(--accent);border-radius:12px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:8px 12px}
+.meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.meta-item{background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:6px 8px}
+.meta-item .lbl{font-size:6.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px}
+.meta-item .val{font-size:9px;color:var(--ink);font-weight:600}
+.doc-body{padding:10px 12px}
+.section-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:8px}
+.s-head{background:var(--brand);color:#fff;padding:5px 12px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;display:flex;justify-content:space-between;align-items:center}
+.s-head .badge{background:rgba(255,255,255,.2);padding:2px 6px;border-radius:6px;font-size:7px}
+.s-body{padding:8px 12px}
+.cliente-nome{font-size:11px;font-weight:800;color:var(--ink);text-transform:uppercase;padding-bottom:6px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.cliente-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px 24px}
+.cli-field{display:flex;font-size:8.5px}
+.cli-field .lbl{color:var(--muted);font-weight:700;min-width:62px;text-transform:uppercase;font-size:8px}
 .cli-field .val{color:var(--ink);font-weight:500}
 .items-table{width:100%;border-collapse:collapse}
-.items-table th{background:var(--brand);color:#fff;padding:7px 8px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:left}
-.items-table td{padding:6px 8px;font-size:9px;border-bottom:1px solid var(--line)}
+.items-table th{background:var(--brand);color:#fff;padding:5px 6px;font-size:7.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:left}
+.items-table td{padding:4px 6px;font-size:8.5px;border-bottom:1px solid var(--line)}
 .items-table .tc{text-align:center}.items-table .tr{text-align:right}
-.totals-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:260px;margin-left:auto}
-.totals-row{display:flex;justify-content:space-between;padding:6px 14px;font-size:9.5px;border-bottom:1px solid var(--line)}
+.totals-card{border:1px solid var(--line);border-radius:12px;overflow:hidden;min-width:240px;margin-left:auto}
+.totals-row{display:flex;justify-content:space-between;padding:4px 12px;font-size:8.5px;border-bottom:1px solid var(--line)}
 .totals-row .lbl{color:var(--muted);font-weight:600}.totals-row .val{color:var(--ink);font-weight:600}
 .totals-row.neg .val{color:#dc2626}
-.totals-row.grand{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:10px 14px}
-.totals-row.grand .lbl{color:#fff;font-size:12px;font-weight:800}
-.totals-row.grand .val{color:#fff;font-size:14px;font-weight:900}
+.totals-row.grand{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:8px 12px}
+.totals-row.grand .lbl{color:#fff;font-size:11px;font-weight:800}
+.totals-row.grand .val{color:#fff;font-size:12px;font-weight:900}
 .cond-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0}
-.cond-item{padding:8px 12px;border-right:1px solid var(--line)}
+.cond-item{padding:6px 10px;border-right:1px solid var(--line)}
 .cond-item:last-child{border-right:none}
-.cond-item .lbl{font-size:7.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
-.cond-item .val{font-size:10px;color:var(--ink);font-weight:600}
-.obs-content{padding:10px 14px;font-size:9.5px;color:var(--text);line-height:1.5;background:var(--accent-soft)}
-.footer-band{margin-top:14px;padding-top:8px;border-top:1px dashed var(--line);font-size:7.5px;color:var(--muted);text-align:center;line-height:1.8}
-.footer-band .sep{margin:0 5px;color:var(--line)}
+.cond-item .lbl{font-size:7px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.cond-item .val{font-size:9px;color:var(--ink);font-weight:600}
+.obs-content{padding:8px 12px;font-size:8.5px;color:var(--text);line-height:1.4;background:var(--accent-soft)}
+.footer-band{margin-top:10px;padding-top:6px;border-top:1px dashed var(--line);font-size:7px;color:var(--muted);text-align:center;line-height:1.6}
+.footer-band .sep{margin:0 4px;color:var(--line)}
 </style>
 </head>
 <body>
@@ -12387,7 +12395,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             <div class="head-grid">
                 <div>
                     <div class="brand-wrap">
-                        <img src="/images/Logo Monocromatico - Azul - Aluforce.webp" alt="Zyntra" style="height:42px;object-fit:contain;" onerror="this.outerHTML='<svg width=42 height=42 viewBox=\\'0 0 42 42\\' fill=\\'#0b2842\\'><rect width=\\'42\\' height=\\'42\\' rx=\\'14\\'/><text x=\\'11\\' y=\\'28\\' font-weight=\\'900\\' font-size=\\'20\\' fill=\\'white\\'>Z</text></svg>'">
+                        <img src="/images/Logo Monocromatico - Azul - Aluforce.webp" alt="Zyntra" style="height:36px;object-fit:contain;" onerror="this.outerHTML='<svg width=36 height=36 viewBox=\\'0 0 36 36\\' fill=\\'#0b2842\\'><rect width=\\'36\\' height=\\'36\\' rx=\\'12\\'/><text x=\\'9\\' y=\\'24\\' font-weight=\\'900\\' font-size=\\'18\\' fill=\\'white\\'>Z</text></svg>'">
                         <div>
                             <div class="brand-name">ALUFORCE</div>
                             <div class="brand-sub">${getEmpresaRazao()}</div>
@@ -12464,18 +12472,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 <div class="s-head">Condições Comerciais</div>
                 <div style="padding:0">
                     <div class="cond-grid">
-                        <div class="cond-item"><div class="lbl">Pagamento</div><div class="val">${d.condicao} dias</div></div>
-                        <div class="cond-item"><div class="lbl">Transportadora</div><div class="val">${pedidoAtual.transportadora || '--'}</div></div>
-                        <div class="cond-item"><div class="lbl">Frete</div><div class="val">${d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'}</div></div>
+                        <div class="cond-item"><div class="lbl">Pagamento</div><div class="val">${d.condicao === 'a vista' || d.condicao === 'a_vista' ? 'À Vista' : d.condicao.replace(/_/g, '/') + ' dias'}</div></div>
+                        <div class="cond-item"><div class="lbl">Transportadora</div><div class="val">${pedidoAtual.transportadora || pedidoAtual.transportadora_nome || '--'}</div></div>
+                        <div class="cond-item"><div class="lbl">Frete</div><div class="val">${(function(){ const tf = pedidoAtual.tipo_frete; if (tf === '0' || tf === 0) return 'CIF (Remetente)'; if (tf === '1' || tf === 1) return 'FOB (Destinatário)'; if (tf === '2' || tf === 2) return 'Redespacho'; return d.frete > 0 ? 'R$ ' + d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '--'; })()}</div></div>
                         <div class="cond-item"><div class="lbl">Prazo</div><div class="val">${pedidoAtual.prazo_entrega || 'A combinar'}</div></div>
                     </div>
                 </div>
             </div>
 
-            ${pedidoAtual.observacoes ? `
+            ${(pedidoAtual.observacoes || pedidoAtual.descricao || pedidoAtual.observacao) ? `
             <div class="section-card">
                 <div class="s-head">Observações</div>
-                <div class="obs-content">${pedidoAtual.observacoes}</div>
+                <div class="obs-content">${escaparHTML(pedidoAtual.observacoes || pedidoAtual.descricao || pedidoAtual.observacao || '')}</div>
             </div>` : ''}
         </div>
     </div>
@@ -15557,29 +15565,49 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 const resp = await fetch('/api/vendas/condicoes-pagamento', { credentials: 'include' });
                 if (resp.ok) {
                     const condicoes = await resp.json();
-                    const select = document.getElementById('edit-condicao-pagamento');
-                    if (select && Array.isArray(condicoes) && condicoes.length > 0) {
+                    const hiddenInput = document.getElementById('edit-condicao-pagamento');
+                    if (hiddenInput && Array.isArray(condicoes) && condicoes.length > 0) {
                         // Manter opções padrão e adicionar do banco
                         const existentes = new Set();
-                        Array.from(select.options).forEach(o => existentes.add(o.value));
+                        Array.from(hiddenInput.options || []).forEach(o => existentes.add(o.value));
                         condicoes.forEach(c => {
                             const valor = c.dias || c.nome;
                             if (!existentes.has(valor)) {
                                 const option = document.createElement('option');
                                 option.value = valor;
                                 option.textContent = c.nome;
-                                select.appendChild(option);
+                                hiddenInput.appendChild(option);
                             }
                         });
-                        // Selecionar a condição do pedido
-                        if (condicaoSelecionada) {
-                            select.value = condicaoSelecionada;
-                        }
                     }
                 }
             } catch (e) {
                 // Silencioso - usar opções padrão
             }
+
+            // Sincronizar o select VISÍVEL com o valor do banco
+            if (condicaoSelecionada) {
+                const headerSel = document.getElementById('edit-condicao-pagamento-header');
+                const hiddenInput = document.getElementById('edit-condicao-pagamento');
+                if (hiddenInput) hiddenInput.value = condicaoSelecionada;
+                if (headerSel) {
+                    // Converter formato banco (barras) para formato select (underscores)
+                    const selectValue = condicaoSelecionada === 'a vista' ? 'a_vista' : condicaoSelecionada.replace(/\//g, '_');
+                    // Verificar se a opção existe no select
+                    const optionExists = Array.from(headerSel.options).some(o => o.value === selectValue);
+                    if (optionExists) {
+                        headerSel.value = selectValue;
+                    } else {
+                        // Adicionar a opção dinamicamente
+                        const opt = document.createElement('option');
+                        opt.value = selectValue;
+                        opt.textContent = condicaoSelecionada === 'a vista' ? 'À Vista' : condicaoSelecionada.replace(/\//g, '/') + ' dias';
+                        headerSel.insertBefore(opt, headerSel.querySelector('option[value="personalizado"]'));
+                        headerSel.value = selectValue;
+                    }
+                }
+            }
+
             // Recalcular parcelas com a condição atual
             recalcularParcelasAutomatico();
         }
