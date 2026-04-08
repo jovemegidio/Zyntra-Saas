@@ -492,20 +492,7 @@
                             <option value="vencidas">Vencidas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
-                            <option value="2025-11">Novembro/2025</option>
-                            <option value="2025-12">Dezembro/2025</option>
-                            <option value="2026-01">Janeiro/2026</option>
-                            <option value="2026-02">Fevereiro/2026</option>
-                            <option value="2026-03">Março/2026</option>
-                            <option value="2026-04">Abril/2026</option>
-                            <option value="2026-05">Maio/2026</option>
-                            <option value="2026-06">Junho/2026</option>
-                            <option value="2026-07">Julho/2026</option>
-                            <option value="2026-08">Agosto/2026</option>
-                            <option value="2026-09">Setembro/2026</option>
-                            <option value="2026-10">Outubro/2026</option>
-                            <option value="2026-11">Novembro/2026</option>
-                            <option value="2026-12">Dezembro/2026</option>
+                            <!-- Meses populados dinamicamente via popularFiltrosDinamicos() -->
                         </select>
                     </div>
                     <div class="filter-group">
@@ -795,6 +782,56 @@
                     </div>
                 </div>
 
+                <!-- TAB PANE: OPERAÇÕES -->
+                <div class="tab-pane-view" id="pane-operacoes">
+                    <div style="display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;">
+                        <!-- KPI Cards -->
+                        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;flex-shrink:0;" id="op-kpis"></div>
+                        <!-- Filtros -->
+                        <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 16px;flex-shrink:0;flex-wrap:wrap;">
+                            <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-filter" style="color:#8b5cf6;margin-right:5px;"></i>Filtros</span>
+                            <select id="op-filtro-empresa" onchange="filtrarOperacoes()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                                <option value="">Todas Empresas</option>
+                            </select>
+                            <select id="op-filtro-instituicao" onchange="filtrarOperacoes()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                                <option value="">Todas Instituições</option>
+                            </select>
+                            <select id="op-filtro-tipo" onchange="filtrarOperacoes()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;">
+                                <option value="">Todos Tipos</option>
+                            </select>
+                            <div style="margin-left:auto;font-size:11px;color:#6b7280;" id="op-filtro-info"></div>
+                        </div>
+                        <!-- Table -->
+                        <div class="table-container" style="flex:1;">
+                            <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
+                                <h3 class="table-title"><i class="fas fa-exchange-alt" style="color:#8b5cf6;margin-right:6px;"></i> Operações de Crédito</h3>
+                                <div style="display:flex;gap:8px;align-items:center;">
+                                    <button class="btn btn-success" onclick="abrirModalImportarOp()" style="padding:4px 12px;font-size:11px;border-radius:6px;"><i class="fas fa-file-excel"></i> Importar</button>
+                                    <span style="font-size:11px;color:#6b7280;" id="op-totais"></span>
+                                </div>
+                            </div>
+                            <div style="overflow-x:auto;flex:1;min-height:0;">
+                            <table>
+                                <thead><tr>
+                                    <th>Borderô</th><th>Empresa</th><th>Tipo</th><th>Instituição</th>
+                                    <th>Prorrog.</th><th style="text-align:right">PM</th>
+                                    <th>Data OP</th><th style="text-align:right">Taxa %</th>
+                                    <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">Títulos</th>
+                                    <th style="text-align:right">Dif Monet</th><th style="text-align:right">Tarifas</th>
+                                    <th style="text-align:right">Deduções</th><th style="text-align:right">Líq OP</th>
+                                    <th style="text-align:right">Retenção</th><th style="text-align:right">Recompra</th>
+                                    <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta Gráfica</th>
+                                    <th style="text-align:right">Líq Liberado</th>
+                                </tr></thead>
+                                <tbody id="tabela-operacoes-body">
+                                    <tr><td colspan="19" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
+                                </tbody>
+                            </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- WORKBOOK TABS (bottom, Excel-style) -->
                 <div class="workbook-tabs">
                     <div class="workbook-tab active" data-pane="pane-receber" onclick="switchPane(this)"><span class="tab-dot red"></span> A RECEBER</div>
@@ -805,6 +842,7 @@
                     <div class="workbook-tab" data-pane="pane-diario" onclick="switchPane(this)"><span class="tab-dot red"></span> DIARIO</div>
                     <div class="workbook-tab" data-pane="pane-pm" onclick="switchPane(this)"><span class="tab-dot pink"></span> PM</div>
                     <div class="workbook-tab" data-pane="pane-td" onclick="switchPane(this)"><span class="tab-dot blue"></span> TD</div>
+                    <div class="workbook-tab" data-pane="pane-operacoes" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERAÇÕES</div>
                 </div>
 
             </div><!-- /content-area -->
@@ -1175,15 +1213,24 @@
                 }
             });
 
-            document.getElementById('stat-total').textContent = fmtMoeda(totalAberto);
-            document.getElementById('stat-vencendo').textContent = fmtMoeda(totalAVencer);
-            document.getElementById('stat-vencidas').textContent = fmtMoeda(totalVencido);
-            document.getElementById('stat-recebidas').textContent = fmtMoeda(totalLiquidado);
+            const elTotal = document.getElementById('stat-total');
+            const elVencendo = document.getElementById('stat-vencendo');
+            const elVencidas = document.getElementById('stat-vencidas');
+            const elRecebidas = document.getElementById('stat-recebidas');
+            const elTotalMeta = document.getElementById('stat-total-meta');
+            const elVencendoMeta = document.getElementById('stat-vencendo-meta');
+            const elVencidasMeta = document.getElementById('stat-vencidas-meta');
+            const elRecebidasMeta = document.getElementById('stat-recebidas-meta');
 
-            document.getElementById('stat-total-meta').innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' títulos em aberto';
-            document.getElementById('stat-vencendo-meta').innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' títulos';
-            document.getElementById('stat-vencidas-meta').innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' títulos';
-            document.getElementById('stat-recebidas-meta').innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' títulos';
+            if (elTotal) elTotal.textContent = fmtMoeda(totalAberto);
+            if (elVencendo) elVencendo.textContent = fmtMoeda(totalAVencer);
+            if (elVencidas) elVencidas.textContent = fmtMoeda(totalVencido);
+            if (elRecebidas) elRecebidas.textContent = fmtMoeda(totalLiquidado);
+
+            if (elTotalMeta) elTotalMeta.innerHTML = '<i class="fas fa-layer-group"></i> ' + qtdAberto + ' títulos em aberto';
+            if (elVencendoMeta) elVencendoMeta.innerHTML = '<i class="fas fa-hourglass-half"></i> ' + qtdAVencer + ' títulos';
+            if (elVencidasMeta) elVencidasMeta.innerHTML = '<i class="fas fa-arrow-down"></i> ' + qtdVencido + ' títulos';
+            if (elRecebidasMeta) elRecebidasMeta.innerHTML = '<i class="fas fa-check"></i> ' + qtdLiquidado + ' títulos';
         }
 
         function atualizarResumoComplementar(dados) {
@@ -1306,6 +1353,28 @@
             var clientes = []; contas.forEach(function(c){ if(c.cliente_nome && clientes.indexOf(c.cliente_nome)===-1) clientes.push(c.cliente_nome); }); clientes.sort();
             var selCli = document.getElementById('filtro-cliente-select');
             if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(''); }
+            
+            // Popular meses dinamicamente
+            var selPer = document.getElementById('filtro-período');
+            if (selPer) {
+                // Remover opções de mês anteriores
+                Array.from(selPer.options).forEach(function(opt) { if (/^\d{4}-\d{2}$/.test(opt.value)) opt.remove(); });
+                var mesesSet = {};
+                contas.forEach(function(c) {
+                    var venc = c.data_vencimento || c.vencimento || c.mes_referencia;
+                    if (venc) { var ms = String(venc).slice(0, 7); if (/^\d{4}-\d{2}$/.test(ms)) mesesSet[ms] = true; }
+                    if (c.mes_referencia && /^\d{4}-\d{2}$/.test(c.mes_referencia)) mesesSet[c.mes_referencia] = true;
+                });
+                var anoAtual = new Date().getFullYear();
+                for (var m = 1; m <= 12; m++) mesesSet[anoAtual + '-' + String(m).padStart(2, '0')] = true;
+                var nomesMeses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+                var meses = Object.keys(mesesSet).sort();
+                var sep = document.createElement('option'); sep.disabled = true; sep.textContent = '── Meses ──'; selPer.appendChild(sep);
+                meses.forEach(function(mes) {
+                    var parts = mes.split('-'); var opt = document.createElement('option');
+                    opt.value = mes; opt.textContent = nomesMeses[parseInt(parts[1]) - 1] + '/' + parts[0]; selPer.appendChild(opt);
+                });
+            }
         }
         function setTableView(view) {
             currentView = view;
@@ -2193,6 +2262,140 @@
                 '</tr>');
             tbody.innerHTML = rows.join('');
         }
+    </script>
+
+    <!-- OPERAÇÕES DE CRÉDITO -->
+    <script>
+        var operacoesData = [];
+        var operacoesFiltradas = [];
+
+        async function carregarOperacoes() {
+            try {
+                var response = await fetch('/api/financeiro/operacoes-credito', { credentials: 'include' });
+                var json = await response.json();
+                operacoesData = json.data || [];
+                populaFiltrosOp();
+                filtrarOperacoes();
+            } catch(e) { console.error('Erro ao carregar operações:', e); }
+        }
+
+        function populaFiltrosOp() {
+            var empresas = [...new Set(operacoesData.map(function(o){return o.empresa;}).filter(Boolean))].sort();
+            var instituicoes = [...new Set(operacoesData.map(function(o){return o.instituicao;}).filter(Boolean))].sort();
+            var tipos = [...new Set(operacoesData.map(function(o){return o.tipo_operacao;}).filter(Boolean))].sort();
+
+            var selEmp = document.getElementById('op-filtro-empresa');
+            selEmp.innerHTML = '<option value="">Todas Empresas</option>' + empresas.map(function(e){return '<option value="'+e+'">'+e+'</option>';}).join('');
+            var selInst = document.getElementById('op-filtro-instituicao');
+            selInst.innerHTML = '<option value="">Todas Instituições</option>' + instituicoes.map(function(i){return '<option value="'+i+'">'+i+'</option>';}).join('');
+            var selTipo = document.getElementById('op-filtro-tipo');
+            selTipo.innerHTML = '<option value="">Todos Tipos</option>' + tipos.map(function(t){return '<option value="'+t+'">'+t+'</option>';}).join('');
+        }
+
+        function filtrarOperacoes() {
+            var emp = document.getElementById('op-filtro-empresa').value;
+            var inst = document.getElementById('op-filtro-instituicao').value;
+            var tipo = document.getElementById('op-filtro-tipo').value;
+
+            operacoesFiltradas = operacoesData.filter(function(o) {
+                if (emp && o.empresa !== emp) return false;
+                if (inst && o.instituicao !== inst) return false;
+                if (tipo && o.tipo_operacao !== tipo) return false;
+                return true;
+            });
+
+            renderOperacoes();
+            renderKpisOp();
+        }
+
+        function renderOperacoes() {
+            var tbody = document.getElementById('tabela-operacoes-body');
+            if (!operacoesFiltradas.length) {
+                tbody.innerHTML = '<tr><td colspan="19" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação encontrada</td></tr>';
+                document.getElementById('op-totais').textContent = '';
+                return;
+            }
+
+            var totBruto = 0, totDed = 0, totLiq = 0;
+            var rows = operacoesFiltradas.map(function(o) {
+                totBruto += parseFloat(o.vlr_bruto) || 0;
+                totDed += parseFloat(o.total_deducoes) || 0;
+                totLiq += parseFloat(o.liq_lib) || 0;
+                var dt = o.data_operacao ? new Date(o.data_operacao + 'T12:00:00').toLocaleDateString('pt-BR') : '';
+                var taxa = o.taxa_periodo ? (parseFloat(o.taxa_periodo) * 100).toFixed(2) + '%' : '';
+                return '<tr>' +
+                    '<td style="font-weight:600;color:#374151;">' + (o.bordero || '') + '</td>' +
+                    '<td>' + (o.empresa || '') + '</td>' +
+                    '<td>' + (o.tipo_operacao || '') + '</td>' +
+                    '<td>' + (o.instituicao || '') + '</td>' +
+                    '<td style="text-align:center;">' + (o.prorrogacao || '') + '</td>' +
+                    '<td style="text-align:right;">' + (parseFloat(o.prazo_medio) || 0).toFixed(1) + '</td>' +
+                    '<td>' + dt + '</td>' +
+                    '<td style="text-align:right;color:#6366f1;">' + taxa + '</td>' +
+                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(o.vlr_bruto) + '</td>' +
+                    '<td style="text-align:right;">' + (parseInt(o.qtde_titulos) || 0) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.dif_monet) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.tarifas) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;font-weight:600;">' + fmtMoeda(o.total_deducoes) + '</td>' +
+                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(o.liq_op) + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(o.retencao_passivo) + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(o.recompra) + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(o.amort_fom) + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(o.conta_grafica) + '</td>' +
+                    '<td style="text-align:right;font-weight:700;color:#059669;">' + fmtMoeda(o.liq_lib) + '</td>' +
+                    '</tr>';
+            });
+
+            // Total row
+            rows.push('<tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e5e7eb;">' +
+                '<td colspan="8">Total (' + operacoesFiltradas.length + ' operações)</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totBruto) + '</td>' +
+                '<td colspan="3"></td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totDed) + '</td>' +
+                '<td colspan="5"></td>' +
+                '<td style="text-align:right;color:#059669;">' + fmtMoeda(totLiq) + '</td>' +
+                '</tr>');
+
+            tbody.innerHTML = rows.join('');
+            document.getElementById('op-totais').textContent = operacoesFiltradas.length + ' operações';
+            document.getElementById('op-filtro-info').textContent = operacoesFiltradas.length + ' de ' + operacoesData.length + ' registros';
+        }
+
+        function renderKpisOp() {
+            var d = operacoesFiltradas;
+            var totBruto = d.reduce(function(s,o){return s + (parseFloat(o.vlr_bruto)||0);}, 0);
+            var totDed = d.reduce(function(s,o){return s + (parseFloat(o.total_deducoes)||0);}, 0);
+            var totLiqLib = d.reduce(function(s,o){return s + (parseFloat(o.liq_lib)||0);}, 0);
+            var totRecomp = d.reduce(function(s,o){return s + (parseFloat(o.recompra)||0);}, 0);
+            var pmMedio = d.length ? d.reduce(function(s,o){return s + (parseFloat(o.prazo_medio)||0);}, 0) / d.length : 0;
+
+            var kpi = function(label, valor, cor, icon) {
+                return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;">' +
+                    '<div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">' +
+                    '<i class="fas fa-' + icon + '" style="color:' + cor + ';margin-right:4px;"></i>' + label + '</div>' +
+                    '<div style="font-size:18px;font-weight:800;color:#111827;margin-top:4px;">' + valor + '</div></div>';
+            };
+
+            document.getElementById('op-kpis').innerHTML =
+                kpi('Vlr Bruto', fmtMoeda(totBruto), '#3b82f6', 'money-bill-wave') +
+                kpi('Deduções', fmtMoeda(totDed), '#ef4444', 'minus-circle') +
+                kpi('Líq Liberado', fmtMoeda(totLiqLib), '#22c55e', 'hand-holding-usd') +
+                kpi('Recompra', fmtMoeda(totRecomp), '#f59e0b', 'undo') +
+                kpi('PM Médio', pmMedio.toFixed(1) + ' dias', '#8b5cf6', 'clock');
+        }
+
+        function abrirModalImportarOp() {
+            document.getElementById('arquivo-excel').value = '';
+            document.getElementById('importar-progresso').style.display = 'none';
+            document.getElementById('importar-resultado').style.display = 'none';
+            document.getElementById('btn-importar').disabled = false;
+            document.getElementById('modal-importar').classList.add('active');
+            // Override import to use operacoes endpoint
+            window._importOpMode = true;
+        }
+
+        // Carregar ao iniciar
+        carregarOperacoes();
     </script>
 
     <!-- Tab Pane Switching -->

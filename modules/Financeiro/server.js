@@ -1013,8 +1013,8 @@ app.post('/api/financeiro/contas-receber/:id/baixar', authenticateToken, async (
         }
         const valorSanitizado = Math.round(valorParsed * 100) / 100;
         
-        // AUDITORIA ENTERPRISE: Verificar se conta existe e não está já recebida
-        const [conta] = await connection.execute('SELECT status, valor FROM contas_receber WHERE id = ?', [idParsed]);
+        // AUDIT-FIX R3: FOR UPDATE para evitar race condition de double-payment
+        const [conta] = await connection.execute('SELECT status, valor FROM contas_receber WHERE id = ? FOR UPDATE', [idParsed]);
         if (conta.length === 0) {
             await connection.rollback();
             connection.release();
@@ -1493,8 +1493,8 @@ app.post('/api/financeiro/movimentacoes-bancarias', authenticateToken, async (re
             return res.status(400).json({ error: 'Data inválida (YYYY-MM-DD)' });
         }
         
-        // Buscar saldo atual do banco
-        const [banco] = await connection.execute('SELECT saldo_atual FROM bancos WHERE id = ?', [banco_id]);
+        // AUDIT-FIX R3: FOR UPDATE para evitar race condition no saldo
+        const [banco] = await connection.execute('SELECT saldo_atual FROM bancos WHERE id = ? FOR UPDATE', [banco_id]);
         if (banco.length === 0) {
             await connection.rollback();
             return res.status(404).json({ error: 'Banco não encontrado' });
@@ -1558,9 +1558,9 @@ app.post('/api/financeiro/transferencia-bancaria', authenticateToken, async (req
             return res.status(400).json({ error: 'Data inválida (YYYY-MM-DD)' });
         }
         
-        // Buscar saldos atuais
-        const [origem] = await connection.execute('SELECT saldo_atual, nome FROM bancos WHERE id = ?', [conta_origem]);
-        const [destino] = await connection.execute('SELECT saldo_atual, nome FROM bancos WHERE id = ?', [conta_destino]);
+        // AUDIT-FIX R3: FOR UPDATE para evitar race condition em transferências concorrentes
+        const [origem] = await connection.execute('SELECT saldo_atual, nome FROM bancos WHERE id = ? FOR UPDATE', [conta_origem]);
+        const [destino] = await connection.execute('SELECT saldo_atual, nome FROM bancos WHERE id = ? FOR UPDATE', [conta_destino]);
         
         if (origem.length === 0 || destino.length === 0) {
             await connection.rollback();
@@ -2053,6 +2053,147 @@ async function startServer() {
             } catch (error) {
                 console.error('Erro ao excluir anexo:', error);
                 res.status(500).json({ error: 'Erro ao excluir anexo', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+            }
+        });
+
+        // ========================
+        // OPERAÇÕES DE CRÉDITO
+        // ========================
+
+        // Listar operações de crédito
+        app.get('/api/financeiro/operacoes-credito', authenticateToken, async (req, res) => {
+            try {
+                const [rows] = await pool.execute(
+                    `SELECT * FROM operacoes_credito ORDER BY data_operacao DESC, id DESC`
+                );
+                res.json({ data: rows });
+            } catch (error) {
+                console.error('Erro ao listar operações de crédito:', error);
+                res.status(500).json({ error: 'Erro ao listar operações' });
+            }
+        });
+
+        // Estatísticas operações de crédito
+        app.get('/api/financeiro/operacoes-credito/estatisticas', authenticateToken, async (req, res) => {
+            try {
+                const [rows] = await pool.execute(`
+                    SELECT 
+                        COUNT(*) as total_operacoes,
+                        SUM(vlr_bruto) as total_bruto,
+                        SUM(total_deducoes) as total_deducoes,
+                        SUM(liq_op) as total_liquido_op,
+                        SUM(liq_lib) as total_liquido_lib,
+                        SUM(recompra) as total_recompra,
+                        SUM(retencao_passivo) as total_retencao,
+                        AVG(prazo_medio) as prazo_medio_geral,
+                        AVG(taxa_periodo) as taxa_media
+                    FROM operacoes_credito
+                `);
+                res.json({ data: rows[0] });
+            } catch (error) {
+                console.error('Erro ao obter estatísticas operações:', error);
+                res.status(500).json({ error: 'Erro ao obter estatísticas' });
+            }
+        });
+
+        // Importar operações via Excel (aba OPERAÇÕES)
+        app.post('/api/financeiro/operacoes-credito/importar-excel', authenticateToken, upload.single('arquivo'), async (req, res) => {
+            try {
+                if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+
+                const XLSX = require('xlsx');
+                const workbook = XLSX.readFile(req.file.path);
+
+                // Procura aba OPERAÇÕES
+                const sheetName = workbook.SheetNames.find(s => s.toUpperCase().includes('OPERA')) || workbook.SheetNames[0];
+                const sheet = workbook.Sheets[sheetName];
+                const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+
+                // Detectar header
+                const HEADER_KW = ['BORDERÔ', 'BORDERO', 'EMPRESA', 'VLR_BRUTO', 'INSTITUICAO', 'TIPO OPERACAO'];
+                let headerIdx = 0;
+                for (let i = 0; i < Math.min(rawData.length, 10); i++) {
+                    const rowStr = (rawData[i] || []).map(c => String(c || '')).join('|').toUpperCase();
+                    if (HEADER_KW.filter(kw => rowStr.includes(kw)).length >= 3) { headerIdx = i; break; }
+                }
+                const headers = (rawData[headerIdx] || []).map(h => String(h || '').trim().toUpperCase());
+
+                const COL = {};
+                const MAP = {
+                    'BORDERÔ': 'bordero', 'BORDERO': 'bordero',
+                    'EMPRESA': 'empresa', 'TIPO OPERACAO': 'tipo_operacao',
+                    'INSTITUICAO': 'instituicao', 'PRORROGACAO': 'prorrogacao',
+                    'PRAZO_MEDIO': 'prazo_medio', 'DATA OP': 'data_operacao',
+                    'TAXA PERIODO': 'taxa_periodo', 'TMP': 'tmp',
+                    'VLR_BRUTO': 'vlr_bruto', 'QTDE_TITULOS': 'qtde_titulos',
+                    'DIF_MONET': 'dif_monet', 'TARIFAS': 'tarifas',
+                    'ISS/RISS/IRRF_PERC': 'iss_riss_irrf_perc',
+                    'ISS/RISS/IRRF_MONET': 'iss_riss_irrf_monet',
+                    'IOF': 'iof', 'CPMF_COBR': 'cpmf_cobr',
+                    'TOTAL DEDUCOES': 'total_deducoes', 'LIQ_OP': 'liq_op',
+                    'RETENCAO PASSIVO': 'retencao_passivo', 'RECOMPRA': 'recompra',
+                    'AMORT_FOM': 'amort_fom', 'CONTA GRAFICA': 'conta_grafica',
+                    'LIQ_LIB': 'liq_lib'
+                };
+                for (let i = 0; i < headers.length; i++) {
+                    const mapped = MAP[headers[i]];
+                    if (mapped) COL[mapped] = i;
+                }
+
+                const parseData = (d) => {
+                    if (!d) return null;
+                    if (d instanceof Date) return d.toISOString().slice(0, 10);
+                    if (typeof d === 'number') {
+                        const dt = XLSX.SSF.parse_date_code(d);
+                        if (dt) return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
+                    }
+                    return null;
+                };
+                const num = (v) => (v !== undefined && v !== null && !isNaN(Number(v))) ? Number(v) : 0;
+                const str = (v) => (v !== undefined && v !== null) ? String(v).trim() : '';
+
+                // Limpar anteriores
+                await pool.execute('DELETE FROM operacoes_credito');
+
+                let importados = 0;
+                for (let i = headerIdx + 1; i < rawData.length; i++) {
+                    const row = rawData[i];
+                    if (!row || row.length === 0) continue;
+                    const empresa = str(row[COL.empresa]);
+                    const vlr = num(row[COL.vlr_bruto]);
+                    if (!empresa && !vlr) continue;
+
+                    await pool.execute(
+                        `INSERT INTO operacoes_credito 
+                         (bordero,empresa,tipo_operacao,instituicao,prorrogacao,prazo_medio,
+                          data_operacao,taxa_periodo,tmp,vlr_bruto,qtde_titulos,dif_monet,
+                          tarifas,iss_riss_irrf_perc,iss_riss_irrf_monet,iof,cpmf_cobr,
+                          total_deducoes,liq_op,retencao_passivo,recompra,amort_fom,
+                          conta_grafica,liq_lib)
+                         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+                        [
+                            str(row[COL.bordero]), empresa, str(row[COL.tipo_operacao]),
+                            str(row[COL.instituicao]), str(row[COL.prorrogacao]),
+                            num(row[COL.prazo_medio]), parseData(row[COL.data_operacao]),
+                            num(row[COL.taxa_periodo]), num(row[COL.tmp]),
+                            vlr, parseInt(num(row[COL.qtde_titulos])) || 0,
+                            num(row[COL.dif_monet]), num(row[COL.tarifas]),
+                            num(row[COL.iss_riss_irrf_perc]), num(row[COL.iss_riss_irrf_monet]),
+                            num(row[COL.iof]), num(row[COL.cpmf_cobr]),
+                            num(row[COL.total_deducoes]), num(row[COL.liq_op]),
+                            num(row[COL.retencao_passivo]), num(row[COL.recompra]),
+                            num(row[COL.amort_fom]), num(row[COL.conta_grafica]),
+                            num(row[COL.liq_lib])
+                        ]
+                    );
+                    importados++;
+                }
+
+                try { fs.unlinkSync(req.file.path); } catch(e) {}
+                res.json({ success: true, importados, sheet: sheetName });
+            } catch (error) {
+                console.error('Erro ao importar operações:', error);
+                res.status(500).json({ error: 'Erro ao importar operações' });
             }
         });
 
