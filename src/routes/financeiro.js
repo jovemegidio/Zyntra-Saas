@@ -3393,6 +3393,49 @@ router.get('/operacoes-credito', authenticateToken, authorizeFinanceiro('receber
     }
 });
 
+// PUT /api/financeiro/operacoes-credito/:id — Atualizar operação de crédito
+router.put('/operacoes-credito/:id', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            bordero, empresa, tipo_operacao, instituicao, prorrogacao,
+            prazo_medio, data_operacao, taxa_periodo, tmp,
+            vlr_bruto, qtde_titulos, dif_monet, tarifas,
+            iss_riss_irrf_perc, iss_riss_irrf_monet, iof, cpmf_cobr,
+            total_deducoes, liq_op, retencao_passivo, recompra,
+            amort_fom, conta_grafica, liq_lib
+        } = req.body;
+
+        const [result] = await pool.execute(`
+            UPDATE operacoes_credito SET
+                bordero = ?, empresa = ?, tipo_operacao = ?, instituicao = ?, prorrogacao = ?,
+                prazo_medio = ?, data_operacao = ?, taxa_periodo = ?, tmp = ?,
+                vlr_bruto = ?, qtde_titulos = ?, dif_monet = ?, tarifas = ?,
+                iss_riss_irrf_perc = ?, iss_riss_irrf_monet = ?, iof = ?, cpmf_cobr = ?,
+                total_deducoes = ?, liq_op = ?, retencao_passivo = ?, recompra = ?,
+                amort_fom = ?, conta_grafica = ?, liq_lib = ?
+            WHERE id = ?
+        `, [
+            bordero, empresa, tipo_operacao, instituicao, prorrogacao,
+            prazo_medio || 0, data_operacao || null, taxa_periodo || 0, tmp || 0,
+            vlr_bruto || 0, qtde_titulos || 0, dif_monet || 0, tarifas || 0,
+            iss_riss_irrf_perc || 0, iss_riss_irrf_monet || 0, iof || 0, cpmf_cobr || 0,
+            total_deducoes || 0, liq_op || 0, retencao_passivo || 0, recompra || 0,
+            amort_fom || 0, conta_grafica || 0, liq_lib || 0,
+            id
+        ]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Operação não encontrada' });
+        }
+
+        res.json({ success: true, message: 'Operação atualizada com sucesso' });
+    } catch (error) {
+        console.error('[Operações Crédito PUT] Erro:', error);
+        res.status(500).json({ error: 'Erro ao atualizar operação', details: error.message });
+    }
+});
+
 module.exports = router;
 
 // =============================================

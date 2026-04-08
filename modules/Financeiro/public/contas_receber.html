@@ -403,6 +403,7 @@
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-base')"><span class="tab-color green"></span> BASE</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-resumo')"><span class="tab-color blue"></span> RESUMO</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-faturamento')"><span class="tab-color orange"></span> FATURAMENTO</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-fat-analise')"><span class="tab-color orange"></span> FAT. ANÁLISE</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-disponivel')"><span class="tab-color blue"></span> DISPONIVEL</a>
                 <a href="#" class="workbook-tab active" onclick="switchWorkbookTab(event,'tab-areceber')"><span class="tab-color red"></span> A RECEBER</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-diario')"><span class="tab-color green"></span> DIARIO</a>
@@ -895,6 +896,62 @@
                     </table></div></div>
                 </div><!-- /tab-td -->
             </div>
+        <!-- Modal Editar Operação -->
+        <div class="modal-overlay-omie" id="modalEditarOperacao" onclick="if(event.target===this) fecharModalOperacao()" style="display:none;">
+            <div class="modal-omie" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;border-radius:16px;padding:0;">
+                <div style="padding:16px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
+                    <h3 style="margin:0;font-size:16px;font-weight:700;"><i class="fas fa-edit" style="margin-right:8px;"></i>Editar Operação de Crédito</h3>
+                    <button onclick="fecharModalOperacao()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="padding:24px;">
+                    <input type="hidden" id="op-edit-id">
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Borderô</label><input class="filter-input" id="op-edit-bordero" style="width:100%;"></div>
+                        <div class="filter-group"><label>Empresa</label><input class="filter-input" id="op-edit-empresa" style="width:100%;"></div>
+                        <div class="filter-group"><label>Tipo Operação</label><input class="filter-input" id="op-edit-tipo-operacao" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Instituição</label><input class="filter-input" id="op-edit-instituicao" style="width:100%;"></div>
+                        <div class="filter-group"><label>Prorrogação</label><input class="filter-input" id="op-edit-prorrogacao" style="width:100%;"></div>
+                        <div class="filter-group"><label>Prazo Médio</label><input type="number" class="filter-input" id="op-edit-prazo-medio" step="0.01" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Data Operação</label><input type="date" class="filter-input" id="op-edit-data-operacao" style="width:100%;"></div>
+                        <div class="filter-group"><label>Taxa Período (%)</label><input type="number" class="filter-input" id="op-edit-taxa-periodo" step="0.0001" style="width:100%;"></div>
+                        <div class="filter-group"><label>TMP (%)</label><input type="number" class="filter-input" id="op-edit-tmp" step="0.0001" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Valor Bruto</label><input type="number" class="filter-input" id="op-edit-vlr-bruto" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Qtde Títulos</label><input type="number" class="filter-input" id="op-edit-qtde-titulos" style="width:100%;"></div>
+                        <div class="filter-group"><label>Dif. Monetária</label><input type="number" class="filter-input" id="op-edit-dif-monet" step="0.01" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Tarifas</label><input type="number" class="filter-input" id="op-edit-tarifas" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>ISS/RISS/IRRF %</label><input type="number" class="filter-input" id="op-edit-iss-perc" step="0.0001" style="width:100%;"></div>
+                        <div class="filter-group"><label>ISS/RISS/IRRF R$</label><input type="number" class="filter-input" id="op-edit-iss-monet" step="0.01" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>IOF</label><input type="number" class="filter-input" id="op-edit-iof" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>CPMF/Cobr.</label><input type="number" class="filter-input" id="op-edit-cpmf-cobr" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Total Deduções</label><input type="number" class="filter-input" id="op-edit-total-deducoes" step="0.01" style="width:100%;background:#fef2f2;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+                        <div class="filter-group"><label>Líq. Operação</label><input type="number" class="filter-input" id="op-edit-liq-op" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Retenção Passivo</label><input type="number" class="filter-input" id="op-edit-retencao-passivo" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Recompra</label><input type="number" class="filter-input" id="op-edit-recompra" step="0.01" style="width:100%;"></div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
+                        <div class="filter-group"><label>Amort. FOM</label><input type="number" class="filter-input" id="op-edit-amort-fom" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Conta Gráfica</label><input type="number" class="filter-input" id="op-edit-conta-grafica" step="0.01" style="width:100%;"></div>
+                        <div class="filter-group"><label>Líq. Liberado</label><input type="number" class="filter-input" id="op-edit-liq-lib" step="0.01" style="width:100%;font-weight:700;background:#ecfdf5;"></div>
+                    </div>
+                    <div style="display:flex;gap:12px;justify-content:flex-end;">
+                        <button onclick="fecharModalOperacao()" style="padding:10px 20px;background:#f1f5f9;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;">Cancelar</button>
+                        <button onclick="salvarOperacao()" style="padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:8px;font-size:13px;font-weight:600;color:white;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-save"></i> Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         </main>
     </div>
     <!-- Modal Omie - Conta a Receber -->
@@ -1850,6 +1907,7 @@
             if (tabId === 'tab-diario') renderizarDiarioTab();
             if (tabId === 'tab-operacoes') carregarOperacoesPub();
             if (tabId === 'tab-td') renderizarTDTab();
+            if (tabId === 'tab-fat-analise') renderizarFatAnalise();
             if (tabId === 'tab-base') carregarBase();
             if (tabId === 'tab-resumo') renderizarResumoTab();
             if (tabId === 'tab-faturamento') renderizarFaturamentoTab();
@@ -1857,6 +1915,7 @@
             if (tabId === 'tab-diario') renderizarDiarioTab();
             if (tabId === 'tab-operacoes') { carregarOperacoesPub(); }
             if (tabId === 'tab-td') renderizarTDTab();
+            if (tabId === 'tab-fat-analise') renderizarFatAnalise();
         }
 
         // Dev Spec 1.3: Simulador de Prazo Médio
@@ -2025,16 +2084,47 @@
         }
 
         function renderizarFaturamentoTab() {
-            var lista = contas.filter(function(c) { var st = String(c.status||'').toLowerCase(); return st !== 'cancelada' && st !== 'cancelado'; });
+            var filtroEmpresa = (document.getElementById('fat-filtro-empresa') || {}).value || '';
+            var filtroTipo = (document.getElementById('fat-filtro-tipo') || {}).value || '';
+            var busca = (document.getElementById('fat-busca') || {}).value.toLowerCase().trim();
+
+            var lista = contas.filter(function(c) {
+                var st = String(c.status||'').toLowerCase();
+                if (st === 'cancelada' || st === 'cancelado') return false;
+                if (filtroEmpresa && (c.empresa||'').toUpperCase().indexOf(filtroEmpresa) === -1) return false;
+                var tipo = (c.categoria||c.tipo||'').toUpperCase().trim();
+                if (filtroTipo === 'NF' && tipo !== 'NF') return false;
+                if (filtroTipo === 'F9' && tipo !== 'F9') return false;
+                if (busca) {
+                    var haystack = [c.nota_fiscal, c.cliente_nome, c.cnpj_cpf, c.cnpj_empresa, c.empresa, c.data_emissao, c.data_vencimento, c.vencimento, c.portador, c.vendedor, c.parcela_info].join('|').toLowerCase();
+                    if (haystack.indexOf(busca) === -1) return false;
+                }
+                return true;
+            });
+            // Sort by empresa group
+            var empresaOrder = {'ALUFORCE':1,'LABOR':2,'ENERGY':3};
+            lista.sort(function(a,b) {
+                var ea = empresaOrder[(a.empresa||'').toUpperCase().trim()] || 99;
+                var eb = empresaOrder[(b.empresa||'').toUpperCase().trim()] || 99;
+                if (ea !== eb) return ea - eb;
+                var da = a.data_vencimento || a.vencimento || '';
+                var db = b.data_vencimento || b.vencimento || '';
+                return da < db ? -1 : da > db ? 1 : 0;
+            });
             var totalVal = 0; lista.forEach(function(c){ totalVal += parseFloat(c.valor_total||c.valor||0)||0; });
             var spanTotais = document.getElementById('fat-totais-pub');
             if(spanTotais) spanTotais.textContent = lista.length + ' registros | Total: ' + fmtMoeda(totalVal);
+            var infoEl = document.getElementById('fat-filtro-info');
+            if(infoEl) infoEl.textContent = lista.length + ' de ' + contas.length + ' registros';
             var body = document.getElementById('tab-faturamento-body');
-            if(!lista.length) { body.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            if(!lista.length) { body.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado encontrado</td></tr>'; return; }
             var badges = {'pendente':'Pendente','a_vencer':'A Vencer','a vencer':'A Vencer','recebido':'Recebido','pago':'Recebido','liquidada':'Liquidada','liquidado':'Liquidado','vencida':'Vencida','vencido':'Vencido','parcial':'Parcial'};
+            var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
             body.innerHTML = lista.map(function(c) {
                 var dias = parseInt(c.dias_vencido)||0; var diasStyle = dias>0?'color:#dc2626;font-weight:700;':''; var st = String(c.status||'').toLowerCase();
-                return '<tr><td>'+_escFin(c.empresa||'-')+'</td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td>'+_escFin(c.cliente_nome||'-')+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(c.valor_total||c.valor)+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.situacao||'-')+'</td><td>'+_escFin(c.portador||'-')+'</td><td>'+(badges[st]||st)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td><td>'+_escFin(c.posicao||'-')+'</td></tr>';
+                var empUpper = (c.empresa||'').toUpperCase().trim();
+                var empColor = empresaColors[empUpper] || '#374151';
+                return '<tr><td><strong style="color:'+empColor+';">'+_escFin(c.empresa||'-')+'</strong></td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td>'+_escFin(c.cliente_nome||'-')+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(c.valor_total||c.valor)+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.situacao||'-')+'</td><td>'+_escFin(c.portador||'-')+'</td><td>'+(badges[st]||st)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td><td>'+_escFin(c.posicao||'-')+'</td></tr>';
             }).join('');
         }
 
@@ -2208,6 +2298,128 @@
             var totalAV=0,totalVenc=0,totalLiq=0,totalGeral=0;
             body.innerHTML = pKeys.map(function(k){ var it=porPeriodo[k]; totalAV+=it.aVencer; totalVenc+=it.vencido; totalLiq+=it.liquidado; totalGeral+=it.total; return '<tr><td><strong>'+it.nome+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td></tr>'; }).join('');
             body.innerHTML += '<tr style="background:#f0fdf4;font-weight:700;"><td>TOTAL</td><td style="text-align:right;">'+fmtMoeda(totalAV)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(totalVenc)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalLiq)+'</td><td style="text-align:right;">'+fmtMoeda(totalGeral)+'</td></tr>';
+        }
+
+
+        // ======= FAT. ANÁLISE - NF vs F9 =======
+        function renderizarFatAnalise() {
+            var lista = contas.filter(function(c) { var st = String(c.status||'').toLowerCase(); return st !== 'cancelada' && st !== 'cancelado'; });
+            var totais = {nfQtd:0,nfVal:0,f9Qtd:0,f9Val:0,totalQtd:0,totalVal:0};
+            var porEmpresa = {};
+            lista.forEach(function(c) {
+                var emp = (c.empresa||'SEM EMPRESA').toUpperCase().trim();
+                var tipo = (c.categoria||c.tipo||'').toUpperCase().trim();
+                var valor = parseFloat(c.valor_total||c.valor||0)||0;
+                if(!porEmpresa[emp]) porEmpresa[emp] = {nfQtd:0,nfVal:0,f9Qtd:0,f9Val:0,totalQtd:0,totalVal:0};
+                if(tipo === 'F9') { porEmpresa[emp].f9Qtd++; porEmpresa[emp].f9Val += valor; totais.f9Qtd++; totais.f9Val += valor; }
+                else { porEmpresa[emp].nfQtd++; porEmpresa[emp].nfVal += valor; totais.nfQtd++; totais.nfVal += valor; }
+                porEmpresa[emp].totalQtd++; porEmpresa[emp].totalVal += valor; totais.totalQtd++; totais.totalVal += valor;
+            });
+            var pctF9 = totais.totalVal > 0 ? (totais.f9Val / totais.totalVal * 100).toFixed(1) : '0.0';
+            // KPIs
+            document.getElementById('fat-analise-kpis').innerHTML = [
+                {label:'Total NF',val:fmtMoeda(totais.nfVal),sub:totais.nfQtd+' notas',color:'#1e40af'},
+                {label:'Total F9',val:fmtMoeda(totais.f9Val),sub:totais.f9Qtd+' notas',color:'#dc2626'},
+                {label:'Total Geral',val:fmtMoeda(totais.totalVal),sub:totais.totalQtd+' registros',color:'#059669'},
+                {label:'% F9 do Total',val:pctF9+'%',sub:'Meia nota',color:'#f59e0b'}
+            ].map(function(k){ return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:14px;border-left:4px solid '+k.color+';"><div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;">'+k.label+'</div><div style="font-size:22px;font-weight:800;color:'+k.color+';margin-top:4px;">'+k.val+'</div><div style="font-size:11px;color:#9ca3af;">'+k.sub+'</div></div>'; }).join('');
+            // Cards por empresa
+            var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
+            var eKeys = Object.keys(porEmpresa).sort();
+            document.getElementById('fat-analise-empresas').innerHTML = eKeys.map(function(emp) {
+                var e = porEmpresa[emp]; var cor = empresaColors[emp]||'#7c3aed';
+                var pf9 = e.totalVal > 0 ? (e.f9Val / e.totalVal * 100).toFixed(1) : '0.0';
+                return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px;border-top:4px solid '+cor+';"><div style="font-size:14px;font-weight:700;color:'+cor+';margin-bottom:12px;"><i class="fas fa-building" style="margin-right:6px;"></i>'+emp+'</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">NF</div><div style="font-size:16px;font-weight:700;color:#1e40af;">'+fmtMoeda(e.nfVal)+'</div><div style="font-size:10px;color:#9ca3af;">'+e.nfQtd+' notas</div></div><div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">F9</div><div style="font-size:16px;font-weight:700;color:#dc2626;">'+fmtMoeda(e.f9Val)+'</div><div style="font-size:10px;color:#9ca3af;">'+e.f9Qtd+' notas</div></div><div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">Total</div><div style="font-size:16px;font-weight:700;">'+fmtMoeda(e.totalVal)+'</div></div><div><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">% F9</div><div style="font-size:16px;font-weight:700;color:#f59e0b;">'+pf9+'%</div></div></div></div>';
+            }).join('');
+            // Tabela
+            var body = document.getElementById('fat-analise-body');
+            body.innerHTML = eKeys.map(function(emp) {
+                var e = porEmpresa[emp]; var cor = empresaColors[emp]||'#374151';
+                var pf9 = e.totalVal > 0 ? (e.f9Val / e.totalVal * 100).toFixed(1) : '0.0';
+                return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+e.nfQtd+'</td><td style="text-align:right;">'+fmtMoeda(e.nfVal)+'</td><td style="text-align:right;color:#dc2626;">'+e.f9Qtd+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(e.f9Val)+'</td><td style="text-align:right;font-weight:600;">'+e.totalQtd+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.totalVal)+'</td><td style="text-align:right;color:#f59e0b;font-weight:700;">'+pf9+'%</td></tr>';
+            }).join('');
+            body.innerHTML += '<tr style="background:#f5f3ff;font-weight:700;"><td>TOTAL</td><td style="text-align:right;">'+totais.nfQtd+'</td><td style="text-align:right;">'+fmtMoeda(totais.nfVal)+'</td><td style="text-align:right;color:#dc2626;">'+totais.f9Qtd+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(totais.f9Val)+'</td><td style="text-align:right;">'+totais.totalQtd+'</td><td style="text-align:right;">'+fmtMoeda(totais.totalVal)+'</td><td style="text-align:right;color:#f59e0b;">'+pctF9+'%</td></tr>';
+        }
+
+        // ======= OPERAÇÕES - Modal Editar (dblclick) =======
+        function abrirModalOperacao(op) {
+            document.getElementById('op-edit-id').value = op.id || '';
+            document.getElementById('op-edit-bordero').value = op.bordero || '';
+            document.getElementById('op-edit-empresa').value = op.empresa || '';
+            document.getElementById('op-edit-tipo-operacao').value = op.tipo_operacao || '';
+            document.getElementById('op-edit-instituicao').value = op.instituicao || '';
+            document.getElementById('op-edit-prorrogacao').value = op.prorrogacao || '';
+            document.getElementById('op-edit-prazo-medio').value = op.prazo_medio || '';
+            var dtOp = op.data_operacao ? String(op.data_operacao).slice(0,10) : '';
+            document.getElementById('op-edit-data-operacao').value = dtOp;
+            document.getElementById('op-edit-taxa-periodo').value = op.taxa_periodo || '';
+            document.getElementById('op-edit-tmp').value = op.tmp || '';
+            document.getElementById('op-edit-vlr-bruto').value = op.vlr_bruto || '';
+            document.getElementById('op-edit-qtde-titulos').value = op.qtde_titulos || '';
+            document.getElementById('op-edit-dif-monet').value = op.dif_monet || '';
+            document.getElementById('op-edit-tarifas').value = op.tarifas || '';
+            document.getElementById('op-edit-iss-perc').value = op.iss_riss_irrf_perc || '';
+            document.getElementById('op-edit-iss-monet').value = op.iss_riss_irrf_monet || '';
+            document.getElementById('op-edit-iof').value = op.iof || '';
+            document.getElementById('op-edit-cpmf-cobr').value = op.cpmf_cobr || '';
+            document.getElementById('op-edit-total-deducoes').value = op.total_deducoes || '';
+            document.getElementById('op-edit-liq-op').value = op.liq_op || '';
+            document.getElementById('op-edit-retencao-passivo').value = op.retencao_passivo || '';
+            document.getElementById('op-edit-recompra').value = op.recompra || '';
+            document.getElementById('op-edit-amort-fom').value = op.amort_fom || '';
+            document.getElementById('op-edit-conta-grafica').value = op.conta_grafica || '';
+            document.getElementById('op-edit-liq-lib').value = op.liq_lib || '';
+            document.getElementById('modalEditarOperacao').style.display = 'flex';
+        }
+
+        function fecharModalOperacao() {
+            document.getElementById('modalEditarOperacao').style.display = 'none';
+        }
+
+        async function salvarOperacao() {
+            var id = document.getElementById('op-edit-id').value;
+            if(!id) { showToast('ID da operação não encontrado', 'error'); return; }
+            var body = {
+                bordero: document.getElementById('op-edit-bordero').value,
+                empresa: document.getElementById('op-edit-empresa').value,
+                tipo_operacao: document.getElementById('op-edit-tipo-operacao').value,
+                instituicao: document.getElementById('op-edit-instituicao').value,
+                prorrogacao: document.getElementById('op-edit-prorrogacao').value,
+                prazo_medio: parseFloat(document.getElementById('op-edit-prazo-medio').value) || 0,
+                data_operacao: document.getElementById('op-edit-data-operacao').value || null,
+                taxa_periodo: parseFloat(document.getElementById('op-edit-taxa-periodo').value) || 0,
+                tmp: parseFloat(document.getElementById('op-edit-tmp').value) || 0,
+                vlr_bruto: parseFloat(document.getElementById('op-edit-vlr-bruto').value) || 0,
+                qtde_titulos: parseInt(document.getElementById('op-edit-qtde-titulos').value) || 0,
+                dif_monet: parseFloat(document.getElementById('op-edit-dif-monet').value) || 0,
+                tarifas: parseFloat(document.getElementById('op-edit-tarifas').value) || 0,
+                iss_riss_irrf_perc: parseFloat(document.getElementById('op-edit-iss-perc').value) || 0,
+                iss_riss_irrf_monet: parseFloat(document.getElementById('op-edit-iss-monet').value) || 0,
+                iof: parseFloat(document.getElementById('op-edit-iof').value) || 0,
+                cpmf_cobr: parseFloat(document.getElementById('op-edit-cpmf-cobr').value) || 0,
+                total_deducoes: parseFloat(document.getElementById('op-edit-total-deducoes').value) || 0,
+                liq_op: parseFloat(document.getElementById('op-edit-liq-op').value) || 0,
+                retencao_passivo: parseFloat(document.getElementById('op-edit-retencao-passivo').value) || 0,
+                recompra: parseFloat(document.getElementById('op-edit-recompra').value) || 0,
+                amort_fom: parseFloat(document.getElementById('op-edit-amort-fom').value) || 0,
+                conta_grafica: parseFloat(document.getElementById('op-edit-conta-grafica').value) || 0,
+                liq_lib: parseFloat(document.getElementById('op-edit-liq-lib').value) || 0
+            };
+            try {
+                var r = await fetch('/api/financeiro/operacoes-credito/' + id, {
+                    method: 'PUT', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if(!r.ok) throw new Error('Erro ' + r.status);
+                showToast('Operação atualizada com sucesso!', 'success');
+                fecharModalOperacao();
+                operacoesCache = null;
+                carregarOperacoesPub();
+            } catch(e) {
+                console.error('[Operação] Erro ao salvar:', e);
+                showToast('Erro ao salvar operação: ' + e.message, 'error');
+            }
         }
 
         // Dev Spec 1.3: Fundos detalhado
