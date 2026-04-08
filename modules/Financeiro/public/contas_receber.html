@@ -828,10 +828,10 @@
 
                 <!-- Tab: DISPONIVEL -->
                 <div id="tab-disponivel" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:8px;"></i>Disponível por Empresa</h2>
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:8px;"></i>Disponível do Dia <span id="disponivel-data-ref" style="font-size:13px;font-weight:400;color:#6b7280;margin-left:8px;"></span></h2>
                     <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Empresa</th><th style="text-align:right">NF (A Vencer)</th><th style="text-align:right">F9 (A Vencer)</th><th style="text-align:right">Total Disponível</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th></tr></thead>
-                        <tbody id="tab-disponivel-body"><tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                        <thead><tr><th>Empresa</th><th style="text-align:right">NF (Hoje)</th><th style="text-align:right">F9 (Hoje)</th><th style="text-align:right">Total Disponível Dia</th><th style="text-align:right">Qtd Títulos</th></tr></thead>
+                        <tbody id="tab-disponivel-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-disponivel -->
 
@@ -2034,28 +2034,36 @@
 
         function renderizarDisponivelTab() {
             var hoje = new Date(); hoje.setHours(0,0,0,0);
+            var hojeStr = hoje.toISOString().slice(0,10);
+            var dataRefEl = document.getElementById('disponivel-data-ref');
+            if(dataRefEl) dataRefEl.textContent = '(' + hoje.toLocaleDateString('pt-BR') + ')';
             var porEmpresa = {};
+            var totalGeralDia = 0;
             contas.forEach(function(c) {
                 var emp = (c.empresa||'SEM EMPRESA').toUpperCase().trim();
-                if(!porEmpresa[emp]) porEmpresa[emp] = {nfAVencer:0,f9AVencer:0,totalDisp:0,vencido:0,liquidado:0};
                 var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
                 var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido; if(valorAberto < 0) valorAberto = 0;
                 var status = String(c.status||'').toLowerCase();
-                var vencRaw = c.data_vencimento||c.vencimento;
-                var venc = vencRaw ? new Date(String(vencRaw).slice(0,10)+'T00:00:00') : null;
-                if(venc && !isNaN(venc.getTime())) venc.setHours(0,0,0,0);
                 var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
-                var vencido = !liquidado && venc && venc < hoje;
+                if(liquidado) return;
+                var vencRaw = c.data_vencimento||c.vencimento;
+                if(!vencRaw) return;
+                var vencStr = String(vencRaw).slice(0,10);
+                if(vencStr !== hojeStr) return;
+                if(!porEmpresa[emp]) porEmpresa[emp] = {nfHoje:0,f9Hoje:0,totalDia:0,qtd:0};
                 var isNF = (c.nota_fiscal||'').toString().trim() !== '';
-                if(liquidado) porEmpresa[emp].liquidado += recebido>0?recebido:bruto;
-                else if(vencido) porEmpresa[emp].vencido += valorAberto;
-                else { if(isNF) porEmpresa[emp].nfAVencer += valorAberto; else porEmpresa[emp].f9AVencer += valorAberto; porEmpresa[emp].totalDisp += valorAberto; }
+                if(isNF) porEmpresa[emp].nfHoje += valorAberto; else porEmpresa[emp].f9Hoje += valorAberto;
+                porEmpresa[emp].totalDia += valorAberto; porEmpresa[emp].qtd++;
+                totalGeralDia += valorAberto;
             });
             var body = document.getElementById('tab-disponivel-body');
             var eKeys = Object.keys(porEmpresa).sort();
-            if(!eKeys.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            if(!eKeys.length) { body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma conta a receber vencendo hoje</td></tr>'; return; }
             var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
-            body.innerHTML = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nfAVencer)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9AVencer)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.totalDisp)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(e.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(e.liquidado)+'</td></tr>'; }).join('');
+            var rows = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nfHoje)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9Hoje)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.totalDia)+'</td><td style="text-align:right;">'+e.qtd+'</td></tr>'; }).join('');
+            var totalQtd = eKeys.reduce(function(s,k){return s+porEmpresa[k].qtd;},0);
+            rows += '<tr style="background:#f0fdf4;font-weight:700;border-top:2px solid #059669;"><td>TOTAL</td><td></td><td></td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalGeralDia)+'</td><td style="text-align:right;">'+totalQtd+'</td></tr>';
+            body.innerHTML = rows;
         }
 
         function renderizarDiarioTab() {
