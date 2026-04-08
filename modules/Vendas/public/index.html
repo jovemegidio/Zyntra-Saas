@@ -12327,34 +12327,89 @@
             executarImpressaoCompleta();
         }
 
+        // Carregar dados COMPLETOS do pedido da API antes de gerar PDF
+        async function carregarDadosCompletosPedido() {
+            if (!pedidoAtual || !pedidoAtual.id) return;
+            try {
+                const resp = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}`, {
+                    credentials: 'include',
+                    headers: getAuthHeaders()
+                });
+                if (resp.ok) {
+                    const dados = await resp.json();
+                    // Enriquecer pedidoAtual com todos os campos do banco
+                    pedidoAtual.cliente = dados.cliente_nome || dados.cliente || pedidoAtual.cliente;
+                    pedidoAtual.cliente_cnpj = dados.cliente_cnpj || pedidoAtual.cliente_cnpj;
+                    pedidoAtual.cliente_ie = dados.cliente_ie || pedidoAtual.cliente_ie;
+                    pedidoAtual.cliente_endereco = dados.cliente_endereco || pedidoAtual.cliente_endereco;
+                    pedidoAtual.cliente_numero = dados.cliente_numero || pedidoAtual.cliente_numero;
+                    pedidoAtual.cliente_bairro = dados.cliente_bairro || pedidoAtual.cliente_bairro;
+                    pedidoAtual.cliente_cidade = dados.cliente_cidade || pedidoAtual.cliente_cidade;
+                    pedidoAtual.cliente_uf = dados.cliente_uf || pedidoAtual.cliente_uf;
+                    pedidoAtual.cliente_cep = dados.cliente_cep || pedidoAtual.cliente_cep;
+                    pedidoAtual.cliente_telefone = dados.cliente_telefone || pedidoAtual.cliente_telefone;
+                    pedidoAtual.cliente_email = dados.cliente_email || pedidoAtual.cliente_email;
+                    pedidoAtual.cliente_contato = dados.cliente_contato || pedidoAtual.cliente_contato;
+                    pedidoAtual.vendedor = dados.vendedor_nome || dados.vendedor || pedidoAtual.vendedor;
+                    pedidoAtual.transportadora = dados.transportadora || dados.transportadora_nome || dados.transp_razao_social || pedidoAtual.transportadora;
+                    pedidoAtual.tipo_frete = dados.tipo_frete ?? pedidoAtual.tipo_frete;
+                    pedidoAtual.prazo_entrega = dados.prazo_entrega || pedidoAtual.prazo_entrega;
+                    pedidoAtual.condicao_pagamento = dados.condicao_pagamento || dados.condicoes_pagamento || pedidoAtual.condicao_pagamento;
+                    pedidoAtual.observacoes = dados.observacao || dados.descricao || dados.observacao_cliente || pedidoAtual.observacoes;
+                    pedidoAtual.descricao = dados.descricao || pedidoAtual.descricao;
+                    pedidoAtual.numero_pedido = dados.numero_pedido || pedidoAtual.numero_pedido;
+                    pedidoAtual.data_criacao = dados.data_criacao || dados.created_at || pedidoAtual.data_criacao;
+                    pedidoAtual._statusOriginal = dados.status || pedidoAtual._statusOriginal;
+                    pedidoAtual.frete = parseFloat(dados.frete) || pedidoAtual.frete || 0;
+                    pedidoAtual.total_ipi = parseFloat(dados.total_ipi) || pedidoAtual.total_ipi || 0;
+                    pedidoAtual.total_icms_st = parseFloat(dados.total_icms_st) || pedidoAtual.total_icms_st || 0;
+                }
+            } catch (e) { console.warn('Erro ao carregar dados completos do pedido:', e); }
+        }
+
         // Função auxiliar para gerar nome do documento baseado no status
         function gerarNomeDocumento(pedido, formato = 'título') {
-            const status = (pedido.status || 'Orçamento').toUpperCase();
-            const numero = String(pedido.id).padStart(5, '0');
-            const empresa = 'ALUFORCE';
+            const statusReal = (pedido._statusOriginal || pedido.status || 'orcamento').toLowerCase();
+            const numero = pedido.numero_pedido || String(pedido.id).padStart(5, '0');
+            const clienteNome = pedido.cliente || 'Cliente';
 
-            // Mapear status para nome do documento
-            const mapaStatus = {
-                'NEGOCIAÇÃO': 'ORÇAMENTO',
-                'NEGOCIACAO': 'ORÇAMENTO',
-                'EM PRODUÇÃO': 'PEDIDO DE VENDA',
-                'EM PRODUCAO': 'PEDIDO DE VENDA',
-                'PRONTO': 'PEDIDO DE VENDA',
-                'AGUARDANDO': 'PEDIDO DE VENDA',
-                'FATURADO': 'PEDIDO FATURADO',
-                'FINALIZADO': 'PEDIDO FINALIZADO',
-                'CANCELADO': 'PEDIDO CANCELADO',
-                'NOVO': 'ORÇAMENTO',
-                'ORÇAMENTO': 'ORÇAMENTO'
+            // Mapear status para label legível
+            const statusLabelsMap = {
+                'orcamento': 'Orçamento',
+                'analise-credito': 'Análise de Crédito',
+                'analise': 'Análise de Crédito',
+                'pedido-aprovado': 'Pedido Aprovado',
+                'aprovado': 'Aprovado',
+                'faturar': 'Faturar',
+                'faturado': 'Faturado',
+                'parcial': 'Faturamento Parcial',
+                'entregue': 'Entregue',
+                'recibo': 'Recibo',
+                'cancelado': 'Cancelado',
+                'credito-reprovado': 'Crédito Reprovado'
             };
+            const statusLbl = statusLabelsMap[statusReal] || 'Orçamento';
 
-            const tipoDoc = mapaStatus[status] || 'ORÇAMENTO';
+            // Tipo documento para título
+            const tipoDocMap = {
+                'orcamento': 'ORÇAMENTO',
+                'analise-credito': 'ORÇAMENTO',
+                'analise': 'ORÇAMENTO',
+                'pedido-aprovado': 'PEDIDO DE VENDA',
+                'aprovado': 'PEDIDO DE VENDA',
+                'faturar': 'PEDIDO DE VENDA',
+                'faturado': 'PEDIDO FATURADO',
+                'parcial': 'PEDIDO DE VENDA',
+                'entregue': 'PEDIDO FATURADO',
+                'recibo': 'PEDIDO FATURADO',
+                'cancelado': 'PEDIDO CANCELADO'
+            };
+            const tipoDoc = tipoDocMap[statusReal] || 'ORÇAMENTO';
 
             if (formato === 'arquivo') {
-                // Para nome de arquivo: ORCAMENTO - 00009Zyntra:
-                return `${tipoDoc.replace(/Ç/g, 'C').replace(/Ã/g, 'A')} - ${numero} - ${empresa}`;
+                // Nome do arquivo: Status - NomeCliente - #00005
+                return `${statusLbl} - ${clienteNome} - #${numero}`;
             } else {
-                // Para título do documento
                 return tipoDoc;
             }
         }
@@ -12371,7 +12426,7 @@
             const dataValidade = new Date(pedidoAtual.data_criacao || new Date());
             dataValidade.setDate(dataValidade.getDate() + 15);
             const dataValidadeStr = dataValidade.toLocaleDateString('pt-BR');
-            const condicao = pedidoAtual.parcelas || '30';
+            const condicao = pedidoAtual.condicao_pagamento || pedidoAtual.parcelas || '30';
 
             // Calcular totais dos itens
             let subtotalBruto = 0;
@@ -12418,7 +12473,14 @@
         }
 
         function _buildDocumentHTML(d) {
-            const statusLabel = (pedidoAtual.status || 'Orçamento').toUpperCase();
+            const statusReal = (pedidoAtual._statusOriginal || pedidoAtual.status || 'orcamento').toLowerCase();
+            const statusLabelsMap = {
+                'orcamento': 'NOVO', 'analise-credito': 'ANÁLISE DE CRÉDITO', 'analise': 'ANÁLISE',
+                'pedido-aprovado': 'APROVADO', 'aprovado': 'APROVADO', 'faturar': 'FATURAR',
+                'faturado': 'FATURADO', 'parcial': 'PARCIAL', 'entregue': 'ENTREGUE',
+                'recibo': 'RECIBO', 'cancelado': 'CANCELADO', 'credito-reprovado': 'REPROVADO'
+            };
+            const statusLabel = statusLabelsMap[statusReal] || statusReal.toUpperCase();
             const totalItens = itensPedidoAtual.length;
             return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -12597,7 +12659,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 gerarImpressaoIframe();
                 return;
             }
-            // Carregar dados completos do cliente antes de gerar o documento
+            // Carregar dados completos do pedido e do cliente antes de gerar o documento
+            try { await carregarDadosCompletosPedido(); } catch(e) { console.warn('Erro pedido:', e); }
             try { await carregarDadosCompletosCliente(); } catch(e) { console.warn('Não foi possível carregar dados do cliente:', e); }
             const d = _buildDocumentData();
             let html = _buildDocumentHTML(d);
@@ -12618,6 +12681,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             iframe.style.cssText = 'position: fixed; right: 0; bottom: 0; width: 0; height: 0; border: 0;';
             document.body.appendChild(iframe);
 
+            try { await carregarDadosCompletosPedido(); } catch(e) {}
+            try { await carregarDadosCompletosCliente(); } catch(e) {}
             const d = _buildDocumentData();
             const html = _buildDocumentHTML(d);
 
