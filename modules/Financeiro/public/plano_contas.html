@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Zyntra: Plano de Contas</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
+    <script src="/js/anti-copy-protection.js"></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <script src="/js/modal-title.js?v=20260319"></script>
+    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+
+    <style>
+        .tree-container { padding: 20px; }
+        .tree-node { padding: 8px 12px; border-left: 2px solid var(--gray-200); margin-left: 20px; cursor: pointer; transition: background 0.2s; }
+        .tree-node:hover { background: var(--gray-50); }
+        .tree-node.root { margin-left: 0; border-left: 3px solid var(--info-500); font-weight: 600; }
+        .tree-toggle { cursor: pointer; margin-right: 6px; }
+        .conta-codigo { color: var(--info-600); font-weight: 600; margin-right: 8px; font-size: 13px; }
+        .conta-nome { font-size: 13px; color: var(--gray-800); }
+        .tipo-badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .tipo-receita { background: #dcfce7; color: #166534; }
+        .tipo-despesa { background: #fee2e2; color: #991b1b; }
+        .actions-top { display: flex; gap: 10px; margin-bottom: 20px; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:white; border-radius:16px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header-custom { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--gray-100); }
+        .modal-header-custom h3 { margin:0; font-size:17px; font-weight:700; color:#1f2937; }
+        .modal-body { padding:20px 24px; }
+        .modal-footer-custom { padding:16px 24px; border-top:1px solid var(--gray-100); display:flex; gap:10px; justify-content:flex-end; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:6px; }
+        .form-input, .form-select { width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; }
+        .form-input:focus, .form-select:focus { outline:none; border-color:var(--info-500); box-shadow:0 0 0 3px rgba(6,182,212,0.1); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .color-input { width:40px; height:36px; border:none; border-radius:8px; cursor:pointer; padding:0; }
+        .tree-actions { display:inline-flex; gap:4px; margin-left:10px; opacity:0; transition:opacity 0.2s; }
+        .tree-node:hover .tree-actions { opacity:1; }
+        .tree-action-btn { width:24px; height:24px; border:none; border-radius:4px; cursor:pointer; font-size:11px; display:inline-flex; align-items:center; justify-content:center; }
+        .tree-action-btn.edit { background:#dbeafe; color:#1e40af; }
+        .tree-action-btn.delete { background:#fee2e2; color:#991b1b; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="contas_receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="plano_contas.html" class="sidebar-btn active" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="impostos.html" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
+            </nav>
+            <div class="sidebar-bottom"><a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a></div>
+        </aside>
+
+        <main class="main-area" data-page-name="Plano de Contas">
+            <header class="header" id="financeiro-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span class="header-separator">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span class="header-dash">—</span>
+                        <span class="page-title">Plano de Contas</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="fin-content">
+                <div class="page-header">
+                    <h1><i class="fas fa-sitemap"></i> Plano de Contas</h1>
+                    <p class="page-subtitle">Estrutura hierárquica de contas contábeis</p>
+                </div>
+
+                <div class="actions-top">
+                    <button class="btn btn-primary" onclick="abrirModalConta()">
+                        <i class="fas fa-plus"></i> Nova Conta
+                    </button>
+                    <button class="btn btn-secondary" onclick="expandirTudo()">
+                        <i class="fas fa-expand-arrows-alt"></i> Expandir Tudo
+                    </button>
+                    <button class="btn btn-secondary" onclick="colapsarTudo()">
+                        <i class="fas fa-compress-arrows-alt"></i> Colapsar Tudo
+                    </button>
+                </div>
+
+                <div class="card">
+                    <div class="card-body" id="tree-plano-contas">
+                        <p style="color: var(--gray-400); text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando plano de contas...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Nova/Editar Conta -->
+    <div class="modal-overlay" id="modal-conta">
+        <div class="modal-box">
+            <div class="modal-header-custom">
+                <h3 id="modal-conta-titulo">Nova Conta</h3>
+                <button onclick="fecharModalConta()" style="background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-conta">
+                    <input type="hidden" id="conta-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Código *</label>
+                            <input type="text" id="conta-codigo" class="form-input" placeholder="Ex: 1.1.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo *</label>
+                            <select id="conta-tipo" class="form-select" required>
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome *</label>
+                        <input type="text" id="conta-nome" class="form-input" placeholder="Nome da conta" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Conta Pai</label>
+                            <select id="conta-pai" class="form-select">
+                                <option value="">(Raiz)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Cor</label>
+                            <input type="color" id="conta-cor" class="color-input" value="#6366f1">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" onclick="fecharModalConta()" class="btn btn-secondary">Cancelar</button>
+                <button type="button" onclick="salvarConta()" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/popup-confirmacao.js"></script>
+    <script src="/js/auth-unified.js?v=20260326"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
+    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260319"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script>
+        const API_BASE = window.location.origin;
+        let planoContas = [];
+        let editandoId = null;
+
+        document.addEventListener('DOMContentLoaded', () => { carregarPlanoContas(); });
+
+        async function carregarPlanoContas() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/plano-contas`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    planoContas = Array.isArray(data) ? data : (data.data || []);
+                    renderizarArvore(planoContas);
+                    popularSelectPai();
+                } else {
+                    document.getElementById('tree-plano-contas').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhuma conta cadastrada. Clique em "Nova Conta" para começar.</p>';
+                }
+            } catch (e) {
+                console.error('Erro ao carregar plano de contas:', e);
+                document.getElementById('tree-plano-contas').innerHTML = '<p style="color: var(--danger-500); text-align: center; padding: 40px;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar plano de contas</p>';
+            }
+        }
+
+        function popularSelectPai() {
+            const sel = document.getElementById('conta-pai');
+            sel.innerHTML = '<option value="">(Raiz)</option>';
+            planoContas.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.codigo || ''} - ${c.nome || ''}</option>`; });
+        }
+
+        function renderizarArvore(contas, parentId = null, nivel = 0) {
+            const container = parentId ? document.getElementById(`children-${parentId}`) : document.getElementById('tree-plano-contas');
+            if (!container) return;
+            const filtradas = contas.filter(c => (c.pai_id || c.conta_pai_id || null) == parentId);
+            if (filtradas.length === 0 && !parentId) {
+                container.innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhuma conta cadastrada.</p>';
+                return;
+            }
+            if (!parentId) container.innerHTML = '';
+            filtradas.forEach(c => {
+                const temFilhos = contas.some(f => (f.pai_id || f.conta_pai_id) === c.id);
+                const tipoBadge = c.tipo === 'receita' ? '<span class="tipo-badge tipo-receita">Receita</span>' : '<span class="tipo-badge tipo-despesa">Despesa</span>';
+                const node = document.createElement('div');
+                node.className = `tree-node${nivel === 0 ? ' root' : ''}`;
+                node.style.marginLeft = `${nivel * 20}px`;
+                const safeNome = (c.nome || c.descricao || '').replace(/</g, '&lt;');
+                const safeCodigo = (c.codigo || '').replace(/</g, '&lt;');
+                node.innerHTML = `
+                    ${temFilhos ? '<span class="tree-toggle" onclick="toggleNode(this)"><i class="fas fa-chevron-down"></i></span>' : '<span style="width:20px;display:inline-block;"></span>'}
+                    <span class="conta-codigo">${safeCodigo}</span>
+                    <span class="conta-nome">${safeNome}</span>
+                    ${tipoBadge}
+                    <span class="tree-actions">
+                        <button class="tree-action-btn edit" onclick="editarConta(${c.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="tree-action-btn delete" onclick="excluirConta(${c.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </span>
+                `;
+                container.appendChild(node);
+                if (temFilhos) {
+                    const childContainer = document.createElement('div');
+                    childContainer.id = `children-${c.id}`;
+                    container.appendChild(childContainer);
+                    renderizarArvore(contas, c.id, nivel + 1);
+                }
+            });
+        }
+
+        function toggleNode(el) {
+            const icon = el.querySelector('i');
+            const sibling = el.closest('.tree-node').nextElementSibling;
+            if (sibling) {
+                sibling.style.display = sibling.style.display === 'none' ? '' : 'none';
+                icon.className = sibling.style.display === 'none' ? 'fas fa-chevron-right' : 'fas fa-chevron-down';
+            }
+        }
+        function expandirTudo() { document.querySelectorAll('[id^="children-"]').forEach(el => el.style.display = ''); }
+        function colapsarTudo() { document.querySelectorAll('[id^="children-"]').forEach(el => el.style.display = 'none'); }
+
+        function abrirModalConta() {
+            editandoId = null;
+            document.getElementById('modal-conta-titulo').textContent = 'Nova Conta';
+            document.getElementById('conta-id').value = '';
+            document.getElementById('conta-codigo').value = '';
+            document.getElementById('conta-nome').value = '';
+            document.getElementById('conta-tipo').value = 'receita';
+            document.getElementById('conta-pai').value = '';
+            document.getElementById('conta-cor').value = '#6366f1';
+            document.getElementById('modal-conta').classList.add('active');
+        }
+
+        function editarConta(id) {
+            const conta = planoContas.find(c => c.id === id);
+            if (!conta) return;
+            editandoId = id;
+            document.getElementById('modal-conta-titulo').textContent = 'Editar Conta';
+            document.getElementById('conta-id').value = id;
+            document.getElementById('conta-codigo').value = conta.codigo || '';
+            document.getElementById('conta-nome').value = conta.nome || '';
+            document.getElementById('conta-tipo').value = conta.tipo || 'receita';
+            document.getElementById('conta-pai').value = conta.pai_id || conta.conta_pai_id || '';
+            document.getElementById('conta-cor').value = conta.cor || '#6366f1';
+            document.getElementById('modal-conta').classList.add('active');
+        }
+
+        function fecharModalConta() { document.getElementById('modal-conta').classList.remove('active'); }
+
+        async function salvarConta() {
+            const codigo = document.getElementById('conta-codigo').value.trim();
+            const nome = document.getElementById('conta-nome').value.trim();
+            const tipo = document.getElementById('conta-tipo').value;
+            const pai_id = document.getElementById('conta-pai').value || null;
+            const cor = document.getElementById('conta-cor').value;
+            if (!codigo || !nome) { if (typeof showToast === 'function') showToast('Preencha código e nome.', 'warning'); return; }
+            try {
+                const url = editandoId ? `${API_BASE}/api/financeiro/plano-contas/${editandoId}` : `${API_BASE}/api/financeiro/plano-contas`;
+                const resp = await fetch(url, {
+                    method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({ codigo, nome, tipo, pai_id, cor, ativo: true })
+                });
+                if (resp.ok) {
+                    if (typeof showToast === 'function') showToast(editandoId ? 'Conta atualizada!' : 'Conta criada!', 'success');
+                    fecharModalConta(); carregarPlanoContas();
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    if (typeof showToast === 'function') showToast(err.error || 'Erro ao salvar.', 'error');
+                }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao salvar.', 'error'); }
+        }
+
+        async function excluirConta(id) {
+            if (!confirm('Deseja excluir esta conta?')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/plano-contas/${id}`, { method: 'DELETE', credentials: 'include' });
+                if (resp.ok) { if (typeof showToast === 'function') showToast('Conta excluída.', 'success'); carregarPlanoContas(); }
+                else { if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+        }
+    </script>
+</body>
+</html>

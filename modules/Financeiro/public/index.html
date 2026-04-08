@@ -338,6 +338,18 @@
             <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                 <i class="fas fa-chart-bar"></i>
             </a>
+            <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas">
+                <i class="fas fa-sitemap"></i>
+            </a>
+            <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                <i class="fas fa-balance-scale"></i>
+            </a>
+            <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <i class="fas fa-clipboard-list"></i>
+            </a>
+            <a href="impostos.html" class="sidebar-btn" title="Impostos">
+                <i class="fas fa-receipt"></i>
+            </a>
         </nav>
         <div class="sidebar-bottom">
             <a href="/dashboard" class="sidebar-btn" title="Configurações">
@@ -533,6 +545,16 @@
         await carregarKPIs();
         await carregarProximosVencimentos();
         await carregarUltimosLancamentos();
+
+        // REATIVIDADE: Escutar alterações de configuração (sem precisar F5)
+        window.addEventListener('zyntra:configUpdated', (e) => {
+            const tipo = e.detail && e.detail.tipo;
+            if (tipo === 'plano-contas' || tipo === 'formas-pagamento' || tipo === 'categorias' || tipo === 'impostos') {
+                console.log('🔄 Config alterada:', tipo, '— recarregando KPIs financeiro');
+                carregarKPIs();
+                carregarUltimosLancamentos();
+            }
+        });
 
         setTimeout(() => { if (loader) loader.classList.add('hide'); }, 400);
     });
@@ -790,15 +812,16 @@
         const origem = document.getElementById('transf-origem').value;
         const destino = document.getElementById('transf-destino').value;
         const valor = parseFloat(document.getElementById('transf-valor').value);
-        const descrição = document.getElementById('transf-descrição').value || 'Transferência entre contas';
+        const descricao = document.getElementById('transf-descrição').value || 'Transferência entre contas';
+        const data = new Date().toISOString().split('T')[0];
         if (origem === destino) { showToast('Origem e destino não podem ser iguais.', 'warning'); return; }
         try {
-            const resp = await fetch('/api/financeiro/transferencias', {
+            const resp = await fetch('/api/financeiro/transferencia-bancaria', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-                body: JSON.stringify({ conta_origem_id: origem, conta_destino_id: destino, valor, descrição })
+                body: JSON.stringify({ conta_origem: origem, conta_destino: destino, valor, data, descricao })
             });
             if (resp.ok) { showToast('Transferência realizada com sucesso!', 'success'); fecharModalTransferencia(); location.reload(); }
-            else { showToast('Erro ao realizar transferência.', 'error'); }
+            else { const err = await resp.json().catch(() => ({})); showToast(err.error || 'Erro ao realizar transferência.', 'error'); }
         } catch (err) { console.error('Erro:', err); showToast('Erro ao realizar transferência.', 'error'); }
     }
 
@@ -846,7 +869,7 @@
 <script src="/js/auth-unified.js?v=20260326"></script>
 <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
-<script src="../js/financeiro-sidebar.js?v=20260319"></script>
+<script src="js/financeiro-sidebar.js?v=20260319"></script>
 <script src="/_shared/accessibility-widget.js?v=20260319"></script>
 <!-- Chat Corporativo (Teams) -->
 <script src="/socket.io/socket.io.js"></script>

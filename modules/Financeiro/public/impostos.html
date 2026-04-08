@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Zyntra: Impostos</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
+    <script src="/js/anti-copy-protection.js"></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <script src="/js/modal-title.js?v=20260319"></script>
+    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+
+    <style>
+        .impostos-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .imposto-card { background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--gray-100); }
+        .imposto-valor { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .imposto-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+        .imposto-badge { padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-icms { background: #dbeafe; color: #1e40af; }
+        .badge-pis { background: #fef3c7; color: #92400e; }
+        .badge-cofins { background: #ede9fe; color: #5b21b6; }
+        .badge-iss { background: #dcfce7; color: #166534; }
+        .badge-irpj { background: #fee2e2; color: #991b1b; }
+        .badge-csll { background: #fce7f3; color: #9d174d; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:white; border-radius:16px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header-custom { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--gray-100); }
+        .modal-header-custom h3 { margin:0; font-size:17px; font-weight:700; color:#1f2937; }
+        .modal-body { padding:20px 24px; }
+        .modal-footer-custom { padding:16px 24px; border-top:1px solid var(--gray-100); display:flex; gap:10px; justify-content:flex-end; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:6px; }
+        .form-input, .form-select, .form-textarea { width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; }
+        .form-textarea { resize: vertical; min-height: 60px; }
+        .form-input:focus, .form-select:focus, .form-textarea:focus { outline:none; border-color:var(--info-500); box-shadow:0 0 0 3px rgba(6,182,212,0.1); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .action-btn { width:30px; height:30px; border:none; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:12px; margin-right:2px; }
+        .action-btn.edit { background:#dbeafe; color:#1e40af; }
+        .action-btn.danger { background:#fee2e2; color:#991b1b; }
+        @media (max-width: 1024px) { .impostos-cards { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .impostos-cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="contas_receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="impostos.html" class="sidebar-btn active" title="Impostos"><i class="fas fa-receipt"></i></a>
+            </nav>
+            <div class="sidebar-bottom"><a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a></div>
+        </aside>
+
+        <main class="main-area" data-page-name="Impostos">
+            <header class="header" id="financeiro-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span class="header-separator">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span class="header-dash">—</span>
+                        <span class="page-title">Impostos</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="fin-content">
+                <div class="page-header">
+                    <h1><i class="fas fa-receipt"></i> Impostos</h1>
+                    <p class="page-subtitle">Gestão de obrigações tributárias e guias de recolhimento</p>
+                </div>
+
+                <div class="impostos-cards">
+                    <div class="imposto-card">
+                        <div class="imposto-label">ICMS a Recolher</div>
+                        <div class="imposto-valor" id="icms-valor">R$ 0,00</div>
+                    </div>
+                    <div class="imposto-card">
+                        <div class="imposto-label">PIS/COFINS</div>
+                        <div class="imposto-valor" id="pis-cofins-valor" style="color: var(--info-600)">R$ 0,00</div>
+                    </div>
+                    <div class="imposto-card">
+                        <div class="imposto-label">ISS</div>
+                        <div class="imposto-valor" id="iss-valor" style="color: #22c55e">R$ 0,00</div>
+                    </div>
+                    <div class="imposto-card">
+                        <div class="imposto-label">IRPJ/CSLL</div>
+                        <div class="imposto-valor" id="irpj-valor" style="color: #f59e0b">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-bottom: 20px;">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Guias e Obrigações</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="filtro-mes-imposto" class="filter-input" onchange="carregarImpostos()">
+                            </select>
+                            <button class="btn btn-primary" onclick="abrirModalImposto()">
+                                <i class="fas fa-plus"></i> Nova Guia
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="lista-impostos">
+                        <p style="color: var(--gray-400); text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando impostos...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Imposto -->
+    <div class="modal-overlay" id="modal-imposto">
+        <div class="modal-box">
+            <div class="modal-header-custom">
+                <h3 id="modal-imp-titulo">Nova Guia de Imposto</h3>
+                <button onclick="fecharModalImposto()" style="background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-imposto">
+                    <input type="hidden" id="imp-id">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tipo de Imposto *</label>
+                            <select id="imp-tipo" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                <option value="ICMS">ICMS</option>
+                                <option value="PIS">PIS</option>
+                                <option value="COFINS">COFINS</option>
+                                <option value="ISS">ISS</option>
+                                <option value="IRPJ">IRPJ</option>
+                                <option value="CSLL">CSLL</option>
+                                <option value="INSS">INSS</option>
+                                <option value="FGTS">FGTS</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Alíquota (%)</label>
+                            <input type="number" id="imp-aliquota" class="form-input" step="0.01" min="0" max="100" placeholder="0,00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição *</label>
+                        <input type="text" id="imp-descricao" class="form-input" placeholder="Ex: ICMS sobre vendas interestaduais" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Base de Cálculo (R$)</label>
+                        <input type="number" id="imp-base" class="form-input" step="0.01" min="0" placeholder="0,00">
+                    </div>
+                    <div class="form-group">
+                        <label>Observações</label>
+                        <textarea id="imp-observacoes" class="form-textarea" rows="2" placeholder="Observações adicionais..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" onclick="fecharModalImposto()" class="btn btn-secondary">Cancelar</button>
+                <button type="button" onclick="salvarImposto()" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/popup-confirmacao.js"></script>
+    <script src="/js/auth-unified.js?v=20260326"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
+    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260319"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script>
+        const API_BASE = window.location.origin;
+        let impostos = [];
+        let editandoId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            preencherMeses();
+            carregarImpostos();
+        });
+
+        function preencherMeses() {
+            const sel = document.getElementById('filtro-mes-imposto');
+            if (!sel) return;
+            const hoje = new Date();
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+                const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+                sel.innerHTML += `<option value="${val}"${i===0?' selected':''}>${label}</option>`;
+            }
+        }
+
+        async function carregarImpostos() {
+            try {
+                const mes = document.getElementById('filtro-mes-imposto')?.value || '';
+                const resp = await fetch(`${API_BASE}/api/financeiro/impostos?mes=${mes}`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    impostos = Array.isArray(data) ? data : (data.data || []);
+                    renderizarImpostos(impostos);
+                    atualizarKPIs(impostos);
+                } else {
+                    document.getElementById('lista-impostos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhuma guia cadastrada.</p>';
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar impostos:', e);
+                document.getElementById('lista-impostos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhuma guia cadastrada.</p>';
+            }
+        }
+
+        function atualizarKPIs(items) {
+            const fmt = v => 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const sum = (tipo) => items.filter(i => (i.tipo || '').toUpperCase().includes(tipo)).reduce((s, i) => s + (parseFloat(i.base) * (parseFloat(i.aliquota) || 0) / 100), 0);
+            document.getElementById('icms-valor').textContent = fmt(sum('ICMS'));
+            document.getElementById('pis-cofins-valor').textContent = fmt(sum('PIS') + sum('COFINS'));
+            document.getElementById('iss-valor').textContent = fmt(sum('ISS'));
+            document.getElementById('irpj-valor').textContent = fmt(sum('IRPJ') + sum('CSLL'));
+        }
+
+        function renderizarImpostos(items) {
+            if (!items.length) {
+                document.getElementById('lista-impostos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhuma guia cadastrada.</p>';
+                return;
+            }
+            let html = '<table class="table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Base (R$)</th><th>Alíquota</th><th>Valor (R$)</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+            items.forEach(i => {
+                const tipo = (i.tipo || '-').replace(/</g, '&lt;');
+                const desc = (i.descricao || '-').replace(/</g, '&lt;');
+                const base = parseFloat(i.base) || 0;
+                const aliq = parseFloat(i.aliquota) || 0;
+                const valor = base * aliq / 100;
+                const badge = `badge-${tipo.toLowerCase().replace(/[^a-z]/g, '')}`;
+                const ativo = i.ativo !== false && i.ativo !== 0;
+                html += `<tr>
+                    <td><span class="imposto-badge ${badge}">${tipo}</span></td>
+                    <td>${desc}</td>
+                    <td>R$ ${base.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>${aliq}%</td>
+                    <td><strong>R$ ${valor.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong></td>
+                    <td><span class="tipo-badge ${ativo ? 'tipo-receita' : 'tipo-despesa'}">${ativo ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="action-btn edit" onclick="editarImposto(${i.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="action-btn danger" onclick="excluirImposto(${i.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('lista-impostos').innerHTML = html;
+        }
+
+        function abrirModalImposto() {
+            editandoId = null;
+            document.getElementById('modal-imp-titulo').textContent = 'Nova Guia de Imposto';
+            document.getElementById('imp-id').value = '';
+            document.getElementById('imp-tipo').value = '';
+            document.getElementById('imp-aliquota').value = '';
+            document.getElementById('imp-descricao').value = '';
+            document.getElementById('imp-base').value = '';
+            document.getElementById('imp-observacoes').value = '';
+            document.getElementById('modal-imposto').classList.add('active');
+        }
+
+        function editarImposto(id) {
+            const i = impostos.find(x => x.id === id);
+            if (!i) return;
+            editandoId = id;
+            document.getElementById('modal-imp-titulo').textContent = 'Editar Imposto';
+            document.getElementById('imp-id').value = id;
+            document.getElementById('imp-tipo').value = i.tipo || '';
+            document.getElementById('imp-aliquota').value = i.aliquota || '';
+            document.getElementById('imp-descricao').value = i.descricao || '';
+            document.getElementById('imp-base').value = i.base || '';
+            document.getElementById('imp-observacoes').value = i.observacoes || '';
+            document.getElementById('modal-imposto').classList.add('active');
+        }
+
+        function fecharModalImposto() { document.getElementById('modal-imposto').classList.remove('active'); }
+
+        async function salvarImposto() {
+            const tipo = document.getElementById('imp-tipo').value;
+            const descricao = document.getElementById('imp-descricao').value.trim();
+            const aliquota = parseFloat(document.getElementById('imp-aliquota').value) || 0;
+            const base = parseFloat(document.getElementById('imp-base').value) || 0;
+            const observacoes = document.getElementById('imp-observacoes').value.trim();
+            if (!tipo || !descricao) { if (typeof showToast === 'function') showToast('Preencha tipo e descrição.', 'warning'); return; }
+            try {
+                const url = editandoId ? `${API_BASE}/api/financeiro/impostos/${editandoId}` : `${API_BASE}/api/financeiro/impostos`;
+                const resp = await fetch(url, {
+                    method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({ tipo, aliquota, descricao, base, observacoes, ativo: true })
+                });
+                if (resp.ok) {
+                    if (typeof showToast === 'function') showToast(editandoId ? 'Imposto atualizado!' : 'Imposto criado!', 'success');
+                    fecharModalImposto(); carregarImpostos();
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    if (typeof showToast === 'function') showToast(err.error || 'Erro ao salvar.', 'error');
+                }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao salvar.', 'error'); }
+        }
+
+        async function excluirImposto(id) {
+            if (!confirm('Deseja excluir esta guia de imposto?')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/impostos/${id}`, { method: 'DELETE', credentials: 'include' });
+                if (resp.ok) { if (typeof showToast === 'function') showToast('Imposto excluído.', 'success'); carregarImpostos(); }
+                else { if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+        }
+    </script>
+</body>
+</html>

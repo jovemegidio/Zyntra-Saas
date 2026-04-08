@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Zyntra: Orçamentos</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
+    <script src="/js/anti-copy-protection.js"></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <script src="/js/modal-title.js?v=20260319"></script>
+    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+
+    <style>
+        .orcamento-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+        .orcamento-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--gray-100); }
+        .orcamento-valor { font-size: 24px; font-weight: 800; }
+        .orcamento-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+        .progress-bar { height: 8px; background: var(--gray-100); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+        .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+        .status-ok { background: #22c55e; }
+        .status-warning { background: #f59e0b; }
+        .status-danger { background: #ef4444; }
+        .modal-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:10000; align-items:center; justify-content:center; }
+        .modal-overlay.active { display:flex; }
+        .modal-box { background:white; border-radius:16px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,0.3); }
+        .modal-header-custom { display:flex; justify-content:space-between; align-items:center; padding:20px 24px; border-bottom:1px solid var(--gray-100); }
+        .modal-header-custom h3 { margin:0; font-size:17px; font-weight:700; color:#1f2937; }
+        .modal-body { padding:20px 24px; }
+        .modal-footer-custom { padding:16px 24px; border-top:1px solid var(--gray-100); display:flex; gap:10px; justify-content:flex-end; }
+        .form-group { margin-bottom:14px; }
+        .form-group label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:6px; }
+        .form-input, .form-select { width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:8px; font-size:13px; font-family:'Inter',sans-serif; }
+        .form-input:focus, .form-select:focus { outline:none; border-color:var(--info-500); box-shadow:0 0 0 3px rgba(6,182,212,0.1); }
+        .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+        .action-btn { width:30px; height:30px; border:none; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; font-size:12px; margin-right:2px; }
+        .action-btn.edit { background:#dbeafe; color:#1e40af; }
+        .action-btn.danger { background:#fee2e2; color:#991b1b; }
+        @media (max-width: 1024px) { .orcamento-cards { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .orcamento-cards { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="contas_receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="orcamentos.html" class="sidebar-btn active" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="impostos.html" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
+            </nav>
+            <div class="sidebar-bottom"><a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a></div>
+        </aside>
+
+        <main class="main-area" data-page-name="Orçamentos">
+            <header class="header" id="financeiro-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span class="header-separator">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span class="header-dash">—</span>
+                        <span class="page-title">Orçamentos</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="fin-content">
+                <div class="page-header">
+                    <h1><i class="fas fa-clipboard-list"></i> Orçamentos</h1>
+                    <p class="page-subtitle">Gestão de orçamentos e previsões financeiras</p>
+                </div>
+
+                <div class="orcamento-cards">
+                    <div class="orcamento-card">
+                        <div class="orcamento-label">Orçamento Previsto</div>
+                        <div class="orcamento-valor" id="orcamento-previsto">R$ 0,00</div>
+                    </div>
+                    <div class="orcamento-card">
+                        <div class="orcamento-label">Realizado</div>
+                        <div class="orcamento-valor" id="orcamento-realizado" style="color: var(--info-600)">R$ 0,00</div>
+                    </div>
+                    <div class="orcamento-card">
+                        <div class="orcamento-label">Saldo Disponível</div>
+                        <div class="orcamento-valor" id="orcamento-saldo" style="color: #22c55e">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3>Orçamentos por Centro de Custo</h3>
+                        <button class="btn btn-primary" onclick="abrirModalOrcamento()">
+                            <i class="fas fa-plus"></i> Novo Orçamento
+                        </button>
+                    </div>
+                    <div class="card-body" id="lista-orcamentos">
+                        <p style="color: var(--gray-400); text-align: center; padding: 40px;">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando orçamentos...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Orçamento -->
+    <div class="modal-overlay" id="modal-orcamento">
+        <div class="modal-box">
+            <div class="modal-header-custom">
+                <h3 id="modal-orc-titulo">Novo Orçamento</h3>
+                <button onclick="fecharModalOrcamento()" style="background:none;border:none;font-size:22px;color:#94a3b8;cursor:pointer;">×</button>
+            </div>
+            <div class="modal-body">
+                <form id="form-orcamento">
+                    <input type="hidden" id="orc-id">
+                    <div class="form-group">
+                        <label>Categoria *</label>
+                        <input type="text" id="orc-categoria" class="form-input" placeholder="Ex: Matéria-prima, Marketing..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Centro de Custo</label>
+                        <input type="text" id="orc-centro" class="form-input" placeholder="Ex: Produção, Administrativo...">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Limite Previsto (R$) *</label>
+                            <input type="number" id="orc-limite" class="form-input" step="0.01" min="0" placeholder="0,00" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Alerta em (%)</label>
+                            <input type="number" id="orc-alerta" class="form-input" min="0" max="100" placeholder="80" value="80">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer-custom">
+                <button type="button" onclick="fecharModalOrcamento()" class="btn btn-secondary">Cancelar</button>
+                <button type="button" onclick="salvarOrcamento()" class="btn btn-primary"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/popup-confirmacao.js"></script>
+    <script src="/js/auth-unified.js?v=20260326"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
+    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260319"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script>
+        const API_BASE = window.location.origin;
+        let orcamentos = [];
+        let editandoId = null;
+
+        document.addEventListener('DOMContentLoaded', () => { carregarOrcamentos(); });
+
+        async function carregarOrcamentos() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/orcamentos`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    orcamentos = Array.isArray(data) ? data : (data.data || []);
+                    renderizarOrcamentos(orcamentos);
+                    atualizarKPIs(orcamentos);
+                } else {
+                    document.getElementById('lista-orcamentos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhum orçamento cadastrado.</p>';
+                }
+            } catch (e) {
+                console.error('Erro:', e);
+                document.getElementById('lista-orcamentos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhum orçamento cadastrado.</p>';
+            }
+        }
+
+        function atualizarKPIs(items) {
+            const fmt = v => 'R$ ' + (v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const totalPrevisto = items.reduce((s, o) => s + (parseFloat(o.limite) || 0), 0);
+            const totalRealizado = items.reduce((s, o) => s + (parseFloat(o.gasto) || 0), 0);
+            document.getElementById('orcamento-previsto').textContent = fmt(totalPrevisto);
+            document.getElementById('orcamento-realizado').textContent = fmt(totalRealizado);
+            const saldo = totalPrevisto - totalRealizado;
+            const saldoEl = document.getElementById('orcamento-saldo');
+            saldoEl.textContent = fmt(saldo);
+            saldoEl.style.color = saldo >= 0 ? '#22c55e' : '#ef4444';
+        }
+
+        function renderizarOrcamentos(items) {
+            if (!items.length) {
+                document.getElementById('lista-orcamentos').innerHTML = '<p style="color: var(--gray-500); text-align: center; padding: 40px;"><i class="fas fa-info-circle"></i> Nenhum orçamento cadastrado.</p>';
+                return;
+            }
+            let html = '<table class="table"><thead><tr><th>Categoria</th><th>Centro de Custo</th><th>Previsto</th><th>Realizado</th><th>%</th><th>Status</th><th>Ações</th></tr></thead><tbody>';
+            items.forEach(o => {
+                const previsto = parseFloat(o.limite) || 0;
+                const realizado = parseFloat(o.gasto) || 0;
+                const pct = previsto > 0 ? ((realizado / previsto) * 100).toFixed(1) : 0;
+                const cls = pct > 100 ? 'status-danger' : pct > 80 ? 'status-warning' : 'status-ok';
+                const cat = (o.categoria || '-').replace(/</g, '&lt;');
+                const cc = (o.centro_custo || '-').replace(/</g, '&lt;');
+                html += `<tr>
+                    <td>${cat}</td>
+                    <td>${cc}</td>
+                    <td>R$ ${previsto.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td>R$ ${realizado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td><div class="progress-bar"><div class="progress-fill ${cls}" style="width: ${Math.min(pct, 100)}%"></div></div> ${pct}%</td>
+                    <td><span class="tipo-badge ${pct > 100 ? 'tipo-despesa' : 'tipo-receita'}">${pct > 100 ? 'Acima' : 'OK'}</span></td>
+                    <td>
+                        <button class="action-btn edit" onclick="editarOrcamento(${o.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="action-btn danger" onclick="excluirOrcamento(${o.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            document.getElementById('lista-orcamentos').innerHTML = html;
+        }
+
+        function abrirModalOrcamento() {
+            editandoId = null;
+            document.getElementById('modal-orc-titulo').textContent = 'Novo Orçamento';
+            document.getElementById('orc-id').value = '';
+            document.getElementById('orc-categoria').value = '';
+            document.getElementById('orc-centro').value = '';
+            document.getElementById('orc-limite').value = '';
+            document.getElementById('orc-alerta').value = '80';
+            document.getElementById('modal-orcamento').classList.add('active');
+        }
+
+        function editarOrcamento(id) {
+            const o = orcamentos.find(x => x.id === id);
+            if (!o) return;
+            editandoId = id;
+            document.getElementById('modal-orc-titulo').textContent = 'Editar Orçamento';
+            document.getElementById('orc-id').value = id;
+            document.getElementById('orc-categoria').value = o.categoria || '';
+            document.getElementById('orc-centro').value = o.centro_custo || '';
+            document.getElementById('orc-limite').value = o.limite || '';
+            document.getElementById('orc-alerta').value = o.alerta || '80';
+            document.getElementById('modal-orcamento').classList.add('active');
+        }
+
+        function fecharModalOrcamento() { document.getElementById('modal-orcamento').classList.remove('active'); }
+
+        async function salvarOrcamento() {
+            const categoria = document.getElementById('orc-categoria').value.trim();
+            const centro_custo = document.getElementById('orc-centro').value.trim() || null;
+            const limite = parseFloat(document.getElementById('orc-limite').value) || 0;
+            const alerta = parseInt(document.getElementById('orc-alerta').value) || 80;
+            if (!categoria || limite <= 0) { if (typeof showToast === 'function') showToast('Preencha categoria e limite.', 'warning'); return; }
+            try {
+                const url = editandoId ? `${API_BASE}/api/financeiro/orcamentos/${editandoId}` : `${API_BASE}/api/financeiro/orcamentos`;
+                const resp = await fetch(url, {
+                    method: editandoId ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({ categoria, centro_custo, limite, alerta, gasto: 0 })
+                });
+                if (resp.ok) {
+                    if (typeof showToast === 'function') showToast(editandoId ? 'Orçamento atualizado!' : 'Orçamento criado!', 'success');
+                    fecharModalOrcamento(); carregarOrcamentos();
+                } else {
+                    const err = await resp.json().catch(() => ({}));
+                    if (typeof showToast === 'function') showToast(err.error || 'Erro ao salvar.', 'error');
+                }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao salvar.', 'error'); }
+        }
+
+        async function excluirOrcamento(id) {
+            if (!confirm('Deseja excluir este orçamento?')) return;
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/orcamentos/${id}`, { method: 'DELETE', credentials: 'include' });
+                if (resp.ok) { if (typeof showToast === 'function') showToast('Orçamento excluído.', 'success'); carregarOrcamentos(); }
+                else { if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+            } catch (e) { console.error('Erro:', e); if (typeof showToast === 'function') showToast('Erro ao excluir.', 'error'); }
+        }
+    </script>
+</body>
+</html>

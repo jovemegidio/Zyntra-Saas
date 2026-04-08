@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Zyntra: Conciliação Bancária</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
+    <script src="/js/anti-copy-protection.js"></script>
+    <link rel="stylesheet" href="/css/popup-confirmacao.css">
+    <script src="/js/modal-title.js?v=20260319"></script>
+    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
+    <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+
+    <style>
+        .conciliacao-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .summary-card { background: white; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--gray-100); }
+        .summary-value { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .summary-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+        .match-row { display: flex; gap: 16px; align-items: center; padding: 12px; border-bottom: 1px solid var(--gray-100); }
+        .match-row:hover { background: var(--gray-50); }
+        .conciliado { color: #22c55e; }
+        .pendente { color: #f59e0b; }
+        .divergente { color: #ef4444; }
+        .upload-area { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; }
+        .upload-area:hover { border-color: var(--info-500); background: rgba(6, 182, 212, 0.04); }
+        .upload-area.dragover { border-color: var(--info-500); background: rgba(6, 182, 212, 0.08); }
+        .filtros-conciliacao { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; align-items: flex-end; }
+        .extrato-table { width: 100%; border-collapse: collapse; }
+        .extrato-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--gray-500); text-transform: uppercase; background: var(--gray-50); border-bottom: 1px solid var(--gray-200); }
+        .extrato-table td { padding: 10px 14px; font-size: 13px; color: var(--gray-700); border-bottom: 1px solid var(--gray-100); }
+        .extrato-table tr:hover td { background: var(--gray-50); }
+        .tipo-entrada { color: #059669; font-weight: 600; }
+        .tipo-saida { color: #dc2626; font-weight: 600; }
+        @media (max-width: 1024px) { .conciliacao-summary { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 640px) { .conciliacao-summary { grid-template-columns: 1fr; } .filtros-conciliacao { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <nav class="sidebar-nav">
+                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="contas_receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn active" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="impostos.html" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
+            </nav>
+            <div class="sidebar-bottom"><a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a></div>
+        </aside>
+
+        <main class="main-area" data-page-name="Conciliação Bancária">
+            <header class="header" id="financeiro-header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span class="header-separator">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span class="header-dash">—</span>
+                        <span class="page-title">Conciliação Bancária</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <div class="user-greeting">
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="fin-content">
+                <div class="page-header">
+                    <h1><i class="fas fa-balance-scale"></i> Conciliação Bancária</h1>
+                    <p class="page-subtitle">Compare extratos bancários com lançamentos internos</p>
+                </div>
+
+                <div class="conciliacao-summary">
+                    <div class="summary-card">
+                        <div class="summary-label">Saldo Bancário</div>
+                        <div class="summary-value" id="total-saldo-bancario">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">A Receber Pendente</div>
+                        <div class="summary-value" id="total-receber-pendente" style="color: var(--info-600)">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">A Pagar Pendente</div>
+                        <div class="summary-value pendente" id="total-pagar-pendente">R$ 0,00</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-label">Itens p/ Conciliar</div>
+                        <div class="summary-value" id="total-itens-conciliar">0</div>
+                    </div>
+                </div>
+
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('input-extrato').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 36px; color: var(--gray-300); margin-bottom: 12px; display:block;"></i>
+                    <p style="color: var(--gray-500); font-weight: 600;">Clique ou arraste para importar extrato bancário</p>
+                    <p style="color: var(--gray-400); font-size: 12px;">Suporta CSV e XLSX</p>
+                    <input type="file" id="input-extrato" accept=".csv,.xlsx" style="display:none" onchange="importarExtrato(this)">
+                </div>
+
+                <div class="filtros-conciliacao">
+                    <div class="filter-group">
+                        <label>Conta Bancária</label>
+                        <select id="filtro-conta" class="filter-input" onchange="carregarConciliacao()">
+                            <option value="">Todas</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Período</label>
+                        <input type="month" id="filtro-mes" class="filter-input" onchange="carregarConciliacao()">
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+                        <h3>Movimentações para Conciliação</h3>
+                        <span id="extrato-info" style="font-size:12px;color:var(--gray-400);"></span>
+                    </div>
+                    <div class="card-body" id="lista-conciliacao">
+                        <p style="color: var(--gray-400); text-align: center; padding: 40px;">
+                            <i class="fas fa-info-circle"></i> Carregando dados de conciliação...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/js/popup-confirmacao.js"></script>
+    <script src="/js/auth-unified.js?v=20260326"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
+    <script src="/js/inactivity-manager.js?v=20260324" defer></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
+    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/_shared/confirm-dialog.js?v=20260319"></script>
+    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
+    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script>
+        const API_BASE = window.location.origin;
+        let extratoData = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const hoje = new Date();
+            const mesEl = document.getElementById('filtro-mes');
+            if (mesEl) mesEl.value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}`;
+            carregarContas();
+            carregarConciliacao();
+            setupDragDrop();
+        });
+
+        function setupDragDrop() {
+            const area = document.getElementById('upload-area');
+            ['dragenter','dragover'].forEach(ev => area.addEventListener(ev, e => { e.preventDefault(); area.classList.add('dragover'); }));
+            ['dragleave','drop'].forEach(ev => area.addEventListener(ev, e => { e.preventDefault(); area.classList.remove('dragover'); }));
+            area.addEventListener('drop', e => {
+                const file = e.dataTransfer.files[0];
+                if (file) processarArquivo(file);
+            });
+        }
+
+        async function carregarContas() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/contas-bancarias`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const contas = Array.isArray(data) ? data : (data.data || []);
+                    const sel = document.getElementById('filtro-conta');
+                    contas.forEach(c => { sel.innerHTML += `<option value="${c.id}">${c.banco || c.nome || 'Conta'} - ${c.agencia || ''}/${c.conta || ''}</option>`; });
+                }
+            } catch (e) { console.warn('Erro ao carregar contas:', e); }
+        }
+
+        async function carregarConciliacao() {
+            try {
+                const resp = await fetch(`${API_BASE}/api/financeiro/conciliacao-resumo`, { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const fmt = v => 'R$ ' + (parseFloat(v) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                    set('total-saldo-bancario', fmt(data.saldoTotal));
+                    set('total-receber-pendente', fmt(data.pendentes?.receber?.total));
+                    set('total-pagar-pendente', fmt(data.pendentes?.pagar?.total));
+                    set('total-itens-conciliar', data.totalItensParaConciliar || 0);
+                    renderizarMovimentacoes(data.movimentacoes || []);
+                } else {
+                    document.getElementById('lista-conciliacao').innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Nenhum dado de conciliação disponível.</p>';
+                }
+            } catch (e) {
+                console.warn('Erro:', e);
+                document.getElementById('lista-conciliacao').innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Erro ao carregar dados de conciliação.</p>';
+            }
+        }
+
+        function renderizarMovimentacoes(movs) {
+            const container = document.getElementById('lista-conciliacao');
+            if (!movs.length) {
+                container.innerHTML = '<p style="color:var(--gray-400);text-align:center;padding:40px;"><i class="fas fa-info-circle"></i> Nenhuma movimentação pendente para conciliação.</p>';
+                return;
+            }
+            let html = '<table class="extrato-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Status</th></tr></thead><tbody>';
+            movs.forEach(m => {
+                const tipoClass = m.tipo === 'entrada' ? 'tipo-entrada' : 'tipo-saida';
+                const tipoLabel = m.tipo === 'entrada' ? '↓ Entrada' : '↑ Saída';
+                const valor = (parseFloat(m.valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                const data = m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-';
+                const desc = (m.descricao || '-').replace(/</g, '&lt;');
+                html += `<tr><td class="${tipoClass}">${tipoLabel}</td><td>${desc}</td><td>R$ ${valor}</td><td>${data}</td><td><span class="pendente">${m.status || 'pendente'}</span></td></tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        function importarExtrato(input) {
+            if (input.files && input.files[0]) processarArquivo(input.files[0]);
+        }
+
+        function processarArquivo(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (ext === 'csv') processarCSV(file);
+            else if (ext === 'xlsx' || ext === 'xls') processarXLSX(file);
+            else { if (typeof showToast === 'function') showToast('Formato não suportado. Use CSV ou XLSX.', 'warning'); }
+        }
+
+        function processarCSV(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const text = e.target.result;
+                    const lines = text.split(/\r?\n/).filter(l => l.trim());
+                    if (lines.length < 2) { if (typeof showToast === 'function') showToast('Arquivo vazio ou sem dados.', 'warning'); return; }
+                    const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                    const rows = [];
+                    for (let i = 1; i < lines.length; i++) {
+                        const cols = lines[i].split(/[;,]/).map(c => c.trim().replace(/"/g, ''));
+                        if (cols.length >= 2) {
+                            const obj = {};
+                            headers.forEach((h, idx) => obj[h] = cols[idx] || '');
+                            rows.push(obj);
+                        }
+                    }
+                    exibirExtrato(rows, file.name);
+                } catch (err) { console.error(err); if (typeof showToast === 'function') showToast('Erro ao processar CSV.', 'error'); }
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        function processarXLSX(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const wb = XLSX.read(e.target.result, { type: 'array' });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+                    if (!rows.length) { if (typeof showToast === 'function') showToast('Planilha vazia.', 'warning'); return; }
+                    // Normalize header keys to lowercase
+                    const normalized = rows.map(r => {
+                        const o = {};
+                        Object.keys(r).forEach(k => o[k.toLowerCase().trim()] = r[k]);
+                        return o;
+                    });
+                    exibirExtrato(normalized, file.name);
+                } catch (err) { console.error(err); if (typeof showToast === 'function') showToast('Erro ao processar XLSX.', 'error'); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function exibirExtrato(rows, filename) {
+            extratoData = rows;
+            document.getElementById('extrato-info').textContent = `Arquivo: ${filename} — ${rows.length} linhas importadas`;
+            if (typeof showToast === 'function') showToast(`${rows.length} registros importados de "${filename}"`, 'success');
+
+            const container = document.getElementById('lista-conciliacao');
+            // Detect columns
+            const keys = Object.keys(rows[0] || {});
+            const findCol = (...names) => keys.find(k => names.some(n => k.includes(n))) || null;
+            const colData = findCol('data', 'date', 'dt');
+            const colDesc = findCol('descri', 'desc', 'historico', 'hist', 'memo');
+            const colValor = findCol('valor', 'value', 'amount', 'vlr');
+            const colTipo = findCol('tipo', 'type', 'natureza');
+
+            let html = '<table class="extrato-table"><thead><tr><th>Tipo</th><th>Descrição</th><th>Valor</th><th>Data</th><th>Conciliação</th></tr></thead><tbody>';
+            rows.forEach((r, i) => {
+                let valor = parseFloat(String(r[colValor] || '0').replace(/[^0-9,.-]/g, '').replace(',', '.')) || 0;
+                let tipo = 'entrada';
+                if (colTipo && r[colTipo]) {
+                    tipo = String(r[colTipo]).toLowerCase().match(/saida|debito|déb|pag/) ? 'saida' : 'entrada';
+                } else if (valor < 0) {
+                    tipo = 'saida'; valor = Math.abs(valor);
+                }
+                const desc = (r[colDesc] || r[keys[1]] || '-').toString().replace(/</g, '&lt;');
+                const data = r[colData] || r[keys[0]] || '-';
+                const tipoClass = tipo === 'entrada' ? 'tipo-entrada' : 'tipo-saida';
+                html += `<tr><td class="${tipoClass}">${tipo === 'entrada' ? '↓ Entrada' : '↑ Saída'}</td><td>${desc}</td><td>R$ ${valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td>${data}</td><td><span class="pendente">Pendente</span></td></tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
