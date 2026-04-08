@@ -767,7 +767,8 @@ module.exports = function createPCPRoutes(deps) {
     router.get('/produtos/:id(\\d+)', async (req, res, next) => {
         try {
             const { id } = req.params;
-            const [rows] = await pool.query('SELECT id, codigo, codigo_produto, nome, descricao, unidade, preco, preco_custo, preco_venda, ncm, cfop, cst, categoria, estoque_atual, estoque_minimo, peso_liquido, peso_bruto, ativo, created_at, updated_at FROM produtos WHERE id = ?', [id]);
+            // Usar SELECT * para evitar ER_BAD_FIELD_ERROR em colunas que podem não existir
+            const [rows] = await pool.query('SELECT * FROM produtos WHERE id = ?', [id]);
 
             if (rows.length === 0) {
                 return res.status(404).json({ message: 'Produto não encontrado' });
@@ -1321,9 +1322,14 @@ module.exports = function createPCPRoutes(deps) {
 
             // Sprint 2 (P-01): Marcar pedido com produção iniciada
             if (pedido_id) {
-                await connection.query(
-                    'UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [pedido_id]
-                );
+                try {
+                    await connection.query(
+                        'UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [pedido_id]
+                    );
+                } catch (colErr) {
+                    // Coluna producao_iniciada pode não existir — ignorar silenciosamente
+                    console.warn('⚠️ Não foi possível marcar producao_iniciada no pedido:', colErr.message);
+                }
             }
 
             await connection.commit();
@@ -1778,64 +1784,8 @@ module.exports = function createPCPRoutes(deps) {
         }
     });
 
-    // API para dashboard do PCP - Contadores
-    // SECURITY: Requer autenticação
-    router.get('/dashboard', authenticateToken, async (req, res) => {
-        try {
-            console.log('📊 Carregando dashboard PCP...');
-
-            // Total de produtos ALUFORCE (marca = 'Aluforce')
-            const [produtosResult] = await pool.query("SELECT COUNT(*) as total FROM produtos WHERE marca = 'Aluforce'");
-            const totalProdutos = produtosResult[0]?.total || 0;
-
-            // Ordens em produção
-            const [ordensResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status IN ('em_producao', 'a_produzir', 'em_andamento', 'iniciado')
-            `);
-            const ordensEmProducao = ordensResult[0]?.total || 0;
-
-            // Estoque baixo (produtos com estoque abaixo do mínimo)
-            const [estoqueBaixoResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM produtos
-                WHERE quantidade_estoque < COALESCE(estoque_minimo, 10)
-                AND quantidade_estoque >= 0
-                AND marca = 'Aluforce'
-            `);
-            const estoqueBaixo = estoqueBaixoResult[0]?.total || 0;
-
-            // Entregas pendentes (esta semana) - usando data_prevista que existe na tabela
-            const [entregasResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status NOT IN ('entregue', 'concluido', 'cancelado', 'finalizado')
-                AND data_prevista BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
-            `);
-            const entregasPendentes = entregasResult[0]?.total || 0;
-
-            // Total de materiais
-            const [materiaisResult] = await pool.query('SELECT COUNT(*) as total FROM materiais');
-            const totalMateriais = materiaisResult[0]?.total || 0;
-
-            console.log(`📊 Dashboard PCP: Produtos=${totalProdutos}, Ordens=${ordensEmProducao}, Estoque Baixo=${estoqueBaixo}, Entregas=${entregasPendentes}, Materiais=${totalMateriais}`);
-
-            res.json({
-                totalProdutos,
-                ordensEmProducao,
-                estoqueBaixo,
-                entregasPendentes,
-                totalMateriais
-            });
-        } catch (error) {
-            console.error('❌ Erro ao carregar dashboard PCP:', error);
-            res.json({
-                totalProdutos: 0,
-                ordensEmProducao: 0,
-                estoqueBaixo: 0,
-                entregasPendentes: 0,
-                totalMateriais: 0
-            });
-        }
-    });
+    // [REMOVIDA] Rota /dashboard duplicada com queries hardcoded para 'Aluforce'.
+    // A rota principal /dashboard (linha ~138) é genérica e funciona para todas as empresas.
 
     // [REFACTORED] Diario de Producao (registro diario, CRUD)
     require('./pcp/diario-producao-routes')(router, deps);
@@ -3566,6 +3516,49 @@ module.exports = function createPCPRoutes(deps) {
                 });
             }
 
+            // 🔧 FIX: Buscar dados completos do cliente no banco quando faltam campos
+            if (dadosOrdem.cliente && (!dadosOrdem.cpf_cnpj || !dadosOrdem.contato_cliente || !dadosOrdem.fone_cliente)) {
+                try {
+                    const [clienteRows] = await pool.query(
+                        'SELECT cnpj_cpf, contato, telefone, email, endereco, bairro, cidade, estado, cep FROM clientes WHERE (nome = ? OR razao_social = ? OR nome_fantasia = ?) AND ativo = 1 LIMIT 1',
+                        [dadosOrdem.cliente, dadosOrdem.cliente, dadosOrdem.cliente]
+                    );
+                    if (clienteRows.length > 0) {
+                        const cli = clienteRows[0];
+                        if (!dadosOrdem.cpf_cnpj) dadosOrdem.cpf_cnpj = cli.cnpj_cpf || '';
+                        if (!dadosOrdem.contato_cliente) dadosOrdem.contato_cliente = cli.contato || '';
+                        if (!dadosOrdem.fone_cliente) dadosOrdem.fone_cliente = cli.telefone || '';
+                        if (!dadosOrdem.email_cliente) dadosOrdem.email_cliente = cli.email || '';
+                        if (!dadosOrdem.endereco) dadosOrdem.endereco = [cli.endereco, cli.bairro, cli.cidade, cli.estado].filter(Boolean).join(', ');
+                        if (!dadosOrdem.cep) dadosOrdem.cep = cli.cep || '';
+                        console.log('✅ Dados do cliente enriquecidos via banco:', cli.cnpj_cpf);
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados do cliente:', dbErr.message);
+                }
+            }
+
+            // 🔧 FIX: Buscar dados completos da transportadora no banco quando faltam campos
+            if (dadosOrdem.transportadora_nome && (!dadosOrdem.transportadora_fone || !dadosOrdem.transportadora_cep)) {
+                try {
+                    const [transpRows] = await pool.query(
+                        'SELECT cnpj_cpf, telefone, email, bairro, cidade, estado, cep FROM transportadoras WHERE (razao_social = ? OR nome_fantasia = ?) LIMIT 1',
+                        [dadosOrdem.transportadora_nome, dadosOrdem.transportadora_nome]
+                    );
+                    if (transpRows.length > 0) {
+                        const tr = transpRows[0];
+                        if (!dadosOrdem.transportadora_fone) dadosOrdem.transportadora_fone = tr.telefone || '';
+                        if (!dadosOrdem.transportadora_cpf_cnpj) dadosOrdem.transportadora_cpf_cnpj = tr.cnpj_cpf || '';
+                        if (!dadosOrdem.transportadora_email_nfe) dadosOrdem.transportadora_email_nfe = tr.email || '';
+                        if (!dadosOrdem.transportadora_cep) dadosOrdem.transportadora_cep = tr.cep || '';
+                        if (!dadosOrdem.transportadora_endereco) dadosOrdem.transportadora_endereco = [tr.bairro, tr.cidade, tr.estado].filter(Boolean).join(', ');
+                        console.log('✅ Dados da transportadora enriquecidos via banco:', tr.cnpj_cpf);
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados da transportadora:', dbErr.message);
+                }
+            }
+
             try {
                 console.log('📊 Tentando gerar XLSX usando template com ExcelJS...');
 
@@ -3791,12 +3784,9 @@ module.exports = function createPCPRoutes(deps) {
         cellC14.value = ''; // Manter vazio conforme template
         console.log(`   C14: Mantido em branco (conforme template)`);
 
-        // G14 - Email NF-e para Cobrança (PRIORIZAR EMAIL DO CLIENTE!)
-        const emailNfeCobranca = dados.email_nfe_cobranca || dados.email_cliente || dados.email ||
-                                 dados.email_nfe;
-        if (emailNfeCobranca) {
-            abaVendas.getCell('D14').value = emailNfeCobranca;
-        }
+        // G14 - Email NF-e para Cobrança - NÃO PREENCHER D14 (conforme requisito)
+        // D14 deve ficar vazio
+        abaVendas.getCell('D14').value = '';
 
         // C15 - CPF/CNPJ do CLIENTE (Dados para Cobrança - conforme template)
         // CORREÇÃO: Usar CNPJ do cliente, não da transportadora
@@ -3808,9 +3798,13 @@ module.exports = function createPCPRoutes(deps) {
             cnpjStr = ''; // Deixar vazio se não informado
         }
         const cellC15 = abaVendas.getCell('C15');
-        cellC15.value = Number(cnpjStr);
-        // Formatação visual igual ao template preenchido
-        cellC15.numFmt = '[<=99999999999]000.000.000-00;00.000.000/0000-00';
+        if (cnpjStr && cnpjStr.length >= 11) {
+            cellC15.value = Number(cnpjStr);
+            // Formatação visual igual ao template preenchido
+            cellC15.numFmt = '[<=99999999999]000.000.000-00;00.000.000/0000-00';
+        } else {
+            cellC15.value = ''; // Deixar vazio quando não informado (evita "TEMP" com formato)
+        }
 
         // 🔧 G15 - Email NF-e da transportadora (calcular ao invés de fórmula)
         const emailNfe = dados.transportadora_email_nfe || dados.transportadora?.email_nfe ||
@@ -3897,19 +3891,9 @@ module.exports = function createPCPRoutes(deps) {
                 // B - Código do produto (usado pelo VLOOKUP da coluna C)
                 abaVendas.getCell(`B${linhaAtual}`).value = codigoProd;
 
-                // C - Atualizar o RESULT da fórmula VLOOKUP para garantir que aparece a descrição
-                // Preservar a fórmula mas forçar o resultado
+                // C - Descrição do produto: SEMPRE forçar texto direto (evita "VLOOKUP" visível)
                 const cellC = abaVendas.getCell(`C${linhaAtual}`);
-                if (cellC.value && typeof cellC.value === 'object' && cellC.value.formula) {
-                    // Manter a fórmula e adicionar o resultado
-                    cellC.value = {
-                        formula: cellC.value.formula,
-                        result: descricaoCatalogo
-                    };
-                } else {
-                    // Se não tem fórmula, colocar direto
-                    cellC.value = descricaoCatalogo;
-                }
+                cellC.value = descricaoCatalogo || prod.descricao || prod['descrição'] || prod.nome || '';
 
                 // F - Embalagem
                 abaVendas.getCell(`F${linhaAtual}`).value = prod.embalagem || '';
@@ -4961,13 +4945,14 @@ module.exports = function createPCPRoutes(deps) {
     router.get('/vendedores', async (req, res, next) => {
         try {
             const query = req.query.q || '';
-            const limit = parseInt(req.query.limit) || 10;
+            const limit = Math.min(parseInt(req.query.limit) || 50, 200);
 
             if (!query) {
                 const [rows] = await pool.query(`
                     SELECT id, nome_completo as nome, cargo, departamento
                     FROM funcionarios
-                    WHERE status = 'ativo' AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                    WHERE status = 'ativo' AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR cargo LIKE '%representante%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                    ORDER BY nome_completo
                     LIMIT ?
                 `, [limit]);
                 return res.json(rows);
@@ -4978,8 +4963,9 @@ module.exports = function createPCPRoutes(deps) {
                 SELECT id, nome_completo as nome, cargo, departamento
                 FROM funcionarios
                 WHERE status = 'ativo'
-                AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR cargo LIKE '%representante%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
                 AND (nome_completo LIKE ? OR cargo LIKE ?)
+                ORDER BY nome_completo
                 LIMIT ?
             `, [searchPattern, searchPattern, limit]);
             res.json(rows);
@@ -8323,7 +8309,7 @@ module.exports = function createPCPRoutes(deps) {
                     TIME_FORMAT(ap.hora_fim, '%H:%i') as hora_fim,
                     ap.duracao_segundos as duracao,
                     ap.pedido_id,
-                    COALESCE(ped.numero_pedido, ap.pedido_id) as pedido_numero,
+                    COALESCE(CAST(ped.id AS CHAR), CAST(ap.pedido_id AS CHAR)) as pedido_numero,
                     ap.produto_descricao,
                     ap.observacoes
                 FROM apontamentos_producao ap

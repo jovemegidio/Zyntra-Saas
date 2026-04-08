@@ -78,7 +78,13 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 COALESCE(cnpj_cpf, cnpj, cpf, '') as cnpj_cpf,
                 COALESCE(cidade, '') as cidade,
                 COALESCE(estado, '') as uf,
-                telefone, email
+                telefone, email,
+                COALESCE(contato, nome_contato, '') as contato,
+                COALESCE(endereco, logradouro, '') as endereco,
+                COALESCE(bairro, '') as bairro,
+                COALESCE(cep, '') as cep,
+                COALESCE(email_nfe, '') as email_nfe,
+                COALESCE(nome_fantasia, '') as nome_fantasia
                 FROM clientes WHERE (ativo = 1 OR ativo IS NULL)`;
             let params = [];
             
@@ -110,11 +116,17 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 id: cliente.id,
                 razao_social: cliente.razao_social || cliente.nome || '',
                 nome: cliente.nome || cliente.razao_social || '',
+                nome_fantasia: cliente.nome_fantasia || '',
                 cnpj_cpf: cliente.cnpj_cpf || cliente.cnpj || cliente.cpf || '',
+                contato: cliente.contato || '',
                 cidade: cliente.cidade || '',
                 uf: cliente.uf || '',
                 telefone: cliente.telefone || '',
-                email: cliente.email || ''
+                email: cliente.email || '',
+                endereco: cliente.endereco || '',
+                bairro: cliente.bairro || '',
+                cep: cliente.cep || '',
+                email_nfe: cliente.email_nfe || cliente.email || ''
             }));
             
             res.json({ success: true, data: clientesFormatados, total: clientesFormatados.length });
@@ -152,7 +164,7 @@ function createClientesRouter(pool, authenticateToken, registrarAuditLog) {
                 ativo !== undefined ? (ativo ? 1 : 0) : 1,
                 req.user?.nome || null, req.user?.nome || null, req.user?.nome || null
             ]);
-            
+            /
             // Audit log
             if (registrarAuditLog) {
                 registrarAuditLog({

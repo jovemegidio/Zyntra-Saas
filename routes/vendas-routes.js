@@ -359,24 +359,39 @@ module.exports = function createVendasRoutes(deps) {
                 }
             }
 
-            // Auto-repair: fill NULL codigo/descricao from produto_id lookup
+            // Auto-repair: fill NULL/VLOOKUP codigo/descricao from produto_id or codigo lookup
             let repaired = false;
             for (const item of itensDB) {
-                if ((!item.codigo || !item.descricao) && item.produto_id) {
+                const descInvalid = !item.descricao || item.descricao.includes('VLOOKUP') || item.descricao.includes('vlookup');
+                if (descInvalid || !item.codigo) {
                     try {
-                        const [prods] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE id = ?', [item.produto_id]);
-                        if (prods.length > 0) {
+                        let prods = [];
+                        if (item.produto_id) {
+                            const [rows] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE id = ?', [item.produto_id]);
+                            prods = rows;
+                        }
+                        if (prods.length === 0 && item.codigo) {
+                            const [rows] = await pool.query('SELECT codigo, COALESCE(NULLIF(TRIM(descricao),\'\'), nome, codigo) as descricao FROM produtos WHERE codigo = ? LIMIT 1', [item.codigo]);
+                            prods = rows;
+                        }
+                        if (prods.length > 0 && prods[0].descricao && !prods[0].descricao.includes('VLOOKUP')) {
                             const pCodigo = prods[0].codigo || '';
                             const pDescricao = prods[0].descricao || '';
                             if (!item.codigo && pCodigo) { item.codigo = pCodigo; }
-                            if (!item.descricao && pDescricao) { item.descricao = pDescricao; }
-                            await pool.query('UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,\'\'), ?), descricao = COALESCE(NULLIF(descricao,\'\'), ?) WHERE id = ?', [pCodigo, pDescricao, item.id]);
-                            repaired = true;
+                            if (descInvalid && pDescricao) {
+                                item.descricao = pDescricao;
+                                await pool.query('UPDATE pedido_itens SET descricao = ? WHERE id = ?', [pDescricao, item.id]);
+                                repaired = true;
+                            }
+                            if (!item.codigo) {
+                                await pool.query('UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,\'\'), ?) WHERE id = ?', [pCodigo, item.id]);
+                                repaired = true;
+                            }
                         }
                     } catch (repairErr) { console.warn('[VENDAS] Auto-repair codigo/descricao erro:', repairErr.message); }
                 }
             }
-            if (repaired) console.log(`[VENDAS] Auto-repair: preencheu codigo/descricao via produto_id para pedido #${id}`);
+            if (repaired) console.log(`[VENDAS] Auto-repair: preencheu codigo/descricao via produto_id/codigo para pedido #${id}`);
 
             pedido.itens = itensDB;
             res.json(pedido);
@@ -3181,15 +3196,31 @@ module.exports = function createVendasRoutes(deps) {
                 [id]
             );
 
-            // Auto-repair: fill NULL codigo/descricao from produto_id
+            // Auto-repair: fill NULL/VLOOKUP codigo/descricao from produto_id or codigo lookup
             for (const item of itens) {
-                if ((!item.codigo || !item.descricao) && item.produto_id) {
+                const descInvalid = !item.descricao || item.descricao.includes('VLOOKUP') || item.descricao.includes('vlookup');
+                if (descInvalid || !item.codigo) {
                     try {
-                        const [prods] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE id = ?", [item.produto_id]);
-                        if (prods.length > 0) {
+                        let prods = [];
+                        // Tentar por produto_id primeiro
+                        if (item.produto_id) {
+                            const [rows] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE id = ?", [item.produto_id]);
+                            prods = rows;
+                        }
+                        // Se não achou por produto_id, tentar pelo código
+                        if (prods.length === 0 && item.codigo) {
+                            const [rows] = await pool.query("SELECT codigo, COALESCE(NULLIF(TRIM(descricao),''), nome, codigo) as descricao FROM produtos WHERE codigo = ? LIMIT 1", [item.codigo]);
+                            prods = rows;
+                        }
+                        if (prods.length > 0 && prods[0].descricao && !prods[0].descricao.includes('VLOOKUP')) {
                             if (!item.codigo && prods[0].codigo) item.codigo = prods[0].codigo;
-                            if (!item.descricao && prods[0].descricao) item.descricao = prods[0].descricao;
-                            await pool.query("UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,''), ?), descricao = COALESCE(NULLIF(descricao,''), ?) WHERE id = ?", [prods[0].codigo || '', prods[0].descricao || '', item.id]);
+                            if (descInvalid && prods[0].descricao) {
+                                item.descricao = prods[0].descricao;
+                                await pool.query("UPDATE pedido_itens SET descricao = ? WHERE id = ?", [prods[0].descricao, item.id]);
+                            }
+                            if (!item.codigo) {
+                                await pool.query("UPDATE pedido_itens SET codigo = COALESCE(NULLIF(codigo,''), ?) WHERE id = ?", [prods[0].codigo || '', item.id]);
+                            }
                         }
                     } catch (e) { /* non-blocking */ }
                 }
