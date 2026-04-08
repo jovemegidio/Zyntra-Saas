@@ -28,10 +28,10 @@
                     window.financeiroPermissoes = perms;
 
                     // Verificar acesso à página atual
-                    if (pathname.includes('contas-pagar') && perms.contas_pagar === false) {
+                    if (pathname.includes('contas_pagar') && perms.contas_pagar === false) {
                         redirecionarParaPaginaPermitidaAPI(perms);
                     }
-                    if (pathname.includes('contas-receber') && perms.contas_receber === false) {
+                    if (pathname.includes('contas_receber') && perms.contas_receber === false) {
                         redirecionarParaPaginaPermitidaAPI(perms);
                     }
 
@@ -47,11 +47,11 @@
 
     function redirecionarParaPaginaPermitidaAPI(perms) {
         if (perms.contas_receber !== false) {
-            window.location.href = 'contas-receber.html';
+            window.location.href = 'contas_receber.html';
         } else if (perms.contas_pagar !== false) {
-            window.location.href = 'contas-pagar.html';
+            window.location.href = 'contas_pagar.html';
         } else if (perms.fluxo_caixa !== false) {
-            window.location.href = 'fluxo-caixa.html';
+            window.location.href = 'fluxo_caixa.html';
         } else {
             window.location.href = 'index.html';
         }
@@ -86,11 +86,11 @@
         ocultarItemSeNaoTemPermissao('menu-conciliacao', perms.conciliacao);
         ocultarItemSeNaoTemPermissao('menu-relatorios', perms.relatorios);
 
-        // Por href (nomes de arquivo reais com hífens)
-        ocultarLinkPorHref('contas-receber.html', perms.contas_receber);
-        ocultarLinkPorHref('contas-pagar.html', perms.contas_pagar);
-        ocultarLinkPorHref('fluxo-caixa.html', perms.fluxo_caixa);
-        ocultarLinkPorHref('bancos.html', perms.bancos);
+        // Por href (nomes de arquivo reais com underscores)
+        ocultarLinkPorHref('contas_receber.html', perms.contas_receber);
+        ocultarLinkPorHref('contas_pagar.html', perms.contas_pagar);
+        ocultarLinkPorHref('fluxo_caixa.html', perms.fluxo_caixa);
+        ocultarLinkPorHref('contas_bancarias.html', perms.bancos);
         ocultarLinkPorHref('conciliacao.html', perms.conciliacao);
 
         // Esconder aba de relatórios CR/CP conforme permissão

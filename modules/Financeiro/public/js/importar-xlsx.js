@@ -357,65 +357,96 @@ function abrirModalImportar(tipo) {
         return;
     }
     
+    // Gerar opções de meses (12 meses para trás + 3 para frente)
+    const hoje = new Date();
+    let mesesOpts = '<option value="">Detectar automaticamente pela data</option>';
+    for (let offset = -12; offset <= 3; offset++) {
+        const d = new Date(hoje.getFullYear(), hoje.getMonth() + offset, 1);
+        const val = d.toISOString().slice(0, 7); // YYYY-MM
+        const label = d.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+        const labelCap = label.charAt(0).toUpperCase() + label.slice(1);
+        const selected = offset === 0 ? ' selected' : '';
+        mesesOpts += `<option value="${val}"${selected}>${labelCap}</option>`;
+    }
+    
     // Criar modal se não existir
     let modal = document.getElementById('modal-importar-xlsx');
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'modal-importar-xlsx';
         modal.className = 'modal-overlay';
-        modal.innerHTML = `
-            <div class="modal-container" style="max-width: 650px;">
-                <div class="modal-header">
-                    <h2><i class="fas fa-file-excel"></i> Importar Dados via Excel</h2>
-                    <button class="modal-close" onclick="fecharModalImportar()">&times;</button>
-                </div>
-                <div class="modal-body" style="padding: 24px;">
-                    <div style="text-align: center; padding: 20px;">
-                        <div style="margin-bottom: 20px;">
-                            <i class="fas fa-file-upload" style="font-size: 48px; color: #10b981;"></i>
-                        </div>
-                        
-                        <h3 style="margin-bottom: 16px; color: #1f2937;">Importar via planilha Excel</h3>
-                        
-                        <p style="color: #6b7280; margin-bottom: 20px;">
-                            Baixe o template, preencha os dados e faça o upload do arquivo.
-                        </p>
-                        
-                        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;">
-                            <button class="btn-secondary" onclick="baixarTemplate('${tipo}')" style="display: flex; align-items: center; gap: 8px;">
-                                <i class="fas fa-download"></i> Baixar Template
-                            </button>
-                        </div>
-                        
-                        <div style="border: 2px dashed #d1d5db; border-radius: 12px; padding: 40px 20px; background: #f9fafb; cursor: pointer;" 
-                             id="drop-zone-xlsx"
-                             onclick="document.getElementById('input-xlsx-file').click()">
-                            <input type="file" id="input-xlsx-file" accept=".xlsx,.xls" style="display: none;" 
-                                   onchange="processarArquivoXLSX(this.files[0], '${tipo}')">
-                            <i class="fas fa-cloud-upload-alt" style="font-size: 36px; color: #9ca3af; margin-bottom: 12px;"></i>
-                            <p style="color: #6b7280; margin: 0;">
-                                <strong>Clique para selecionar</strong> ou arraste o arquivo aqui
-                            </p>
-                            <p style="color: #9ca3af; font-size: 12px; margin-top: 8px;">
-                                Arquivos aceitos: .xlsx, .xls
-                            </p>
-                        </div>
-                        
-                        <div id="import-preview" style="margin-top: 16px; display: none;"></div>
-                        
-                        <div id="import-status" style="margin-top: 20px; display: none;">
-                            <div class="loading-spinner" style="margin: 0 auto;"></div>
-                            <p style="color: #6b7280; margin-top: 12px;">Processando arquivo...</p>
-                        </div>
-                        
-                        <div id="import-result" style="margin-top: 20px; display: none;"></div>
+    }
+    
+    modal.innerHTML = `
+        <div class="modal-container" style="max-width: 650px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-excel"></i> Importar Dados via Excel</h2>
+                <button class="modal-close" onclick="fecharModalImportar()">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <div style="text-align: center; padding: 20px;">
+                    <div style="margin-bottom: 20px;">
+                        <i class="fas fa-file-upload" style="font-size: 48px; color: #10b981;"></i>
                     </div>
+                    
+                    <h3 style="margin-bottom: 16px; color: #1f2937;">Importar via planilha Excel</h3>
+                    
+                    <p style="color: #6b7280; margin-bottom: 20px;">
+                        Selecione o mês de referência, baixe o template, preencha os dados e faça o upload.
+                    </p>
+                    
+                    <!-- Seletor de Mês de Referência -->
+                    <div style="margin-bottom: 20px; text-align: left; max-width: 350px; margin-left: auto; margin-right: auto;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px;">
+                            <i class="fas fa-calendar-alt" style="margin-right: 6px; color: #3b82f6;"></i> Mês de Referência
+                        </label>
+                        <select id="import-mes-referencia" style="width: 100%; padding: 10px 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; color: #1e293b; background: white; cursor: pointer;">
+                            ${mesesOpts}
+                        </select>
+                        <p style="font-size: 11px; color: #9ca3af; margin-top: 4px;">
+                            Os dados importados serão organizados por este mês. Se não selecionar, será detectado pela data de vencimento.
+                        </p>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 24px;">
+                        <button class="btn-secondary" onclick="baixarTemplate('${tipo}')" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-download"></i> Baixar Template
+                        </button>
+                    </div>
+                    
+                    <div style="border: 2px dashed #d1d5db; border-radius: 12px; padding: 40px 20px; background: #f9fafb; cursor: pointer;" 
+                         id="drop-zone-xlsx"
+                         onclick="document.getElementById('input-xlsx-file').click()">
+                        <input type="file" id="input-xlsx-file" accept=".xlsx,.xls" style="display: none;" 
+                               onchange="processarArquivoXLSX(this.files[0], '${tipo}')">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 36px; color: #9ca3af; margin-bottom: 12px;"></i>
+                        <p style="color: #6b7280; margin: 0;">
+                            <strong>Clique para selecionar</strong> ou arraste o arquivo aqui
+                        </p>
+                        <p style="color: #9ca3af; font-size: 12px; margin-top: 8px;">
+                            Arquivos aceitos: .xlsx, .xls
+                        </p>
+                    </div>
+                    
+                    <div id="import-preview" style="margin-top: 16px; display: none;"></div>
+                    
+                    <div id="import-status" style="margin-top: 20px; display: none;">
+                        <div class="loading-spinner" style="margin: 0 auto;"></div>
+                        <p style="color: #6b7280; margin-top: 12px;">Processando arquivo...</p>
+                    </div>
+                    
+                    <div id="import-result" style="margin-top: 20px; display: none;"></div>
                 </div>
             </div>
-        `;
+        </div>
+    `;
+    
+    if (!modal.parentElement) {
         document.body.appendChild(modal);
-        
-        // Adicionar drag & drop
+    }
+    
+    // Adicionar drag & drop
+    {
         const dropZone = document.getElementById('drop-zone-xlsx');
         if (dropZone) {
             dropZone.addEventListener('dragover', (e) => {
@@ -485,8 +516,7 @@ async function processarArquivoXLSX(file, tipo) {
         
         // Detectar linha de header automaticamente
         const headerRowIndex = detectHeaderRow(rawData, config.headerMap);
-        console.log('[IMPORT] Header detectado na linha:', headerRowIndex + 1);
-        
+
         const headers = rawData[headerRowIndex];
         if (!headers || headers.length < 2) {
             throw new Error('Não foi possível detectar os cabeçalhos da planilha');
@@ -505,7 +535,7 @@ async function processarArquivoXLSX(file, tipo) {
             }
         }
         
-        console.log('[IMPORT] Campos mapeados:', mappedCount, 'de', headers.length);
+
         console.log('[IMPORT] Mapeamento:', fieldMapping.map(f => `${f.headerOriginal} → ${f.campo}`));
         
         if (mappedCount === 0) {
@@ -600,9 +630,16 @@ async function processarArquivoXLSX(file, tipo) {
             <p style="color: #6b7280; margin-top: 12px;">Enviando ${dados.length} registros para o servidor...</p>
         `;
         
-        console.log('[IMPORT] Enviando', dados.length, 'registros para', config.endpoint);
+
+        // Enviar para API - incluir mes_referencia do seletor
+        const mesReferenciaSelect = document.getElementById('import-mes-referencia');
+        const mesReferenciaForced = mesReferenciaSelect ? mesReferenciaSelect.value : '';
         
-        // Enviar para API
+        // Se um mês foi selecionado, sobrescrever mes_referencia em todos os registros
+        if (mesReferenciaForced) {
+            dados.forEach(d => { d.mes_referencia = mesReferenciaForced; });
+        }
+        
         const response = await fetch(config.endpoint, {
             method: 'POST',
             headers: {

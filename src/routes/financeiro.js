@@ -778,7 +778,7 @@ router.get('/dashboard', authenticateToken, authorizeFinanceiro('dashboard'), as
  */
 router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
     try {
-        const { status, limite } = req.query;
+        const { status, limite, mes } = req.query;
         const dataInicio = req.query.dataInicio || req.query.data_inicio;
         const dataFim = req.query.dataFim || req.query.data_fim;
         let query = `
@@ -855,6 +855,12 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
         if (dataFim) {
             query += ' AND COALESCE(cr.data_vencimento, cr.vencimento) <= ?';
             params.push(dataFim);
+        }
+
+        // Filtro por mês (YYYY-MM)
+        if (mes && /^\d{4}-\d{2}$/.test(mes)) {
+            query += ' AND DATE_FORMAT(COALESCE(cr.data_vencimento, cr.vencimento), "%Y-%m") = ?';
+            params.push(mes);
         }
 
         query += ' ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC';
@@ -1100,6 +1106,14 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
             return res.status(400).json({ error: 'Nenhum campo para atualizar' });
         }
 
+        // AUDIT-FIX R2: Guard de idempotência — impedir pagamento duplo
+        if (status && ['liquidada', 'pago'].includes(status.toLowerCase())) {
+            const [current] = await pool.execute('SELECT status FROM contas_receber WHERE id = ?', [id]);
+            if (current.length && ['liquidada', 'pago', 'recebido'].includes((current[0].status || '').toLowerCase())) {
+                return res.status(409).json({ error: 'Esta conta já está liquidada/paga. Não é possível pagar novamente.' });
+            }
+        }
+
         params.push(id);
         const [result] = await pool.execute(
             `UPDATE contas_receber SET ${updates.join(', ')} WHERE id = ?`,
@@ -1264,7 +1278,7 @@ router.delete('/contas-receber/:id', authenticateToken, authorizeFinanceiro('rec
  */
 router.get('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     try {
-        const { status, limite } = req.query;
+        const { status, limite, mes } = req.query;
         const dataInicio = req.query.dataInicio || req.query.data_inicio;
         const dataFim = req.query.dataFim || req.query.data_fim;
         let query = `
@@ -1318,6 +1332,12 @@ router.get('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), asy
         if (dataFim) {
             query += ' AND COALESCE(cp.data_vencimento, cp.vencimento) <= ?';
             params.push(dataFim);
+        }
+
+        // Filtro por mês (YYYY-MM)
+        if (mes && /^\d{4}-\d{2}$/.test(mes)) {
+            query += ' AND DATE_FORMAT(COALESCE(cp.data_vencimento, cp.vencimento), "%Y-%m") = ?';
+            params.push(mes);
         }
 
         query += ' ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC';
@@ -1499,6 +1519,14 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
             return res.status(400).json({ error: 'Nenhum campo para atualizar' });
         }
         
+        // AUDIT-FIX R2: Guard de idempotência — impedir pagamento duplo
+        if (status && ['liquidada', 'pago'].includes(status.toLowerCase())) {
+            const [current] = await pool.execute('SELECT status FROM contas_pagar WHERE id = ?', [id]);
+            if (current.length && ['liquidada', 'pago'].includes((current[0].status || '').toLowerCase())) {
+                return res.status(409).json({ error: 'Esta conta já está liquidada/paga. Não é possível pagar novamente.' });
+            }
+        }
+
         params.push(id);
         const [result] = await pool.execute(
             `UPDATE contas_pagar SET ${updates.join(', ')} WHERE id = ?`,
@@ -1647,7 +1675,8 @@ router.put('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('banc
 router.delete('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const { id } = req.params;
-        const [result] = await pool.query('DELETE FROM contas_bancarias WHERE id = ?', [id]);
+        // AUDIT-FIX R3: Soft delete em vez de hard DELETE
+        const [result] = await pool.query('UPDATE contas_bancarias SET ativo = 0 WHERE id = ?', [id]);
         
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Conta bancária não encontrada' });
@@ -2749,7 +2778,8 @@ router.put('/bancos/:id', authenticateToken, authorizeFinanceiro('bancos'), asyn
 router.delete('/bancos/:id', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const { id } = req.params;
-        await pool.query('DELETE FROM bancos WHERE id = ?', [id]);
+        // AUDIT-FIX R3: Soft delete em vez de hard DELETE
+        await pool.query('UPDATE bancos SET ativo = 0 WHERE id = ?', [id]);
         res.json({ message: 'Banco excluído com sucesso' });
     } catch (error) {
         console.error('[Financeiro] Erro ao excluir banco:', error);
@@ -3001,7 +3031,7 @@ router.post('/importar/contas-pagar', authenticateToken, authorizeFinanceiro('pa
         res.json({ success: true, importados, total: dados.length, erros });
     } catch (error) {
         console.error('[Financeiro] Erro na importação contas-pagar:', error);
-        res.status(500).json({ error: 'Erro na importação', details: error.message });
+        res.status(500).json({ error: 'Erro na importação de contas a pagar' });
     }
 });
 
@@ -3089,7 +3119,7 @@ router.post('/importar/contas-receber', authenticateToken, authorizeFinanceiro('
         res.json({ success: true, importados, total: dados.length, erros });
     } catch (error) {
         console.error('[Financeiro] Erro na importação contas-receber:', error);
-        res.status(500).json({ error: 'Erro na importação', details: error.message });
+        res.status(500).json({ error: 'Erro na importação de contas a receber' });
     }
 });
 
@@ -3284,6 +3314,85 @@ router.patch('/notificacoes/:id', authenticateToken, async (req, res) => {
     }
 });
 
+/**
+ * GET /api/financeiro/prazo-medio
+ * Retorna dados reais de prazo médio agrupados por empresa e por dia de vencimento.
+ * Integra dados de contas_receber e contas_pagar.
+ */
+router.get('/prazo-medio', authenticateToken, async (req, res) => {
+    try {
+        const corte = req.financeiroCorteTemporal;
+        const hoje = new Date().toISOString().slice(0, 10);
+
+        // === CONTAS A RECEBER - por empresa ===
+        const crQuery = `
+            SELECT 
+                COALESCE(UPPER(TRIM(cr.empresa)), 'SEM EMPRESA') as empresa,
+                DATE_FORMAT(COALESCE(cr.data_vencimento, cr.vencimento), '%Y-%m-%d') as dia_vencimento,
+                COUNT(*) as qtd_titulos,
+                SUM(cr.valor) as valor_bruto,
+                SUM(COALESCE(cr.valor_recebido, 0)) as valor_recebido,
+                SUM(cr.valor - COALESCE(cr.valor_recebido, 0)) as valor_aberto,
+                cr.portador
+            FROM contas_receber cr
+            WHERE LOWER(cr.status) NOT IN ('liquidada','liquidado','pago','recebido','cancelada')
+                AND (cr.valor - COALESCE(cr.valor_recebido, 0)) > 0
+                ${corte ? corte.crClause('cr') : ''}
+            GROUP BY empresa, dia_vencimento, cr.portador
+            ORDER BY empresa, dia_vencimento
+        `;
+        const [crRows] = await pool.execute(crQuery);
+
+        // === CONTAS A PAGAR - por empresa ===
+        const cpQuery = `
+            SELECT 
+                COALESCE(UPPER(TRIM(cp.minha_empresa_nome_fantasia)), 'SEM EMPRESA') as empresa,
+                DATE_FORMAT(COALESCE(cp.data_vencimento, cp.vencimento), '%Y-%m-%d') as dia_vencimento,
+                COUNT(*) as qtd_titulos,
+                SUM(cp.valor) as valor_bruto,
+                SUM(COALESCE(cp.valor_pago, 0)) as valor_pago,
+                SUM(cp.valor - COALESCE(cp.valor_pago, 0)) as valor_aberto
+            FROM contas_pagar cp
+            WHERE LOWER(cp.status) NOT IN ('liquidada','liquidado','pago','cancelada')
+                AND (cp.valor - COALESCE(cp.valor_pago, 0)) > 0
+                ${corte ? corte.cpClause('cp') : ''}
+            GROUP BY empresa, dia_vencimento
+            ORDER BY empresa, dia_vencimento
+        `;
+        const [cpRows] = await pool.execute(cpQuery);
+
+        res.json({
+            success: true,
+            hoje,
+            contas_receber: crRows,
+            contas_pagar: cpRows
+        });
+    } catch (error) {
+        console.error('[Prazo Médio] Erro:', error);
+        res.status(500).json({ error: 'Erro ao calcular prazo médio', details: error.message });
+    }
+});
+
+// GET /api/financeiro/operacoes-credito — Operações de crédito
+router.get('/operacoes-credito', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
+    try {
+        const [rows] = await pool.execute(`
+            SELECT id, bordero, empresa, tipo_operacao, instituicao, prorrogacao,
+                   prazo_medio, data_operacao, taxa_periodo, tmp,
+                   vlr_bruto, qtde_titulos, dif_monet, tarifas,
+                   iss_riss_irrf_perc, iss_riss_irrf_monet, iof, cpmf_cobr,
+                   total_deducoes, liq_op, retencao_passivo, recompra,
+                   amort_fom, conta_grafica, liq_lib
+            FROM operacoes_credito
+            ORDER BY data_operacao DESC
+        `);
+        res.json({ success: true, data: rows });
+    } catch (error) {
+        console.error('[Operações Crédito] Erro:', error);
+        res.status(500).json({ error: 'Erro ao buscar operações', details: error.message });
+    }
+});
+
 module.exports = router;
 
 // =============================================
@@ -3451,7 +3560,8 @@ router.delete('/conciliacao/:id', authenticateToken, async (req, res) => {
         const [conc] = await pool.execute('SELECT extrato_id FROM conciliacoes WHERE id = ?', [id]);
         if (conc.length === 0) return res.status(404).json({ success: false, message: 'Conciliação não encontrada' });
         const extratoId = conc[0].extrato_id;
-        await pool.execute('DELETE FROM conciliacoes WHERE id = ?', [id]);
+        // AUDIT-FIX R3: Soft delete em vez de hard DELETE
+        await pool.execute('UPDATE conciliacoes SET ativo = 0 WHERE id = ?', [id]);
         if (extratoId) {
             await pool.execute('UPDATE extrato_bancario SET conciliado = 0 WHERE id = ?', [extratoId]);
         }

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -10,15 +10,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
-    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
+    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260408">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/importar-xlsx.js"></script>
     <script src="/js/anti-copy-protection.js"></script>
     <link rel="stylesheet" href="/css/popup-confirmacao.css">
-    <script src="/js/modal-title.js?v=20260319"></script>
+    <script src="/js/modal-title.js?v=20260408"></script>
 
     <style>
         /* ===== CONTAS A PAGAR — ESTILOS ESPECÍFICOS ===== */
@@ -243,29 +243,33 @@
 
         .highlight { background: #fef9c3; padding: 0 2px; border-radius: 2px; }
 
-        /* ===== MODAIS ===== */
-        .modal {
+        /* ===== MODAIS (padrão Omie) ===== */
+        .modal-overlay-omie {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.5);
+            width: 100%;
+            height: 100%;
+            background: rgba(15,23,42,0.65);
+            backdrop-filter: blur(4px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
         }
-        .modal.active {
+        .modal-overlay-omie.active {
             display: flex;
         }
-        .modal-content {
+        .modal-omie {
             background: white;
             border-radius: 16px;
             width: 95%;
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.25);
+            animation: cpSlideIn 0.25s ease-out;
         }
+        @keyframes cpSlideIn { from{opacity:0;transform:translateY(-20px) scale(0.98);} to{opacity:1;transform:translateY(0) scale(1);} }
 
         /* Modal Institucional */
         .modal-institucional {
@@ -670,7 +674,7 @@
         }
     </style>
     <!-- Chat Widget BOB AI -->
-    <link rel="stylesheet" href="/chat/widget.css?v=20260319">
+    <link rel="stylesheet" href="/chat/widget.css?v=20260408">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
 </head>
@@ -685,34 +689,34 @@
                 <i class="fas fa-home"></i>
             </a>
             <nav class="sidebar-nav">
-                <a href="index.html" class="sidebar-btn" title="Dashboard">
+                <a href="/Financeiro/index.html" class="sidebar-btn" title="Dashboard">
                     <i class="fas fa-chart-pie"></i>
                 </a>
-                <a href="contas_pagar.html" class="sidebar-btn active" title="Contas a Pagar">
+                <a href="/Financeiro/contas_pagar.html" class="sidebar-btn active" title="Contas a Pagar">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </a>
-                <a href="contas_receber.html" class="sidebar-btn" title="Contas a Receber">
+                <a href="/Financeiro/contas_receber.html" class="sidebar-btn" title="Contas a Receber">
                     <i class="fas fa-hand-holding-usd"></i>
                 </a>
-                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias">
+                <a href="/Financeiro/contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias">
                     <i class="fas fa-university"></i>
                 </a>
-                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa">
+                <a href="/Financeiro/fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa">
                     <i class="fas fa-money-bill-wave"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                <a href="/Financeiro/relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
-                <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas">
+                <a href="/Financeiro/plano_contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-sitemap"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                <a href="/Financeiro/conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                <a href="/Financeiro/orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-clipboard-list"></i>
                 </a>
-                <a href="impostos.html" class="sidebar-btn" title="Impostos">
+                <a href="/Financeiro/impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-receipt"></i>
                 </a>
             </nav>
@@ -870,8 +874,8 @@
     </div>
 
     <!-- Modal CNAB Preview -->
-    <div id="modal-cnab" class="modal">
-        <div class="modal-content modal-institucional" style="max-width:720px;">
+    <div id="modal-cnab" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalCNAB()">
+        <div class="modal-omie modal-institucional" style="max-width:720px;">
             <div class="modal-header-institucional" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
                 <div class="modal-header-icon"><i class="fas fa-file-code"></i></div>
                 <div class="modal-header-info">
@@ -896,8 +900,8 @@
     </div>
 
     <!-- Modal Importar Retorno CNAB -->
-    <div id="modal-retorno-cnab" class="modal">
-        <div class="modal-content modal-institucional" style="max-width:640px;">
+    <div id="modal-retorno-cnab" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalRetornoCNAB()">
+        <div class="modal-omie modal-institucional" style="max-width:640px;">
             <div class="modal-header-institucional" style="background:linear-gradient(135deg,#059669,#34d399);">
                 <div class="modal-header-icon"><i class="fas fa-file-import"></i></div>
                 <div class="modal-header-info">
@@ -926,8 +930,8 @@
     </div>
 
     <!-- Modal Nova/Editar Conta -->
-    <div id="modal-conta" class="modal">
-        <div class="modal-content modal-institucional">
+    <div id="modal-conta" class="modal-overlay-omie" onclick="if(event.target===this) fecharModal()">
+        <div class="modal-omie modal-institucional">
             <div class="modal-header-institucional">
                 <div class="modal-header-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                 <div class="modal-header-info">
@@ -1035,8 +1039,8 @@
     </div>
 
     <!-- Modal Visualizar -->
-    <div id="modal-visualizar" class="modal">
-        <div class="modal-content modal-visualizar">
+    <div id="modal-visualizar" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalVisualizar()">
+        <div class="modal-omie modal-visualizar">
             <div class="view-header">
                 <div class="view-header-top">
                     <span class="view-id" id="view-id">#000</span>
@@ -1071,8 +1075,8 @@
     </div>
 
     <!-- Modal Pagar -->
-    <div id="modal-pagar" class="modal">
-        <div class="modal-content modal-pagar">
+    <div id="modal-pagar" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalPagar()">
+        <div class="modal-omie modal-pagar">
             <div class="modal-pagar-header">
                 <div class="icon"><i class="fas fa-check-double"></i></div>
                 <div class="info"><h3>Confirmar Pagamento</h3><p>Registre os dados do pagamento</p></div>
@@ -1275,16 +1279,16 @@
             document.getElementById('conta-parcelas').value = 1;
             document.getElementById('parcelas-preview').style.display = 'none';
             if (id) {
-                const conta = contas.find(c => c.id === id);
+                const conta = contas.find(c => String(c.id) === String(id));
                 if (conta) {
                     document.getElementById('modal-titulo').textContent = 'Editar Despesa';
                     document.querySelector('.modal-header-info .modal-subtitle').textContent = 'Altere os dados da conta a pagar';
                     document.getElementById('conta-id').value = conta.id;
-                    document.getElementById('descrição').value = conta.descrição;
+                    document.getElementById('descrição').value = conta.descrição || conta.descricao || '';
                     document.getElementById('fornecedor-id').value = conta.fornecedor_id;
                     document.getElementById('categoria-id').value = conta.categoria_id;
-                    document.getElementById('conta-valor').value = conta.valor;
-                    document.getElementById('conta-vencimento').value = conta.data_vencimento?.split('T')[0];
+                    document.getElementById('conta-valor').value = conta.valor_total || conta.valor;
+                    document.getElementById('conta-vencimento').value = (conta.data_vencimento || conta.vencimento || '')?.split('T')[0];
                     document.getElementById('forma-pagamento').value = conta.forma_pagamento || 'pix';
                     document.getElementById('observacoes').value = conta.observacoes || '';
                     document.getElementById('numero-documento').value = conta.numero_documento || '';
@@ -1311,7 +1315,7 @@
 
             if (ids.length === 1) {
                 try {
-                    const response = await fetch(`/api/financeiro/contas-pagar/${ids[0]}/pagar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
+                    const response = await fetch(`/api/financeiro/contas-pagar/${ids[0]}/baixa`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                     if (response.ok) { alert('Pagamento confirmado com sucesso!'); fecharModalPagar(); contasSelecionadas.clear(); await init(); } else { alert('Erro ao confirmar pagamento'); }
                 } catch (error) { console.error('Erro:', error); alert('Erro ao confirmar pagamento'); }
             } else {
@@ -1321,7 +1325,7 @@
                     const c = contas.find(x => x.id === id);
                     const valorUnit = c ? parseFloat(c.valor_total || c.valor || 0) : dados.valor_pago / ids.length;
                     try {
-                        const resp = await fetch(`/api/financeiro/contas-pagar/${id}/pagar`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({...dados, valor_pago: valorUnit}) });
+                        const resp = await fetch(`/api/financeiro/contas-pagar/${id}/baixa`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({...dados, valor_pago: valorUnit}) });
                         if (resp.ok) ok++; else fail++;
                     } catch(e) { fail++; }
                 }
@@ -1396,10 +1400,10 @@
         // ===== VISUALIZAR =====
         let contaVisualizando = null;
         function visualizarConta(id) {
-            const conta = contas.find(c => c.id === id); if (!conta) return;
+            const conta = contas.find(c => String(c.id) === String(id)); if (!conta) return;
             contaVisualizando = conta;
             document.getElementById('view-id').textContent = '#' + conta.id;
-            document.getElementById('view-descrição').textContent = conta.descrição || '-';
+            document.getElementById('view-descrição').textContent = conta.descrição || conta.descricao || '-';
             document.getElementById('view-fornecedor').textContent = conta.fornecedor_nome || '-';
             document.getElementById('view-categoria').textContent = conta.categoria_nome || '-';
             document.getElementById('view-valor').textContent = `R$ ${(conta.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
@@ -1751,22 +1755,22 @@
         });
     </script>
 
-    <script src="/js/chat-suporte-widgets.js?v=20260319"></script>
-    <script src="../../_shared/connection-monitor.js?v=20260319"></script>
+    <script src="/js/chat-suporte-widgets.js?v=20260408"></script>
+    <script src="../../_shared/connection-monitor.js?v=20260408"></script>
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/js/auth-unified.js?v=20260326"></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
-    <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
-    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/js/mobile-auto-enhance.js?v=20260408" defer></script>
+    <script src="/Financeiro/js/financeiro-sidebar.js?v=20260408"></script>
 
-<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260319"></script>
+<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260408"></script>
     <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260319" defer></script>
-    <script src="/_shared/accessibility-widget.js?v=20260319"></script>
+    <script src="/chat/widget.js?v=20260408" defer></script>
+    <script src="/_shared/accessibility-widget.js?v=20260408"></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260319" defer></script>
-    <script src="/js/user-dropdown.js?v=20260319" defer></script>
+    <script src="/chat-teams/chat-widget.js?v=20260408" defer></script>
+    <script src="/js/user-dropdown.js?v=20260408" defer></script>
 </body>
 </html>

@@ -19,8 +19,7 @@
 
     // Carregar informações do usuário
     async function loadUserInfo() {
-        console.log('🔄 [Financeiro] Carregando dados do usuário...');
-        
+
         // Sempre buscar da API primeiro para garantir dados atualizados
         let user = null;
         
@@ -149,7 +148,7 @@
             }
         });
         
-        console.log('✅ [Financeiro] Usuário carregado:', primeiroNome, '| Foto:', temFotoValida ? fotoUrl : 'sem foto');
+
     }
 
     // Executar quando o DOM estiver pronto

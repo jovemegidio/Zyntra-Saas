@@ -16,7 +16,7 @@
         
         // Verificar se há cache válido
         if (cache[cacheKey] && (now - cache[cacheKey].timestamp) < CACHE_DURATION) {
-            console.log('[Cache] Usando cache para:', url);
+
             return cache[cacheKey].data;
         }
 
@@ -36,7 +36,7 @@
                     timestamp: now
                 };
                 
-                console.log('[Cache] Dados armazenados para:', url);
+
                 return data;
             }
             
@@ -46,7 +46,7 @@
             
             // Se tiver cache antigo, usar mesmo assim
             if (cache[cacheKey]) {
-                console.log('[Cache] Usando cache antigo para:', url);
+
                 return cache[cacheKey].data;
             }
             
@@ -58,18 +58,17 @@
     window.invalidarCache = function(url) {
         if (url) {
             delete cache[url];
-            console.log('[Cache] Cache invalidado para:', url);
+
         } else {
             // Invalidar todo o cache
             Object.keys(cache).forEach(key => delete cache[key]);
-            console.log('[Cache] Todo o cache foi invalidado');
+
         }
     };
 
     // Pré-carregar dados comuns do Financeiro
     window.precarregarDadosFinanceiro = async function() {
-        console.log('[Financeiro] Pré-carregando dados...');
-        
+
         const endpoints = [
             '/api/financeiro/contas-bancarias',
             '/api/financeiro/resumo',
@@ -86,7 +85,7 @@
         });
 
         await Promise.allSettled(promises);
-        console.log('[Financeiro] Pré-carregamento concluído');
+
     };
 
     // Iniciar pré-carregamento quando a página carregar

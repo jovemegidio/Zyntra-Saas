@@ -324,6 +324,33 @@
             .tabs-conta { overflow-x:auto; padding:0 16px; }
             .recebimentos-layout { flex-direction:column; }
         }
+
+        /* ============================================
+           RESPONSIVE - Workbook + Conteúdo
+           ============================================ */
+        @media (max-width: 1200px) {
+            .workbook-tabs { gap:0; }
+            .workbook-tab { padding:6px 12px; font-size:11px; }
+        }
+        @media (max-width: 768px) {
+            .workbook-tabs { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+            .workbook-tabs::-webkit-scrollbar { display:none; }
+            .workbook-tab { padding:6px 10px; font-size:10px; min-width:fit-content; }
+            .content-area { padding:12px 10px 16px; }
+            #pm-cards-global { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
+            #pm-cards-empresa { grid-template-columns:1fr !important; }
+            #pm-resultado-simulacao > div { grid-template-columns:1fr !important; }
+            #op-kpis-pub { grid-template-columns:repeat(2,1fr) !important; }
+            .filters-bar { flex-direction:column; }
+            .filter-group { width:100%; }
+            .filter-input { width:100%; min-width:auto; }
+        }
+        @media (max-width: 480px) {
+            #pm-cards-global { grid-template-columns:1fr !important; }
+            #op-kpis-pub { grid-template-columns:1fr !important; }
+            .workbook-tab { padding:5px 8px; font-size:9px; }
+            .content-area { padding:8px 6px 12px; }
+        }
     </style>
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
@@ -335,16 +362,16 @@
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
             <nav class="sidebar-nav">
-                <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="contas_receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
-                <a href="/bancos" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
-                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
-                <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
-                <a href="/orcamentos" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
-                <a href="/impostos" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
+                <a href="/Financeiro/index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
+                <a href="/Financeiro/contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="/Financeiro/contas_receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
+                <a href="/Financeiro/contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="/Financeiro/fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="/Financeiro/relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="/Financeiro/plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
+                <a href="/Financeiro/conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="/Financeiro/orcamentos.html" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="/Financeiro/impostos.html" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a>
@@ -1810,6 +1837,13 @@
             // Carregar dados da aba se necessario
             if (tabId === 'tab-pm') calcularPM();
             if (tabId === 'tab-fundos') renderizarFundosDetalhado();
+            if (tabId === 'tab-base') carregarBase();
+            if (tabId === 'tab-resumo') renderizarResumoTab();
+            if (tabId === 'tab-faturamento') renderizarFaturamentoTab();
+            if (tabId === 'tab-disponivel') renderizarDisponivelTab();
+            if (tabId === 'tab-diario') renderizarDiarioTab();
+            if (tabId === 'tab-operacoes') carregarOperacoesPub();
+            if (tabId === 'tab-td') renderizarTDTab();
             if (tabId === 'tab-base') carregarBase();
             if (tabId === 'tab-resumo') renderizarResumoTab();
             if (tabId === 'tab-faturamento') renderizarFaturamentoTab();
