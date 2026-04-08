@@ -848,10 +848,11 @@
         
         // Mapeamento de avatares por nome de usuário
         const avatarNameMap = {
-            'clemerson': '/avatars/Clemerson.webp',
-            'isabela': '/avatars/Isabela.webp',
+            'clemerson': '/avatars/Clemerson.png',
+            'isabela': '/avatars/Isabella.png',
+            'isabella': '/avatars/Isabella.png',
             'thaina': '/avatars/Thaina.webp',
-            'thiago': '/avatars/Thiago.webp',
+            'thiago': '/avatars/Thiago.png',
             'nicolas': '/avatars/NicolasDaniel.webp',
             'nicolasdaniel': '/avatars/NicolasDaniel.webp',
             'rh': '/avatars/Rh.webp',
@@ -860,16 +861,36 @@
             'tialuforce': '/avatars/TI.webp',
             'antonio': '/avatars/Antonio.webp',
             'andreia': '/avatars/Andreia.webp',
-            'guilherme': '/avatars/Guilherme.webp',
-            'marcia': '/avatars/Marcia.webp',
-            'augusto': '/avatars/Augusto.jpg',
-            'renata': '/avatars/Renata.jpg',
-            'fabiano': '/avatars/Fabiano.webp',
+            'guilherme': '/avatars/GuilhermeBastos.png',
+            'compras': '/avatars/GuilhermeBastos.png',
+            'marcia': '/avatars/Marcia.png',
+            'augusto': '/avatars/Augusto.png',
+            'renata': '/avatars/Renata.png',
+            'fabiano': '/avatars/Fabiano.png',
             'fabiola': '/avatars/Fabiola.webp',
-            'ronaldo': '/avatars/RonaldoTorres.jpg',
-            'joao': '/avatars/JoaoVictor.jpg',
+            'ronaldo': '/avatars/Ronaldo.png',
+            'joao': '/avatars/JoaoVitor.png',
             'douglas': '/avatars/Douglas.webp',
-            'fernando': '/avatars/Fernando.webp'
+            'fernando': '/avatars/Fernando.png',
+            'sergio': '/avatars/Sergio.png',
+            'lucas': '/avatars/Lucas.png',
+            'miqueias': '/avatars/Miqueias.png',
+            'lucio': '/avatars/Lucio.png',
+            'bruno': '/avatars/Bruno.png',
+            'tatiane': '/avatars/Tatiane.png',
+            'robson': '/avatars/Robson.png',
+            'junior': '/avatars/Junior.png',
+            'felipe': '/avatars/FelipeSimoes.png',
+            'hellen': '/avatars/Hellen.png',
+            'anapaula': '/avatars/AnaPaula.png',
+            'ana': '/avatars/AnaPaula.png',
+            'luiz': '/avatars/LuizHenrique.png',
+            'luizhenrique': '/avatars/LuizHenrique.png',
+            'ramon': '/avatars/Ramon.png',
+            'regina': '/avatars/Regina.png',
+            'christian': '/avatars/Christian.png',
+            'silvio': '/avatars/Silvio.png',
+            'cleiton': '/avatars/Cleiton.png'
         };
 
         function getAvatarFromEmail(email, nome) {
@@ -911,15 +932,11 @@
             const [cor1, cor2] = gerarCorAvatar(nome);
             
             // Lista de avatares válidos (fotos reais)
-            const avatarsValidos = ['ti', 'antonio', 'clemerson', 'isabela', 'thaina', 'thiago', 'nicolasdaniel', 'rh', 'guilherme', 'andreia', 'marcia', 'renata', 'fabiola', 'fabiano'];
-            // Avatares em formato .jpg (importados recentemente)
-            const avatarsJpg = ['marcia', 'renata', 'fabiola', 'fabiano'];
+            const avatarsValidos = ['ti', 'antonio', 'clemerson', 'isabela', 'isabella', 'thaina', 'thiago', 'nicolasdaniel', 'rh', 'guilherme', 'compras', 'andreia', 'marcia', 'renata', 'fabiola', 'fabiano', 'augusto', 'ronaldo', 'joao', 'douglas', 'fernando', 'sergio', 'lucas', 'miqueias', 'lucio', 'bruno', 'tatiane', 'robson', 'junior', 'felipe', 'hellen', 'anapaula', 'ana', 'luiz', 'luizhenrique', 'ramon', 'regina', 'christian', 'silvio', 'cleiton'];
             const username = email ? email.split('@')[0].split('.')[0].toLowerCase() : '';
             
             if (avatarsValidos.includes(username)) {
-                const ext = avatarsJpg.includes(username) ? 'jpg' : 'webp';
-                const nomeCapitalizado = username.charAt(0).toUpperCase() + username.slice(1);
-                const imgUrl = `/avatars/${nomeCapitalizado}.${ext}`;
+                const imgUrl = avatarNameMap[username] || `/avatars/${username.charAt(0).toUpperCase() + username.slice(1)}.png`;
                 return `<img src="${imgUrl}" alt="${nome}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
             }
             
@@ -935,7 +952,7 @@
                     const user = await response.json();
                     const userName = user.apelido || user.nome || 'Usuário';
                     const _partesNome = user.nome ? user.nome.split(/\s+/) : [];
-                    const primeiroNome = user.apelido || (_partesNome.length > 1 ? _partesNome[0] + ' ' + _partesNome[_partesNome.length - 1] : (_partesNome[0] || 'Usuário'));
+                    const primeiroNome = user.apelido || (_partesNome[0] || 'Usuário');
                     // Verificar múltiplos campos de foto
                     let userAvatar = (user.avatar || user.foto || user.foto_perfil_url);
                     if (userAvatar === '/avatars/default.webp') userAvatar = null;

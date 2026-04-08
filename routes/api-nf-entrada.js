@@ -37,8 +37,8 @@ function createNFEntradaRouter(pool, authenticateToken) {
         try {
             const { status, fornecedor, data_inicio, data_fim, pagina = 1, limite = 50 } = req.query;
             let query = `
-                SELECT id, chave_acesso, numero_nfe, serie, 
-                    fornecedor_cnpj, fornecedor_razao_social, fornecedor_uf,
+                SELECT id, chave_nfe AS chave_acesso, numero_nfe, serie, 
+                    emitente_cnpj AS fornecedor_cnpj, emitente_razao AS fornecedor_razao_social, emitente_uf AS fornecedor_uf,
                     valor_total, valor_icms, valor_ipi, valor_pis, valor_cofins,
                     credito_icms, credito_pis, credito_cofins,
                     data_emissao, data_entrada, status, manifestacao_status,
@@ -52,7 +52,7 @@ function createNFEntradaRouter(pool, authenticateToken) {
                 params.push(status);
             }
             if (fornecedor) {
-                query += ' AND (fornecedor_cnpj LIKE ? OR fornecedor_razao_social LIKE ?)';
+                query += ' AND (emitente_cnpj LIKE ? OR emitente_razao LIKE ?)';
                 params.push(`%${fornecedor}%`, `%${fornecedor}%`);
             }
             if (data_inicio) {

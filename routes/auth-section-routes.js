@@ -32,7 +32,9 @@ module.exports = function createAuthSectionRoutes(deps) {
     const path = require('path');
     const multer = require('multer');
     const fs = require('fs');
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
+    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
+    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
     const validate = (req, res, next) => {
         const errors = validationResult(req);
@@ -70,8 +72,12 @@ module.exports = function createAuthSectionRoutes(deps) {
     // SISTEMA DE LOGIN - ENDPOINT FALLBACK (authRouter é o principal)
     // ============================================================================
     
+    // AUDIT-FIX R2: Rate limiter reativado no login fallback
+    const rateLimit = require('express-rate-limit');
+    const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10, message: { message: 'Muitas tentativas de login. Tente novamente em 15 minutos.' }, standardHeaders: true, legacyHeaders: false });
+
     // Rota de login fallback (só executa se authRouter não capturar)
-    router.post('/login', /* authLimiter, */ async (req, res) => {
+    router.post('/login', authLimiter, async (req, res) => {
         logger.warn('[SERVER/LOGIN-FALLBACK] Rota de login fallback atingida - authRouter pode não estar funcionando');
         try {
             const { email, password } = req.body;
@@ -139,19 +145,21 @@ module.exports = function createAuthSectionRoutes(deps) {
                 }
             }
     
-            // SECURITY FIX: Plaintext password fallback REMOVIDO (Due Diligence 2026-02-15)
-            // Se o usuário ainda tem senha em texto plano, forçar reset via bcrypt
+            // AUDIT-FIX R2: Plaintext migration com timing-safe compare (previne timing attack)
             if (!senhaValida && user.senha && !user.senha_hash) {
-                // Migrar automaticamente para bcrypt na próxima tentativa válida
                 try {
                     const isPlaintext = !user.senha.startsWith('$2a$') && !user.senha.startsWith('$2b$');
                     if (isPlaintext) {
+                        const crypto = require('crypto');
                         const bcryptCheck = require('bcryptjs');
-                        // Comparar com texto plano para migração única
-                        if (user.senha === password) {
+                        // Timing-safe comparison para migração (evita timing attack)
+                        const storedBuf = Buffer.from(user.senha, 'utf8');
+                        const inputBuf = Buffer.from(password, 'utf8');
+                        const match = storedBuf.length === inputBuf.length && crypto.timingSafeEqual(storedBuf, inputBuf);
+                        if (match) {
                             const newHash = await bcryptCheck.hash(password, 12);
-                            await pool.query('UPDATE usuarios SET senha_hash = ?, password_hash = ? WHERE id = ?', [newHash, newHash, user.id]);
-                            logger.warn(`[SECURITY] Usuário ${user.id} migrado de texto plano para bcrypt.`);
+                            await pool.query('UPDATE usuarios SET senha_hash = ?, password_hash = ?, senha = NULL WHERE id = ?', [newHash, newHash, user.id]);
+                            logger.warn(`[SECURITY] Usuário ${user.id} migrado de texto plano para bcrypt. Senha plaintext apagada.`);
                             senhaValida = true;
                         }
                     }
@@ -193,11 +201,11 @@ module.exports = function createAuthSectionRoutes(deps) {
     
             console.log(`✅ Login bem-sucedido: ${user.email} | Secure Cookie: ${isSecure}`);
     
-            // Resposta de sucesso - inclui token e deviceId para multi-dispositivo
+            // AUDIT-FIX R2: JWT removido do body (usa apenas httpOnly cookie)
             res.json({
                 message: 'Login realizado com sucesso',
-                token: token, // Token JWT para localStorage (compatibilidade com módulos que usam Bearer token)
-                deviceId: deviceId, // 🔒 MULTI-DEVICE: ID único deste dispositivo
+                // token REMOVIDO do body — usar httpOnly cookie exclusivamente
+                deviceId: deviceId,
                 user: {
                     id: user.id,
                     nome: user.nome,
@@ -255,83 +263,20 @@ module.exports = function createAuthSectionRoutes(deps) {
     // Expõe a função globalmente
     global.registrarAuditLog = registrarAuditLog;
     
-    // GET /api/audit-log - Listar logs de auditoria
-    // SECURITY: Requer autenticação e privilégios de administrador
-    router.get('/audit-log', authenticateToken, authorizeAdmin, (req, res) => {
-        try {
-            const { limite = 50, modulo, usuario, acao, dataInicio, dataFim } = req.query;
+    // NOTA: GET/POST /api/audit-log foi removido daqui.
+    // O endpoint real está em routes/audit-api.js que lê do banco de dados.
     
-            let logs = [...auditLogs];
-    
-            // Filtros
-            if (modulo) {
-                logs = logs.filter(l => l.modulo.toLowerCase() === modulo.toLowerCase());
-            }
-    
-            if (usuario) {
-                logs = logs.filter(l => l.usuario.toLowerCase().includes(usuario.toLowerCase()));
-            }
-    
-            if (acao) {
-                logs = logs.filter(l => l.acao.toLowerCase() === acao.toLowerCase());
-            }
-    
-            if (dataInicio) {
-                const inicio = new Date(dataInicio);
-                logs = logs.filter(l => new Date(l.data) >= inicio);
-            }
-    
-            if (dataFim) {
-                const fim = new Date(dataFim);
-                logs = logs.filter(l => new Date(l.data) <= fim);
-            }
-    
-            // Limita resultado
-            const resultado = logs.slice(0, parseInt(limite));
-    
-            res.json({
-                success: true,
-                logs: resultado,
-                total: auditLogs.length,
-                filtrados: logs.length
-            });
-        } catch (error) {
-            console.error('Erro ao buscar logs:', error);
-            res.status(500).json({ success: false, message: 'Erro ao buscar logs' });
-        }
-    });
-    
-    // POST /api/audit-log - Registrar nova entrada
-    // SECURITY: Requer autenticação para registrar logs
-    router.post('/audit-log', authenticateToken, (req, res) => {
-        try {
-            const { usuario, usuarioId, acao, modulo, descricao, dados } = req.body;
-    
-            const log = registrarAuditLog({
-                usuario,
-                usuarioId,
-                acao,
-                modulo,
-                descricao,
-                dados,
-                ip: req.ip || req.connection?.remoteAddress
-            });
-    
-            res.json({ success: true, log });
-        } catch (error) {
-            console.error('Erro ao registrar log:', error);
-            res.status(500).json({ success: false, message: 'Erro ao registrar log' });
-        }
-    });
-    
-    // Adiciona alguns logs de exemplo na inicialização
+    // Adiciona log de inicialização no banco via writeAuditLog (se disponível)
     setTimeout(() => {
-        registrarAuditLog({
-            usuario: 'Sistema',
-            acao: 'Iniciou',
-            modulo: 'Sistema',
-            descricao: 'Sistema Aluforce iniciado com sucesso'
-        });
+        if (typeof writeAuditLog === 'function') {
+            writeAuditLog({
+                userId: null,
+                action: 'Iniciou',
+                module: 'Sistema',
+                description: 'Sistema Aluforce iniciado com sucesso',
+                ip: '127.0.0.1'
+            }).catch(() => {});
+        }
     }, 1000);
     
     // ============================================================================
@@ -947,32 +892,19 @@ module.exports = function createAuthSectionRoutes(deps) {
     });
     
     // Endpoint para obter permissões do usuário
-    // 🔐 v6.0: Prioridade = Authorization header > cookie
-    router.get('/permissions', (req, res) => {
-        const authHeader = req.headers['authorization'];
-        let token = null;
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const ht = authHeader.split(' ')[1];
-            if (ht && ht !== 'null' && ht !== 'undefined') token = ht;
-        }
-        if (!token) token = req.cookies?.authToken;
-        if (!token) return res.status(401).json({ message: 'Não autenticado' });
-    
-        try {
-            const user = jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] });
-            const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
-            const emailPrefix = user.email ? user.email.split('@')[0].toLowerCase() : '';
-    
-            const permissions = {
-                areas: userPermissions.getUserAreas(firstName) || userPermissions.getUserAreas(emailPrefix),
-                rhType: userPermissions.getRHType(firstName) || userPermissions.getRHType(emailPrefix),
-                isAdmin: userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)
-            };
-    
-            return res.json(permissions);
-        } catch (err) {
-            return res.status(401).json({ message: 'Token inválido' });
-        }
+    // 🔐 v7.0: Usa authenticateToken centralizado (fix: JWT bypass manual removido)
+    router.get('/permissions', authenticateToken, (req, res) => {
+        const user = req.user;
+        const firstName = user.nome ? user.nome.split(' ')[0].toLowerCase() : '';
+        const emailPrefix = user.email ? user.email.split('@')[0].toLowerCase() : '';
+
+        const permissions = {
+            areas: userPermissions.getUserAreas(firstName) || userPermissions.getUserAreas(emailPrefix),
+            rhType: userPermissions.getRHType(firstName) || userPermissions.getRHType(emailPrefix),
+            isAdmin: userPermissions.isAdmin(firstName) || userPermissions.isAdmin(emailPrefix)
+        };
+
+        return res.json(permissions);
     });
     
     // Atualizar perfil do usuário (nome, apelido, telefone, bio, etc.) - aceita token via cookie ou Authorization header

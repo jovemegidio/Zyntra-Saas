@@ -14,6 +14,11 @@ const userPermissions = {
         rhType: 'areaadm',
         isAdmin: true
     },
+    'gerenciavendas': {
+        areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'],
+        rhType: 'areaadm',
+        isAdmin: true
+    },
     'ti': {
         areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'],
         rhType: 'areaadm',
@@ -70,14 +75,9 @@ const userPermissions = {
         isAdmin: true
     },
 
-    // Guilherme Bastos (compras@aluforce.ind.br)
+    // Guilherme Bastos (compras@aluforce.ind.br) — acesso apenas a Compras e Configurações
     'compras': {
-        areas: ['vendas', 'compras', 'pcp', 'financeiro'],
-        rhType: 'funcionario',
-        isAdmin: false
-    },
-    'guilherme.bastos': {
-        areas: ['vendas', 'compras', 'pcp', 'financeiro'],
+        areas: ['compras'],
         rhType: 'funcionario',
         isAdmin: false
     },
@@ -233,7 +233,7 @@ function isAdmin(userName) {
     // Verifica se tem a flag isAdmin ou se está na lista de admins
     if (userPerms && userPerms.isAdmin) return true;
 
-    const adminUsers = ['douglas', 'andreia', 'ti', 'rh', 'antonio', 'egidio', 'junior', 'eldir', 'adm', 'aluforce'];
+    const adminUsers = ['douglas', 'andreia', 'gerenciavendas', 'ti', 'rh', 'antonio', 'egidio', 'junior', 'eldir', 'adm', 'aluforce'];
     return adminUsers.includes(userKey) || adminUsers.includes(normalizedKey);
 }
 

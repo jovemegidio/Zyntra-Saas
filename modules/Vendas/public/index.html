@@ -5778,8 +5778,8 @@
             </nav>
 
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurar Etapas do Processo" data-page="page.configuracoes"
-                    onclick="abrirModalEtapas()">
+                <button class="sidebar-btn" id="btn-config-etapas-sidebar" title="Configurar Etapas do Processo" data-page="page.configuracoes"
+                    onclick="abrirModalEtapas()" style="display:none;">
                     <i class="fas fa-cog"></i>
                 </button>
             </div>
@@ -5857,7 +5857,7 @@
                 <button onclick="abrirModalExportar()" title="Exportar" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:white;color:#475569;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;">
                     <i class="fas fa-download" style="font-size:13px;"></i>
                 </button>
-                <button onclick="abrirModalEtapas()" title="Configurações" style="display:flex;align-items:center;justify-content:center;width:34px;height:34px;background:white;color:#475569;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;">
+                <button id="btn-config-etapas-toolbar" onclick="abrirModalEtapas()" title="Configurações" style="display:none;align-items:center;justify-content:center;width:34px;height:34px;background:white;color:#475569;border:1px solid #e2e8f0;border-radius:7px;cursor:pointer;">
                     <i class="fas fa-cog" style="font-size:13px;"></i>
                 </button>
             </div>
@@ -6084,13 +6084,15 @@
                             <input type="hidden" id="edit-tipo-venda" value="consumidor">
                         </div>
                         <div class="info-field">
-                            <label>Condições de Pagamento</label>
+                            <label>Condições de Pagamento <span style="color:#ef4444;">*</span></label>
                             <select id="edit-condicao-pagamento-header" onchange="syncCondicaoPagamento('edit')" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                                <option value="">Selecione...</option>
                                 <option value="a_vista">À Vista</option>
-                                <option value="30">30 dias</option>
-                                <option value="30_60">30/60 dias</option>
-                                <option value="30_60_90">30/60/90 dias</option>
-                                <option value="28_35_42_49">28/35/42/49 dias</option>
+                                <option value="21_28_35">21/28/35 dias</option>
+                                <option value="28_35_42">28/35/42 dias</option>
+                                <option value="28_42">28/42 dias</option>
+                                <option value="21_28_35_42_49">21/28/35/42/49 dias</option>
+                                <option value="28_35_42_49_56">28/35/42/49/56 dias</option>
                                 <option value="personalizado">Personalizado</option>
                             </select>
                         </div>
@@ -6195,8 +6197,14 @@
                         <div class="form-row" style="display: grid; grid-template-columns: 2fr 1.5fr 1fr; gap: 12px; margin-bottom:12px;">
                             <div class="form-group" style="position: relative;">
                                 <label><i class="fas fa-truck" style="color: #f97316;"></i> Transportadora</label>
-                                <input type="text" id="edit-transportadora"
-                                    placeholder="Digite para buscar transportadora..." autocomplete="off">
+                                <div style="display: flex; gap: 6px; align-items: center;">
+                                    <input type="text" id="edit-transportadora"
+                                        placeholder="Digite para buscar transportadora..." autocomplete="off" style="flex:1;">
+                                    <button type="button" onclick="abrirModalNovaTransportadora()" title="Cadastrar nova transportadora"
+                                        style="width:36px;height:36px;border-radius:8px;border:1.5px solid #3b82f6;background:#eff6ff;color:#3b82f6;font-size:16px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
                                 <input type="hidden" id="edit-transportadora-id">
                                 <div id="dropdown-edit-transportadoras"
                                     style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15); max-height: 250px; overflow-y: auto; z-index: 9999;">
@@ -6918,17 +6926,16 @@
                                 <span style="font-size:13px; color:#666; font-weight:600;">%</span>
                             </div>
                             <script>
-                                // Aplicar restrição de desconto no orçamento quando o DOM carregar
+                                // Desconto liberado para todos até 33,88% — acima requer senha de supervisor
                                 document.addEventListener('DOMContentLoaded', function () {
                                     setTimeout(function () {
                                         const novoDescontoInput = document.getElementById('novo-desconto');
-                                        if (novoDescontoInput && typeof verificarPermissaoDesconto === 'function') {
-                                            const podeDesc = verificarPermissaoDesconto();
-                                            novoDescontoInput.readOnly = !podeDesc;
-                                            novoDescontoInput.disabled = !podeDesc;
-                                            novoDescontoInput.style.opacity = podeDesc ? '1' : '0.6';
-                                            novoDescontoInput.style.cursor = podeDesc ? 'text' : 'not-allowed';
-                                            novoDescontoInput.title = podeDesc ? '' : 'Apenas Andreia, Guilherme ou T.I. podem alterar o desconto';
+                                        if (novoDescontoInput) {
+                                            novoDescontoInput.readOnly = false;
+                                            novoDescontoInput.disabled = false;
+                                            novoDescontoInput.style.opacity = '1';
+                                            novoDescontoInput.style.cursor = 'text';
+                                            novoDescontoInput.title = 'Até 33,88% livre — acima requer autorização';
                                         }
                                     }, 2000);
                                 });
@@ -6973,13 +6980,15 @@
                             <input type="hidden" id="novo-tipo-venda" value="consumidor">
                         </div>
                         <div class="orcamento-field-group" style="flex: 1; min-width: 0;">
-                            <label>Condições de Pagamento</label>
-                            <select id="novo-condicao-pagamento" class="orcamento-input" onchange="syncCondicaoPagamento('novo')">
+                            <label>Condições de Pagamento <span style="color:#ef4444;">*</span></label>
+                            <select id="novo-condicao-pagamento" class="orcamento-input" onchange="syncCondicaoPagamento('novo')" required>
+                                <option value="">Selecione...</option>
                                 <option value="a_vista">À Vista</option>
-                                <option value="30">30 dias</option>
-                                <option value="30_60">30/60 dias</option>
-                                <option value="30_60_90">30/60/90 dias</option>
-                                <option value="28_35_42_49">28/35/42/49 dias</option>
+                                <option value="21_28_35">21/28/35 dias</option>
+                                <option value="28_35_42">28/35/42 dias</option>
+                                <option value="28_42">28/42 dias</option>
+                                <option value="21_28_35_42_49">21/28/35/42/49 dias</option>
+                                <option value="28_35_42_49_56">28/35/42/49/56 dias</option>
                                 <option value="personalizado">Personalizado</option>
                             </select>
                         </div>
@@ -10304,6 +10313,7 @@
             if (listEl) listEl.style.display = view === 'lista' ? '' : 'none';
             if (pipeEl) pipeEl.style.display = view === 'pipeline' ? '' : 'none';
 
+            if (view === 'kanban') renderKanban();
             if (view === 'lista') renderListView();
             if (view === 'pipeline') renderPipelineView();
         }
@@ -11201,14 +11211,13 @@
             // Desconto geral em %
             if (document.getElementById('edit-desconto-pct')) {
                 document.getElementById('edit-desconto-pct').value = pedido.desconto_pct || 0;
-                // Somente Andreia, Guilherme e T.I. podem alterar o desconto
-                const podeDesconto = verificarPermissaoDesconto();
+                // Todos podem alterar desconto até 33,88% — acima requer senha de supervisor
                 const descontoInput = document.getElementById('edit-desconto-pct');
-                descontoInput.readOnly = !podeDesconto;
-                descontoInput.disabled = !podeDesconto;
-                descontoInput.style.opacity = podeDesconto ? '1' : '0.6';
-                descontoInput.style.cursor = podeDesconto ? 'text' : 'not-allowed';
-                descontoInput.title = podeDesconto ? '' : 'Apenas Andreia, Guilherme ou T.I. podem alterar o desconto';
+                descontoInput.readOnly = false;
+                descontoInput.disabled = false;
+                descontoInput.style.opacity = '1';
+                descontoInput.style.cursor = 'text';
+                descontoInput.title = 'Até 33,88% livre — acima requer autorização';
             }
 
             // Atualizar alerta de status
@@ -13288,14 +13297,12 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 // Limpar campos de desconto e impostos
                 if (document.getElementById('edit-desconto-pct')) {
                     document.getElementById('edit-desconto-pct').value = 0;
-                    // Somente Andreia, Guilherme e T.I. podem alterar o desconto
-                    const podeDesconto = verificarPermissaoDesconto();
                     const descontoInput = document.getElementById('edit-desconto-pct');
-                    descontoInput.readOnly = !podeDesconto;
-                    descontoInput.disabled = !podeDesconto;
-                    descontoInput.style.opacity = podeDesconto ? '1' : '0.6';
-                    descontoInput.style.cursor = podeDesconto ? 'text' : 'not-allowed';
-                    descontoInput.title = podeDesconto ? '' : 'Apenas Andreia, Guilherme ou T.I. podem alterar o desconto';
+                    descontoInput.readOnly = false;
+                    descontoInput.disabled = false;
+                    descontoInput.style.opacity = '1';
+                    descontoInput.style.cursor = 'text';
+                    descontoInput.title = 'Até 33,88% livre — acima requer autorização';
                 }
                 if (document.getElementById('edit-desconto-valor')) {
                     document.getElementById('edit-desconto-valor').value = '0,00';
@@ -15241,10 +15248,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             atualizarCalculosItem();
         }
 
-        // Senhas de supervisores autorizados (hash simples para não expor em plaintext)
+        // Senhas de supervisores autorizados
         const _SENHAS_SUPERVISORES = {
-            'andreia': 'Andreia@2026',
-            'guilherme': 'Guilherme@2026'
+            'andreia': 'IMDOSREIS',
+            'guilherme': 'IMDOSREIS'
         };
 
         function confirmarDescontoAutorizado() {
@@ -15401,6 +15408,41 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             input.value = valor === '' ? '' : numero.toString();
         }
 
+        // ============================================================
+        // VALIDAÇÃO DE CONDIÇÃO DE PAGAMENTO POR FAIXA DE VALOR
+        // ============================================================
+        function validarCondicaoPagamentoValor(condicao, valorTotal) {
+            if (!condicao || condicao === 'a_vista' || condicao === 'personalizado') return null;
+
+            // Regras por faixa de valor
+            if (valorTotal >= 3000 && valorTotal <= 5999.99) {
+                // R$3.000–R$5.999: Prazo Máximo 21/28/35 — Prazo Médio 28
+                const permitidas = ['a_vista', '21_28_35'];
+                if (!permitidas.includes(condicao)) {
+                    return `Para pedidos de R$3.000 a R$5.999, a condição permitida é: À Vista ou 21/28/35 dias (Prazo Médio 28 dias).`;
+                }
+            } else if (valorTotal >= 6000 && valorTotal <= 9999.99) {
+                // R$6.000–R$9.999: 28/35/42 ou 28/42 — Máx 3 parcelas
+                const permitidas = ['a_vista', '21_28_35', '28_35_42', '28_42'];
+                if (!permitidas.includes(condicao)) {
+                    return `Para pedidos de R$6.000 a R$9.999, condições permitidas: À Vista, 28/35/42 ou 28/42 dias (Máx 3 parcelas).`;
+                }
+            } else if (valorTotal >= 10000 && valorTotal <= 19999.99) {
+                // R$10.000–R$19.999: 21/28/35/42/49 — Máx 5 parcelas
+                const permitidas = ['a_vista', '21_28_35', '28_35_42', '28_42', '21_28_35_42_49'];
+                if (!permitidas.includes(condicao)) {
+                    return `Para pedidos de R$10.000 a R$19.999, condição recomendada: 21/28/35/42/49 dias (Máx 5 parcelas).`;
+                }
+            } else if (valorTotal >= 20000) {
+                // Acima R$20.000: 28/35/42/49/56 — obrigatória validação financeiro
+                const permitidas = ['a_vista', '21_28_35', '28_35_42', '28_42', '21_28_35_42_49', '28_35_42_49_56'];
+                if (!permitidas.includes(condicao)) {
+                    return `Para pedidos acima de R$20.000, condição recomendada: 28/35/42/49/56 dias (Máx 5 parcelas). Validação do financeiro obrigatória.`;
+                }
+            }
+            return null; // OK
+        }
+
         // Sincronizar select visível de condição de pagamento com campo oculto
         function syncCondicaoPagamento(context) {
             if (context === 'edit') {
@@ -15413,6 +15455,40 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 recalcularParcelasAutomatico();
             }
             // 'novo': #novo-condicao-pagamento é lido diretamente pelo salvar — sem hidden necessário
+        }
+
+        // Filtrar opções de condição de pagamento baseado no valor do pedido
+        function filtrarCondicoesPorValor(selectId, valorTotal) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return;
+            const opcoes = sel.querySelectorAll('option');
+            opcoes.forEach(opt => {
+                const v = opt.value;
+                if (!v || v === 'a_vista' || v === 'personalizado') {
+                    opt.disabled = false;
+                    opt.style.display = '';
+                    return;
+                }
+                let permitida = true;
+                if (valorTotal > 0 && valorTotal < 3000) {
+                    // Abaixo de R$3.000: apenas À Vista ou Personalizado
+                    permitida = false;
+                } else if (valorTotal >= 3000 && valorTotal <= 5999.99) {
+                    permitida = ['21_28_35'].includes(v);
+                } else if (valorTotal >= 6000 && valorTotal <= 9999.99) {
+                    permitida = ['21_28_35', '28_35_42', '28_42'].includes(v);
+                } else if (valorTotal >= 10000 && valorTotal <= 19999.99) {
+                    permitida = ['21_28_35', '28_35_42', '28_42', '21_28_35_42_49'].includes(v);
+                } else if (valorTotal >= 20000) {
+                    permitida = ['21_28_35', '28_35_42', '28_42', '21_28_35_42_49', '28_35_42_49_56'].includes(v);
+                }
+                opt.disabled = !permitida;
+                opt.style.display = permitida ? '' : 'none';
+            });
+            // Se opção selecionada ficou desabilitada, resetar
+            if (sel.selectedOptions[0]?.disabled) {
+                sel.value = '';
+            }
         }
 
         // Recalcular parcelas automaticamente baseado na condição de pagamento
@@ -16329,6 +16405,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (freteResumoInput) freteResumoInput.value = formatarMoeda(frete);
             if (valorTotalInput) valorTotalInput.value = formatarMoeda(valorTotal);
 
+            // Filtrar condições de pagamento disponíveis conforme valor
+            filtrarCondicoesPorValor('edit-condicao-pagamento-header', valorTotal);
+
             // Atualizar o valor no pedidoAtual (mantendo consistência)
             if (pedidoAtual) {
                 pedidoAtual.valor = valorTotal;
@@ -17023,6 +17102,186 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('dropdown-edit-transportadoras').style.display = 'none';
 
             showNotification('Transportadora selecionada: ' + nome, 'success');
+        }
+
+        // ========================================
+        // MODAL NOVA TRANSPORTADORA
+        // ========================================
+        function abrirModalNovaTransportadora() {
+            // Remover modal anterior se existir
+            const anterior = document.getElementById('modal-nova-transportadora');
+            if (anterior) anterior.remove();
+
+            const modal = document.createElement('div');
+            modal.id = 'modal-nova-transportadora';
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:99999;display:flex;align-items:center;justify-content:center;';
+            modal.innerHTML = `
+                <div style="background:white;border-radius:16px;padding:32px;max-width:520px;width:95%;box-shadow:0 25px 50px rgba(0,0,0,0.25);max-height:90vh;overflow-y:auto;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h3 style="margin:0;color:#1e293b;font-size:18px;"><i class="fas fa-truck" style="color:#3b82f6;margin-right:8px;"></i>Nova Transportadora</h3>
+                        <button onclick="fecharModalNovaTransportadora()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#94a3b8;">&times;</button>
+                    </div>
+                    <div style="display:grid;gap:12px;">
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Razão Social *</label>
+                            <input type="text" id="nova-transp-razao" placeholder="Razão Social da transportadora..." style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Nome Fantasia</label>
+                            <input type="text" id="nova-transp-fantasia" placeholder="Nome fantasia..." style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">CNPJ</label>
+                                <input type="text" id="nova-transp-cnpj" placeholder="00.000.000/0000-00" maxlength="18" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;" oninput="formatarCNPJInput(this)">
+                            </div>
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Inscrição Estadual</label>
+                                <input type="text" id="nova-transp-ie" placeholder="IE..." style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Telefone</label>
+                                <input type="text" id="nova-transp-telefone" placeholder="(00) 00000-0000" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Email</label>
+                                <input type="text" id="nova-transp-email" placeholder="email@transp.com" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;">
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">Cidade</label>
+                                <input type="text" id="nova-transp-cidade" placeholder="Cidade..." style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">UF</label>
+                                <select id="nova-transp-uf" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                                    <option value="">UF</option>
+                                    <option value="AC">AC</option><option value="AL">AL</option><option value="AM">AM</option><option value="AP">AP</option>
+                                    <option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option>
+                                    <option value="GO">GO</option><option value="MA">MA</option><option value="MG">MG</option><option value="MS">MS</option>
+                                    <option value="MT">MT</option><option value="PA">PA</option><option value="PB">PB</option><option value="PE">PE</option>
+                                    <option value="PI">PI</option><option value="PR">PR</option><option value="RJ">RJ</option><option value="RN">RN</option>
+                                    <option value="RO">RO</option><option value="RR">RR</option><option value="RS">RS</option><option value="SC">SC</option>
+                                    <option value="SE">SE</option><option value="SP" selected>SP</option><option value="TO">TO</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:12px;font-weight:600;color:#374151;display:block;margin-bottom:4px;">CEP</label>
+                                <input type="text" id="nova-transp-cep" placeholder="00000-000" maxlength="9" style="width:100%;padding:10px 14px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:20px;">
+                        <button onclick="fecharModalNovaTransportadora()" style="flex:1;padding:12px;border-radius:8px;border:1px solid #d1d5db;background:white;color:#374151;font-weight:600;cursor:pointer;font-size:13px;">Cancelar</button>
+                        <button onclick="salvarNovaTransportadora()" style="flex:1;padding:12px;border-radius:8px;border:none;background:#3b82f6;color:white;font-weight:600;cursor:pointer;font-size:13px;"><i class="fas fa-save" style="margin-right:6px;"></i>Salvar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            setTimeout(() => document.getElementById('nova-transp-razao')?.focus(), 100);
+        }
+
+        function fecharModalNovaTransportadora() {
+            const modal = document.getElementById('modal-nova-transportadora');
+            if (modal) modal.remove();
+        }
+
+        function formatarCNPJInput(input) {
+            let v = input.value.replace(/\D/g, '').substring(0, 14);
+            if (v.length > 12) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/, '$1.$2.$3/$4-$5');
+            else if (v.length > 8) v = v.replace(/^(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+            else if (v.length > 5) v = v.replace(/^(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            else if (v.length > 2) v = v.replace(/^(\d{2})(\d{1,3})/, '$1.$2');
+            input.value = v;
+
+            // Auto-fill when CNPJ is complete (14 digits)
+            if (v.replace(/\D/g, '').length === 14) {
+                buscarCNPJTransportadora(v.replace(/\D/g, ''));
+            }
+        }
+
+        async function buscarCNPJTransportadora(cnpj) {
+            try {
+                showNotification('Consultando CNPJ...', 'info');
+                const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('CNPJ não encontrado');
+                const dados = await response.json();
+
+                // Preencher campos do modal
+                if (dados.razao_social) document.getElementById('nova-transp-razao').value = dados.razao_social;
+                if (dados.nome_fantasia) document.getElementById('nova-transp-fantasia').value = dados.nome_fantasia;
+                if (dados.inscricao_estadual) document.getElementById('nova-transp-ie').value = dados.inscricao_estadual;
+
+                // Telefone
+                const telRaw = dados.ddd_telefone_1 || '';
+                const telDigits = telRaw.replace(/\D/g, '');
+                if (telDigits.length >= 10) {
+                    document.getElementById('nova-transp-telefone').value = `(${telDigits.slice(0, 2)}) ${telDigits.slice(2)}`;
+                } else if (telRaw) {
+                    document.getElementById('nova-transp-telefone').value = telRaw;
+                }
+
+                if (dados.email) document.getElementById('nova-transp-email').value = dados.email;
+                if (dados.municipio) document.getElementById('nova-transp-cidade').value = dados.municipio;
+                if (dados.uf) document.getElementById('nova-transp-uf').value = dados.uf;
+
+                // CEP
+                const cepLimpo = (dados.cep || '').replace(/\D/g, '');
+                if (cepLimpo) {
+                    document.getElementById('nova-transp-cep').value = cepLimpo.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+                }
+
+                showNotification('Dados preenchidos automaticamente!', 'success');
+            } catch (err) {
+                console.warn('CNPJ não encontrado:', err.message);
+            }
+        }
+
+        async function salvarNovaTransportadora() {
+            const razao = document.getElementById('nova-transp-razao')?.value?.trim();
+            if (!razao) {
+                showNotification('Razão Social é obrigatória', 'error');
+                document.getElementById('nova-transp-razao')?.focus();
+                return;
+            }
+
+            const dados = {
+                razao_social: razao,
+                nome_fantasia: document.getElementById('nova-transp-fantasia')?.value?.trim() || '',
+                cnpj_cpf: (document.getElementById('nova-transp-cnpj')?.value || '').replace(/\D/g, ''),
+                inscricao_estadual: document.getElementById('nova-transp-ie')?.value?.trim() || '',
+                telefone: document.getElementById('nova-transp-telefone')?.value?.trim() || '',
+                email: document.getElementById('nova-transp-email')?.value?.trim() || '',
+                cidade: document.getElementById('nova-transp-cidade')?.value?.trim() || '',
+                estado: document.getElementById('nova-transp-uf')?.value || '',
+                cep: document.getElementById('nova-transp-cep')?.value?.trim() || ''
+            };
+
+            try {
+                const resp = await fetch('/api/vendas/transportadoras', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+                    credentials: 'include',
+                    body: JSON.stringify(dados)
+                });
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    throw new Error(err.error || 'Erro ao salvar');
+                }
+                const result = await resp.json();
+
+                // Selecionar a transportadora recém-criada
+                const nome = dados.nome_fantasia || dados.razao_social;
+                selecionarTransportadoraEdit(result.id, nome, dados.cnpj_cpf);
+
+                fecharModalNovaTransportadora();
+                showNotification('Transportadora cadastrada com sucesso!', 'success');
+            } catch (err) {
+                showNotification('Erro: ' + err.message, 'error');
+            }
         }
 
         // Função de consulta de crédito para modal de edição
@@ -18166,6 +18425,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('novo-total-ipi').value = totalIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('novo-total-icms').value = totalIcms.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('novo-valor-total').value = valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+            // Filtrar condições de pagamento disponíveis conforme valor
+            filtrarCondicoesPorValor('novo-condicao-pagamento', valorTotal);
         }
 
         // Modal Adicionar Item
@@ -18549,7 +18811,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             const cliente = document.getElementById('novo-cliente').value.trim();
             const clienteId = document.getElementById('novo-cliente-id').value;
             const valorTotal = parseFloat(document.getElementById('novo-valor-total').value.replace('.', '').replace(',', '.')) || 0;
-            const parcelas = document.getElementById('novo-parcelas').value;
+            const condicaoPagamento = document.getElementById('novo-condicao-pagamento')?.value || '';
             const vendedorId = document.getElementById('novo-vendedor-id').value;
             const vendedorNome = document.getElementById('novo-vendedor').value.trim();
             const transportadora = document.getElementById('novo-transportadora')?.value?.trim() || '';
@@ -18574,10 +18836,27 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 ativarAbaOrcamento('itens');
                 return;
             }
+            if (!condicaoPagamento || condicaoPagamento === '') {
+                showNotification('Condição de pagamento é obrigatória.', 'warning');
+                document.getElementById('novo-condicao-pagamento')?.focus();
+                return;
+            }
 
-            // Mapear parcelas
-            const parcelasMap = {
+            // Validar condição de pagamento vs valor total
+            const erroCondicao = validarCondicaoPagamentoValor(condicaoPagamento, valorTotal);
+            if (erroCondicao) {
+                showNotification(erroCondicao, 'warning');
+                return;
+            }
+
+            // Mapear condições de pagamento
+            const condicoesMap = {
                 'a_vista': 'À Vista',
+                '21_28_35': '21/28/35 dias',
+                '28_35_42': '28/35/42 dias',
+                '28_42': '28/42 dias',
+                '21_28_35_42_49': '21/28/35/42/49 dias',
+                '28_35_42_49_56': '28/35/42/49/56 dias',
                 '30': '30 dias',
                 '30_60': '30/60 dias',
                 '30_60_90': '30/60/90 dias',
@@ -18600,7 +18879,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                         vendedor_id: vendedorId,
                         valor: valorTotal,
                         status: 'orcamento',
-                        condicao_pagamento: parcelasMap[parcelas] || parcelas,
+                        condicao_pagamento: condicoesMap[condicaoPagamento] || condicaoPagamento,
                         cenario_fiscal: cenarioFiscal,
                         previsao_faturamento: previsaoFaturamento,
                         frete: frete,
@@ -19653,29 +19932,43 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function aplicarRestricoesVendedor() {
             console.log('[Vendas] Aplicando restrições de vendedor...');
 
-            // ---- SIDEBAR: "Meu Dashboard" só visível para vendedores (não admin/supervisor) ----
-            if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {
+            if (usuarioLogado.isAdmin || usuarioLogado.isSupervisor) {
+                // ---- ADMIN/SUPERVISOR: mostrar "Gestão de Vendas", ocultar "Meu Dashboard" ----
+                document.querySelectorAll('.sidebar-btn').forEach(btn => {
+                    const title = btn.getAttribute('title') || btn.getAttribute('data-title');
+                    if (title === 'Gestão de Vendas') {
+                        btn.style.display = '';
+                        btn.style.removeProperty('display');
+                    }
+                });
+                // Remover CSS injetado pelo vendas-admin-check.js (redundância segura)
+                const hideStyle = document.getElementById('vendas-gestao-hide-css');
+                if (hideStyle) hideStyle.remove();
+                // Ocultar "Meu Dashboard" para admins
+                document.querySelectorAll('.btn-meu-dashboard').forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                console.log('[Vendas] Admin/Supervisor: Gestão de Vendas visível, Meu Dashboard oculto');
+            } else {
+                // ---- VENDEDOR: mostrar "Meu Dashboard", ocultar "Gestão de Vendas" ----
                 document.querySelectorAll('.btn-meu-dashboard').forEach(btn => {
                     btn.style.display = '';
                 });
-            }
-            // Admin/supervisor: manter oculto (default)
-
-            // ---- SIDEBAR: esconder páginas admin para vendedores ----
-            if (!usuarioLogado.isAdmin && !usuarioLogado.isSupervisor) {
                 // Esconder "Gestão de Vendas" (dashboard-admin.html) — somente admin
                 document.querySelectorAll('.sidebar-btn').forEach(btn => {
-                    if (btn.getAttribute('title') === 'Gestão de Vendas') {
+                    const title = btn.getAttribute('title') || btn.getAttribute('data-title');
+                    if (title === 'Gestão de Vendas') {
                         btn.style.display = 'none';
                     }
                 });
                 // Esconder "Configurar Etapas do Processo" — somente admin
                 document.querySelectorAll('.sidebar-bottom .sidebar-btn').forEach(btn => {
-                    if (btn.getAttribute('title') === 'Configurar Etapas do Processo') {
+                    const title = btn.getAttribute('title') || btn.getAttribute('data-title');
+                    if (title === 'Configurar Etapas do Processo') {
                         btn.style.display = 'none';
                     }
                 });
-                console.log('[Vendas] Botões admin ocultados para vendedor');
+                console.log('[Vendas] Vendedor: Meu Dashboard visível, Gestão de Vendas oculto');
             }
 
             // ---- FILTRO VENDEDOR: bloquear para vendedor puro ----
@@ -19759,6 +20052,14 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     if (!usuarioLogado.isAdmin) {
                         const btnPipeline = document.getElementById('btn-pipeline-view');
                         if (btnPipeline) btnPipeline.style.display = 'none';
+                    }
+
+                    // Gear icon: mostrar apenas para admins
+                    if (usuarioLogado.isAdmin) {
+                        const btnConfigSidebar = document.getElementById('btn-config-etapas-sidebar');
+                        const btnConfigToolbar = document.getElementById('btn-config-etapas-toolbar');
+                        if (btnConfigSidebar) btnConfigSidebar.style.display = '';
+                        if (btnConfigToolbar) btnConfigToolbar.style.display = 'flex';
                     }
 
                     // ========================================
@@ -22709,6 +23010,19 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 _kanbanRefreshTimer = setTimeout(() => carregarDadosKanban(filtrosState), 1500);
             }
             window.addEventListener('focus', debouncedRefreshKanban);
+
+            // REATIVIDADE: Escutar alterações de configuração (sem precisar F5)
+            window.addEventListener('zyntra:configUpdated', (e) => {
+                const tipo = e.detail && e.detail.tipo;
+                if (tipo === 'impostos') {
+                    console.log('🔄 Recarregando impostos (config atualizada)');
+                    carregarConfigImpostosSistema();
+                }
+                if (tipo === 'condicoes-pagamento' || tipo === 'vendedores' || tipo === 'tabelas-preco' || tipo === 'venda-produtos') {
+                    console.log('🔄 Config alterada:', tipo, '— atualizando kanban');
+                    debouncedRefreshKanban();
+                }
+            });
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') debouncedRefreshKanban();
             });

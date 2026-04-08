@@ -4,6 +4,45 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.5.0] — 2026-04-08
+
+### Adicionado
+- **App Android Nativo (Kotlin)**: Aplicativo Android completo com Clean Architecture (MVVM), Hilt DI, Retrofit — módulos: Vendas, Compras, Financeiro, PCP, RH, NFe, Clientes, Dashboard; autenticação com TokenAuthenticator/SessionManager
+- **Base Enterprise Multi-Tenant**: Sistema base reutilizável (Indústria, Comércio, Serviços, Agropecuário, Demo) com 516+ módulos e 110+ páginas públicas
+- **AI Proxy**: Nova rota de integração com serviços de IA (`routes/ai-proxy.js`)
+- **PDF Template Engine**: Motor de geração de PDFs profissionais (`routes/pdf-template.js`)
+- **Fotos Colaboradores (Comissões)**: 28 fotos reais integradas ao sistema de avatares com `avatarNameMap` de 44 funcionários — elimina iniciais coloridas
+- **Condições de Pagamento Dinâmicas**: Opções filtradas automaticamente pelo valor total do pedido — À Vista sempre disponível; condições a prazo habilitadas conforme faixa de valor
+- **CNPJ Auto-Fill (Transportadoras)**: Ao digitar CNPJ completo no modal Nova Transportadora, preenche automaticamente razão social, nome fantasia, IE, telefone, email, cidade, UF e CEP via API proxy
+- **POST /transportadoras**: Cadastro rápido de transportadoras direto do modal de vendas com botão "+"
+- **Auto-Entrada de Estoque**: Entrada automática no estoque ao importar XML de NF de Entrada (compras)
+- **Rate Limiter Redis**: Rate limiting em produção com Redis (`services/rate-limiter-redis.js`)
+- **Financeiro Sidebar JS**: Componente de sidebar dinâmica para módulo Financeiro
+- **Monitoring Stack**: Dashboards Grafana + métricas Prometheus para monitoramento em produção
+- **Página 403 (Acesso Negado)**: Página profissional de controle de acesso
+- **Z-Index Scale (Design System)**: Escala padronizada de z-index para consistência visual
+- **Condições de Pagamento Utils**: Módulo utilitário reutilizável (`utils/condicoes-pagamento.js`)
+- **12+ Relatórios de Auditoria**: Documentação detalhada de segurança, qualidade e permissões do ERP
+
+### Corrigido
+- **Histórico de Alterações (Audit Log)**: Rota duplicada em `auth-section-routes.js` interceptava antes da rota real — removida; modal agora exibe dados reais de 3 tabelas MySQL
+- **Condições de Pagamento — Labels**: Removidos textos de faixa de valor dos labels do dropdown (ex: "R$3.000–R$5.999"); validação agora é dinâmica com opções habilitadas/desabilitadas conforme valor
+- **Condições de Pagamento — Novo Orçamento**: Campo lia de `novo-parcelas` (inexistente); corrigido para `novo-condicao-pagamento` com validação obrigatória
+- **NFs de Entrada — Mapeamento de Colunas**: Aliases corrigidos: `chave_nfe→chave_acesso`, `emitente_cnpj→fornecedor_cnpj`, `emitente_razao→fornecedor_razao_social`
+- **Permissões — guilherme.bastos**: Login removido; migrado para `compras@aluforce.ind.br` com acesso restrito ao módulo Compras
+- **Desconto 33.88%**: Validação de desconto aceita percentuais com decimais corretamente
+
+### Alterado
+- **Permissões Compras@**: Usuário `compras` restrito a `areas: ['compras']` (antes tinha acesso a vendas, PCP, financeiro)
+- **Avatares Comissões**: Sistema migrado de `.webp/.jpg` para `.png` padronizado com mapa de 44 funcionários
+
+### Implantação
+- 9 arquivos de código + 29 fotos de avatar deployados na VPS
+- DB atualizado (login guilherme.bastos → compras)
+- PM2 reiniciado (aluforce-v2-production)
+
+---
+
 ## [2.4.0] — 2026-04-06
 
 ### Adicionado

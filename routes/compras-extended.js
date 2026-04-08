@@ -277,7 +277,8 @@ module.exports = function createComprasExtendedRoutes(deps) {
     });
 
     // Criar novo material
-    router.post('/materiais', authenticateToken, async (req, res) => {
+    // AUDIT-FIX R3: Adicionado requireComprasWrite (estava faltando)
+    router.post('/materiais', authenticateToken, requireComprasWrite, async (req, res) => {
         try {
             const {
                 codigo, descricao, categoria, unidade, especificacoes, ncm, cest,
@@ -1624,6 +1625,121 @@ module.exports = function createComprasExtendedRoutes(deps) {
         }
     });
 
+    // Importar NF-e por chave de acesso (44 dígitos)
+    router.post('/nf-entrada/importar-chave', authenticateToken, async (req, res) => {
+        try {
+            const chaveRaw = (req.body.chave || '').replace(/\D/g, '');
+            if (chaveRaw.length !== 44) {
+                return res.status(400).json({ error: 'Chave de acesso deve ter 44 dígitos' });
+            }
+
+            await initTabelaNfEntrada;
+
+            // Verificar duplicidade
+            const [existe] = await pool.query('SELECT id FROM nf_entrada WHERE chave_nfe = ?', [chaveRaw]);
+            if (existe.length > 0) {
+                return res.json({ success: false, duplicada: true, id: existe[0].id, error: 'NF-e já importada' });
+            }
+
+            // Decodificar informações da chave de acesso
+            const info = {
+                uf: chaveRaw.substring(0, 2),
+                aamm: chaveRaw.substring(2, 6),
+                cnpj: chaveRaw.substring(6, 20),
+                modelo: chaveRaw.substring(20, 22),
+                serie: parseInt(chaveRaw.substring(22, 25)),
+                numero: parseInt(chaveRaw.substring(25, 34)),
+                forma_emissao: chaveRaw.substring(34, 35),
+                codigo_numerico: chaveRaw.substring(35, 43),
+                dv: chaveRaw.substring(43, 44)
+            };
+
+            // Mapa de UF
+            const UF_MAP = {
+                '11':'RO','12':'AC','13':'AM','14':'RR','15':'PA','16':'AP','17':'TO',
+                '21':'MA','22':'PI','23':'CE','24':'RN','25':'PB','26':'PE','27':'AL','28':'SE','29':'BA',
+                '31':'MG','32':'ES','33':'RJ','35':'SP',
+                '41':'PR','42':'SC','43':'RS',
+                '50':'MS','51':'MT','52':'GO','53':'DF'
+            };
+            const ufSigla = UF_MAP[info.uf] || info.uf;
+
+            const dataEmissao = `20${info.aamm.substring(0, 2)}-${info.aamm.substring(2, 4)}-01`;
+
+            // Formatar CNPJ extraído da chave (14 dígitos -> XX.XXX.XXX/XXXX-XX)
+            function formatCNPJ(raw) {
+                const d = raw.replace(/\D/g, '');
+                if (d.length !== 14) return raw;
+                return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12,14)}`;
+            }
+            const cnpjFormatado = formatCNPJ(info.cnpj);
+
+            // Buscar fornecedor pelo CNPJ
+            let fornecedorRazao = 'Fornecedor não cadastrado';
+            let fornecedorCNPJ = cnpjFormatado;
+            try {
+                // Busca por CNPJ limpo (sem pontuação) — usa aspas simples no SQL
+                const [fornecedores] = await pool.query(
+                    `SELECT razao_social, nome_fantasia, cnpj FROM fornecedores 
+                     WHERE REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') = ?
+                        OR cnpj = ?
+                        OR cnpj = ?`,
+                    [info.cnpj, cnpjFormatado, info.cnpj]
+                );
+                if (fornecedores.length > 0) {
+                    fornecedorRazao = fornecedores[0].razao_social || fornecedores[0].nome_fantasia || fornecedorRazao;
+                    fornecedorCNPJ = fornecedores[0].cnpj || cnpjFormatado;
+                } else {
+                    // Fallback: buscar pela raiz do CNPJ (8 primeiros dígitos = mesma empresa, filial diferente)
+                    const raizCnpj = info.cnpj.substring(0, 8);
+                    const [fornecedoresRaiz] = await pool.query(
+                        `SELECT razao_social, nome_fantasia, cnpj FROM fornecedores 
+                         WHERE REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE CONCAT(?, '%')
+                         LIMIT 1`,
+                        [raizCnpj]
+                    );
+                    if (fornecedoresRaiz.length > 0) {
+                        fornecedorRazao = fornecedoresRaiz[0].razao_social || fornecedoresRaiz[0].nome_fantasia || fornecedorRazao;
+                        // Mantém o CNPJ da NF (filial diferente), não o do cadastro
+                    }
+                }
+            } catch (e) {
+                console.warn('[COMPRAS] Erro ao buscar fornecedor por CNPJ:', e.message);
+            }
+
+            // Inserir NF de entrada com dados da chave
+            // emitente_cnpj é VARCHAR(14) — armazenar sem formatação
+            const cnpjParaDB = info.cnpj; // 14 dígitos raw
+            const [insertResult] = await pool.query(`
+                INSERT INTO nf_entrada (
+                    chave_nfe, numero_nfe, serie,
+                    emitente_cnpj, emitente_razao, emitente_uf,
+                    valor_produtos, valor_frete, valor_seguro, valor_desconto, valor_outras_despesas, valor_total,
+                    base_icms, valor_icms, base_icms_st, valor_icms_st, valor_ipi, valor_pis, valor_cofins,
+                    data_emissao, data_entrada, status, xml_conteudo
+                ) VALUES (?, ?, ?, ?, ?, ?, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ?, NOW(), 'pendente', NULL)
+            `, [
+                chaveRaw, info.numero, info.serie,
+                cnpjParaDB, fornecedorRazao, ufSigla,
+                dataEmissao
+            ]);
+
+            res.json({
+                success: true,
+                id: insertResult.insertId,
+                chave_acesso: chaveRaw,
+                numero_nfe: info.numero,
+                serie: info.serie,
+                data_emissao: dataEmissao,
+                fornecedor: { razao_social: fornecedorRazao, cnpj: cnpjFormatado },
+                message: `NF ${info.numero} registrada via chave de acesso`
+            });
+        } catch (error) {
+            console.error('[COMPRAS] Erro ao importar por chave:', error);
+            res.status(500).json({ error: 'Erro ao registrar NF-e por chave de acesso' });
+        }
+    });
+
     // Listar NFs de entrada importadas
     router.get('/nf-entrada', authenticateToken, async (req, res) => {
         await initTabelaNfEntrada; // Garantir que tabela existe
@@ -1702,10 +1818,22 @@ module.exports = function createComprasExtendedRoutes(deps) {
             };
 
             // Buscar fornecedor pelo CNPJ extraído da chave
+            const cnpjRaw = info.cnpj;
+            const raizCnpj = cnpjRaw.substring(0, 8);
             const [fornecedores] = await pool.query(
-                'SELECT razao_social, nome_fantasia, cnpj FROM fornecedores WHERE cnpj = ?',
-                [info.cnpj]
+                `SELECT razao_social, nome_fantasia, cnpj FROM fornecedores 
+                 WHERE REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') = ?
+                    OR REPLACE(REPLACE(REPLACE(cnpj, '.', ''), '-', ''), '/', '') LIKE CONCAT(?, '%')
+                 LIMIT 1`,
+                [cnpjRaw, raizCnpj]
             );
+
+            // Formatar CNPJ para exibição
+            function fmtCNPJ(raw) {
+                const d = raw.replace(/\D/g, '');
+                if (d.length !== 14) return raw;
+                return `${d.slice(0,2)}.${d.slice(2,5)}.${d.slice(5,8)}/${d.slice(8,12)}-${d.slice(12,14)}`;
+            }
 
             res.json({
                 encontrada: false,
@@ -1716,7 +1844,7 @@ module.exports = function createComprasExtendedRoutes(deps) {
                 emitente: fornecedores.length > 0 ? {
                     razao_social: fornecedores[0].razao_social,
                     cnpj: fornecedores[0].cnpj
-                } : { cnpj: info.cnpj, razao_social: 'Fornecedor não cadastrado' },
+                } : { cnpj: fmtCNPJ(info.cnpj), razao_social: 'Fornecedor não cadastrado' },
                 valor_total: null,
                 message: 'NF-e não encontrada no banco local. Dados decodificados da chave de acesso.'
             });
@@ -3095,6 +3223,56 @@ async function processarXMLEntradaCompras(pool, xmlContent, userId) {
         console.warn('[COMPRAS] Erro ao auto-cadastrar fornecedor:', e.message);
     }
 
+    // ============================================================
+    // ENTRADA AUTOMÁTICA EM ESTOQUE — cada item da NFe entra no estoque
+    // ============================================================
+    let itensEstoque = 0;
+    try {
+        const [itensNF] = await pool.query(
+            'SELECT codigo_produto, descricao, unidade, quantidade FROM nf_entrada_itens WHERE nf_entrada_id = ?',
+            [nfEntradaId]
+        );
+        for (const item of itensNF) {
+            if (!item.quantidade || item.quantidade <= 0) continue;
+            // Tentar encontrar material existente pelo código
+            const [existente] = await pool.query(
+                'SELECT id, estoque_atual FROM estoque_materias_primas WHERE codigo = ? LIMIT 1',
+                [item.codigo_produto]
+            );
+            if (existente.length > 0) {
+                // Atualizar estoque existente (somar)
+                await pool.query(
+                    'UPDATE estoque_materias_primas SET estoque_atual = estoque_atual + ? WHERE id = ?',
+                    [item.quantidade, existente[0].id]
+                );
+                itensEstoque++;
+            } else {
+                // Inserir novo item no estoque
+                try {
+                    await pool.query(`
+                        INSERT INTO estoque_materias_primas (codigo, descricao, unidade_medida, estoque_atual)
+                        VALUES (?, ?, ?, ?)
+                    `, [item.codigo_produto, item.descricao, item.unidade || 'UN', item.quantidade]);
+                    itensEstoque++;
+                } catch (e) {
+                    console.warn('[COMPRAS] Erro ao inserir item no estoque:', e.message);
+                }
+            }
+            // Registrar movimentação se tabela existir
+            try {
+                await pool.query(`
+                    INSERT INTO movimentacoes_estoque (material_id, tipo, quantidade, observacao, data_movimentacao)
+                    VALUES ((SELECT id FROM estoque_materias_primas WHERE codigo = ? LIMIT 1), 'entrada', ?, ?, NOW())
+                `, [item.codigo_produto, item.quantidade, `NF-e ${parseInt(nNF) || 0} - ${fornecedorRazao}`]);
+            } catch (e) { /* tabela pode não existir */ }
+        }
+        if (itensEstoque > 0) {
+            console.log(`[COMPRAS] ✅ Entrada automática: ${itensEstoque} itens atualizados no estoque (NF ${nNF})`);
+        }
+    } catch (e) {
+        console.warn('[COMPRAS] Erro na entrada automática de estoque:', e.message);
+    }
+
     return {
         success: true,
         id: nfEntradaId,
@@ -3104,7 +3282,8 @@ async function processarXMLEntradaCompras(pool, xmlContent, userId) {
         fornecedor: { razao_social: fornecedorRazao, cnpj: fornecedorCNPJ },
         valor_total: valorNF,
         itens: itensInseridos,
+        itens_estoque: itensEstoque,
         impostos: { icms: valorICMS, ipi: valorIPI, pis: valorPIS, cofins: valorCOFINS },
-        message: `NF ${nNF} importada com sucesso (${itensInseridos} itens)`
+        message: `NF ${nNF} importada com sucesso (${itensInseridos} itens, ${itensEstoque} entradas em estoque)`
     };
 }

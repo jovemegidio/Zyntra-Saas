@@ -3511,6 +3511,38 @@ module.exports = function createVendasRoutes(deps) {
         }
     });
 
+    // POST /transportadoras - Criar nova transportadora
+    router.post('/transportadoras', async (req, res, next) => {
+        try {
+            const { razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, cidade, estado, cep } = req.body;
+            if (!razao_social || !razao_social.trim()) {
+                return res.status(400).json({ error: 'Razão Social é obrigatória' });
+            }
+            const _enc = lgpdCrypto ? lgpdCrypto.encryptPII : (v => v);
+            const [result] = await pool.query(`
+                INSERT INTO transportadoras (razao_social, nome_fantasia, cnpj_cpf, inscricao_estadual, telefone, email, cidade, estado, cep)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            `, [
+                razao_social.trim(),
+                (nome_fantasia || '').trim(),
+                _enc((cnpj_cpf || '').replace(/\D/g, '')),
+                _enc((inscricao_estadual || '').trim()),
+                (telefone || '').trim(),
+                (email || '').trim(),
+                (cidade || '').trim(),
+                (estado || '').trim(),
+                (cep || '').trim()
+            ]);
+            res.json({ success: true, id: result.insertId, message: 'Transportadora cadastrada com sucesso' });
+        } catch (error) {
+            if (error.code === 'ER_DUP_ENTRY') {
+                return res.status(409).json({ error: 'Transportadora já cadastrada com este CNPJ' });
+            }
+            console.error('❌ Erro ao criar transportadora:', error);
+            next(error);
+        }
+    });
+
     // GET /vendedores - Lista vendedores para filtros e dashboards
     router.get('/vendedores', async (req, res, next) => {
         try {

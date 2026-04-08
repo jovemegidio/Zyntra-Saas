@@ -437,6 +437,7 @@ const userPermissions = {
     // ============ ADMINISTRAÇÃO / TI ============
     'douglas': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'andreia': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
+    'gerenciavendas': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'ti': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'antonio': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'antônio': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
@@ -447,24 +448,28 @@ const userPermissions = {
     'eldir': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'adm': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'aluforce': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
-    'compras': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
-    'guilherme.bastos': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
+    'compras': { areas: ['compras'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
     'logistica': { areas: ['nfe', 'vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'funcionario' },
 
-    // ============ CONTAS QA (Gerentes - Full Admin por Módulo) ============
-    'qafinanceiro': { areas: ['financeiro', 'vendas', 'compras', 'nfe', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'financeiro_completo' },
-    'qavendas': { areas: ['vendas', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'supervisor_vendas' },
-    'qapcp': { areas: ['pcp', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'producao_gerente' },
-    'qarh': { areas: ['rh'], rhType: 'areaadm', isAdmin: true, profile: 'rh_admin' },
-    'qacompras': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'areaadm', isAdmin: true, profile: 'compras_comprador' },
-    'qanfe': { areas: ['nfe', 'faturamento', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'funcionario' },
-    'qapainel': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'faturamento', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
+    // ============ CONTAS QA — DESABILITADAS EM PRODUÇÃO (AUDIT-FIX: backdoor removal) ============
+    // ATENÇÃO: Contas QA com isAdmin:true são backdoors. Manter comentadas em produção.
+    // Em ambiente de teste, descomentar conforme necessário.
+    // 'qafinanceiro': { areas: ['financeiro', 'vendas', 'compras', 'nfe', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'financeiro_completo' },
+    // 'qavendas': { areas: ['vendas', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'supervisor_vendas' },
+    // 'qapcp': { areas: ['pcp', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'producao_gerente' },
+    // 'qarh': { areas: ['rh'], rhType: 'areaadm', isAdmin: true, profile: 'rh_admin' },
+    // 'qacompras': { areas: ['vendas', 'compras', 'pcp', 'financeiro'], rhType: 'areaadm', isAdmin: true, profile: 'compras_comprador' },
+    // 'qanfe': { areas: ['nfe', 'faturamento', 'rh'], rhType: 'areaadm', isAdmin: true, profile: 'funcionario' },
+    // 'qapainel': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'faturamento', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
 
     // ============ FINANCEIRO / RH ============
     'hellen': { areas: ['financeiro', 'rh'], rhType: 'area', profile: 'funcionario' },
     'tatiane': { areas: ['financeiro', 'rh'], rhType: 'area', profile: 'funcionario' },
 
     // ============ PRODUÇÃO / PCP ============
+    'christian': { areas: ['pcp', 'rh'], rhType: 'area', isAdmin: false, profile: 'producao_operador' },
+    'clayton': { areas: ['pcp', 'rh'], rhType: 'area', isAdmin: false, profile: 'producao_operador' },
+    'sergio': { areas: ['pcp', 'rh'], rhType: 'area', isAdmin: false, profile: 'producao_operador' },
     'ana': {
         areas: ['pcp', 'rh'],
         rhType: 'area',

@@ -134,24 +134,12 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">&#8212;</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Recebimento</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="atualizarLista()"><i class="fas fa-sync-alt"></i></button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge hidden" id="notification-count">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header"><h3><i class="fas fa-bell"></i> Notificações</h3><div class="notification-actions"><button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button><button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button></div></div>
-                            <div class="notification-tabs"><button class="notif-tab active" onclick="filtrarNotificacoes('todas', this)">Todas</button><button class="notif-tab" onclick="filtrarNotificacoes('nao-lidas', this)">Não lidas</button><button class="notif-tab" onclick="filtrarNotificacoes('importantes', this)">Importantes</button></div>
-                            <div class="notification-list" id="notification-list"></div>
-                            <div class="notification-footer"><a href="#" onclick="verTodasNotificacoes(); return false;">Ver histórico completo</a></div>
-                        </div>
-                    </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -173,7 +161,7 @@
                     <div class="xml-import-section">
                         <h3><i class="fas fa-file-code"></i> Entrada Automática é Importar NF-e de Fornecedor</h3>
                         <p style="font-size:0.8rem; color:var(--gray-600); margin-bottom:var(--space-3);">
-                            Cole o XML da NF-e abaixo ou faça upload do arquivo. O sistema extrai automaticamente todos os dados: emitente, itens, impostos e valores.
+                            Cole o XML da NF-e ou a <strong>chave de acesso (44 dígitos)</strong> abaixo, ou faça upload do arquivo. O sistema extrai automaticamente todos os dados.
                         </p>
 
                         <div class="xml-tabs">
@@ -183,7 +171,7 @@
 
                         <!-- Colar XML -->
                         <div id="xmlTabColar">
-                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o conteúdo completo do XML da NF-e...&#10;&#10;Exemplo: &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;nfeProc ...&gt;"></textarea>
+                            <textarea class="xml-textarea" id="xmlTextoInput" placeholder="Cole aqui o XML da NF-e ou a Chave de Acesso (44 dígitos)...&#10;&#10;Chave de acesso: 00000000000000000000000000000000000000000000&#10;Ou XML: &lt;?xml version=&quot;1.0&quot;?&gt;&lt;nfeProc ...&gt;"></textarea>
                             <div style="display:flex; gap:var(--space-2); margin-top:var(--space-2);">
                                 <button class="btn-import-xml" id="btnImportarXml" onclick="importarXmlTexto()">
                                     <i class="fas fa-magic"></i> Processar e Importar
@@ -456,10 +444,18 @@
 
     /* ========== XML Import ========== */
     async function importarXmlTexto() {
-        const xml = document.getElementById('xmlTextoInput').value.trim();
-        if (!xml) { alert('Cole o conteúdo XML primeiro'); return; }
+        const input = document.getElementById('xmlTextoInput').value.trim();
+        if (!input) { alert('Cole o conteúdo XML ou a chave de acesso (44 dígitos)'); return; }
+
+        // Detectar se é chave de acesso (44 dígitos numéricos)
+        const somenteDigitos = input.replace(/[\s.-]/g, '');
+        if (/^\d{44}$/.test(somenteDigitos)) {
+            return importarPorChaveAcesso(somenteDigitos);
+        }
+
+        const xml = input;
         if (!xml.includes('<nfeProc') && !xml.includes('<NFe') && !xml.includes('<infNFe')) {
-            alert('O conteúdo não parece ser um XML de NF-e válido'); return;
+            alert('O conteúdo não parece ser um XML de NF-e válido e não é uma chave de acesso (44 dígitos).'); return;
         }
         const btn = document.getElementById('btnImportarXml');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
@@ -519,6 +515,60 @@
         }
     }
 
+    async function importarPorChaveAcesso(chave) {
+        const btn = document.getElementById('btnImportarXml');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Consultando chave...';
+        btn.disabled = true;
+        try {
+            const token = localStorage.getItem('token');
+            const r = await fetch(`${API_BASE}/nf-entrada/importar-chave`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ chave })
+            });
+            const d = await r.json();
+            if (d.duplicada) {
+                document.getElementById('xmlResultado').innerHTML = `
+                    <div class="xml-result-card error">
+                        <h4 style="font-size:0.85rem; color:var(--danger-600);"><i class="fas fa-exclamation-triangle"></i> NF-e já importada</h4>
+                        <p style="font-size:0.8rem; color:var(--gray-600);">Esta nota fiscal já existe no sistema (ID: ${d.id}).</p>
+                    </div>`;
+                return;
+            }
+            if (!r.ok || !d.success) throw new Error(d.error || 'Erro ao importar por chave');
+            document.getElementById('xmlResultado').innerHTML = `
+                <div class="xml-result-card">
+                    <h4 style="font-size:0.85rem; color:var(--success-700); margin-bottom:var(--space-2);"><i class="fas fa-check-circle"></i> NF-e Registrada via Chave de Acesso</h4>
+                    <div class="xml-result-grid">
+                        <div class="field"><label>Nº NF-e</label><p><strong>${d.numero_nfe || '-'}</strong></p></div>
+                        <div class="field"><label>Série</label><p>${d.serie || '-'}</p></div>
+                        <div class="field"><label>Chave de Acesso</label><p style="font-size:0.7rem; word-break:break-all;">${d.chave_acesso || chave}</p></div>
+                        <div class="field"><label>Fornecedor</label><p>${d.fornecedor?.razao_social || d.fornecedor || '-'}</p></div>
+                        <div class="field"><label>CNPJ</label><p>${formatarCNPJ(d.fornecedor?.cnpj)}</p></div>
+                        <div class="field"><label>Data Emissão</label><p>${d.data_emissao || '-'}</p></div>
+                    </div>
+                    <p style="font-size:0.75rem; color:var(--warning-600); margin-top:var(--space-2);"><i class="fas fa-info-circle"></i> Nota registrada a partir da chave de acesso. Para dados completos (itens, impostos, valores), importe o XML.</p>
+                    <div style="margin-top:var(--space-3); display:flex; gap:var(--space-2);">
+                        <button class="btn-import-xml" onclick="switchTab('nf-entrada', document.querySelectorAll('.page-tab')[2])">
+                            <i class="fas fa-list"></i> Ver NFs de Entrada
+                        </button>
+                        <button class="btn btn-secondary" style="font-size:0.75rem;" onclick="document.getElementById('xmlTextoInput').value=''; document.getElementById('xmlResultado').innerHTML='';">
+                            <i class="fas fa-plus"></i> Importar Outra
+                        </button>
+                    </div>
+                </div>`;
+        } catch (e) {
+            document.getElementById('xmlResultado').innerHTML = `
+                <div class="xml-result-card error">
+                    <h4 style="font-size:0.85rem; color:var(--danger-600);"><i class="fas fa-times-circle"></i> Erro ao Importar por Chave</h4>
+                    <p style="font-size:0.8rem; color:var(--gray-600);">${e.message}</p>
+                </div>`;
+        } finally {
+            btn.innerHTML = '<i class="fas fa-magic"></i> Processar e Importar';
+            btn.disabled = false;
+        }
+    }
+
     function handleXmlUpload(files) {
         if (!files || !files.length) return;
         const file = files[0];
@@ -547,9 +597,9 @@
                 return;
             }
             tbody.innerHTML = notas.map(nf => `<tr>
-                <td><strong>${nf.número_nfe || '-'}</strong></td>
-                <td>${nf.fornecedor_razao_social || '-'}</td>
-                <td>${formatarCNPJ(nf.fornecedor_cnpj)}</td>
+                <td><strong>${nf.numero_nfe || '-'}</strong></td>
+                <td>${nf.emitente_razao || nf.fornecedor_razao_social || '-'}</td>
+                <td>${formatarCNPJ(nf.emitente_cnpj || nf.fornecedor_cnpj)}</td>
                 <td>${formatarMoeda(nf.valor_total)}</td>
                 <td>${formatarData(nf.data_emissao)}</td>
                 <td><span class="nf-entrada-badge ${nf.status || 'importada'}">${(nf.status || 'importada').charAt(0).toUpperCase() + (nf.status || 'importada').slice(1)}</span></td>
