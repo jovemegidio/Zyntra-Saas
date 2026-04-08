@@ -6122,6 +6122,7 @@
                             onclick="switchModalTab('informações')">Informações Adicionais</button>
                         <button class="modal-tab" data-tab="observacoes"
                             onclick="switchModalTab('observacoes')">Observações</button>
+                        <button class="modal-tab" data-tab="parcelas" onclick="switchModalTab('parcelas')">Parcelas</button>
                         <button class="modal-tab" data-tab="email" onclick="switchModalTab('email')">E-mail para o
                             Cliente</button>
                     </div>
@@ -6286,6 +6287,29 @@
                             <textarea id="edit-observacoes-cliente"
                                 placeholder="Observações que aparecerão para o cliente..."
                                 style="min-height: 120px;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content: Parcelas -->
+                    <div class="tab-content" id="tab-parcelas">
+                        <div style="margin-bottom:12px;">
+                            <span style="font-weight:600;color:#1e293b;font-size:14px;">Detalhamento das Parcelas</span>
+                            <span id="parcelas-condicao-label" style="margin-left:8px;font-size:12px;color:#64748b;"></span>
+                        </div>
+                        <div class="items-table-container">
+                            <table class="items-table" style="font-size:13px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width:80px;">Parcela</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th>Forma Pgto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="parcelas-tbody">
+                                    <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:24px;">Selecione uma condição de pagamento</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -7020,6 +7044,7 @@
                         <button class="orcamento-tab" data-tab="departamentos">Departamentos</button>
                         <button class="orcamento-tab" data-tab="info">Informações Adicionais</button>
                         <button class="orcamento-tab" data-tab="obs">Observações</button>
+                        <button class="orcamento-tab" data-tab="novo-parcelas">Parcelas</button>
                         <button class="orcamento-tab" data-tab="email">E-mail para o Cliente</button>
                     </div>
 
@@ -7625,6 +7650,29 @@
                                 <textarea id="novo-observacoes" class="orcamento-textarea"
                                     style="min-height: 200px; margin-top: 8px;" placeholder=""></textarea>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Aba Parcelas (Novo Orçamento) -->
+                    <div class="orcamento-tab-content" id="tab-novo-parcelas">
+                        <div style="margin-bottom:12px;">
+                            <span style="font-weight:600;color:#1e293b;font-size:14px;">Detalhamento das Parcelas</span>
+                            <span id="novo-parcelas-condicao-label" style="margin-left:8px;font-size:12px;color:#64748b;"></span>
+                        </div>
+                        <div class="items-table-container">
+                            <table class="items-table" style="font-size:13px;">
+                                <thead>
+                                    <tr>
+                                        <th style="width:80px;">Parcela</th>
+                                        <th>Vencimento</th>
+                                        <th>Valor</th>
+                                        <th>Forma Pgto</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="novo-parcelas-tbody">
+                                    <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:24px;">Selecione uma condição de pagamento</td></tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -9490,6 +9538,35 @@
          ======================================== -->
 
     <!-- Modal Aprovação de Crédito -->
+
+    <!-- Modal Condição Personalizada -->
+    <div class="modal-overlay" id="modal-condicao-personalizada" style="display:none;z-index:10002;">
+        <div class="modal-content" style="max-width:420px;border-radius:14px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+            <div style="padding:16px 20px;background:linear-gradient(135deg,#1e293b,#334155);">
+                <h3 style="font-size:15px;color:white;margin:0;"><i class="fas fa-plus-circle" style="color:#60a5fa;margin-right:8px;"></i>Nova Condição de Pagamento</h3>
+            </div>
+            <div style="padding:20px;">
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;display:block;">Nome da Condição</label>
+                    <input type="text" id="custom-cond-nome" placeholder="Ex: 28/35/42/49/56/63" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;display:block;">Dias (separados por /)</label>
+                    <input type="text" id="custom-cond-dias" placeholder="Ex: 28/35/42/49/56/63" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+                    <small style="color:#94a3b8;font-size:11px;">Use 0 para à vista. Separe com / (ex: 30/60/90)</small>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label style="font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;display:block;">Descrição (opcional)</label>
+                    <input type="text" id="custom-cond-desc" placeholder="Descrição da condição" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;">
+                </div>
+                <div style="display:flex;gap:10px;justify-content:flex-end;">
+                    <button onclick="fecharModalCondicaoPersonalizada()" style="padding:8px 18px;background:#f3f4f6;color:#374151;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+                    <button onclick="salvarCondicaoPersonalizada()" style="padding:8px 18px;background:#3b82f6;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;"><i class="fas fa-check" style="margin-right:6px;"></i>Salvar Condição</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="modal-aprovacao-credito">
         <div class="modal-content" style="max-width:560px;border-radius:16px;overflow:hidden;box-shadow:0 25px 60px rgba(0,0,0,0.3);">
             <div class="modal-header-omie" style="padding:16px 24px;min-height:auto;background:linear-gradient(135deg,#1e293b,#334155);">
@@ -9885,6 +9962,22 @@
             return String(str).replace(/[&<>"']/g, function (c) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
             });
+        }
+
+        function abreviarNome(nomeCompleto) {
+            if (!nomeCompleto) return '';
+            const partes = nomeCompleto.trim().split(/\s+/);
+            if (partes.length <= 2) return nomeCompleto;
+            const primeiro = partes[0];
+            const prepos = ['de', 'do', 'da', 'dos', 'das', 'e'];
+            let ultimo = partes[partes.length - 1];
+            for (let i = partes.length - 1; i >= 1; i--) {
+                if (!prepos.includes(partes[i].toLowerCase())) {
+                    ultimo = partes[i];
+                    break;
+                }
+            }
+            return primeiro + ' ' + ultimo;
         }
 
         // showToast: definição real em seção "MODAL CONFIRMAÇÃO ALTERAÇÕES NÃO SALVAS" (redireciona para showNotification)
@@ -10729,7 +10822,7 @@
                             <span style="font-weight:600;color:#7c3aed;font-size:12px;min-width:60px;">#${it.numero_pedido || it.id}</span>
                             <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#1e293b;">${escaparHTML(it.cliente || 'Cliente não informado')}</span>
                             <span style="color:#94a3b8;font-size:11px;min-width:70px;">${dataInc}</span>
-                            <span style="color:#64748b;font-size:12px;min-width:80px;">${escaparHTML(it.vendedor || '-')}</span>
+                            <span style="color:#64748b;font-size:12px;min-width:80px;">${escaparHTML(abreviarNome(it.vendedor) || '-')}</span>
                             ${parcialTag}${nfTag}
                             <span style="font-family:'SF Mono',monospace;font-weight:700;font-size:13px;min-width:110px;text-align:right;color:#1e293b;">R$ ${valorFmt}</span>
                             <button onclick="event.stopPropagation();abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:#475569;" title="Editar"><i class="fas fa-edit"></i></button>
@@ -11162,7 +11255,8 @@
             document.getElementById('edit-cliente').value = pedido.cliente || '';
             document.getElementById('edit-valor-total').value = formatarMoeda(pedido.valor || 0);
             document.getElementById('edit-total-mercadorias').value = formatarMoeda(pedido.valor || 0);
-            document.getElementById('edit-vendedor').value = pedido.vendedor || '';
+            document.getElementById('edit-vendedor').value = abreviarNome(pedido.vendedor || '');
+            document.getElementById('edit-vendedor').dataset.fullName = pedido.vendedor || '';
             if (document.getElementById('edit-parcelas')) document.getElementById('edit-parcelas').value = pedido.parcelas || '28/35/42/49';
             if (document.getElementById('edit-observacoes')) document.getElementById('edit-observacoes').value = pedido.mensagem || '';
 
@@ -11443,7 +11537,7 @@
                 alteracoes.push(`Parcelas alteradas para "${novasParcelas}"`);
             }
 
-            const novoVendedor = document.getElementById('edit-vendedor').value;
+            const novoVendedor = document.getElementById('edit-vendedor').dataset.fullName || document.getElementById('edit-vendedor').value;
             if (novoVendedor !== pedidoAtual.vendedor) {
                 alteracoes.push(`Vendedor alterado para "${novoVendedor}"`);
             }
@@ -12121,7 +12215,7 @@
           <div class="grid-3">
             <div class="field"><span class="field-label">Endereço de entrega</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_endereco||'—')}</span><span class="field-help">${escaparHTML(pedidoAtual.cliente_bairro||'')} · ${escaparHTML(pedidoAtual.cliente_cidade||'')}/${escaparHTML(pedidoAtual.cliente_uf||'')} · ${escaparHTML(pedidoAtual.cliente_cep||'')}</span></div>
             <div class="field"><span class="field-label">Transportadora</span><span class="field-value">${escaparHTML(pedidoAtual.transportadora||'—')}</span></div>
-            <div class="field"><span class="field-label">Vendedor</span><span class="field-value">${escaparHTML(pedidoAtual.vendedor||'—')}</span></div>
+            <div class="field"><span class="field-label">Vendedor</span><span class="field-value">${escaparHTML(abreviarNome(pedidoAtual.vendedor)||'—')}</span></div>
           </div>
           <div class="items-table" style="overflow:hidden;border-radius:10px">
             <table style="width:100%;border-collapse:collapse;font-size:9px">
@@ -12417,7 +12511,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         <div class="doc-card">
             <div class="meta-grid">
                 <div class="meta-item"><div class="lbl">Emissão</div><div class="val">${d.dataEmissao}</div></div>
-                <div class="meta-item"><div class="lbl">Vendedor</div><div class="val">${pedidoAtual.vendedor || '--'}</div></div>
+                <div class="meta-item"><div class="lbl">Vendedor</div><div class="val">${abreviarNome(pedidoAtual.vendedor) || '--'}</div></div>
                 <div class="meta-item"><div class="lbl">Validade</div><div class="val">${d.dataValidadeStr}</div></div>
                 <div class="meta-item"><div class="lbl">Status</div><div class="val">${statusLabel}</div></div>
             </div>
@@ -15450,11 +15544,100 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 const hiddenInput = document.getElementById('edit-condicao-pagamento');
                 if (!headerSel || !hiddenInput) return;
                 const raw = headerSel.value;
+                if (raw === 'personalizado') {
+                    abrirModalCondicaoPersonalizada('edit');
+                    return;
+                }
                 const normalized = raw === 'a_vista' ? 'a vista' : raw.replace(/_/g, '/');
                 hiddenInput.value = normalized;
                 recalcularParcelasAutomatico();
+            } else if (context === 'novo') {
+                const sel = document.getElementById('novo-condicao-pagamento');
+                if (sel && sel.value === 'personalizado') {
+                    abrirModalCondicaoPersonalizada('novo');
+                    return;
+                }
             }
-            // 'novo': #novo-condicao-pagamento é lido diretamente pelo salvar — sem hidden necessário
+        }
+
+        let _condicaoPersonalizadaContext = 'edit';
+
+        function abrirModalCondicaoPersonalizada(context) {
+            _condicaoPersonalizadaContext = context;
+            document.getElementById('custom-cond-nome').value = '';
+            document.getElementById('custom-cond-dias').value = '';
+            document.getElementById('custom-cond-desc').value = '';
+            document.getElementById('modal-condicao-personalizada').style.display = 'flex';
+        }
+
+        function fecharModalCondicaoPersonalizada() {
+            document.getElementById('modal-condicao-personalizada').style.display = 'none';
+            // Reverter select para vazio se nada foi salvo
+            if (_condicaoPersonalizadaContext === 'edit') {
+                const sel = document.getElementById('edit-condicao-pagamento-header');
+                if (sel && sel.value === 'personalizado') sel.value = '';
+            } else {
+                const sel = document.getElementById('novo-condicao-pagamento');
+                if (sel && sel.value === 'personalizado') sel.value = '';
+            }
+        }
+
+        async function salvarCondicaoPersonalizada() {
+            const nome = document.getElementById('custom-cond-nome').value.trim();
+            const dias = document.getElementById('custom-cond-dias').value.trim();
+            const descricao = document.getElementById('custom-cond-desc').value.trim();
+
+            if (!dias) {
+                showNotification('Informe os dias da condição', 'error');
+                return;
+            }
+
+            // Validar formato dos dias
+            const diasArr = dias.split('/').map(d => d.trim());
+            if (diasArr.some(d => isNaN(parseInt(d)))) {
+                showNotification('Formato inválido. Use números separados por / (ex: 28/35/42)', 'error');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/vendas/condicoes-pagamento', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ nome: nome || dias.replace(/\//g, '/') + ' dias', dias: dias.replace(/\//g, ','), descricao })
+                });
+                if (!resp.ok) throw new Error('Erro ao salvar');
+
+                // Adicionar opção no select e selecionar
+                const selectValue = dias.replace(/\//g, '_');
+                const selectLabel = (nome || dias) + ' dias';
+                const selId = _condicaoPersonalizadaContext === 'edit' ? 'edit-condicao-pagamento-header' : 'novo-condicao-pagamento';
+                const sel = document.getElementById(selId);
+                if (sel) {
+                    const optPersonalizado = sel.querySelector('option[value="personalizado"]');
+                    const newOpt = document.createElement('option');
+                    newOpt.value = selectValue;
+                    newOpt.textContent = selectLabel;
+                    if (optPersonalizado) {
+                        sel.insertBefore(newOpt, optPersonalizado);
+                    } else {
+                        sel.appendChild(newOpt);
+                    }
+                    sel.value = selectValue;
+                }
+
+                // Sincronizar hidden input
+                if (_condicaoPersonalizadaContext === 'edit') {
+                    const hiddenInput = document.getElementById('edit-condicao-pagamento');
+                    if (hiddenInput) hiddenInput.value = dias;
+                    recalcularParcelasAutomatico();
+                }
+
+                document.getElementById('modal-condicao-personalizada').style.display = 'none';
+                showNotification('Condição de pagamento cadastrada!', 'success');
+            } catch (e) {
+                showNotification('Erro ao salvar condição: ' + e.message, 'error');
+            }
         }
 
         // Filtrar opções de condição de pagamento baseado no valor do pedido
