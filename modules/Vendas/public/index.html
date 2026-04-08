@@ -10101,6 +10101,7 @@
                             status: pedido.faturamento || pedido.observacoes || 'Aguardando',
                             valor: pedido.valor || pedido.valor_total || 0,
                             parcelas: pedido.tipo || pedido.condicao_pagamento || 'a vista',
+                            condicao_pagamento: pedido.condicao_pagamento || pedido.condicoes_pagamento || null,
                             origem: pedido.origem || 'Omie',
                             vendedor: pedido.vendedor_nome || pedido.vendedor || '',
                             vendedor_id: pedido.vendedor_id,
@@ -11344,8 +11345,8 @@
             // Carregar itens do pedido da API
             carregarItensPedido(pedido.id);
 
-            // Carregar condições de pagamento do banco
-            carregarCondicoesPagamentoDB(pedido.condicao_pagamento);
+            // Carregar condições de pagamento do banco (usar parcelas como fallback)
+            carregarCondicoesPagamentoDB(pedido.condicao_pagamento || pedido.parcelas);
 
             // Carregar dados completos do cliente (para impressão com dados reais)
             carregarDadosCompletosCliente().then(() => {
@@ -11596,12 +11597,15 @@
             const condicaoPagamento = document.getElementById('edit-condicao-pagamento')?.value || '';
             const descontoPct = parseFloat(document.getElementById('edit-desconto-pct')?.value) || 0;
 
+            // Sincronizar parcelas com condição de pagamento
+            const condicaoFinal = condicaoPagamento || novasParcelas;
+
             // Preparar dados para enviar à API
             const dadosAtualizacao = {
                 cliente: novoCliente,
                 cliente_id: document.getElementById('edit-cliente-id')?.value || null,
                 vendedor_nome: novoVendedor,
-                parcelas: novasParcelas,
+                parcelas: condicaoFinal,
                 observacao: novaObs,
                 transportadora: novaTransp,
                 nf: novaNF,
@@ -11620,7 +11624,7 @@
                 valor_seguro: valorSeguro,
                 tipo_entrega: tipoEntrega,
                 cenario_fiscal: cenarioFiscal,
-                condicao_pagamento: condicaoPagamento,
+                condicao_pagamento: condicaoFinal,
                 desconto_pct: descontoPct,
                 desconto: pedidoAtual ? (pedidoAtual.desconto || 0) : 0,
                 valor: pedidoAtual ? (pedidoAtual.valor || 0) : 0
@@ -11707,6 +11711,7 @@
                     document.getElementById('impostos-cenario-fiscal')?.value ||
                     'venda_normal';
                 const condicaoPagamento = document.getElementById('edit-condicao-pagamento')?.value || '';
+                const condicaoFinalNovo = condicaoPagamento || parcelas;
                 const origem = document.getElementById('edit-origem')?.value || 'Sistema';
 
                 // ============================================
@@ -11781,7 +11786,7 @@
                         cliente_nome: cliente,
                         cliente_id: clienteId,
                         vendedor_nome: vendedor,
-                        parcelas: parcelas,
+                        parcelas: condicaoFinalNovo,
                         observacao: obs,
                         transportadora: transportadora,
                         origem: origem,
@@ -11801,7 +11806,7 @@
                         valor_seguro: parseFloat(document.getElementById('edit-valor-seguro')?.value) || 0,
                         tipo_entrega: document.getElementById('edit-tipo-entrega')?.value || '',
                         cenario_fiscal: cenarioFiscal,
-                        condicao_pagamento: condicaoPagamento,
+                        condicao_pagamento: condicaoFinalNovo,
                         desconto_pct: parseFloat(document.getElementById('edit-desconto-pct')?.value) || 0
                     })
                 });
@@ -15757,9 +15762,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             }
             if (dias.length === 0) dias = [0];
 
-            // Atualizar campo número de parcelas automaticamente
+            // Atualizar campo parcelas com a condição de pagamento completa
             if (parcelasInput) {
-                parcelasInput.value = dias.length;
+                parcelasInput.value = condicao || dias.join('/');
             }
 
             // Calcular valor total do pedido
