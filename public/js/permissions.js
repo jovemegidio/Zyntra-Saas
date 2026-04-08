@@ -75,9 +75,14 @@ const userPermissions = {
         isAdmin: true
     },
 
-    // Guilherme Bastos (compras@aluforce.ind.br) — acesso apenas a Compras e Configurações
+    // Guilherme Bastos (compras@aluforce.ind.br) — Compras + RH (funcionário) + Configurações
     'compras': {
-        areas: ['compras'],
+        areas: ['compras', 'rh'],
+        rhType: 'funcionario',
+        isAdmin: false
+    },
+    'guilherme': {
+        areas: ['compras', 'rh'],
         rhType: 'funcionario',
         isAdmin: false
     },

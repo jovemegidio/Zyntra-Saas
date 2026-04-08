@@ -448,7 +448,7 @@ const userPermissions = {
     'eldir': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'adm': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
     'aluforce': { areas: ['vendas', 'rh', 'pcp', 'financeiro', 'nfe', 'compras', 'ti'], rhType: 'areaadm', isAdmin: true, profile: 'admin_total' },
-    'compras': { areas: ['compras'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
+    'compras': { areas: ['compras', 'rh'], rhType: 'funcionario', isAdmin: false, profile: 'funcionario' },
     'logistica': { areas: ['nfe', 'vendas', 'rh'], rhType: 'area', isAdmin: false, profile: 'funcionario' },
 
     // ============ CONTAS QA — DESABILITADAS EM PRODUÇÃO (AUDIT-FIX: backdoor removal) ============
