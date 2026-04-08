@@ -2224,6 +2224,108 @@ module.exports = function createVendasRoutes(deps) {
             });
         } catch (error) { next(error); }
     });
+
+    // ═══════════════════════════════════════════════════════
+    // CREDIT ANALYSIS ROUTES
+    // ═══════════════════════════════════════════════════════
+
+    // GET /clientes/:id/credito — Credit limit and available credit
+    router.get('/clientes/:id/credito', authenticateToken, async (req, res, next) => {
+        try {
+            const clienteId = parseInt(req.params.id);
+            if (isNaN(clienteId)) return res.status(400).json({ message: 'ID inválido.' });
+
+            const [clienteRows] = await pool.query(
+                'SELECT id, nome, razao_social, limite_credito, empresa_id FROM clientes WHERE id = ? LIMIT 1',
+                [clienteId]
+            );
+            if (clienteRows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
+
+            const cliente = clienteRows[0];
+            const limiteCredito = parseFloat(cliente.limite_credito || 0);
+
+            const [creditUsed] = await pool.query(
+                `SELECT COALESCE(SUM(valor), 0) as total_pendente
+                 FROM pedidos
+                 WHERE cliente_id = ?
+                   AND status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'parcial')`,
+                [clienteId]
+            );
+            const totalPendente = parseFloat(creditUsed[0].total_pendente || 0);
+            const creditoDisponivel = Math.max(0, limiteCredito - totalPendente);
+
+            res.json({
+                cliente_id: clienteId,
+                nome: cliente.razao_social || cliente.nome,
+                limite_credito: limiteCredito,
+                total_pendente: totalPendente,
+                credito_disponivel: creditoDisponivel
+            });
+        } catch (error) { next(error); }
+    });
+
+    // POST /pedidos/:id/aprovacao-credito — Register credit analysis decision
+    router.post('/pedidos/:id/aprovacao-credito', authenticateToken, async (req, res, next) => {
+        try {
+            const pedidoId = parseInt(req.params.id);
+            if (isNaN(pedidoId)) return res.status(400).json({ success: false, message: 'ID inválido.' });
+
+            const { parecer, condicao_pagamento, observacoes } = req.body;
+            if (!parecer || !['aprovado', 'aprovado_avista', 'reprovado'].includes(parecer)) {
+                return res.status(400).json({ success: false, message: 'Parecer inválido.' });
+            }
+
+            const [pedidoRows] = await pool.query('SELECT id, status, cliente_id, valor FROM pedidos WHERE id = ? LIMIT 1', [pedidoId]);
+            if (pedidoRows.length === 0) return res.status(404).json({ success: false, message: 'Pedido não encontrado.' });
+
+            const connection = await pool.getConnection();
+            try {
+                await connection.beginTransaction();
+
+                if (condicao_pagamento) {
+                    await connection.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', [condicao_pagamento, pedidoId]);
+                }
+
+                let novoStatus;
+                let descricao = '';
+                if (parecer === 'aprovado') {
+                    novoStatus = 'pedido-aprovado';
+                    descricao = 'Crédito aprovado';
+                } else if (parecer === 'aprovado_avista') {
+                    novoStatus = 'pedido-aprovado';
+                    descricao = 'Crédito aprovado (à vista)';
+                    await connection.query('UPDATE pedidos SET condicao_pagamento = ? WHERE id = ?', ['a_vista', pedidoId]);
+                } else {
+                    novoStatus = 'credito-reprovado';
+                    descricao = 'Crédito reprovado';
+                }
+                if (observacoes) descricao += ' — ' + observacoes;
+
+                await connection.query('UPDATE pedidos SET status = ? WHERE id = ?', [novoStatus, pedidoId]);
+
+                // Log to history
+                try {
+                    const [tables] = await connection.query("SHOW TABLES LIKE 'pedido_historico'");
+                    if (tables.length > 0) {
+                        await connection.query(
+                            `INSERT INTO pedido_historico (pedido_id, usuario_id, usuario_nome, acao, descricao, created_at)
+                             VALUES (?, ?, ?, ?, ?, NOW())`,
+                            [pedidoId, req.user.id, req.user.nome || req.user.email, 'aprovacao-credito', descricao]
+                        );
+                    }
+                } catch (_) { /* table may not exist */ }
+
+                await connection.commit();
+                res.json({ success: true, message: descricao, novo_status: novoStatus });
+            } catch (err) {
+                await connection.rollback();
+                throw err;
+            } finally {
+                connection.release();
+            }
+        } catch (error) { next(error); }
+    });
+
     router.post('/clientes', authenticateToken, async (req, res, next) => {
         try {
             // Field aliasing — frontend may send razao_social/cnpj_cpf/ie/logradouro/número

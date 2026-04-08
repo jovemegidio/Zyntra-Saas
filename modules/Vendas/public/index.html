@@ -9887,22 +9887,6 @@
             });
         }
 
-        function abreviarNome(nomeCompleto) {
-            if (!nomeCompleto) return '';
-            const partes = nomeCompleto.trim().split(/\s+/);
-            if (partes.length <= 2) return nomeCompleto;
-            const primeiro = partes[0];
-            const prepos = ['de', 'do', 'da', 'dos', 'das', 'e'];
-            let ultimo = partes[partes.length - 1];
-            for (let i = partes.length - 1; i >= 1; i--) {
-                if (!prepos.includes(partes[i].toLowerCase())) {
-                    ultimo = partes[i];
-                    break;
-                }
-            }
-            return primeiro + ' ' + ultimo;
-        }
-
         // showToast: definição real em seção "MODAL CONFIRMAÇÃO ALTERAÇÕES NÃO SALVAS" (redireciona para showNotification)
 
         // ========================================
@@ -10745,7 +10729,7 @@
                             <span style="font-weight:600;color:#7c3aed;font-size:12px;min-width:60px;">#${it.numero_pedido || it.id}</span>
                             <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:#1e293b;">${escaparHTML(it.cliente || 'Cliente não informado')}</span>
                             <span style="color:#94a3b8;font-size:11px;min-width:70px;">${dataInc}</span>
-                            <span style="color:#64748b;font-size:12px;min-width:80px;">${escaparHTML(abreviarNome(it.vendedor) || '-')}</span>
+                            <span style="color:#64748b;font-size:12px;min-width:80px;">${escaparHTML(it.vendedor || '-')}</span>
                             ${parcialTag}${nfTag}
                             <span style="font-family:'SF Mono',monospace;font-weight:700;font-size:13px;min-width:110px;text-align:right;color:#1e293b;">R$ ${valorFmt}</span>
                             <button onclick="event.stopPropagation();abrirModalEditar(${it.id})" style="background:white;border:1px solid #e2e8f0;border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:#475569;" title="Editar"><i class="fas fa-edit"></i></button>
@@ -11178,8 +11162,7 @@
             document.getElementById('edit-cliente').value = pedido.cliente || '';
             document.getElementById('edit-valor-total').value = formatarMoeda(pedido.valor || 0);
             document.getElementById('edit-total-mercadorias').value = formatarMoeda(pedido.valor || 0);
-            document.getElementById('edit-vendedor').value = abreviarNome(pedido.vendedor || '');
-            document.getElementById('edit-vendedor').dataset.fullName = pedido.vendedor || '';
+            document.getElementById('edit-vendedor').value = pedido.vendedor || '';
             if (document.getElementById('edit-parcelas')) document.getElementById('edit-parcelas').value = pedido.parcelas || '28/35/42/49';
             if (document.getElementById('edit-observacoes')) document.getElementById('edit-observacoes').value = pedido.mensagem || '';
 
@@ -11460,7 +11443,7 @@
                 alteracoes.push(`Parcelas alteradas para "${novasParcelas}"`);
             }
 
-            const novoVendedor = document.getElementById('edit-vendedor').dataset.fullName || document.getElementById('edit-vendedor').value;
+            const novoVendedor = document.getElementById('edit-vendedor').value;
             if (novoVendedor !== pedidoAtual.vendedor) {
                 alteracoes.push(`Vendedor alterado para "${novoVendedor}"`);
             }
@@ -12138,7 +12121,7 @@
           <div class="grid-3">
             <div class="field"><span class="field-label">Endereço de entrega</span><span class="field-value">${escaparHTML(pedidoAtual.cliente_endereco||'—')}</span><span class="field-help">${escaparHTML(pedidoAtual.cliente_bairro||'')} · ${escaparHTML(pedidoAtual.cliente_cidade||'')}/${escaparHTML(pedidoAtual.cliente_uf||'')} · ${escaparHTML(pedidoAtual.cliente_cep||'')}</span></div>
             <div class="field"><span class="field-label">Transportadora</span><span class="field-value">${escaparHTML(pedidoAtual.transportadora||'—')}</span></div>
-            <div class="field"><span class="field-label">Vendedor</span><span class="field-value">${escaparHTML(abreviarNome(pedidoAtual.vendedor)||'—')}</span></div>
+            <div class="field"><span class="field-label">Vendedor</span><span class="field-value">${escaparHTML(pedidoAtual.vendedor||'—')}</span></div>
           </div>
           <div class="items-table" style="overflow:hidden;border-radius:10px">
             <table style="width:100%;border-collapse:collapse;font-size:9px">
@@ -12434,7 +12417,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         <div class="doc-card">
             <div class="meta-grid">
                 <div class="meta-item"><div class="lbl">Emissão</div><div class="val">${d.dataEmissao}</div></div>
-                <div class="meta-item"><div class="lbl">Vendedor</div><div class="val">${abreviarNome(pedidoAtual.vendedor) || '--'}</div></div>
+                <div class="meta-item"><div class="lbl">Vendedor</div><div class="val">${pedidoAtual.vendedor || '--'}</div></div>
                 <div class="meta-item"><div class="lbl">Validade</div><div class="val">${d.dataValidadeStr}</div></div>
                 <div class="meta-item"><div class="lbl">Status</div><div class="val">${statusLabel}</div></div>
             </div>
