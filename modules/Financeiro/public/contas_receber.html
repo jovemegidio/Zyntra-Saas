@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
@@ -1916,6 +1916,206 @@
             } else {
                 document.getElementById('pm-resultado-simulacao').style.display = 'none';
             }
+        }
+
+
+        // ======= WORKBOOK TAB FUNCTIONS (dados reais) =======
+
+        function carregarBase() {
+            var portadores = {}, statusSet = {}, situacoes = {}, posicoes = {}, recomprados = {}, cartorios = {};
+            contas.forEach(function(c) {
+                if (c.portador) portadores[c.portador] = true;
+                if (c.status) statusSet[c.status] = true;
+                if (c.situacao) situacoes[c.situacao] = true;
+                if (c.posicao) posicoes[c.posicao] = true;
+                if (c.recomprado != null && c.recomprado !== '') recomprados[c.recomprado] = true;
+                if (c.cartorio != null && c.cartorio !== '') cartorios[c.cartorio] = true;
+            });
+            var portBody = document.getElementById('base-portador-body');
+            var pKeys = Object.keys(portadores).sort();
+            portBody.innerHTML = pKeys.length ? pKeys.map(function(p) { return '<tr><td>' + _escFin(p) + '</td></tr>'; }).join('') : '<tr><td style="text-align:center;color:var(--gray-400);">Nenhum</td></tr>';
+            var statusBody = document.getElementById('base-status-body');
+            var allSt = Object.keys(statusSet).sort(), allSit = Object.keys(situacoes).sort(), allPos = Object.keys(posicoes).sort();
+            var maxLen = Math.max(allSt.length, allSit.length, allPos.length, 1);
+            var rows = '';
+            for (var i = 0; i < maxLen; i++) rows += '<tr><td>' + _escFin(allSt[i]||'') + '</td><td>' + _escFin(allSit[i]||'') + '</td><td>' + _escFin(allPos[i]||'') + '</td></tr>';
+            statusBody.innerHTML = rows;
+            var recompBody = document.getElementById('base-recomprado-body');
+            var allR = Object.keys(recomprados).sort(), allC = Object.keys(cartorios).sort();
+            var maxR = Math.max(allR.length, allC.length, 1);
+            var rowsR = '';
+            for (var j = 0; j < maxR; j++) rowsR += '<tr><td>' + _escFin(allR[j]||'-') + '</td><td>' + _escFin(allC[j]||'-') + '</td></tr>';
+            recompBody.innerHTML = rowsR || '<tr><td>-</td><td>-</td></tr>';
+        }
+
+        function renderizarResumoTab() {
+            var hoje = new Date(); hoje.setHours(0,0,0,0);
+            var porParceiro = {}, porMes = {};
+            var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            contas.forEach(function(c) {
+                var bruto = parseFloat(c.valor_total||c.valor||0)||0;
+                var recebido = parseFloat(c.valor_recebido||0)||0;
+                var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido;
+                if(valorAberto < 0) valorAberto = 0;
+                var status = String(c.status||'').toLowerCase();
+                var vencRaw = c.data_vencimento||c.vencimento;
+                var venc = vencRaw ? new Date(String(vencRaw).slice(0,10)+'T00:00:00') : null;
+                if(venc && !isNaN(venc.getTime())) venc.setHours(0,0,0,0);
+                var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
+                var vencido = !liquidado && venc && venc < hoje;
+                var parceiro = c.cliente_nome || c.portador || 'SEM NOME';
+                if(!porParceiro[parceiro]) porParceiro[parceiro] = {aVencer:0,vencido:0,total:0,liquidado:0};
+                if(liquidado) porParceiro[parceiro].liquidado += recebido>0?recebido:bruto;
+                else if(vencido) { porParceiro[parceiro].vencido += valorAberto; porParceiro[parceiro].total += valorAberto; }
+                else { porParceiro[parceiro].aVencer += valorAberto; porParceiro[parceiro].total += valorAberto; }
+                if(venc && !isNaN(venc.getTime())) {
+                    var mKey = venc.getFullYear()+'-'+String(venc.getMonth()+1).padStart(2,'0');
+                    if(!porMes[mKey]) porMes[mKey] = {nome:meses[venc.getMonth()]+'/'+venc.getFullYear(),aVencer:0,vencido:0,liquidado:0,total:0};
+                    if(liquidado) porMes[mKey].liquidado += recebido>0?recebido:bruto;
+                    else if(vencido) { porMes[mKey].vencido += valorAberto; porMes[mKey].total += valorAberto; }
+                    else { porMes[mKey].aVencer += valorAberto; porMes[mKey].total += valorAberto; }
+                }
+            });
+            var pBody = document.getElementById('tab-resumo-parceiro-body');
+            var pKeys = Object.keys(porParceiro).sort(function(a,b){ return porParceiro[b].total - porParceiro[a].total; });
+            pBody.innerHTML = pKeys.length ? pKeys.slice(0,50).map(function(n){ var it=porParceiro[n]; return '<tr><td><strong>'+_escFin(n)+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td></tr>'; }).join('') : '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
+            var mBody = document.getElementById('tab-resumo-mensal-body');
+            var mKeys = Object.keys(porMes).sort();
+            mBody.innerHTML = mKeys.length ? mKeys.map(function(k){ var it=porMes[k]; return '<tr><td><strong>'+it.nome+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total+it.liquidado)+'</td></tr>'; }).join('') : '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
+        }
+
+        function renderizarFaturamentoTab() {
+            var lista = contas.filter(function(c) { var st = String(c.status||'').toLowerCase(); return st !== 'cancelada' && st !== 'cancelado'; });
+            var totalVal = 0; lista.forEach(function(c){ totalVal += parseFloat(c.valor_total||c.valor||0)||0; });
+            var spanTotais = document.getElementById('fat-totais-pub');
+            if(spanTotais) spanTotais.textContent = lista.length + ' registros | Total: ' + fmtMoeda(totalVal);
+            var body = document.getElementById('tab-faturamento-body');
+            if(!lista.length) { body.innerHTML = '<tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            var badges = {'pendente':'Pendente','a_vencer':'A Vencer','a vencer':'A Vencer','recebido':'Recebido','pago':'Recebido','liquidada':'Liquidada','liquidado':'Liquidado','vencida':'Vencida','vencido':'Vencido','parcial':'Parcial'};
+            body.innerHTML = lista.map(function(c) {
+                var dias = parseInt(c.dias_vencido)||0; var diasStyle = dias>0?'color:#dc2626;font-weight:700;':''; var st = String(c.status||'').toLowerCase();
+                return '<tr><td>'+_escFin(c.empresa||'-')+'</td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td>'+_escFin(c.cliente_nome||'-')+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(c.valor_total||c.valor)+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.situacao||'-')+'</td><td>'+_escFin(c.portador||'-')+'</td><td>'+(badges[st]||st)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td><td>'+_escFin(c.posicao||'-')+'</td></tr>';
+            }).join('');
+        }
+
+        function renderizarDisponivelTab() {
+            var hoje = new Date(); hoje.setHours(0,0,0,0);
+            var porEmpresa = {};
+            contas.forEach(function(c) {
+                var emp = (c.empresa||'SEM EMPRESA').toUpperCase().trim();
+                if(!porEmpresa[emp]) porEmpresa[emp] = {nfAVencer:0,f9AVencer:0,totalDisp:0,vencido:0,liquidado:0};
+                var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
+                var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido; if(valorAberto < 0) valorAberto = 0;
+                var status = String(c.status||'').toLowerCase();
+                var vencRaw = c.data_vencimento||c.vencimento;
+                var venc = vencRaw ? new Date(String(vencRaw).slice(0,10)+'T00:00:00') : null;
+                if(venc && !isNaN(venc.getTime())) venc.setHours(0,0,0,0);
+                var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
+                var vencido = !liquidado && venc && venc < hoje;
+                var isNF = (c.nota_fiscal||'').toString().trim() !== '';
+                if(liquidado) porEmpresa[emp].liquidado += recebido>0?recebido:bruto;
+                else if(vencido) porEmpresa[emp].vencido += valorAberto;
+                else { if(isNF) porEmpresa[emp].nfAVencer += valorAberto; else porEmpresa[emp].f9AVencer += valorAberto; porEmpresa[emp].totalDisp += valorAberto; }
+            });
+            var body = document.getElementById('tab-disponivel-body');
+            var eKeys = Object.keys(porEmpresa).sort();
+            if(!eKeys.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
+            body.innerHTML = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nfAVencer)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9AVencer)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.totalDisp)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(e.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(e.liquidado)+'</td></tr>'; }).join('');
+        }
+
+        function renderizarDiarioTab() {
+            var hoje = new Date(); hoje.setHours(0,0,0,0);
+            var diasSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+            var porDia = {}, totalGeralDia = 0;
+            contas.forEach(function(c) {
+                var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
+                var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido;
+                if(valorAberto <= 0) return;
+                var status = String(c.status||'').toLowerCase();
+                if(status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||status==='cancelada') return;
+                var vencRaw = c.data_vencimento||c.vencimento; if(!vencRaw) return;
+                var diaStr = String(vencRaw).slice(0,10); var venc = new Date(diaStr+'T00:00:00');
+                if(isNaN(venc.getTime())) return; venc.setHours(0,0,0,0);
+                if(!porDia[diaStr]) porDia[diaStr] = {aVencer:0,vencido:0,total:0,qtd:0,dow:venc.getDay()};
+                if(venc < hoje) porDia[diaStr].vencido += valorAberto; else porDia[diaStr].aVencer += valorAberto;
+                porDia[diaStr].total += valorAberto; porDia[diaStr].qtd++; totalGeralDia += valorAberto;
+            });
+            var spanTotais = document.getElementById('diario-totais-pub');
+            if(spanTotais) spanTotais.textContent = Object.keys(porDia).length+' dias | Total: '+fmtMoeda(totalGeralDia);
+            var body = document.getElementById('tab-diario-body');
+            var dKeys = Object.keys(porDia).sort();
+            if(!dKeys.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            body.innerHTML = dKeys.map(function(d){ var it=porDia[d]; var dt=new Date(d+'T00:00:00'); var bgColor=it.vencido>0?'background:#fef2f2;':''; return '<tr style="'+bgColor+'"><td>'+diasSemana[it.dow]+'</td><td>'+dt.toLocaleDateString('pt-BR')+'</td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;">'+it.qtd+'</td></tr>'; }).join('');
+        }
+
+        var operacoesCache = null;
+        async function carregarOperacoesPub() {
+            try {
+                if(!operacoesCache) {
+                    var r = await fetch('/api/financeiro/operacoes-credito', { credentials: 'include' });
+                    if(!r.ok) throw new Error('API error ' + r.status);
+                    var json = await r.json(); operacoesCache = json.data || [];
+                    var emps={},insts={},tipos={};
+                    operacoesCache.forEach(function(op){ if(op.empresa)emps[op.empresa]=true; if(op.instituicao)insts[op.instituicao]=true; if(op.tipo_operacao)tipos[op.tipo_operacao]=true; });
+                    document.getElementById('op-filtro-empresa-pub').innerHTML='<option value="">Todas Empresas</option>'+Object.keys(emps).sort().map(function(e){return '<option value="'+_escFin(e)+'">'+_escFin(e)+'</option>';}).join('');
+                    document.getElementById('op-filtro-instituicao-pub').innerHTML='<option value="">Todas Instituições</option>'+Object.keys(insts).sort().map(function(e){return '<option value="'+_escFin(e)+'">'+_escFin(e)+'</option>';}).join('');
+                    document.getElementById('op-filtro-tipo-pub').innerHTML='<option value="">Todos Tipos</option>'+Object.keys(tipos).sort().map(function(e){return '<option value="'+_escFin(e)+'">'+_escFin(e)+'</option>';}).join('');
+                }
+                filtrarOperacoesPub();
+            } catch(e) {
+                console.error('[Operações] Erro:', e);
+                document.getElementById('tabela-operacoes-body-pub').innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:#dc2626;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar</td></tr>';
+            }
+        }
+
+        function filtrarOperacoesPub() {
+            var data = operacoesCache || [];
+            var fEmp = document.getElementById('op-filtro-empresa-pub').value;
+            var fInst = document.getElementById('op-filtro-instituicao-pub').value;
+            var fTipo = document.getElementById('op-filtro-tipo-pub').value;
+            if(fEmp) data = data.filter(function(o){ return o.empresa === fEmp; });
+            if(fInst) data = data.filter(function(o){ return o.instituicao === fInst; });
+            if(fTipo) data = data.filter(function(o){ return o.tipo_operacao === fTipo; });
+            var totalBruto=0,totalLiq=0,totalDed=0,totalTit=0,countOps=data.length;
+            data.forEach(function(o){ totalBruto+=parseFloat(o.vlr_bruto)||0; totalLiq+=parseFloat(o.liq_lib)||0; totalDed+=parseFloat(o.total_deducoes)||0; totalTit+=parseInt(o.qtde_titulos)||0; });
+            document.getElementById('op-kpis-pub').innerHTML = [{label:'Operações',val:countOps,color:'#7c3aed'},{label:'Vlr Bruto',val:fmtMoeda(totalBruto),color:'#1e40af'},{label:'Títulos',val:totalTit,color:'#059669'},{label:'Deduções',val:fmtMoeda(totalDed),color:'#dc2626'},{label:'Líq Liberado',val:fmtMoeda(totalLiq),color:'#0891b2'}].map(function(k){ return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;border-left:3px solid '+k.color+';"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">'+k.label+'</div><div style="font-size:16px;font-weight:800;color:'+k.color+';">'+k.val+'</div></div>'; }).join('');
+            var infoEl = document.getElementById('op-filtro-info-pub'); if(infoEl) infoEl.textContent = data.length + ' de ' + (operacoesCache||[]).length + ' operações';
+            var totaisEl = document.getElementById('op-totais-pub'); if(totaisEl) totaisEl.textContent = data.length + ' registros';
+            var body = document.getElementById('tabela-operacoes-body-pub');
+            if(!data.length) { body.innerHTML='<tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação</td></tr>'; return; }
+            var fmtDec = function(v){ return (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); };
+            var fmtPct = function(v){ return (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})+'%'; };
+            body.innerHTML = data.map(function(o){
+                return '<tr><td>'+_escFin(o.bordero||'-')+'</td><td>'+_escFin(o.empresa||'-')+'</td><td>'+_escFin(o.tipo_operacao||'-')+'</td><td>'+_escFin(o.instituicao||'-')+'</td><td>'+_escFin(o.prorrogacao||'-')+'</td><td style="text-align:right;">'+fmtDec(o.prazo_medio)+'</td><td>'+fmtData(o.data_operacao)+'</td><td style="text-align:right;">'+fmtPct(o.taxa_periodo)+'</td><td style="text-align:right;">'+fmtPct(o.tmp)+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(o.vlr_bruto)+'</td><td style="text-align:right;">'+(o.qtde_titulos||0)+'</td><td style="text-align:right;">'+fmtMoeda(o.dif_monet)+'</td><td style="text-align:right;">'+fmtMoeda(o.tarifas)+'</td><td style="text-align:right;">'+fmtPct(o.iss_riss_irrf_perc)+'</td><td style="text-align:right;">'+fmtMoeda(o.iss_riss_irrf_monet)+'</td><td style="text-align:right;">'+fmtMoeda(o.iof)+'</td><td style="text-align:right;">'+fmtMoeda(o.cpmf_cobr)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(o.total_deducoes)+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(o.liq_op)+'</td><td style="text-align:right;">'+fmtMoeda(o.retencao_passivo)+'</td><td style="text-align:right;">'+fmtMoeda(o.recompra)+'</td><td style="text-align:right;">'+fmtMoeda(o.amort_fom)+'</td><td style="text-align:right;">'+fmtMoeda(o.conta_grafica)+'</td><td style="text-align:right;font-weight:700;color:#059669;">'+fmtMoeda(o.liq_lib)+'</td></tr>';
+            }).join('');
+        }
+
+        function renderizarTDTab() {
+            var hoje = new Date(); hoje.setHours(0,0,0,0);
+            var porPeriodo = {};
+            contas.forEach(function(c) {
+                var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
+                var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido; if(valorAberto < 0) valorAberto = 0;
+                var status = String(c.status||'').toLowerCase();
+                var vencRaw = c.data_vencimento||c.vencimento;
+                var venc = vencRaw ? new Date(String(vencRaw).slice(0,10)+'T00:00:00') : null;
+                if(!venc || isNaN(venc.getTime())) return; venc.setHours(0,0,0,0);
+                var mKey = venc.getFullYear()+'-'+String(venc.getMonth()+1).padStart(2,'0');
+                var mNome = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][venc.getMonth()]+'/'+venc.getFullYear();
+                if(!porPeriodo[mKey]) porPeriodo[mKey] = {nome:mNome,aVencer:0,vencido:0,liquidado:0,total:0};
+                var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
+                var vencido = !liquidado && venc < hoje;
+                if(liquidado) { porPeriodo[mKey].liquidado += recebido>0?recebido:bruto; porPeriodo[mKey].total += recebido>0?recebido:bruto; }
+                else if(vencido) { porPeriodo[mKey].vencido += valorAberto; porPeriodo[mKey].total += valorAberto; }
+                else { porPeriodo[mKey].aVencer += valorAberto; porPeriodo[mKey].total += valorAberto; }
+            });
+            var body = document.getElementById('tab-td-body');
+            var pKeys = Object.keys(porPeriodo).sort();
+            if(!pKeys.length) { body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
+            var totalAV=0,totalVenc=0,totalLiq=0,totalGeral=0;
+            body.innerHTML = pKeys.map(function(k){ var it=porPeriodo[k]; totalAV+=it.aVencer; totalVenc+=it.vencido; totalLiq+=it.liquidado; totalGeral+=it.total; return '<tr><td><strong>'+it.nome+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td></tr>'; }).join('');
+            body.innerHTML += '<tr style="background:#f0fdf4;font-weight:700;"><td>TOTAL</td><td style="text-align:right;">'+fmtMoeda(totalAV)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(totalVenc)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalLiq)+'</td><td style="text-align:right;">'+fmtMoeda(totalGeral)+'</td></tr>';
         }
 
         // Dev Spec 1.3: Fundos detalhado
