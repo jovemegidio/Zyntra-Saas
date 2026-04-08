@@ -910,11 +910,11 @@ module.exports = function createVendasRoutes(deps) {
                 let opAtiva = [];
                 try {
                     [opAtiva] = await patchConn.query(
-                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_vinculado_id = ? AND status NOT IN ("concluida", "cancelada") LIMIT 1',
                         [id]
                     );
                 } catch (_opErr) {
-                    // pedido_id column may not exist in this deployment — skip OP check
+                    // pedido_vinculado_id column may not exist in this deployment — skip OP check
                     opAtiva = [];
                 }
                 if (opAtiva.length > 0 && !isAdmin) {
@@ -1439,7 +1439,7 @@ module.exports = function createVendasRoutes(deps) {
 
             // Sprint 1 (K-03/RC-01 fix): SELECT ... FOR UPDATE para atomicidade
             await connection.beginTransaction();
-            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id, cliente_id, cliente_nome, valor, condicao_pagamento FROM pedidos WHERE id = ? FOR UPDATE', [id]);
+            const [pedidoAtual] = await connection.query('SELECT id, status, vendedor_id, cliente_id, cliente_nome, valor, condicao_pagamento, parcelas FROM pedidos WHERE id = ? FOR UPDATE', [id]);
             if (pedidoAtual.length === 0) {
                 await connection.rollback();
                 return res.status(404).json({ message: 'Pedido não encontrado.' });
@@ -1582,7 +1582,7 @@ module.exports = function createVendasRoutes(deps) {
                 try {
                     // Verificar se já existe OP para este pedido
                     const [opExistente] = await connection.query(
-                        'SELECT id, codigo FROM ordens_producao WHERE pedido_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
+                        'SELECT id, codigo FROM ordens_producao WHERE pedido_vinculado_id = ? AND status NOT IN ("cancelada") LIMIT 1', [id]
                     );
                     if (opExistente.length === 0) {
                         // BUG-10 FIX: Buscar TODOS os itens do pedido (não só o primeiro)
@@ -1605,6 +1605,46 @@ module.exports = function createVendasRoutes(deps) {
                         const codigoOP = `OP N° ${ano}/${String(proximoNumero).padStart(5, '0')}`;
 
                         const pedidoData = pedidoAtual[0];
+
+                        // Buscar dados completos do cliente para a OP
+                        let clienteNomeOP = pedidoData.cliente_nome || '';
+                        let clienteCnpjOP = '';
+                        let clienteContatoOP = '';
+                        let clienteTelefoneOP = '';
+                        let clienteEmailOP = '';
+                        let clienteEnderecoOP = '';
+                        let clienteCepOP = '';
+                        let vendedorOP = '';
+                        let condicaoPagamentoOP = pedidoData.condicao_pagamento || '';
+                        let valorTotalOP = parseFloat(pedidoData.valor) || 0;
+
+                        if (pedidoData.cliente_id) {
+                            try {
+                                const [clienteRows] = await connection.query(
+                                    'SELECT nome, razao_social, nome_fantasia, cnpj_cpf, contato, telefone, email, endereco, numero, bairro, cidade, estado, cep FROM clientes WHERE id = ?',
+                                    [pedidoData.cliente_id]
+                                );
+                                if (clienteRows.length > 0) {
+                                    const cl = clienteRows[0];
+                                    clienteNomeOP = cl.razao_social || cl.nome_fantasia || cl.nome || clienteNomeOP;
+                                    clienteCnpjOP = cl.cnpj_cpf || '';
+                                    clienteContatoOP = cl.contato || '';
+                                    clienteTelefoneOP = cl.telefone || '';
+                                    clienteEmailOP = cl.email || '';
+                                    clienteEnderecoOP = [cl.endereco, cl.numero, cl.bairro, cl.cidade ? cl.cidade + '/' + (cl.estado || '') : ''].filter(Boolean).join(', ');
+                                    clienteCepOP = cl.cep || '';
+                                }
+                            } catch (clErr) { console.warn('[PIPELINE_AUTO] Erro ao buscar cliente:', clErr.message); }
+                        }
+
+                        // Buscar nome do vendedor
+                        if (pedidoData.vendedor_id) {
+                            try {
+                                const [vendRows] = await connection.query('SELECT nome FROM usuarios WHERE id = ?', [pedidoData.vendedor_id]);
+                                if (vendRows.length > 0) vendedorOP = vendRows[0].nome;
+                            } catch (_) {}
+                        }
+
                         let descProduto, qtdOP, undOP, obsItens;
                         if (itensOP.length > 1) {
                             // Múltiplos itens: listar todos na descrição e observações
@@ -1630,12 +1670,17 @@ module.exports = function createVendasRoutes(deps) {
                             INSERT INTO ordens_producao (
                                 codigo, produto_nome, quantidade, unidade,
                                 status, prioridade, data_prevista, responsavel, observacoes,
-                                progresso, quantidade_produzida, pedido_id, created_at, updated_at
-                            ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?, NOW(), NOW())
-                        `, [codigoOP, descProduto, qtdOP, undOP, obsItens, id]);
-
-                        // Marcar pedido com produção iniciada
-                        await connection.query('UPDATE pedidos SET producao_iniciada = 1 WHERE id = ?', [id]);
+                                progresso, quantidade_produzida, pedido_vinculado_id,
+                                cliente_nome, cliente_cnpj, cliente_contato, cliente_telefone,
+                                cliente_email, cliente_endereco, cliente_cep,
+                                vendedor, condicoes_pagamento, valor_total, numero_pedido,
+                                created_at, updated_at
+                            ) VALUES (?, ?, ?, ?, 'ativa', 'media', NULL, NULL, ?, 0, 0, ?,
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                        `, [codigoOP, descProduto, qtdOP, undOP, obsItens, id,
+                            clienteNomeOP, clienteCnpjOP, clienteContatoOP, clienteTelefoneOP,
+                            clienteEmailOP, clienteEnderecoOP, clienteCepOP,
+                            vendedorOP, condicaoPagamentoOP, valorTotalOP, String(id)]);
 
                         opAutoCriada = { id: opResult.insertId, codigo: codigoOP };
                         console.log(`[PIPELINE_AUTO] OP ${codigoOP} criada automaticamente para Pedido #${id}`);
