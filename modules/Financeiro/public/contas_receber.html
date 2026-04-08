@@ -10,10 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260319">
-    <link rel="stylesheet" href="css/fin-components.css?v=20260319">
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260319">
-    <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260319">
+    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-counter-standard.css?v=20260408">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260319">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
@@ -338,13 +338,13 @@
                 <a href="index.html" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
                 <a href="contas_pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="contas_receber.html" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
-                <a href="contas_bancarias.html" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
-                <a href="fluxo_caixa.html" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
+                <a href="/bancos" class="sidebar-btn" title="Contas Bancárias"><i class="fas fa-university"></i></a>
+                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
                 <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
                 <a href="plano_contas.html" class="sidebar-btn" title="Plano de Contas"><i class="fas fa-sitemap"></i></a>
                 <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
-                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
-                <a href="impostos.html" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
+                <a href="/orcamentos" class="sidebar-btn" title="Orçamentos"><i class="fas fa-clipboard-list"></i></a>
+                <a href="/impostos" class="sidebar-btn" title="Impostos"><i class="fas fa-receipt"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a>
@@ -373,15 +373,16 @@
             </header>
             <!-- Workbook Tabs -->
             <div class="workbook-tabs">
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color green"></span> BASE</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color blue"></span> RESUMO</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color orange"></span> FATURAMENTO</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color blue"></span> DISPONIVEL</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-base')"><span class="tab-color green"></span> BASE</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-resumo')"><span class="tab-color blue"></span> RESUMO</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-faturamento')"><span class="tab-color orange"></span> FATURAMENTO</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-disponivel')"><span class="tab-color blue"></span> DISPONIVEL</a>
                 <a href="#" class="workbook-tab active" onclick="switchWorkbookTab(event,'tab-areceber')"><span class="tab-color red"></span> A RECEBER</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color green"></span> DIARIO</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-diario')"><span class="tab-color green"></span> DIARIO</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-fundos')"><span class="tab-color blue"></span> FUNDOS</a>
                 <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-pm')"><span class="tab-color purple"></span> PM</a>
-                <a href="#" class="workbook-tab" onclick="event.preventDefault()"><span class="tab-color green"></span> TD</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-operacoes')"><span class="tab-color purple"></span> OPERAÇÕES</a>
+                <a href="#" class="workbook-tab" onclick="switchWorkbookTab(event,'tab-td')"><span class="tab-color green"></span> TD</a>
             </div>
 
             <div class="content-area">
@@ -403,6 +404,7 @@
                         </div>
                         <div class="metric-value" id="stat-total">R$ 0,00</div>
                         <div class="metric-label">Total a Receber</div>
+                        <div class="metric-meta" id="stat-total-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
                     </div>
                     <div class="metric-card blue">
                         <div class="metric-header">
@@ -410,6 +412,7 @@
                         </div>
                         <div class="metric-value" id="stat-vencendo">R$ 0,00</div>
                         <div class="metric-label">A Vencer</div>
+                        <div class="metric-meta" id="stat-vencendo-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
                     </div>
                     <div class="metric-card red">
                         <div class="metric-header">
@@ -417,6 +420,7 @@
                         </div>
                         <div class="metric-value" id="stat-vencidas">R$ 0,00</div>
                         <div class="metric-label">Vencido</div>
+                        <div class="metric-meta" id="stat-vencidas-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
                     </div>
                     <div class="metric-card green">
                         <div class="metric-header">
@@ -424,6 +428,7 @@
                         </div>
                         <div class="metric-value" id="stat-recebidas">R$ 0,00</div>
                         <div class="metric-label">Liquidado</div>
+                        <div class="metric-meta" id="stat-recebidas-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
                     </div>
                 </div>
 
@@ -476,6 +481,15 @@
                             <option value="OPERADO">Operado</option>
                             <option value="CARTEIRA">Carteira</option>
                             <option value="A VISTA">A Vista</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label><i class="fas fa-building"></i> Empresa</label>
+                        <select class="filter-input" id="filtro-empresa" onchange="filtrarContas()">
+                            <option value="">Todas</option>
+                            <option value="LABOR">Labor</option>
+                            <option value="ALUFORCE">Aluforce</option>
+                            <option value="ENERGY">Energy</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -598,15 +612,48 @@
                 <div id="tab-pm" class="workbook-content" style="display:none;">
                     <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calculator" style="color:#a142f4;margin-right:8px;"></i>Simulador de Prazo Médio</h2>
                     <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:16px;margin-bottom:20px;">
-                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Médio (PM):</strong> Calculado com base nos títulos em aberto. PM = Soma(Valor x Dias) / Soma(Valor). As taxas são aplicadas conforme tabela de referência.</p>
+                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Médio (PM):</strong> Calculado com dados reais dos módulos (A Receber + A Pagar). PM = Σ(Valor × Dias) / Σ(Valor). Dados integrados por empresa e por dia de vencimento.</p>
                     </div>
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+
+                    <!-- Filtro Empresa -->
+                    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;">
+                        <div class="filter-group">
+                            <label>Empresa</label>
+                            <select class="filter-input" id="pm-filtro-empresa" onchange="renderizarPM()">
+                                <option value="">Todas as Empresas</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Módulo</label>
+                            <select class="filter-input" id="pm-filtro-modulo" onchange="renderizarPM()">
+                                <option value="receber" selected>A Receber</option>
+                                <option value="pagar">A Pagar</option>
+                                <option value="ambos">Ambos (Consolidado)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fas fa-percentage"></i> Taxa Mensal (%)</label>
+                            <input type="number" class="filter-input" id="pm-taxa-mensal" value="1.50" step="0.01" min="0" max="100" style="text-align:right;min-width:100px;" onchange="renderizarPM()">
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fas fa-calendar-alt"></i> Prazo Simulado (dias)</label>
+                            <input type="number" class="filter-input" id="pm-prazo-simulado" value="30" min="1" max="365" style="text-align:right;min-width:100px;" onchange="renderizarPM()">
+                        </div>
+                        <div class="filter-group">
+                            <label><i class="fas fa-money-bill"></i> Valor Base Simulação</label>
+                            <input type="text" class="filter-input" id="pm-valor-simulacao" placeholder="0,00" style="text-align:right;min-width:120px;" oninput="formatarMoedaInput(this);renderizarPM()">
+                        </div>
+                        <button type="button" onclick="carregarPMDados()" style="padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;height:38px;"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                    </div>
+
+                    <!-- Cards Resumo Global -->
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" id="pm-cards-global">
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">PM Recebimento</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">PM Geral</div>
                             <div style="font-size:24px;font-weight:800;color:#7c3aed;margin-top:4px;" id="pm-recebimento">0 dias</div>
                         </div>
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Total Ponderado</div>
+                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Total em Aberto</div>
                             <div style="font-size:24px;font-weight:800;color:#1e40af;margin-top:4px;" id="pm-total-ponderado">R$ 0,00</div>
                         </div>
                         <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
@@ -618,38 +665,67 @@
                             <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:4px;" id="pm-custo-financeiro">R$ 0,00</div>
                         </div>
                     </div>
-                    <!-- Simulador -->
-                    <div class="table-container" style="margin-bottom:20px;">
-                        <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-sliders-h" style="margin-right:6px;"></i> Simulação de Prazo</h3>
-                        </div>
-                        <div style="padding:16px;">
-                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
-                                <div class="form-group-conta">
-                                    <label><i class="fas fa-percentage"></i> Taxa Mensal (%)</label>
-                                    <input type="number" id="pm-taxa-mensal" value="1.50" step="0.01" min="0" max="100" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" onchange="calcularPM()">
-                                </div>
-                                <div class="form-group-conta">
-                                    <label><i class="fas fa-calendar-alt"></i> Prazo Simulado (dias)</label>
-                                    <input type="number" id="pm-prazo-simulado" value="30" min="1" max="365" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" onchange="calcularPM()">
-                                </div>
-                                <div class="form-group-conta">
-                                    <label><i class="fas fa-money-bill"></i> Valor Base Simulacao</label>
-                                    <input type="text" id="pm-valor-simulacao" placeholder="0,00" style="padding:10px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;text-align:right;" oninput="formatarMoedaInput(this);calcularPM()">
-                                </div>
-                                <div class="form-group-conta" style="display:flex;align-items:flex-end;">
-                                    <button type="button" onclick="calcularPM()" style="padding:10px 20px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;width:100%;"><i class="fas fa-calculator"></i> Calcular</button>
-                                </div>
-                            </div>
-                            <div id="pm-resultado-simulacao" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:14px;display:none;">
-                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-                                    <div><span style="font-size:11px;color:#6b7280;">Custo Total Estimado:</span><div style="font-size:16px;font-weight:700;color:#7c3aed;" id="pm-sim-custo">R$ 0,00</div></div>
-                                    <div><span style="font-size:11px;color:#6b7280;">Valor Liquido Estimado:</span><div style="font-size:16px;font-weight:700;color:#059669;" id="pm-sim-liquido">R$ 0,00</div></div>
-                                    <div><span style="font-size:11px;color:#6b7280;">Taxa Efetiva:</span><div style="font-size:16px;font-weight:700;color:#dc2626;" id="pm-sim-taxa-efetiva">0,00%</div></div>
-                                </div>
-                            </div>
+
+                    <!-- Cards PM por Empresa -->
+                    <div id="pm-cards-empresa" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;"></div>
+
+                    <!-- Simulação -->
+                    <div id="pm-resultado-simulacao" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:14px;margin-bottom:20px;display:none;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+                            <div><span style="font-size:11px;color:#6b7280;">Custo Total Estimado:</span><div style="font-size:16px;font-weight:700;color:#7c3aed;" id="pm-sim-custo">R$ 0,00</div></div>
+                            <div><span style="font-size:11px;color:#6b7280;">Valor Líquido Estimado:</span><div style="font-size:16px;font-weight:700;color:#059669;" id="pm-sim-liquido">R$ 0,00</div></div>
+                            <div><span style="font-size:11px;color:#6b7280;">Taxa Efetiva:</span><div style="font-size:16px;font-weight:700;color:#dc2626;" id="pm-sim-taxa-efetiva">0,00%</div></div>
                         </div>
                     </div>
+
+                    <!-- Tabela PM por Empresa -->
+                    <div class="table-container" style="margin-bottom:20px;">
+                        <div class="table-header">
+                            <h3 class="table-title"><i class="fas fa-building" style="margin-right:6px;color:#7c3aed;"></i> Prazo Médio por Empresa</h3>
+                        </div>
+                        <div style="overflow-x:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Empresa</th>
+                                    <th style="text-align:center;">Qtd. Títulos</th>
+                                    <th style="text-align:right;">Valor em Aberto</th>
+                                    <th style="text-align:center;">PM (dias)</th>
+                                    <th style="text-align:right;">Custo Fin. Estimado</th>
+                                    <th style="text-align:center;">% Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pm-empresa">
+                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando dados reais...</td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+
+                    <!-- Tabela PM por Dia -->
+                    <div class="table-container" style="margin-bottom:20px;">
+                        <div class="table-header">
+                            <h3 class="table-title"><i class="fas fa-calendar-day" style="margin-right:6px;color:#1e40af;"></i> Prazo Médio por Dia de Vencimento</h3>
+                        </div>
+                        <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Dia Vencimento</th>
+                                    <th style="text-align:center;">Qtd.</th>
+                                    <th style="text-align:right;">Valor em Aberto</th>
+                                    <th style="text-align:center;">Dias até Vcto.</th>
+                                    <th style="text-align:right;">Custo Fin. Estimado</th>
+                                    <th>Empresa(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-pm-diario">
+                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando dados reais...</td></tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+
                     <!-- Tabela PM por Portador -->
                     <div class="table-container">
                         <div class="table-header">
@@ -660,11 +736,11 @@
                             <thead>
                                 <tr>
                                     <th>Portador</th>
-                                    <th>Qtd. Títulos</th>
-                                    <th>Valor Total</th>
-                                    <th>PM (dias)</th>
-                                    <th>Custo Fin. Estimado</th>
-                                    <th>% Volume</th>
+                                    <th style="text-align:center;">Qtd. Títulos</th>
+                                    <th style="text-align:right;">Valor Total</th>
+                                    <th style="text-align:center;">PM (dias)</th>
+                                    <th style="text-align:right;">Custo Fin. Estimado</th>
+                                    <th style="text-align:center;">% Volume</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-pm-body">
@@ -674,6 +750,117 @@
                         </div>
                     </div>
                 </div><!-- /tab-pm -->
+
+                <!-- Tab: BASE (dados de referência) -->
+                <div id="tab-base" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-database" style="color:#34a853;margin-right:8px;"></i>Dados de Referência</h2>
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-university" style="color:#ef4444;margin-right:6px;"></i> Portador</h3></div>
+                            <table><thead><tr><th>Nome</th></tr></thead>
+                            <tbody id="base-portador-body"></tbody></table>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situação / Posição</h3></div>
+                            <table><thead><tr><th>Status</th><th>Situação</th><th>Posição</th></tr></thead>
+                            <tbody id="base-status-body"></tbody></table>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo" style="color:#f59e0b;margin-right:6px;"></i> Recomprado / Cartório</h3></div>
+                            <table><thead><tr><th>Recomprado</th><th>Cartório</th></tr></thead>
+                            <tbody id="base-recomprado-body"></tbody></table>
+                        </div>
+                    </div>
+                </div><!-- /tab-base -->
+
+                <!-- Tab: RESUMO -->
+                <div id="tab-resumo" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-chart-bar" style="color:#4285f4;margin-right:8px;"></i>Resumo por Parceiro / Mensal</h2>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title">Por Parceiro</h3></div>
+                            <div style="overflow-x:auto;"><table><thead><tr><th>Parceiro</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Total</th><th style="text-align:right">Liquidado</th></tr></thead>
+                            <tbody id="tab-resumo-parceiro-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody></table></div>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title">Mensal</h3></div>
+                            <div style="overflow-x:auto;"><table><thead><tr><th>Mês</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th><th style="text-align:right">Total</th></tr></thead>
+                            <tbody id="tab-resumo-mensal-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody></table></div>
+                        </div>
+                    </div>
+                </div><!-- /tab-resumo -->
+
+                <!-- Tab: FATURAMENTO -->
+                <div id="tab-faturamento" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-file-invoice-dollar" style="color:#fbbc04;margin-right:8px;"></i>Faturamento / Operações <span id="fat-totais-pub" style="font-size:12px;font-weight:400;color:#6b7280;margin-left:12px;"></span></h2>
+                    <div class="table-container"><div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th style="text-align:right">Valor</th><th>Emissão</th><th>Vcto</th><th>Situação</th><th>Portador</th><th>Status</th><th style="text-align:right">Dias</th><th>Posição</th></tr></thead>
+                        <tbody id="tab-faturamento-body"><tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    </table></div></div>
+                </div><!-- /tab-faturamento -->
+
+                <!-- Tab: DISPONIVEL -->
+                <div id="tab-disponivel" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:8px;"></i>Disponível por Empresa</h2>
+                    <div class="table-container"><div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Empresa</th><th style="text-align:right">NF (A Vencer)</th><th style="text-align:right">F9 (A Vencer)</th><th style="text-align:right">Total Disponível</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th></tr></thead>
+                        <tbody id="tab-disponivel-body"><tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    </table></div></div>
+                </div><!-- /tab-disponivel -->
+
+                <!-- Tab: DIARIO -->
+                <div id="tab-diario" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calendar-day" style="color:#ea4335;margin-right:8px;"></i>Contas a Receber — Diário <span id="diario-totais-pub" style="font-size:12px;font-weight:400;color:#6b7280;margin-left:12px;"></span></h2>
+                    <div class="table-container"><div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Dia da Semana</th><th>Data</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Total do Dia</th><th style="text-align:right">Qtd</th></tr></thead>
+                        <tbody id="tab-diario-body"><tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    </table></div></div>
+                </div><!-- /tab-diario -->
+
+                <!-- Tab: OPERAÇÕES -->
+                <div id="tab-operacoes" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-exchange-alt" style="color:#a142f4;margin-right:8px;"></i>Operações de Crédito</h2>
+                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;" id="op-kpis-pub"></div>
+                    <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 16px;margin-bottom:12px;flex-wrap:wrap;">
+                        <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-filter" style="color:#8b5cf6;margin-right:5px;"></i>Filtros</span>
+                        <select id="op-filtro-empresa-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Empresas</option></select>
+                        <select id="op-filtro-instituicao-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Instituições</option></select>
+                        <select id="op-filtro-tipo-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todos Tipos</option></select>
+                        <div style="margin-left:auto;font-size:11px;color:#6b7280;" id="op-filtro-info-pub"></div>
+                    </div>
+                    <div class="table-container">
+                        <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
+                            <h3 class="table-title">Operações</h3>
+                            <span style="font-size:11px;color:#6b7280;" id="op-totais-pub"></span>
+                        </div>
+                        <div style="overflow-x:auto;"><table>
+                            <thead><tr>
+                                <th>Borderô</th><th>Empresa</th><th>Tipo</th><th>Instituição</th>
+                                <th>Prorrog.</th><th style="text-align:right">PM</th>
+                                <th>Data OP</th><th style="text-align:right">Taxa Per.</th>
+                                <th style="text-align:right">TMP</th>
+                                <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">Títulos</th>
+                                <th style="text-align:right">Dif Monet</th><th style="text-align:right">Tarifas</th>
+                                <th style="text-align:right">ISS %</th><th style="text-align:right">ISS R$</th>
+                                <th style="text-align:right">IOF</th><th style="text-align:right">CPMF</th>
+                                <th style="text-align:right">Deduções</th><th style="text-align:right">Líq OP</th>
+                                <th style="text-align:right">Retenção</th><th style="text-align:right">Recompra</th>
+                                <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta Gráfica</th>
+                                <th style="text-align:right">Líq Liberado</th>
+                            </tr></thead>
+                            <tbody id="tabela-operacoes-body-pub"><tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                        </table></div>
+                    </div>
+                </div><!-- /tab-operacoes -->
+
+                <!-- Tab: TD (Tabela Dinâmica) -->
+                <div id="tab-td" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-table" style="color:#34a853;margin-right:8px;"></i>Tabela Dinâmica — Por Vencimento</h2>
+                    <div class="table-container"><div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Mês/Período</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th><th style="text-align:right">Total Geral</th></tr></thead>
+                        <tbody id="tab-td-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    </table></div></div>
+                </div><!-- /tab-td -->
             </div>
         </main>
     </div>
@@ -1320,7 +1507,7 @@
             document.getElementById('cr-comprovante-file').value = '';
             resetTabsCR();
             if (id) {
-                var c = contas.find(function(x){return x.id===id;}); if (!c) return;
+                var c = contas.find(function(x){return String(x.id)===String(id);}); if (!c) { console.error('Conta não encontrada para id:', id); return; }
                 document.getElementById('modal-titulo').textContent = 'Editar Conta a Receber';
                 document.getElementById('conta-id').value = c.id;
                 document.getElementById('descricao').value = c.descricao || [c.cliente_nome, c.nota_fiscal ? 'NFe ' + c.nota_fiscal : '', c.parcela_info].filter(Boolean).join(' - ') || '';
@@ -1409,7 +1596,7 @@
             var id = document.getElementById('receber-conta-id').value;
             var dados = { valor_recebido: parseFloat(document.getElementById('receber-valor').value), data_recebimento: document.getElementById('receber-data').value, forma_recebimento: document.getElementById('receber-forma').value, observações: document.getElementById('receber-obs').value };
             try {
-                var r = await fetch('/api/financeiro/contas-receber/'+id+'/receber', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
+                var r = await fetch('/api/financeiro/contas-receber/'+id+'/baixa', { method: 'POST', headers:{'Content-Type':'application/json'}, credentials: 'include', body: JSON.stringify(dados) });
                 if (r.ok) { showToast('Recebimento confirmado com sucesso!'); fecharModalReceber(); await init(); } else { showToast('Erro ao confirmar recebimento', 'error'); }
             } catch(e) { console.error(e); showToast('Erro ao confirmar recebimento', 'error'); }
         }
@@ -1434,7 +1621,19 @@
                 aceita_troca_factory: document.getElementById('cr-aceita-troca-factory').checked,
                 dia_recomprado: document.getElementById('cr-dia-recomprado').value || null,
                 data_para_cartório: document.getElementById('cr-data-cartório').value || null,
-                data_protestado: document.getElementById('cr-data-protestado').value || null
+                data_protestado: document.getElementById('cr-data-protestado').value || null,
+                nota_fiscal: document.getElementById('cr-nota-fiscal').value || null,
+                data_emissao: document.getElementById('cr-emissao').value || null,
+                data_registro: document.getElementById('cr-registro').value || null,
+                projeto: document.getElementById('cr-projeto').value || null,
+                vendedor: document.getElementById('cr-vendedor').value || null,
+                previsao_recebimento: document.getElementById('cr-previsao').value || null,
+                valor_pis: parseMoeda(document.getElementById('cr-valor-pis').value) || 0,
+                valor_cofins: parseMoeda(document.getElementById('cr-valor-cofins').value) || 0,
+                valor_csll: parseMoeda(document.getElementById('cr-valor-csll').value) || 0,
+                valor_ir: parseMoeda(document.getElementById('cr-valor-ir').value) || 0,
+                valor_iss: parseMoeda(document.getElementById('cr-valor-iss').value) || 0,
+                valor_inss: parseMoeda(document.getElementById('cr-valor-inss').value) || 0
             };
             try {
                 var url = id ? '/api/financeiro/contas-receber/'+id : '/api/financeiro/contas-receber';
@@ -1476,6 +1675,7 @@
             var portador = document.getElementById('filtro-portador') ? document.getElementById('filtro-portador').value : '';
             var situacao = document.getElementById('filtro-situacao') ? document.getElementById('filtro-situacao').value : '';
             var clienteNome = document.getElementById('filtro-cliente-select').value;
+            var empresa = document.getElementById('filtro-empresa') ? document.getElementById('filtro-empresa').value : '';
             var pesquisa = document.getElementById('pesquisa-global').value.toLowerCase();
             var filtradas = contas.slice();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
@@ -1486,6 +1686,7 @@
             if (portador) filtradas = filtradas.filter(function(c){ return c.portador === portador; });
             if (situacao) filtradas = filtradas.filter(function(c){ return (c.situacao||'').toUpperCase() === situacao.toUpperCase(); });
             if (clienteNome) filtradas = filtradas.filter(function(c){ return c.cliente_nome === clienteNome; });
+            if (empresa) filtradas = filtradas.filter(function(c){ return (c.empresa||'').toUpperCase().indexOf(empresa.toUpperCase()) > -1; });
             if (pesquisa) filtradas = filtradas.filter(function(c){ return (c.descricao||'').toLowerCase().indexOf(pesquisa)>-1||(c.cliente_nome||'').toLowerCase().indexOf(pesquisa)>-1||(c.valor+'').indexOf(pesquisa)>-1||(c.numero_documento||'').toLowerCase().indexOf(pesquisa)>-1||(c.nota_fiscal||'').toLowerCase().indexOf(pesquisa)>-1||(c.portador||'').toLowerCase().indexOf(pesquisa)>-1||(c.cnpj_cpf||c.cnpj_cliente||'').indexOf(pesquisa)>-1||(c.vendedor||'').toLowerCase().indexOf(pesquisa)>-1; });
             return filtradas;
         }
@@ -1493,7 +1694,7 @@
         var pesquisaTimeout;
         function pesquisarGlobal() { clearTimeout(pesquisaTimeout); var i=document.getElementById('pesquisa-global'); i.parentElement.querySelector('.btn-clear-search').style.display=i.value?'flex':'none'; pesquisaTimeout=setTimeout(function(){filtrarContas();},300); }
         function limparPesquisa() { document.getElementById('pesquisa-global').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
-        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-periodo').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
+        function limparFiltros() { document.getElementById('pesquisa-global').value=''; document.getElementById('filtro-periodo').value='todas'; document.getElementById('filtro-status').value=''; document.getElementById('filtro-cliente-select').value=''; if(document.getElementById('filtro-portador'))document.getElementById('filtro-portador').value=''; if(document.getElementById('filtro-situacao'))document.getElementById('filtro-situacao').value=''; if(document.getElementById('filtro-empresa'))document.getElementById('filtro-empresa').value=''; document.querySelector('.btn-clear-search').style.display='none'; filtrarContas(); }
 
         var contaVisualizando = null;
         function visualizarConta(id) {
@@ -1609,6 +1810,13 @@
             // Carregar dados da aba se necessario
             if (tabId === 'tab-pm') calcularPM();
             if (tabId === 'tab-fundos') renderizarFundosDetalhado();
+            if (tabId === 'tab-base') carregarBase();
+            if (tabId === 'tab-resumo') renderizarResumoTab();
+            if (tabId === 'tab-faturamento') renderizarFaturamentoTab();
+            if (tabId === 'tab-disponivel') renderizarDisponivelTab();
+            if (tabId === 'tab-diario') renderizarDiarioTab();
+            if (tabId === 'tab-operacoes') { carregarOperacoesPub(); }
+            if (tabId === 'tab-td') renderizarTDTab();
         }
 
         // Dev Spec 1.3: Simulador de Prazo Médio
@@ -1768,7 +1976,7 @@
     <script src="/js/user-dropdown.js?v=20260327" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
-    <script src="js/financeiro-sidebar.js?v=20260319"></script>
+    <script src="/Financeiro/js/financeiro-sidebar.js?v=20260408"></script>
     <script src="/_shared/confirm-dialog.js?v=20260319"></script>
     <script src="/_shared/accessibility-widget.js?v=20260319"></script>
     <script src="/socket.io/socket.io.js"></script>
