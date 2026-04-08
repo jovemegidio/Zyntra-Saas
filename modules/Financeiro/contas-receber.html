@@ -426,6 +426,27 @@
                     </div>
                 </div>
 
+                <!-- TAB PANE: BASE (dados de referência) -->
+                <div class="tab-pane-view" id="pane-base">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:8px 0;">
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-university" style="color:#ef4444;margin-right:6px;"></i> Portador</h3></div>
+                            <table><thead><tr><th>Nome</th></tr></thead>
+                            <tbody id="base-portador-body"></tbody></table>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situação / Posição</h3></div>
+                            <table><thead><tr><th>Status</th><th>Situação</th><th>Posição</th></tr></thead>
+                            <tbody id="base-status-body"></tbody></table>
+                        </div>
+                        <div class="table-container">
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo" style="color:#f59e0b;margin-right:6px;"></i> Recomprado / Cartório</h3></div>
+                            <table><thead><tr><th>Recomprado</th><th>Cartório</th></tr></thead>
+                            <tbody id="base-recomprado-body"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- TAB PANE: A RECEBER (default active) -->
                 <div class="tab-pane-view active" id="pane-receber">
 
@@ -815,16 +836,19 @@
                                 <thead><tr>
                                     <th>Borderô</th><th>Empresa</th><th>Tipo</th><th>Instituição</th>
                                     <th>Prorrog.</th><th style="text-align:right">PM</th>
-                                    <th>Data OP</th><th style="text-align:right">Taxa %</th>
+                                    <th>Data OP</th><th style="text-align:right">Taxa Per.</th>
+                                    <th style="text-align:right">TMP</th>
                                     <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">Títulos</th>
                                     <th style="text-align:right">Dif Monet</th><th style="text-align:right">Tarifas</th>
+                                    <th style="text-align:right">ISS %</th><th style="text-align:right">ISS R$</th>
+                                    <th style="text-align:right">IOF</th><th style="text-align:right">CPMF</th>
                                     <th style="text-align:right">Deduções</th><th style="text-align:right">Líq OP</th>
                                     <th style="text-align:right">Retenção</th><th style="text-align:right">Recompra</th>
                                     <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta Gráfica</th>
                                     <th style="text-align:right">Líq Liberado</th>
                                 </tr></thead>
                                 <tbody id="tabela-operacoes-body">
-                                    <tr><td colspan="19" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
+                                    <tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
                                 </tbody>
                             </table>
                             </div>
@@ -834,15 +858,16 @@
 
                 <!-- WORKBOOK TABS (bottom, Excel-style) -->
                 <div class="workbook-tabs">
-                    <div class="workbook-tab active" data-pane="pane-receber" onclick="switchPane(this)"><span class="tab-dot red"></span> A RECEBER</div>
-                    <div class="workbook-tab" data-pane="pane-fundos" onclick="switchPane(this)"><span class="tab-dot purple"></span> FUNDOS</div>
+                    <div class="workbook-tab" data-pane="pane-base" onclick="switchPane(this)"><span class="tab-dot red"></span> BASE</div>
                     <div class="workbook-tab" data-pane="pane-resumo" onclick="switchPane(this)"><span class="tab-dot blue"></span> RESUMO</div>
                     <div class="workbook-tab" data-pane="pane-faturamento" onclick="switchPane(this)"><span class="tab-dot orange"></span> FATURAMENTO</div>
                     <div class="workbook-tab" data-pane="pane-disponivel" onclick="switchPane(this)"><span class="tab-dot green"></span> DISPONIVEL</div>
-                    <div class="workbook-tab" data-pane="pane-diario" onclick="switchPane(this)"><span class="tab-dot red"></span> DIARIO</div>
+                    <div class="workbook-tab active" data-pane="pane-receber" onclick="switchPane(this)"><span class="tab-dot red"></span> A RECEBER</div>
+                    <div class="workbook-tab" data-pane="pane-diario" onclick="switchPane(this)"><span class="tab-dot green"></span> DIARIO</div>
                     <div class="workbook-tab" data-pane="pane-pm" onclick="switchPane(this)"><span class="tab-dot pink"></span> PM</div>
-                    <div class="workbook-tab" data-pane="pane-td" onclick="switchPane(this)"><span class="tab-dot blue"></span> TD</div>
+                    <div class="workbook-tab" data-pane="pane-fundos" onclick="switchPane(this)"><span class="tab-dot purple"></span> FUNDOS</div>
                     <div class="workbook-tab" data-pane="pane-operacoes" onclick="switchPane(this)"><span class="tab-dot indigo"></span> OPERAÇÕES</div>
+                    <div class="workbook-tab" data-pane="pane-td" onclick="switchPane(this)"><span class="tab-dot blue"></span> TD</div>
                 </div>
 
             </div><!-- /content-area -->
@@ -2264,16 +2289,94 @@
         }
     </script>
 
-    <!-- OPERAÇÕES DE CRÉDITO -->
+    <!-- BASE - Dados de Referência -->
+    <script>
+        (function carregarBase() {
+            var portadores = ['ALUFORCE','AUGURI','CAPITAL ANNEX','CONTINENTAL','DEL MONTE','FAMA','H8','IGNIS','ITAU','LEPTA','ONIX','VALE RIO CLARO'];
+            var status = ['A VENCER','VENCIDO'];
+            var situacao = ['A VISTA','CARTEIRA','DISPONÍVEL','OPERADO'];
+            var posicao = ['LIQUIDADO','RECOMPRADO'];
+            var recomprado = ['A RECEBER','RECEBIDO'];
+            var cartorio = ['FUNDO','ALUFORCE'];
+
+            var bp = document.getElementById('base-portador-body');
+            if(bp) bp.innerHTML = portadores.map(function(p){return '<tr><td>'+p+'</td></tr>';}).join('');
+
+            var bs = document.getElementById('base-status-body');
+            if(bs) {
+                var maxLen = Math.max(status.length, situacao.length, posicao.length);
+                var rows = '';
+                for(var i=0;i<maxLen;i++){
+                    rows += '<tr><td>'+(status[i]||'')+'</td><td>'+(situacao[i]||'')+'</td><td>'+(posicao[i]||'')+'</td></tr>';
+                }
+                bs.innerHTML = rows;
+            }
+
+            var br = document.getElementById('base-recomprado-body');
+            if(br) {
+                var maxLen2 = Math.max(recomprado.length, cartorio.length);
+                var rows2 = '';
+                for(var i=0;i<maxLen2;i++){
+                    rows2 += '<tr><td>'+(recomprado[i]||'')+'</td><td>'+(cartorio[i]||'')+'</td></tr>';
+                }
+                br.innerHTML = rows2;
+            }
+        })();
+    </script>
+
+    <!-- OPERAÇÕES DE CRÉDITO (com fórmulas) -->
     <script>
         var operacoesData = [];
         var operacoesFiltradas = [];
+
+        /*
+         * FÓRMULAS DO EXCEL (Tabela13):
+         * TOTAL_DEDUCOES (R) = DIF_MONET + TARIFAS + ISS_MONET + IOF + CPMF_COBR
+         * TAXA_PERIODO  (H) = (VLR_BRUTO - LIQ_OP) / VLR_BRUTO
+         * TMP           (I) = (TAXA_PERIODO * 30) / PRAZO_MEDIO
+         * ISS_PERC      (N) = ISS_MONET / VLR_BRUTO / PRAZO_MEDIO * 30
+         * LIQ_OP        (S) = VLR_BRUTO - TOTAL_DEDUCOES
+         * LIQ_LIB       (X) = Se PRORROGACAO="SIM" → 0;
+         *                      Senão: LIQ_OP - RETENCAO - RECOMPRA - CONTA_GRAFICA - AMORT_FOM
+         */
+        function calcularFormulas(o) {
+            var vlr = parseFloat(o.vlr_bruto) || 0;
+            var dif = parseFloat(o.dif_monet) || 0;
+            var tar = parseFloat(o.tarifas) || 0;
+            var issMonet = parseFloat(o.iss_riss_irrf_monet) || 0;
+            var iof = parseFloat(o.iof) || 0;
+            var cpmf = parseFloat(o.cpmf_cobr) || 0;
+            var pm = parseFloat(o.prazo_medio) || 0;
+            var ret = parseFloat(o.retencao_passivo) || 0;
+            var rec = parseFloat(o.recompra) || 0;
+            var cg = parseFloat(o.conta_grafica) || 0;
+            var af = parseFloat(o.amort_fom) || 0;
+            var prorrog = String(o.prorrogacao || '').trim().toUpperCase();
+
+            // Fórmula R: TOTAL_DEDUCOES
+            o._total_deducoes = dif + tar + issMonet + iof + cpmf;
+            // Fórmula S: LIQ_OP
+            o._liq_op = vlr - o._total_deducoes;
+            // Fórmula H: TAXA_PERIODO
+            o._taxa_periodo = vlr > 0 ? (vlr - o._liq_op) / vlr : 0;
+            // Fórmula I: TMP (Taxa Mensal Ponderada)
+            o._tmp = pm > 0 ? (o._taxa_periodo * 30) / pm : 0;
+            // Fórmula N: ISS_PERC
+            o._iss_perc = (vlr > 0 && pm > 0) ? (issMonet / vlr / pm * 30) : 0;
+            // Fórmula X: LIQ_LIB
+            if (prorrog === 'SIM') {
+                o._liq_lib = 0;
+            } else {
+                o._liq_lib = o._liq_op - ret - rec - cg - af;
+            }
+            return o;
+        }
 
         async function carregarOperacoes() {
             try {
                 var response = await fetch('/api/financeiro/operacoes-credito', { credentials: 'include' });
                 var json = await response.json();
-                operacoesData = json.data || [];
+                operacoesData = (json.data || []).map(calcularFormulas);
                 populaFiltrosOp();
                 filtrarOperacoes();
             } catch(e) { console.error('Erro ao carregar operações:', e); }
@@ -2308,52 +2411,98 @@
             renderKpisOp();
         }
 
+        function fmtPerc(v) { return v ? (v * 100).toFixed(4) + '%' : '0.0000%'; }
+
         function renderOperacoes() {
             var tbody = document.getElementById('tabela-operacoes-body');
             if (!operacoesFiltradas.length) {
-                tbody.innerHTML = '<tr><td colspan="19" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação encontrada</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma operação encontrada</td></tr>';
                 document.getElementById('op-totais').textContent = '';
                 return;
             }
 
-            var totBruto = 0, totDed = 0, totLiq = 0;
+            var totBruto = 0, totDifMonet = 0, totTarifas = 0, totDed = 0, totLiqOp = 0;
+            var totRet = 0, totRec = 0, totAmort = 0, totCG = 0, totLiqLib = 0, totTitulos = 0;
+            var totIssMonet = 0, totIof = 0, totCpmf = 0;
+            var sumPMxVlr = 0;
+
             var rows = operacoesFiltradas.map(function(o) {
-                totBruto += parseFloat(o.vlr_bruto) || 0;
-                totDed += parseFloat(o.total_deducoes) || 0;
-                totLiq += parseFloat(o.liq_lib) || 0;
+                var vlr = parseFloat(o.vlr_bruto) || 0;
+                var pm = parseFloat(o.prazo_medio) || 0;
+                totBruto += vlr;
+                totDifMonet += parseFloat(o.dif_monet) || 0;
+                totTarifas += parseFloat(o.tarifas) || 0;
+                totIssMonet += parseFloat(o.iss_riss_irrf_monet) || 0;
+                totIof += parseFloat(o.iof) || 0;
+                totCpmf += parseFloat(o.cpmf_cobr) || 0;
+                totDed += o._total_deducoes;
+                totLiqOp += o._liq_op;
+                totRet += parseFloat(o.retencao_passivo) || 0;
+                totRec += parseFloat(o.recompra) || 0;
+                totAmort += parseFloat(o.amort_fom) || 0;
+                totCG += parseFloat(o.conta_grafica) || 0;
+                totLiqLib += o._liq_lib;
+                totTitulos += parseInt(o.qtde_titulos) || 0;
+                sumPMxVlr += pm * vlr;
+
                 var dt = o.data_operacao ? new Date(o.data_operacao + 'T12:00:00').toLocaleDateString('pt-BR') : '';
-                var taxa = o.taxa_periodo ? (parseFloat(o.taxa_periodo) * 100).toFixed(2) + '%' : '';
+
                 return '<tr>' +
                     '<td style="font-weight:600;color:#374151;">' + (o.bordero || '') + '</td>' +
                     '<td>' + (o.empresa || '') + '</td>' +
                     '<td>' + (o.tipo_operacao || '') + '</td>' +
                     '<td>' + (o.instituicao || '') + '</td>' +
                     '<td style="text-align:center;">' + (o.prorrogacao || '') + '</td>' +
-                    '<td style="text-align:right;">' + (parseFloat(o.prazo_medio) || 0).toFixed(1) + '</td>' +
+                    '<td style="text-align:right;">' + pm.toFixed(1) + '</td>' +
                     '<td>' + dt + '</td>' +
-                    '<td style="text-align:right;color:#6366f1;">' + taxa + '</td>' +
-                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(o.vlr_bruto) + '</td>' +
+                    '<td style="text-align:right;color:#6366f1;">' + fmtPerc(o._taxa_periodo) + '</td>' +
+                    '<td style="text-align:right;color:#8b5cf6;">' + fmtPerc(o._tmp) + '</td>' +
+                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(vlr) + '</td>' +
                     '<td style="text-align:right;">' + (parseInt(o.qtde_titulos) || 0) + '</td>' +
                     '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.dif_monet) + '</td>' +
                     '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.tarifas) + '</td>' +
-                    '<td style="text-align:right;color:#dc2626;font-weight:600;">' + fmtMoeda(o.total_deducoes) + '</td>' +
-                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(o.liq_op) + '</td>' +
+                    '<td style="text-align:right;color:#9ca3af;">' + fmtPerc(o._iss_perc) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.iss_riss_irrf_monet) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.iof) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(o.cpmf_cobr) + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;font-weight:600;">' + fmtMoeda(o._total_deducoes) + '</td>' +
+                    '<td style="text-align:right;font-weight:600;">' + fmtMoeda(o._liq_op) + '</td>' +
                     '<td style="text-align:right;">' + fmtMoeda(o.retencao_passivo) + '</td>' +
                     '<td style="text-align:right;">' + fmtMoeda(o.recompra) + '</td>' +
                     '<td style="text-align:right;">' + fmtMoeda(o.amort_fom) + '</td>' +
                     '<td style="text-align:right;">' + fmtMoeda(o.conta_grafica) + '</td>' +
-                    '<td style="text-align:right;font-weight:700;color:#059669;">' + fmtMoeda(o.liq_lib) + '</td>' +
+                    '<td style="text-align:right;font-weight:700;color:#059669;">' + fmtMoeda(o._liq_lib) + '</td>' +
                     '</tr>';
             });
 
-            // Total row
+            // Totais calculados
+            var pmGeralPonderado = totBruto > 0 ? sumPMxVlr / totBruto : 0;
+            var taxaPeriodoTotal = totBruto > 0 ? totDed / totBruto : 0;
+
+            var tmpGeral = pmGeralPonderado > 0 ? (taxaPeriodoTotal * 30) / pmGeralPonderado : 0;
+            var issPercGeral = (totBruto > 0 && pmGeralPonderado > 0) ? (totIssMonet / totBruto / pmGeralPonderado * 30) : 0;
+
             rows.push('<tr style="background:#f8fafc;font-weight:700;border-top:2px solid #e5e7eb;">' +
-                '<td colspan="8">Total (' + operacoesFiltradas.length + ' operações)</td>' +
+                '<td colspan="5">TOTAL (' + operacoesFiltradas.length + ' operações)</td>' +
+                '<td style="text-align:right;">' + pmGeralPonderado.toFixed(1) + '</td>' +
+                '<td></td>' +
+                '<td style="text-align:right;color:#6366f1;">' + fmtPerc(taxaPeriodoTotal) + '</td>' +
+                '<td style="text-align:right;color:#8b5cf6;">' + fmtPerc(tmpGeral) + '</td>' +
                 '<td style="text-align:right;">' + fmtMoeda(totBruto) + '</td>' +
-                '<td colspan="3"></td>' +
+                '<td style="text-align:right;">' + totTitulos + '</td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totDifMonet) + '</td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totTarifas) + '</td>' +
+                '<td style="text-align:right;color:#9ca3af;">' + fmtPerc(issPercGeral) + '</td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totIssMonet) + '</td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totIof) + '</td>' +
+                '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totCpmf) + '</td>' +
                 '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(totDed) + '</td>' +
-                '<td colspan="5"></td>' +
-                '<td style="text-align:right;color:#059669;">' + fmtMoeda(totLiq) + '</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totLiqOp) + '</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totRet) + '</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totRec) + '</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totAmort) + '</td>' +
+                '<td style="text-align:right;">' + fmtMoeda(totCG) + '</td>' +
+                '<td style="text-align:right;color:#059669;">' + fmtMoeda(totLiqLib) + '</td>' +
                 '</tr>');
 
             tbody.innerHTML = rows.join('');
@@ -2364,24 +2513,30 @@
         function renderKpisOp() {
             var d = operacoesFiltradas;
             var totBruto = d.reduce(function(s,o){return s + (parseFloat(o.vlr_bruto)||0);}, 0);
-            var totDed = d.reduce(function(s,o){return s + (parseFloat(o.total_deducoes)||0);}, 0);
-            var totLiqLib = d.reduce(function(s,o){return s + (parseFloat(o.liq_lib)||0);}, 0);
+            var totDed = d.reduce(function(s,o){return s + o._total_deducoes;}, 0);
+            var totLiqLib = d.reduce(function(s,o){return s + o._liq_lib;}, 0);
+            var totLiqOp = d.reduce(function(s,o){return s + o._liq_op;}, 0);
             var totRecomp = d.reduce(function(s,o){return s + (parseFloat(o.recompra)||0);}, 0);
+            var totRet = d.reduce(function(s,o){return s + (parseFloat(o.retencao_passivo)||0);}, 0);
             var pmMedio = d.length ? d.reduce(function(s,o){return s + (parseFloat(o.prazo_medio)||0);}, 0) / d.length : 0;
+            var taxaMedia = totBruto > 0 ? (totDed / totBruto) : 0;
+            var tmpMedio = pmMedio > 0 ? (taxaMedia * 30) / pmMedio : 0;
 
-            var kpi = function(label, valor, cor, icon) {
+            var kpi = function(label, valor, cor, icon, sub) {
                 return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:12px 16px;">' +
                     '<div style="font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;">' +
                     '<i class="fas fa-' + icon + '" style="color:' + cor + ';margin-right:4px;"></i>' + label + '</div>' +
-                    '<div style="font-size:18px;font-weight:800;color:#111827;margin-top:4px;">' + valor + '</div></div>';
+                    '<div style="font-size:18px;font-weight:800;color:#111827;margin-top:4px;">' + valor + '</div>' +
+                    (sub ? '<div style="font-size:10px;color:#9ca3af;margin-top:2px;">' + sub + '</div>' : '') +
+                    '</div>';
             };
 
             document.getElementById('op-kpis').innerHTML =
-                kpi('Vlr Bruto', fmtMoeda(totBruto), '#3b82f6', 'money-bill-wave') +
-                kpi('Deduções', fmtMoeda(totDed), '#ef4444', 'minus-circle') +
-                kpi('Líq Liberado', fmtMoeda(totLiqLib), '#22c55e', 'hand-holding-usd') +
-                kpi('Recompra', fmtMoeda(totRecomp), '#f59e0b', 'undo') +
-                kpi('PM Médio', pmMedio.toFixed(1) + ' dias', '#8b5cf6', 'clock');
+                kpi('Vlr Bruto', fmtMoeda(totBruto), '#3b82f6', 'money-bill-wave', d.length + ' operações') +
+                kpi('Total Deduções', fmtMoeda(totDed), '#ef4444', 'minus-circle', 'Taxa período: ' + fmtPerc(taxaMedia)) +
+                kpi('Líq Operação', fmtMoeda(totLiqOp), '#f59e0b', 'calculator', 'Bruto - Deduções') +
+                kpi('Líq Liberado', fmtMoeda(totLiqLib), '#22c55e', 'hand-holding-usd', 'Líq OP - Ret - Rec - Amort') +
+                kpi('PM Médio', pmMedio.toFixed(1) + ' dias', '#8b5cf6', 'clock', 'TMP: ' + fmtPerc(tmpMedio));
         }
 
         function abrirModalImportarOp() {
@@ -2390,7 +2545,6 @@
             document.getElementById('importar-resultado').style.display = 'none';
             document.getElementById('btn-importar').disabled = false;
             document.getElementById('modal-importar').classList.add('active');
-            // Override import to use operacoes endpoint
             window._importOpMode = true;
         }
 
