@@ -821,12 +821,29 @@
                 <!-- Tab: FATURAMENTO -->
                 <div id="tab-faturamento" class="workbook-content" style="display:none;">
                     <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-file-invoice-dollar" style="color:#fbbc04;margin-right:8px;"></i>Faturamento / Operações <span id="fat-totais-pub" style="font-size:12px;font-weight:400;color:#6b7280;margin-left:12px;"></span></h2>
+                    <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 16px;margin-bottom:12px;flex-wrap:wrap;">
+                        <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-filter" style="color:#f59e0b;margin-right:5px;"></i>Filtros</span>
+                        <select id="fat-filtro-empresa" onchange="renderizarFaturamentoTab()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <select id="fat-filtro-tipo" onchange="renderizarFaturamentoTab()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">NF + F9</option><option value="NF">Apenas NF</option><option value="F9">Apenas F9</option></select>
+                        <input type="text" id="fat-busca" placeholder="Buscar nota, cliente, data..." oninput="renderizarFaturamentoTab()" style="padding:4px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;min-width:200px;">
+                        <div style="margin-left:auto;font-size:11px;color:#6b7280;" id="fat-filtro-info"></div>
+                    </div>
                     <div class="table-container"><div style="overflow-x:auto;"><table>
                         <thead><tr><th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th style="text-align:right">Valor</th><th>Emissão</th><th>Vcto</th><th>Situação</th><th>Portador</th><th>Status</th><th style="text-align:right">Dias</th><th>Posição</th></tr></thead>
                         <tbody id="tab-faturamento-body"><tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-faturamento -->
 
+                <!-- Tab: FAT. ANÁLISE -->
+                <div id="tab-fat-analise" class="workbook-content" style="display:none;">
+                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-chart-pie" style="color:#f59e0b;margin-right:8px;"></i>Faturamento — Análise NF vs F9</h2>
+                    <div id="fat-analise-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
+                    <div id="fat-analise-empresas" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;"></div>
+                    <div class="table-container"><div style="overflow-x:auto;"><table>
+                        <thead><tr><th>Empresa</th><th style="text-align:right">NF (Qtd)</th><th style="text-align:right">NF (Valor)</th><th style="text-align:right;color:#dc2626;">F9 (Qtd)</th><th style="text-align:right;color:#dc2626;">F9 (Valor)</th><th style="text-align:right">Total (Qtd)</th><th style="text-align:right">Total (Valor)</th><th style="text-align:right;color:#f59e0b;">% F9</th></tr></thead>
+                        <tbody id="fat-analise-body"><tr><td colspan="8" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    </table></div></div>
+                </div><!-- /tab-fat-analise -->
                 <!-- Tab: DISPONIVEL -->
                 <div id="tab-disponivel" class="workbook-content" style="display:none;">
                     <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:12px;"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:8px;"></i>Disponível do Dia <span id="disponivel-data-ref" style="font-size:13px;font-weight:400;color:#6b7280;margin-left:8px;"></span></h2>
@@ -948,6 +965,43 @@
                     <div style="display:flex;gap:12px;justify-content:flex-end;">
                         <button onclick="fecharModalOperacao()" style="padding:10px 20px;background:#f1f5f9;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;">Cancelar</button>
                         <button onclick="salvarOperacao()" style="padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:8px;font-size:13px;font-weight:600;color:white;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-save"></i> Salvar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+                <!-- Modal Editar Faturado -->
+        <div id="modalEditarFaturado" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:#fff;border-radius:16px;width:90%;max-width:820px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
+                <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:16px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
+                    <h3 style="color:#fff;font-size:18px;font-weight:700;margin:0;"><i class="fas fa-file-invoice-dollar" style="margin-right:8px;"></i>Editar Faturamento</h3>
+                    <button onclick="fecharModalFaturado()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-times"></i></button>
+                </div>
+                <div style="padding:24px;">
+                    <input type="hidden" id="fat-edit-id">
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Empresa</label><input id="fat-edit-empresa" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nota Fiscal</label><input id="fat-edit-nota-fiscal" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Tipo (NF/F9)</label><select id="fat-edit-tipo" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"><option value="NF">NF</option><option value="F9">F9</option></select></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Cliente</label><input id="fat-edit-cliente" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">CNPJ/CPF Cliente</label><input id="fat-edit-cnpj-cliente" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Valor Total</label><input id="fat-edit-valor" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Data Emissão</label><input id="fat-edit-emissao" type="date" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Data Vencimento</label><input id="fat-edit-vencimento" type="date" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Parcela</label><input id="fat-edit-parcela" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Situação</label><input id="fat-edit-situacao" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Portador</label><input id="fat-edit-portador" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Status</label><select id="fat-edit-status" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"><option value="pendente">Pendente</option><option value="a_vencer">A Vencer</option><option value="vencida">Vencida</option><option value="recebido">Recebido</option><option value="parcial">Parcial</option><option value="liquidada">Liquidada</option><option value="cancelada">Cancelada</option></select></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Vendedor</label><input id="fat-edit-vendedor" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Posição</label><input id="fat-edit-posicao" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Categoria</label><input id="fat-edit-categoria" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Valor Recebido</label><input id="fat-edit-valor-recebido" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nº Documento</label><input id="fat-edit-num-doc" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nº Boleto</label><input id="fat-edit-num-boleto" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
+                        <div style="grid-column:span 3;"><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Observações</label><textarea id="fat-edit-observacoes" rows="2" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;"></textarea></div>
+                    </div>
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                        <button onclick="fecharModalFaturado()" style="padding:10px 24px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
+                        <button onclick="salvarFaturado()" style="padding:10px 24px;border:none;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Salvar Alterações</button>
                     </div>
                 </div>
             </div>
@@ -2086,7 +2140,7 @@
         function renderizarFaturamentoTab() {
             var filtroEmpresa = (document.getElementById('fat-filtro-empresa') || {}).value || '';
             var filtroTipo = (document.getElementById('fat-filtro-tipo') || {}).value || '';
-            var busca = (document.getElementById('fat-busca') || {}).value.toLowerCase().trim();
+            var busca = ((document.getElementById('fat-busca') || {}).value || '').toLowerCase().trim();
 
             var lista = contas.filter(function(c) {
                 var st = String(c.status||'').toLowerCase();
@@ -2124,7 +2178,7 @@
                 var dias = parseInt(c.dias_vencido)||0; var diasStyle = dias>0?'color:#dc2626;font-weight:700;':''; var st = String(c.status||'').toLowerCase();
                 var empUpper = (c.empresa||'').toUpperCase().trim();
                 var empColor = empresaColors[empUpper] || '#374151';
-                return '<tr><td><strong style="color:'+empColor+';">'+_escFin(c.empresa||'-')+'</strong></td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td>'+_escFin(c.cliente_nome||'-')+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(c.valor_total||c.valor)+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.situacao||'-')+'</td><td>'+_escFin(c.portador||'-')+'</td><td>'+(badges[st]||st)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td><td>'+_escFin(c.posicao||'-')+'</td></tr>';
+                return '<tr style="cursor:pointer;" ondblclick="abrirModalFaturado('+c.id+')"><td><strong style="color:'+empColor+';">'+_escFin(c.empresa||'-')+'</strong></td><td>'+_escFin(c.categoria||'-')+'</td><td>'+_escFin(c.nota_fiscal||'-')+'</td><td>'+_escFin(c.parcela_info||'-')+'</td><td>'+_escFin(c.cliente_nome||'-')+'</td><td style="text-align:right;font-weight:600;">'+fmtMoeda(c.valor_total||c.valor)+'</td><td>'+fmtData(c.data_emissao)+'</td><td>'+fmtData(c.data_vencimento||c.vencimento)+'</td><td>'+_escFin(c.situacao||'-')+'</td><td>'+_escFin(c.portador||'-')+'</td><td>'+(badges[st]||st)+'</td><td style="'+diasStyle+'">'+(dias||'-')+'</td><td>'+_escFin(c.posicao||'-')+'</td></tr>';
             }).join('');
         }
 
@@ -2300,6 +2354,83 @@
             body.innerHTML += '<tr style="background:#f0fdf4;font-weight:700;"><td>TOTAL</td><td style="text-align:right;">'+fmtMoeda(totalAV)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(totalVenc)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalLiq)+'</td><td style="text-align:right;">'+fmtMoeda(totalGeral)+'</td></tr>';
         }
 
+
+        // ======= FATURAMENTO - Modal Editar (dblclick) =======
+        function abrirModalFaturado(id) {
+            var item = contas.find(function(c){ return c.id == id; });
+            if(!item) { showToast('Registro não encontrado', 'error'); return; }
+            document.getElementById('fat-edit-id').value = item.id || '';
+            document.getElementById('fat-edit-empresa').value = item.empresa || '';
+            document.getElementById('fat-edit-nota-fiscal').value = item.nota_fiscal || '';
+            document.getElementById('fat-edit-tipo').value = (item.categoria || item.tipo || 'NF').toUpperCase().trim() === 'F9' ? 'F9' : 'NF';
+            document.getElementById('fat-edit-cliente').value = item.cliente_nome || '';
+            document.getElementById('fat-edit-cnpj-cliente').value = item.cnpj_cliente || item.cnpj_cpf || '';
+            document.getElementById('fat-edit-valor').value = parseFloat(item.valor_total || item.valor || 0) || 0;
+            document.getElementById('fat-edit-emissao').value = item.data_emissao ? String(item.data_emissao).slice(0,10) : '';
+            document.getElementById('fat-edit-vencimento').value = (item.data_vencimento || item.vencimento) ? String(item.data_vencimento || item.vencimento).slice(0,10) : '';
+            document.getElementById('fat-edit-parcela').value = item.parcela_info || '';
+            document.getElementById('fat-edit-situacao').value = item.situacao || '';
+            document.getElementById('fat-edit-portador').value = item.portador || '';
+            document.getElementById('fat-edit-status').value = (item.status || 'pendente').toLowerCase();
+            document.getElementById('fat-edit-vendedor').value = item.vendedor || '';
+            document.getElementById('fat-edit-posicao').value = item.posicao || '';
+            document.getElementById('fat-edit-categoria').value = item.categoria_nome || item.categoria || '';
+            document.getElementById('fat-edit-valor-recebido').value = parseFloat(item.valor_recebido || 0) || 0;
+            document.getElementById('fat-edit-num-doc').value = item.numero_documento || '';
+            document.getElementById('fat-edit-num-boleto').value = item.numero_boleto || '';
+            document.getElementById('fat-edit-observacoes').value = item.observacoes || '';
+            document.getElementById('modalEditarFaturado').style.display = 'flex';
+        }
+
+        function fecharModalFaturado() {
+            document.getElementById('modalEditarFaturado').style.display = 'none';
+        }
+
+        async function salvarFaturado() {
+            var id = document.getElementById('fat-edit-id').value;
+            if(!id) { showToast('ID do registro não encontrado', 'error'); return; }
+            var body = {
+                empresa: document.getElementById('fat-edit-empresa').value,
+                nota_fiscal: document.getElementById('fat-edit-nota-fiscal').value,
+                tipo: document.getElementById('fat-edit-tipo').value,
+                cliente_nome: document.getElementById('fat-edit-cliente').value,
+                cnpj_cliente: document.getElementById('fat-edit-cnpj-cliente').value,
+                valor: parseFloat(document.getElementById('fat-edit-valor').value) || 0,
+                data_emissao: document.getElementById('fat-edit-emissao').value || null,
+                data_vencimento: document.getElementById('fat-edit-vencimento').value || null,
+                parcela_info: document.getElementById('fat-edit-parcela').value,
+                situacao: document.getElementById('fat-edit-situacao').value,
+                portador: document.getElementById('fat-edit-portador').value,
+                status: document.getElementById('fat-edit-status').value,
+                vendedor: document.getElementById('fat-edit-vendedor').value,
+                posicao: document.getElementById('fat-edit-posicao').value,
+                categoria_nome: document.getElementById('fat-edit-categoria').value,
+                valor_recebido: parseFloat(document.getElementById('fat-edit-valor-recebido').value) || 0,
+                numero_documento: document.getElementById('fat-edit-num-doc').value,
+                numero_boleto: document.getElementById('fat-edit-num-boleto').value,
+                observacoes: document.getElementById('fat-edit-observacoes').value
+            };
+            try {
+                var r = await fetch('/api/financeiro/contas-receber/' + id, {
+                    method: 'PUT', credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if(!r.ok) throw new Error('Erro ' + r.status);
+                var json = await r.json();
+                if(json.success) {
+                    showToast('Faturamento atualizado com sucesso!', 'success');
+                    fecharModalFaturado();
+                    // Refresh contas data
+                    var resp = await fetch('/api/financeiro/contas-receber', { credentials: 'include' });
+                    if(resp.ok) { var d = await resp.json(); contas = d.data || d.contas || []; }
+                    renderizarFaturamentoTab();
+                } else { throw new Error(json.error || 'Erro desconhecido'); }
+            } catch(e) {
+                console.error('[Faturado] Erro ao salvar:', e);
+                showToast('Erro ao salvar: ' + e.message, 'error');
+            }
+        }
 
         // ======= FAT. ANÁLISE - NF vs F9 =======
         function renderizarFatAnalise() {

@@ -1060,14 +1060,17 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
     try {
         const { id } = req.params;
         const {
-            cliente, descricao, valor, vencimento, status, tipo,
+            cliente, cliente_nome, descricao, valor, vencimento, status, tipo,
             pago_no_dia, aceita_troca_factory, comprovante_url,
             dia_recomprado, data_para_cartorio, data_protestado,
-            observacoes, forma_recebimento, categoria
+            observacoes, forma_recebimento, categoria, categoria_nome,
+            empresa, nota_fiscal, cnpj_cliente, data_emissao, data_vencimento,
+            parcela_info, situacao, portador, vendedor, posicao,
+            valor_recebido, numero_documento, numero_boleto
         } = req.body;
 
         // Validar status contra domínio estrito
-        const STATUS_VALIDOS_CR = ['cancelada', 'liquidada', 'vencida', 'a_vencer'];
+        const STATUS_VALIDOS_CR = ['cancelada', 'liquidada', 'vencida', 'a_vencer', 'pendente', 'recebido', 'parcial', 'pago'];
         if (status && !STATUS_VALIDOS_CR.includes(status.toLowerCase())) {
             return res.status(400).json({
                 error: `Status inválido. Valores aceitos: ${STATUS_VALIDOS_CR.join(', ')}`
@@ -1102,6 +1105,23 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
         if (data_para_cartorio !== undefined) { updates.push('data_para_cartorio = ?'); params.push(data_para_cartorio || null); }
         if (data_protestado !== undefined) { updates.push('data_protestado = ?'); params.push(data_protestado || null); }
 
+        // Campos Faturamento Modal (v2.5)
+        if (empresa !== undefined) { updates.push('empresa = ?'); params.push(sanitizeString(empresa)); }
+        if (nota_fiscal !== undefined) { updates.push('nota_fiscal = ?'); params.push(sanitizeString(nota_fiscal)); }
+        if (cnpj_cliente !== undefined) { updates.push('cnpj_cliente = ?'); params.push(sanitizeString(cnpj_cliente)); }
+        if (data_emissao !== undefined) { updates.push('data_emissao = ?'); params.push(data_emissao || null); }
+        if (data_vencimento !== undefined) { updates.push('data_vencimento = ?'); params.push(data_vencimento || null); }
+        if (parcela_info !== undefined) { updates.push('parcela_info = ?'); params.push(sanitizeString(parcela_info)); }
+        if (situacao !== undefined) { updates.push('situacao = ?'); params.push(sanitizeString(situacao)); }
+        if (portador !== undefined) { updates.push('portador = ?'); params.push(sanitizeString(portador)); }
+        if (vendedor !== undefined) { updates.push('vendedor = ?'); params.push(sanitizeString(vendedor)); }
+        if (posicao !== undefined) { updates.push('posicao = ?'); params.push(sanitizeString(posicao)); }
+        if (cliente_nome !== undefined) { updates.push('cliente_nome = ?'); params.push(sanitizeString(cliente_nome)); }
+        if (categoria_nome !== undefined) { updates.push('categoria_nome = ?'); params.push(sanitizeString(categoria_nome)); }
+        if (valor_recebido !== undefined) { updates.push('valor_recebido = ?'); params.push(parseFloat(valor_recebido) || 0); }
+        if (numero_documento !== undefined) { updates.push('numero_documento = ?'); params.push(sanitizeString(numero_documento)); }
+        if (numero_boleto !== undefined) { updates.push('numero_boleto = ?'); params.push(sanitizeString(numero_boleto)); }
+
         if (updates.length === 0) {
             return res.status(400).json({ error: 'Nenhum campo para atualizar' });
         }
@@ -1132,7 +1152,7 @@ router.put('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
             );
         }
 
-        res.json({ message: 'Conta atualizada com sucesso' });
+        res.json({ success: true, message: 'Conta atualizada com sucesso' });
     } catch (error) {
         console.error('[Financeiro] Erro ao atualizar conta a receber:', error);
         res.status(500).json({ error: 'Erro ao atualizar conta' });
