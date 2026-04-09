@@ -488,10 +488,12 @@
             }
         }
 
-        /* Modules Grid - Omie ERP style (v2026-04-08b) */
+        /* Modules Grid - glassmorphism colorido (v2026-04-08c) */
         .modules-grid {
-            display: grid !important;
-            grid-template-columns: repeat(7, 1fr) !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            justify-content: center !important;
+            align-items: stretch !important;
             gap: 16px;
             margin-bottom: 40px;
             animation: fadeInUp 0.5s ease 0.2s both;
@@ -540,25 +542,30 @@
         }
 
         .module-card {
-            background: #ffffff;
-            border: 1px solid #e8ecf1;
-            border-radius: 12px;
-            padding: 24px 12px 20px;
+            background: var(--card-bg, rgba(59,130,246,0.85));
+            -webkit-backdrop-filter: blur(16px) saturate(1.4);
+            backdrop-filter: blur(16px) saturate(1.4);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 18px;
+            padding: 28px 14px 22px;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             text-decoration: none;
             display: flex !important;
             flex-direction: column !important;
             align-items: center !important;
-            justify-content: flex-start !important;
+            justify-content: center !important;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.15);
+            flex: 1 1 0 !important;
             min-width: 0 !important;
             box-sizing: border-box !important;
-            color: inherit;
+            color: #fff;
             text-align: center;
             gap: 12px;
+            aspect-ratio: 1 / 1;
+            max-width: 160px;
         }
 
         /* Impedir que elementos injetados por JS quebrem o layout */
@@ -567,17 +574,23 @@
             display: none !important;
         }
 
-        .module-card::before,
+        .module-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
         .module-card::after {
             display: none;
         }
 
         .module-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--card-accent, #cbd5e1);
-            box-shadow:
-                0 8px 25px rgba(0, 0, 0, 0.08),
-                0 4px 10px rgba(0, 0, 0, 0.04);
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
         }
 
         .module-icon {
@@ -585,17 +598,19 @@
             height: 52px;
             min-width: 52px;
             min-height: 52px;
-            border-radius: 50%;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 22px;
             margin-bottom: 0;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
             position: relative;
             z-index: 1;
             flex-shrink: 0;
-            box-shadow: none;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .module-icon i {
@@ -607,7 +622,8 @@
         }
 
         .module-card:hover .module-icon {
-            transform: scale(1.08);
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.3);
         }
 
         .module-info {
@@ -626,7 +642,7 @@
             font-family: 'Inter', sans-serif;
             font-size: 13px;
             font-weight: 600;
-            color: #1e293b;
+            color: #fff;
             margin-bottom: 2px;
             line-height: 1.3;
             letter-spacing: 0;
@@ -634,11 +650,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.15);
         }
 
         .module-desc {
             font-size: 10.5px;
-            color: #94a3b8;
+            color: rgba(255,255,255,0.75);
             line-height: 1.35;
             white-space: nowrap;
             overflow: hidden;
@@ -697,61 +714,40 @@
             }
         }
 
-        /* Module Colors - Omie ERP flat style */
+        /* Module Colors - glassmorphism colorido */
         .module-card.compras {
-            --card-accent: #f97316;
-        }
-        .module-card.compras .module-icon {
-            background: #fff7ed;
-            color: #ea580c;
+            --card-bg: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
+            background: linear-gradient(135deg, #5b7cf7 0%, #4a6cf7 100%);
         }
 
         .module-card.vendas {
-            --card-accent: #3b82f6;
-        }
-        .module-card.vendas .module-icon {
-            background: #eff6ff;
-            color: #2563eb;
+            --card-bg: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
+            background: linear-gradient(135deg, #1a3ab5 0%, #2545c9 100%);
         }
 
         .module-card.nfe {
-            --card-accent: #6366f1;
-        }
-        .module-card.nfe .module-icon {
-            background: #eef2ff;
-            color: #4f46e5;
+            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
         }
 
         .module-card.logistica {
-            --card-accent: #0ea5e9;
-        }
-        .module-card.logistica .module-icon {
-            background: #e0f2fe;
-            color: #0284c7;
+            --card-bg: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
+            background: linear-gradient(135deg, #18b87e 0%, #21cc8e 100%);
         }
 
         .module-card.pcp {
-            --card-accent: #64748b;
-        }
-        .module-card.pcp .module-icon {
-            background: #f1f5f9;
-            color: #475569;
+            --card-bg: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
+            background: linear-gradient(135deg, #ef4444 0%, #f25f5f 100%);
         }
 
         .module-card.financeiro {
-            --card-accent: #10b981;
-        }
-        .module-card.financeiro .module-icon {
-            background: #ecfdf5;
-            color: #059669;
+            --card-bg: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
+            background: linear-gradient(135deg, #7ccf00 0%, #8ed616 100%);
         }
 
         .module-card.rh {
-            --card-accent: #ec4899;
-        }
-        .module-card.rh .module-icon {
-            background: #fdf2f8;
-            color: #db2777;
+            --card-bg: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
+            background: linear-gradient(135deg, #9b59b6 0%, #a76bc8 100%);
         }
 
 
@@ -1051,9 +1047,15 @@
         /* Responsive - tablets */
         @media (max-width: 1024px) and (min-width: 769px) {
             .modules-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 12px;
+                flex-wrap: wrap !important;
+                gap: 14px;
                 padding: 0 20px;
+            }
+
+            .module-card {
+                flex: 0 0 calc(25% - 11px) !important;
+                max-width: none;
+                aspect-ratio: auto;
             }
         }
 
@@ -1076,14 +1078,17 @@
             }
 
             .modules-grid {
-                grid-template-columns: repeat(3, 1fr) !important;
-                gap: 10px;
-                padding: 0 12px;
+                flex-wrap: wrap !important;
+                gap: 12px;
+                padding: 0 16px;
             }
 
             .module-card {
-                border-radius: 10px;
-                padding: 16px 8px 14px;
+                flex: 0 0 calc(33.33% - 8px) !important;
+                max-width: none;
+                aspect-ratio: auto;
+                border-radius: 14px;
+                padding: 18px 10px 16px;
             }
 
             .module-icon {
@@ -1092,6 +1097,7 @@
                 min-width: 40px;
                 min-height: 40px;
                 font-size: 16px;
+                border-radius: 11px;
             }
 
             .module-title {
@@ -1105,12 +1111,14 @@
 
         @media (max-width: 480px) {
             .modules-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+                flex-wrap: wrap !important;
                 gap: 10px;
                 padding: 0 12px;
             }
 
             .module-card {
+                flex: 0 0 calc(50% - 5px) !important;
+                max-width: none;
                 padding: 18px 10px 16px;
             }
 
@@ -1120,6 +1128,7 @@
                 min-width: 38px;
                 min-height: 38px;
                 font-size: 15px;
+                border-radius: 10px;
             }
 
             .module-title {
