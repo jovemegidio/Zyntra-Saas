@@ -153,7 +153,7 @@
             }
         }
 
-        /* Header - forçando estilo branco (sobrescreve backgrounds.css) */
+        /* Header - Efeito Vidro (Glassmorphism) */
         .main-header,
         #dashboard-area .main-header,
         #dashboard-area.bg-contrast-light .main-header,
@@ -163,13 +163,25 @@
             left: 0;
             right: 0;
             height: 64px;
-            background: rgba(255, 255, 255, 0.95) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            backdrop-filter: blur(20px) !important;
-            -webkit-backdrop-filter: blur(20px) !important;
-            border-bottom: 1px solid var(--slate-200) !important;
+            background: rgba(255, 255, 255, 0.45) !important;
+            -webkit-backdrop-filter: blur(24px) saturate(1.8) !important;
+            backdrop-filter: blur(24px) saturate(1.8) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3) !important;
             z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        /* Logos brancas em fundo escuro */
+        #dashboard-area.bg-contrast-light .header-logo .logo-azul,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-azul {
+            display: none !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-branca,
+        #dashboard-area.bg-contrast-light .header-logo .logo-zyntra-branca {
+            display: block !important;
+        }
+        #dashboard-area.bg-contrast-light .header-logo .logo-separator {
+            color: rgba(255,255,255,0.3) !important;
         }
 
         .header-content {
@@ -1534,12 +1546,18 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        body.dark-mode .header-logo img.logo-azul {
-            display: none;
+        body.dark-mode .header-logo .logo-azul,
+        body.dark-mode .header-logo .logo-zyntra-azul {
+            display: none !important;
         }
 
-        body.dark-mode .header-logo img.logo-branca {
-            display: block;
+        body.dark-mode .header-logo .logo-branca,
+        body.dark-mode .header-logo .logo-zyntra-branca {
+            display: block !important;
+        }
+
+        body.dark-mode .header-logo .logo-separator {
+            color: rgba(255,255,255,0.3) !important;
         }
 
         body.dark-mode .header-icon-btn {
@@ -1816,11 +1834,12 @@
 
     <header class="main-header">
         <div class="header-content">
-            <div class="header-logo">
-                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul"
-                    id="logo-azul">
-                <img src="/images/Logo Monocromatico - Branco - Aluforce copy.webp" alt="ALUFORCE" class="logo-branca"
-                    id="logo-branca" style="display:none;">
+            <div class="header-logo" style="display:flex;align-items:center;gap:12px;">
+                <img src="/images/zyntra-sem-fundo.png" alt="Zyntra" class="logo-zyntra-azul" style="height:28px;object-fit:contain;">
+                <img src="/images/zyntra-branco.png" alt="Zyntra" class="logo-zyntra-branca" id="logo-zyntra-branca" style="height:28px;object-fit:contain;display:none;">
+                <span class="logo-separator" style="color:rgba(0,0,0,0.15);font-weight:200;font-size:20px;user-select:none;">×</span>
+                <img src="/images/Logo Monocromatico - Azul - Aluforce.png" alt="ALUFORCE" class="logo-azul" id="logo-azul" style="height:26px;object-fit:contain;">
+                <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="logo-branca" id="logo-branca" style="height:26px;object-fit:contain;display:none;">
             </div>
 
             <div class="header-right">
@@ -2085,7 +2104,7 @@
                 const isNoConfig = userEmail && noConfigEmails.includes(userEmail);
 
                 // Emails não-admin que devem ter acesso ao modal Configurações
-                const configAllowedEmails = ['thiago.scarcella@aluforce.ind.br', 'guilherme.bastos@aluforce.ind.br'];
+                const configAllowedEmails = ['thiago.scarcella@aluforce.ind.br', 'guilherme.bastos@aluforce.ind.br', 'compras@aluforce.ind.br'];
                 const isConfigAllowed = userEmail && configAllowedEmails.includes(userEmail);
 
                 // Mostrar opções de admin (exceto para consultoria e emails restritos)
@@ -2125,8 +2144,8 @@
             // Financeiro - Apenas Financeiro + RH (funcionário)
             'financeiro2@aluforce.ind.br': ['financeiro', 'rh'],
             'financeiro3@aluforce.ind.br': ['financeiro', 'rh'],
-            // Compras - Guilherme Bastos (Compras + RH funcionário)
-            'compras@aluforce.ind.br': ['compras', 'rh'],
+            // Compras - Guilherme Bastos (Compras + PCP + Vendas + RH funcionário)
+            'compras@aluforce.ind.br': ['compras', 'vendas', 'pcp', 'rh'],
             // ADM (Junior) - RH + Financeiro
             'adm@aluforce.ind.br': ['rh', 'financeiro'],
             // Douglas (email atualizado)
@@ -2953,15 +2972,24 @@
         window.aplicarDarkMode = function (ativar) {
             const logoAzul = document.getElementById('logo-azul');
             const logoBranca = document.getElementById('logo-branca');
+            const logoZyntraAzul = document.querySelector('.logo-zyntra-azul');
+            const logoZyntraBranca = document.getElementById('logo-zyntra-branca');
+            const logoSep = document.querySelector('.logo-separator');
 
             if (ativar) {
                 document.body.classList.add('dark-mode');
                 if (logoAzul) logoAzul.style.display = 'none';
                 if (logoBranca) logoBranca.style.display = 'block';
+                if (logoZyntraAzul) logoZyntraAzul.style.display = 'none';
+                if (logoZyntraBranca) logoZyntraBranca.style.display = 'block';
+                if (logoSep) logoSep.style.color = 'rgba(255,255,255,0.3)';
             } else {
                 document.body.classList.remove('dark-mode');
                 if (logoAzul) logoAzul.style.display = 'block';
                 if (logoBranca) logoBranca.style.display = 'none';
+                if (logoZyntraAzul) logoZyntraAzul.style.display = 'block';
+                if (logoZyntraBranca) logoZyntraBranca.style.display = 'none';
+                if (logoSep) logoSep.style.color = 'rgba(0,0,0,0.15)';
             }
         };
 

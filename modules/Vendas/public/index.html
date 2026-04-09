@@ -6036,18 +6036,10 @@
                             <input type="text" class="valor-input" id="edit-total-mercadorias" value="0,00" readonly>
                         </div>
                         <div class="valor-item">
-                            <label class="valor-label">Desconto %</label>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <input type="number" class="valor-input" id="edit-desconto-pct" value="0" min="0"
-                                    max="100" step="0.5" style="flex:1; text-align:right; padding-right:4px;"
-                                    oninput="recalcularDescontoGeral()">
-                                <span style="font-size:13px; color:#666; font-weight:600;">%</span>
-                            </div>
-                        </div>
-                        <div class="valor-item">
-                            <label class="valor-label">Valor Desconto</label>
+                            <label class="valor-label">Desconto (itens)</label>
                             <input type="text" class="valor-input" id="edit-desconto-valor" value="0,00" readonly
                                 style="color:#dc2626; font-size:12px;">
+                            <input type="hidden" id="edit-desconto-pct" value="0">
                         </div>
                         <div class="valor-item">
                             <label class="valor-label">Total de IPI</label>
@@ -6083,17 +6075,10 @@
                             </div>
                             <input type="hidden" id="edit-tipo-venda" value="consumidor">
                         </div>
-                        <div class="info-field">
-                            <label>Condições de Pagamento <span style="color:#ef4444;">*</span></label>
-                            <select id="edit-condicao-pagamento-header" onchange="syncCondicaoPagamento('edit')" style="width:100%;padding:7px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
-                                <option value="">Selecione...</option>
-                                <option value="a_vista">À Vista</option>
-                                <option value="21_28_35">21/28/35 dias</option>
-                                <option value="28_35_42">28/35/42 dias</option>
-                                <option value="28_42">28/42 dias</option>
-                                <option value="21_28_35_42_49">21/28/35/42/49 dias</option>
-                                <option value="28_35_42_49_56">28/35/42/49/56 dias</option>
-                                <option value="personalizado">Personalizado</option>
+                        <div class="info-field" id="field-condicao-pagamento" style="display:flex !important;flex-direction:column;flex:1;min-width:180px;visibility:visible !important;opacity:1 !important;">
+                            <label style="font-size:11px;font-weight:600;color:#854d0e;text-transform:uppercase;letter-spacing:0.5px;">Condições de Pagamento <span style="color:#ef4444;">*</span></label>
+                            <select id="edit-condicao-pagamento-header" onchange="syncCondicaoPagamento('edit')" style="width:100%;padding:12px 14px;border:2px solid #fde047;border-radius:10px;font-size:13px;background:white;font-weight:500;">
+                                <option value="">Carregando...</option>
                             </select>
                         </div>
                         <div class="info-field" style="min-width:110px;">
@@ -6153,6 +6138,8 @@
                                         <th>Quantidade (Parcial)</th>
                                         <th>Local de Estoque</th>
                                         <th>Preço Unitário</th>
+                                        <th>Desc.%</th>
+                                        <th>Valor Total</th>
                                     </tr>
                                 </thead>
                                 <tbody id="itens-pedido-tbody">
@@ -6162,6 +6149,8 @@
                                         <td>1.000 M</td>
                                         <td>0 M</td>
                                         <td>PADRAO - Local de Estoque Padrão</td>
+                                        <td>R$ 11.540,00</td>
+                                        <td>0%</td>
                                         <td>R$ 11.540,00</td>
                                     </tr>
                                 </tbody>
@@ -6946,33 +6935,10 @@
                                 readonly>
                         </div>
                         <div class="orcamento-valor-box">
-                            <label>Desconto %</label>
-                            <div style="display: flex; align-items: center; gap: 4px;">
-                                <input type="number" id="novo-desconto" class="orcamento-valor-input" value="0" min="0"
-                                    max="100" step="0.5" style="text-align:right; padding-right:4px;"
-                                    oninput="validarDescontoNovoOrcamento(this)">
-                                <span style="font-size:13px; color:#666; font-weight:600;">%</span>
-                            </div>
-                            <script>
-                                // Desconto liberado para todos até 33,88% — acima requer senha de supervisor
-                                document.addEventListener('DOMContentLoaded', function () {
-                                    setTimeout(function () {
-                                        const novoDescontoInput = document.getElementById('novo-desconto');
-                                        if (novoDescontoInput) {
-                                            novoDescontoInput.readOnly = false;
-                                            novoDescontoInput.disabled = false;
-                                            novoDescontoInput.style.opacity = '1';
-                                            novoDescontoInput.style.cursor = 'text';
-                                            novoDescontoInput.title = 'Até 33,88% livre — acima requer autorização';
-                                        }
-                                    }, 2000);
-                                });
-                            </script>
-                        </div>
-                        <div class="orcamento-valor-box">
-                            <label>Valor Desconto</label>
+                            <label>Desconto (itens)</label>
                             <input type="text" id="novo-desconto-valor" class="orcamento-valor-input" value="0,00"
                                 readonly style="color:#dc2626;">
+                            <input type="hidden" id="novo-desconto" value="0">
                         </div>
                         <div class="orcamento-valor-box">
                             <label>Total de IPI</label>
@@ -7010,14 +6976,7 @@
                         <div class="orcamento-field-group" style="flex: 1; min-width: 0;">
                             <label>Condições de Pagamento <span style="color:#ef4444;">*</span></label>
                             <select id="novo-condicao-pagamento" class="orcamento-input" onchange="syncCondicaoPagamento('novo')" required>
-                                <option value="">Selecione...</option>
-                                <option value="a_vista">À Vista</option>
-                                <option value="21_28_35">21/28/35 dias</option>
-                                <option value="28_35_42">28/35/42 dias</option>
-                                <option value="28_42">28/42 dias</option>
-                                <option value="21_28_35_42_49">21/28/35/42/49 dias</option>
-                                <option value="28_35_42_49_56">28/35/42/49/56 dias</option>
-                                <option value="personalizado">Personalizado</option>
+                                <option value="">Carregando...</option>
                             </select>
                         </div>
                         <div class="orcamento-field-group" style="min-width:100px;">
@@ -7805,7 +7764,15 @@
                                     maxlength="15" readonly>
                             </div>
                         </div>
-                        <input type="hidden" id="item-pedido-desconto-pct" value="0">
+                        <div class="field-group" style="flex: 0 0 130px;">
+                            <label>Desconto %</label>
+                            <div style="position: relative;">
+                                <input type="text" id="item-pedido-desconto-pct" value="0" class="input-number"
+                                    style="padding-right: 28px; text-align:right;"
+                                    oninput="validarDescontoItem(this); atualizarCalculosItem()" maxlength="6" placeholder="0">
+                                <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #666; font-size: 13px; font-weight:600;">%</span>
+                            </div>
+                        </div>
                         <input type="hidden" id="item-nao-gerar-conta" value="">
                         <input type="hidden" id="item-pedido-tabela-preco" value="">
                     </div>
@@ -7813,13 +7780,13 @@
 
                 <!-- Total do Item -->
                 <div class="valores-calculados-table" style="grid-template-columns: 1fr 1fr;">
-                    <div class="valor-calc-item" style="display:none;">
+                    <div class="valor-calc-item">
                         <span class="valor-calc-label">Valor da Mercadoria</span>
                         <span class="valor-calc-value" id="calc-valor-mercadoria">R$ 0,00</span>
                     </div>
-                    <div class="valor-calc-item" style="display:none;">
+                    <div class="valor-calc-item">
                         <span class="valor-calc-label">Valor do Desconto</span>
-                        <span class="valor-calc-value" id="calc-valor-desconto">R$ 0,00</span>
+                        <span class="valor-calc-value" id="calc-valor-desconto" style="color:#dc2626;">R$ 0,00</span>
                     </div>
                     <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">IPI</span>
@@ -11511,14 +11478,6 @@
             window._salvandoPedido = true;
             try {
 
-            // ====================================================
-            // BLOQUEIO: Desconto ultrapassa margem bruta
-            // ====================================================
-            if (pedidoAtual._descontoIrregular) {
-                showNotification('Não é possível salvar: o desconto ultrapassa a margem bruta. Solicite autorização de Andreia ou Guilherme.', 'error');
-                return;
-            }
-
             // Se é um novo pedido (ainda não salvo no banco), criar ao invés de atualizar
             if (modoNovoPedido) {
                 await criarNovoPedidoNoBanco();
@@ -11595,7 +11554,8 @@
             const tipoEntrega = document.getElementById('edit-tipo-entrega')?.value || '';
             const cenarioFiscal = document.getElementById('edit-cenario-fiscal')?.value || '';
             const condicaoPagamento = document.getElementById('edit-condicao-pagamento')?.value || '';
-            const descontoPct = parseFloat(document.getElementById('edit-desconto-pct')?.value) || 0;
+            // Desconto agora é por item — calcular soma dos itens
+            const descontoItensTotal = itensPedidoAtual.reduce((sum, item) => sum + (parseFloat(item.desconto) || 0), 0);
 
             // Sincronizar parcelas com condição de pagamento
             const condicaoFinal = condicaoPagamento || novasParcelas;
@@ -11625,8 +11585,8 @@
                 tipo_entrega: tipoEntrega,
                 cenario_fiscal: cenarioFiscal,
                 condicao_pagamento: condicaoFinal,
-                desconto_pct: descontoPct,
-                desconto: pedidoAtual ? (pedidoAtual.desconto || 0) : 0,
+                desconto_pct: 0,
+                desconto: descontoItensTotal,
                 valor: pedidoAtual ? (pedidoAtual.valor || 0) : 0
             };
 
@@ -11691,13 +11651,6 @@
         // Função para CRIAR um novo pedido no banco de dados (chamada apenas ao clicar em Salvar)
         async function criarNovoPedidoNoBanco() {
             try {
-                // ====================================================
-                // BLOQUEIO: Desconto ultrapassa margem bruta
-                // ====================================================
-                if (pedidoAtual && pedidoAtual._descontoIrregular) {
-                    showNotification('Não é possível salvar: o desconto ultrapassa a margem bruta. Solicite autorização de Andreia ou Guilherme.', 'error');
-                    return;
-                }
 
                 const cliente = document.getElementById('edit-cliente').value;
                 const clienteId = document.getElementById('edit-cliente-id')?.value || null;
@@ -11807,7 +11760,8 @@
                         tipo_entrega: document.getElementById('edit-tipo-entrega')?.value || '',
                         cenario_fiscal: cenarioFiscal,
                         condicao_pagamento: condicaoFinalNovo,
-                        desconto_pct: parseFloat(document.getElementById('edit-desconto-pct')?.value) || 0
+                        desconto_pct: 0,
+                        desconto: (itensPedidoAtual || []).reduce((sum, item) => sum + (parseFloat(item.desconto) || 0), 0)
                     })
                 });
 
@@ -13548,6 +13502,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 }
 
                 // Sincronizar condição de pagamento padrão (À Vista)
+                // Carregar condições de pagamento do banco de dados
+                await carregarCondicoesPagamentoDB();
                 if (document.getElementById('edit-condicao-pagamento-header')) {
                     document.getElementById('edit-condicao-pagamento-header').value = 'a_vista';
                 }
@@ -15414,8 +15370,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
         // Senhas de supervisores autorizados
         const _SENHAS_SUPERVISORES = {
-            'andreia': 'IMDOSREIS',
-            'guilherme': 'IMDOSREIS'
+            'andreia': 'Pegasus1910',
+            'guilherme': 'Pegasus1910'
         };
 
         function confirmarDescontoAutorizado() {
@@ -15480,6 +15436,110 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             window._descontoAutorizado = false;
             atualizarCalculosItem();
             if (typeof recalcularTotaisNovoOrcamento === 'function') recalcularTotaisNovoOrcamento();
+        }
+
+        // Validar desconto no item (33.88% limit — pede senha supervisor)
+        function validarDescontoItem(input) {
+            let valor = input.value.replace(/[^0-9.,]/g, '');
+            let numero = parseFloat(valor.replace(',', '.')) || 0;
+            if (numero < 0) { numero = 0; input.value = '0'; }
+            if (numero > 100) { numero = 100; input.value = '100'; }
+
+            const LIMITE_DESCONTO = 33.88;
+            if (numero > LIMITE_DESCONTO && !window._descontoItemAutorizado) {
+                input.style.border = '2px solid #ef4444';
+                input.style.background = '#fef2f2';
+                input.style.color = '#dc2626';
+                input.style.fontWeight = '700';
+
+                // Criar modal de autorização
+                let modal = document.getElementById('modal-senha-desconto-item');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'modal-senha-desconto-item';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:99999;';
+                    modal.innerHTML = `
+                        <div style="background:white;border-radius:16px;padding:30px;max-width:400px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+                            <div style="text-align:center;margin-bottom:20px;">
+                                <div style="width:60px;height:60px;background:#fef2f2;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+                                    <i class="fas fa-lock" style="font-size:24px;color:#dc2626;"></i>
+                                </div>
+                                <h3 style="color:#1e293b;margin:0 0 6px;">Autorização Necessária</h3>
+                                <p style="color:#64748b;font-size:13px;margin:0;">Desconto acima de ${LIMITE_DESCONTO}% requer senha de supervisor</p>
+                            </div>
+                            <div style="margin-bottom:16px;">
+                                <input type="password" id="input-senha-desconto-item" placeholder="Senha do supervisor"
+                                    style="width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:14px;box-sizing:border-box;"
+                                    onkeydown="if(event.key==='Enter') confirmarDescontoItemAutorizado()">
+                                <p id="erro-senha-desconto-item" style="color:#dc2626;font-size:12px;margin:6px 0 0;display:none;">Senha incorreta</p>
+                            </div>
+                            <div style="display:flex;gap:10px;">
+                                <button onclick="cancelarDescontoItem()" style="flex:1;padding:10px;border:1px solid #e2e8f0;border-radius:8px;background:white;color:#64748b;font-weight:600;cursor:pointer;">Cancelar</button>
+                                <button onclick="confirmarDescontoItemAutorizado()" style="flex:1;padding:10px;border:none;border-radius:8px;background:#3b82f6;color:white;font-weight:600;cursor:pointer;">Confirmar</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                } else {
+                    modal.style.display = 'flex';
+                    document.getElementById('input-senha-desconto-item').value = '';
+                    document.getElementById('erro-senha-desconto-item').style.display = 'none';
+                }
+                setTimeout(() => document.getElementById('input-senha-desconto-item')?.focus(), 100);
+                return;
+            }
+
+            // Autorizado ou dentro do limite — limpar estilos
+            input.style.border = '';
+            input.style.background = '';
+            input.style.color = '';
+            input.style.fontWeight = '';
+        }
+
+        function confirmarDescontoItemAutorizado() {
+            const senha = document.getElementById('input-senha-desconto-item').value;
+            const erroMsg = document.getElementById('erro-senha-desconto-item');
+            let autorizado = false;
+
+            for (const [nome, senhaCorreta] of Object.entries(_SENHAS_SUPERVISORES)) {
+                if (senha === senhaCorreta) {
+                    autorizado = true;
+                    break;
+                }
+            }
+
+            if (autorizado) {
+                window._descontoItemAutorizado = true;
+                const modal = document.getElementById('modal-senha-desconto-item');
+                if (modal) modal.style.display = 'none';
+
+                const input = document.getElementById('item-pedido-desconto-pct');
+                if (input) {
+                    input.style.border = '2px solid #22c55e';
+                    input.style.background = '#f0fdf4';
+                    input.style.color = '#15803d';
+                    input.style.fontWeight = '700';
+                }
+                showNotification('Desconto autorizado pelo supervisor!', 'success');
+                atualizarCalculosItem();
+            } else {
+                erroMsg.style.display = 'block';
+                erroMsg.textContent = 'Senha incorreta. Tente novamente.';
+            }
+        }
+
+        function cancelarDescontoItem() {
+            const modal = document.getElementById('modal-senha-desconto-item');
+            if (modal) modal.style.display = 'none';
+            const input = document.getElementById('item-pedido-desconto-pct');
+            if (input) {
+                input.value = '0';
+                input.style.border = '';
+                input.style.background = '';
+                input.style.color = '';
+                input.style.fontWeight = '';
+            }
+            atualizarCalculosItem();
         }
 
         // Validar desconto no novo orçamento (33.88% limit)
@@ -15813,45 +15873,67 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         }
 
         // Carregar condições de pagamento do banco de dados
+        // Popula AMBOS os selects: novo-condicao-pagamento e edit-condicao-pagamento-header
         async function carregarCondicoesPagamentoDB(condicaoSelecionada) {
             try {
                 const resp = await fetch('/api/vendas/condicoes-pagamento', { credentials: 'include' });
-                if (resp.ok) {
-                    const condicoes = await resp.json();
-                    const hiddenInput = document.getElementById('edit-condicao-pagamento');
-                    if (hiddenInput && Array.isArray(condicoes) && condicoes.length > 0) {
-                        // Manter opções padrão e adicionar do banco
-                        const existentes = new Set();
-                        Array.from(hiddenInput.options || []).forEach(o => existentes.add(o.value));
-                        condicoes.forEach(c => {
-                            const valor = c.dias || c.nome;
-                            if (!existentes.has(valor)) {
-                                const option = document.createElement('option');
-                                option.value = valor;
-                                option.textContent = c.nome;
-                                hiddenInput.appendChild(option);
-                            }
-                        });
+                if (!resp.ok) return;
+                const condicoes = await resp.json();
+                if (!Array.isArray(condicoes) || condicoes.length === 0) return;
+
+                // IDs dos selects para popular
+                const selectIds = [
+                    'novo-condicao-pagamento',
+                    'edit-condicao-pagamento-header'
+                ];
+
+                selectIds.forEach(selId => {
+                    const sel = document.getElementById(selId);
+                    if (!sel) return;
+
+                    // Guardar valor atual antes de reconstruir
+                    const valorAtual = sel.value;
+
+                    // Limpar todas as options e reconstruir
+                    sel.innerHTML = '<option value="">Selecione...</option>';
+
+                    // Adicionar condições do banco
+                    condicoes.forEach(c => {
+                        const opt = document.createElement('option');
+                        // Usar dias como value (formato com barras: 28/35/42)
+                        const diasStr = c.dias ? String(c.dias).replace(/,/g, '/') : '0';
+                        opt.value = diasStr === '0' ? 'a_vista' : diasStr.replace(/\//g, '_');
+                        opt.textContent = c.nome;
+                        sel.appendChild(opt);
+                    });
+
+                    // Adicionar opção personalizado no final
+                    const optPers = document.createElement('option');
+                    optPers.value = 'personalizado';
+                    optPers.textContent = 'Personalizado';
+                    sel.appendChild(optPers);
+
+                    // Restaurar valor anterior se existia
+                    if (valorAtual) {
+                        const exists = Array.from(sel.options).some(o => o.value === valorAtual);
+                        if (exists) sel.value = valorAtual;
                     }
-                }
+                });
             } catch (e) {
-                // Silencioso - usar opções padrão
+                // Silencioso - manter opções hardcoded como fallback
             }
 
-            // Sincronizar o select VISÍVEL com o valor do banco
+            // Sincronizar o select VISÍVEL com o valor do banco (modal editar)
             if (condicaoSelecionada) {
                 const headerSel = document.getElementById('edit-condicao-pagamento-header');
                 const hiddenInput = document.getElementById('edit-condicao-pagamento');
                 if (hiddenInput) hiddenInput.value = condicaoSelecionada;
                 if (headerSel) {
-                    // Converter formato banco (barras) para formato select (underscores)
                     const selectValue = condicaoSelecionada === 'a vista' ? 'a_vista' : condicaoSelecionada.replace(/\//g, '_');
-                    // Verificar se a opção existe no select
                     const optionExists = Array.from(headerSel.options).some(o => o.value === selectValue);
                     if (optionExists) {
                         headerSel.value = selectValue;
                     } else {
-                        // Adicionar a opção dinamicamente
                         const opt = document.createElement('option');
                         opt.value = selectValue;
                         opt.textContent = condicaoSelecionada === 'a vista' ? 'À Vista' : condicaoSelecionada.replace(/\//g, '/') + ' dias';
@@ -16165,7 +16247,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (itensPedidoAtual.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="6" style="text-align: center; color: #888; padding: 40px;">
+                        <td colspan="8" style="text-align: center; color: #888; padding: 40px;">
                             <i class="fas fa-box-open" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>
                             Nenhum item adicionado. Clique em "Novo Item" para adicionar.
                         </td>
@@ -16189,6 +16271,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     <td>${formatarQuantidade(item.quantidade_parcial)} ${escaparHTML(item.unidade || 'M')}</td>
                     <td>${escaparHTML(item.local_estoque || 'PADRAO')}</td>
                     <td>${formatarMoeda(item.preco_unitario)}</td>
+                    <td style="color:${(parseFloat(item.desconto_pct) || 0) > 0 ? '#dc2626' : '#64748b'};font-weight:600;">${(parseFloat(item.desconto_pct) || 0).toFixed(1)}%</td>
+                    <td style="font-weight:600;">${formatarMoeda((parseFloat(item.quantidade) || 0) * (parseFloat(item.preco_unitario) || 0) - (parseFloat(item.desconto) || 0))}</td>
                 </tr>`;
             }).join('');
 
@@ -16229,6 +16313,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             modoEdicaoItem = false;
             itemSelecionado = null;
             produtoSelecionadoAutoComplete = null;
+            window._descontoItemAutorizado = false;
 
             // Limpar campos do novo modal
             document.getElementById('item-pedido-id').value = '';
@@ -16297,6 +16382,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
             modoEdicaoItem = true;
             itemSelecionado = item;
+            window._descontoItemAutorizado = false;
             produtoSelecionadoAutoComplete = {
                 id: item.produto_id,
                 código: item.código,
@@ -16317,7 +16403,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('item-pedido-quantidade').value = parseFloat(item.quantidade || 1).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             document.getElementById('item-pedido-preco').value = formatarDecimal(item.preco_unitario);
             document.getElementById('item-pedido-tabela-preco').value = item.tabela_preco || '';
-            document.getElementById('item-pedido-desconto-pct').value = '0';
+            document.getElementById('item-pedido-desconto-pct').value = parseFloat(item.desconto_pct || 0).toString();
             document.getElementById('item-pedido-estoque').value = item.local_estoque || 'PADRAO - Local de Estoque Padrão';
             document.getElementById('item-pedido-cenario')?.value != null && (document.getElementById('item-pedido-cenario').value = item.cenario_fiscal || 'Padrão');
             document.getElementById('item-pedido-npc')?.value != null && (document.getElementById('item-pedido-npc').value = item.numero_pedido_compra || '');
@@ -16642,10 +16728,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             // Subtotal líquido dos itens (após descontos individuais)
             const subtotalLiquido = totalMercadorias - descontoItens;
 
-            // Desconto geral em % (sobre o subtotal líquido dos itens)
-            const descontoPctInput = document.getElementById('edit-desconto-pct');
-            const descontoPct = descontoPctInput ? (parseFloat(descontoPctInput.value) || 0) : 0;
-            const descontoGeralValor = subtotalLiquido * (descontoPct / 100);
+            // Desconto geral zerado (desconto agora é por item)
+            const descontoPct = 0;
+            const descontoGeralValor = 0;
 
             // Calcular impostos (se existirem)
             const totalIPI = itensPedidoAtual.reduce((sum, item) => {
@@ -16672,7 +16757,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             const valorTotalInput = document.getElementById('edit-valor-total');
 
             if (totalMercadoriasInput) totalMercadoriasInput.value = formatarMoeda(subtotalLiquido);
-            if (descontoValorInput) descontoValorInput.value = descontoGeralValor > 0 ? '-' + formatarMoeda(descontoGeralValor) : formatarMoeda(0);
+            if (descontoValorInput) descontoValorInput.value = descontoItens > 0 ? '-' + formatarMoeda(descontoItens) : formatarMoeda(0);
             if (ipiInput) ipiInput.value = formatarMoeda(totalIPI);
             if (icmsStInput) icmsStInput.value = formatarMoeda(totalICMSST);
             if (freteResumoInput) freteResumoInput.value = formatarMoeda(frete);
@@ -16687,8 +16772,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 pedidoAtual.total_mercadorias = subtotalLiquido;
                 pedidoAtual.total_ipi = totalIPI;
                 pedidoAtual.total_icms_st = totalICMSST;
-                pedidoAtual.desconto_pct = descontoPct;
-                pedidoAtual.desconto = descontoGeralValor;
+                pedidoAtual.desconto_pct = 0;
+                pedidoAtual.desconto = descontoItens;
             }
 
             console.log('[Vendas] Totais atualizados:', {
@@ -16696,8 +16781,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 totalMercadorias,
                 descontoItens,
                 subtotalLiquido,
-                descontoPct: descontoPct + '%',
-                descontoGeralValor,
+                descontoPct: '0% (desconto por item)',
                 totalIPI,
                 totalICMSST,
                 frete,
@@ -23261,17 +23345,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             // Carregar configurações de impostos (não bloqueia a renderização)
             carregarConfigImpostosSistema();
 
-            // Controlar visibilidade do campo Condições de Pagamento (apenas admin, hellen, tatiane)
-            if (!verificarPermissaoParcelas()) {
-                const seletores = ['#edit-condicao-pagamento-header', '#novo-condicao-pagamento'];
-                seletores.forEach(sel => {
-                    const el = document.querySelector(sel);
-                    if (el) {
-                        const grupo = el.closest('.info-field') || el.closest('.orcamento-field-group');
-                        if (grupo) grupo.style.display = 'none';
-                    }
-                });
-            }
+            // Carregar condições de pagamento do banco de dados
+            carregarCondicoesPagamentoDB();
 
             // Inicializar sistema de notificações
             inicializarNotificacoes();
