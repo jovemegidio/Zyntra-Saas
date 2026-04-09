@@ -488,18 +488,16 @@
             }
         }
 
-        /* Modules Grid - single row layout (v2026-04-08) */
+        /* Modules Grid - Omie ERP style (v2026-04-08b) */
         .modules-grid {
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            justify-content: center !important;
-            align-items: stretch !important;
-            gap: 20px;
+            display: grid !important;
+            grid-template-columns: repeat(7, 1fr) !important;
+            gap: 16px;
             margin-bottom: 40px;
             animation: fadeInUp 0.5s ease 0.2s both;
-            max-width: 1140px;
+            max-width: 1100px;
             width: 100%;
-            padding: 0 32px;
+            padding: 0 24px;
             margin-left: auto;
             margin-right: auto;
             box-sizing: border-box;
@@ -542,15 +540,12 @@
         }
 
         .module-card {
-            background: rgba(255, 255, 255, 0.95);
-            -webkit-backdrop-filter: blur(24px) saturate(1.5);
-            backdrop-filter: blur(24px) saturate(1.5);
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            border-top: 3px solid var(--card-accent, #94a3b8);
-            border-radius: 18px;
-            padding: 28px 14px 22px;
+            background: #ffffff;
+            border: 1px solid #e8ecf1;
+            border-radius: 12px;
+            padding: 24px 12px 20px;
             cursor: pointer;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.25s ease;
             text-decoration: none;
             display: flex !important;
             flex-direction: column !important;
@@ -558,17 +553,12 @@
             justify-content: flex-start !important;
             position: relative;
             overflow: hidden;
-            box-shadow:
-                0 2px 8px rgba(0, 0, 0, 0.04),
-                0 8px 24px rgba(0, 0, 0, 0.06),
-                inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            flex: 1 1 0 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
             min-width: 0 !important;
-            max-width: 180px;
             box-sizing: border-box !important;
             color: inherit;
             text-align: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         /* Impedir que elementos injetados por JS quebrem o layout */
@@ -577,58 +567,35 @@
             display: none !important;
         }
 
-        /* Gradient accent bar - hidden, using top border instead */
-        .module-card::before {
-            display: none;
-        }
-
-        .module-card:hover::before {
-            display: none;
-        }
-
-        /* Subtle ambient glow on hover */
+        .module-card::before,
         .module-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 16px;
-            background: radial-gradient(ellipse at 50% 0%, var(--glow-color, rgba(59, 130, 246, 0.08)), transparent 70%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
-        }
-
-        .module-card:hover::after {
-            opacity: 1;
+            display: none;
         }
 
         .module-card:hover {
-            transform: translateY(-6px) scale(1.03);
-            background: rgba(255, 255, 255, 1);
-            border-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-4px);
+            border-color: var(--card-accent, #cbd5e1);
             box-shadow:
-                0 16px 40px rgba(0, 0, 0, 0.12),
-                0 6px 16px rgba(0, 0, 0, 0.06),
-                0 0 30px var(--glow-shadow, rgba(59, 130, 246, 0.12)),
-                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                0 8px 25px rgba(0, 0, 0, 0.08),
+                0 4px 10px rgba(0, 0, 0, 0.04);
         }
 
         .module-icon {
-            width: 54px;
-            height: 54px;
-            min-width: 54px;
-            min-height: 54px;
-            border-radius: 15px;
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            min-height: 52px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            margin-bottom: 2px;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 20px;
+            margin-bottom: 0;
+            transition: all 0.25s ease;
             position: relative;
             z-index: 1;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px var(--icon-shadow, rgba(0, 0, 0, 0.10));
+            box-shadow: none;
         }
 
         .module-icon i {
@@ -640,8 +607,7 @@
         }
 
         .module-card:hover .module-icon {
-            transform: scale(1.12);
-            box-shadow: 0 8px 22px var(--icon-shadow, rgba(0, 0, 0, 0.20));
+            transform: scale(1.08);
         }
 
         .module-info {
@@ -657,13 +623,13 @@
         }
 
         .module-title {
-            font-family: 'Manrope', sans-serif;
-            font-size: 13.5px;
-            font-weight: 700;
-            color: var(--slate-900);
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1e293b;
             margin-bottom: 2px;
             line-height: 1.3;
-            letter-spacing: -0.01em;
+            letter-spacing: 0;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -671,8 +637,8 @@
         }
 
         .module-desc {
-            font-size: 11px;
-            color: var(--slate-500);
+            font-size: 10.5px;
+            color: #94a3b8;
             line-height: 1.35;
             white-space: nowrap;
             overflow: hidden;
@@ -731,131 +697,61 @@
             }
         }
 
-        /* Module Colors - Premium Gradients */
+        /* Module Colors - Omie ERP flat style */
         .module-card.compras {
-            --glow-color: rgba(234, 88, 12, 0.08);
-            --glow-shadow: rgba(234, 88, 12, 0.15);
-            --card-gradient: linear-gradient(135deg, #f97316, #fb923c);
-            --icon-shadow: rgba(234, 88, 12, 0.25);
-            --arrow-bg: rgba(234, 88, 12, 0.08);
             --card-accent: #f97316;
         }
-
         .module-card.compras .module-icon {
-            background: linear-gradient(135deg, #fff7ed, #ffedd5);
+            background: #fff7ed;
             color: #ea580c;
         }
 
-        .module-card.compras .module-arrow {
-            color: #f97316;
-        }
-
         .module-card.vendas {
-            --glow-color: rgba(59, 130, 246, 0.08);
-            --glow-shadow: rgba(59, 130, 246, 0.15);
-            --card-gradient: linear-gradient(135deg, #3b82f6, #60a5fa);
-            --icon-shadow: rgba(59, 130, 246, 0.25);
-            --arrow-bg: rgba(59, 130, 246, 0.08);
             --card-accent: #3b82f6;
         }
-
         .module-card.vendas .module-icon {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            background: #eff6ff;
             color: #2563eb;
-        }
-
-        .module-card.vendas .module-arrow {
-            color: #3b82f6;
         }
 
         .module-card.nfe {
-            --glow-color: rgba(37, 99, 235, 0.08);
-            --glow-shadow: rgba(37, 99, 235, 0.15);
-            --card-gradient: linear-gradient(135deg, #2563eb, #3b82f6);
-            --icon-shadow: rgba(37, 99, 235, 0.25);
-            --arrow-bg: rgba(37, 99, 235, 0.08);
-            --card-accent: #2563eb;
+            --card-accent: #6366f1;
         }
-
         .module-card.nfe .module-icon {
-            background: linear-gradient(135deg, #eef2ff, #e0e7ff);
-            color: #1d4ed8;
-        }
-
-        .module-card.nfe .module-arrow {
-            color: #2563eb;
+            background: #eef2ff;
+            color: #4f46e5;
         }
 
         .module-card.logistica {
-            --glow-color: rgba(14, 165, 233, 0.08);
-            --glow-shadow: rgba(14, 165, 233, 0.15);
-            --card-gradient: linear-gradient(135deg, #0ea5e9, #38bdf8);
-            --icon-shadow: rgba(14, 165, 233, 0.25);
-            --arrow-bg: rgba(14, 165, 233, 0.08);
             --card-accent: #0ea5e9;
         }
-
         .module-card.logistica .module-icon {
-            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            background: #e0f2fe;
             color: #0284c7;
         }
 
-        .module-card.logistica .module-arrow {
-            color: #0ea5e9;
-        }
-
         .module-card.pcp {
-            --glow-color: rgba(71, 85, 105, 0.08);
-            --glow-shadow: rgba(71, 85, 105, 0.15);
-            --card-gradient: linear-gradient(135deg, #475569, #64748b);
-            --icon-shadow: rgba(71, 85, 105, 0.25);
-            --arrow-bg: rgba(71, 85, 105, 0.08);
-            --card-accent: #475569;
+            --card-accent: #64748b;
         }
-
         .module-card.pcp .module-icon {
-            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
-            color: #334155;
-        }
-
-        .module-card.pcp .module-arrow {
+            background: #f1f5f9;
             color: #475569;
         }
 
         .module-card.financeiro {
-            --glow-color: rgba(16, 185, 129, 0.08);
-            --glow-shadow: rgba(16, 185, 129, 0.15);
-            --card-gradient: linear-gradient(135deg, #10b981, #34d399);
-            --icon-shadow: rgba(16, 185, 129, 0.25);
-            --arrow-bg: rgba(16, 185, 129, 0.08);
             --card-accent: #10b981;
         }
-
         .module-card.financeiro .module-icon {
-            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            background: #ecfdf5;
             color: #059669;
         }
 
-        .module-card.financeiro .module-arrow {
-            color: #10b981;
-        }
-
         .module-card.rh {
-            --glow-color: rgba(236, 72, 153, 0.08);
-            --glow-shadow: rgba(236, 72, 153, 0.15);
-            --card-gradient: linear-gradient(135deg, #ec4899, #f472b6);
-            --icon-shadow: rgba(236, 72, 153, 0.25);
-            --arrow-bg: rgba(236, 72, 153, 0.08);
             --card-accent: #ec4899;
         }
-
         .module-card.rh .module-icon {
-            background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+            background: #fdf2f8;
             color: #db2777;
-        }
-
-        .module-card.rh .module-arrow {
-            color: #ec4899;
         }
 
 
@@ -1152,18 +1048,12 @@
             color: var(--blue-400);
         }
 
-        /* Responsive - tablets/medium screens */
+        /* Responsive - tablets */
         @media (max-width: 1024px) and (min-width: 769px) {
             .modules-grid {
-                flex-wrap: wrap !important;
-                gap: 14px;
-                max-width: 100%;
-                padding: 0 24px;
-            }
-
-            .module-card {
-                flex: 0 0 calc(25% - 11px) !important;
-                max-width: none;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 12px;
+                padding: 0 20px;
             }
         }
 
@@ -1186,34 +1076,26 @@
             }
 
             .modules-grid {
-                flex-wrap: wrap !important;
-                gap: 12px;
-                max-width: 100%;
-                padding: 0 16px;
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 10px;
+                padding: 0 12px;
             }
 
             .module-card {
-                flex: 0 0 calc(33.33% - 8px) !important;
-                max-width: none;
-                height: auto !important;
-                min-height: auto !important;
-                max-height: none !important;
-                border-radius: 14px;
-                padding: 18px 10px 16px;
+                border-radius: 10px;
+                padding: 16px 8px 14px;
             }
 
             .module-icon {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                min-height: 38px;
+                width: 40px;
+                height: 40px;
+                min-width: 40px;
+                min-height: 40px;
                 font-size: 16px;
-                border-radius: 10px;
-                margin-bottom: 4px;
             }
 
             .module-title {
-                font-size: 11.5px;
+                font-size: 11px;
             }
 
             .module-desc {
@@ -1223,24 +1105,21 @@
 
         @media (max-width: 480px) {
             .modules-grid {
-                flex-wrap: wrap !important;
+                grid-template-columns: repeat(2, 1fr) !important;
                 gap: 10px;
                 padding: 0 12px;
             }
 
             .module-card {
-                flex: 0 0 calc(50% - 5px) !important;
-                max-width: none;
-                padding: 16px 8px 14px;
+                padding: 18px 10px 16px;
             }
 
             .module-icon {
-                width: 34px;
-                height: 34px;
-                min-width: 34px;
-                min-height: 34px;
-                font-size: 14px;
-                border-radius: 9px;
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                min-height: 38px;
+                font-size: 15px;
             }
 
             .module-title {
