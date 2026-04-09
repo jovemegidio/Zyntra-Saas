@@ -1336,11 +1336,27 @@ app.get('/e-Nf-e/*', (req, res, next) => {
 });
 
 // Financeiro — com clean URLs e aliases root-level
+// Páginas habilitadas: index.html, contas_receber.html
+const finEnabledPages = ['index.html', 'contas_receber.html'];
 app.get('/Financeiro/*.html', (req, res, next) => {
+    const page = req.params[0].split('/').pop();
+    if (!finEnabledPages.includes(page)) {
+        return res.redirect('/Financeiro/index.html');
+    }
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 app.get('/Financeiro/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
+    // Bloquear clean URLs de páginas desativadas
+    const page = req.params[0].split('/').pop();
+    const cleanToFile = { 'contas_pagar': 'contas_pagar.html', 'contas_receber': 'contas_receber.html',
+        'contas_bancarias': 'contas_bancarias.html', 'fluxo_caixa': 'fluxo_caixa.html',
+        'relatorios': 'relatorios.html', 'plano_contas': 'plano_contas.html',
+        'conciliacao': 'conciliacao.html', 'orcamentos': 'orcamentos.html', 'impostos': 'impostos.html' };
+    const resolved = cleanToFile[page];
+    if (resolved && !finEnabledPages.includes(resolved)) {
+        return res.redirect('/Financeiro/index.html');
+    }
     serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 // Financeiro: Dashboard alias
@@ -1349,12 +1365,9 @@ app.get('/Financeiro', (req, res, next) => {
     safeSendModuleHtml(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 
-// Aliases root-level para páginas do Financeiro (fix 404s)
+// Aliases root-level para páginas do Financeiro (apenas habilitadas)
 const finRootAliases = {
-    'contas-pagar': 'contas_pagar', 'contas-receber': 'contas_receber',
-    'fluxo-caixa': 'fluxo_caixa', 'bancos': 'contas_bancarias',
-    'plano-contas': 'plano_contas', 'orcamentos': 'orcamentos',
-    'conciliacao': 'conciliacao', 'relatorios': 'relatorios', 'impostos': 'impostos'
+    'contas-receber': 'contas_receber'
 };
 Object.entries(finRootAliases).forEach(([alias, file]) => {
     app.get(`/${alias}`, (req, res, next) => {

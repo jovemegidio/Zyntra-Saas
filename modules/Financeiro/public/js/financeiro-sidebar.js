@@ -161,6 +161,56 @@
     }
 
     // ========================================================
+    // REDIRECIONAR PÁGINAS DESATIVADAS
+    // ========================================================
+
+    function redirectIfDisabled() {
+        var path = window.location.pathname;
+        var page = path.split('/').pop() || 'index.html';
+        var allowedPages = ['index.html', 'contas_receber.html', ''];
+        if (path.indexOf('/Financeiro') !== -1 && allowedPages.indexOf(page) === -1) {
+            window.location.href = '/Financeiro/index.html';
+        }
+    }
+
+    // ========================================================
+    // OCULTAR PÁGINAS DESATIVADAS (sidebar, quick-actions, links)
+    // Mantém apenas: Dashboard (index.html) + Contas a Receber
+    // ========================================================
+
+    function hidePagesNotEnabled() {
+        const allowedPages = ['index.html', 'contas_receber.html'];
+        // Ocultar itens da sidebar
+        var sidebarBtns = document.querySelectorAll('.sidebar-nav .sidebar-btn');
+        sidebarBtns.forEach(function (btn) {
+            var href = btn.getAttribute('href') || '';
+            var page = href.split('/').pop() || '';
+            if (!allowedPages.some(function (p) { return page === p || (p === 'index.html' && page === ''); })) {
+                btn.style.display = 'none';
+            }
+        });
+        // Ocultar quick-actions que linkam para páginas desativadas
+        var quickActions = document.querySelectorAll('.quick-action');
+        quickActions.forEach(function (qa) {
+            var onclick = qa.getAttribute('onclick') || '';
+            var disabledPages = ['contas_pagar', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
+            if (disabledPages.some(function (p) { return onclick.indexOf(p) !== -1; })) {
+                qa.style.display = 'none';
+            }
+        });
+        // Ocultar cards que linkam para páginas desativadas
+        var allLinks = document.querySelectorAll('a[href]');
+        allLinks.forEach(function (link) {
+            var href = link.getAttribute('href') || '';
+            var page = href.split('/').pop() || '';
+            var disabledFiles = ['contas_pagar.html', 'contas_bancarias.html', 'fluxo_caixa.html', 'relatorios.html', 'plano_contas.html', 'conciliacao.html', 'orcamentos.html', 'impostos.html'];
+            if (disabledFiles.indexOf(page) !== -1 && !link.classList.contains('sidebar-btn') && !link.classList.contains('sidebar-logo')) {
+                link.style.display = 'none';
+            }
+        });
+    }
+
+    // ========================================================
     // INIT - PONTO DE ENTRADA
     // ========================================================
 
@@ -184,6 +234,11 @@
 
         // 1. RBAC: ocultar botões não autorizados
         applyRBAC(userRole);
+
+        // 1.5. Ocultar páginas desativadas (manter apenas Dashboard + Contas a Receber)
+        hidePagesNotEnabled();
+        // 1.6. Redirecionar se estiver em página desativada
+        redirectIfDisabled();
 
         // 2. Marcar página ativa na sidebar
         markActivePage();
