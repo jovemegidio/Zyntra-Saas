@@ -57,6 +57,7 @@ app.use(cookieParser());
 
 // Servir arquivos estáticos
 app.use('/modules/Faturamento/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false }));
+app.use('/modules/Faturamento/public/css', express.static(path.join(__dirname, 'css'), { dotfiles: 'deny', index: false }));
 
 // Pool MySQL centralizado
 const pool = require('../../database/pool');
