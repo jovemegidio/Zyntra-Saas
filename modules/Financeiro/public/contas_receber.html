@@ -3,18 +3,17 @@
 <head>
     <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Zyntra: Contas a Receber</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260408">
-    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260408">
-    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260408">
-    <link rel="stylesheet" href="/Financeiro/css/fin-counter-standard.css?v=20260408">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260319">
+    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260617">
+    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260617">
+    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260617">
+    <link rel="stylesheet" href="/Financeiro/css/fin-counter-standard.css?v=20260410">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" integrity="sha384-vtjasyidUo0kW94K5MXDXntzOJpQgBKXmE7e2Ga4LG0skTTLeBi97eFAXsqewJjw" crossorigin="anonymous"></script>
     <script src="/js/anti-copy-protection.js"></script>
@@ -238,19 +237,19 @@
         @media (max-width: 640px) { .form-row { grid-template-columns: 1fr; } .filters-bar { flex-direction: column; } .view-grid { grid-template-columns: 1fr; } }
 
         /* ========== OVERLAY OMIE ========== */
-        .modal-overlay-omie { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.65); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center; }
+        .modal-overlay-omie { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.65); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); z-index:10000; align-items:center; justify-content:center; }
         .modal-overlay-omie.active { display:flex; }
         .modal-omie { background:#fff; border-radius:12px; max-height:95vh; overflow:hidden; display:flex; flex-direction:column; box-shadow:0 25px 80px rgba(0,0,0,0.25); animation:crSlideIn 0.25s ease-out; }
         @keyframes crSlideIn { from{opacity:0;transform:translateY(-20px) scale(0.98);} to{opacity:1;transform:translateY(0) scale(1);} }
 
         .modal-conta-receber { width:96vw; max-width:1150px; height:92vh; max-height:800px; display:flex; flex-direction:row; position:relative; border-radius:16px; }
 
-        .modal-header-conta { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; background:#fff; border-bottom:1px solid #e5e7eb; position:absolute; top:0; left:0; right:100px; z-index:10; border-radius:16px 0 0 0; }
+        .modal-header-conta { display:flex; justify-content:space-between; align-items:center; padding:18px 24px; background:linear-gradient(135deg,#1e40af,#3b82f6); border-bottom:1px solid #e5e7eb; position:absolute; top:0; left:0; right:100px; z-index:10; border-radius:16px 0 0 0; color:white; }
         .modal-header-left-conta { display:flex; align-items:center; gap:14px; }
-        .modal-avatar-conta { width:46px; height:46px; background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#84cc16; font-size:20px; border:2px solid #bbf7d0; }
-        .modal-titulo-conta h2 { font-size:18px; font-weight:700; color:#84cc16; margin:0; letter-spacing:-0.3px; }
-        .btn-fechar-omie { background:#f9fafb; border:1px solid #e5e7eb; color:#6b7280; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; transition:all 0.2s; font-weight:500; }
-        .btn-fechar-omie:hover { background:#f3f4f6; border-color:#d1d5db; color:#111827; }
+        .modal-avatar-conta { width:46px; height:46px; background:rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; border:none; }
+        .modal-titulo-conta h2 { font-size:18px; font-weight:700; color:#fff; margin:0; letter-spacing:-0.3px; }
+        .btn-fechar-omie { background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.3); color:#fff; font-size:13px; cursor:pointer; display:flex; align-items:center; gap:8px; padding:8px 14px; border-radius:8px; transition:all 0.2s; font-weight:500; }
+        .btn-fechar-omie:hover { background:rgba(255,255,255,0.25); border-color:rgba(255,255,255,0.5); color:#fff; }
 
         .modal-body-conta { flex:1; overflow-y:auto; padding:0; padding-top:82px; padding-right:100px; background:#fafafa; border-radius:16px 0 0 16px; }
         .form-principal-conta { padding:24px; background:#fff; border-bottom:1px solid #e5e7eb; }
@@ -260,21 +259,21 @@
         .form-group-conta label { font-size:12px; color:#374151; font-weight:600; display:flex; align-items:center; gap:4px; }
         .form-group-conta input, .form-group-conta select, .form-group-conta textarea { padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; font-size:14px; color:#111827; background:#fff; transition:all 0.2s; font-family:'Inter',sans-serif; }
         .form-group-conta input::placeholder { color:#9ca3af; }
-        .form-group-conta input:focus, .form-group-conta select:focus, .form-group-conta textarea:focus { outline:none; border-color:#84cc16; box-shadow:0 0 0 3px rgba(132,204,22,0.15); background:#fefffe; }
+        .form-group-conta input:focus, .form-group-conta select:focus, .form-group-conta textarea:focus { outline:none; border-color:#3b82f6; box-shadow:0 0 0 3px rgba(59,130,246,0.15); background:#fefffe; }
         .form-group-conta textarea { resize:vertical; min-height:80px; }
         .input-icon-conta, .input-search-conta { position:relative; }
         .input-icon-conta input, .input-search-conta input { padding-right:40px; width:100%; }
         .input-icon-conta i, .input-search-conta i { position:absolute; right:14px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:14px; pointer-events:none; }
         .input-search-conta select { width:100%; }
-        .link-adicionar { font-size:12px; color:#84cc16; text-decoration:none; font-weight:500; }
+        .link-adicionar { font-size:12px; color:#3b82f6; text-decoration:none; font-weight:500; }
         .link-adicionar:hover { text-decoration:underline; }
-        .link-icon { color:#84cc16; font-size:11px; margin-left:4px; }
+        .link-icon { color:#3b82f6; font-size:11px; margin-left:4px; }
         .parcela-info { font-size:11px; color:#9ca3af; margin-left:auto; }
 
         .tabs-conta { display:flex; border-bottom:1px solid #e5e7eb; background:#fff; padding:0 24px; gap:4px; overflow-x:auto; }
         .tab-conta { padding:14px 18px; background:none; border:none; border-bottom:3px solid transparent; font-size:13px; font-weight:600; color:#6b7280; cursor:pointer; white-space:nowrap; transition:all 0.2s; margin-bottom:-1px; }
         .tab-conta:hover { color:#374151; background:#f9fafb; border-radius:8px 8px 0 0; }
-        .tab-conta.active { color:#84cc16; border-bottom-color:#84cc16; background:#f0fdf4; border-radius:8px 8px 0 0; }
+        .tab-conta.active { color:#3b82f6; border-bottom-color:#3b82f6; background:#eff6ff; border-radius:8px 8px 0 0; }
         .tab-content-conta { padding:24px; min-height:200px; background:#fff; }
         .tab-pane-conta { display:none; }
         .tab-pane-conta.active { display:block; animation:crFadeIn 0.2s ease; }
@@ -283,12 +282,12 @@
         .empty-state-conta { text-align:center; padding:48px 24px; color:#6b7280; background:#fafafa; border-radius:8px; border:1px dashed #e5e7eb; }
         .empty-state-conta span { font-size:32px; display:block; margin-bottom:12px; }
         .empty-state-conta p { font-size:14px; margin-bottom:8px; color:#6b7280; }
-        .link-acao { color:#84cc16; text-decoration:none; font-size:14px; font-weight:500; }
+        .link-acao { color:#3b82f6; text-decoration:none; font-size:14px; font-weight:500; }
         .link-acao:hover { text-decoration:underline; }
 
         .checkbox-conta { justify-content:flex-end; padding-bottom:10px; }
         .checkbox-label-cr { display:flex; align-items:center; gap:8px; font-size:13px; color:#4b5563; cursor:pointer; }
-        .checkbox-label-cr input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:#84cc16; }
+        .checkbox-label-cr input[type="checkbox"] { width:18px; height:18px; cursor:pointer; accent-color:#3b82f6; }
         .input-valor-imposto input { text-align:right; width:100%; }
 
         .recebimentos-layout { display:flex; gap:24px; }
@@ -296,23 +295,23 @@
         .recebimentos-resumo { flex:1; display:flex; flex-direction:column; gap:12px; }
         .recebimentos-header-info { font-size:14px; font-weight:600; color:#374151; margin-bottom:8px; }
         .tabela-recebimentos { width:100%; border-collapse:collapse; font-size:12px; }
-        .tabela-recebimentos th { background:linear-gradient(135deg,#84cc16 0%,#65a30d 100%); color:white; padding:10px 12px; text-align:left; font-weight:600; }
+        .tabela-recebimentos th { background:linear-gradient(135deg,#1e40af 0%,#3b82f6 100%); color:white; padding:10px 12px; text-align:left; font-weight:600; }
         .tabela-recebimentos th:first-child { border-radius:8px 0 0 0; }
         .tabela-recebimentos th:last-child { border-radius:0 8px 0 0; }
         .tabela-recebimentos td { padding:10px 12px; border-bottom:1px solid #e5e7eb; }
         .recebimentos-botoes { display:flex; gap:12px; margin-top:16px; justify-content:center; }
-        .btn-registrar-recebimento { padding:10px 20px; background:#dcfce7; color:#16a34a; border:none; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; }
-        .btn-registrar-recebimento:hover { background:#bbf7d0; }
+        .btn-registrar-recebimento { padding:10px 20px; background:#dbeafe; color:#1e40af; border:none; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:all 0.2s; }
+        .btn-registrar-recebimento:hover { background:#bfdbfe; }
         .resumo-item-cr { display:flex; flex-direction:column; gap:6px; }
         .resumo-item-cr label { font-size:12px; color:#6b7280; font-weight:500; }
         .resumo-item-cr input { padding:10px 12px; border:1px solid #d1d5db; border-radius:6px; text-align:right; font-size:14px; background:#f9fafb; }
         .resumo-item-cr.destaque input { background:#dbeafe; border-color:#3b82f6; font-weight:700; }
 
         .painel-lateral-salvar { position:absolute; top:0; right:0; width:100px; height:100%; background:linear-gradient(to top,#f3f4f6,#f9fafb); border-left:1px solid #e5e7eb; display:flex; flex-direction:column; align-items:center; padding-top:100px; gap:16px; border-radius:0 16px 16px 0; }
-        .btn-salvar-lateral { padding:14px 18px; background:linear-gradient(135deg,#84cc16 0%,#65a30d 100%); border:none; color:white; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s; box-shadow:0 2px 8px rgba(132,204,22,0.3); }
-        .btn-salvar-lateral:hover { background:linear-gradient(135deg,#65a30d 0%,#4d7c0f 100%); transform:translateY(-2px); box-shadow:0 4px 12px rgba(132,204,22,0.4); }
-        .btn-avancar-lateral { width:44px; height:44px; background:#fff; border:2px solid #84cc16; color:#84cc16; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; transition:all 0.2s; }
-        .btn-avancar-lateral:hover { background:#84cc16; color:white; }
+        .btn-salvar-lateral { padding:14px 18px; background:linear-gradient(135deg,#1e40af 0%,#3b82f6 100%); border:none; color:white; border-radius:10px; font-size:13px; font-weight:600; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px; transition:all 0.2s; box-shadow:0 2px 8px rgba(30,64,175,0.3); }
+        .btn-salvar-lateral:hover { background:linear-gradient(135deg,#1e3a8a 0%,#1e40af 100%); transform:translateY(-2px); box-shadow:0 4px 12px rgba(30,64,175,0.4); }
+        .btn-avancar-lateral { width:44px; height:44px; background:#fff; border:2px solid #3b82f6; color:#3b82f6; border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:18px; transition:all 0.2s; }
+        .btn-avancar-lateral:hover { background:#3b82f6; color:white; }
 
         @media (max-width: 768px) {
             .modal-conta-receber { width:100%; height:100vh; max-height:none; border-radius:0; }
@@ -333,9 +332,9 @@
             .workbook-tab { padding:6px 12px; font-size:11px; }
         }
         @media (max-width: 768px) {
-            .workbook-tabs { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+            .workbook-tabs { overflow-x:auto; scrollbar-width:none; -ms-overflow-style:none; }
             .workbook-tabs::-webkit-scrollbar { display:none; }
-            .workbook-tab { padding:6px 10px; font-size:10px; min-width:fit-content; }
+            .workbook-tab { padding:6px 10px; font-size:10px; min-width:-webkit-fill-available; min-width:fit-content; }
             .content-area { padding:12px 10px 16px; }
             #pm-cards-global { grid-template-columns:repeat(2,1fr) !important; gap:10px !important; }
             #pm-cards-empresa { grid-template-columns:1fr !important; }
@@ -351,6 +350,175 @@
             .workbook-tab { padding:5px 8px; font-size:9px; }
             .content-area { padding:8px 6px 12px; }
         }
+
+        /* ── Inline-style extraction classes ── */
+        body { margin:0; padding:0; }
+        .main-area { display:flex; flex-direction:column; margin-left:48px; padding-top:42px; min-height:100vh; overflow-y:auto; overflow-x:hidden; box-sizing:border-box; position:relative; min-width:0; }
+        #financeiro-header { background:#1e1e1e; }
+        .header-logo { height:22px; object-fit:contain; }
+        .content-area { flex:1; overflow-y:auto; overflow-x:hidden; min-height:0; padding:20px 24px; }
+        .page-header-end { justify-content:flex-end; }
+        .metric-meta { font-size:11px; color:var(--gray-400); margin-top:4px; }
+        .filter-group-end { align-self:end; }
+        #contagem-total { font-weight:400; color:var(--gray-400); font-size:12px; }
+        .table-scroll-x { overflow-x:auto; }
+        .table-scroll-x-maxh { overflow-x:auto; max-height:400px; overflow-y:auto; }
+        .loading-cell { text-align:center; padding:60px; color:var(--gray-400); }
+        .loading-spinner { font-size:48px; margin-bottom:16px; display:block; }
+        .loading-cell-sm { text-align:center; padding:36px; color:var(--gray-400); }
+        .table-container.mt-24 { margin-top:24px; }
+        .table-container.mt-24-mb-24 { margin-top:24px; margin-bottom:24px; }
+        .table-container.mb-20 { margin-bottom:20px; }
+
+        /* Tab titles & icons */
+        .wb-title { font-size:18px; font-weight:700; color:var(--gray-800); margin-bottom:16px; }
+        .wb-title-sm { margin-bottom:12px; }
+        .wb-icon { margin-right:8px; }
+        .wb-icon.green { color:#34a853; }
+        .wb-icon.blue { color:#4285f4; }
+        .wb-icon.orange { color:#fbbc04; }
+        .wb-icon.purple { color:#a142f4; }
+        .wb-icon.red { color:#ea4335; }
+        .wb-icon.teal { color:#14b8a6; }
+        .th-icon { margin-right:6px; }
+        .th-icon.purple { color:#7c3aed; }
+        .th-icon.blue { color:#1e40af; }
+        .th-icon.red { color:#ef4444; }
+        .th-icon.blue-alt { color:#3b82f6; }
+        .th-icon.yellow { color:#f59e0b; }
+        .th-icon.green { color:#34a853; }
+        .th-center { text-align:center; }
+        .th-right { text-align:right; }
+        .th-right-red { text-align:right; color:#dc2626; }
+        .th-right-yellow { text-align:right; color:#f59e0b; }
+
+        /* PM section */
+        .pm-info-box { background:#f5f3ff; border:1px solid #c4b5fd; border-radius:10px; padding:16px; margin-bottom:20px; }
+        .pm-info-text { font-size:13px; color:#5b21b6; margin:0; }
+        .pm-filter-row { display:flex; gap:12px; align-items:flex-end; margin-bottom:20px; flex-wrap:wrap; }
+        .input-align-right { text-align:right; min-width:100px; }
+        .input-align-right-wide { text-align:right; min-width:120px; }
+        .btn-pm-refresh { padding:8px 16px; background:linear-gradient(135deg,#7c3aed,#a78bfa); color:white; border:none; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:6px; height:38px; }
+        .pm-card { background:white; border:1px solid var(--gray-200); border-radius:10px; padding:16px; text-align:center; }
+        .pm-card-label { font-size:11px; font-weight:600; color:var(--gray-500); text-transform:uppercase; }
+        .pm-card-value { font-size:24px; font-weight:800; margin-top:4px; }
+        .pm-card-value.purple { color:#7c3aed; }
+        .pm-card-value.blue { color:#1e40af; }
+        .pm-card-value.green { color:#059669; }
+        .pm-card-value.red { color:#dc2626; }
+        #pm-cards-empresa { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+        #pm-resultado-simulacao { background:#f5f3ff; border:1px solid #c4b5fd; border-radius:8px; padding:14px; margin-bottom:20px; }
+        .pm-sim-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+        .pm-sim-label { font-size:11px; color:#6b7280; }
+        .pm-sim-value { font-size:16px; font-weight:700; }
+        .pm-sim-value.purple { color:#7c3aed; }
+        .pm-sim-value.green { color:#059669; }
+        .pm-sim-value.red { color:#dc2626; }
+
+        /* BASE & RESUMO */
+        .base-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+        .resumo-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+
+        /* Faturamento & filter bars */
+        .totais-span { font-size:12px; font-weight:400; color:#6b7280; margin-left:12px; }
+        .filter-bar-inline { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #e5e7eb; border-radius:10px; padding:8px 16px; margin-bottom:12px; flex-wrap:wrap; }
+        .filter-bar-label { font-size:12px; font-weight:700; color:#374151; white-space:nowrap; }
+        .filter-bar-icon.yellow { color:#f59e0b; margin-right:5px; }
+        .filter-bar-icon.purple { color:#8b5cf6; margin-right:5px; }
+        .filter-bar-select { padding:4px 8px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; }
+        .filter-bar-search { padding:4px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:12px; min-width:200px; }
+        .filter-bar-info { margin-left:auto; font-size:11px; color:#6b7280; }
+        #fat-analise-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
+        #fat-analise-empresas { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:16px; }
+
+        /* Disponível */
+        .disponivel-ref { font-size:13px; font-weight:400; color:#6b7280; margin-left:8px; }
+        .disp-btn-bar { display:flex; align-items:center; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+        .disp-btn { padding:6px 14px; border:1px solid #d1d5db; border-radius:6px; background:#fff; cursor:pointer; font-size:13px; font-weight:500; }
+        .disp-btn.active { border-color:#14b8a6; background:#14b8a6; color:#fff; font-weight:600; }
+        .disp-separator { color:#9ca3af; font-size:13px; }
+        .disp-date-input { padding:5px 10px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; }
+
+        /* Operações */
+        #op-kpis-pub { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:12px; }
+        .op-table-header { display:flex; align-items:center; justify-content:space-between; }
+        .op-totais { font-size:11px; color:#6b7280; }
+
+        /* Modal Operação */
+        .modal-op-container { max-width:900px; width:95%; max-height:90vh; overflow-y:auto; border-radius:16px; padding:0; }
+        .modal-op-header { padding:16px 24px; background:linear-gradient(135deg,#7c3aed,#a78bfa); color:white; border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:space-between; }
+        .modal-op-title { margin:0; font-size:16px; font-weight:700; }
+        .modal-op-title i { margin-right:8px; }
+        .modal-close-btn { background:none; border:none; color:white; font-size:20px; cursor:pointer; }
+        .modal-close-btn-lg { background:none; border:none; color:white; font-size:24px; cursor:pointer; opacity:0.8; }
+        .modal-op-body { padding:24px; }
+        .modal-op-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:16px; }
+        .modal-op-grid-last { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:20px; }
+        .filter-input.w-full { width:100%; }
+        .filter-input.bg-red { background:#fef2f2; }
+        .filter-input.bg-green { font-weight:700; background:#ecfdf5; }
+        .filter-input.w-full-bg-red { width:100%; background:#fef2f2; }
+        .filter-input.w-full-bg-green { width:100%; font-weight:700; background:#ecfdf5; }
+        .modal-op-actions { display:flex; gap:12px; justify-content:flex-end; }
+        .btn-cancel-modal { padding:10px 20px; background:#f1f5f9; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:600; color:#64748b; cursor:pointer; }
+        .btn-save-modal-purple { padding:10px 24px; background:linear-gradient(135deg,#7c3aed,#a78bfa); border:none; border-radius:8px; font-size:13px; font-weight:600; color:white; cursor:pointer; display:flex; align-items:center; gap:6px; }
+
+        /* Modal Faturado */
+        .modal-fat-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; }
+        .modal-fat-container { background:#fff; border-radius:16px; width:90%; max-width:820px; max-height:90vh; overflow-y:auto; box-shadow:0 25px 50px rgba(0,0,0,0.25); }
+        .modal-fat-header { background:linear-gradient(135deg,#f59e0b,#d97706); padding:16px 24px; border-radius:16px 16px 0 0; display:flex; align-items:center; justify-content:space-between; }
+        .modal-fat-title { color:#fff; font-size:18px; font-weight:700; margin:0; }
+        .modal-fat-title i { margin-right:8px; }
+        .modal-fat-body { padding:24px; }
+        .modal-fat-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+        .modal-fat-label { font-size:11px; font-weight:600; color:#6b7280; display:block; margin-bottom:4px; }
+        .modal-fat-input { width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; }
+        .modal-fat-textarea { width:100%; padding:8px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; resize:vertical; }
+        .modal-fat-span-3 { grid-column:span 3; }
+        .modal-fat-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+        .btn-cancel-fat { padding:10px 24px; border:1px solid #d1d5db; border-radius:8px; background:#fff; color:#374151; font-size:13px; font-weight:600; cursor:pointer; }
+        .btn-save-fat { padding:10px 24px; border:none; border-radius:8px; background:linear-gradient(135deg,#f59e0b,#d97706); color:#fff; font-size:13px; font-weight:700; cursor:pointer; }
+
+        /* CR Modal form helpers */
+        .form-group-conta.flex-2 { flex:2; }
+        .form-group-conta.max-w-150 { max-width:150px; }
+        .form-group-conta.max-w-120 { max-width:120px; }
+        .input-right { text-align:right; }
+        .form-group-flex-end { display:flex; align-items:flex-end; }
+        .checkbox-label-padded { padding-bottom:10px; }
+        .tab-icon { margin-right:4px; opacity:0.6; }
+        .tab-icon-link { margin-right:4px; opacity:0.5; }
+
+        /* Comprovante/Rastreamento */
+        .file-input-styled { padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:13px; width:100%; }
+        .file-hint { font-size:11px; color:#9ca3af; margin-top:4px; display:block; }
+        .comprovante-preview { margin-top:12px; }
+        .comprovante-success { background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:14px; display:flex; align-items:center; gap:12px; }
+        .comprovante-icon { font-size:24px; color:#16a34a; }
+        .comprovante-info { flex:1; }
+        .comprovante-name { font-size:13px; font-weight:600; color:#166534; margin:0; }
+        .comprovante-link { font-size:12px; color:#1e40af; text-decoration:underline; }
+        .comprovante-remove { background:#fee2e2; border:none; color:#dc2626; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
+        .comprovante-upload-area { margin-top:16px; }
+        .btn-upload-comp { background:#dbeafe; color:#1e40af; }
+        .info-box-blue { background:#eff6ff; border:1px solid #93c5fd; border-radius:8px; padding:12px; margin-bottom:16px; }
+        .info-box-text-blue { font-size:12px; color:#1e40af; margin:0; }
+        .loading-cell-receb { text-align:center; padding:20px; color:#999; }
+
+        /* Modal Importar */
+        .modal-importar { max-width:520px; }
+        .modal-importar-body { padding:24px; }
+        .file-input-simple { padding:8px; }
+        .info-box-blue-import { background:#dbeafe; border:1px solid #93c5fd; border-radius:8px; padding:12px; margin-top:12px; }
+        .info-box-text-blue-import { font-size:12px; color:#1e40af; margin:0; }
+        .info-box-yellow { background:#fef3c7; border:1px solid #fde68a; border-radius:8px; padding:12px; margin-top:12px; }
+        .info-box-text-yellow { font-size:12px; color:#92400e; margin:0; }
+        .importar-progresso { margin-top:16px; text-align:center; }
+        .importar-spinner { font-size:24px; color:#059669; }
+        .importar-texto { font-size:13px; color:var(--gray-600); margin-top:8px; }
+        .importar-resultado { margin-top:16px; }
+        .btn-importar-green { background:linear-gradient(135deg,#059669,#10b981); }
+        .btn-save-confirm { background:linear-gradient(135deg,#10b981,#059669); }
     </style>
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
@@ -382,9 +550,9 @@
                 <div class="header-left">
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
                     <div class="header-brand">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="header-logo">
                         <span class="header-separator">|</span>
-                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" class="header-logo">
                         <span class="header-dash">&#8212;</span>
                         <span class="page-title">Contas a Receber</span>
                     </div>
@@ -416,7 +584,7 @@
             <div class="content-area">
                 <!-- Tab: A RECEBER (default active) -->
                 <div id="tab-areceber" class="workbook-content active">
-                <div class="page-header" style="justify-content: flex-end;">
+                <div class="page-header page-header-end">
                     <div class="page-actions">
                         <button class="btn btn-success" onclick="abrirModalImportar()"><i class="fas fa-file-excel"></i> Importar XLSX</button>
                         <button class="btn btn-secondary" onclick="exportarExcel()"><i class="fas fa-download"></i> Exportar</button>
@@ -432,7 +600,7 @@
                         </div>
                         <div class="metric-value" id="stat-total">R$ 0,00</div>
                         <div class="metric-label">Total a Receber</div>
-                        <div class="metric-meta" id="stat-total-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
+                        <div class="metric-meta" id="stat-total-meta"></div>
                     </div>
                     <div class="metric-card blue">
                         <div class="metric-header">
@@ -440,7 +608,7 @@
                         </div>
                         <div class="metric-value" id="stat-vencendo">R$ 0,00</div>
                         <div class="metric-label">A Vencer</div>
-                        <div class="metric-meta" id="stat-vencendo-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
+                        <div class="metric-meta" id="stat-vencendo-meta"></div>
                     </div>
                     <div class="metric-card red">
                         <div class="metric-header">
@@ -448,7 +616,7 @@
                         </div>
                         <div class="metric-value" id="stat-vencidas">R$ 0,00</div>
                         <div class="metric-label">Vencido</div>
-                        <div class="metric-meta" id="stat-vencidas-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
+                        <div class="metric-meta" id="stat-vencidas-meta"></div>
                     </div>
                     <div class="metric-card green">
                         <div class="metric-header">
@@ -456,7 +624,7 @@
                         </div>
                         <div class="metric-value" id="stat-recebidas">R$ 0,00</div>
                         <div class="metric-label">Liquidado</div>
-                        <div class="metric-meta" id="stat-recebidas-meta" style="font-size:11px;color:var(--gray-400);margin-top:4px;"></div>
+                        <div class="metric-meta" id="stat-recebidas-meta"></div>
                     </div>
                 </div>
 
@@ -473,7 +641,7 @@
                 <div class="filters-bar">
                     <div class="filter-group">
                         <label><i class="fas fa-calendar"></i> Período</label>
-                        <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()" title="Filtrar por período">
                             <option value="todas" selected>Todas</option>
                             <option value="hoje">Hoje</option>
                             <option value="semana">Esta Semana</option>
@@ -485,7 +653,7 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-tag"></i> Status</label>
-                        <select class="filter-input" id="filtro-status" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-status" onchange="filtrarContas()" title="Filtrar por status">
                             <option value="">Todos</option>
                             <option value="a_vencer">A Vencer</option>
                             <option value="vencida">Vencida</option>
@@ -498,13 +666,13 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-university"></i> Portador</label>
-                        <select class="filter-input" id="filtro-portador" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-portador" onchange="filtrarContas()" title="Filtrar por portador">
                             <option value="">Todos</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-map-marker-alt"></i> Situação</label>
-                        <select class="filter-input" id="filtro-situacao" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-situacao" onchange="filtrarContas()" title="Filtrar por situação">
                             <option value="">Todas</option>
                             <option value="OPERADO">Operado</option>
                             <option value="CARTEIRA">Carteira</option>
@@ -513,7 +681,7 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-building"></i> Empresa</label>
-                        <select class="filter-input" id="filtro-empresa" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-empresa" onchange="filtrarContas()" title="Filtrar por empresa">
                             <option value="">Todas</option>
                             <option value="LABOR">Labor</option>
                             <option value="ALUFORCE">Aluforce</option>
@@ -522,11 +690,11 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-user"></i> Cliente</label>
-                        <select class="filter-input" id="filtro-cliente-select" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-cliente-select" onchange="filtrarContas()" title="Filtrar por cliente">
                             <option value="">Todos</option>
                         </select>
                     </div>
-                    <div class="filter-group" style="align-self:end;">
+                    <div class="filter-group filter-group-end">
                         <button class="btn-limpar-filtros" onclick="limparFiltros()"><i class="fas fa-eraser"></i> Limpar</button>
                     </div>
                 </div>
@@ -541,14 +709,14 @@
                 <!-- Tabela -->
                 <div class="table-container">
                     <div class="table-header">
-                        <h3 class="table-title">Listagem de Contas a Receber <span id="contagem-total" style="font-weight:400;color:var(--gray-400);font-size:12px;"></span></h3>
+                        <h3 class="table-title">Listagem de Contas a Receber <span id="contagem-total"></span></h3>
                         <div class="table-actions">
                             <button class="btn-secondary-outline" onclick="abrirModalImportar()" title="Importar planilha Excel"><i class="fas fa-file-upload"></i> Importar Excel</button>
                             <button class="btn-primary" onclick="enviarCobranças()" title="Enviar cobranças em lote"><i class="fas fa-paper-plane"></i> Cobranças</button>
                             <button class="btn-success" onclick="exportarExcel()"><i class="fas fa-file-excel"></i> Exportar</button>
                         </div>
                     </div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-scroll-x">
                     <table>
                         <thead id="tabela-header">
                             <tr>
@@ -558,17 +726,17 @@
                             </tr>
                         </thead>
                         <tbody id="tabela-contas">
-                            <tr><td colspan="12" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando contas...</td></tr>
+                            <tr><td colspan="12" class="loading-cell"><i class="fas fa-spinner fa-spin loading-spinner"></i>Carregando contas...</td></tr>
                         </tbody>
                     </table>
                     </div>
                 </div>
 
-                <div class="table-container" style="margin-top:24px;">
+                <div class="table-container mt-24">
                     <div class="table-header">
                         <h3 class="table-title">Posicao dos Fundos / Portadores</h3>
                     </div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-scroll-x">
                     <table>
                         <thead>
                             <tr>
@@ -580,17 +748,17 @@
                             </tr>
                         </thead>
                         <tbody id="tabela-fundos-body">
-                            <tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
+                            <tr><td colspan="5" class="loading-cell-sm">Aguardando dados...</td></tr>
                         </tbody>
                     </table>
                     </div>
                 </div>
 
-                <div class="table-container" style="margin-top:24px; margin-bottom:24px;">
+                <div class="table-container mt-24-mb-24">
                     <div class="table-header">
                         <h3 class="table-title">Resumo Mensal</h3>
                     </div>
-                    <div style="overflow-x:auto;">
+                    <div class="table-scroll-x">
                     <table>
                         <thead>
                             <tr>
@@ -602,7 +770,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabela-mensal-body">
-                            <tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Aguardando dados...</td></tr>
+                            <tr><td colspan="5" class="loading-cell-sm">Aguardando dados...</td></tr>
                         </tbody>
                     </table>
                     </div>
@@ -610,13 +778,13 @@
                 </div><!-- /tab-areceber -->
 
                 <!-- Tab: FUNDOS -->
-                <div id="tab-fundos" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-landmark" style="color:#4285f4;margin-right:8px;"></i>Posicao dos Fundos / Portadores</h2>
+                <div id="tab-fundos" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-landmark wb-icon blue"></i>Posicao dos Fundos / Portadores</h2>
                     <div class="table-container">
                         <div class="table-header">
                             <h3 class="table-title">Detalhamento por Portador</h3>
                         </div>
-                        <div style="overflow-x:auto;">
+                        <div class="table-scroll-x">
                         <table>
                             <thead>
                                 <tr>
@@ -629,7 +797,7 @@
                                 </tr>
                             </thead>
                             <tbody id="tabela-fundos-detail">
-                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr>
+                                <tr><td colspan="6" class="loading-cell-sm">Carregando...</td></tr>
                             </tbody>
                         </table>
                         </div>
@@ -637,14 +805,14 @@
                 </div><!-- /tab-fundos -->
 
                 <!-- Tab: PM (Prazo Médio) -->
-                <div id="tab-pm" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calculator" style="color:#a142f4;margin-right:8px;"></i>Simulador de Prazo Médio</h2>
-                    <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:10px;padding:16px;margin-bottom:20px;">
-                        <p style="font-size:13px;color:#5b21b6;margin:0;"><i class="fas fa-info-circle"></i> <strong>Prazo Médio (PM):</strong> Calculado com dados reais dos módulos (A Receber + A Pagar). PM = Σ(Valor × Dias) / Σ(Valor). Dados integrados por empresa e por dia de vencimento.</p>
+                <div id="tab-pm" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-calculator wb-icon purple"></i>Simulador de Prazo Médio</h2>
+                    <div class="pm-info-box">
+                        <p class="pm-info-text"><i class="fas fa-info-circle"></i> <strong>Prazo Médio (PM):</strong> Calculado com dados reais dos módulos (A Receber + A Pagar). PM = Σ(Valor × Dias) / Σ(Valor). Dados integrados por empresa e por dia de vencimento.</p>
                     </div>
 
                     <!-- Filtro Empresa -->
-                    <div style="display:flex;gap:12px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;">
+                    <div class="pm-filter-row">
                         <div class="filter-group">
                             <label>Empresa</label>
                             <select class="filter-input" id="pm-filtro-empresa" onchange="renderizarPM()">
@@ -661,94 +829,94 @@
                         </div>
                         <div class="filter-group">
                             <label><i class="fas fa-percentage"></i> Taxa Mensal (%)</label>
-                            <input type="number" class="filter-input" id="pm-taxa-mensal" value="1.50" step="0.01" min="0" max="100" style="text-align:right;min-width:100px;" onchange="renderizarPM()">
+                            <input type="number" class="filter-input input-align-right" id="pm-taxa-mensal" value="1.50" step="0.01" min="0" max="100" onchange="renderizarPM()">
                         </div>
                         <div class="filter-group">
                             <label><i class="fas fa-calendar-alt"></i> Prazo Simulado (dias)</label>
-                            <input type="number" class="filter-input" id="pm-prazo-simulado" value="30" min="1" max="365" style="text-align:right;min-width:100px;" onchange="renderizarPM()">
+                            <input type="number" class="filter-input input-align-right" id="pm-prazo-simulado" value="30" min="1" max="365" onchange="renderizarPM()">
                         </div>
                         <div class="filter-group">
                             <label><i class="fas fa-money-bill"></i> Valor Base Simulação</label>
-                            <input type="text" class="filter-input" id="pm-valor-simulacao" placeholder="0,00" style="text-align:right;min-width:120px;" oninput="formatarMoedaInput(this);renderizarPM()">
+                            <input type="text" class="filter-input input-align-right-wide" id="pm-valor-simulacao" placeholder="0,00" oninput="formatarMoedaInput(this);renderizarPM()">
                         </div>
-                        <button type="button" onclick="carregarPMDados()" style="padding:8px 16px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;height:38px;"><i class="fas fa-sync-alt"></i> Atualizar</button>
+                        <button type="button" onclick="carregarPMDados()" class="btn-pm-refresh"><i class="fas fa-sync-alt"></i> Atualizar</button>
                     </div>
 
                     <!-- Cards Resumo Global -->
-                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;" id="pm-cards-global">
-                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">PM Geral</div>
-                            <div style="font-size:24px;font-weight:800;color:#7c3aed;margin-top:4px;" id="pm-recebimento">0 dias</div>
+                    <div id="pm-cards-global">
+                        <div class="pm-card">
+                            <div class="pm-card-label">PM Geral</div>
+                            <div class="pm-card-value purple" id="pm-recebimento">0 dias</div>
                         </div>
-                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Total em Aberto</div>
-                            <div style="font-size:24px;font-weight:800;color:#1e40af;margin-top:4px;" id="pm-total-ponderado">R$ 0,00</div>
+                        <div class="pm-card">
+                            <div class="pm-card-label">Total em Aberto</div>
+                            <div class="pm-card-value blue" id="pm-total-ponderado">R$ 0,00</div>
                         </div>
-                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Títulos em Aberto</div>
-                            <div style="font-size:24px;font-weight:800;color:#059669;margin-top:4px;" id="pm-titulos-aberto">0</div>
+                        <div class="pm-card">
+                            <div class="pm-card-label">Títulos em Aberto</div>
+                            <div class="pm-card-value green" id="pm-titulos-aberto">0</div>
                         </div>
-                        <div style="background:white;border:1px solid var(--gray-200);border-radius:10px;padding:16px;text-align:center;">
-                            <div style="font-size:11px;font-weight:600;color:var(--gray-500);text-transform:uppercase;">Custo Financeiro Est.</div>
-                            <div style="font-size:24px;font-weight:800;color:#dc2626;margin-top:4px;" id="pm-custo-financeiro">R$ 0,00</div>
+                        <div class="pm-card">
+                            <div class="pm-card-label">Custo Financeiro Est.</div>
+                            <div class="pm-card-value red" id="pm-custo-financeiro">R$ 0,00</div>
                         </div>
                     </div>
 
                     <!-- Cards PM por Empresa -->
-                    <div id="pm-cards-empresa" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;"></div>
+                    <div id="pm-cards-empresa"></div>
 
                     <!-- Simulação -->
-                    <div id="pm-resultado-simulacao" style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:8px;padding:14px;margin-bottom:20px;display:none;">
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
-                            <div><span style="font-size:11px;color:#6b7280;">Custo Total Estimado:</span><div style="font-size:16px;font-weight:700;color:#7c3aed;" id="pm-sim-custo">R$ 0,00</div></div>
-                            <div><span style="font-size:11px;color:#6b7280;">Valor Líquido Estimado:</span><div style="font-size:16px;font-weight:700;color:#059669;" id="pm-sim-liquido">R$ 0,00</div></div>
-                            <div><span style="font-size:11px;color:#6b7280;">Taxa Efetiva:</span><div style="font-size:16px;font-weight:700;color:#dc2626;" id="pm-sim-taxa-efetiva">0,00%</div></div>
+                    <div id="pm-resultado-simulacao" hidden>
+                        <div class="pm-sim-grid">
+                            <div><span class="pm-sim-label">Custo Total Estimado:</span><div class="pm-sim-value purple" id="pm-sim-custo">R$ 0,00</div></div>
+                            <div><span class="pm-sim-label">Valor Líquido Estimado:</span><div class="pm-sim-value green" id="pm-sim-liquido">R$ 0,00</div></div>
+                            <div><span class="pm-sim-label">Taxa Efetiva:</span><div class="pm-sim-value red" id="pm-sim-taxa-efetiva">0,00%</div></div>
                         </div>
                     </div>
 
                     <!-- Tabela PM por Empresa -->
-                    <div class="table-container" style="margin-bottom:20px;">
+                    <div class="table-container mb-20">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-building" style="margin-right:6px;color:#7c3aed;"></i> Prazo Médio por Empresa</h3>
+                            <h3 class="table-title"><i class="fas fa-building th-icon purple"></i> Prazo Médio por Empresa</h3>
                         </div>
-                        <div style="overflow-x:auto;">
+                        <div class="table-scroll-x">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Empresa</th>
-                                    <th style="text-align:center;">Qtd. Títulos</th>
-                                    <th style="text-align:right;">Valor em Aberto</th>
-                                    <th style="text-align:center;">PM (dias)</th>
-                                    <th style="text-align:right;">Custo Fin. Estimado</th>
-                                    <th style="text-align:center;">% Volume</th>
+                                    <th class="th-center">Qtd. Títulos</th>
+                                    <th class="th-right">Valor em Aberto</th>
+                                    <th class="th-center">PM (dias)</th>
+                                    <th class="th-right">Custo Fin. Estimado</th>
+                                    <th class="th-center">% Volume</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-pm-empresa">
-                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando dados reais...</td></tr>
+                                <tr><td colspan="6" class="loading-cell-sm">Carregando dados reais...</td></tr>
                             </tbody>
                         </table>
                         </div>
                     </div>
 
                     <!-- Tabela PM por Dia -->
-                    <div class="table-container" style="margin-bottom:20px;">
+                    <div class="table-container mb-20">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-calendar-day" style="margin-right:6px;color:#1e40af;"></i> Prazo Médio por Dia de Vencimento</h3>
+                            <h3 class="table-title"><i class="fas fa-calendar-day th-icon blue"></i> Prazo Médio por Dia de Vencimento</h3>
                         </div>
-                        <div style="overflow-x:auto;max-height:400px;overflow-y:auto;">
+                        <div class="table-scroll-x-maxh">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Dia Vencimento</th>
-                                    <th style="text-align:center;">Qtd.</th>
-                                    <th style="text-align:right;">Valor em Aberto</th>
-                                    <th style="text-align:center;">Dias até Vcto.</th>
-                                    <th style="text-align:right;">Custo Fin. Estimado</th>
+                                    <th class="th-center">Qtd.</th>
+                                    <th class="th-right">Valor em Aberto</th>
+                                    <th class="th-center">Dias até Vcto.</th>
+                                    <th class="th-right">Custo Fin. Estimado</th>
                                     <th>Empresa(s)</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-pm-diario">
-                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando dados reais...</td></tr>
+                                <tr><td colspan="6" class="loading-cell-sm">Carregando dados reais...</td></tr>
                             </tbody>
                         </table>
                         </div>
@@ -757,22 +925,22 @@
                     <!-- Tabela PM por Portador -->
                     <div class="table-container">
                         <div class="table-header">
-                            <h3 class="table-title"><i class="fas fa-table" style="margin-right:6px;"></i> Prazo Médio por Portador</h3>
+                            <h3 class="table-title"><i class="fas fa-table th-icon"></i> Prazo Médio por Portador</h3>
                         </div>
-                        <div style="overflow-x:auto;">
+                        <div class="table-scroll-x">
                         <table>
                             <thead>
                                 <tr>
                                     <th>Portador</th>
-                                    <th style="text-align:center;">Qtd. Títulos</th>
-                                    <th style="text-align:right;">Valor Total</th>
-                                    <th style="text-align:center;">PM (dias)</th>
-                                    <th style="text-align:right;">Custo Fin. Estimado</th>
-                                    <th style="text-align:center;">% Volume</th>
+                                    <th class="th-center">Qtd. Títulos</th>
+                                    <th class="th-right">Valor Total</th>
+                                    <th class="th-center">PM (dias)</th>
+                                    <th class="th-right">Custo Fin. Estimado</th>
+                                    <th class="th-center">% Volume</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-pm-body">
-                                <tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr>
+                                <tr><td colspan="6" class="loading-cell-sm">Carregando...</td></tr>
                             </tbody>
                         </table>
                         </div>
@@ -780,21 +948,21 @@
                 </div><!-- /tab-pm -->
 
                 <!-- Tab: BASE (dados de referência) -->
-                <div id="tab-base" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-database" style="color:#34a853;margin-right:8px;"></i>Dados de Referência</h2>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                <div id="tab-base" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-database wb-icon green"></i>Dados de Referência</h2>
+                    <div class="base-grid">
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-university" style="color:#ef4444;margin-right:6px;"></i> Portador</h3></div>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-university th-icon red"></i> Portador</h3></div>
                             <table><thead><tr><th>Nome</th></tr></thead>
                             <tbody id="base-portador-body"></tbody></table>
                         </div>
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags" style="color:#3b82f6;margin-right:6px;"></i> Status / Situação / Posição</h3></div>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-tags th-icon blue-alt"></i> Status / Situação / Posição</h3></div>
                             <table><thead><tr><th>Status</th><th>Situação</th><th>Posição</th></tr></thead>
                             <tbody id="base-status-body"></tbody></table>
                         </div>
                         <div class="table-container">
-                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo" style="color:#f59e0b;margin-right:6px;"></i> Recomprado / Cartório</h3></div>
+                            <div class="table-header"><h3 class="table-title"><i class="fas fa-undo th-icon yellow"></i> Recomprado / Cartório</h3></div>
                             <table><thead><tr><th>Recomprado</th><th>Cartório</th></tr></thead>
                             <tbody id="base-recomprado-body"></tbody></table>
                         </div>
@@ -802,206 +970,206 @@
                 </div><!-- /tab-base -->
 
                 <!-- Tab: RESUMO -->
-                <div id="tab-resumo" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-chart-bar" style="color:#4285f4;margin-right:8px;"></i>Resumo por Parceiro / Mensal</h2>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div id="tab-resumo" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-chart-bar wb-icon blue"></i>Resumo por Parceiro / Mensal</h2>
+                    <div class="resumo-grid">
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title">Por Parceiro</h3></div>
-                            <div style="overflow-x:auto;"><table><thead><tr><th>Parceiro</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Total</th><th style="text-align:right">Liquidado</th></tr></thead>
-                            <tbody id="tab-resumo-parceiro-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody></table></div>
+                            <div class="table-scroll-x"><table><thead><tr><th>Parceiro</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Total</th><th class="th-right">Liquidado</th></tr></thead>
+                            <tbody id="tab-resumo-parceiro-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody></table></div>
                         </div>
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title">Mensal</h3></div>
-                            <div style="overflow-x:auto;"><table><thead><tr><th>Mês</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th><th style="text-align:right">Total</th></tr></thead>
-                            <tbody id="tab-resumo-mensal-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody></table></div>
+                            <div class="table-scroll-x"><table><thead><tr><th>Mês</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Liquidado</th><th class="th-right">Total</th></tr></thead>
+                            <tbody id="tab-resumo-mensal-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody></table></div>
                         </div>
                     </div>
                 </div><!-- /tab-resumo -->
 
                 <!-- Tab: FATURAMENTO -->
-                <div id="tab-faturamento" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-file-invoice-dollar" style="color:#fbbc04;margin-right:8px;"></i>Faturamento / Operações <span id="fat-totais-pub" style="font-size:12px;font-weight:400;color:#6b7280;margin-left:12px;"></span></h2>
-                    <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 16px;margin-bottom:12px;flex-wrap:wrap;">
-                        <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-filter" style="color:#f59e0b;margin-right:5px;"></i>Filtros</span>
-                        <select id="fat-filtro-empresa" onchange="renderizarFaturamentoTab()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
-                        <select id="fat-filtro-tipo" onchange="renderizarFaturamentoTab()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">NF + F9</option><option value="NF">Apenas NF</option><option value="F9">Apenas F9</option></select>
-                        <input type="text" id="fat-busca" placeholder="Buscar nota, cliente, data..." oninput="renderizarFaturamentoTab()" style="padding:4px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;min-width:200px;">
-                        <div style="margin-left:auto;font-size:11px;color:#6b7280;" id="fat-filtro-info"></div>
+                <div id="tab-faturamento" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-file-invoice-dollar wb-icon orange"></i>Faturamento / Operações <span id="fat-totais-pub" class="totais-span"></span></h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="fat-filtro-empresa" onchange="renderizarFaturamentoTab()" class="filter-bar-select"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <select id="fat-filtro-tipo" onchange="renderizarFaturamentoTab()" class="filter-bar-select"><option value="">NF + F9</option><option value="NF">Apenas NF</option><option value="F9">Apenas F9</option></select>
+                        <input type="text" id="fat-busca" placeholder="Buscar nota, cliente, data..." oninput="renderizarFaturamentoTab()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="fat-filtro-info"></div>
                     </div>
-                    <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th style="text-align:right">Valor</th><th>Emissão</th><th>Vcto</th><th>Situação</th><th>Portador</th><th>Status</th><th style="text-align:right">Dias</th><th>Posição</th></tr></thead>
-                        <tbody id="tab-faturamento-body"><tr><td colspan="13" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    <div class="table-container"><div class="table-scroll-x"><table>
+                        <thead><tr><th>Empresa</th><th>Tipo</th><th>NFe</th><th>Parcela</th><th>Cliente</th><th class="th-right">Valor</th><th>Emissão</th><th>Vcto</th><th>Situação</th><th>Portador</th><th>Status</th><th class="th-right">Dias</th><th>Posição</th></tr></thead>
+                        <tbody id="tab-faturamento-body"><tr><td colspan="13" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-faturamento -->
 
                 <!-- Tab: FAT. ANÁLISE -->
-                <div id="tab-fat-analise" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-chart-pie" style="color:#f59e0b;margin-right:8px;"></i>Faturamento — Análise NF vs F9</h2>
-                    <div id="fat-analise-kpis" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px;"></div>
-                    <div id="fat-analise-empresas" style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;"></div>
-                    <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Empresa</th><th style="text-align:right">NF (Qtd)</th><th style="text-align:right">NF (Valor)</th><th style="text-align:right;color:#dc2626;">F9 (Qtd)</th><th style="text-align:right;color:#dc2626;">F9 (Valor)</th><th style="text-align:right">Total (Qtd)</th><th style="text-align:right">Total (Valor)</th><th style="text-align:right;color:#f59e0b;">% F9</th></tr></thead>
-                        <tbody id="fat-analise-body"><tr><td colspan="8" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                <div id="tab-fat-analise" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-chart-pie wb-icon orange"></i>Faturamento — Análise NF vs F9</h2>
+                    <div id="fat-analise-kpis" class="fat-analise-kpis-grid"></div>
+                    <div id="fat-analise-empresas" class="fat-analise-empresas-grid"></div>
+                    <div class="table-container"><div class="table-scroll-x"><table>
+                        <thead><tr><th>Empresa</th><th class="th-right">NF (Qtd)</th><th class="th-right">NF (Valor)</th><th class="th-right-red">F9 (Qtd)</th><th class="th-right-red">F9 (Valor)</th><th class="th-right">Total (Qtd)</th><th class="th-right">Total (Valor)</th><th class="th-right-yellow">% F9</th></tr></thead>
+                        <tbody id="fat-analise-body"><tr><td colspan="8" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-fat-analise -->
                 <!-- Tab: DISPONIVEL -->
-                <div id="tab-disponivel" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:12px;"><i class="fas fa-wallet" style="color:#14b8a6;margin-right:8px;"></i>Disponível do Dia <span id="disponivel-data-ref" style="font-size:13px;font-weight:400;color:#6b7280;margin-left:8px;"></span></h2>
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-                        <button onclick="filtrarDisponivelDia('ontem')" id="btn-disp-ontem" style="padding:6px 14px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;font-size:13px;font-weight:500;">Ontem</button>
-                        <button onclick="filtrarDisponivelDia('hoje')" id="btn-disp-hoje" style="padding:6px 14px;border:1px solid #14b8a6;border-radius:6px;background:#14b8a6;color:#fff;cursor:pointer;font-size:13px;font-weight:600;">Hoje</button>
-                        <span style="color:#9ca3af;font-size:13px;">ou</span>
-                        <input type="date" id="disponivel-data-input" onchange="filtrarDisponivelDia('custom')" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;">
+                <div id="tab-disponivel" class="workbook-content" hidden>
+                    <h2 class="wb-title wb-title-sm"><i class="fas fa-wallet wb-icon teal"></i>Disponível do Dia <span id="disponivel-data-ref" class="disponivel-ref"></span></h2>
+                    <div class="disp-btn-bar">
+                        <button onclick="filtrarDisponivelDia('ontem')" id="btn-disp-ontem" class="disp-btn">Ontem</button>
+                        <button onclick="filtrarDisponivelDia('hoje')" id="btn-disp-hoje" class="disp-btn active">Hoje</button>
+                        <span class="disp-separator">ou</span>
+                        <input type="date" id="disponivel-data-input" onchange="filtrarDisponivelDia('custom')" class="disp-date-input">
                     </div>
-                    <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Empresa</th><th style="text-align:right">NF</th><th style="text-align:right">F9</th><th style="text-align:right">Total Disponível</th><th style="text-align:right">Qtd Títulos</th></tr></thead>
-                        <tbody id="tab-disponivel-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                    <div class="table-container"><div class="table-scroll-x"><table>
+                        <thead><tr><th>Empresa</th><th class="th-right">NF</th><th class="th-right">F9</th><th class="th-right">Total Disponível</th><th class="th-right">Qtd Títulos</th></tr></thead>
+                        <tbody id="tab-disponivel-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-disponivel -->
 
                 <!-- Tab: DIARIO -->
-                <div id="tab-diario" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-calendar-day" style="color:#ea4335;margin-right:8px;"></i>Contas a Receber — Diário <span id="diario-totais-pub" style="font-size:12px;font-weight:400;color:#6b7280;margin-left:12px;"></span></h2>
-                    <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Dia da Semana</th><th>Data</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Total do Dia</th><th style="text-align:right">Qtd</th></tr></thead>
-                        <tbody id="tab-diario-body"><tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                <div id="tab-diario" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-calendar-day wb-icon red"></i>Contas a Receber — Diário <span id="diario-totais-pub" class="totais-span"></span></h2>
+                    <div class="table-container"><div class="table-scroll-x"><table>
+                        <thead><tr><th>Dia da Semana</th><th>Data</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Total do Dia</th><th class="th-right">Qtd</th></tr></thead>
+                        <tbody id="tab-diario-body"><tr><td colspan="6" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-diario -->
 
                 <!-- Tab: OPERAÇÕES -->
-                <div id="tab-operacoes" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-exchange-alt" style="color:#a142f4;margin-right:8px;"></i>Operações de Crédito</h2>
-                    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:12px;" id="op-kpis-pub"></div>
-                    <div style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:8px 16px;margin-bottom:12px;flex-wrap:wrap;">
-                        <span style="font-size:12px;font-weight:700;color:#374151;white-space:nowrap;"><i class="fas fa-filter" style="color:#8b5cf6;margin-right:5px;"></i>Filtros</span>
-                        <select id="op-filtro-empresa-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Empresas</option></select>
-                        <select id="op-filtro-instituicao-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todas Instituições</option></select>
-                        <select id="op-filtro-tipo-pub" onchange="filtrarOperacoesPub()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:12px;"><option value="">Todos Tipos</option></select>
-                        <div style="margin-left:auto;font-size:11px;color:#6b7280;" id="op-filtro-info-pub"></div>
+                <div id="tab-operacoes" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-exchange-alt wb-icon purple"></i>Operações de Crédito</h2>
+                    <div id="op-kpis-pub" class="op-kpis-grid"></div>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon purple"></i>Filtros</span>
+                        <select id="op-filtro-empresa-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todas Empresas</option></select>
+                        <select id="op-filtro-instituicao-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todas Instituições</option></select>
+                        <select id="op-filtro-tipo-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todos Tipos</option></select>
+                        <div class="filter-bar-info" id="op-filtro-info-pub"></div>
                     </div>
                     <div class="table-container">
-                        <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;">
+                        <div class="table-header op-table-header">
                             <h3 class="table-title">Operações</h3>
-                            <span style="font-size:11px;color:#6b7280;" id="op-totais-pub"></span>
+                            <span class="op-totais" id="op-totais-pub"></span>
                         </div>
-                        <div style="overflow-x:auto;"><table>
+                        <div class="table-scroll-x"><table>
                             <thead><tr>
                                 <th>Borderô</th><th>Empresa</th><th>Tipo</th><th>Instituição</th>
-                                <th>Prorrog.</th><th style="text-align:right">PM</th>
-                                <th>Data OP</th><th style="text-align:right">Taxa Per.</th>
-                                <th style="text-align:right">TMP</th>
-                                <th style="text-align:right">Vlr Bruto</th><th style="text-align:right">Títulos</th>
-                                <th style="text-align:right">Dif Monet</th><th style="text-align:right">Tarifas</th>
-                                <th style="text-align:right">ISS %</th><th style="text-align:right">ISS R$</th>
-                                <th style="text-align:right">IOF</th><th style="text-align:right">CPMF</th>
-                                <th style="text-align:right">Deduções</th><th style="text-align:right">Líq OP</th>
-                                <th style="text-align:right">Retenção</th><th style="text-align:right">Recompra</th>
-                                <th style="text-align:right">Amort FOM</th><th style="text-align:right">Cta Gráfica</th>
-                                <th style="text-align:right">Líq Liberado</th>
+                                <th>Prorrog.</th><th class="th-right">PM</th>
+                                <th>Data OP</th><th class="th-right">Taxa Per.</th>
+                                <th class="th-right">TMP</th>
+                                <th class="th-right">Vlr Bruto</th><th class="th-right">Títulos</th>
+                                <th class="th-right">Dif Monet</th><th class="th-right">Tarifas</th>
+                                <th class="th-right">ISS %</th><th class="th-right">ISS R$</th>
+                                <th class="th-right">IOF</th><th class="th-right">CPMF</th>
+                                <th class="th-right">Deduções</th><th class="th-right">Líq OP</th>
+                                <th class="th-right">Retenção</th><th class="th-right">Recompra</th>
+                                <th class="th-right">Amort FOM</th><th class="th-right">Cta Gráfica</th>
+                                <th class="th-right">Líq Liberado</th>
                             </tr></thead>
-                            <tbody id="tabela-operacoes-body-pub"><tr><td colspan="24" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                            <tbody id="tabela-operacoes-body-pub"><tr><td colspan="24" class="loading-cell-sm">Carregando...</td></tr></tbody>
                         </table></div>
                     </div>
                 </div><!-- /tab-operacoes -->
 
                 <!-- Tab: TD (Tabela Dinâmica) -->
-                <div id="tab-td" class="workbook-content" style="display:none;">
-                    <h2 style="font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:16px;"><i class="fas fa-table" style="color:#34a853;margin-right:8px;"></i>Tabela Dinâmica — Por Vencimento</h2>
-                    <div class="table-container"><div style="overflow-x:auto;"><table>
-                        <thead><tr><th>Mês/Período</th><th style="text-align:right">A Vencer</th><th style="text-align:right">Vencido</th><th style="text-align:right">Liquidado</th><th style="text-align:right">Total Geral</th></tr></thead>
-                        <tbody id="tab-td-body"><tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Carregando...</td></tr></tbody>
+                <div id="tab-td" class="workbook-content" hidden>
+                    <h2 class="wb-title"><i class="fas fa-table wb-icon green"></i>Tabela Dinâmica — Por Vencimento</h2>
+                    <div class="table-container"><div class="table-scroll-x"><table>
+                        <thead><tr><th>Mês/Período</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Liquidado</th><th class="th-right">Total Geral</th></tr></thead>
+                        <tbody id="tab-td-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-td -->
             </div>
         <!-- Modal Editar Operação -->
-        <div class="modal-overlay-omie" id="modalEditarOperacao" onclick="if(event.target===this) fecharModalOperacao()" style="display:none;">
-            <div class="modal-omie" style="max-width:900px;width:95%;max-height:90vh;overflow-y:auto;border-radius:16px;padding:0;">
-                <div style="padding:16px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
-                    <h3 style="margin:0;font-size:16px;font-weight:700;"><i class="fas fa-edit" style="margin-right:8px;"></i>Editar Operação de Crédito</h3>
-                    <button onclick="fecharModalOperacao()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <div class="modal-overlay-omie" id="modalEditarOperacao" onclick="if(event.target===this) fecharModalOperacao()" hidden>
+            <div class="modal-omie modal-op-container">
+                <div class="modal-op-header">
+                    <h3 class="modal-op-title"><i class="fas fa-edit"></i>Editar Operação de Crédito</h3>
+                    <button onclick="fecharModalOperacao()" class="modal-close-btn"><i class="fas fa-times"></i></button>
                 </div>
-                <div style="padding:24px;">
+                <div class="modal-op-body">
                     <input type="hidden" id="op-edit-id">
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Borderô</label><input class="filter-input" id="op-edit-bordero" style="width:100%;"></div>
-                        <div class="filter-group"><label>Empresa</label><input class="filter-input" id="op-edit-empresa" style="width:100%;"></div>
-                        <div class="filter-group"><label>Tipo Operação</label><input class="filter-input" id="op-edit-tipo-operacao" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Borderô</label><input class="filter-input w-full" id="op-edit-bordero"></div>
+                        <div class="filter-group"><label>Empresa</label><input class="filter-input w-full" id="op-edit-empresa"></div>
+                        <div class="filter-group"><label>Tipo Operação</label><input class="filter-input w-full" id="op-edit-tipo-operacao"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Instituição</label><input class="filter-input" id="op-edit-instituicao" style="width:100%;"></div>
-                        <div class="filter-group"><label>Prorrogação</label><input class="filter-input" id="op-edit-prorrogacao" style="width:100%;"></div>
-                        <div class="filter-group"><label>Prazo Médio</label><input type="number" class="filter-input" id="op-edit-prazo-medio" step="0.01" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Instituição</label><input class="filter-input w-full" id="op-edit-instituicao"></div>
+                        <div class="filter-group"><label>Prorrogação</label><input class="filter-input w-full" id="op-edit-prorrogacao"></div>
+                        <div class="filter-group"><label>Prazo Médio</label><input type="number" class="filter-input w-full" id="op-edit-prazo-medio" step="0.01"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Data Operação</label><input type="date" class="filter-input" id="op-edit-data-operacao" style="width:100%;"></div>
-                        <div class="filter-group"><label>Taxa Período (%)</label><input type="number" class="filter-input" id="op-edit-taxa-periodo" step="0.0001" style="width:100%;"></div>
-                        <div class="filter-group"><label>TMP (%)</label><input type="number" class="filter-input" id="op-edit-tmp" step="0.0001" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Data Operação</label><input type="date" class="filter-input w-full" id="op-edit-data-operacao"></div>
+                        <div class="filter-group"><label>Taxa Período (%)</label><input type="number" class="filter-input w-full" id="op-edit-taxa-periodo" step="0.0001"></div>
+                        <div class="filter-group"><label>TMP (%)</label><input type="number" class="filter-input w-full" id="op-edit-tmp" step="0.0001"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Valor Bruto</label><input type="number" class="filter-input" id="op-edit-vlr-bruto" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Qtde Títulos</label><input type="number" class="filter-input" id="op-edit-qtde-titulos" style="width:100%;"></div>
-                        <div class="filter-group"><label>Dif. Monetária</label><input type="number" class="filter-input" id="op-edit-dif-monet" step="0.01" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Valor Bruto</label><input type="number" class="filter-input w-full" id="op-edit-vlr-bruto" step="0.01"></div>
+                        <div class="filter-group"><label>Qtde Títulos</label><input type="number" class="filter-input w-full" id="op-edit-qtde-titulos"></div>
+                        <div class="filter-group"><label>Dif. Monetária</label><input type="number" class="filter-input w-full" id="op-edit-dif-monet" step="0.01"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Tarifas</label><input type="number" class="filter-input" id="op-edit-tarifas" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>ISS/RISS/IRRF %</label><input type="number" class="filter-input" id="op-edit-iss-perc" step="0.0001" style="width:100%;"></div>
-                        <div class="filter-group"><label>ISS/RISS/IRRF R$</label><input type="number" class="filter-input" id="op-edit-iss-monet" step="0.01" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Tarifas</label><input type="number" class="filter-input w-full" id="op-edit-tarifas" step="0.01"></div>
+                        <div class="filter-group"><label>ISS/RISS/IRRF %</label><input type="number" class="filter-input w-full" id="op-edit-iss-perc" step="0.0001"></div>
+                        <div class="filter-group"><label>ISS/RISS/IRRF R$</label><input type="number" class="filter-input w-full" id="op-edit-iss-monet" step="0.01"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>IOF</label><input type="number" class="filter-input" id="op-edit-iof" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>CPMF/Cobr.</label><input type="number" class="filter-input" id="op-edit-cpmf-cobr" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Total Deduções</label><input type="number" class="filter-input" id="op-edit-total-deducoes" step="0.01" style="width:100%;background:#fef2f2;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>IOF</label><input type="number" class="filter-input w-full" id="op-edit-iof" step="0.01"></div>
+                        <div class="filter-group"><label>CPMF/Cobr.</label><input type="number" class="filter-input w-full" id="op-edit-cpmf-cobr" step="0.01"></div>
+                        <div class="filter-group"><label>Total Deduções</label><input type="number" class="filter-input w-full bg-red" id="op-edit-total-deducoes" step="0.01"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
-                        <div class="filter-group"><label>Líq. Operação</label><input type="number" class="filter-input" id="op-edit-liq-op" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Retenção Passivo</label><input type="number" class="filter-input" id="op-edit-retencao-passivo" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Recompra</label><input type="number" class="filter-input" id="op-edit-recompra" step="0.01" style="width:100%;"></div>
+                    <div class="modal-op-grid">
+                        <div class="filter-group"><label>Líq. Operação</label><input type="number" class="filter-input w-full" id="op-edit-liq-op" step="0.01"></div>
+                        <div class="filter-group"><label>Retenção Passivo</label><input type="number" class="filter-input w-full" id="op-edit-retencao-passivo" step="0.01"></div>
+                        <div class="filter-group"><label>Recompra</label><input type="number" class="filter-input w-full" id="op-edit-recompra" step="0.01"></div>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;">
-                        <div class="filter-group"><label>Amort. FOM</label><input type="number" class="filter-input" id="op-edit-amort-fom" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Conta Gráfica</label><input type="number" class="filter-input" id="op-edit-conta-grafica" step="0.01" style="width:100%;"></div>
-                        <div class="filter-group"><label>Líq. Liberado</label><input type="number" class="filter-input" id="op-edit-liq-lib" step="0.01" style="width:100%;font-weight:700;background:#ecfdf5;"></div>
+                    <div class="modal-op-grid-last">
+                        <div class="filter-group"><label>Amort. FOM</label><input type="number" class="filter-input w-full" id="op-edit-amort-fom" step="0.01"></div>
+                        <div class="filter-group"><label>Conta Gráfica</label><input type="number" class="filter-input w-full" id="op-edit-conta-grafica" step="0.01"></div>
+                        <div class="filter-group"><label>Líq. Liberado</label><input type="number" class="filter-input w-full bg-green" id="op-edit-liq-lib" step="0.01"></div>
                     </div>
-                    <div style="display:flex;gap:12px;justify-content:flex-end;">
-                        <button onclick="fecharModalOperacao()" style="padding:10px 20px;background:#f1f5f9;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-weight:600;color:#64748b;cursor:pointer;">Cancelar</button>
-                        <button onclick="salvarOperacao()" style="padding:10px 24px;background:linear-gradient(135deg,#7c3aed,#a78bfa);border:none;border-radius:8px;font-size:13px;font-weight:600;color:white;cursor:pointer;display:flex;align-items:center;gap:6px;"><i class="fas fa-save"></i> Salvar</button>
+                    <div class="modal-op-actions">
+                        <button onclick="fecharModalOperacao()" class="btn-cancel-modal">Cancelar</button>
+                        <button onclick="salvarOperacao()" class="btn-save-modal-purple"><i class="fas fa-save"></i> Salvar</button>
                     </div>
                 </div>
             </div>
         </div>
                 <!-- Modal Editar Faturado -->
-        <div id="modalEditarFaturado" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-            <div style="background:#fff;border-radius:16px;width:90%;max-width:820px;max-height:90vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,0.25);">
-                <div style="background:linear-gradient(135deg,#f59e0b,#d97706);padding:16px 24px;border-radius:16px 16px 0 0;display:flex;align-items:center;justify-content:space-between;">
-                    <h3 style="color:#fff;font-size:18px;font-weight:700;margin:0;"><i class="fas fa-file-invoice-dollar" style="margin-right:8px;"></i>Editar Faturamento</h3>
-                    <button onclick="fecharModalFaturado()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <div id="modalEditarFaturado" class="modal-fat-overlay" hidden>
+            <div class="modal-fat-container">
+                <div class="modal-fat-header">
+                    <h3 class="modal-fat-title"><i class="fas fa-file-invoice-dollar"></i>Editar Faturamento</h3>
+                    <button onclick="fecharModalFaturado()" class="modal-close-btn"><i class="fas fa-times"></i></button>
                 </div>
-                <div style="padding:24px;">
+                <div class="modal-fat-body">
                     <input type="hidden" id="fat-edit-id">
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Empresa</label><input id="fat-edit-empresa" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nota Fiscal</label><input id="fat-edit-nota-fiscal" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Tipo (NF/F9)</label><select id="fat-edit-tipo" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"><option value="NF">NF</option><option value="F9">F9</option></select></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Cliente</label><input id="fat-edit-cliente" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">CNPJ/CPF Cliente</label><input id="fat-edit-cnpj-cliente" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Valor Total</label><input id="fat-edit-valor" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Data Emissão</label><input id="fat-edit-emissao" type="date" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Data Vencimento</label><input id="fat-edit-vencimento" type="date" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Parcela</label><input id="fat-edit-parcela" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Situação</label><input id="fat-edit-situacao" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Portador</label><input id="fat-edit-portador" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Status</label><select id="fat-edit-status" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"><option value="pendente">Pendente</option><option value="a_vencer">A Vencer</option><option value="vencida">Vencida</option><option value="recebido">Recebido</option><option value="parcial">Parcial</option><option value="liquidada">Liquidada</option><option value="cancelada">Cancelada</option></select></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Vendedor</label><input id="fat-edit-vendedor" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Posição</label><input id="fat-edit-posicao" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Categoria</label><input id="fat-edit-categoria" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Valor Recebido</label><input id="fat-edit-valor-recebido" type="number" step="0.01" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nº Documento</label><input id="fat-edit-num-doc" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Nº Boleto</label><input id="fat-edit-num-boleto" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;"></div>
-                        <div style="grid-column:span 3;"><label style="font-size:11px;font-weight:600;color:#6b7280;display:block;margin-bottom:4px;">Observações</label><textarea id="fat-edit-observacoes" rows="2" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;"></textarea></div>
+                    <div class="modal-fat-grid">
+                        <div><label class="modal-fat-label">Empresa</label><input id="fat-edit-empresa" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Nota Fiscal</label><input id="fat-edit-nota-fiscal" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Tipo (NF/F9)</label><select id="fat-edit-tipo" class="modal-fat-input"><option value="NF">NF</option><option value="F9">F9</option></select></div>
+                        <div><label class="modal-fat-label">Cliente</label><input id="fat-edit-cliente" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">CNPJ/CPF Cliente</label><input id="fat-edit-cnpj-cliente" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Valor Total</label><input id="fat-edit-valor" type="number" step="0.01" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Data Emissão</label><input id="fat-edit-emissao" type="date" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Data Vencimento</label><input id="fat-edit-vencimento" type="date" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Parcela</label><input id="fat-edit-parcela" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Situação</label><input id="fat-edit-situacao" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Portador</label><input id="fat-edit-portador" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Status</label><select id="fat-edit-status" class="modal-fat-input"><option value="pendente">Pendente</option><option value="a_vencer">A Vencer</option><option value="vencida">Vencida</option><option value="recebido">Recebido</option><option value="parcial">Parcial</option><option value="liquidada">Liquidada</option><option value="cancelada">Cancelada</option></select></div>
+                        <div><label class="modal-fat-label">Vendedor</label><input id="fat-edit-vendedor" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Posição</label><input id="fat-edit-posicao" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Categoria</label><input id="fat-edit-categoria" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Valor Recebido</label><input id="fat-edit-valor-recebido" type="number" step="0.01" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Nº Documento</label><input id="fat-edit-num-doc" class="modal-fat-input"></div>
+                        <div><label class="modal-fat-label">Nº Boleto</label><input id="fat-edit-num-boleto" class="modal-fat-input"></div>
+                        <div class="modal-fat-span-3"><label class="modal-fat-label">Observações</label><textarea id="fat-edit-observacoes" rows="2" class="modal-fat-textarea"></textarea></div>
                     </div>
-                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
-                        <button onclick="fecharModalFaturado()" style="padding:10px 24px;border:1px solid #d1d5db;border-radius:8px;background:#fff;color:#374151;font-size:13px;font-weight:600;cursor:pointer;">Cancelar</button>
-                        <button onclick="salvarFaturado()" style="padding:10px 24px;border:none;border-radius:8px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:13px;font-weight:700;cursor:pointer;">Salvar Alterações</button>
+                    <div class="modal-fat-actions">
+                        <button onclick="fecharModalFaturado()" class="btn-cancel-fat">Cancelar</button>
+                        <button onclick="salvarFaturado()" class="btn-save-fat">Salvar Alterações</button>
                     </div>
                 </div>
             </div>
@@ -1025,7 +1193,7 @@
                     <input type="hidden" id="conta-id">
                     <div class="form-principal-conta">
                         <div class="form-row-conta">
-                            <div class="form-group-conta" style="flex:2;">
+                            <div class="form-group-conta flex-2">
                                 <label>Cliente <i class="fas fa-external-link-alt link-icon"></i></label>
                                 <select id="cliente-id" required><option value="">Selecione o cliente...</option></select>
                             </div>
@@ -1033,9 +1201,9 @@
                                 <label>Vencimento</label>
                                 <div class="input-icon-conta"><input type="date" id="conta-vencimento" required><i class="fas fa-calendar"></i></div>
                             </div>
-                            <div class="form-group-conta" style="max-width:150px;">
+                            <div class="form-group-conta max-w-150">
                                 <label>Valor da Conta <span class="parcela-info">001/001</span></label>
-                                <input type="text" id="conta-valor" placeholder="0,00" oninput="formatarMoedaInput(this)" required style="text-align:right;">
+                                <input type="text" id="conta-valor" placeholder="0,00" oninput="formatarMoedaInput(this)" required class="input-right">
                             </div>
                         </div>
                         <div class="form-row-conta">
@@ -1066,8 +1234,8 @@
                                 <label><i class="fas fa-calendar-check"></i> Pago no Dia</label>
                                 <div class="input-icon-conta"><input type="date" id="cr-pago-no-dia"><i class="fas fa-calendar-check"></i></div>
                             </div>
-                            <div class="form-group-conta" style="display:flex;align-items:flex-end;">
-                                <label class="checkbox-label-cr" style="padding-bottom:10px;">
+                            <div class="form-group-conta form-group-flex-end">
+                                <label class="checkbox-label-cr checkbox-label-padded">
                                     <input type="checkbox" id="cr-aceita-troca-factory">
                                     <span><i class="fas fa-exchange-alt"></i> Aceita Troca Factory</span>
                                 </label>
@@ -1077,22 +1245,22 @@
                     <div class="tabs-conta">
                         <button type="button" class="tab-conta active" data-tab="cr-detalhes">Detalhes</button>
                         <button type="button" class="tab-conta" data-tab="cr-impostos">Impostos Retidos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-comprovante"><i class="fas fa-file-invoice" style="margin-right:4px;opacity:0.6;"></i> Comprovante</button>
-                        <button type="button" class="tab-conta" data-tab="cr-rastreamento"><i class="fas fa-search-location" style="margin-right:4px;opacity:0.6;"></i> Rastreamento</button>
+                        <button type="button" class="tab-conta" data-tab="cr-comprovante"><i class="fas fa-file-invoice tab-icon"></i> Comprovante</button>
+                        <button type="button" class="tab-conta" data-tab="cr-rastreamento"><i class="fas fa-search-location tab-icon"></i> Rastreamento</button>
                         <button type="button" class="tab-conta" data-tab="cr-departamentos">Departamentos</button>
                         <button type="button" class="tab-conta" data-tab="cr-repetição">Repetição</button>
                         <button type="button" class="tab-conta" data-tab="cr-recebimentos">Recebimentos</button>
-                        <button type="button" class="tab-conta" data-tab="cr-integracao"><i class="fas fa-link" style="margin-right:4px;opacity:0.5;"></i> Integração Bancária e CNAB</button>
+                        <button type="button" class="tab-conta" data-tab="cr-integracao"><i class="fas fa-link tab-icon-link"></i> Integração Bancária e CNAB</button>
                         <button type="button" class="tab-conta" data-tab="cr-diversos">Diversos</button>
                     </div>
                     <div class="tab-content-conta">
                         <div class="tab-pane-conta active" id="tab-cr-detalhes">
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="flex:2;">
+                                <div class="form-group-conta flex-2">
                                     <label>Descrição</label>
                                     <input type="text" id="descricao" placeholder="Ex: Venda de produtos, Serviço prestado...">
                                 </div>
-                                <div class="form-group-conta" style="max-width:150px;">
+                                <div class="form-group-conta max-w-150">
                                     <label>Nota Fiscal</label>
                                     <input type="text" id="cr-nota-fiscal" placeholder="">
                                 </div>
@@ -1117,21 +1285,21 @@
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-impostos">
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor PIS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-pis" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor PIS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-pis" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-pis"><span>Reter</span></label></div>
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor COFINS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-cofins" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor COFINS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-cofins" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-cofins"><span>Reter</span></label></div>
                             </div>
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor CSLL</label><div class="input-valor-imposto"><input type="text" id="cr-valor-csll" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor CSLL</label><div class="input-valor-imposto"><input type="text" id="cr-valor-csll" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-csll"><span>Reter</span></label></div>
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor IR</label><div class="input-valor-imposto"><input type="text" id="cr-valor-ir" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor IR</label><div class="input-valor-imposto"><input type="text" id="cr-valor-ir" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-ir"><span>Reter</span></label></div>
                             </div>
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor ISS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-iss" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor ISS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-iss" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-iss"><span>Reter</span></label></div>
-                                <div class="form-group-conta" style="max-width:150px;"><label>Valor INSS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-inss" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
+                                <div class="form-group-conta max-w-150"><label>Valor INSS</label><div class="input-valor-imposto"><input type="text" id="cr-valor-inss" placeholder="0,00" oninput="formatarMoedaInput(this)"></div></div>
                                 <div class="form-group-conta checkbox-conta"><label class="checkbox-label-cr"><input type="checkbox" id="cr-reter-inss"><span>Reter</span></label></div>
                             </div>
                         </div>
@@ -1139,29 +1307,29 @@
                             <div class="form-row-conta">
                                 <div class="form-group-conta">
                                     <label><i class="fas fa-file-upload"></i> Comprovante de Pagamento</label>
-                                    <input type="file" id="cr-comprovante-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;width:100%;">
-                                    <span style="font-size:11px;color:#9ca3af;margin-top:4px;display:block;">PDF, JPG, PNG, DOC (max 10MB). O anexo ficara salvo em banco.</span>
+                                    <input type="file" id="cr-comprovante-file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="file-input-styled">
+                                    <span class="file-hint">PDF, JPG, PNG, DOC (max 10MB). O anexo ficara salvo em banco.</span>
                                 </div>
                             </div>
-                            <div id="cr-comprovante-preview" style="margin-top:12px;display:none;">
-                                <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:14px;display:flex;align-items:center;gap:12px;">
-                                    <i class="fas fa-file-check" style="font-size:24px;color:#16a34a;"></i>
-                                    <div style="flex:1;">
-                                        <p style="font-size:13px;font-weight:600;color:#166534;margin:0;">Comprovante Anexado</p>
-                                        <a href="#" id="cr-comprovante-link" target="_blank" style="font-size:12px;color:#1e40af;text-decoration:underline;">Visualizar comprovante</a>
+                            <div id="cr-comprovante-preview" class="comprovante-preview" hidden>
+                                <div class="comprovante-success">
+                                    <i class="fas fa-file-check comprovante-icon"></i>
+                                    <div class="comprovante-info">
+                                        <p class="comprovante-name">Comprovante Anexado</p>
+                                        <a href="#" id="cr-comprovante-link" target="_blank" class="comprovante-link">Visualizar comprovante</a>
                                     </div>
-                                    <button type="button" onclick="removerComprovante()" style="background:#fee2e2;border:none;color:#dc2626;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                                    <button type="button" onclick="removerComprovante()" class="comprovante-remove"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
-                            <div style="margin-top:16px;">
-                                <button type="button" onclick="uploadComprovante()" class="btn-registrar-recebimento" style="background:#dbeafe;color:#1e40af;">
+                            <div class="comprovante-upload-area">
+                                <button type="button" onclick="uploadComprovante()" class="btn-registrar-recebimento btn-upload-comp">
                                     <i class="fas fa-cloud-upload-alt"></i> Enviar Comprovante
                                 </button>
                             </div>
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-rastreamento">
-                            <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-bottom:16px;">
-                                <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Rastreamento:</strong> Datas de recompra, encaminhamento para cartório e protesto são preenchidas automaticamente via importação ou manualmente.</p>
+                            <div class="info-box-blue">
+                                <p class="info-box-text-blue"><i class="fas fa-info-circle"></i> <strong>Rastreamento:</strong> Datas de recompra, encaminhamento para cartório e protesto são preenchidas automaticamente via importação ou manualmente.</p>
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta">
@@ -1190,7 +1358,7 @@
                                     <div class="recebimentos-header-info">Recebimentos Realizados</div>
                                     <table class="tabela-recebimentos">
                                         <thead><tr><th>Data Receb. <i class="fas fa-sort"></i></th><th>Valor Recebido <i class="fas fa-sort"></i></th><th>Descon. <i class="fas fa-sort"></i></th><th>Juros <i class="fas fa-sort"></i></th><th>Multa <i class="fas fa-sort"></i></th><th>Banco <i class="fas fa-sort"></i></th><th>Forma <i class="fas fa-sort"></i></th></tr></thead>
-                                        <tbody><tr><td colspan="7" style="text-align:center;padding:20px;color:#999;">Nenhum registro encontrado</td></tr></tbody>
+                                        <tbody><tr><td colspan="7" class="loading-cell-receb">Nenhum registro encontrado</td></tr></tbody>
                                     </table>
                                     <div class="recebimentos-botoes">
                                         <button type="button" class="btn-registrar-recebimento" onclick="registrarRecebimentoFromModal()"><i class="fas fa-dollar-sign"></i> Registrar Recebimento</button>
@@ -1209,9 +1377,9 @@
                         </div>
                         <div class="tab-pane-conta" id="tab-cr-diversos">
                             <div class="form-row-conta">
-                                <div class="form-group-conta" style="max-width:150px;"><label>Nr Documento</label><input type="text" id="numero-documento"></div>
+                                <div class="form-group-conta max-w-150"><label>Nr Documento</label><input type="text" id="numero-documento"></div>
                                 <div class="form-group-conta"><label>Tipo de Documento</label><select id="cr-tipo-doc"><option value="outros">Outros</option><option value="nf">Nota Fiscal</option><option value="boleto">Boleto</option><option value="recibo">Recibo</option><option value="contrato">Contrato</option></select></div>
-                                <div class="form-group-conta" style="max-width:120px;"><label>Parcelas</label><input type="number" id="num-parcelas" min="1" max="48" value="1"></div>
+                                <div class="form-group-conta max-w-120"><label>Parcelas</label><input type="number" id="num-parcelas" min="1" max="48" value="1"></div>
                             </div>
                             <div class="form-row-conta">
                                 <div class="form-group-conta"><label>Forma de Recebimento</label><select id="forma-pagamento"><option value="pix">PIX</option><option value="transferencia">Transferência</option><option value="boleto">Boleto</option><option value="cartao">Cartão</option><option value="dinheiro">Dinheiro</option><option value="cheque">Cheque</option></select></div>
@@ -1234,7 +1402,7 @@
 
     <!-- Modal Importar Excel -->
     <div id="modal-importar" class="modal">
-        <div class="modal-content modal-institucional" style="max-width:520px;">
+        <div class="modal-content modal-institucional modal-importar">
             <div class="modal-header-institucional">
                 <div class="modal-header-icon"><i class="fas fa-file-excel"></i></div>
                 <div class="modal-header-info">
@@ -1243,29 +1411,29 @@
                 </div>
                 <button class="close-modal-inst" onclick="fecharModalImportar()">&times;</button>
             </div>
-            <div style="padding:24px;">
+            <div class="modal-importar-body">
                 <div class="form-group">
                     <label><i class="fas fa-file-upload"></i> Arquivo Excel (.xlsx)</label>
-                    <input type="file" class="form-input" id="arquivo-excel" accept=".xlsx,.xls" style="padding:8px;">
+                    <input type="file" class="form-input file-input-styled" id="arquivo-excel" accept=".xlsx,.xls">
                     <span class="input-hint">Selecione o arquivo - todas as colunas serão importadas automaticamente</span>
                 </div>
-                <div style="background:#dbeafe;border:1px solid #93c5fd;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#1e40af;margin:0;"><i class="fas fa-info-circle"></i> <strong>Colunas importadas:</strong> Empresa, Emissão, Tipo, NFe, Parcela, Cliente, CNPJ, Valor, Vencimento, Situação, Portador, Status, Observação, PIS, COFINS, CSLL, IR, ISS, INSS</p>
+                <div class="info-box-blue-import">
+                    <p class="info-box-text-blue"><i class="fas fa-info-circle"></i> <strong>Colunas importadas:</strong> Empresa, Emissão, Tipo, NFe, Parcela, Cliente, CNPJ, Valor, Vencimento, Situação, Portador, Status, Observação, PIS, COFINS, CSLL, IR, ISS, INSS</p>
                 </div>
-                <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-top:12px;">
-                    <p style="font-size:12px;color:#92400e;margin:0;"><i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> A importação substituirá todos os registros importados anteriormente.</p>
+                <div class="info-box-yellow">
+                    <p class="info-box-text-yellow"><i class="fas fa-exclamation-triangle"></i> <strong>Atenção:</strong> A importação substituirá todos os registros importados anteriormente.</p>
                 </div>
-                <div id="importar-progresso" style="display:none;margin-top:16px;text-align:center;">
-                    <i class="fas fa-spinner fa-spin" style="font-size:24px;color:#059669;"></i>
-                    <p style="font-size:13px;color:var(--gray-600);margin-top:8px;">Processando arquivo...</p>
+                <div id="importar-progresso" class="importar-progresso" hidden>
+                    <i class="fas fa-spinner fa-spin importar-spinner"></i>
+                    <p class="importar-texto">Processando arquivo...</p>
                 </div>
-                <div id="importar-resultado" style="display:none;margin-top:16px;"></div>
+                <div id="importar-resultado" class="importar-resultado" hidden></div>
             </div>
             <div class="modal-footer-institucional">
                 <div class="footer-info"><i class="fas fa-info-circle"></i><span>Formatos aceitos: .xlsx, .xls</span></div>
                 <div class="footer-actions">
                     <button type="button" class="btn-cancel" onclick="fecharModalImportar()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="button" class="btn-save" id="btn-importar" onclick="executarImportacao()" style="background:linear-gradient(135deg,#059669,#10b981);"><i class="fas fa-upload"></i> Importar</button>
+                    <button type="button" class="btn-save btn-importar-green" id="btn-importar" onclick="executarImportacao()"><i class="fas fa-upload"></i> Importar</button>
                 </div>
             </div>
         </div>
@@ -1277,7 +1445,7 @@
             <div class="modal-receber-header">
                 <div class="icon"><i class="fas fa-check-double"></i></div>
                 <div class="info"><h3>Confirmar Recebimento</h3><p>Registre os dados do recebimento</p></div>
-                <button onclick="fecharModalReceber()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;opacity:0.8;">&times;</button>
+                <button onclick="fecharModalReceber()" class="modal-close-btn-lg">&times;</button>
             </div>
             <form id="form-receber" onsubmit="confirmarRecebimento(event)">
                 <input type="hidden" id="receber-conta-id">
@@ -1292,7 +1460,7 @@
                 </div>
                 <div class="modal-receber-footer">
                     <button type="button" class="btn-cancel" onclick="fecharModalReceber()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-check"></i> Confirmar</button>
+                    <button type="submit" class="btn-save btn-save-confirm"><i class="fas fa-check"></i> Confirmar</button>
                 </div>
             </form>
         </div>
@@ -1346,7 +1514,36 @@
             } catch (error) { console.error('Erro ao carregar usuario:', error); }
         }
 
-        async function init() { await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias()]); }
+        async function init() {
+            await Promise.all([carregarUsuarioLogado(), carregarContas(), carregarClientes(), carregarCategorias(), carregarContasBancarias()]);
+            const urlParams = new URLSearchParams(window.location.search);
+            const acao = urlParams.get('acao');
+            const id = urlParams.get('id');
+            if (acao === 'nova') { abrirModal(); }
+            else if (acao === 'receber' && id) { const c = contas.find(x => String(x.id) === String(id)); if (c) abrirModalReceber(c.id, c.valor); }
+            else if (acao === 'detalhes' && id) { visualizarConta(id); }
+            else if (acao === 'comprovante' && id) { visualizarConta(id); }
+            if (acao) window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        async function carregarContasBancarias() {
+            try {
+                var response = await fetch('/api/financeiro/contas-bancarias', { credentials: 'include' });
+                if (response.ok) {
+                    var bancos = await response.json();
+                    var sel = document.getElementById('cr-conta-corrente');
+                    if (sel) {
+                        sel.innerHTML = '<option value="">Selecione...</option>';
+                        (Array.isArray(bancos) ? bancos : bancos.contas || []).forEach(function(b) {
+                            var opt = document.createElement('option');
+                            opt.value = b.id;
+                            opt.textContent = b.nome || b.banco + ' - ' + (b.agencia||'') + '/' + (b.conta||'');
+                            sel.appendChild(opt);
+                        });
+                    }
+                }
+            } catch(e) { console.error('Erro ao carregar contas bancárias:', e); }
+        }
 
         async function carregarResumo() {
             try {
@@ -1678,7 +1875,7 @@
                 document.getElementById('conta-valor').value = val ? val.toFixed(2).replace('.',',') : '';
                 document.getElementById('conta-vencimento').value = (c.data_vencimento||c.vencimento||'').split('T')[0];
                 document.getElementById('forma-pagamento').value = c.forma_recebimento || c.forma_pagamento || 'pix';
-                document.getElementById('observações').value = c.observações || '';
+                document.getElementById('observações').value = c.observacoes || c['observações'] || '';
                 document.getElementById('numero-documento').value = c.numero_documento || '';
                 document.getElementById('num-parcelas').value = c.num_parcelas || 1;
                 document.getElementById('cr-nota-fiscal').value = c.nota_fiscal || '';
@@ -1704,8 +1901,18 @@
                 document.getElementById('cr-pago-no-dia').value = (c.pago_no_dia||'').split('T')[0];
                 document.getElementById('cr-aceita-troca-factory').checked = !!(c.aceita_troca_factory);
                 document.getElementById('cr-dia-recomprado').value = (c.dia_recomprado||'').split('T')[0];
-                document.getElementById('cr-data-cartório').value = (c.data_para_cartório||'').split('T')[0];
+                document.getElementById('cr-data-cartório').value = (c.data_para_cartorio||'').split('T')[0];
                 document.getElementById('cr-data-protestado').value = (c.data_protestado||'').split('T')[0];
+                // Conta corrente: match por ID ou nome
+                var ccId = c.conta_corrente_id || '';
+                if (!ccId && (c.conta_corrente_nome || c.centro_receita)) {
+                    var ccNome = (c.conta_corrente_nome || c.centro_receita || '').trim().toLowerCase();
+                    var selCC = document.getElementById('cr-conta-corrente');
+                    for (var kk = 0; kk < selCC.options.length; kk++) {
+                        if (selCC.options[kk].text.trim().toLowerCase() === ccNome) { ccId = selCC.options[kk].value; break; }
+                    }
+                }
+                document.getElementById('cr-conta-corrente').value = ccId;
                 // Comprovante
                 if (c.comprovante_url) {
                     document.getElementById('cr-comprovante-preview').style.display = 'block';
@@ -1757,14 +1964,14 @@
                 data_vencimento: document.getElementById('conta-vencimento').value,
                 vencimento: document.getElementById('conta-vencimento').value,
                 forma_recebimento: document.getElementById('forma-pagamento').value,
-                observações: document.getElementById('observações').value,
+                observacoes: document.getElementById('observações').value,
                 numero_documento: document.getElementById('numero-documento').value,
                 num_parcelas: parseInt(document.getElementById('num-parcelas').value) || 1,
                 status: document.getElementById('cr-status').value,
                 pago_no_dia: document.getElementById('cr-pago-no-dia').value || null,
                 aceita_troca_factory: document.getElementById('cr-aceita-troca-factory').checked,
                 dia_recomprado: document.getElementById('cr-dia-recomprado').value || null,
-                data_para_cartório: document.getElementById('cr-data-cartório').value || null,
+                data_para_cartorio: document.getElementById('cr-data-cartório').value || null,
                 data_protestado: document.getElementById('cr-data-protestado').value || null,
                 nota_fiscal: document.getElementById('cr-nota-fiscal').value || null,
                 data_emissao: document.getElementById('cr-emissao').value || null,
@@ -1772,6 +1979,7 @@
                 projeto: document.getElementById('cr-projeto').value || null,
                 vendedor: document.getElementById('cr-vendedor').value || null,
                 previsao_recebimento: document.getElementById('cr-previsao').value || null,
+                conta_corrente_id: document.getElementById('cr-conta-corrente').value || null,
                 valor_pis: parseMoeda(document.getElementById('cr-valor-pis').value) || 0,
                 valor_cofins: parseMoeda(document.getElementById('cr-valor-cofins').value) || 0,
                 valor_csll: parseMoeda(document.getElementById('cr-valor-csll').value) || 0,
@@ -2611,7 +2819,7 @@
     <script src="/js/user-dropdown.js?v=20260327" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <script src="/js/mobile-auto-enhance.js?v=20260319" defer></script>
-    <script src="/Financeiro/js/financeiro-sidebar.js?v=20260408"></script>
+    <script src="/Financeiro/js/financeiro-sidebar.js?v=20260410"></script>
     <script src="/_shared/confirm-dialog.js?v=20260319"></script>
     <script src="/_shared/accessibility-widget.js?v=20260319"></script>
     <script src="/socket.io/socket.io.js"></script>
