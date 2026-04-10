@@ -6049,6 +6049,10 @@
                             <label class="valor-label">Total de ICMS ST</label>
                             <input type="text" class="valor-input" id="edit-icms-st" value="0,00" readonly>
                         </div>
+                        <div class="valor-item" id="edit-difal-container" style="display:none;">
+                            <label class="valor-label">DIFAL</label>
+                            <input type="text" class="valor-input" id="edit-difal" value="0,00" readonly>
+                        </div>
                         <div class="valor-item">
                             <label class="valor-label">Frete</label>
                             <input type="text" class="valor-input" id="edit-frete-resumo" value="0,00" readonly>
@@ -6948,6 +6952,10 @@
                             <label>Total de ICMS ST</label>
                             <input type="text" id="novo-total-icms" class="orcamento-valor-input" value="0,00" readonly>
                         </div>
+                        <div class="orcamento-valor-box" id="novo-difal-container" style="display:none;">
+                            <label>DIFAL</label>
+                            <input type="text" id="novo-total-difal" class="orcamento-valor-input" value="0,00" readonly>
+                        </div>
                         <div class="orcamento-valor-box destaque">
                             <label>Valor Total do Pedido</label>
                             <input type="text" id="novo-valor-total" class="orcamento-valor-input destaque" value="0,00"
@@ -7795,6 +7803,10 @@
                     <div class="valor-calc-item" style="display:none;">
                         <span class="valor-calc-label">ICMS ST+FCP ST</span>
                         <span class="valor-calc-value" id="calc-icms-st">R$ 0,00</span>
+                    </div>
+                    <div class="valor-calc-item" style="display:none;">
+                        <span class="valor-calc-label">DIFAL</span>
+                        <span class="valor-calc-value" id="calc-difal">R$ 0,00</span>
                     </div>
                     <div class="valor-calc-item destaque">
                         <span class="valor-calc-label">Total do Item</span>
@@ -12417,7 +12429,8 @@
             const frete = parseFloat(pedidoAtual.frete) || 0;
             const ipi = parseFloat(pedidoAtual.total_ipi) || 0;
             const icmsST = parseFloat(pedidoAtual.total_icms_st) || 0;
-            const totalGeral = subtotal + frete + ipi + icmsST;
+            const difal = parseFloat(pedidoAtual.total_difal) || 0;
+            const totalGeral = subtotal + frete + ipi + icmsST + difal;
 
             // Endereço cliente
             const endCliente = [
@@ -12428,7 +12441,7 @@
                 pedidoAtual.cliente_uf ? `/${pedidoAtual.cliente_uf}` : ''
             ].join('') || '-';
 
-            return { tipoDocumento, nomeArquivo, dataAtual, horaAtual, dataEmissao, dataValidadeStr, condicao, itensRows, subtotalBruto, totalDescontos, subtotal, frete, ipi, icmsST, totalGeral, endCliente };
+            return { tipoDocumento, nomeArquivo, dataAtual, horaAtual, dataEmissao, dataValidadeStr, condicao, itensRows, subtotalBruto, totalDescontos, subtotal, frete, ipi, icmsST, difal, totalGeral, endCliente };
         }
 
         function _buildDocumentHTML(d) {
@@ -12579,6 +12592,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     ${d.frete > 0 ? `<div class="totals-row"><span class="lbl">Frete:</span><span class="val">R$ ${d.frete.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
                     ${d.ipi > 0 ? `<div class="totals-row"><span class="lbl">IPI:</span><span class="val">R$ ${d.ipi.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
                     ${d.icmsST > 0 ? `<div class="totals-row"><span class="lbl">ICMS ST:</span><span class="val">R$ ${d.icmsST.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
+                    ${d.difal > 0 ? `<div class="totals-row"><span class="lbl">DIFAL:</span><span class="val">R$ ${d.difal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>` : ''}
                     <div class="totals-row grand"><span class="lbl">TOTAL:</span><span class="val">R$ ${d.totalGeral.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span></div>
                 </div>
             </div>
@@ -15976,15 +15990,31 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 }
             }
 
-            const totalItem = subtotalItem + valorIPI + valorICMSST;
+            // Calcular DIFAL (consumidor final) ou ICMS-ST (revenda) conforme tipo de venda
+            const tipoVendaAtual = document.getElementById('edit-tipo-venda')?.value || document.getElementById('novo-tipo-venda')?.value || 'consumidor';
+            const ufDestinoAtual = document.getElementById('edit-estado-destino')?.value || document.getElementById('novo-estado-destino')?.value || 'SP';
+            const valorDifal = calcularDifalItem(subtotalItem, tipoVendaAtual, ufDestinoAtual);
+            // ICMS-ST para revenda: usa tabela UF se não houver cálculo por produto
+            const valorIcmsStTipoVenda = calcularIcmsStItem(subtotalItem, tipoVendaAtual, ufDestinoAtual);
+            if (valorIcmsStTipoVenda > 0 && valorICMSST === 0) {
+                valorICMSST = valorIcmsStTipoVenda;
+            }
+
+            const totalItem = subtotalItem + valorIPI + valorICMSST + valorDifal;
 
             // Atualizar exibição
             document.getElementById('calc-valor-mercadoria').textContent = formatarMoeda(valorMercadoria);
             document.getElementById('calc-valor-desconto').textContent = formatarMoeda(valorDesconto);
             const calcIpiEl = document.getElementById('calc-ipi');
             const calcIcmsStEl = document.getElementById('calc-icms-st');
+            const calcDifalEl = document.getElementById('calc-difal');
             if (calcIpiEl) calcIpiEl.textContent = formatarMoeda(valorIPI);
             if (calcIcmsStEl) calcIcmsStEl.textContent = formatarMoeda(valorICMSST);
+            if (calcDifalEl) {
+                calcDifalEl.textContent = formatarMoeda(valorDifal);
+                const difalContainer = calcDifalEl.closest('.valor-calc-item');
+                if (difalContainer) difalContainer.style.display = valorDifal > 0 ? '' : 'none';
+            }
             document.getElementById('calc-total-item').textContent = formatarMoeda(totalItem);
 
             // Calcular total do pedido (itens existentes + este item)
@@ -15994,7 +16024,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 const desc = parseFloat(item.desconto) || 0;
                 const ipi = parseFloat(item.valor_ipi) || 0;
                 const icmsSt = parseFloat(item.valor_icms_st) || 0;
-                return sum + (qtd * prc - desc) + ipi + icmsSt;
+                const difal = parseFloat(item.valor_difal) || 0;
+                return sum + (qtd * prc - desc) + ipi + icmsSt + difal;
             }, 0);
 
             document.getElementById('calc-total-pedido').textContent = formatarMoeda(totalExistente + totalItem);
@@ -16218,6 +16249,11 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             }
             renderizarTabelaItens();
 
+            // Calcular DIFAL nos itens carregados (baseado no tipo_venda e UF atuais)
+            const tipoVendaCarregar = document.getElementById('edit-tipo-venda')?.value || 'consumidor';
+            const ufDestinoCarregar = document.getElementById('edit-estado-destino')?.value || 'SP';
+            recalcularDifalItens(tipoVendaCarregar, ufDestinoCarregar);
+
             // Atualizar totais do modal após carregar os itens
             atualizarTotalModalEditar();
         }
@@ -16342,6 +16378,12 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             document.getElementById('calc-valor-desconto').textContent = 'R$ 0,00';
             document.getElementById('calc-ipi').textContent = 'R$ 0,00';
             document.getElementById('calc-icms-st').textContent = 'R$ 0,00';
+            const calcDifalReset = document.getElementById('calc-difal');
+            if (calcDifalReset) {
+                calcDifalReset.textContent = 'R$ 0,00';
+                const difalResetContainer = calcDifalReset.closest('.valor-calc-item');
+                if (difalResetContainer) difalResetContainer.style.display = 'none';
+            }
             document.getElementById('calc-total-item').textContent = 'R$ 0,00';
 
             // Atualizar total do pedido existente
@@ -16523,6 +16565,17 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 itemData.aliquota_icms = produtoSelecionadoAutoComplete?.aliquota_icms || 0;
                 itemData.mva_st = produtoSelecionadoAutoComplete?.mva_st || 0;
 
+                // Calcular DIFAL (consumidor final) ou ICMS-ST (revenda) conforme tipo de venda
+                const tipoVendaSalvar = document.getElementById('edit-tipo-venda')?.value || document.getElementById('novo-tipo-venda')?.value || 'consumidor';
+                const ufDestinoSalvar = document.getElementById('edit-estado-destino')?.value || document.getElementById('novo-estado-destino')?.value || 'SP';
+                const valorDifalItem = calcularDifalItem(subtotalCalc, tipoVendaSalvar, ufDestinoSalvar);
+                itemData.valor_difal = valorDifalItem;
+                // Para revenda: calcular ICMS-ST pela tabela de UF (sobrescreve se não houver cálculo por produto)
+                const valorIcmsStTipoVenda = calcularIcmsStItem(subtotalCalc, tipoVendaSalvar, ufDestinoSalvar);
+                if (valorIcmsStTipoVenda > 0 || tipoVendaSalvar === 'revenda') {
+                    itemData.valor_icms_st = valorIcmsStTipoVenda;
+                }
+
                 // DEBUG: Log dos dados do item sendo salvo
                 console.log('📝 Salvando item:', {
                     ...itemData,
@@ -16532,8 +16585,8 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
 
                 // Se for um pedido NOVO (ainda não salvo no banco), salvar apenas localmente
                 if (modoNovoPedido || !pedidoAtual || pedidoAtual.id === 'NOVO') {
-                    // Calcular total do item (inclui IPI e ICMS ST)
-                    const totalItem = subtotalCalc + valorIPI + valorICMSST;
+                    // Calcular total do item (inclui IPI, ICMS ST e DIFAL)
+                    const totalItem = subtotalCalc + valorIPI + valorICMSST + valorDifalItem;
 
                     if (modoEdicaoItem && itemSelecionado) {
                         // MODO EDIÇÃO: Atualizar item existente no array local
@@ -16741,18 +16794,24 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 return sum + (parseFloat(item.valor_icms_st) || 0);
             }, 0);
 
+            // Calcular DIFAL total
+            const totalDIFAL = itensPedidoAtual.reduce((sum, item) => {
+                return sum + (parseFloat(item.valor_difal) || 0);
+            }, 0);
+
             // Incluir frete no cálculo
             const freteInput = document.getElementById('edit-valor-frete');
             const frete = freteInput ? (parseFloat(freteInput.value) || 0) : (pedidoAtual ? (parseFloat(pedidoAtual.frete) || 0) : 0);
 
-            // Valor final = subtotal líquido - desconto geral + impostos + frete
-            const valorTotal = subtotalLiquido - descontoGeralValor + totalIPI + totalICMSST + frete;
+            // Valor final = subtotal líquido - desconto geral + impostos + frete + DIFAL
+            const valorTotal = subtotalLiquido - descontoGeralValor + totalIPI + totalICMSST + totalDIFAL + frete;
 
             // Atualizar campos do modal
             const totalMercadoriasInput = document.getElementById('edit-total-mercadorias');
             const descontoValorInput = document.getElementById('edit-desconto-valor');
             const ipiInput = document.getElementById('edit-ipi');
             const icmsStInput = document.getElementById('edit-icms-st');
+            const difalInput = document.getElementById('edit-difal');
             const freteResumoInput = document.getElementById('edit-frete-resumo');
             const valorTotalInput = document.getElementById('edit-valor-total');
 
@@ -16760,8 +16819,13 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             if (descontoValorInput) descontoValorInput.value = descontoItens > 0 ? '-' + formatarMoeda(descontoItens) : formatarMoeda(0);
             if (ipiInput) ipiInput.value = formatarMoeda(totalIPI);
             if (icmsStInput) icmsStInput.value = formatarMoeda(totalICMSST);
+            if (difalInput) difalInput.value = formatarMoeda(totalDIFAL);
             if (freteResumoInput) freteResumoInput.value = formatarMoeda(frete);
             if (valorTotalInput) valorTotalInput.value = formatarMoeda(valorTotal);
+
+            // Mostrar/ocultar campo DIFAL
+            const difalContainer = difalInput?.closest('.valor-item');
+            if (difalContainer) difalContainer.style.display = totalDIFAL > 0 ? '' : 'none';
 
             // Filtrar condições de pagamento disponíveis conforme valor
             filtrarCondicoesPorValor('edit-condicao-pagamento-header', valorTotal);
@@ -16772,6 +16836,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 pedidoAtual.total_mercadorias = subtotalLiquido;
                 pedidoAtual.total_ipi = totalIPI;
                 pedidoAtual.total_icms_st = totalICMSST;
+                pedidoAtual.total_difal = totalDIFAL;
                 pedidoAtual.desconto_pct = 0;
                 pedidoAtual.desconto = descontoItens;
             }
@@ -16784,6 +16849,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 descontoPct: '0% (desconto por item)',
                 totalIPI,
                 totalICMSST,
+                totalDIFAL,
                 frete,
                 valorTotal
             });
@@ -18774,13 +18840,18 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             // Calcular IPI e ICMS ST dos itens (usar valores calculados por item se disponíveis)
             const totalIpi = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_ipi) || 0), 0);
             const totalIcms = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_icms_st) || 0), 0);
-            const valorTotal = totalMercadorias - descontoValor + totalIpi + totalIcms;
+            const totalDifal = itensOrcamento.reduce((sum, item) => sum + (parseFloat(item.valor_difal) || 0), 0);
+            const valorTotal = totalMercadorias - descontoValor + totalIpi + totalIcms + totalDifal;
 
             document.getElementById('novo-total-mercadorias').value = totalMercadorias.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             const descontoValorInput = document.getElementById('novo-desconto-valor');
             if (descontoValorInput) descontoValorInput.value = descontoValor > 0 ? '-' + descontoValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) : '0,00';
             document.getElementById('novo-total-ipi').value = totalIpi.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
             document.getElementById('novo-total-icms').value = totalIcms.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const difalInput = document.getElementById('novo-total-difal');
+            if (difalInput) difalInput.value = totalDifal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+            const difalContainer = document.getElementById('novo-difal-container');
+            if (difalContainer) difalContainer.style.display = totalDifal > 0 ? '' : 'none';
             document.getElementById('novo-valor-total').value = valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
             // Filtrar condições de pagamento disponíveis conforme valor
@@ -18832,6 +18903,14 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 localEstoque: estoqueLabels[estoque] || estoque,
                 precoUnitario: preco
             });
+
+            // Calcular impostos (DIFAL / ICMS-ST) no item recém-adicionado conforme tipo de venda
+            const tipoVendaAtual = document.getElementById('novo-tipo-venda')?.value || 'consumidor';
+            const ufDestinoAtual = document.getElementById('novo-estado-destino')?.value || 'SP';
+            const novoItem = itensOrcamento[itensOrcamento.length - 1];
+            const subtotalNovo = quantidade * preco;
+            novoItem.valor_difal = calcularDifalItem(subtotalNovo, tipoVendaAtual, ufDestinoAtual);
+            novoItem.valor_icms_st = calcularIcmsStItem(subtotalNovo, tipoVendaAtual, ufDestinoAtual);
 
             renderTabelaItens();
             fecharModalAdicionarItem();
@@ -23345,6 +23424,9 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             // Carregar configurações de impostos (não bloqueia a renderização)
             carregarConfigImpostosSistema();
 
+            // Sincronizar tabelas DIFAL/ICMS-ST com Custos & Precificação (mesma fonte)
+            carregarImpostosArvore();
+
             // Carregar condições de pagamento do banco de dados
             carregarCondicoesPagamentoDB();
 
@@ -23578,6 +23660,78 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         const _UF_LABELS = ['AC','AL','AM','AP','BA','CE','DF','ES','GO','MA','MG','MS','MT',
                             'PA','PB','PE','PI','PR','RJ','RN','RO','RR','RS','SC','SE','SP','TO'];
 
+        // Tabela DIFAL por UF (diferença de alíquota ICMS destino vs interestadual 12%)
+        // Tabelas de impostos por UF — inicializadas com fallback, atualizadas via API (mesma config de custos e precificação)
+        let _DIFAL_POR_UF = {
+            'AC': 5, 'AL': 6, 'AM': 6, 'AP': 6, 'BA': 7.5, 'CE': 6,
+            'DF': 6, 'ES': 5, 'GO': 5, 'MA': 6, 'MG': 6, 'MS': 5,
+            'MT': 5, 'PA': 5, 'PB': 6, 'PE': 6, 'PI': 9, 'PR': 7,
+            'RJ': 8, 'RN': 6, 'RO': 5.5, 'RR': 5, 'RS': 5, 'SC': 5,
+            'SE': 6, 'SP': 0, 'TO': 6
+        };
+
+        // Tabela ICMS-ST por UF (Substituição Tributária para Revenda)
+        let _ICMSST_POR_UF = {
+            'AC': 0, 'AL': 0, 'AM': 0, 'AP': 0, 'BA': 0, 'CE': 0,
+            'DF': 0, 'ES': 0, 'GO': 0, 'MA': 0, 'MG': 10, 'MS': 0,
+            'MT': 0, 'PA': 0, 'PB': 0, 'PE': 0, 'PI': 0, 'PR': 10,
+            'RJ': 10, 'RN': 0, 'RO': 0, 'RR': 0, 'RS': 10, 'SC': 10,
+            'SE': 0, 'SP': 10, 'TO': 0
+        };
+
+        // Sincronizar tabelas de impostos com a API de Custos & Precificação
+        async function carregarImpostosArvore() {
+            try {
+                const resp = await fetch('/api/pcp/arvore-produto', { credentials: 'include' });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                const icmsEstados = (data.parametros || data.parâmetros || data.config || {}).icms_estados;
+                if (!icmsEstados) return;
+                const novoDifal = {}, novoSt = {};
+                Object.keys(icmsEstados).forEach(uf => {
+                    novoDifal[uf] = parseFloat(icmsEstados[uf].difal) || 0;
+                    novoSt[uf] = parseFloat(icmsEstados[uf].st) || 0;
+                });
+                if (Object.keys(novoDifal).length > 0) {
+                    _DIFAL_POR_UF = novoDifal;
+                    _ICMSST_POR_UF = novoSt;
+                    console.log('✅ Impostos (DIFAL/ICMS-ST) sincronizados com Custos & Precificação:', Object.keys(novoDifal).length, 'UFs');
+                }
+            } catch (e) {
+                console.warn('⚠️ Usando tabelas de impostos padrão (fallback):', e.message);
+            }
+        }
+
+        // Calcula DIFAL por item (só para consumidor final e UF != SP)
+        function calcularDifalItem(subtotalItem, tipoVenda, ufDestino) {
+            if (tipoVenda !== 'consumidor') return 0;
+            const uf = (ufDestino || 'SP').toUpperCase();
+            const difal = _DIFAL_POR_UF[uf] || 0;
+            if (difal <= 0) return 0;
+            return subtotalItem * (difal / 100);
+        }
+
+        // Calcula ICMS-ST por item (só para revenda)
+        function calcularIcmsStItem(subtotalItem, tipoVenda, ufDestino) {
+            if (tipoVenda !== 'revenda') return 0;
+            const uf = (ufDestino || 'SP').toUpperCase();
+            const st = _ICMSST_POR_UF[uf] || 0;
+            if (st <= 0) return 0;
+            return subtotalItem * (st / 100);
+        }
+
+        // Recalcula impostos (DIFAL / ICMS-ST) em todos os itens do pedido atual
+        function recalcularDifalItens(tipoVenda, ufDestino) {
+            itensPedidoAtual.forEach(item => {
+                const qtd = parseFloat(item.quantidade) || 0;
+                const preco = parseFloat(item.preco_unitario) || 0;
+                const desc = parseFloat(item.desconto) || 0;
+                const subtotal = (qtd * preco) - desc;
+                item.valor_difal = calcularDifalItem(subtotal, tipoVenda, ufDestino);
+                item.valor_icms_st = calcularIcmsStItem(subtotal, tipoVenda, ufDestino);
+            });
+        }
+
         function setTipoVendaEdit(tipo) {
             document.getElementById('edit-tipo-venda').value = tipo;
             const btnCons = document.getElementById('edit-btn-consumidor');
@@ -23590,8 +23744,12 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 btnRev.style.cssText  = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:600;cursor:pointer;';
                 btnCons.style.cssText = 'flex:1;padding:6px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
             }
-            // Recalcular preços dos itens com base no tipo de venda (custos e precificações)
-            recalcularPrecosItens(tipo, 'edit');
+            // Salvar tipo de venda no pedido (recalcula impostos conforme tipo)
+            if (pedidoAtual) pedidoAtual.tipo_venda = tipo;
+            // Recalcular DIFAL / ICMS-ST nos itens e atualizar totais
+            const ufDestino = document.getElementById('edit-estado-destino')?.value || 'SP';
+            recalcularDifalItens(tipo, ufDestino);
+            atualizarTotalModalEditar();
         }
 
         function setTipoVendaNovo(tipo) {
@@ -23606,56 +23764,14 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                 btnRev.style.cssText  = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #3b82f6;background:#eff6ff;color:#1d4ed8;font-size:12px;font-weight:700;cursor:pointer;';
                 btnCons.style.cssText = 'flex:1;padding:7px 10px;border-radius:6px;border:1.5px solid #e2e8f0;background:white;color:#64748b;font-size:12px;font-weight:600;cursor:pointer;';
             }
-            // Recalcular preços dos itens com base no tipo de venda (custos e precificações)
-            recalcularPrecosItens(tipo, 'novo');
-        }
-
-        /**
-         * Recalcula preços dos itens do pedido com base no tipo de venda (consumidor/revenda)
-         * Usa as configurações do modal de custos e precificações para ajustar valores
-         */
-        async function recalcularPrecosItens(tipoVenda, contexto) {
-            const uf = document.getElementById(contexto === 'edit' ? 'edit-estado-destino' : 'novo-estado-destino')?.value || 'SP';
-            
-            if (!itensPedidoAtual || itensPedidoAtual.length === 0) return;
-
-            try {
-                // Buscar precificação do sistema
-                const resp = await fetch(`/api/vendas/precificacao?tipo_venda=${tipoVenda}&uf=${uf}`, {
-                    credentials: 'include',
-                    headers: typeof getAuthHeaders === 'function' ? getAuthHeaders('application/json') : { 'Content-Type': 'application/json' }
-                });
-
-                if (!resp.ok) {
-                    console.warn('[Vendas] API de precificação não disponível, mantendo preços atuais');
-                    return;
-                }
-
-                const config = await resp.json();
-                const fator = parseFloat(config.fator_preco || config.markup || 1);
-
-                if (fator === 1 || fator === 0) return;
-
-                // Atualizar preço de cada item
-                let totalAtualizado = 0;
-                for (const item of itensPedidoAtual) {
-                    const precoCusto = parseFloat(item.preco_custo) || 0;
-                    if (precoCusto > 0) {
-                        item.preco_unitario = (precoCusto * fator).toFixed(2);
-                    }
-                    totalAtualizado += (parseFloat(item.quantidade) || 0) * (parseFloat(item.preco_unitario) || 0);
-                }
-
-                // Atualizar total
-                if (contexto === 'edit') {
-                    if (typeof atualizarTotalModalEditar === 'function') atualizarTotalModalEditar();
-                    if (typeof renderizarItensTabela === 'function') renderizarItensTabela();
-                }
-
-                showNotification(`Preços atualizados para ${tipoVenda === 'consumidor' ? 'Consumidor Final' : 'Revenda'} (${uf})`, 'info');
-            } catch (e) {
-                console.warn('[Vendas] Erro ao recalcular preços:', e.message);
-            }
+            // Recalcular impostos (DIFAL / ICMS-ST) nos itens do orçamento e atualizar totais
+            const ufDestino = document.getElementById('novo-estado-destino')?.value || 'SP';
+            itensOrcamento.forEach(item => {
+                const subtotal = (parseFloat(item.quantidade) || 0) * (parseFloat(item.precoUnitario) || 0);
+                item.valor_difal = calcularDifalItem(subtotal, tipo, ufDestino);
+                item.valor_icms_st = calcularIcmsStItem(subtotal, tipo, ufDestino);
+            });
+            calcularTotaisOrcamento();
         }
 
         // ========================================

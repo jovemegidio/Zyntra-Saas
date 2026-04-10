@@ -384,24 +384,21 @@ class GeradorPDF {
     <style>
         ${this.getEstilosBase()}
         @page { size: A4 ${orientacao}; }
-        .titulo-doc { color: #374151; }
+        .titulo-doc { color: var(--ink); }
     </style>
 </head>
 <body>
-    <div class="cabecalho">
-        <div class="empresa-info">
-            <h2>${this.empresa.nome}</h2>
-            <p>${this.empresa.cnpj}</p>
-        </div>
-        <div class="doc-info">
-            <h1 class="titulo-doc">${titulo}</h1>
-            ${subtitulo ? `<p class="subtitulo">${subtitulo}</p>` : ''}
-            ${periodo ? `<p class="periodo">Período: ${periodo}</p>` : ''}
-            <p class="data-emissao">Emitido em: ${this.formatarDataHora(new Date())}</p>
-        </div>
-    </div>
+    ${this.renderCabecalho(titulo, '')}
 
-    <div class="secao">
+    ${subtitulo || periodo ? `
+    <div class="doc-card">
+        ${subtitulo ? `<h2>${subtitulo}</h2>` : ''}
+        ${periodo ? `<div class="subtitle">Período: ${periodo}</div>` : ''}
+    </div>
+    ` : ''}
+
+    <div class="section-card">
+        <div class="s-head">Detalhamento</div>
         <table class="tabela-itens">
             <thead>
                 <tr>
@@ -446,68 +443,93 @@ class GeradorPDF {
 
     getEstilosBase() {
         return `
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { font-family: Arial, sans-serif; font-size: 10pt; color: #333; padding: 20px; }
+            :root{--ink:#0c1726;--text:#385062;--muted:#6d8092;--line:#d8e4ed;--soft:#f6fafc;--brand:#0b2842;--brand-2:#103758;--accent:#18b6c8;--accent-soft:#e7fbfd}
+            @page{margin:8mm;size:A4}
+            @media print{@page{margin:8mm}html,body{margin:0;padding:0}body::before,body::after{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+            *{margin:0;padding:0;box-sizing:border-box}
+            body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);background:#eef4f8;display:flex;justify-content:center;font-size:10px;line-height:1.4}
+            .page-shell{width:190mm;margin:8mm auto;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 42px rgba(11,40,66,.08);padding:7mm}
+            .top-rule{height:5px;background:linear-gradient(90deg,var(--brand) 0%,var(--brand-2) 62%,var(--accent) 100%);border-radius:999px;margin-bottom:14px}
             
-            .cabecalho { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px; }
-            .empresa-info h2 { font-size: 16pt; color: #1e40af; margin-bottom: 5px; }
-            .empresa-info p { font-size: 9pt; color: #666; }
-            .doc-info { text-align: right; }
-            .doc-info h1 { font-size: 18pt; margin-bottom: 5px; }
-            .doc-info .numero { font-size: 14pt; color: #666; }
-            .doc-info .data-emissao { font-size: 8pt; color: #999; margin-top: 5px; }
+            .cabecalho{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px}
+            .empresa-info .brand-name{font-size:18px;font-weight:900;color:var(--brand);letter-spacing:.08em;text-transform:uppercase}
+            .empresa-info .brand-sub{font-size:8px;color:var(--muted);margin-top:2px}
+            .empresa-info p{font-size:8px;color:var(--muted);line-height:1.6;margin-top:4px}
+            .doc-info{text-align:right}
+            .doc-info h1{font-size:14px;font-weight:900;color:var(--ink);margin-bottom:4px}
+            .doc-info .numero{font-size:10px;color:var(--accent);font-weight:600}
+            .doc-info .data-emissao{font-size:8px;color:var(--muted);margin-top:4px}
             
-            .secao { margin-bottom: 20px; }
-            .secao-titulo { background: #f3f4f6; padding: 8px 12px; font-weight: bold; font-size: 10pt; color: #374151; border-left: 4px solid #3b82f6; margin-bottom: 10px; }
+            .doc-card{border:1px solid var(--accent);border-radius:14px;background:linear-gradient(135deg,var(--accent-soft) 0%,#fff 100%);padding:12px 16px;margin-bottom:14px;text-align:center}
+            .doc-card h2{font-size:13px;font-weight:800;color:var(--ink);letter-spacing:.5px;margin:0}
+            .doc-card .subtitle{font-size:9px;color:var(--accent);margin-top:3px;font-weight:600}
             
-            .tabela-info { width: 100%; border-collapse: collapse; }
-            .tabela-info td { padding: 6px 8px; border-bottom: 1px solid #e5e7eb; }
-            .tabela-info td:first-child { width: 120px; color: #666; }
+            .secao{margin-bottom:14px}
+            .secao-titulo,.s-head{background:var(--brand);color:#fff;padding:7px 14px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;border-radius:14px 14px 0 0}
+            .section-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:14px}
+            .s-body{padding:10px 14px}
             
-            .tabela-itens { width: 100%; border-collapse: collapse; }
-            .tabela-itens th { background: #1e40af; color: white; padding: 10px 8px; text-align: left; font-size: 9pt; }
-            .tabela-itens td { padding: 8px; border-bottom: 1px solid #e5e7eb; font-size: 9pt; }
-            .tabela-itens tbody tr:nth-child(even) { background: #f9fafb; }
-            .tabela-itens .center { text-align: center; }
-            .tabela-itens .right { text-align: right; }
+            .tabela-info{width:100%;border-collapse:collapse}
+            .tabela-info td{padding:6px 10px;border-bottom:1px solid var(--line);font-size:9px}
+            .tabela-info td:first-child{color:var(--muted);font-weight:700;min-width:110px}
+            .tabela-info td strong{color:var(--muted);font-weight:700}
             
-            .totais-box { margin-top: 20px; display: flex; justify-content: flex-end; }
-            .totais-tabela { width: 300px; }
-            .totais-tabela td { padding: 6px 10px; border-bottom: 1px solid #e5e7eb; }
-            .totais-tabela td:first-child { text-align: right; color: #666; }
-            .totais-tabela td:last-child { text-align: right; font-weight: bold; }
-            .totais-tabela tr.total-geral td { background: #1e40af; color: white; font-size: 11pt; }
+            .tabela-itens{width:100%;border-collapse:collapse}
+            .tabela-itens th{background:var(--brand);color:#fff;padding:7px 10px;font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;text-align:left}
+            .tabela-itens td{padding:6px 10px;border-bottom:1px solid var(--line);font-size:9px}
+            .tabela-itens tbody tr:nth-child(even){background:var(--soft)}
+            .tabela-itens .center{text-align:center}
+            .tabela-itens .right{text-align:right}
             
-            .observacoes { background: #fffbeb; border: 1px solid #fbbf24; padding: 10px; border-radius: 4px; font-size: 9pt; }
+            .totais-box{margin-top:14px;display:flex;justify-content:flex-end}
+            .totais-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:260px}
+            .totais-row{display:flex;justify-content:space-between;padding:6px 14px;font-size:9px;border-bottom:1px solid var(--line)}
+            .totais-row .lbl{color:var(--muted);font-weight:600}
+            .totais-row .val{color:var(--ink);font-weight:600}
+            .totais-row.neg .val{color:#dc2626}
+            .totais-row.grand{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);border-bottom:none;padding:10px 14px}
+            .totais-row.grand .lbl{color:#fff;font-size:11px;font-weight:800}
+            .totais-row.grand .val{color:#fff;font-size:12px;font-weight:900}
             
-            .assinaturas { display: flex; justify-content: space-around; margin-top: 40px; }
-            .assinatura { text-align: center; }
-            .linha-assinatura { width: 200px; border-top: 1px solid #333; margin-bottom: 5px; }
-            .assinatura p { font-size: 9pt; color: #666; }
+            .totais-tabela{width:100%}
+            .totais-tabela td{padding:6px 14px;font-size:9px}
+            .totais-tabela td:first-child{text-align:right;color:var(--muted);font-weight:600}
+            .totais-tabela td:last-child{text-align:right;color:var(--ink);font-weight:600}
+            .totais-tabela tr.total-geral td{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-2) 60%,var(--accent) 100%);color:#fff;font-size:11px;font-weight:800;padding:10px 14px}
             
-            .rodape { position: fixed; bottom: 20px; left: 20px; right: 20px; border-top: 1px solid #e5e7eb; padding-top: 10px; font-size: 8pt; color: #999; display: flex; justify-content: space-between; }
+            .observacoes{background:var(--accent-soft);border:1px solid var(--accent);padding:12px 14px;border-radius:12px;font-size:9px;color:var(--text);line-height:1.5}
             
-            .badge { padding: 3px 8px; border-radius: 4px; font-size: 8pt; font-weight: bold; }
+            .assinaturas{display:flex;justify-content:space-around;margin-top:40px}
+            .assinatura{text-align:center}
+            .linha-assinatura{width:200px;border-top:1px solid var(--line);margin-bottom:5px}
+            .assinatura p{font-size:8px;color:var(--muted)}
             
-            .tabela-controle { width: 100%; border-collapse: collapse; }
-            .tabela-controle td { padding: 15px 10px; border: 1px solid #e5e7eb; }
+            .rodape{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line);font-size:7px;color:var(--muted);text-align:center;line-height:1.8}
             
-            @media print {
-                body { padding: 0; }
-                .rodape { position: fixed; }
-            }
+            .badge{padding:3px 8px;border-radius:8px;font-size:8px;font-weight:700}
+            
+            .meta-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+            .meta-item{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:8px 10px}
+            .meta-item .lbl{font-size:7px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+            .meta-item .val{font-size:10px;color:var(--ink);font-weight:600}
+            
+            .tabela-controle{width:100%;border-collapse:collapse}
+            .tabela-controle td{padding:15px 10px;border:1px solid var(--line)}
+            
+            .resumo-relatorio{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:9px;margin-bottom:14px}
+            .resumo-relatorio p{color:var(--muted);font-weight:600}
         `;
     }
 
     renderCabecalho(titulo, numero) {
         return `
+        <div class="page-shell">
+        <div class="top-rule"></div>
         <div class="cabecalho">
             <div class="empresa-info">
-                <h2>${this.empresa.nome}</h2>
-                <p>CNPJ: ${this.empresa.cnpj}</p>
-                <p>${this.empresa.endereco}</p>
-                <p>${this.empresa.cidade}</p>
-                <p>Tel: ${this.empresa.telefone}</p>
+                <div class="brand-name">${this.empresa.nome}</div>
+                <div class="brand-sub">${this.empresa.cnpj}</div>
+                <p>${this.empresa.endereco}<br>${this.empresa.cidade}<br>Tel: ${this.empresa.telefone}</p>
             </div>
             <div class="doc-info">
                 <h1 class="titulo-doc">${titulo}</h1>
@@ -520,43 +542,51 @@ class GeradorPDF {
     renderTotais(pedido) {
         const subtotal = parseFloat(pedido.subtotal) || parseFloat(pedido.valor_total) || 0;
         const desconto = parseFloat(pedido.desconto) || 0;
-        const frete = parseFloat(pedido.valor_frete) || 0;
-        const total = subtotal - desconto + frete;
+        const frete = parseFloat(pedido.valor_frete) || parseFloat(pedido.frete) || 0;
+        const ipi = parseFloat(pedido.total_ipi) || 0;
+        const icmsST = parseFloat(pedido.total_icms_st) || 0;
+        const difal = parseFloat(pedido.total_difal) || 0;
+        const total = subtotal - desconto + frete + ipi + icmsST + difal;
 
         return `
         <div class="totais-box">
-            <table class="totais-tabela">
-                <tr><td>Subtotal:</td><td>${this.formatarMoeda(subtotal)}</td></tr>
-                ${desconto > 0 ? `<tr><td>Desconto:</td><td>- ${this.formatarMoeda(desconto)}</td></tr>` : ''}
-                ${frete > 0 ? `<tr><td>Frete:</td><td>${this.formatarMoeda(frete)}</td></tr>` : ''}
-                <tr class="total-geral"><td>TOTAL:</td><td>${this.formatarMoeda(total)}</td></tr>
-            </table>
+            <div class="totais-card">
+                <div class="totais-row"><span class="lbl">Subtotal:</span><span class="val">${this.formatarMoeda(subtotal)}</span></div>
+                ${desconto > 0 ? `<div class="totais-row neg"><span class="lbl">Desconto:</span><span class="val">- ${this.formatarMoeda(desconto)}</span></div>` : ''}
+                ${frete > 0 ? `<div class="totais-row"><span class="lbl">Frete:</span><span class="val">${this.formatarMoeda(frete)}</span></div>` : ''}
+                ${ipi > 0 ? `<div class="totais-row"><span class="lbl">IPI:</span><span class="val">${this.formatarMoeda(ipi)}</span></div>` : ''}
+                ${icmsST > 0 ? `<div class="totais-row"><span class="lbl">ICMS ST:</span><span class="val">${this.formatarMoeda(icmsST)}</span></div>` : ''}
+                ${difal > 0 ? `<div class="totais-row"><span class="lbl">DIFAL:</span><span class="val">${this.formatarMoeda(difal)}</span></div>` : ''}
+                <div class="totais-row grand"><span class="lbl">TOTAL:</span><span class="val">${this.formatarMoeda(total)}</span></div>
+            </div>
         </div>`;
     }
 
     renderTotaisCompra(pedido) {
         const subtotal = parseFloat(pedido.subtotal) || parseFloat(pedido.valor_total) || 0;
         const desconto = parseFloat(pedido.desconto) || 0;
-        const frete = parseFloat(pedido.valor_frete) || 0;
+        const frete = parseFloat(pedido.valor_frete) || parseFloat(pedido.frete) || 0;
         const total = parseFloat(pedido.valor_final) || (subtotal - desconto + frete);
 
         return `
         <div class="totais-box">
-            <table class="totais-tabela">
-                <tr><td>Subtotal:</td><td>${this.formatarMoeda(subtotal)}</td></tr>
-                ${desconto > 0 ? `<tr><td>Desconto (${pedido.desconto_percentual || 0}%):</td><td>- ${this.formatarMoeda(desconto)}</td></tr>` : ''}
-                ${frete > 0 ? `<tr><td>Frete:</td><td>${this.formatarMoeda(frete)}</td></tr>` : ''}
-                <tr class="total-geral"><td>VALOR TOTAL:</td><td>${this.formatarMoeda(total)}</td></tr>
-            </table>
+            <div class="totais-card">
+                <div class="totais-row"><span class="lbl">Subtotal:</span><span class="val">${this.formatarMoeda(subtotal)}</span></div>
+                ${desconto > 0 ? `<div class="totais-row neg"><span class="lbl">Desconto (${pedido.desconto_percentual || 0}%):</span><span class="val">- ${this.formatarMoeda(desconto)}</span></div>` : ''}
+                ${frete > 0 ? `<div class="totais-row"><span class="lbl">Frete:</span><span class="val">${this.formatarMoeda(frete)}</span></div>` : ''}
+                <div class="totais-row grand"><span class="lbl">VALOR TOTAL:</span><span class="val">${this.formatarMoeda(total)}</span></div>
+            </div>
         </div>`;
     }
 
     renderRodape() {
         return `
         <div class="rodape">
-            <span>${this.empresa.nome} - ${this.empresa.email}</span>
-            <span>Documento gerado pelo Sistema Aluforce ERP</span>
-        </div>`;
+            <div>Documento gerado automaticamente pelo sistema ALUFORCE</div>
+            <div>${this.empresa.nome} | ${this.empresa.email}</div>
+            <div style="font-style:italic;margin-top:2px;">Este documento é válido apenas para fins de consulta interna.</div>
+        </div>
+        </div><!-- /.page-shell -->`;
     }
 
     formatarData(data) {
