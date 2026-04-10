@@ -3,16 +3,16 @@
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Zyntra: Contas a Pagar</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Design System Institucional Financeiro -->
-    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260408">
-    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260408">
-    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260408">
+    <link rel="stylesheet" href="/Financeiro/css/fin-layout.css?v=20260617">
+    <link rel="stylesheet" href="/Financeiro/css/fin-components.css?v=20260617">
+    <link rel="stylesheet" href="/Financeiro/css/fin-header-sidebar.css?v=20260617">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="js/importar-xlsx.js"></script>
@@ -252,6 +252,7 @@
             width: 100%;
             height: 100%;
             background: rgba(15,23,42,0.65);
+            -webkit-backdrop-filter: blur(4px);
             backdrop-filter: blur(4px);
             z-index: 10000;
             align-items: center;
@@ -266,6 +267,7 @@
             width: 95%;
             max-height: 90vh;
             overflow-y: auto;
+            overflow-x: hidden;
             box-shadow: 0 25px 80px rgba(0,0,0,0.25);
             animation: cpSlideIn 0.25s ease-out;
         }
@@ -672,6 +674,38 @@
             .form-row { grid-template-columns: 1fr; }
             .filters-bar { flex-direction: column; }
         }
+
+        /* Inline-style extraction classes */
+        body { margin: 0; padding: 0; }
+        .main-area { display: flex; flex-direction: column; margin-left: 48px; padding-top: 42px; min-height: 100vh; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; position: relative; min-width: 0; }
+        #financeiro-header { background: #1e1e1e; }
+        .header-logo { height: 22px; object-fit: contain; }
+        .notification-badge { background: #ef4444; color: #fff; border-radius: 50%; min-width: 20px; height: 20px; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; padding: 0 5px; }
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; padding: 20px 24px; }
+        .filter-group-end { align-self: end; }
+        .th-checkbox { width: 36px; text-align: center; }
+        .loading-cell { text-align: center; padding: 60px; color: var(--gray-400); }
+        .loading-spinner { font-size: 48px; margin-bottom: 16px; display: block; }
+        .modal-cnab { max-width: 720px; }
+        .modal-header-cnab { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+        .modal-body-pad { padding: 24px; }
+        .modal-actions-right { display: flex; gap: 12px; justify-content: flex-end; }
+        .btn-save-cnab { background: linear-gradient(135deg, #7c3aed, #a78bfa); }
+        .modal-retorno { max-width: 640px; }
+        .modal-header-retorno { background: linear-gradient(135deg, #059669, #34d399); }
+        .upload-dropzone { border: 2px dashed var(--gray-300); border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 20px; cursor: pointer; }
+        .upload-icon { font-size: 48px; color: var(--gray-400); margin-bottom: 12px; display: block; }
+        .upload-text { color: var(--gray-500); font-size: 13px; margin: 0; }
+        .file-input-hidden { display: none; }
+        .resultado-titulo { font-size: 14px; font-weight: 700; margin-bottom: 12px; }
+        .resultado-titulo i { color: #059669; margin-right: 6px; }
+        .resultado-resumo { margin-bottom: 12px; }
+        .resultado-detalhes { max-height: 200px; overflow-y: auto; }
+        .modal-actions-bottom { display: flex; gap: 12px; justify-content: flex-end; margin-top: 16px; }
+        .btn-save-retorno { background: linear-gradient(135deg, #059669, #34d399); }
+        #view-observacoes { font-weight: normal; font-size: 14px; }
+        .close-btn-pagar { background: none; border: none; color: white; font-size: 24px; cursor: pointer; opacity: 0.8; }
+        .btn-save-pagar { background: linear-gradient(135deg, #10b981, #059669); }
     </style>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260408">
@@ -735,9 +769,9 @@
                         <i class="fas fa-bars"></i>
                     </button>
                     <div class="header-brand">
-                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" class="header-logo">
                         <span class="header-separator">|</span>
-                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" class="header-logo">
                         <span class="header-dash">—</span>
                         <span class="page-title">Contas a Pagar</span>
                     </div>
@@ -745,6 +779,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Nova Despesa" onclick="abrirModal()"><i class="fas fa-plus"></i></button>
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
+                    <span class="notification-badge" id="notification-count" hidden>0</span>
 
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
@@ -754,22 +789,34 @@
 
             <div class="content-area">
                 <!-- Resumo -->
-                <div class="summary-cards">
-                    <div class="summary-card">
-                        <div class="summary-value" style="color:#ef4444;" id="total-pagar">R$ 0,00</div>
-                        <div class="summary-label">Total a Pagar</div>
+                <div class="metrics-grid">
+                    <div class="metric-card red">
+                        <div class="metric-header">
+                            <div class="metric-icon red"><i class="fas fa-file-invoice-dollar"></i></div>
+                        </div>
+                        <div class="metric-value" id="total-pagar">R$ 0,00</div>
+                        <div class="metric-label">Total a Pagar</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-value" style="color:#f59e0b;" id="total-vencendo">R$ 0,00</div>
-                        <div class="summary-label">Vencendo (7 dias)</div>
+                    <div class="metric-card orange">
+                        <div class="metric-header">
+                            <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                        </div>
+                        <div class="metric-value" id="total-vencendo">R$ 0,00</div>
+                        <div class="metric-label">Vencendo (7 dias)</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-value" style="color:#dc2626;" id="total-vencidas">R$ 0,00</div>
-                        <div class="summary-label">Vencidas</div>
+                    <div class="metric-card red">
+                        <div class="metric-header">
+                            <div class="metric-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                        </div>
+                        <div class="metric-value" id="total-vencidas">R$ 0,00</div>
+                        <div class="metric-label">Vencidas</div>
                     </div>
-                    <div class="summary-card">
-                        <div class="summary-value" style="color:#16a34a;" id="total-pagas">R$ 0,00</div>
-                        <div class="summary-label">Pagas este Mês</div>
+                    <div class="metric-card green">
+                        <div class="metric-header">
+                            <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
+                        </div>
+                        <div class="metric-value" id="total-pagas">R$ 0,00</div>
+                        <div class="metric-label">Pagas este Mês</div>
                     </div>
                 </div>
 
@@ -788,7 +835,7 @@
                 <div class="filters-bar">
                     <div class="filter-group">
                         <label><i class="fas fa-calendar"></i> Período</label>
-                        <select class="filter-input" id="filtro-periodo" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-periodo" title="Período" onchange="filtrarContas()">
                             <option value="todas">Todas</option>
                             <option value="mes">Este Mês</option>
                             <option value="proximos7">Próximos 7 dias</option>
@@ -798,7 +845,7 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-tag"></i> Status</label>
-                        <select class="filter-input" id="filtro-status" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-status" title="Status" onchange="filtrarContas()">
                             <option value="">Todos</option>
                             <option value="pendente">Pendente</option>
                             <option value="pago">Pago</option>
@@ -807,17 +854,17 @@
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-truck"></i> Fornecedor</label>
-                        <select class="filter-input" id="filtro-fornecedor-select" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-fornecedor-select" title="Fornecedor" onchange="filtrarContas()">
                             <option value="">Todos</option>
                         </select>
                     </div>
                     <div class="filter-group">
                         <label><i class="fas fa-folder"></i> Categoria</label>
-                        <select class="filter-input" id="filtro-categoria-select" onchange="filtrarContas()">
+                        <select class="filter-input" id="filtro-categoria-select" title="Categoria" onchange="filtrarContas()">
                             <option value="">Todas</option>
                         </select>
                     </div>
-                    <div class="filter-group" style="align-self:end;">
+                    <div class="filter-group filter-group-end">
                         <button class="btn-limpar-filtros" onclick="limparFiltros()">
                             <i class="fas fa-eraser"></i> Limpar
                         </button>
@@ -840,7 +887,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th style="width:36px;text-align:center;"><input type="checkbox" id="select-all-cp" onchange="toggleSelectAll(this)" title="Selecionar todas"></th>
+                                <th class="th-checkbox"><input type="checkbox" id="select-all-cp" onchange="toggleSelectAll(this)" title="Selecionar todas"></th>
                                 <th>ID</th>
                                 <th>Descrição</th>
                                 <th>Fornecedor</th>
@@ -852,8 +899,8 @@
                         </thead>
                         <tbody id="tabela-contas">
                             <tr>
-                                <td colspan="8" style="text-align:center;padding:60px;color:var(--gray-400);">
-                                    <i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>
+                                <td colspan="8" class="loading-cell">
+                                    <i class="fas fa-spinner fa-spin loading-spinner"></i>
                                     Carregando contas...
                                 </td>
                             </tr>
@@ -875,8 +922,8 @@
 
     <!-- Modal CNAB Preview -->
     <div id="modal-cnab" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalCNAB()">
-        <div class="modal-omie modal-institucional" style="max-width:720px;">
-            <div class="modal-header-institucional" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">
+        <div class="modal-omie modal-institucional modal-cnab">
+            <div class="modal-header-institucional modal-header-cnab">
                 <div class="modal-header-icon"><i class="fas fa-file-code"></i></div>
                 <div class="modal-header-info">
                     <h3 class="modal-title">Remessa CNAB</h3>
@@ -884,16 +931,16 @@
                 </div>
                 <button class="close-modal-inst" onclick="fecharModalCNAB()">×</button>
             </div>
-            <div style="padding:24px;">
+            <div class="modal-body-pad">
                 <div class="cnab-summary">
                     <div class="cnab-summary-item"><label>Qtd. Títulos</label><span id="cnab-qtd">0</span></div>
                     <div class="cnab-summary-item"><label>Valor Total</label><span id="cnab-total">R$ 0,00</span></div>
                     <div class="cnab-summary-item"><label>Layout</label><span id="cnab-layout">CNAB 240</span></div>
                 </div>
                 <div class="cnab-preview" id="cnab-preview"></div>
-                <div style="display:flex;gap:12px;justify-content:flex-end;">
+                <div class="modal-actions-right">
                     <button type="button" class="btn-cancel" onclick="fecharModalCNAB()"><i class="fas fa-times"></i> Fechar</button>
-                    <button type="button" class="btn-save" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);" onclick="downloadCNAB()"><i class="fas fa-download"></i> Baixar Arquivo .REM</button>
+                    <button type="button" class="btn-save btn-save-cnab" onclick="downloadCNAB()"><i class="fas fa-download"></i> Baixar Arquivo .REM</button>
                 </div>
             </div>
         </div>
@@ -901,8 +948,8 @@
 
     <!-- Modal Importar Retorno CNAB -->
     <div id="modal-retorno-cnab" class="modal-overlay-omie" onclick="if(event.target===this) fecharModalRetornoCNAB()">
-        <div class="modal-omie modal-institucional" style="max-width:640px;">
-            <div class="modal-header-institucional" style="background:linear-gradient(135deg,#059669,#34d399);">
+        <div class="modal-omie modal-institucional modal-retorno">
+            <div class="modal-header-institucional modal-header-retorno">
                 <div class="modal-header-icon"><i class="fas fa-file-import"></i></div>
                 <div class="modal-header-info">
                     <h3 class="modal-title">Importar Retorno CNAB</h3>
@@ -910,20 +957,20 @@
                 </div>
                 <button class="close-modal-inst" onclick="fecharModalRetornoCNAB()">×</button>
             </div>
-            <div style="padding:24px;">
-                <div style="border:2px dashed var(--gray-300);border-radius:12px;padding:40px;text-align:center;margin-bottom:20px;cursor:pointer;" onclick="document.getElementById('cnab-retorno-file').click()">
-                    <i class="fas fa-cloud-upload-alt" style="font-size:48px;color:var(--gray-400);margin-bottom:12px;display:block;"></i>
-                    <p style="color:var(--gray-500);font-size:13px;margin:0;">Clique para selecionar o arquivo de retorno (.RET, .CRT, .TXT)</p>
-                    <input type="file" id="cnab-retorno-file" accept=".ret,.crt,.txt" style="display:none;" onchange="processarRetornoCNAB(this)">
+            <div class="modal-body-pad">
+                <div class="upload-dropzone" onclick="document.getElementById('cnab-retorno-file').click()">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Clique para selecionar o arquivo de retorno (.RET, .CRT, .TXT)</p>
+                    <input type="file" id="cnab-retorno-file" accept=".ret,.crt,.txt" class="file-input-hidden" onchange="processarRetornoCNAB(this)">
                 </div>
-                <div id="retorno-resultado" style="display:none;">
-                    <h4 style="font-size:14px;font-weight:700;margin-bottom:12px;"><i class="fas fa-list-check" style="color:#059669;margin-right:6px;"></i> Resultado do Processamento</h4>
-                    <div id="retorno-resumo" style="margin-bottom:12px;"></div>
-                    <div style="max-height:200px;overflow-y:auto;" id="retorno-detalhes"></div>
+                <div id="retorno-resultado" hidden>
+                    <h4 class="resultado-titulo"><i class="fas fa-list-check"></i> Resultado do Processamento</h4>
+                    <div id="retorno-resumo" class="resultado-resumo"></div>
+                    <div class="resultado-detalhes" id="retorno-detalhes"></div>
                 </div>
-                <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px;">
+                <div class="modal-actions-bottom">
                     <button type="button" class="btn-cancel" onclick="fecharModalRetornoCNAB()"><i class="fas fa-times"></i> Fechar</button>
-                    <button type="button" class="btn-save" id="btn-aplicar-retorno" style="display:none;background:linear-gradient(135deg,#059669,#34d399);" onclick="aplicarRetornoCNAB()"><i class="fas fa-check"></i> Aplicar Baixas</button>
+                    <button type="button" class="btn-save btn-save-retorno" id="btn-aplicar-retorno" hidden onclick="aplicarRetornoCNAB()"><i class="fas fa-check"></i> Aplicar Baixas</button>
                 </div>
             </div>
         </div>
@@ -970,7 +1017,7 @@
                                 <label><i class="fas fa-money-bill-wave"></i> Valor Total *</label>
                                 <div class="input-with-prefix">
                                     <span class="input-prefix">R$</span>
-                                    <input type="number" step="0.01" min="0.01" class="form-input with-prefix" id="conta-valor" required placeholder="0,00" oninput="calcularParcelas()">
+                                    <input type="text" class="form-input with-prefix" id="conta-valor" required placeholder="0,00" oninput="this.value = formatarMoedaInput(this.value); calcularParcelas()" onblur="this.value = formatarMoedaInput(this.value)">
                                 </div>
                             </div>
                             <div class="form-group">
@@ -998,7 +1045,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="parcelas-preview" id="parcelas-preview" style="display:none;">
+                        <div class="parcelas-preview" id="parcelas-preview" hidden>
                             <div class="preview-header"><i class="fas fa-list-ol"></i> Prévia das Parcelas</div>
                             <div class="preview-content" id="parcelas-preview-content"></div>
                         </div>
@@ -1010,7 +1057,7 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label><i class="fas fa-file-alt"></i> Nº Documento</label>
-                                <input type="text" class="form-input" id="numero-documento" placeholder="NF, Boleto, etc...">
+                                <input type="text" class="form-input" id="numero-documento" placeholder="Somente números (máx. 44 dígitos)" maxlength="44" oninput="this.value = this.value.replace(/[^0-9]/g, '')" inputmode="numeric">
                             </div>
                             <div class="form-group">
                                 <label><i class="fas fa-building"></i> Centro de Custo</label>
@@ -1057,9 +1104,9 @@
                     <div class="view-item"><div class="view-label"><i class="fas fa-tags"></i> Categoria</div><div class="view-value" id="view-categoria">-</div></div>
                     <div class="view-item"><div class="view-label"><i class="fas fa-credit-card"></i> Forma de Pagamento</div><div class="view-value" id="view-forma">-</div></div>
                     <div class="view-item"><div class="view-label"><i class="fas fa-file-alt"></i> Nº Documento</div><div class="view-value" id="view-documento">-</div></div>
-                    <div class="view-item full"><div class="view-label"><i class="fas fa-comment"></i> Observações</div><div class="view-value" id="view-observacoes" style="font-weight:normal;font-size:14px;">-</div></div>
+                    <div class="view-item full"><div class="view-label"><i class="fas fa-comment"></i> Observações</div><div class="view-value" id="view-observacoes">-</div></div>
                 </div>
-                <div class="view-pagamento-info" id="view-pagamento-info" style="display:none;">
+                <div class="view-pagamento-info" id="view-pagamento-info" hidden>
                     <h4><i class="fas fa-check-circle"></i> Informações do Pagamento</h4>
                     <div class="view-pagamento-grid">
                         <div><div class="view-label">Data Pagamento</div><div class="view-value" id="view-data-pagamento">-</div></div>
@@ -1080,7 +1127,7 @@
             <div class="modal-pagar-header">
                 <div class="icon"><i class="fas fa-check-double"></i></div>
                 <div class="info"><h3>Confirmar Pagamento</h3><p>Registre os dados do pagamento</p></div>
-                <button class="close-btn" onclick="fecharModalPagar()" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;opacity:0.8;">×</button>
+                <button class="close-btn close-btn-pagar" onclick="fecharModalPagar()">×</button>
             </div>
             <form id="form-pagar" onsubmit="confirmarPagamento(event)">
                 <input type="hidden" id="pagar-conta-id">
@@ -1106,7 +1153,7 @@
                 </div>
                 <div class="modal-pagar-footer">
                     <button type="button" class="btn-cancel" onclick="fecharModalPagar()"><i class="fas fa-times"></i> Cancelar</button>
-                    <button type="submit" class="btn-save" style="background:linear-gradient(135deg,#10b981,#059669);"><i class="fas fa-check"></i> Confirmar Pagamento</button>
+                    <button type="submit" class="btn-save btn-save-pagar"><i class="fas fa-check"></i> Confirmar Pagamento</button>
                 </div>
             </form>
         </div>
@@ -1180,11 +1227,29 @@
             } catch (error) { console.error('Erro ao carregar usuário:', error); }
         }
 
+        // ===== MÁSCARA MONETÁRIA =====
+        function formatarMoedaInput(valor) {
+            let v = String(valor).replace(/\D/g, '');
+            if (!v || v === '0') return '';
+            v = (parseInt(v, 10) / 100).toFixed(2);
+            return v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        function parseMoeda(valor) {
+            if (!valor) return 0;
+            return parseFloat(String(valor).replace(/[R$\s.]/g, '').replace(',', '.')) || 0;
+        }
+
         // ===== INIT =====
         async function init() {
             await Promise.all([carregarUsuarioLogado(), carregarResumo(), carregarContas(), carregarFornecedores(), carregarCategorias(), carregarCentrosCusto()]);
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('acao') === 'nova') { abrirModal(); window.history.replaceState({}, document.title, window.location.pathname); }
+            const acao = urlParams.get('acao');
+            const id = urlParams.get('id');
+            if (acao === 'nova') { abrirModal(); }
+            else if (acao === 'pagar' && id) { const c = contas.find(x => String(x.id) === String(id)); if (c) abrirModalPagar(c.id, c.valor); }
+            else if (acao === 'detalhes' && id) { visualizarConta(id); }
+            else if (acao === 'comprovante' && id) { visualizarConta(id); }
+            if (acao) window.history.replaceState({}, document.title, window.location.pathname);
         }
 
         async function carregarResumo() {
@@ -1262,12 +1327,24 @@
             } catch (error) { console.error('Erro ao carregar centros de custo:', error); }
         }
 
-        async function carregarCategorias() {
+        async function carregarCategorias(fornecedorId) {
             try {
-                const response = await fetch('/api/financeiro/categorias', { credentials: 'include' });
-                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const despesas = categorias.filter(c => c.tipo === 'despesa'); const select = document.getElementById('categoria-id'); if (select) select.innerHTML = '<option value="">Selecione...</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); const selectFiltro = document.getElementById('filtro-categoria-select'); if (selectFiltro) selectFiltro.innerHTML = '<option value="">Todas</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); }
+                let url = '/api/financeiro/categorias';
+                if (fornecedorId) url += `?fornecedor_id=${encodeURIComponent(fornecedorId)}`;
+                const response = await fetch(url, { credentials: 'include' });
+                if (response.ok) { const rawCats = await response.json(); const categorias = Array.isArray(rawCats) ? rawCats : (Array.isArray(rawCats?.data) ? rawCats.data : []); const despesas = categorias.filter(c => c.tipo === 'despesa'); const select = document.getElementById('categoria-id'); if (select) select.innerHTML = '<option value="">Selecione...</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); const selectFiltro = document.getElementById('filtro-categoria-select'); if (selectFiltro && !fornecedorId) selectFiltro.innerHTML = '<option value="">Todas</option>' + despesas.map(c => `<option value="${c.id}">${esc(c.nome)}</option>`).join(''); }
             } catch (error) { console.error('Erro ao carregar categorias:', error); }
         }
+
+        // Recarregar categorias ao trocar fornecedor
+        document.addEventListener('DOMContentLoaded', () => {
+            const fornecedorSelect = document.getElementById('fornecedor-id');
+            if (fornecedorSelect) {
+                fornecedorSelect.addEventListener('change', function() {
+                    carregarCategorias(this.value);
+                });
+            }
+        });
 
         function abrirModal(id = null) {
             document.getElementById('modal-conta').classList.add('active');
@@ -1287,7 +1364,7 @@
                     document.getElementById('descrição').value = conta.descrição || conta.descricao || '';
                     document.getElementById('fornecedor-id').value = conta.fornecedor_id;
                     document.getElementById('categoria-id').value = conta.categoria_id;
-                    document.getElementById('conta-valor').value = conta.valor_total || conta.valor;
+                    document.getElementById('conta-valor').value = formatarMoedaInput(Math.round((parseFloat(conta.valor_total || conta.valor) || 0) * 100).toString());
                     document.getElementById('conta-vencimento').value = (conta.data_vencimento || conta.vencimento || '')?.split('T')[0];
                     document.getElementById('forma-pagamento').value = conta.forma_pagamento || 'pix';
                     document.getElementById('observacoes').value = conta.observacoes || '';
@@ -1337,7 +1414,7 @@
         async function salvarConta(event) {
             event.preventDefault();
             const id = document.getElementById('conta-id').value;
-            const dados = { descricao: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseFloat(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
+            const dados = { descricao: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
             try {
                 const url = id ? `/api/financeiro/contas-pagar/${id}` : '/api/financeiro/contas-pagar';
                 const method = id ? 'PUT' : 'POST';
@@ -1453,7 +1530,7 @@
 
         // ===== PARCELAS =====
         function calcularParcelas() {
-            const valor = parseFloat(document.getElementById('conta-valor')?.value) || 0;
+            const valor = parseMoeda(document.getElementById('conta-valor')?.value) || 0;
             const numParcelas = parseInt(document.getElementById('conta-parcelas')?.value) || 1;
             const preview = document.getElementById('parcelas-preview');
             const previewContent = document.getElementById('parcelas-preview-content');
@@ -1744,6 +1821,7 @@
                 if (vencendo.length > 0) notifs.push({ id: 2, tipo: 'warning', mensagem: `${vencendo.length} conta(s) vencem nos próximos 7 dias`, lida: false });
                 notificacoes = notifs;
                 const badge = document.getElementById('notification-count');
+                if (!badge) return;
                 const naoLidas = notifs.filter(n => !n.lida).length;
                 if (naoLidas > 0) { badge.textContent = naoLidas > 9 ? '9+' : naoLidas; badge.style.display = 'flex'; } else { badge.style.display = 'none'; }
             } catch (error) { console.error('Erro notificações:', error); }
