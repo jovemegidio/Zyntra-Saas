@@ -3605,19 +3605,29 @@ module.exports = function createPCPRoutes(deps) {
             } catch (excelError) {
                 console.error('[XLSX] Erro ao gerar:', excelError.message);
 
-                // Fallback para CSV
-                const csvBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
+                // 🔧 FIX BUG-R5-31: Wrap CSV fallback em try/catch para não crashar silenciosamente
+                try {
+                    const csvBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
 
-                const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
-                const nomeArquivo = `Ordem de Produção - ${nomeCliente} - ERP.csv`;
+                    const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+                    const nomeArquivo = `Ordem de Produção - ${nomeCliente} - ERP.csv`;
+                    const encodedCsvName = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+                    const asciiCsvName = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
 
-                res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
-                res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-                res.setHeader('Content-Length', csvBuffer.length);
+                    res.setHeader('Content-Disposition', `attachment; filename="${asciiCsvName}"; filename*=UTF-8''${encodedCsvName}`);
+                    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+                    res.setHeader('Content-Length', csvBuffer.length);
 
-                res.send(csvBuffer);
+                    res.send(csvBuffer);
 
-                console.log(`✅ CSV gerado com sucesso como fallback: ${nomeArquivo}`);
+                    console.log(`✅ CSV gerado com sucesso como fallback: ${nomeArquivo}`);
+                } catch (csvError) {
+                    console.error('[CSV Fallback] Também falhou:', csvError.message);
+                    res.status(500).json({
+                        error: 'Erro ao gerar Excel e CSV. Contate o suporte.',
+                        detalhe: excelError.message
+                    });
+                }
             }
 
         } catch (error) {
@@ -3666,7 +3676,12 @@ module.exports = function createPCPRoutes(deps) {
 
         // C4 - Número do Orçamento (como número se possível)
         const numOrcamento = dados.numero_orcamento || '';
-        abaVendas.getCell('C4').value = isNaN(numOrcamento) ? numOrcamento : parseFloat(numOrcamento);
+        // 🔧 FIX BUG-R4-23: isNaN('') → false, parseFloat('') → NaN → célula com NaN
+        if (numOrcamento === '') {
+            abaVendas.getCell('C4').value = '';
+        } else {
+            abaVendas.getCell('C4').value = isNaN(numOrcamento) ? numOrcamento : parseFloat(numOrcamento);
+        }
 
         // 🔧 FIX BUG-OP-04: E4 - Revisão (campo existente no modal mas nunca escrito no template)
         abaVendas.getCell('E4').value = dados.revisao || '';
@@ -3691,7 +3706,9 @@ module.exports = function createPCPRoutes(deps) {
                     const [d, m, y] = dataStr.split('/');
                     dataObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
                 } else if (dataStr.includes('-')) {
-                    dataObj = new Date(dataStr);
+                    // 🔧 FIX BUG-R4-21: new Date('yyyy-mm-dd') cria data UTC → off-by-one em BRT
+                    const [y2, m2, d2] = dataStr.split('-');
+                    dataObj = new Date(parseInt(y2), parseInt(m2) - 1, parseInt(d2));
                 } else {
                     dataObj = new Date();
                 }
@@ -3702,6 +3719,12 @@ module.exports = function createPCPRoutes(deps) {
         } else {
             abaVendas.getCell('J4').value = new Date();
             abaVendas.getCell('J4').numFmt = 'dd/mm/yyyy';
+        }
+
+        // 🔧 FIX: Garantir largura mínima da coluna J para exibir data sem *******
+        const colJ = abaVendas.getColumn('J');
+        if (!colJ.width || colJ.width < 14) {
+            colJ.width = 14;
         }
 
         // Vendedor (linha 6)
@@ -3715,6 +3738,10 @@ module.exports = function createPCPRoutes(deps) {
             } else if (typeof dados.prazo_entrega === 'string' && dados.prazo_entrega.includes('/')) {
                 // Tentar parsear data no formato dd/mm/yyyy
                 const [d, m, y] = dados.prazo_entrega.split('/');
+                abaVendas.getCell('H6').value = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+            } else if (typeof dados.prazo_entrega === 'string' && dados.prazo_entrega.includes('-')) {
+                // 🔧 FIX BUG-R4-22: <input type="date"> envia yyyy-mm-dd → parsear sem UTC
+                const [y, m, d] = dados.prazo_entrega.split('-');
                 abaVendas.getCell('H6').value = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
             } else {
                 abaVendas.getCell('H6').value = dados.prazo_entrega;
@@ -3735,10 +3762,12 @@ module.exports = function createPCPRoutes(deps) {
         abaVendas.getCell('C7').value = dados.cliente || '';
         abaVendas.getCell('C8').value = dados.contato || dados.contato_cliente || '';
 
-        // H8 - Telefone (como número se possível, sem formatação)
+        // H8 - Telefone (como texto formatado, NÃO parseFloat — perde precisão em 11+ dígitos)
         const telefone = dados.telefone || dados.fone_cliente || '';
-        const telefoneNum = String(telefone).replace(/\D/g, ''); // Remove não-dígitos
-        abaVendas.getCell('H8').value = telefoneNum ? parseFloat(telefoneNum) : telefone;
+        const telefoneNum = String(telefone).replace(/\D/g, '');
+        // 🔧 FIX BUG-R5-30: parseFloat('11999887766') → 11999887766 OK, mas parseFloat('119998877660') → perde dígitos
+        // Manter como string para números com 11+ dígitos
+        abaVendas.getCell('H8').value = telefoneNum || telefone;
 
         abaVendas.getCell('C9').value = dados.email || dados.email_cliente || '';
         abaVendas.getCell('J9').value = dados.frete || dados.tipo_frete || '';
@@ -3752,11 +3781,11 @@ module.exports = function createPCPRoutes(deps) {
         abaVendas.getCell('C12').value = nomeTransp;
         console.log(`   Transportadora Nome: ${nomeTransp}`);
 
-        // 🔧 H12 - Telefone da transportadora (calcular ao invés de fórmula)
+        // 🔧 H12 - Telefone da transportadora (manter como string — NÃO parseFloat)
         const telefoneTransp = dados.transportadora_fone || dados.transportadora?.fone || telefone || '';
         if (telefoneTransp) {
             const telefoneTranspNum = String(telefoneTransp).replace(/\D/g, '');
-            abaVendas.getCell('H12').value = telefoneTranspNum ? parseFloat(telefoneTranspNum) : telefoneTransp;
+            abaVendas.getCell('H12').value = telefoneTranspNum || telefoneTransp;
             console.log(`   Transportadora Fone: ${telefoneTransp}`);
         } else {
             abaVendas.getCell('H12').value = '';
@@ -3895,8 +3924,8 @@ module.exports = function createPCPRoutes(deps) {
                 const cellC = abaVendas.getCell(`C${linhaAtual}`);
                 cellC.value = descricaoCatalogo || prod.descricao || prod['descrição'] || prod.nome || '';
 
-                // F - Embalagem
-                abaVendas.getCell(`F${linhaAtual}`).value = prod.embalagem || '';
+                // F - Embalagem (default 'Bobina' conforme dropdown do frontend)
+                abaVendas.getCell(`F${linhaAtual}`).value = prod.embalagem || 'Bobina';
 
                 // G - Lance(s)
                 abaVendas.getCell(`G${linhaAtual}`).value = prod.lances || '';
@@ -3919,6 +3948,20 @@ module.exports = function createPCPRoutes(deps) {
                 linhaAtual++;
             }
         });
+
+        // 🔧 FIX BUG-R5-27: Limpar linhas de produto não utilizadas (stale template data)
+        for (let i = linhaAtual; i <= LINHA_MAXIMA_PRODUTOS; i++) {
+            for (const col of ['A', 'B', 'C', 'F', 'G', 'H', 'I', 'J']) {
+                const cell = abaVendas.getCell(`${col}${i}`);
+                // Preservar fórmulas, limpar apenas valores diretos
+                if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                    cell.value = { formula: cell.value.formula, result: '' };
+                } else {
+                    cell.value = null;
+                }
+            }
+        }
+
         // Reforçar formatação de I18-I32 e J18-J32 após o preenchimento dos produtos
         // Linha 17 é cabeçalho, produtos começam na 18
         for (let i = 18; i <= 32; i++) {
@@ -3994,6 +4037,20 @@ module.exports = function createPCPRoutes(deps) {
                 abaVendas.getCell('E46').value = perc2;
                 abaVendas.getCell('E46').numFmt = '0%';
                 abaVendas.getCell('F46').value = formasPag[1].metodo || '';
+                // 🔧 FIX BUG-R5-28: Valor da 2ª forma de pagamento nunca era preenchido
+                const valor2 = totalGeral * perc2;
+                abaVendas.getCell('I46').value = valor2;
+                abaVendas.getCell('I46').numFmt = 'R$ #,##0.00';
+            }
+
+            // 🔧 FIX BUG-R5-28b: 3ª forma de pagamento (frontend coleta 3, backend só escrevia 2)
+            if (formasPag.length > 2) {
+                // Condições extras de pagamento vão para observações (template tem apenas 2 linhas)
+                const perc3 = parseFloat(formasPag[2].percentual || 0);
+                const valor3 = totalGeral * (perc3 / 100);
+                const pag3Texto = `3ª Pag: ${formasPag[2].forma || ''} ${perc3}% ${formasPag[2].metodo || ''} R$ ${valor3.toFixed(2)}`;
+                const obsExistente = abaVendas.getCell('A37').value || '';
+                abaVendas.getCell('A37').value = obsExistente ? `${obsExistente}\n${pag3Texto}` : pag3Texto;
             }
         } else {
             // Fallback: usar campos legados
@@ -4069,7 +4126,8 @@ module.exports = function createPCPRoutes(deps) {
         let cnpjStrFinal = String(cnpjClienteFinal).replace(/\D/g, '');
         if (cnpjStrFinal && cnpjStrFinal.length >= 11) {
             const cellC15Final = abaVendas.getCell('C15');
-            cellC15Final.value = cnpjStrFinal;
+            // 🔧 FIX BUG-R4-24: Usar Number() em vez de string para que numFmt funcione
+            cellC15Final.value = Number(cnpjStrFinal);
             cellC15Final.numFmt = '[<=99999999999]000.000.000-00;00.000.000/0000-00';
         }
         // ========================================
@@ -4077,6 +4135,84 @@ module.exports = function createPCPRoutes(deps) {
         // ========================================
         if (abaProducao) {
             console.log('\n🔧 Atualizando aba PRODUÇÃO...');
+
+            // ========================================
+            // 🔧 FIX BUG-OP-PAGE2: Replicar cabeçalho/dados do cliente na aba PRODUÇÃO
+            // A aba PRODUÇÃO tem cabeçalho (linhas 1-12) com fórmulas referenciando VENDAS_PCP.
+            // ExcelJS NÃO recalcula fórmulas, então os "result" ficam vazios/stale.
+            // Solução: atualizar o result de cada fórmula E/OU preencher diretamente.
+            // ========================================
+            console.log('📋 Replicando cabeçalho na aba PRODUÇÃO (FIX page 2)...');
+
+            // Percorrer linhas 1-12 da aba PRODUÇÃO e atualizar results de fórmulas
+            // 🔧 R2 FIX BUG-14: Regex expandido para suportar 'VENDAS_PCP'!$C$4, espaços, etc.
+            const formulaRefRegex = /(?:'?VENDAS_PCP'?)\s*!\s*\$?([A-Z]{1,3})\$?(\d+)/i;
+            for (let row = 1; row <= 12; row++) {
+                for (const colLetter of ['A','B','C','D','E','F','G','H','I','J','K']) {
+                    const cell = abaProducao.getCell(`${colLetter}${row}`);
+                    if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                        const formula = cell.value.formula;
+                        const match = formula.match(formulaRefRegex);
+                        if (match) {
+                            const refCol = match[1];
+                            const refRow = match[2];
+                            const sourceCell = abaVendas.getCell(`${refCol}${refRow}`);
+                            const sourceValue = sourceCell.value;
+                            // Preservar fórmula e injetar result calculado
+                            cell.value = { formula: formula, result: sourceValue || '' };
+                            if (sourceValue) {
+                                console.log(`   📋 PRODUÇÃO ${colLetter}${row}: fórmula=${formula} → result=${String(sourceValue).substring(0, 30)}`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Fallback direto: garantir que dados-chave estejam preenchidos APENAS se célula vazia
+            // 🔧 R2 FIX BUG-15: Não sobrescrever fórmulas — só preencher células realmente vazias
+            const headerMapping = [
+                { cell: 'C4', value: dados.numero_orcamento || numOrcamento, desc: 'Nº Orçamento' },
+                { cell: 'G4', value: numPedidoFinal, desc: 'Nº Pedido' },
+                { cell: 'C6', value: dados.vendedor || '', desc: 'Vendedor' },
+                { cell: 'C7', value: dados.cliente || '', desc: 'Cliente' },
+                { cell: 'C8', value: dados.contato || dados.contato_cliente || '', desc: 'Contato' },
+                { cell: 'H8', value: dados.telefone || dados.fone_cliente || '', desc: 'Telefone' },
+                { cell: 'C9', value: dados.email || dados.email_cliente || '', desc: 'Email' },
+                { cell: 'J9', value: dados.frete || dados.tipo_frete || '', desc: 'Tipo Frete' },
+                { cell: 'C12', value: dados.transportadora_nome || '', desc: 'Transportadora' },
+                { cell: 'H12', value: dados.transportadora_fone || '', desc: 'Transp. Fone' },
+                { cell: 'C13', value: dados.transportadora_cep || '', desc: 'Transp. CEP' },
+                { cell: 'F13', value: dados.transportadora_endereco || '', desc: 'Transp. Endereço' },
+            ];
+
+            for (const mapping of headerMapping) {
+                const cell = abaProducao.getCell(mapping.cell);
+                // 🔧 R2: Só preencher se a célula estiver REALMENTE vazia (sem valor algum)
+                const val = cell.value;
+                const isEmpty = !val || (typeof val === 'string' && val.trim() === '');
+                if (isEmpty && mapping.value) {
+                    cell.value = mapping.value;
+                    console.log(`   📋 PRODUÇÃO ${mapping.cell} (${mapping.desc}): ${String(mapping.value).substring(0, 30)}`);
+                }
+            }
+
+            // 🔧 R2 FIX BUG-16: Data de liberação na PRODUÇÃO — só se célula vazia
+            const cellJ4Prod = abaProducao.getCell('J4');
+            const j4Val = cellJ4Prod.value;
+            const j4Empty = !j4Val || (typeof j4Val === 'string' && j4Val.trim() === '');
+            if (j4Empty) {
+                cellJ4Prod.value = abaVendas.getCell('J4').value || new Date();
+                cellJ4Prod.numFmt = 'dd/mm/yyyy';
+                console.log(`   📋 PRODUÇÃO J4 (Data): ${cellJ4Prod.value}`);
+            }
+
+            // 🔧 FIX: Garantir largura mínima da coluna J na PRODUÇÃO
+            const colJProd = abaProducao.getColumn('J');
+            if (!colJProd.width || colJProd.width < 14) {
+                colJProd.width = 14;
+            }
+
+            console.log('   ✅ Cabeçalho da aba PRODUÇÃO atualizado!\n');
 
             // A aba PRODUÇÃO tem suas próprias fórmulas VLOOKUP na coluna C
             // As linhas de produtos são: 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52 (de 3 em 3)
@@ -4140,15 +4276,71 @@ module.exports = function createPCPRoutes(deps) {
                         cellPeso.numFmt = '#,##0.00';
                     }
 
+                    // F - Código de Cores
+                    const codigoCores = prod.codigo_cores || prod.cores || '';
+                    if (codigoCores) {
+                        const cellCodCores = abaProducao.getCell(`F${linhaProd}`);
+                        if (cellCodCores.value && typeof cellCodCores.value === 'object' && cellCodCores.value.formula) {
+                            cellCodCores.value = { formula: cellCodCores.value.formula, result: codigoCores };
+                        } else {
+                            cellCodCores.value = codigoCores;
+                        }
+                    }
+
+                    // G - Embalagem (default 'Bobina')
+                    const embalagemProd = prod.embalagem || 'Bobina';
+                    const cellEmb = abaProducao.getCell(`G${linhaProd}`);
+                    if (cellEmb.value && typeof cellEmb.value === 'object' && cellEmb.value.formula) {
+                        cellEmb.value = { formula: cellEmb.value.formula, result: embalagemProd };
+                    } else {
+                        cellEmb.value = embalagemProd;
+                    }
+
+                    // H - Lance(s)
+                    const lancesProd = prod.lances || '';
+                    if (lancesProd) {
+                        const cellLances = abaProducao.getCell(`H${linhaProd}`);
+                        if (cellLances.value && typeof cellLances.value === 'object' && cellLances.value.formula) {
+                            cellLances.value = { formula: cellLances.value.formula, result: lancesProd };
+                        } else {
+                            cellLances.value = lancesProd;
+                        }
+                    }
+
                     // Preencher LOTE na coluna G da linha seguinte (linhaProd + 1)
                     if (prod.lote) {
                         const cellLote = abaProducao.getCell(`G${linhaProd + 1}`);
                         cellLote.value = prod.lote;
                     }
 
-                    console.log(`   📦 PRODUÇÃO Linha ${linhaProd}: ${codigoProd} = ${descricaoCatalogo.substring(0, 40)}...`);
+                    console.log(`   📦 PRODUÇÃO Linha ${linhaProd}: ${codigoProd} = ${descricaoCatalogo.substring(0, 40)}... | CodCores=${codigoCores} | Emb=${embalagemProd} | Lances=${lancesProd}`);
                 }
             });
+
+            // 🔧 FIX BUG-R5-29: Limpar linhas de produto não utilizadas na aba PRODUÇÃO
+            const prodCount = Math.min(produtos.length, linhasProducao.length);
+            for (let idx = prodCount; idx < linhasProducao.length; idx++) {
+                const linhaClear = linhasProducao[idx];
+                for (const col of ['B', 'C', 'F', 'G', 'H', 'J']) {
+                    const cell = abaProducao.getCell(`${col}${linhaClear}`);
+                    if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                        cell.value = { formula: cell.value.formula, result: '' };
+                    } else {
+                        cell.value = null;
+                    }
+                }
+                // Limpar também linhas +1 e +2 (peso, lote)
+                for (let offset = 1; offset <= 2; offset++) {
+                    for (const col of ['E', 'G']) {
+                        const cellExtra = abaProducao.getCell(`${col}${linhaClear + offset}`);
+                        if (cellExtra.value && typeof cellExtra.value === 'object' && cellExtra.value.formula) {
+                            cellExtra.value = { formula: cellExtra.value.formula, result: '' };
+                        } else if (cellExtra.value) {
+                            cellExtra.value = null;
+                        }
+                    }
+                }
+            }
 
             console.log(`   ✅ ${Math.min(produtos.length, linhasProducao.length)} produtos atualizados na aba PRODUÇÃO`);
         }

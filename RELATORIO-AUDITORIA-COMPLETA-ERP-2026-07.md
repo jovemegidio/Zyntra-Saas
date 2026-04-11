@@ -351,6 +351,146 @@
 
 ---
 
+## ROUND 4 — AUDITORIA MISSÃO CRÍTICA: ORDEM DE PRODUÇÃO (Excel)
+
+**Data:** 11/04/2026  
+**Escopo:** Auditoria end-to-end do fluxo de geração de Ordem de Produção Excel  
+**Metodologia:** Code review de ponta a ponta: Frontend (coletarDadosOP → gerarExcelOP) → Backend (POST /api/gerar-ordem-excel → gerarExcelOrdemProducaoCompleta) → Template Excel (VENDAS_PCP + PRODUÇÃO)
+
+### R4.1 — Bugs Encontrados e Corrigidos
+
+| Bug ID | Severidade | Descrição | Impacto | Status |
+|--------|-----------|-----------|---------|--------|
+| **BUG-R4-21** | **CRÍTICO** | `new Date('yyyy-mm-dd')` cria data UTC → off-by-one dia no fuso BRT (-3h) | Data de liberação J4 pode mostrar dia anterior (ex: 11/04 vira 10/04) | ✅ CORRIGIDO |
+| **BUG-R4-22** | **ALTO** | `prazo_entrega` de `<input type="date">` (yyyy-mm-dd) ia como string raw, não como Date | H6 mostrava "2026-04-11" em vez de "11/04/2026", quebrando `numFmt: 'dd/mm/yyyy'` | ✅ CORRIGIDO |
+| **BUG-R4-23** | **MÉDIO** | `isNaN('')` retorna `false`, `parseFloat('')` retorna `NaN` | C4 (Nº Orçamento) mostrava NaN quando campo vazio | ✅ CORRIGIDO |
+| **BUG-R4-24** | **MÉDIO** | Reforço final do CNPJ (C15) sobrescrevia Number com String | `numFmt` de CPF/CNPJ não funcionava — exibia dígitos crus sem máscara | ✅ CORRIGIDO |
+| **BUG-R4-25** | **BAIXO** | >15 produtos silenciosamente descartados do Excel | Cliente não sabia que produtos foram omitidos | ✅ CORRIGIDO |
+| **BUG-R4-26** | **INFO** | Fórmulas concatenadas na PRODUÇÃO (`=A&B`) só resolvem 1ª referência | Risco teórico em templates com fórmulas complexas. Templates atuais são simples (1 ref por célula) | 📋 DOCUMENTADO |
+
+### R4.2 — Detalhamento Técnico
+
+#### BUG-R4-21: Data UTC Off-by-One (CRÍTICO)
+**Arquivo:** `routes/pcp-routes.js` linha ~3700  
+**Causa:** `new Date('2026-04-11')` é interpretado pelo V8 como midnight UTC. No fuso BRT (UTC-3), isso equivale a 10/04/2026 21:00. O Excel formata a parte "date" como 10/04/2026.  
+**Fix:** Substituído por parse manual `new Date(parseInt(y), parseInt(m)-1, parseInt(d))` que cria data local.
+
+#### BUG-R4-22: Prazo de Entrega como String (ALTO)
+**Arquivo:** `routes/pcp-routes.js` linha ~3730  
+**Causa:** O `<input type="date">` envia valor no formato ISO `yyyy-mm-dd`. O código só tratava `dd/mm/yyyy` (com `/`) e `instanceof Date`. Strings com `-` caíam no `else` e eram escritas como texto cru.  
+**Fix:** Adicionado branch `else if (includes('-'))` com parse manual para criar Date local.
+
+#### BUG-R4-23: NaN no Nº Orçamento (MÉDIO)
+**Arquivo:** `routes/pcp-routes.js` linha ~3668  
+**Causa:** `isNaN('')` retorna `false` (porque `Number('') === 0`), mas `parseFloat('')` retorna `NaN`. Célula C4 ficava com valor `NaN`.  
+**Fix:** Guard explícito `if (numOrcamento === '') { cell = '' }` antes do `parseFloat`.
+
+#### BUG-R4-24: CNPJ Reforço com String (MÉDIO)
+**Arquivo:** `routes/pcp-routes.js` linha ~4075  
+**Causa:** `cellC15Final.value = cnpjStrFinal` atribuía string. O `numFmt` de CPF/CNPJ (`[<=99999999999]000.000.000-00;...`) só funciona em valores numéricos.  
+**Fix:** Mudado para `Number(cnpjStrFinal)`.
+
+#### BUG-R4-25: Produtos > 15 Silenciosos (BAIXO)
+**Arquivo:** `modules/PCP/index.html` (gerarExcelOP)  
+**Causa:** Template tem 15 linhas de produto (18-32). Produtos além do 15º eram ignorados sem aviso.  
+**Fix:** Adicionado `showNotification` alertando o usuário sobre quantos produtos serão omitidos.
+
+### R4.3 — Matriz de Cobertura Pós-R4
+
+| Componente | Bugs R1-R3 | Bugs R4 | Total Corrigido | Status |
+|-----------|-----------|---------|-----------------|--------|
+| Excel VENDAS_PCP — Cabeçalho | 4 | 3 | 7 | ✅ Limpo |
+| Excel VENDAS_PCP — Produtos | 2 | 0 | 2 | ✅ Limpo |
+| Excel PRODUÇÃO — Cabeçalho | 3 | 0 | 3 | ✅ Limpo |
+| Excel PRODUÇÃO — Produtos | 4 | 0 | 4 | ✅ Limpo |
+| Datas (J4, H6) | 0 | 2 | 2 | ✅ Limpo |
+| CNPJ/CPF (C15) | 1 | 1 | 2 | ✅ Limpo |
+| Frontend — coletarDadosOP | 1 | 1 | 2 | ✅ Limpo |
+| **TOTAL** | **15** | **5+1doc** | **22** | ✅ |
+
+### R4.4 — Arquivos Modificados
+
+| Arquivo | Alterações R4 |
+|---------|--------------|
+| `routes/pcp-routes.js` | 5 fixes: date UTC, prazo_entrega, NaN orçamento, CNPJ string→number |
+| `modules/PCP/index.html` | 1 fix: warning >15 produtos |
+
+---
+
+## ROUND 5 — AUDITORIA MISSÃO CRÍTICA: INTEGRIDADE DE DADOS & EDGE CASES
+
+**Data:** 11/04/2026  
+**Escopo:** Auditoria de integridade de dados, stale rows, pagamentos 2ª/3ª forma, precisão numérica, e resiliência de fallback  
+**Metodologia:** Code review E2E com focus em edge cases de produção (poucos produtos, múltiplas formas de pagamento, telefones longos, crash do template)
+
+### R5.1 — Bugs Encontrados e Corrigidos
+
+| Bug ID | Severidade | Descrição | Impacto | Status |
+|--------|-----------|-----------|---------|--------|
+| **BUG-R5-27** | **CRÍTICO** | Linhas de produto não utilizadas na VENDAS_PCP não são limpas | Se template tem dados exemplo nas linhas 20-32, OP com 2 produtos mostra dados fantasma de outros pedidos | ✅ CORRIGIDO |
+| **BUG-R5-28** | **ALTO** | 2ª forma de pagamento sem valor (I46) e sem método; 3ª forma totalmente ignorada | Valor da 2ª parcela ausente no Excel; 3ª forma de pagamento coletada pelo frontend desaparece | ✅ CORRIGIDO |
+| **BUG-R5-29** | **ALTO** | Linhas de produto não utilizadas na aba PRODUÇÃO não são limpas | Mesma situação do BUG-R5-27, mas no sheet PRODUÇÃO (linhas 13-55 em blocos de 3) | ✅ CORRIGIDO |
+| **BUG-R5-30** | **MÉDIO** | `parseFloat()` em telefone com 11+ dígitos pode perder precisão | Telefones com DDD+9 dígitos (ex: 11999887766) podem ter último dígito truncado ou arredondado | ✅ CORRIGIDO |
+| **BUG-R5-31** | **MÉDIO** | CSV fallback não tem try/catch — crash silencioso se falhar | Se XLSX E CSV falharem, o request fica pendurado com timeout. Também faltava RFC 5987 encoding no Content-Disposition do CSV | ✅ CORRIGIDO |
+
+### R5.2 — Detalhamento Técnico
+
+#### BUG-R5-27: Stale Product Rows — VENDAS_PCP (CRÍTICO)
+**Arquivo:** `routes/pcp-routes.js`  
+**Causa:** O loop `produtos.forEach()` preenache linhas 18 até `linhaAtual`. Linhas de `linhaAtual` até 32 ficam com dados do template original (podem ter produto exemplo pré-preenchido).  
+**Fix:** Após o loop de produtos, itera de `linhaAtual` até `LINHA_MAXIMA_PRODUTOS` (32) limpando colunas A,B,C,F,G,H,I,J. Preserva fórmulas (seta `result: ''`), limpa valores diretos (`null`).
+
+#### BUG-R5-28: 2ª/3ª Forma de Pagamento (ALTO)
+**Arquivo:** `routes/pcp-routes.js`  
+**Causa:** 2ª forma faltava `I46` (valor) e `F46` (método já era preenchido). 3ª forma (`formasPag[2]`) era completamente ignorada, mas o frontend coleta até 3 formas.  
+**Fix:** Adicionado `I46` com valor calculado (totalGeral × perc2). Para a 3ª forma, como template só tem 2 linhas de pagamento, o excedente vai para observações (A37) com texto formatado.
+
+#### BUG-R5-29: Stale Product Rows — PRODUÇÃO (ALTO)
+**Arquivo:** `routes/pcp-routes.js`  
+**Causa:** Mesmo pattern do BUG-R5-27 na aba PRODUÇÃO. Linhas em blocos de 3 (13,16,19,...55) não limpas quando há menos produtos.  
+**Fix:** Após o loop de produtos PRODUÇÃO, itera pelas linhas não utilizadas limpando B,C,F,G,H,J da linha principal e E,G das linhas +1/+2 (peso/lote).
+
+#### BUG-R5-30: Telefone parseFloat Precision (MÉDIO)
+**Arquivo:** `routes/pcp-routes.js`  
+**Causa:** `parseFloat('11999887766')` funciona para 11 dígitos, mas `parseFloat` de números ≥ 2^53 perde bits. Risco concreto: telefones internacionais ou com zeros à esquerda.  
+**Fix:** Mantém telefone como string (sem parseFloat). Apenas `replace(/\D/g, '')` para limpar formatação.
+
+#### BUG-R5-31: CSV Fallback Resiliência (MÉDIO)
+**Arquivo:** `routes/pcp-routes.js`  
+**Causa:** Se `gerarExcelOrdemProducaoFallback()` lançar exceção, o request ficava pendurado (catch externo pegava, mas já tinha feito console.error sem re-throw limpo). Também o Content-Disposition do CSV não tinha RFC 5987 encoding.  
+**Fix:** Wrap em try/catch com resposta 500 estruturada se ambos falharem. CSV agora usa encoding RFC 5987 igual ao XLSX.
+
+### R5.3 — Matriz de Cobertura Acumulada (R1-R5)
+
+| Componente | R1-R3 | R4 | R5 | Total | Status |
+|-----------|-------|-----|-----|-------|--------|
+| Excel VENDAS_PCP — Cabeçalho | 4 | 3 | 1 | 8 | ✅ |
+| Excel VENDAS_PCP — Produtos | 2 | 0 | 1 | 3 | ✅ |
+| Excel VENDAS_PCP — Pagamento | 0 | 0 | 1 | 1 | ✅ |
+| Excel PRODUÇÃO — Cabeçalho | 3 | 0 | 0 | 3 | ✅ |
+| Excel PRODUÇÃO — Produtos | 4 | 0 | 1 | 5 | ✅ |
+| Datas (J4, H6) | 0 | 2 | 0 | 2 | ✅ |
+| CNPJ/CPF (C15) | 1 | 1 | 0 | 2 | ✅ |
+| Telefone (H8, H12) | 0 | 0 | 1 | 1 | ✅ |
+| Frontend — coletarDadosOP | 1 | 1 | 0 | 2 | ✅ |
+| Error Handling / Fallback | 0 | 0 | 1 | 1 | ✅ |
+| **TOTAL** | **15** | **6** | **5** | **28** | ✅ |
+
+### R5.4 — Itens Verificados OK (Sem Bugs)
+
+| Item | Status | Observação |
+|------|--------|------------|
+| Catálogo produtos (N:O) | ✅ | Escopo local, sem colisão |
+| outputPath (disk I/O) | ✅ | Cleanup com `unlinkSync` |
+| Content-Disposition XLSX | ✅ | RFC 5987 encoding correto |
+| Validação frontend (6 checks) | ✅ | Pedido, data, vendedor, produto, %, telefone, email |
+| XSS no autocomplete | ✅ | Usa `esc()` para sanitizar |
+| Template `existsSync` check | ✅ | Verifica antes de ler |
+| Product modal reset | ✅ | `adicionarProdutoOP()` limpa todos os campos |
+| Embalagem dropdown sync | ✅ | Default "Bobina", inline select funciona |
+
+---
+
 ## 9. RECOMENDAÇÕES ESTRATÉGICAS
 
 ### Prioridade IMEDIATA (antes do próximo deploy)

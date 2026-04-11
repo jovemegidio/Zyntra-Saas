@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -13,7 +13,7 @@
     <title>Zyntra: Dashboard Financeiro</title>
 <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
 
-    <!-- Autenticação -->
+    <!-- Autentica��o -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -26,15 +26,17 @@
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260324">
 
     <!-- Financeiro Design System -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
-    <link rel="stylesheet" href="css/fin-components.css?v=20260215">
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260411a">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260411a">
+    <!-- ?? R2 FIX: Tema verde do financeiro (--fin-primary) � faltava no carregamento -->
+    <link rel="stylesheet" href="css/financeiro.css?v=20260411">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
 
-    <!-- Redirecionamento baseado em permissões -->
+    <!-- Redirecionamento baseado em permiss�es -->
     <script>
         var _financeiroUserCache = null;
         (async function () {
@@ -44,7 +46,7 @@
                     : await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
                 _financeiroUserCache = response;
                 const user = response;
-                const permFinanceiro = user.permissões_financeiro || [];
+                const permFinanceiro = user.permiss�es_financeiro || [];
                 const isAdmin = user.is_admin === 1 || user.role === 'admin';
                 if (!isAdmin && permFinanceiro.length > 0) {
                     const temContasPagar = permFinanceiro.includes('contas_pagar');
@@ -56,9 +58,9 @@
         })();
     </script>
 
-    <!-- Estilos específicos desta página -->
+    <!-- Estilos espec�ficos desta p�gina -->
     <style>
-        /* Cards de resumo - padrão Compras */
+        /* Cards de resumo - padr�o Compras */
 
 
         /* Chart */
@@ -100,8 +102,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
         }
 
         .vencimento-item:last-child {
@@ -115,13 +117,13 @@
         }
 
         .vencimento-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .vencimento-icon.receber {
@@ -136,18 +138,18 @@
 
         .vencimento-info h4 {
             font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
+            font-weight: 600;
+            color: var(--gray-900, #111827);
         }
 
         .vencimento-info span {
             font-size: 12px;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
         }
 
         .vencimento-valor {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .vencimento-valor.green {
@@ -160,16 +162,20 @@
 
         /* Page actions */
         .page-header {
+            margin-bottom: var(--space-8, 2rem);
+        }
+
+        .page-header-top {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--space-6, 1.5rem);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: var(--space-3, 0.75rem);
             flex-wrap: wrap;
-            align-items: center;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
         }
 
         .page-header .btn {
@@ -177,20 +183,6 @@
             font-size: 14px;
             font-weight: 600;
             border-radius: 10px;
-        }
-
-        .page-header .btn-secondary {
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-
-        .page-header .btn-secondary:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-
-        .page-header .btn-relatorios {
-            margin-left: auto;
         }
 
         /* Table helpers */
@@ -213,12 +205,12 @@
             padding: 14px 18px;
             text-align: left;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #64748b;
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: 0.05em;
+            color: var(--gray-500, #6b7280);
+            background: var(--gray-100, #f3f4f6);
+            border-bottom: 2px solid var(--gray-200, #e5e7eb);
             white-space: nowrap;
         }
 
@@ -232,8 +224,8 @@
 
         .table-container td {
             padding: 14px 18px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #374151;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
+            color: var(--gray-700, #374151);
             vertical-align: middle;
         }
 
@@ -242,7 +234,7 @@
         }
 
         .table-container tbody tr:hover {
-            background: #f0f7ff;
+            background: var(--gray-50, #f9fafb);
         }
 
         .table-container tbody tr:last-child td {
@@ -291,12 +283,12 @@
         /* Lancamentos nav buttons */
         .lancamentos-nav-btn {
             padding: 7px 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
-            border: 1px solid #e2e8f0;
+            border: 1.5px solid var(--gray-200, #e5e7eb);
             background: white;
-            color: #475569;
+            color: var(--gray-600, #4b5563);
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
@@ -305,9 +297,10 @@
         }
 
         .lancamentos-nav-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-            color: #1e293b;
+            background: var(--gray-50, #f9fafb);
+            border-color: var(--gray-300, #d1d5db);
+            color: var(--gray-900, #111827);
+            transform: translateY(-1px);
         }
 
         .lancamentos-nav-btn i {
@@ -338,8 +331,8 @@
             z-index: 10000;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .modal-overlay-omie.active {
@@ -348,10 +341,22 @@
 
         .modal-omie {
             background: white;
-            border-radius: 12px;
+            border-radius: 18px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal-omie--sm {
@@ -375,15 +380,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 24px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 12px 12px 0 0;
+            padding: 20px 24px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 18px 18px 0 0;
         }
 
         .modal-omie-header h2 {
             color: white;
             font-size: 16px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .modal-omie-close {
@@ -391,13 +399,15 @@
             align-items: center;
             gap: 6px;
             background: rgba(255, 255, 255, 0.1);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.7);
             padding: 6px 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
             transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .modal-omie-close:hover {
@@ -423,8 +433,8 @@
             margin-bottom: 20px;
         }
 
-        /* Opção cards */
-        .opção-card {
+        /* Op��o cards */
+        .op��o-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -432,17 +442,17 @@
             overflow: hidden;
         }
 
-        .opção-card--clickable {
+        .op��o-card--clickable {
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .opção-card--clickable:hover {
+        .op��o-card--clickable:hover {
             border-color: #3b82f6;
             background: #eff6ff;
         }
 
-        .opção-card-header {
+        .op��o-card-header {
             padding: 12px 16px;
             font-weight: 600;
             font-size: 14px;
@@ -450,24 +460,24 @@
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .opção-card-body {
+        .op��o-card-body {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 16px;
         }
 
-        .opção-card-left {
+        .op��o-card-left {
             flex: 1;
         }
 
-        .opção-card-left p {
+        .op��o-card-left p {
             color: #64748b;
             font-size: 13px;
             line-height: 1.5;
         }
 
-        .opção-card-right {
+        .op��o-card-right {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -486,13 +496,13 @@
             font-weight: 600;
         }
 
-        .opção-card-input {
+        .op��o-card-input {
             display: flex;
             gap: 8px;
             margin-top: 10px;
         }
 
-        .opção-card-input input {
+        .op��o-card-input input {
             flex: 1;
             padding: 10px 14px;
             border: 1px solid #e2e8f0;
@@ -500,7 +510,7 @@
             font-size: 13px;
         }
 
-        .opção-card-input button {
+        .op��o-card-input button {
             padding: 10px 16px;
             background: #3b82f6;
             color: white;
@@ -509,17 +519,17 @@
             cursor: pointer;
         }
 
-        .opção-pesquisas-info {
+        .op��o-pesquisas-info {
             font-size: 12px;
             color: #64748b;
             margin-bottom: 8px;
         }
 
-        .opção-pesquisas-info a {
+        .op��o-pesquisas-info a {
             color: #3b82f6;
         }
 
-        /* Campos e botões de modal */
+        /* Campos e bot�es de modal */
         .campo-input {
             width: 100%;
             padding: 10px 14px;
@@ -755,22 +765,24 @@
         .resultados-table th {
             padding: 12px 16px;
             text-align: left;
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-            font-size: 13px;
+            background: var(--gray-100, #f3f4f6);
+            border-bottom: 2px solid var(--gray-200, #e5e7eb);
+            font-size: 12px;
             font-weight: 600;
-            color: #374151;
+            color: var(--gray-600, #4b5563);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .resultados-table td {
             padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
             font-size: 13px;
-            color: #374151;
+            color: var(--gray-700, #374151);
         }
 
         .resultados-table tr:hover {
-            background: #eff6ff;
+            background: var(--gray-50, #f9fafb);
         }
 
         .resultados-table tr.selected {
@@ -841,32 +853,40 @@
         .btn-salvar-sidebar {
             width: 42px;
             height: 42px;
-            background: #3b82f6;
+            background: linear-gradient(135deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
 
         .btn-salvar-sidebar:hover {
-            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .nav-arrow {
             width: 42px;
             height: 42px;
             background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            border: 1.5px solid var(--gray-200, #e5e7eb);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-arrow:hover {
+            border-color: var(--gray-300, #d1d5db);
+            color: var(--gray-600, #4b5563);
         }
 
         .cadastro-avatar-area {
@@ -878,16 +898,21 @@
         .cadastro-avatar {
             width: 80px;
             height: 80px;
-            background: #f1f5f9;
-            border-radius: 12px;
+            background: var(--gray-100, #f3f4f6);
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
             font-size: 28px;
             cursor: pointer;
             position: relative;
+            transition: all var(--transition-base, 0.2s);
+        }
+
+        .cadastro-avatar:hover {
+            background: var(--gray-200, #e5e7eb);
         }
 
         .cadastro-avatar-alterar {
@@ -924,22 +949,23 @@
             padding: 10px 16px;
             border: none;
             background: none;
-            color: #64748b;
+            color: var(--gray-500, #6b7280);
             font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
             border-bottom: 2px solid transparent;
             margin-bottom: -2px;
             transition: all 0.2s;
+            font-weight: 500;
         }
 
         .cadastro-tab:hover {
-            color: #3b82f6;
+            color: var(--primary-500, #3b82f6);
         }
 
         .cadastro-tab.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
+            color: var(--primary-600, #2563eb);
+            border-bottom-color: var(--primary-500, #3b82f6);
             font-weight: 600;
         }
 
@@ -1112,8 +1138,8 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- Header & Sidebar refinado -->
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
-    <!-- Global Header & Sidebar — override final unificado -->
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260411a">
+    <!-- Global Header & Sidebar � override final unificado -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
@@ -1126,7 +1152,7 @@
         <!-- Overlay para fechar sidebar em mobile -->
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
-        <!-- SIDEBAR - PADRÃO FINANCEIRO -->
+        <!-- SIDEBAR - PADR�O FINANCEIRO -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
@@ -1151,13 +1177,13 @@
                 <a href="/plano-contas" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="/orcamentos" class="sidebar-btn" title="Orçamentos">
+                <a href="/orcamentos" class="sidebar-btn" title="Or�amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="/conciliacao" class="sidebar-btn" title="Conciliação">
+                <a href="/conciliacao" class="sidebar-btn" title="Concilia��o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="/relatorios" class="sidebar-btn" title="Relatórios">
+                <a href="/relatorios" class="sidebar-btn" title="Relat�rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -1175,10 +1201,10 @@
 
         <!-- Main Area -->
         <main class="main-area">
-            <!-- HEADER - PADRÃO FINANCEIRO -->
+            <!-- HEADER - PADR�O FINANCEIRO -->
             <header class="header">
                 <div class="header-left">
-                    <!-- Botão Menu Mobile -->
+                    <!-- Bot�o Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -1189,7 +1215,7 @@
                             style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
                         <span
-                            style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">—</span>
+                            style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">�</span>
                         <span
                             style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Financeiro</span>
                     </div>
@@ -1199,7 +1225,7 @@
                         <i class="fas fa-sync-alt"></i>
                     </button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usu�rio</strong></span>
                     </div>
                 </div>
             </header>
@@ -1210,14 +1236,18 @@
 
                     <!-- Page Actions -->
                     <div class="page-header">
-                        <button class="btn btn-secondary" onclick="abrirModalClienteFornecedor()"><i
-                                class="fas fa-user-plus"></i> Incluir Cliente/Fornecedor</button>
-                        <button class="btn btn-success" onclick="novoLancamento('receber')"><i
-                                class="fas fa-plus-circle"></i> Nova Conta a Receber</button>
-                        <button class="btn btn-primary" onclick="novoLancamento('pagar')"><i
-                                class="fas fa-plus-circle"></i> Nova Conta a Pagar</button>
-                        <button class="btn btn-secondary btn-relatorios" onclick="location.href='/relatorios'"><i
-                                class="fas fa-chart-bar"></i> Relatórios</button>
+                        <div class="page-header-top" style="justify-content: flex-end; width: 100%;">
+                            <div class="page-actions">
+                                <button class="btn btn-secondary" onclick="abrirModalClienteFornecedor()"><i
+                                        class="fas fa-user-plus"></i> Incluir Cliente/Fornecedor</button>
+                                <button class="btn btn-success" onclick="novoLancamento('receber')"><i
+                                        class="fas fa-plus-circle"></i> Nova Conta a Receber</button>
+                                <button class="btn btn-primary" onclick="novoLancamento('pagar')"><i
+                                        class="fas fa-plus-circle"></i> Nova Conta a Pagar</button>
+                                <button class="btn btn-secondary" onclick="location.href='/relatorios'"><i
+                                        class="fas fa-chart-bar"></i> Relat�rios</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Resumo Financeiro -->
@@ -1260,9 +1290,11 @@
                     <div class="grid-2">
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-chart-area"></i> Fluxo de Caixa - Próximos 30 dias</h3>
-                                <button class="btn btn-secondary" onclick="location.href='fluxo-caixa.html'">Ver
-                                    Detalhes</button>
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-area"></i> Fluxo de Caixa - Pr�ximos 30 dias
+                                </h3>
+                                <button class="btn btn-sm btn-secondary" onclick="location.href='fluxo-caixa.html'">Ver
+                                    Detalhes <i class="fas fa-arrow-right"></i></button>
                             </div>
                             <div class="card-body">
                                 <div class="chart-legend">
@@ -1270,7 +1302,7 @@
                                         <div class="chart-legend-dot green"></div> Entradas
                                     </div>
                                     <div class="chart-legend-item">
-                                        <div class="chart-legend-dot red"></div> Saídas
+                                        <div class="chart-legend-dot red"></div> Sa�das
                                     </div>
                                 </div>
                                 <div class="chart-container">
@@ -1280,7 +1312,9 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-calendar-alt"></i> Próximos Vencimentos</h3>
+                                <h3 class="card-title">
+                                    <i class="fas fa-calendar-alt"></i> Pr�ximos Vencimentos
+                                </h3>
                             </div>
                             <div class="card-body" id="lista-vencimentos">
                                 <div class="empty-state">
@@ -1291,11 +1325,12 @@
                         </div>
                     </div>
 
-                    <!-- Últimos Lançamentos -->
+                    <!-- �ltimos Lan�amentos -->
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-list" style="color: #3b82f6; margin-right: 6px;"></i> Últimos
-                                Lançamentos</h3>
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i> �ltimos Lan�amentos
+                            </h3>
                             <div class="flex-row-gap-sm">
                                 <button class="lancamentos-nav-btn btn-pagar"
                                     onclick="location.href='contas-pagar.html'">
@@ -1313,7 +1348,7 @@
                                     <thead>
                                         <tr>
                                             <th style="width:90px">Tipo</th>
-                                            <th>Descrição</th>
+                                            <th>Descri��o</th>
                                             <th style="width:120px">Vencimento</th>
                                             <th style="width:130px">Valor</th>
                                             <th style="width:110px">Status</th>
@@ -1323,7 +1358,7 @@
                                         <tr>
                                             <td colspan="5" class="td-loading">
                                                 <i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>
-                                                Carregando lançamentos...
+                                                Carregando lan�amentos...
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1355,11 +1390,11 @@
             if (panel) panel.classList.toggle('active');
         }
 
-        // Notificações removidas — funções stub para compatibilidade
+        // Notifica��es removidas � fun��es stub para compatibilidade
         function marcarTodasLidas() {}
         function limparNotificacoes() {}
 
-        // ======== Carregar usuário ========
+        // ======== Carregar usu�rio ========
         async function carregarUsuario() {
             try {
                 let user;
@@ -1371,7 +1406,7 @@
                     user = await response.json();
                     _financeiroUserCache = user;
                 }
-                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
+                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usu�rio');
                 const hour = new Date().getHours();
                 let greeting = 'Bom dia';
                 if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
@@ -1391,7 +1426,7 @@
                     const initEl = document.getElementById('user-initials');
                     if (initEl) { initEl.textContent = primeiroNome.charAt(0).toUpperCase(); initEl.style.display = 'flex'; }
                 }
-            } catch (e) { console.error('Erro ao carregar usuário:', e); }
+            } catch (e) { console.error('Erro ao carregar usu�rio:', e); }
         }
 
         // ======== Dados do Dashboard ========
@@ -1422,8 +1457,8 @@
         }
 
         function converterNumero(valor) {
-            const número = Number.parseFloat(valor);
-            return Number.isFinite(número) ? número : 0;
+            const n�mero = Number.parseFloat(valor);
+            return Number.isFinite(n�mero) ? n�mero : 0;
         }
 
         function normalizarStatus(status) {
@@ -1473,8 +1508,8 @@
 
             const referenciaAtual = new Date();
             const referenciaAnterior = new Date(referenciaAtual.getFullYear(), referenciaAtual.getMonth() - 1, 1);
-            const períodoAtual = obterPeriodoMensal(referenciaAtual);
-            const períodoAnterior = obterPeriodoMensal(referenciaAnterior);
+            const per�odoAtual = obterPeriodoMensal(referenciaAtual);
+            const per�odoAnterior = obterPeriodoMensal(referenciaAnterior);
 
             dashboardCache.loadPromise = (async () => {
                 const [
@@ -1487,10 +1522,10 @@
                     lancamentosPayload,
                     resumoKpisPayload
                 ] = await Promise.all([
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${per�odoAtual.inicio}&dataFim=${per�odoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${per�odoAtual.inicio}&dataFim=${per�odoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${per�odoAnterior.inicio}&dataFim=${per�odoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${per�odoAnterior.inicio}&dataFim=${per�odoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
                     fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=6', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=10', { data: [] }),
@@ -1560,7 +1595,7 @@
                                     <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:16px;"></i>
                                 </div>
                                 <div>
-                                    <strong style="color:#dc2626;font-size:15px;">${total} título(s) vencido(s)</strong>
+                                    <strong style="color:#dc2626;font-size:15px;">${total} t�tulo(s) vencido(s)</strong>
                                     <p style="margin:3px 0 0;font-size:12px;color:#64748b;">Contas com vencimento ultrapassado</p>
                                 </div>
                             </div>
@@ -1654,7 +1689,7 @@
             }
         }
 
-        // ======== Gráfico ========
+        // ======== Gr�fico ========
         let fluxoCaixaChartInstance = null;
         async function carregarGrafico() {
             const canvas = document.getElementById('fluxoCaixaChart');
@@ -1675,7 +1710,7 @@
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
 
-                // Mês atual: do dia 1 ao último dia do mês
+                // M�s atual: do dia 1 ao �ltimo dia do m�s
                 const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
                 const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
                 const totalDias = ultimoDia.getDate();
@@ -1714,7 +1749,7 @@
                                 pointBackgroundColor: '#22c55e'
                             },
                             {
-                                label: 'Saídas',
+                                label: 'Sa�das',
                                 data: saidas,
                                 borderColor: '#ef4444',
                                 backgroundColor: 'rgba(239,68,68,0.08)',
@@ -1759,7 +1794,7 @@
                     }
                 });
             } catch (error) {
-                console.error('Erro ao carregar gráfico do fluxo de caixa:', error);
+                console.error('Erro ao carregar gr�fico do fluxo de caixa:', error);
             }
         }
 
@@ -1772,9 +1807,9 @@
             const data = new Date(`${String(dataVencimento).slice(0, 10)}T00:00:00`);
             const diferencaDias = Math.round((data - hoje) / 86400000);
 
-            if (diferencaDias < 0) return `Vencido há ${Math.abs(diferencaDias)} dia(s)`;
+            if (diferencaDias < 0) return `Vencido h� ${Math.abs(diferencaDias)} dia(s)`;
             if (diferencaDias === 0) return 'Vence hoje';
-            if (diferencaDias === 1) return 'Vence amanhã';
+            if (diferencaDias === 1) return 'Vence amanh�';
             return `Vence em ${diferencaDias} dia(s)`;
         }
 
@@ -1790,7 +1825,7 @@
                     .slice(0, 6);
 
                 if (vencimentos.length === 0) {
-                    lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento próximo</p></div>';
+                    lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento pr�ximo</p></div>';
                     return;
                 }
 
@@ -1801,20 +1836,20 @@
                                 <i class="fas fa-${item.tipo === 'receber' ? 'arrow-down' : 'arrow-up'}"></i>
                             </div>
                             <div class="vencimento-info">
-                                <h4>${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</h4>
-                                <span>${obterTextoPrazo(item.data_vencimento)} • ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
+                                <h4>${escapeHtml(item.descricao || item.descri��o || 'Sem descri��o')}</h4>
+                                <span>${obterTextoPrazo(item.data_vencimento)} � ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
                             </div>
                         </div>
                         <div class="vencimento-valor ${item.tipo === 'receber' ? 'green' : 'red'}">${formatarMoeda(item.valor)}</div>
                     </div>
                 `).join('');
             } catch (error) {
-                console.error('Erro ao carregar próximos vencimentos:', error);
+                console.error('Erro ao carregar pr�ximos vencimentos:', error);
                 lista.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Erro ao carregar vencimentos</p></div>';
             }
         }
 
-        // ======== Lançamentos ========
+        // ======== Lan�amentos ========
         async function carregarLancamentos() {
             const tbody = document.getElementById('tabela-lancamentos');
             if (!tbody) return;
@@ -1824,7 +1859,7 @@
                 const lancamentos = [...dados.ultimosLancamentos].slice(0, 10);
 
                 if (lancamentos.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lançamento</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lan�amento</td></tr>';
                     return;
                 }
 
@@ -1833,7 +1868,7 @@
                     return `
                         <tr>
                             <td><span class="badge ${tipo === 'Receber' ? 'badge-success' : 'badge-danger'}">${tipo}</span></td>
-                            <td class="td-description">${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</td>
+                            <td class="td-description">${escapeHtml(item.descricao || item.descri��o || 'Sem descri��o')}</td>
                             <td>${formatarData(item.data_vencimento)}</td>
                             <td class="td-valor ${tipo === 'Receber' ? 'td-valor--success' : 'td-valor--danger'}">${formatarMoeda(item.valor)}</td>
                             <td><span class="badge ${getStatusClass(item.status)}">${formatarStatus(item.status)}</span></td>
@@ -1841,7 +1876,7 @@
                     `;
                 }).join('');
             } catch (error) {
-                console.error('Erro ao carregar últimos lançamentos:', error);
+                console.error('Erro ao carregar �ltimos lan�amentos:', error);
                 tbody.innerHTML = '<tr><td colspan="5" class="td-loading td-valor--danger">Erro ao carregar</td></tr>';
             }
         }
@@ -1912,11 +1947,14 @@
             carregarUsuario();
             atualizarDashboard();
             window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
-            // Cleanup: pausar quando tab oculta
+            // Cleanup: pausar quando tab oculta, for�ar refresh quando voltar
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
                     clearInterval(window._dashIntervalFin);
                 } else {
+                    // ?? R2 FIX BUG-20: Invalidar cache ao retornar � tab para garantir dados frescos
+                    invalidarCacheDashboard();
+                    atualizarDashboard(true);
                     window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
                 }
             });
@@ -1927,7 +1965,7 @@
     <!-- MODAIS -->
     <!-- ============================================================ -->
 
-    <!-- MODAL: Escolha do Método -->
+    <!-- MODAL: Escolha do M�todo -->
     <div class="modal-overlay-omie" id="modalEscolhaCliente">
         <div class="modal-omie modal-omie--sm">
             <div class="modal-omie-header">
@@ -1936,20 +1974,20 @@
                         class="fas fa-times"></i></button>
             </div>
             <div class="modal-omie-body">
-                <p class="modal-omie-subtitle">Utilize uma das opções de pesquisa abaixo para incluir digitando quase
+                <p class="modal-omie-subtitle">Utilize uma das op��es de pesquisa abaixo para incluir digitando quase
                     nada</p>
 
-                <!-- Pesquisa Atômica -->
+                <!-- Pesquisa At�mica -->
                 <div class="opcao-card">
-                    <div class="opcao-card-header">Pesquisa Atômica</div>
+                    <div class="opcao-card-header">Pesquisa At�mica</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
-                            <div class="opcao-pesquisas-info">Você ainda possui 3 pesquisas gratuitas<br><a
+                            <div class="opcao-pesquisas-info">Voc� ainda possui 3 pesquisas gratuitas<br><a
                                     href="#">Quero pesquisas ilimitadas</a></div>
                             <p>Digite aqui o que deseja pesquisar</p>
                             <div class="opcao-card-input">
                                 <input type="text" id="pesquisaAtomicaInput"
-                                    placeholder="CNPJ, CPF, Nome, Razão Social, Telefone, E-mail">
+                                    placeholder="CNPJ, CPF, Nome, Raz�o Social, Telefone, E-mail">
                                 <button onclick="pesquisaAtomica()"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
@@ -2006,7 +2044,7 @@
                     <div class="opcao-card-header">Pesquisa no Google</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
-                            <p>Pesquise pelo nome, razão social e até mesmo pelo endereço. Use termos para refinar.</p>
+                            <p>Pesquise pelo nome, raz�o social e at� mesmo pelo endere�o. Use termos para refinar.</p>
                         </div>
                         <div class="opcao-card-right">
                             <div class="icon-wrapper"><span class="google-text">by<span class="g-blue">G</span><span
@@ -2017,9 +2055,9 @@
                     </div>
                 </div>
 
-                <!-- Inserção Manual -->
+                <!-- Inser��o Manual -->
                 <div class="opcao-card opcao-card--clickable" onclick="abrirModalInsercaoManual()">
-                    <div class="opcao-card-header">Inserção Manual</div>
+                    <div class="opcao-card-header">Inser��o Manual</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
                             <p>Inclua os dados manualmente ou pesquisando pelo CEP.</p>
@@ -2101,7 +2139,7 @@
                 <p class="text-hint--sm">Digite o termo que deseja pesquisar:</p>
                 <div class="pos-relative">
                     <input type="text" id="googleSearchInput" class="campo-input google-search-input"
-                        placeholder="Pesquisar nome, razão social, endereço..."
+                        placeholder="Pesquisar nome, raz�o social, endere�o..."
                         onkeypress="if(event.key==='Enter') executarPesquisaGoogle()">
                     <button onclick="executarPesquisaGoogle()" class="google-search-btn"><i
                             class="fas fa-search icon-white"></i></button>
@@ -2115,7 +2153,7 @@
                             class="fas fa-search"></i> Pesquisar</button>
                     <button onclick="fecharModalGoogle()" class="btn-google-cancel">Cancelar</button>
                 </div>
-                <p class="text-footnote">Os resultados serão exibidos para seleção</p>
+                <p class="text-footnote">Os resultados ser�o exibidos para sele��o</p>
             </div>
         </div>
     </div>
@@ -2133,7 +2171,7 @@
                     <thead>
                         <tr>
                             <th><span class="resultados-filter">Localidade <i class="fas fa-filter"></i></span></th>
-                            <th><span class="resultados-filter">Endereço <i class="fas fa-filter"></i></span></th>
+                            <th><span class="resultados-filter">Endere�o <i class="fas fa-filter"></i></span></th>
                         </tr>
                     </thead>
                     <tbody id="resultadosTableBody"></tbody>
@@ -2143,7 +2181,7 @@
                     <button><i class="fas fa-angle-double-left"></i></button>
                     <button>anterior</button>
                     <span class="current">1</span>
-                    <button>próximo</button>
+                    <button>pr�ximo</button>
                     <button><i class="fas fa-angle-double-right"></i></button>
                 </div>
                 <div class="text-center-pad">
@@ -2154,7 +2192,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Inserção Manual -->
+    <!-- MODAL: Inser��o Manual -->
     <div class="modal-overlay-omie" id="modalInsercaoManual">
         <div class="modal-omie modal-omie--md">
             <div class="modal-omie-header">
@@ -2163,18 +2201,18 @@
                         class="fas fa-times"></i></button>
             </div>
             <div class="modal-omie-body">
-                <p class="text-hint">Informe o CEP e o Número do endereço para pesquisa</p>
+                <p class="text-hint">Informe o CEP e o N�mero do endere�o para pesquisa</p>
                 <div class="flex-row-end">
                     <div><label class="campo-label">CEP</label><input type="text" id="cepInput"
                             class="campo-input campo-input--sm"></div>
-                    <div><label class="campo-label">Número do endereço</label><input type="text"
-                            id="númeroEnderecoInput" class="campo-input campo-input--sm"></div>
+                    <div><label class="campo-label">N�mero do endere�o</label><input type="text"
+                            id="n�meroEnderecoInput" class="campo-input campo-input--sm"></div>
                     <button class="btn-selecionar btn--flush-h40" onclick="pesquisarCEP()"><i class="fas fa-bolt"></i>
                         Pesquisar</button>
                 </div>
                 <br><br>
-                <p class="add-link" onclick="abrirCadastroCompleto()">Quero continuar a inclusão manualmente<br><small
-                        class="text-muted">(não utilizarei a pesquisa por CEP agora)</small></p>
+                <p class="add-link" onclick="abrirCadastroCompleto()">Quero continuar a inclus�o manualmente<br><small
+                        class="text-muted">(n�o utilizarei a pesquisa por CEP agora)</small></p>
             </div>
         </div>
     </div>
@@ -2194,7 +2232,7 @@
                                 class="cadastro-avatar-alterar">Alterar</span></div>
                         <div class="flex-1">
                             <div class="grid-cadastro-main">
-                                <div><label class="campo-label">Razão Social / Nome Completo</label><input type="text"
+                                <div><label class="campo-label">Raz�o Social / Nome Completo</label><input type="text"
                                         id="razaoSocialInput" class="campo-input"></div>
                                 <div><label class="campo-label">CNPJ / CPF <span class="campo-label-link">@ Pesquisar
                                             SEFAZ</span></label><input type="text" id="cnpjInput" class="campo-input">
@@ -2211,31 +2249,31 @@
                                         id="contatoInput" class="campo-input"></div>
                             </div>
                             <div class="text-right-mt"><span class="campo-label-link btn--flush">@ Consulta de
-                                    Crédito</span></div>
+                                    Cr�dito</span></div>
                         </div>
                     </div>
 
                     <div class="cadastro-tabs">
-                        <button class="cadastro-tab active" data-tab="endereco">Endereço</button>
+                        <button class="cadastro-tab active" data-tab="endereco">Endere�o</button>
                         <button class="cadastro-tab" data-tab="telefones">Telefones e E-mail</button>
-                        <button class="cadastro-tab" data-tab="bancarios">Dados Bancários</button>
-                        <button class="cadastro-tab" data-tab="inscricoes">Inscrições, CNAE e Outros</button>
-                        <button class="cadastro-tab" data-tab="integração"><i class="fas fa-cog"></i> Integração
-                            Automática</button>
-                        <button class="cadastro-tab" data-tab="caracteristicas">Características</button>
-                        <button class="cadastro-tab" data-tab="recomendacoes">Recomendações</button>
-                        <button class="cadastro-tab" data-tab="faturamento">Faturamento e Crédito</button>
+                        <button class="cadastro-tab" data-tab="bancarios">Dados Banc�rios</button>
+                        <button class="cadastro-tab" data-tab="inscricoes">Inscri��es, CNAE e Outros</button>
+                        <button class="cadastro-tab" data-tab="integra��o"><i class="fas fa-cog"></i> Integra��o
+                            Autom�tica</button>
+                        <button class="cadastro-tab" data-tab="caracteristicas">Caracter�sticas</button>
+                        <button class="cadastro-tab" data-tab="recomendacoes">Recomenda��es</button>
+                        <button class="cadastro-tab" data-tab="faturamento">Faturamento e Cr�dito</button>
                         <button class="cadastro-tab" data-tab="mapa">Mapa</button>
                     </div>
 
                     <div class="cadastro-tab-content">
-                        <!-- Endereço -->
+                        <!-- Endere�o -->
                         <div class="cadastro-tab-panel active" id="tab-endereco">
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>Endereço <span
-                                            class="campo-label-link">@ Pesquisar Endereço</span></label><input
+                                <div class="form-group form-group--span2"><label>Endere�o <span
+                                            class="campo-label-link">@ Pesquisar Endere�o</span></label><input
                                         type="text" id="enderecoInput" class="campo-input"></div>
-                                <div class="form-group"><label>Número</label><input type="text" id="númeroInput"
+                                <div class="form-group"><label>N�mero</label><input type="text" id="n�meroInput"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
@@ -2286,7 +2324,7 @@
                                         class="campo-input"></div>
                             </div>
                             <p class="add-link"><i class="fas fa-plus"></i> Clique aqui para <strong>adicionar um
-                                    endereço de entrega diferente</strong> deste</p>
+                                    endere�o de entrega diferente</strong> deste</p>
                             <div class="tags-area">
                                 <h4>Preencha quantas Tags quiser para este cadastro</h4>
                                 <p>Clique aqui para selecionar (ou criar uma nova)</p>
@@ -2311,7 +2349,7 @@
                                         type="email" class="campo-input" placeholder="email@empresa.com.br"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>E-mail para Cobrança</label><input
+                                <div class="form-group form-group--span2"><label>E-mail para Cobran�a</label><input
                                         type="email" class="campo-input" placeholder="financeiro@empresa.com.br"></div>
                             </div>
                             <div class="form-row">
@@ -2319,26 +2357,26 @@
                                         class="campo-input" placeholder="https://www.empresa.com.br"></div>
                             </div>
                         </div>
-                        <!-- Bancários -->
+                        <!-- Banc�rios -->
                         <div class="cadastro-tab-panel" id="tab-bancarios">
                             <div class="form-row">
                                 <div class="form-group"><label>Banco</label><select class="campo-input">
                                         <option value="">Selecione o banco</option>
                                         <option value="001">001 - Banco do Brasil</option>
                                         <option value="033">033 - Santander</option>
-                                        <option value="104">104 - Caixa Econômica</option>
+                                        <option value="104">104 - Caixa Econ�mica</option>
                                         <option value="237">237 - Bradesco</option>
-                                        <option value="341">341 - Itaú</option>
+                                        <option value="341">341 - Ita�</option>
                                         <option value="756">756 - Sicoob</option>
                                     </select></div>
                                 <div class="form-group"><label>Tipo de Conta</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                         <option value="corrente">Conta Corrente</option>
-                                        <option value="poupanca">Conta Poupança</option>
+                                        <option value="poupanca">Conta Poupan�a</option>
                                     </select></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Agência</label><input type="text" class="campo-input"
+                                <div class="form-group"><label>Ag�ncia</label><input type="text" class="campo-input"
                                         placeholder="0000"></div>
                                 <div class="form-group"><label>Conta</label><input type="text" class="campo-input"
                                         placeholder="00000-0"></div>
@@ -2346,25 +2384,25 @@
                             <div class="form-row">
                                 <div class="form-group form-group--span2"><label>Chave PIX</label><input type="text"
                                         class="campo-input"
-                                        placeholder="CPF, CNPJ, E-mail, Telefone ou Chave Aleatória"></div>
+                                        placeholder="CPF, CNPJ, E-mail, Telefone ou Chave Aleat�ria"></div>
                             </div>
                         </div>
-                        <!-- Inscrições -->
+                        <!-- Inscri��es -->
                         <div class="cadastro-tab-panel" id="tab-inscricoes">
                             <div class="form-row">
-                                <div class="form-group"><label>Inscrição Estadual</label><input type="text"
+                                <div class="form-group"><label>Inscri��o Estadual</label><input type="text"
                                         class="campo-input"></div>
-                                <div class="form-group"><label>Inscrição Municipal</label><input type="text"
+                                <div class="form-group"><label>Inscri��o Municipal</label><input type="text"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Inscrição SUFRAMA</label><input type="text"
+                                <div class="form-group"><label>Inscri��o SUFRAMA</label><input type="text"
                                         class="campo-input"></div>
                                 <div class="form-group"><label>CNAE Principal</label><input type="text"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Regime Tributário</label><select class="campo-input">
+                                <div class="form-group"><label>Regime Tribut�rio</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                         <option value="simples">Simples Nacional</option>
                                         <option value="presumido">Lucro Presumido</option>
@@ -2375,18 +2413,18 @@
                                         <option value="">Selecione</option>
                                         <option value="1">Contribuinte</option>
                                         <option value="2">Isento</option>
-                                        <option value="9">Não Contribuinte</option>
+                                        <option value="9">N�o Contribuinte</option>
                                     </select></div>
                             </div>
                         </div>
-                        <!-- Integração -->
-                        <div class="cadastro-tab-panel" id="tab-integração">
+                        <!-- Integra��o -->
+                        <div class="cadastro-tab-panel" id="tab-integra��o">
                             <div class="tab-placeholder"><i class="fas fa-cog icon-placeholder"></i>
-                                <h3 class="heading-placeholder">Integração Automática</h3>
-                                <p>Configure integrações com sistemas externos aqui.</p>
+                                <h3 class="heading-placeholder">Integra��o Autom�tica</h3>
+                                <p>Configure integra��es com sistemas externos aqui.</p>
                             </div>
                         </div>
-                        <!-- Características -->
+                        <!-- Caracter�sticas -->
                         <div class="cadastro-tab-panel" id="tab-caracteristicas">
                             <div class="form-row">
                                 <div class="form-group"><label>Tipo de Cliente</label><select class="campo-input">
@@ -2396,18 +2434,18 @@
                                         <option value="ambos">Cliente e Fornecedor</option>
                                     </select></div>
                                 <div class="form-group"><label>Segmento</label><input type="text" class="campo-input"
-                                        placeholder="Ex: Indústria, Comércio"></div>
+                                        placeholder="Ex: Ind�stria, Com�rcio"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>Observações</label><textarea
+                                <div class="form-group form-group--span2"><label>Observa��es</label><textarea
                                         class="campo-input" rows="4"
-                                        placeholder="Observações gerais sobre o cliente/fornecedor"></textarea></div>
+                                        placeholder="Observa��es gerais sobre o cliente/fornecedor"></textarea></div>
                             </div>
                         </div>
-                        <!-- Recomendações -->
+                        <!-- Recomenda��es -->
                         <div class="cadastro-tab-panel" id="tab-recomendacoes">
                             <div class="form-row">
-                                <div class="form-group"><label>Vendedor Responsável</label><select class="campo-input">
+                                <div class="form-group"><label>Vendedor Respons�vel</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                     </select></div>
                                 <div class="form-group"><label>Indicado Por</label><input type="text"
@@ -2417,12 +2455,12 @@
                         <!-- Faturamento -->
                         <div class="cadastro-tab-panel" id="tab-faturamento">
                             <div class="form-row">
-                                <div class="form-group"><label>Limite de Crédito</label><input type="text"
+                                <div class="form-group"><label>Limite de Cr�dito</label><input type="text"
                                         class="campo-input" placeholder="R$ 0,00"></div>
-                                <div class="form-group"><label>Condição de Pagamento Padrão</label><select
+                                <div class="form-group"><label>Condi��o de Pagamento Padr�o</label><select
                                         class="campo-input">
                                         <option value="">Selecione</option>
-                                        <option value="avista">À Vista</option>
+                                        <option value="avista">� Vista</option>
                                         <option value="7dias">7 Dias</option>
                                         <option value="14dias">14 Dias</option>
                                         <option value="28dias">28 Dias</option>
@@ -2432,10 +2470,10 @@
                                     </select></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Desconto Padrão (%)</label><input type="text"
+                                <div class="form-group"><label>Desconto Padr�o (%)</label><input type="text"
                                         class="campo-input" placeholder="0,00"></div>
-                                <div class="form-group"><label>Tabela de Preços</label><select class="campo-input">
-                                        <option value="">Padrão</option>
+                                <div class="form-group"><label>Tabela de Pre�os</label><select class="campo-input">
+                                        <option value="">Padr�o</option>
                                     </select></div>
                             </div>
                         </div>
@@ -2443,7 +2481,7 @@
                         <div class="cadastro-tab-panel" id="tab-mapa">
                             <div class="map-placeholder">
                                 <div class="text-center"><i class="fas fa-map-marker-alt icon-placeholder"></i>
-                                    <p>Preencha o endereço para visualizar no mapa</p>
+                                    <p>Preencha o endere�o para visualizar no mapa</p>
                                 </div>
                             </div>
                         </div>
@@ -2485,20 +2523,20 @@
         async function pesquisaAtomica() {
             const termo = document.getElementById('pesquisaAtomicaInput').value;
             if (!termo) { showToast('Digite um termo para pesquisar', 'warning'); return; }
-            showToast('Funcionalidade em implementação', 'info');
+            showToast('Funcionalidade em implementa��o', 'info');
             return;
         }
 
         async function pesquisarCNPJ() {
             const cnpj = document.getElementById('cnpjCpfInput').value.replace(/\D/g, '');
-            if (!cnpj || (cnpj.length !== 11 && cnpj.length !== 14)) { showToast('Informe um CPF ou CNPJ válido', 'warning'); return; }
+            if (!cnpj || (cnpj.length !== 11 && cnpj.length !== 14)) { showToast('Informe um CPF ou CNPJ v�lido', 'warning'); return; }
             try {
                 if (cnpj.length === 14) {
                     const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { credentials: 'include' });
                     if (response.ok) { const data = await response.json(); fecharModalCNPJ(); preencherDadosCNPJ(data); abrirCadastroCompleto(); return; }
                 }
-                showToast('Não foi possível encontrar dados para este documento', 'warning');
-            } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar. Tente a inserção manual.', 'error'); }
+                showToast('N�o foi poss�vel encontrar dados para este documento', 'warning');
+            } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar. Tente a inser��o manual.', 'error'); }
         }
 
         function preencherDadosCNPJ(data) {
@@ -2508,7 +2546,7 @@
             document.getElementById('dddInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(0, 2) : '';
             document.getElementById('telefoneInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(2) : '';
             document.getElementById('enderecoInput').value = data.logradouro || '';
-            document.getElementById('númeroInput').value = data.número || '';
+            document.getElementById('n�meroInput').value = data.n�mero || '';
             document.getElementById('bairroInput').value = data.bairro || '';
             document.getElementById('complementoInput').value = data.complemento || '';
             document.getElementById('cidadeInput').value = data.municipio || '';
@@ -2518,7 +2556,7 @@
 
         async function pesquisarCEP() {
             const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
-            if (!cep || cep.length !== 8) { showToast('Informe um CEP válido', 'warning'); return; }
+            if (!cep || cep.length !== 8) { showToast('Informe um CEP v�lido', 'warning'); return; }
             try {
                 const response = await fetch(`/api/proxy/cep/${cep}`, { credentials: 'include' });
                 if (response.ok) {
@@ -2530,11 +2568,11 @@
                         document.getElementById('cidadeInput').value = data.localidade || '';
                         document.getElementById('estadoSelect').value = data.uf || '';
                         document.getElementById('cepCadastroInput').value = cep;
-                        document.getElementById('númeroInput').value = document.getElementById('númeroEnderecoInput').value || '';
+                        document.getElementById('n�meroInput').value = document.getElementById('n�meroEnderecoInput').value || '';
                         abrirCadastroCompleto(); return;
                     }
                 }
-                showToast('CEP não encontrado', 'warning');
+                showToast('CEP n�o encontrado', 'warning');
             } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar CEP', 'error'); }
         }
 
@@ -2552,21 +2590,21 @@
                 let resultados = [];
                 try {
                     const response = await fetch(`/api/financeiro/clientes-fornecedores/buscar?termo=${encodeURIComponent(termo)}`, { credentials: 'include' });
-                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereco: `${item.endereco || ''}, ${item.número || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
-                } catch (e) { console.log('Busca interna não disponível'); }
+                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereco: `${item.endereco || ''}, ${item.n�mero || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
+                } catch (e) { console.log('Busca interna n�o dispon�vel'); }
                 if (resultados.length === 0) {
                     const cnpjLimpo = termo.replace(/\D/g, '');
                     if (cnpjLimpo.length === 14) {
-                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereco: `${d.logradouro || ''}, ${d.número || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereco: d.logradouro, número: d.número, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereco: `${d.logradouro || ''}, ${d.n�mero || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereco: d.logradouro, n�mero: d.n�mero, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
                     }
                 }
                 if (resultados.length === 0) {
                     const cepLimpo = termo.replace(/\D/g, '');
                     if (cepLimpo.length === 8) {
-                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `Endereço em ${d.localidade}`, endereco: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereco: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `Endere�o em ${d.localidade}`, endereco: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereco: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
                     }
                 }
-                if (resultados.length === 0) { resultados = [{ localidade: termo, endereco: 'Endereço não encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
+                if (resultados.length === 0) { resultados = [{ localidade: termo, endereco: 'Endere�o n�o encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
                 resultadosPesquisa = resultados;
                 document.getElementById('googleSearchLoading').style.display = 'none';
                 document.getElementById('btnPesquisarGoogle').disabled = false;
@@ -2604,7 +2642,7 @@
                 document.getElementById('nomeFantasiaInput').value = d.nome_fantasia || '';
                 document.getElementById('cnpjInput').value = d.cnpj_cpf || d.cnpj || '';
                 document.getElementById('enderecoInput').value = d.endereco || d.logradouro || '';
-                document.getElementById('númeroInput').value = d.número || '';
+                document.getElementById('n�meroInput').value = d.n�mero || '';
                 document.getElementById('bairroInput').value = d.bairro || '';
                 document.getElementById('complementoInput').value = d.complemento || '';
                 document.getElementById('cidadeInput').value = d.cidade || d.municipio || '';
@@ -2617,14 +2655,14 @@
 
         async function salvarClienteFornecedor() {
             if (window._guardSalvarCliFor) return;
-            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
-            if (!dados.razao_social) { showToast('Informe a Razão Social / Nome', 'warning'); return; }
+            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, n�mero: document.getElementById('n�meroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
+            if (!dados.razao_social) { showToast('Informe a Raz�o Social / Nome', 'warning'); return; }
             window._guardSalvarCliFor = true;
             try {
                 const response = await fetch('/api/financeiro/clientes-fornecedores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (response.ok) { showToast('Cliente/Fornecedor salvo com sucesso!', 'success'); fecharCadastroCompleto(); document.querySelectorAll('#modalCadastroCompleto input').forEach(i => i.value = ''); }
                 else { const err = await response.json(); showToast('Erro ao salvar. Tente novamente.', 'error'); }
-            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexão.', 'error'); } finally { window._guardSalvarCliFor = false; }
+            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conex�o.', 'error'); } finally { window._guardSalvarCliFor = false; }
         }
 
         // Tab navigation
@@ -2644,9 +2682,9 @@
         });
     </script>
 
-    <!-- Popup Confirmação -->
+    <!-- Popup Confirma��o -->
     <script src="/js/popup-confirmacao.js?v=20260219"></script>
-    <!-- Funções Compartilhadas Financeiro -->
+    <!-- Fun��es Compartilhadas Financeiro -->
     <script src="public/js/financeiro-shared.js?v=20260217"></script>
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>

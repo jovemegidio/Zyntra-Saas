@@ -8,25 +8,37 @@
    ============================================ */
 .card {
     background: white;
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-sm);
-    border: 1px solid var(--gray-100);
+    border: 1px solid var(--gray-200);
+    transition: all var(--transition-base);
     overflow: hidden;
 }
 
+.card:hover {
+    box-shadow: var(--shadow-md);
+}
+
 .card-header {
-    padding: var(--space-4) var(--space-6);
+    padding: var(--space-5) var(--space-6);
     border-bottom: 1px solid var(--gray-100);
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
 }
 
 .card-header h3 {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 600;
-    color: var(--gray-800);
+    color: var(--gray-900);
     margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.card-header h3 i {
+    color: var(--primary-500);
 }
 
 .card-body {
@@ -636,10 +648,10 @@
 .card-title {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    font-size: 15px;
+    gap: var(--space-3);
+    font-size: 16px;
     font-weight: 600;
-    color: var(--gray-800);
+    color: var(--gray-900);
 }
 
 .card-title i { color: var(--primary-500); }

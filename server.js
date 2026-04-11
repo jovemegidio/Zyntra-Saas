@@ -1336,10 +1336,10 @@ app.get('/e-Nf-e/*', (req, res, next) => {
 });
 
 // Financeiro — com clean URLs e aliases root-level
-// Páginas habilitadas: index.html, contas_receber.html
-const finEnabledPages = ['index.html', 'contas_receber.html'];
+// Todas as páginas disponíveis no módulo Financeiro
+const finEnabledPages = ['index', 'contas_pagar', 'contas_receber', 'contas_bancarias', 'fluxo_caixa', 'relatorios', 'plano_contas', 'conciliacao', 'orcamentos', 'impostos'];
 app.get('/Financeiro/*.html', (req, res, next) => {
-    const page = req.params[0].split('/').pop();
+    const page = req.params[0].split('/').pop(); // Express strip .html from wildcard
     if (!finEnabledPages.includes(page)) {
         return res.redirect('/Financeiro/index.html');
     }
@@ -1347,16 +1347,7 @@ app.get('/Financeiro/*.html', (req, res, next) => {
 });
 app.get('/Financeiro/*', (req, res, next) => {
     if (req.params[0].includes('.')) return next();
-    // Bloquear clean URLs de páginas desativadas
     const page = req.params[0].split('/').pop();
-    const cleanToFile = { 'contas_pagar': 'contas_pagar.html', 'contas_receber': 'contas_receber.html',
-        'contas_bancarias': 'contas_bancarias.html', 'fluxo_caixa': 'fluxo_caixa.html',
-        'relatorios': 'relatorios.html', 'plano_contas': 'plano_contas.html',
-        'conciliacao': 'conciliacao.html', 'orcamentos': 'orcamentos.html', 'impostos': 'impostos.html' };
-    const resolved = cleanToFile[page];
-    if (resolved && !finEnabledPages.includes(resolved)) {
-        return res.redirect('/Financeiro/index.html');
-    }
     serveCleanUrl(req, res, next, path.join(__dirname, 'modules', 'Financeiro', 'public'));
 });
 // Financeiro: Dashboard alias

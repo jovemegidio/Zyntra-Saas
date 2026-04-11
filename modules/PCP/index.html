@@ -3217,11 +3217,13 @@
 
         .modal-op-table-container {
             overflow-x: auto;
+            margin: 0;
         }
 
         .modal-op-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
         }
 
         .modal-op-table thead {
@@ -3229,13 +3231,15 @@
         }
 
         .modal-op-table th {
-            padding: 12px 16px;
+            padding: 10px 8px;
             text-align: left;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: #475569;
             border-bottom: 1px solid #e2e8f0;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .modal-op-table tbody tr {
@@ -3247,21 +3251,26 @@
         }
 
         .modal-op-table td {
-            padding: 12px 16px;
-            font-size: 14px;
+            padding: 8px 6px;
+            font-size: 13px;
             color: #334155;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* Campos inline editáveis na tabela de produtos */
         .embalagem-inline-select {
             width: 100%;
-            padding: 6px 8px;
+            padding: 5px 4px;
             border: 1px solid #e2e8f0;
             border-radius: 6px;
             font-size: 13px;
             background: white;
             cursor: pointer;
             transition: all 0.2s;
+            box-sizing: border-box;
+            overflow: visible;
+            white-space: nowrap;
         }
 
         .embalagem-inline-select:hover {
@@ -5366,16 +5375,16 @@
                                 <table class="modal-op-table">
                                     <thead>
                                         <tr>
-                                            <th style="width: 30px;"><input type="checkbox" id="op-select-all-produtos">
+                                            <th style="width: 28px; padding-left: 12px;"><input type="checkbox" id="op-select-all-produtos">
                                             </th>
-                                            <th style="width: 80px;">Código</th>
+                                            <th style="width: 65px;">Código</th>
                                             <th>Produto</th>
-                                            <th style="width: 55px;">Unid.</th>
-                                            <th style="width: 80px;">Embalagem</th>
-                                            <th style="width: 80px;">Lance(s)</th>
-                                            <th style="width: 55px;">Qtd</th>
-                                            <th style="width: 80px;">V. Un. R$</th>
-                                            <th style="width: 90px;">V. Total R$</th>
+                                            <th style="width: 95px;">Embalagem</th>
+                                            <th style="width: 75px;">Lance(s)</th>
+                                            <th style="width: 40px;">Qtd</th>
+                                            <th style="width: 35px;">Unid.</th>
+                                            <th style="width: 75px;">V. Un. R$</th>
+                                            <th style="width: 80px;">V. Total R$</th>
                                         </tr>
                                     </thead>
                                     <tbody id="op-produtos-tbody">
@@ -5398,41 +5407,42 @@
                         </div>
 
                         <!-- Aba: Pagamento -->
-                        <div class="modal-op-tab-pane" id="op-tab-pagamento">
+                        <div class="modal-op-tab-pane" id="op-tab-pagamento" style="padding: 24px;">
                             <!-- Título da Seção -->
                             <div
-                                style="background: linear-gradient(135deg, #fef3c7, #fde68a); padding: 12px 16px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                                style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); padding: 14px 20px; border-radius: 12px; margin-bottom: 24px; border-left: 5px solid #f59e0b; box-shadow: 0 1px 3px rgba(245,158,11,0.1);">
                                 <h4
-                                    style="margin: 0; color: #92400e; font-size: 14px; display: flex; align-items: center; gap: 8px;">
-                                    <i class="fas fa-file-invoice-dollar"></i>
+                                    style="margin: 0; color: #92400e; font-size: 13px; display: flex; align-items: center; gap: 10px; letter-spacing: 0.8px; font-weight: 700;">
+                                    <i class="fas fa-file-invoice-dollar" style="font-size: 15px; color: #d97706;"></i>
                                     CONDIÇÕES DE PAGAMENTO
                                 </h4>
                             </div>
 
                             <!-- Tabela de Formas de Pagamento -->
                             <div
-                                style="background: white; border: 2px solid #e2e8f0; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+                                style="background: white; border: 1px solid #e2e8f0; border-radius: 14px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04);">
                                 <!-- Header da Tabela -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; background: #fef3c7; padding: 12px 16px; border-bottom: 2px solid #e2e8f0;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); padding: 14px 20px; border-bottom: 1px solid #e5e7eb;">
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase;">Formas
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Formas
                                         de Pagamento</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; text-align: center;">%</span>
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; text-align: center; letter-spacing: 0.5px;">%</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase;">Método
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Método
                                         de Pagamento</span>
                                     <span
-                                        style="font-weight: 700; color: #1e293b; font-size: 12px; text-transform: uppercase; text-align: right;">Valor
+                                        style="font-weight: 700; color: #78350f; font-size: 11px; text-transform: uppercase; text-align: right; letter-spacing: 0.5px;">Valor
                                         R$</span>
                                 </div>
 
                                 <!-- Linha 1: À Vista / Entrada -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 14px; background: #fffef5; transition: background 0.15s;">
                                     <select id="op-forma-pagamento-1"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: #fefce8;"
+                                        style="padding: 9px 12px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 13px; background: #fefce8; color: #1e293b; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="A_VISTA">À VISTA</option>
                                         <option value="ENTRADA">ENTRADA</option>
@@ -5440,13 +5450,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-1" value="100" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; background: #fefce8;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; background: #fefce8; color: #1e293b; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #a1a1aa; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-1"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #d4d4d8; border-radius: 8px; font-size: 13px; background: white; color: #1e293b; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#d4d4d8'">
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
                                         <option value="PIX">PIX</option>
@@ -5456,15 +5468,17 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-1"
-                                            style="font-size: 15px; font-weight: 700; color: #16a34a;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #16a34a; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
 
                                 <!-- Linha 2: Entrega / Parcela -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; align-items: center; gap: 14px; transition: background 0.15s;"
+                                    onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
                                     <select id="op-forma-pagamento-2"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;"
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="">Selecione...</option>
                                         <option value="ENTREGA">ENTREGA</option>
@@ -5473,13 +5487,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-2" value="0" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; color: #a1a1aa; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #d4d4d8; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-2"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'">
                                         <option value="">-</option>
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
@@ -5489,15 +5505,17 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-2"
-                                            style="font-size: 15px; font-weight: 700; color: #64748b;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #a1a1aa; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
 
                                 <!-- Linha 3: Adicional (opcional) -->
                                 <div
-                                    style="display: grid; grid-template-columns: 2fr 1fr 2fr 1.5fr; padding: 12px 16px; align-items: center; gap: 12px;">
+                                    style="display: grid; grid-template-columns: 2.2fr 0.8fr 2fr 1.2fr; padding: 14px 20px; align-items: center; gap: 14px; transition: background 0.15s;"
+                                    onmouseenter="this.style.background='#f8fafc'" onmouseleave="this.style.background='transparent'">
                                     <select id="op-forma-pagamento-3"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;"
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                         onchange="calcularValoresPagamento()">
                                         <option value="">Selecione...</option>
                                         <option value="PARCELA_2">PARCELA 2</option>
@@ -5506,13 +5524,15 @@
                                     </select>
                                     <div style="position: relative;">
                                         <input type="number" id="op-percent-3" value="0" min="0" max="100"
-                                            style="width: 100%; padding: 10px 30px 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center;"
+                                            style="width: 100%; padding: 9px 28px 9px 10px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 14px; font-weight: 600; text-align: center; color: #a1a1aa; transition: border-color 0.2s; outline: none;"
+                                            onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"
                                             oninput="calcularValoresPagamento()" onchange="calcularValoresPagamento()">
                                         <span
-                                            style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #64748b; font-weight: 600;">%</span>
+                                            style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #d4d4d8; font-weight: 600; font-size: 13px; pointer-events: none;">%</span>
                                     </div>
                                     <select id="op-metodo-pagamento-3"
-                                        style="padding: 10px 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 13px; background: white;">
+                                        style="padding: 9px 12px; border: 1.5px solid #e4e4e7; border-radius: 8px; font-size: 13px; background: white; color: #71717a; font-weight: 500; cursor: pointer; transition: border-color 0.2s; outline: none;"
+                                        onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'">
                                         <option value="">-</option>
                                         <option value="BOLETO">BOLETO</option>
                                         <option value="TRANSFERENCIA">TRANSFERÊNCIA</option>
@@ -5522,22 +5542,20 @@
                                     </select>
                                     <div style="text-align: right;">
                                         <span id="op-valor-pagamento-3"
-                                            style="font-size: 15px; font-weight: 700; color: #64748b;">R$ 0,00</span>
+                                            style="font-size: 14px; font-weight: 700; color: #a1a1aa; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Resumo e Total -->
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 4px;">
                                 <!-- Percentual Total -->
                                 <div
-                                    style="background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-size: 13px; color: #64748b; font-weight: 600;">Total
-                                            Percentual:</span>
-                                        <span id="op-percent-total"
-                                            style="font-size: 20px; font-weight: 700; color: #1e293b;">100%</span>
-                                    </div>
+                                    style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Total
+                                        Percentual:</span>
+                                    <span id="op-percent-total"
+                                        style="font-size: 22px; font-weight: 800; color: #1e293b; font-family: 'Segoe UI', system-ui, sans-serif;">100%</span>
                                     <div id="op-percent-alert"
                                         style="display: none; margin-top: 8px; padding: 8px 12px; background: #fef2f2; border-radius: 6px; color: #dc2626; font-size: 12px;">
                                         <i class="fas fa-exclamation-triangle"></i> O percentual deve totalizar 100%
@@ -5546,26 +5564,25 @@
 
                                 <!-- Valor Total -->
                                 <div
-                                    style="background: linear-gradient(135deg, #dcfce7, #bbf7d0); border: 2px solid #86efac; border-radius: 12px; padding: 16px;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                                        <span style="font-size: 13px; color: #166534; font-weight: 600;">Valor Total
-                                            $:</span>
-                                        <span id="op-valor-total-pagamento"
-                                            style="font-size: 20px; font-weight: 700; color: #16a34a;">R$ 0,00</span>
-                                    </div>
+                                    style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border: 1px solid #a7f3d0; border-radius: 12px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;">
+                                    <span style="font-size: 12px; color: #166534; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;">Valor
+                                        Total:</span>
+                                    <span id="op-valor-total-pagamento"
+                                        style="font-size: 22px; font-weight: 800; color: #16a34a; font-family: 'Segoe UI', system-ui, sans-serif;">R$ 0,00</span>
                                 </div>
                             </div>
 
                             <!-- Condições Adicionais -->
                             <div style="margin-top: 20px;">
                                 <label
-                                    style="display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px;">
-                                    <i class="fas fa-info-circle" style="color: #64748b;"></i> Condições de Pagamento
+                                    style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px;">
+                                    <i class="fas fa-info-circle" style="color: #94a3b8; font-size: 13px;"></i> Condições de Pagamento
                                     (Observações)
                                 </label>
-                                <input type="text" id="op-condições-pagamento"
+                                <textarea id="op-condições-pagamento" rows="2"
                                     placeholder="Ex: 28 dias após o faturamento, 30/60/90 dias, etc."
-                                    style="width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px;">
+                                    style="width: 100%; padding: 12px 16px; border: 1.5px solid #e4e4e7; border-radius: 10px; font-size: 13px; resize: vertical; min-height: 44px; font-family: inherit; transition: border-color 0.2s; outline: none; color: #374151;"
+                                    onfocus="this.style.borderColor='#f59e0b'" onblur="this.style.borderColor='#e4e4e7'"></textarea>
                             </div>
                         </div>
 
@@ -10567,7 +10584,7 @@
                 produtos: (dados.produtos || []).map(p => ({
                     codigo: p.codigo || '',
                     descrição: p.descrição || '',
-                    embalagem: p.embalagem || '',
+                    embalagem: p.embalagem || 'Bobina',
                     codigo_cores: p.codigo_cores || '',
                     lances: p.lances || '',
                     quantidade: parseFloat(p.quantidade) || 0,
@@ -10783,6 +10800,7 @@
                 metodo_pagamento: document.getElementById('op-metodo-pagamento-1')?.value || 'BOLETO',
                 percentual_pagamento: parseFloat(document.getElementById('op-percent-1')?.value) || 100,
                 condições_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
+                condicoes_pagamento: document.getElementById('op-condições-pagamento')?.value || '',
 
                 // Entrega
                 data_previsao_entrega: document.getElementById('op-data-entrega')?.value || '',
@@ -11058,6 +11076,7 @@
             const produto = {
                 codigo,
                 descrição: descriçãoFinal,
+                descricao: descriçãoFinal,
                 embalagem,
                 codigo_cores: codigoCores,
                 lances,
@@ -11320,9 +11339,9 @@
                 totalGeral += prod.total;
                 html += `
                     <tr>
-                        <td><input type="checkbox" class="op-produto-check" data-index="${index}"></td>
+                        <td style="padding-left: 12px;"><input type="checkbox" class="op-produto-check" data-index="${index}"></td>
                         <td><span class="prod-codigo-cell">${prod.codigo}</span></td>
-                        <td title="${prod.descrição}">${prod.descrição && !prod.descrição.includes('VLOOKUP') ? prod.descrição : prod.codigo || 'Sem descrição'}</td>
+                        <td title="${prod.descrição}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${prod.descrição && !prod.descrição.includes('VLOOKUP') ? prod.descrição : prod.codigo || 'Sem descrição'}</td>
                         <td>
                             <select class="embalagem-inline-select" data-index="${index}" onchange="atualizarEmbalagemProduto(${index}, this.value)">
                                 <option value="Bobina" ${prod.embalagem === 'Bobina' || !prod.embalagem ? 'selected' : ''}>Bobina</option>
@@ -11430,6 +11449,11 @@
                 showNotification('Preencha pelo menos os dados do cliente', 'warning');
                 switchOPTab('cliente');
                 return;
+            }
+
+            // 🔧 FIX BUG-R4-25: Alertar usuário se houver mais de 15 produtos (limite do template)
+            if (dados.produtos && dados.produtos.length > 15) {
+                showNotification(`Atenção: O template suporta no máximo 15 produtos. ${dados.produtos.length - 15} produto(s) serão omitidos do Excel.`, 'warning');
             }
 
             console.log('Gerando Excel com dados:', dados);
@@ -18741,7 +18765,8 @@
                         return {
                             codigo: item.codigo || '',
                             descrição: desc,
-                            embalagem: item.embalagem || '',
+                            embalagem: item.embalagem || 'Bobina',
+                            codigo_cores: item.codigo_cores || '',
                             lances: item.lances || '',
                             quantidade: parseFloat(item.quantidade) || 1,
                             unidade_medida: item.unidade || item.unidade_medida || 'M',

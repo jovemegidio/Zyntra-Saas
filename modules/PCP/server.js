@@ -638,14 +638,19 @@ app.get('/api/pcp/transportadoras', authRequired, async (req, res) => {
             return {
                 id: r.id,
                 nome: r.razao_social || r.nome_fantasia || '',
+                razao_social: r.razao_social || '',
+                nome_fantasia: r.nome_fantasia || '',
                 cnpj: _dec(r.cnpj_cpf || ''),
+                cnpj_cpf: _dec(r.cnpj_cpf || ''),
                 inscricao_estadual: _dec(r.inscricao_estadual || ''),
                 email: r.email || '',
                 telefone: r.telefone || '',
                 endereco: endereco,
                 cep: r.cep || '',
                 cidade: r.cidade || '',
-                estado: r.estado || ''
+                estado: r.estado || '',
+                contato: r.contato || '',
+                bairro: r.bairro || ''
             };
         });
         return res.json(resultado);
@@ -7354,11 +7359,8 @@ async function handleGerarOrdemExcel(req, res) {
         // Frete
         wsVendas.getCell('J9').value = dados.tipo_frete || 'FOB';
 
-        // CEP
-        wsVendas.getCell('C13').value = dados.cep || '';
-
-        // Endereço
-        wsVendas.getCell('F13').value = dados.endereco || '';
+        // CEP, Endereço e CPF/CNPJ ficam nas células C13/F13/C15 (área transportadora)
+        // Preenchidos mais abaixo na seção TRANSPORTADORA com fallback para dados do cliente
 
         // Dados para cobrança (Linha 14) - Em branco por padrão
         // NÃO PREENCHER - deve ficar vazio conforme modelo padrão
@@ -7368,10 +7370,6 @@ async function handleGerarOrdemExcel(req, res) {
             if (cell.formula) cell.formula = undefined;
             if (cell.sharedFormula) cell.sharedFormula = undefined;
         });
-
-        // CPF/CNPJ - Formatado com pontuação
-        const cpfCnpjFormatado = formatarCpfCnpjExcel(dados.cpf_cnpj || '');
-        wsVendas.getCell('C15').value = cpfCnpjFormatado;
 
         // Email NF-e (usa o email do cliente se não informado)
         wsVendas.getCell('G15').value = dados.email_nfe || dados.email_cliente || dados.email || '';
@@ -7396,9 +7394,9 @@ async function handleGerarOrdemExcel(req, res) {
             // As fórmulas são: =IFERROR(VLOOKUP(B18,N18:O198,2,0),"")
             // Se o código do produto existir na tabela N:O, o nome aparecerá automaticamente
             // Se precisar forçar o nome (produto não cadastrado na tabela), preencher apenas se código não existe
-            if (!produto.codigo && (produto.descricao || produto.nome || produto.produto)) {
+            if (!produto.codigo && (produto.descricao || produto['descri\u00e7\u00e3o'] || produto.nome || produto.produto)) {
                 // Produto sem código - preencher nome manualmente
-                const nomeProduto = produto.descricao || produto.nome || produto.produto || '';
+                const nomeProduto = produto.descricao || produto['descri\u00e7\u00e3o'] || produto.nome || produto.produto || '';
                 wsVendas.getCell(`C${linhaVendas}`).value = nomeProduto;
             }
             // Se tem código, deixa o VLOOKUP do template buscar o nome automaticamente
@@ -7478,6 +7476,15 @@ async function handleGerarOrdemExcel(req, res) {
                 wsVendas.getCell('E46').numFmt = '0%';
                 wsVendas.getCell('F46').value = pgto2.metodo || '';
             }
+
+            // Linha 47: Terceira forma de pagamento (se houver)
+            if (dados.formas_pagamento.length > 2) {
+                const pgto3 = dados.formas_pagamento[2];
+                wsVendas.getCell('A47').value = pgto3.forma || '';
+                wsVendas.getCell('E47').value = (pgto3.percentual || 0) / 100;
+                wsVendas.getCell('E47').numFmt = '0%';
+                wsVendas.getCell('F47').value = pgto3.metodo || '';
+            }
         } else {
             // Compatibilidade com formato antigo
             if (dados.forma_pagamento) {
@@ -7492,6 +7499,12 @@ async function handleGerarOrdemExcel(req, res) {
             wsVendas.getCell('E45').numFmt = '0%';
         }
         // I45 = Fórmula =I35 (não preencher)
+
+        // Condições de Pagamento (Observações) - aceitar variantes com e sem acento
+        const condicoesPagamentoObs = dados['condi\u00e7\u00f5es_pagamento'] || dados.condicoes_pagamento || dados.condições_pagamento || '';
+        if (condicoesPagamentoObs) {
+            wsVendas.getCell('A48').value = condicoesPagamentoObs;
+        }
 
         // ENTREGA (Linhas 48-54)
         if (dados.qtd_volumes) {
@@ -7535,7 +7548,7 @@ async function handleGerarOrdemExcel(req, res) {
                 }
 
                 // Preencher DESCRIÇÃO/PRODUTO na coluna C (SEMPRE, não depender do VLOOKUP)
-                const descricao = produto.descricao || produto.nome || produto.produto || '';
+                const descricao = produto.descricao || produto['descri\u00e7\u00e3o'] || produto.nome || produto.produto || '';
                 // SEMPRE preencher a célula C, mesmo que descricao esteja vazia (para limpar fórmulas)
                 const cellDescricao = wsProd.getCell(`C${linhaProduto}`);
                 // Limpar fórmula ANTES de preencher valor
