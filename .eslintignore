@@ -1,0 +1,86 @@
+# ===================================================================
+# ESLint Ignore — Limita varredura ao código de produção principal
+# ===================================================================
+
+# Dependências
+node_modules/
+
+# Build/Output
+dist/
+coverage/
+.nyc_output/
+
+# Sub-projetos independentes (têm seu próprio config)
+Base/
+Chat Teams/
+chat/
+desktop-app/
+android-app/
+android/
+lp/
+n8n/
+
+# Diretórios de operações / scripts auxiliares
+auditorias/
+backups/
+backup-*/
+backup-vps-*/
+deploy/
+scripts/
+scripts_auxiliares/
+monitoring/
+_Zyntra_Legacy/
+_shared/
+storage/
+images/
+image/
+ssl/
+cert/
+docs/
+tmp/
+temp/
+emails-sge/
+Templates - Sistema/
+Fotos Colaboradores - Atualizada/
+
+# Scripts utilitários na raiz (não são código de produção)
+check-*.js
+test-*.js
+fix-*.js
+deploy-*.js
+deploy-qa-*.js
+tmp-*.js
+temp-*.js
+master-patch-*.js
+mega-*.js
+precision-*.js
+patch-*.js
+remove-*.js
+setup-*.js
+reset-*.js
+sync-*.js
+auto-sync-*.js
+vps-*.js
+start-*.js
+import-*.js
+verify-*.js
+audit-*.js
+enrich-*.js
+find-*.js
+debug-*.js
+create-*.js
+test-modais-*.js
+test-e2e-*.js
+lgpd-crypto.js
+atualizar-*.js
+ec2-*.js
+aluforce-*.js
+
+# Arquivos de configuração de infraestrutura
+ecosystem.*.config.js
+nodemon.json
+playwright.config.js
+playwright.*.config.js
+
+# Arquivos gerados
+*.min.js
