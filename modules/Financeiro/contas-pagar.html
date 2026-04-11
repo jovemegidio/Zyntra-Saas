@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <script src="/js/anti-copy-protection.js?v=20260410" defer></script>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
     <meta charset="UTF-8">
@@ -281,6 +282,7 @@
         <!-- MAIN -->
         <main class="main-area">
             <header class="header">
+    <script src="/js/anti-copy-protection.js?v=20260410" defer></script>
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
@@ -290,7 +292,7 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;"></span>
+                        <span style="color:rgba(255,255,255,0.18);font-weight:200;font-size:16px;user-select:none;margin:0 2px;">&#8212;</span>
                         <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Contas a Pagar</span>
                     </div>
                 </div>
@@ -388,13 +390,6 @@
                             <option value="ultimos-30">últimos 30 dias</option>
                             <option value="ultimos-60">últimos 60 dias</option>
                             <option value="ultimos-90">últimos 90 dias</option>
-                            <option value="2026-01">Janeiro/2026</option>
-                            <option value="2026-02">Fevereiro/2026</option>
-                            <option value="2026-03">Março/2026</option>
-                            <option value="2026-04">Abril/2026</option>
-                            <option value="2026-05">Maio/2026</option>
-                            <option value="2026-06">Junho/2026</option>
-
                         </select>
                     </div>
                     <div class="filter-group">
@@ -667,6 +662,20 @@
                                 <label>Conta Corrente</label>
                                 <select id="conta-banco">
                                     <option value="">Selecione...</option>
+                                </select>
+                            </div>
+                            <div class="form-group-conta">
+                                <label>Forma de Pagamento</label>
+                                <select id="conta-forma-pagamento">
+                                    <option value="">Selecione...</option>
+                                    <option value="boleto">Boleto</option>
+                                    <option value="pix">PIX</option>
+                                    <option value="ted">TED</option>
+                                    <option value="doc">DOC</option>
+                                    <option value="cartao">Cartão</option>
+                                    <option value="cheque">Cheque</option>
+                                    <option value="dinheiro">Dinheiro</option>
+                                    <option value="debito_automatico">Débito Automático</option>
                                 </select>
                             </div>
                         </div>
@@ -2331,6 +2340,7 @@
                 const raw = data.data || data || [];
                 contasPagar = Array.isArray(raw) ? raw : [];
                 todasContas = [...contasPagar]; // Guardar todas para filtros
+                populateMesesFiltro();
                 filtrarDados();
                 atualizarStats();
             } catch (e) {
@@ -2339,6 +2349,53 @@
                 renderizarTabela();
                 atualizarStats();
             }
+        }
+
+        // Popula o filtro de período com meses detectados dos dados
+        function populateMesesFiltro() {
+            const select = document.getElementById('filter-período');
+            if (!select) return;
+
+            // Remover opções de mês anteriores (padrão YYYY-MM)
+            Array.from(select.options).forEach(opt => {
+                if (/^\d{4}-\d{2}$/.test(opt.value)) opt.remove();
+            });
+
+            // Coletar meses únicos dos dados
+            const mesesSet = new Set();
+            todasContas.forEach(c => {
+                const venc = c.data_vencimento || c.vencimento || c.mes_referencia;
+                if (venc) {
+                    const mesStr = String(venc).slice(0, 7);
+                    if (/^\d{4}-\d{2}$/.test(mesStr)) mesesSet.add(mesStr);
+                }
+                if (c.mes_referencia && /^\d{4}-\d{2}$/.test(c.mes_referencia)) {
+                    mesesSet.add(c.mes_referencia);
+                }
+            });
+
+            // Também adicionar meses do ano corrente
+            const anoAtual = new Date().getFullYear();
+            for (let m = 1; m <= 12; m++) {
+                mesesSet.add(`${anoAtual}-${String(m).padStart(2, '0')}`);
+            }
+
+            const mesesOrdenados = Array.from(mesesSet).sort();
+            const nomesMeses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+            // Separador
+            const sep = document.createElement('option');
+            sep.disabled = true;
+            sep.textContent = '── Meses ──';
+            select.appendChild(sep);
+
+            mesesOrdenados.forEach(mes => {
+                const [ano, m] = mes.split('-');
+                const opt = document.createElement('option');
+                opt.value = mes;
+                opt.textContent = `${nomesMeses[parseInt(m) - 1]}/${ano}`;
+                select.appendChild(opt);
+            });
         }
 
         function renderizarTabela() {
@@ -2561,13 +2618,13 @@
         // ============================================
         let centrosCusto = [];
         let distribuicaoLinhas = [];
-        
+
         async function carregarCentrosCusto() {
             try {
                 const res = await fetch('/api/financeiro/centros-custo', { credentials: 'include' });
                 const data = await res.json();
                 centrosCusto = data.data || [];
-            } catch(e) { 
+            } catch(e) {
                 console.error('Erro ao carregar centros de custo:', e);
             }
         }
@@ -2786,6 +2843,7 @@
             document.getElementById('conta-vencimento-original').value = conta.data_vencimento_original || conta.vencimento_original || conta.data_vencimento || conta.vencimento || '';
             document.getElementById('conta-vencimento').value = conta.data_vencimento || conta.data_vencimento_atualizado || conta.vencimento || '';
             document.getElementById('conta-banco').value = conta.conta_bancaria_id || '';
+            document.getElementById('conta-forma-pagamento').value = conta.forma_pagamento || '';
             document.getElementById('conta-observacoes').value = conta.observacoes || '';
 
             // Resetar para primeira aba
@@ -2800,6 +2858,7 @@
         async function salvarConta() {
             const dados = {
                 fornecedor: document.getElementById('conta-fornecedor').value,
+                fornecedor_id: document.getElementById('conta-fornecedor').dataset.id || document.getElementById('conta-fornecedor').value,
                 categoria: document.getElementById('conta-categoria').value,
                 numero_documento: document.getElementById('conta-documento').value,
                 codigo_barras: document.getElementById('conta-código-barras').value,
@@ -2808,6 +2867,8 @@
                 data_vencimento_original: document.getElementById('conta-vencimento-original').value,
                 data_vencimento: document.getElementById('conta-vencimento').value || document.getElementById('conta-vencimento-original').value,
                 conta_bancaria_id: document.getElementById('conta-banco').value || null,
+                forma_pagamento: document.getElementById('conta-forma-pagamento').value || null,
+                descricao: document.getElementById('conta-documento').value || document.getElementById('conta-fornecedor').value,
                 observacoes: document.getElementById('conta-observacoes').value
             };
 
@@ -2829,9 +2890,15 @@
                     ? `/api/financeiro/contas-pagar/${editandoId}`
                     : '/api/financeiro/contas-pagar';
 
+                // UC-FIN-01: Gerar X-Idempotency-Key para prevenir lançamentos duplicados
+                const headers = { 'Content-Type': 'application/json' };
+                if (!editandoId) {
+                    headers['X-Idempotency-Key'] = crypto.randomUUID();
+                }
+
                 const response = await fetch(url, {
                     method: editandoId ? 'PUT' : 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers,
                     credentials: 'include',
                     body: JSON.stringify(dados)
                 });
@@ -2840,6 +2907,9 @@
                     fecharModal();
                     await carregarContas();
                     mostrarNotificacao(editandoId ? 'Conta atualizada com sucesso!' : 'Conta criada com sucesso!', 'success');
+                } else if (response.status === 409) {
+                    const error = await response.json();
+                    mostrarNotificacao('Lançamento duplicado detectado. Esta conta já foi salva.', 'warning');
                 } else {
                     const error = await response.json();
                     mostrarNotificacao('Erro: ' + (error.message || 'Falha ao salvar'), 'error');
