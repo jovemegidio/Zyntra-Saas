@@ -346,7 +346,7 @@ describe('FASE 1: Validação de Mapeamento de Dados PRODUÇÃO', () => {
                 assert.strictEqual(typeof item.codigo, 'string');
                 assert.ok(item.codigo.length >= 3, `Item ${index + 1}: codigo muito curto`);
                 // Não pode conter caracteres de controle
-                assert.ok(!/[\x00-\x1F]/.test(item.codigo),
+                assert.ok(!/[\x00-\x1F]/.test(item.codigo), // eslint-disable-line no-control-regex
                     `Item ${index + 1}: codigo contém caracteres de controle`);
             });
         });
