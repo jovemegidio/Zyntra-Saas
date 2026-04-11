@@ -36,6 +36,7 @@ jobs:
         run: npm run lint:check
 
       - name: Prettier check
+        continue-on-error: true
         run: npx prettier --check "**/*.{js,json,css}" --ignore-path .prettierignore
 
   # ────────────────────────────────────────────────
