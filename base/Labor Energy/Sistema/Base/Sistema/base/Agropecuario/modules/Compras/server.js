@@ -84,7 +84,7 @@ const mysqlPool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',
     database: process.env.DB_NAME || 'aluforce_vendas',
     waitForConnections: true,
-    connectionLimit: 5
+    connectionLimit: 2
 });
 
 // Inicializar MySQL pool no módulo database.js para as APIs
@@ -220,12 +220,11 @@ app.post('/api/compras/pedidos/:id/receber', authenticateToken, async (req, res)
         `, [data_recebimento, data_recebimento, numero_nfe, chave_acesso, novoStatus, atualizar_estoque ? 1 : 0,
             `[${new Date().toLocaleString('pt-BR')}] Recebimento ${tipo} por ${responsavel || 'Sistema'}: NF-e ${numero_nfe || 'N/A'}`, pedidoId]);
 
-        // Atualizar estoque
+        // COMPRAS-05 FIX: Usar material_id do item em vez de matching por índice de array
         if (atualizar_estoque && itens.length > 0) {
-            const [itensPedido] = await connection.query('SELECT * FROM pedidos_compra_itens WHERE pedido_id = ?', [pedidoId]);
-            for (let i = 0; i < itens.length; i++) {
-                const qtd = parseFloat(itens[i].quantidade_recebida) || 0;
-                const materialId = itensPedido[i]?.material_id;
+            for (const item of itens) {
+                const qtd = parseFloat(item.quantidade_recebida) || 0;
+                const materialId = item.material_id;
                 if (qtd <= 0 || !materialId) continue;
                 const [est] = await connection.query('SELECT id FROM estoque WHERE material_id = ?', [materialId]);
                 if (est.length > 0) {
@@ -349,18 +348,18 @@ app.get('/api/compras/nf-entrada', authenticateToken, async (req, res) => {
     }
 });
 
-// Importar NF-e por chave de acesso (44 dígitos)
+// Importar NF-e por chave de acesso (44 digitos)
 app.post('/api/compras/nf-entrada/importar-chave', authenticateToken, async (req, res) => {
     try {
         const { chave } = req.body;
-        if (!chave) return res.status(400).json({ error: 'Chave de acesso é obrigatória' });
+        if (!chave) return res.status(400).json({ error: 'Chave de acesso e obrigatoria' });
 
         const chaveClean = chave.replace(/\D/g, '');
-        if (chaveClean.length !== 44) return res.status(400).json({ error: 'Chave deve ter 44 dígitos' });
+        if (chaveClean.length !== 44) return res.status(400).json({ error: 'Chave deve ter 44 digitos' });
 
         // Verificar duplicata
         const [existe] = await mysqlPool.query('SELECT id FROM nf_entrada WHERE chave_acesso = ?', [chaveClean]);
-        if (existe.length > 0) return res.json({ success: false, duplicada: true, id: existe[0].id, error: 'NF-e já importada' });
+        if (existe.length > 0) return res.json({ success: false, duplicada: true, id: existe[0].id, error: 'NF-e ja importada' });
 
         // Decodificar campos da chave
         const cnpj = chaveClean.substring(6, 20);
@@ -393,11 +392,11 @@ app.post('/api/compras/nf-entrada/importar-chave', authenticateToken, async (req
         res.status(500).json({ error: 'Erro ao importar NF-e por chave de acesso' });
     }
 });
-
 // Dashboard endpoint - COM AUTENTICAÇÃO
 app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
+    let conn; // FIX RT-PL01: declarado fora do try para garantir release no finally
     try {
-        const conn = await mysqlPool.getConnection();
+        conn = await mysqlPool.getConnection();
 
         // Total de pedidos e valor
         const [totais] = await conn.query(`
@@ -479,8 +478,7 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             LIMIT 10
         `).catch(() => [[]]);
 
-        conn.release();
-
+        // FIX RT-PL01: conn.release() movido para finally
         res.json({
             total_pedidos: totais[0].total_pedidos || 0,
             valor_total_pedidos: parseFloat(totais[0].valor_total_pedidos) || 0,
@@ -512,6 +510,9 @@ app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
             ultimos_pedidos: [],
             atividades_recentes: []
         });
+    } finally {
+        // FIX RT-PL01: garante release mesmo com erro — evita pool starvation
+        if (conn) conn.release();
     }
 });
 

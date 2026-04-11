@@ -349,18 +349,18 @@ app.get('/api/compras/nf-entrada', authenticateToken, async (req, res) => {
     }
 });
 
-// Importar NF-e por chave de acesso (44 dígitos)
+// Importar NF-e por chave de acesso (44 digitos)
 app.post('/api/compras/nf-entrada/importar-chave', authenticateToken, async (req, res) => {
     try {
         const { chave } = req.body;
-        if (!chave) return res.status(400).json({ error: 'Chave de acesso é obrigatória' });
+        if (!chave) return res.status(400).json({ error: 'Chave de acesso e obrigatoria' });
 
         const chaveClean = chave.replace(/\D/g, '');
-        if (chaveClean.length !== 44) return res.status(400).json({ error: 'Chave deve ter 44 dígitos' });
+        if (chaveClean.length !== 44) return res.status(400).json({ error: 'Chave deve ter 44 digitos' });
 
         // Verificar duplicata
         const [existe] = await mysqlPool.query('SELECT id FROM nf_entrada WHERE chave_acesso = ?', [chaveClean]);
-        if (existe.length > 0) return res.json({ success: false, duplicada: true, id: existe[0].id, error: 'NF-e já importada' });
+        if (existe.length > 0) return res.json({ success: false, duplicada: true, id: existe[0].id, error: 'NF-e ja importada' });
 
         // Decodificar campos da chave
         const cnpj = chaveClean.substring(6, 20);
@@ -393,7 +393,6 @@ app.post('/api/compras/nf-entrada/importar-chave', authenticateToken, async (req
         res.status(500).json({ error: 'Erro ao importar NF-e por chave de acesso' });
     }
 });
-
 // Dashboard endpoint - COM AUTENTICAÇÃO
 app.get('/api/compras/dashboard', authenticateToken, async (req, res) => {
     try {
