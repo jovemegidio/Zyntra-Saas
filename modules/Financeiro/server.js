@@ -132,6 +132,49 @@ app.use(cookieParser());
 // Dev Spec 1.1: Interceptador global de corte temporal
 app.use('/api/financeiro', corteTemporalMiddleware);
 
+// ============================================
+// ROTA: /api/me — usada por auth-unified.js e financeiro-sidebar.js
+// Sem esta rota, auth-unified.js recebe 404, trata como "sessão expirada"
+// e redireciona o usuário para login.html incorretamente.
+// ============================================
+app.get('/api/me', authenticateToken, (req, res) => {
+    res.json(req.user);
+});
+
+// Compatibilidade: /api/auth/refresh para auth-unified.js (token refresh)
+app.post('/api/auth/refresh', async (req, res) => {
+    try {
+        // Delegar refresh para o módulo de auth central via cookie
+        const jwt = require('jsonwebtoken');
+        const refreshToken = req.cookies?.refreshToken;
+        if (!refreshToken) {
+            return res.status(401).json({ message: 'Refresh token não encontrado', code: 'AUTH_MISSING' });
+        }
+        const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET || process.env.SECRET_KEY;
+        try {
+            const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET, { algorithms: ['HS256'] });
+            const JWT_SECRET = process.env.JWT_SECRET || process.env.SECRET_KEY;
+            const accessToken = jwt.sign(
+                { id: payload.id, email: payload.email, role: payload.role, nome: payload.nome, is_admin: payload.is_admin },
+                JWT_SECRET,
+                { algorithm: 'HS256', expiresIn: '15m' }
+            );
+            res.cookie('authToken', accessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 15 * 60 * 1000
+            });
+            return res.json({ success: true, user: { id: payload.id, email: payload.email, role: payload.role, nome: payload.nome } });
+        } catch (jwtErr) {
+            return res.status(401).json({ message: 'Refresh token expirado ou inválido', code: 'AUTH_EXPIRED' });
+        }
+    } catch (err) {
+        console.error('[Financeiro] Erro no refresh de token:', err);
+        return res.status(500).json({ message: 'Erro interno no refresh', code: 'SERVER_ERROR' });
+    }
+});
+
 // Servir arquivos estáticos (HTML sem cache para deploy imediato)
 app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));

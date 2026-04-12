@@ -413,6 +413,9 @@
                 <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
         <main class="main-area" data-page-name="Contas a Receber">
@@ -1407,7 +1410,7 @@
             var clientes = []; contas.forEach(function(c){ if(c.cliente_nome && clientes.indexOf(c.cliente_nome)===-1) clientes.push(c.cliente_nome); }); clientes.sort();
             var selCli = document.getElementById('filtro-cliente-select');
             if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(''); }
-            
+
             // Popular meses dinamicamente
             var selPer = document.getElementById('filtro-período');
             if (selPer) {
