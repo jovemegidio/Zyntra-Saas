@@ -650,16 +650,14 @@
             const nome = esc(contaVisualizando?.nome || 'Conta');
             const inicio = document.getElementById('extrato-data-inicio').value;
             const fim = document.getElementById('extrato-data-fim').value;
-            w.document.write(`<html><head><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${extratoMovimentacoes.map(m=>`<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${esc(m.descricao)||'-'}</td><td>${esc(m.tipo)}</td><td class="${esc(m.tipo)}">${m.tipo==='entrada'?'+':'-'} R$ ${(parseFloat(m.valor)||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`).join('')}</tbody></table>
-<!-- Zyntra: Confirm Dialog Profissional v2.0 --><script src="/_shared/confirm-dialog.js?v=20260408"></script>
-    <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260408" defer></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260408" defer></script>
-    <script src="/js/user-dropdown.js?v=20260408" defer></script>
-</body></html>`);
+            const escHtml = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            const rows = extratoMovimentacoes.map(m => {
+                const tipo = m.tipo === 'entrada' ? 'entrada' : 'saida';
+                const sinal = tipo === 'entrada' ? '+' : '-';
+                const valor = (parseFloat(m.valor) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                return `<tr><td>${new Date(m.data).toLocaleDateString('pt-BR')}</td><td>${escHtml(m.descricao || '-')}</td><td>${tipo}</td><td class="${tipo}">${sinal} R$ ${valor}</td></tr>`;
+            }).join('');
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Extrato - ${nome}</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Extrato Bancário — ${nome}</h2><p>Período: ${inicio} a ${fim}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th></tr></thead><tbody>${rows}</tbody></table></body></html>`);
             w.document.close(); w.print();
         }
 
