@@ -11546,7 +11546,7 @@
             // Validar Tipo de Frete obrigatório
             if (!tipoFrete || tipoFrete === '') {
                 showNotification('Selecione o Tipo de Frete (CIF, FOB, etc.)', 'warning');
-                switchTab('frete');
+                switchModalTab('frete');
                 document.getElementById('edit-tipo-frete')?.focus();
                 window._salvandoPedido = false;
                 return;
@@ -11608,7 +11608,7 @@
 
                 // Salvar no backend via API
                 const response = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}`, {
-                    credentials: 'include', method: 'PATCH',
+                    credentials: 'include', method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dadosAtualizacao)
                 });

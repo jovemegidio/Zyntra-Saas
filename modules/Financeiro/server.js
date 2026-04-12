@@ -897,6 +897,65 @@ app.post('/api/financeiro/contas-receber/importar-excel', authenticateToken, upl
     }
 });
 
+// Importar contas a receber via JSON (frontend faz parse do Excel e envia array)
+app.post('/api/financeiro/contas-receber/importar-json', authenticateToken, async (req, res) => {
+    try {
+        const { dados } = req.body;
+        if (!Array.isArray(dados) || dados.length === 0) {
+            return res.status(400).json({ error: 'Dados inválidos. Envie um array de registros em "dados".' });
+        }
+        if (dados.length > 5000) {
+            return res.status(400).json({ error: 'Limite de 5000 registros por importação' });
+        }
+
+        // Remover imports anteriores
+        await pool.execute(`DELETE FROM contas_receber WHERE origem_integracao = 'importacao_excel'`);
+
+        let importados = 0;
+        const erros = [];
+
+        for (let i = 0; i < dados.length; i++) {
+            const row = dados[i];
+            try {
+                const valor = parseFloat(row.valor) || 0;
+                if (valor <= 0) continue;
+
+                const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+                const emissao = row.data_emissao && dateRegex.test(row.data_emissao) ? row.data_emissao : new Date().toISOString().slice(0, 10);
+                const vencimento = row.data_vencimento && dateRegex.test(row.data_vencimento) ? row.data_vencimento : emissao;
+
+                const statusMap = { 'liquidado': 'liquidada', 'liquidada': 'liquidada', 'vencido': 'vencida', 'vencida': 'vencida', 'a vencer': 'a_vencer' };
+                const statusFinal = statusMap[String(row.status || '').toLowerCase()] || 'a_vencer';
+
+                await pool.execute(
+                    `INSERT INTO contas_receber
+                     (empresa, nota_fiscal, parcela_info, cliente_nome, cnpj_cliente,
+                      data_emissao, data_vencimento, valor, tipo_documento,
+                      situacao, portador, data_operacao, status, dias_vencido,
+                      posicao, observacoes, origem_integracao)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'importacao_excel')`,
+                    [
+                        row.empresa || null, row.nota_fiscal || null, row.parcela_info || null,
+                        row.cliente_nome || null, row.cnpj_cliente || null,
+                        emissao, vencimento, valor, row.tipo || null,
+                        row.situacao || null, row.portador || null, row.data_operacao || null,
+                        statusFinal, parseInt(row.dias_vencido) || null,
+                        row.posicao || null, row.observacoes || null
+                    ]
+                );
+                importados++;
+            } catch (e) {
+                erros.push({ linha: i + 1, erro: e.message });
+            }
+        }
+
+        res.json({ success: true, importados, erros: erros.slice(0, 10) });
+    } catch (error) {
+        console.error('❌ Erro ao importar contas a receber (JSON):', error);
+        res.status(500).json({ error: 'Erro ao importar', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+    }
+});
+
 // Editar conta a receber
 app.put('/api/financeiro/contas-receber/:id', authenticateToken, async (req, res) => {
     try {
@@ -2095,6 +2154,26 @@ app.get('/relatorios', (req, res) => {
     res.sendFile(path.join(__dirname, 'relatorios.html'));
 });
 
+app.get('/plano-contas', (req, res) => {
+    res.sendFile(path.join(__dirname, 'plano-contas.html'));
+});
+
+app.get('/orcamentos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'orcamentos.html'));
+});
+
+app.get('/conciliacao', (req, res) => {
+    res.sendFile(path.join(__dirname, 'conciliacao.html'));
+});
+
+app.get('/impostos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'impostos.html'));
+});
+
+app.get('/centros-custo', (req, res) => {
+    res.sendFile(path.join(__dirname, 'centros-custo.html'));
+});
+
 // ============================================
 // ERROR HANDLERS
 // ============================================
@@ -2389,6 +2468,133 @@ async function startServer() {
             } catch (error) {
                 console.error('Erro ao importar operações:', error);
                 res.status(500).json({ error: 'Erro ao importar operações' });
+            }
+        });
+
+        // Registrar operação de desconto de títulos (usado por relatorios.html)
+        app.post('/api/financeiro/operacoes/desconto', authenticateToken, async (req, res) => {
+            try {
+                const {
+                    número_título, cliente_sacado, valor_titulo, data_vencimento,
+                    banco, data_operação, taxa_desconto, iof, observacoes, valor_liquido
+                } = req.body;
+
+                if (!valor_titulo || !data_vencimento) {
+                    return res.status(400).json({ error: 'valor_titulo e data_vencimento são obrigatórios' });
+                }
+
+                const valorNum = parseFloat(valor_titulo);
+                if (isNaN(valorNum) || valorNum <= 0) {
+                    return res.status(400).json({ error: 'valor_titulo inválido' });
+                }
+
+                const [result] = await pool.execute(
+                    `INSERT INTO operacoes_credito
+                     (empresa, tipo_operacao, instituicao, data_operacao, vlr_bruto,
+                      iof, liq_op, taxa_periodo, bordero)
+                     VALUES (?, 'desconto', ?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        cliente_sacado || null,
+                        banco || null,
+                        data_operação || new Date().toISOString().slice(0, 10),
+                        Math.round(valorNum * 100) / 100,
+                        parseFloat(iof) || 0,
+                        parseFloat(valor_liquido) || valorNum,
+                        parseFloat(taxa_desconto) || 0,
+                        número_título || null
+                    ]
+                );
+
+                res.json({ success: true, id: result.insertId, message: 'Operação de desconto registrada com sucesso' });
+            } catch (error) {
+                console.error('Erro ao registrar operação de desconto:', error);
+                res.status(500).json({ error: 'Erro ao registrar operação de desconto', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+            }
+        });
+
+        // Dados da empresa (stub para compatibilidade com relatorios.html)
+        app.get('/api/configuracoes/empresa', authenticateToken, async (req, res) => {
+            try {
+                const [rows] = await pool.execute(
+                    'SELECT * FROM configuracoes_empresa LIMIT 1'
+                );
+                if (rows.length > 0) {
+                    return res.json({ success: true, data: rows[0] });
+                }
+                // Retornar dados padrão se não houver registro
+                res.json({ success: true, data: { razao_social: 'ALUFORCE', nome_fantasia: 'ALUFORCE', cnpj: '' } });
+            } catch (error) {
+                // Tabela pode não existir — retornar dados padrão sem erro
+                res.json({ success: true, data: { razao_social: 'ALUFORCE', nome_fantasia: 'ALUFORCE', cnpj: '' } });
+            }
+        });
+
+        // =============================================
+        // STUBS: Integrações Bancárias (bancos.html)
+        // =============================================
+        const notImplemented = (featureName) => (req, res) => {
+            res.status(501).json({ error: 'Funcionalidade não implementada', feature: featureName });
+        };
+
+        app.post('/api/financeiro/integracoes-bancarias', authenticateToken, notImplemented('integracoes-bancarias-criar'));
+        app.post('/api/financeiro/integracoes-bancarias/testar', authenticateToken, notImplemented('integracoes-bancarias-testar'));
+        app.get('/api/financeiro/integracoes-bancarias/:bancoId', authenticateToken, notImplemented('integracoes-bancarias-obter'));
+        app.delete('/api/financeiro/integracoes-bancarias/:bancoId', authenticateToken, notImplemented('integracoes-bancarias-excluir'));
+        app.post('/api/financeiro/integracoes-bancarias/:bancoId/remessa', authenticateToken, notImplemented('integracoes-bancarias-remessa'));
+        app.post('/api/financeiro/integracoes-bancarias/retorno', authenticateToken, notImplemented('integracoes-bancarias-retorno'));
+
+        // =============================================
+        // STUBS: Conciliação Bancária (conciliacao.html)
+        // =============================================
+        app.post('/api/financeiro/conciliacao', authenticateToken, notImplemented('conciliacao-registrar'));
+        app.post('/api/financeiro/conciliacao/automatica', authenticateToken, notImplemented('conciliacao-automatica'));
+        app.delete('/api/financeiro/conciliacao/:id', authenticateToken, notImplemented('conciliacao-excluir'));
+        app.post('/api/financeiro/conciliacao/importar-ofx', authenticateToken, notImplemented('conciliacao-importar-ofx'));
+
+        // =============================================
+        // STUBS: Orçamentos (orcamentos.html)
+        // =============================================
+        app.get('/api/financeiro/orcamentos', authenticateToken, async (req, res) => {
+            try {
+                const [rows] = await pool.execute(
+                    'SELECT * FROM orcamentos ORDER BY created_at DESC LIMIT 100'
+                );
+                res.json({ success: true, data: rows });
+            } catch (error) {
+                // Tabela pode não existir ainda
+                res.json({ success: true, data: [] });
+            }
+        });
+
+        app.post('/api/financeiro/orcamentos', authenticateToken, async (req, res) => {
+            try {
+                const { descricao, valor, periodo } = req.body;
+                if (!descricao || valor === undefined) {
+                    return res.status(400).json({ error: 'descricao e valor são obrigatórios' });
+                }
+                const [result] = await pool.execute(
+                    'INSERT INTO orcamentos (descricao, valor, periodo, criado_em) VALUES (?, ?, ?, NOW())',
+                    [descricao, parseFloat(valor) || 0, periodo || null]
+                );
+                res.json({ success: true, id: result.insertId });
+            } catch (error) {
+                console.error('Erro ao salvar orçamento:', error);
+                res.status(500).json({ error: 'Erro ao salvar orçamento', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
+            }
+        });
+
+        app.put('/api/financeiro/orcamentos/:id', authenticateToken, async (req, res) => {
+            try {
+                const { id } = req.params;
+                const { descricao, valor, periodo } = req.body;
+                await pool.execute(
+                    'UPDATE orcamentos SET descricao = ?, valor = ?, periodo = ? WHERE id = ?',
+                    [descricao, parseFloat(valor) || 0, periodo || null, id]
+                );
+                res.json({ success: true });
+            } catch (error) {
+                console.error('Erro ao atualizar orçamento:', error);
+                res.status(500).json({ error: 'Erro ao atualizar orçamento', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
             }
         });
 

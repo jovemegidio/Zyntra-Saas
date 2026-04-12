@@ -3779,7 +3779,7 @@
 
             // Buscar movimentações especficas do banco
             try {
-                const response = await fetch(`/api/financeiro/bancos/${id}/movimentacoes?limit=20`, { credentials: 'include' });
+                const response = await fetch(`/api/financeiro/bancos/${id}/extrato?limit=20`, { credentials: 'include' });
                 const data = await response.json();
 
                 if (Array.isArray(data) && data.length > 0) {

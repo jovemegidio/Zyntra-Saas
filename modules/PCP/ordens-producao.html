@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
     <!-- CSS PCP Padrão - Mesmo layout das outras páginas -->
     <link rel="stylesheet" href="css/pcp-layout.css">
-    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260711">
     <link rel="stylesheet" href="css/pcp-components.css">
 
     <style>
@@ -1560,11 +1560,11 @@
     </style>
 
     <!-- Tooltips Profissionais -->
-    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260711">
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- PCP Header & Sidebar ? Design Institucional Refinado (DEVE SER O ÚLTIMO) -->
-    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260224">
+    <link rel="stylesheet" href="css/pcp-header-sidebar.css?v=20260711">
     <!-- Chat Widget BOB AI --><!-- Chat Widget REMOVIDO --><!--
     <link rel="stylesheet" href="/chat/widget.css?v=20260218"> -->
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260324">
@@ -2320,6 +2320,9 @@
                     <button class="sidebar-action" onclick="criarOrdemEGerarExcel()" style="color: #059669; font-weight: 600;">
                         <i class="fas fa-file-excel"></i> Gerar Excel
                     </button>
+                    <button class="sidebar-action" onclick="criarOrdemEGerarPDF()" style="color: #D32F2F; font-weight: 600;">
+                        <i class="fas fa-file-pdf"></i> Gerar PDF
+                    </button>
                     <button class="sidebar-action" onclick="imprimirNovaOrdem()">
                         <i class="fas fa-print"></i> Imprimir
                     </button>
@@ -2568,84 +2571,42 @@
             }
         }
 
-        // Configurar sidebar baseado na role do usuário
+        // ============================================
+        // RESTRIÇÃO DE SIDEBAR POR ROLE (espelho do index.html)
+        // ============================================
         function configurarSidebarPorRole(user) {
+            const sidebarNav = document.querySelector('.sidebar-nav');
+            if (!sidebarNav) return;
+
             const role = (user.role || user.cargo || '').toLowerCase();
             const roles = (user.roles || []).map(r => r.toLowerCase());
-            const nomeUsuario = (user.nome || '').toLowerCase();
 
-            // Roles com acesso completo
-            const rolesAdmin = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
-            const isAdmin = rolesAdmin.some(r => role.includes(r)) || roles.some(r => rolesAdmin.some(a => r.includes(a)));
+            // Roles com acesso completo ao módulo PCP (idêntico ao index.html)
+            const rolesFullAccess = ['admin', 'administrador', 'supervisor', 'gerente', 'diretoria', 'ti', 'pcp', 'analista'];
+            const isFullAccess = user.is_admin === true || user.is_admin === 1 ||
+                                 rolesFullAccess.some(r => role.includes(r)) ||
+                                 roles.some(r => rolesFullAccess.some(a => r.includes(a)));
 
-            // Verificar se pode ver relatórios (admin ou Clemerson)
-            const podeVerRelatorios = isAdmin || nomeUsuario.includes('clemerson');
+            // Acesso completo → não altera a sidebar (mantém o HTML original com todos os itens)
+            if (isFullAccess) return;
 
-            const sidebarNav = document.querySelector('.sidebar-nav');
-            const sidebarLogo = document.querySelector('.sidebar-logo');
+            // Operador: substitui sidebar por apenas Ordens de Produção e Apontamentos
+            sidebarNav.innerHTML = `
+                <a href="ordens-producao.html" class="sidebar-btn active" title="Ordens de Produção">
+                    <i class="fas fa-clipboard-list"></i>
+                </a>
+                <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
+                    <i class="fas fa-stopwatch"></i>
+                </a>
+            `;
+
             const sidebarBottom = document.querySelector('.sidebar-bottom');
-
-            if (isAdmin) {
-                // Admin tem acesso completo
-                if (sidebarLogo) sidebarLogo.href = '/dashboard';
-                let linksHTML = `
-                    <a href="index.html" class="sidebar-btn" title="Dashboard PCP">
-                        <i class="fas fa-tachometer-alt"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Produtos e Estoque" onclick="localStorage.setItem('pcp-view','produtos')">
-                        <i class="fas fa-boxes"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Ordem de Compra" onclick="localStorage.setItem('pcp-view','ordem-compra')">
-                        <i class="fas fa-shopping-cart"></i>
-                    </a>
-                    <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
-                        <i class="fas fa-clipboard-list"></i>
-                    </a>
-                    <a href="index.html" class="sidebar-btn" title="Gestão de Produção" onclick="localStorage.setItem('pcp-view','gestao-producao')">
-                        <i class="fas fa-industry"></i>
-                    </a>
-                    <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
-                        <i class="fas fa-stopwatch"></i>
-                    </a>
-                    <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
-                        <i class="fas fa-chart-pie"></i>
-                    </a>
+            if (sidebarBottom) {
+                sidebarBottom.innerHTML = `
+                    <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 `;
-                if (sidebarNav) sidebarNav.innerHTML = linksHTML;
-                if (sidebarBottom) {
-                    sidebarBottom.innerHTML = `
-                        <button class="sidebar-btn" title="Configurações" onclick="abrirModalEtapasPCP()">
-                            <i class="fas fa-cog"></i>
-                        </button>
-                    `;
-                }
-            } else {
-                // Usuário de produção - acesso limitado
-                if (sidebarLogo) sidebarLogo.href = 'ordens-producao.html';
-                let linksHTML = `
-                    <a href="ordens-producao.html" class="sidebar-btn active" title="Kanban Produção">
-                        <i class="fas fa-clipboard-list"></i>
-                    </a>
-                    <a href="apontamentos.html" class="sidebar-btn" title="Meus Apontamentos">
-                        <i class="fas fa-stopwatch"></i>
-                    </a>
-                `;
-                // Adicionar relatórios apenas para Clemerson
-                if (podeVerRelatorios) {
-                    linksHTML += `
-                    <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
-                        <i class="fas fa-chart-pie"></i>
-                    </a>
-                    `;
-                }
-                if (sidebarNav) sidebarNav.innerHTML = linksHTML;
-                if (sidebarBottom) {
-                    sidebarBottom.innerHTML = `
-                        <button class="sidebar-btn" title="Sair" onclick="fazerLogout()">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                    `;
-                }
             }
         }
 
@@ -2921,7 +2882,7 @@
             localStorage.setItem('ordensProducao', JSON.stringify(ordensProducao));
         }
 
-        async function criarOrdemProducao(gerarExcel) {
+        async function criarOrdemProducao(gerarExcel, gerarPdf) {
             // Coletar produtos da tabela
             const produtos = [];
             const tbody = document.getElementById('nova-produtos-lista');
@@ -3056,6 +3017,36 @@
                 } catch (exErr) {
                     console.error('Erro ao gerar Excel:', exErr);
                     showNotification('Erro ao gerar Excel.', 'error');
+                }
+            }
+
+            // Se pediu para gerar PDF, chamar endpoint XSL-FO
+            if (gerarPdf) {
+                try {
+                    const pdfResp = await fetch('/api/gerar-ordem-pdf', {
+                        credentials: 'include',
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(novaOrdem)
+                    });
+                    if (pdfResp.ok) {
+                        const blob = await pdfResp.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `Ordem_Producao_${novaOrdem.numero || Date.now()}.pdf`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        showNotification('PDF gerado com sucesso!', 'success');
+                    } else {
+                        const errData = await pdfResp.json().catch(() => ({}));
+                        showNotification(errData.error || 'Erro ao gerar PDF.', 'error');
+                    }
+                } catch (pdfErr) {
+                    console.error('Erro ao gerar PDF:', pdfErr);
+                    showNotification('Erro ao gerar PDF. Verifique se o Apache FOP está instalado.', 'error');
                 }
             }
         }
@@ -3435,6 +3426,11 @@
         // Gerar Excel da nova ordem
         async function criarOrdemEGerarExcel() {
             await criarOrdemProducao(true);
+        }
+
+        // Gerar PDF da nova ordem (XSL-FO / Apache FOP)
+        async function criarOrdemEGerarPDF() {
+            await criarOrdemProducao(false, true);
         }
 
         // ========================================

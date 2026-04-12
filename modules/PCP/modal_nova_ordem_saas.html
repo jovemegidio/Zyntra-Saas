@@ -466,6 +466,12 @@
                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16,185,129,0.3)'">
                         <i class="fas fa-file-excel"></i> Gerar Ordem em Excel
                     </button>
+                    <button type="button" onclick="gerarOrdemPdfSaas()"
+                        style="background: linear-gradient(135deg, #EF4444, #DC2626); color: white; border: none; padding: 14px 40px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 14px; box-shadow: 0 4px 12px rgba(239,68,68,0.3);"
+                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(239,68,68,0.4)'"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(239,68,68,0.3)'">
+                        <i class="fas fa-file-pdf"></i> Gerar Ordem em PDF
+                    </button>
                 </div>
                 
             </form>
@@ -775,6 +781,75 @@ async function submitNovaOrdem(event) {
 function fecharModalNovaOrdem() {
     document.getElementById('modal-nova-ordem').classList.add('hidden');
     document.body.style.overflow = '';
+}
+
+// Gerar PDF da Ordem de Produção (XSL-FO / Apache FOP)
+async function gerarOrdemPdfSaas() {
+    const form = document.getElementById('form-nova-ordem');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    const btnPdf = event?.target?.closest('button');
+    const textoOriginal = btnPdf ? btnPdf.innerHTML : '';
+    if (btnPdf) {
+        btnPdf.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando PDF...';
+        btnPdf.disabled = true;
+    }
+
+    try {
+        const dados = coletarDadosFormulario();
+
+        // 1. Salvar no Kanban/Banco
+        try {
+            await salvarNoKanban(dados);
+        } catch (err) {
+            console.warn('Aviso ao salvar no Kanban:', err.message);
+        }
+
+        // 2. Gerar PDF via FOP
+        const response = await fetch('/api/gerar-ordem-pdf', {
+            credentials: 'include',
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        });
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || errData.detalhe || 'Erro ao gerar PDF');
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Ordem_Produção_${dados.num_pedido || Date.now()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        alert('PDF gerado com sucesso!');
+        fecharModalNovaOrdem();
+        form.reset();
+        calcularTotalGeral();
+
+        if (typeof loadDashboardData === 'function') loadDashboardData();
+        if (typeof carregarControlePCP === 'function') carregarControlePCP();
+        if (typeof carregarOrdensKanban === 'function') carregarOrdensKanban();
+        if (typeof renderizarKanban === 'function') renderizarKanban();
+
+    } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        alert('Erro ao gerar PDF. Verifique se o Apache FOP está instalado no servidor.');
+    } finally {
+        if (btnPdf) {
+            btnPdf.innerHTML = textoOriginal;
+            btnPdf.disabled = false;
+        }
+    }
 }
 </script>
 

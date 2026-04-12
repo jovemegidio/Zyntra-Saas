@@ -283,7 +283,6 @@
         <!-- MAIN -->
         <main class="main-area">
             <header class="header">
-    <script src="/js/anti-copy-protection.js?v=20260410" defer></script>
                 <div class="header-left">
                     <!-- Botao Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
@@ -2971,7 +2970,7 @@
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
                 btn.disabled = true;
 
-                const response = await fetch(`/api/financeiro/contas-pagar/${id}/baixa`, {
+                const response = await fetch(`/api/financeiro/contas-pagar/${id}/baixar`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',

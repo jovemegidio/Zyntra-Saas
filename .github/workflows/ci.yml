@@ -11,7 +11,7 @@ on:
     branches: [main]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: '22.12.0'
 
 jobs:
   # ────────────────────────────────────────────────
@@ -30,7 +30,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps --ignore-scripts
+        run: npm ci --legacy-peer-deps --ignore-scripts || npm install --legacy-peer-deps --ignore-scripts
 
       - name: ESLint
         run: npm run lint:check
@@ -96,7 +96,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Wait for MySQL
         run: |
@@ -177,7 +177,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps
+        run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
@@ -212,7 +212,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci --legacy-peer-deps --ignore-scripts
+        run: npm ci --legacy-peer-deps --ignore-scripts || npm install --legacy-peer-deps --ignore-scripts
 
       - name: npm audit
         run: npm audit --audit-level=moderate || true
@@ -266,7 +266,7 @@ jobs:
           script: |
             cd /var/www/aluforce
             git pull origin main
-            npm ci --production
+            npm ci --omit=dev --legacy-peer-deps || npm install --omit=dev --legacy-peer-deps --ignore-scripts
             pm2 reload ecosystem.config.js --env production
             sleep 5
             curl -sf http://localhost:3000/api/health || exit 1

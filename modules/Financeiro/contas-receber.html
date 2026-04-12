@@ -374,17 +374,45 @@
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
         <aside class="sidebar" id="mobile-sidebar">
-            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel"><i class="fas fa-home"></i></a>
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
+                <i class="fas fa-home"></i>
+            </a>
             <nav class="sidebar-nav">
-                <a href="/" class="sidebar-btn" title="Dashboard"><i class="fas fa-chart-pie"></i></a>
-                <a href="/contas-pagar" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
-                <a href="/contas-receber" class="sidebar-btn active" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
-                <a href="/bancos" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
-                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa"><i class="fas fa-money-bill-wave"></i></a>
-                <a href="/relatorios" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
+                <a href="index.html" class="sidebar-btn" title="Dashboard">
+                    <i class="fas fa-chart-line"></i>
+                </a>
+                <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                </a>
+                <a href="contas-receber.html" class="sidebar-btn active" title="Contas a Receber">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </a>
+                <a href="fluxo-caixa.html" class="sidebar-btn" title="Fluxo de Caixa">
+                    <i class="fas fa-chart-area"></i>
+                </a>
+                <a href="bancos.html" class="sidebar-btn" title="Bancos">
+                    <i class="fas fa-university"></i>
+                </a>
+                <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
+                    <i class="fas fa-list-alt"></i>
+                </a>
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
+                    <i class="fas fa-calculator"></i>
+                </a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
+                    <i class="fas fa-balance-scale"></i>
+                </a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
+                    <i class="fas fa-chart-bar"></i>
+                </a>
             </nav>
             <div class="sidebar-bottom">
-                <a href="/dashboard" class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></a>
+                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
+                    <i class="fas fa-sitemap"></i>
+                </a>
+                <a href="impostos.html" class="sidebar-btn" title="Impostos">
+                    <i class="fas fa-percent"></i>
+                </a>
             </div>
         </aside>
         <main class="main-area" data-page-name="Contas a Receber">
@@ -1447,7 +1475,7 @@
 
         async function carregarClientes() {
             try {
-                var response = await fetch('/api/clientes', { credentials: 'include' });
+                var response = await fetch('/api/financeiro/clientes', { credentials: 'include' });
                 if (response.ok) {
                     var rawClientes = await response.json();
                     clientesList = Array.isArray(rawClientes) ? rawClientes : (Array.isArray(rawClientes && rawClientes.data) ? rawClientes.data : []);
@@ -1651,8 +1679,8 @@
             window._guardEnviarCobrancas = true;
             try {
                 var ids = pendentes.map(function(c){return c.id;});
-                var r = await fetch('/api/financeiro/enviar-cobranca-lote', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({ ids: ids }) });
-                if (r.ok) { showToast('Cobrancas enviadas para '+pendentes.length+' conta(s)!'); } else { showToast('Erro ao enviar cobrancas em lote', 'error'); }
+                showToast('Envio de cobranças em lote ainda não disponível nesta versão.', 'warning');
+                return;
             } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); } finally { window._guardEnviarCobrancas = false; }
         }
         function getFilteredContas() {
@@ -1919,7 +1947,7 @@
 
                 if (dados.length === 0) throw new Error('Nenhum registro válido encontrado na planilha (verifique coluna VALOR P e VCTO)');
 
-                var r = await fetch('/api/financeiro/importar/contas-receber', {
+                var r = await fetch('/api/financeiro/contas-receber/importar-json', {
                     method: 'POST', credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ dados: dados })

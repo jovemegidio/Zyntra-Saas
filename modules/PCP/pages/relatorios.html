@@ -775,6 +775,17 @@
     }
 
     function renderCabos(data) {
+        function firstNonEmpty() {
+            for (var i = 0; i < arguments.length; i++) {
+                var v = arguments[i];
+                if (v !== null && v !== undefined) {
+                    var s = String(v).trim();
+                    if (s && s !== '-' && s !== '' && s.toLowerCase() !== 'n/a') return s;
+                }
+            }
+            return null;
+        }
+
         var res = data.resumo || {};
         document.getElementById('cabos-total-produtos').textContent = res.total_produtos_vendidos || '0';
         document.getElementById('cabos-total-qtd').textContent = (parseFloat(res.quantidade_total) || 0).toLocaleString('pt-BR');
@@ -787,7 +798,20 @@
         /* Chart */
         destroyChart('cabos');
         var top = items.slice(0, 10);
-        var lbls = top.map(function(i) { var d = i.descrição || i.produto_nome || i.código || 'N/A'; return d.length > 35 ? d.substring(0,35) + '' : d; });
+        var lbls = top.map(function(i) {
+            var d = firstNonEmpty(
+                i.descricao,
+                i.descrição,
+                i.descricao_produto,
+                i.produto_descricao,
+                i.produto_nome,
+                i.nome,
+                i.codigo,
+                i.código,
+                i.codigo_produto
+            ) || 'N/A';
+            return d.length > 35 ? d.substring(0,35) + '' : d;
+        });
         var vals = top.map(function(i) { return parseFloat(i.total_quantidade) || 0; });
         var maxVal = Math.max.apply(null, vals) || 1;
         var colors = top.map(function(_, idx) { var o = 1 - (idx * 0.07); return 'rgba(59,130,246,' + o.toFixed(2) + ')'; });
@@ -808,14 +832,16 @@
         var html = '';
         items.forEach(function(item, idx) {
             var pct = maxVal > 0 ? ((parseFloat(item.total_quantidade) || 0) / maxVal * 100) : 0;
+            var codigo = firstNonEmpty(item.codigo, item.código, item.codigo_produto, item.produto_codigo) || '-';
+            var descricao = firstNonEmpty(item.descricao, item.descrição, item.descricao_produto, item.produto_descricao, item.produto_nome, item.nome) || '-';
             html += '<tr>';
             html += '<td>' + rankBadge(idx) + '</td>';
-            html += '<td class="mono">' + (item.código || item.codigo_produto || '') + '</td>';
-            html += '<td class="product-name">' + (item.descrição || item.produto_nome || '') + '</td>';
+            html += '<td class="mono">' + codigo + '</td>';
+            html += '<td class="product-name">' + descricao + '</td>';
             html += '<td style="text-align:right"><div class="progress-bar-cell"><span class="money">' + (parseFloat(item.total_quantidade) || 0).toLocaleString('pt-BR') + '</span><div class="progress-mini"><div class="fill" style="width:' + pct.toFixed(0) + '%;background:linear-gradient(90deg,#3b82f6,#60a5fa)"></div></div></div></td>';
-            html += '<td>' + (item.unidade || '') + '</td>';
+            html += '<td>' + (firstNonEmpty(item.unidade, item.unid, item.unidade_medida) || '-') + '</td>';
             html += '<td style="text-align:right" class="money">' + formatarMoeda(item.total_valor || 0) + '</td>';
-            html += '<td style="text-align:right">' + (item.total_pedidos || item.total_ordens || '') + '</td>';
+            html += '<td style="text-align:right">' + (item.total_pedidos || item.total_ordens || 0) + '</td>';
             html += '<td style="text-align:right" class="money">' + formatarMoeda(item.preco_medio || 0) + '</td>';
             html += '</tr>';
         });

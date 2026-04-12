@@ -67,72 +67,70 @@ router.get('/materiais-pcp', async (req, res) => {
         let total = 0;
         let tipos = [];
 
-        // Try estoque_materias_primas first
+        // Usar tabela 'materiais' como fonte principal (191 itens classificados)
         try {
-            let sql = `SELECT id, codigo, descricao, unidade_medida as unidade,
-                        quantidade_minima as estoque_min,
-                        COALESCE(quantidade_atual, 0) as estoque_atual,
-                        localizacao, tipo, ativo,
-                        CASE WHEN EXISTS (SELECT 1 FROM estoque e2 WHERE e2.material_id = estoque_materias_primas.id) THEN 1 ELSE 0 END as vinculado_estoque
-                 FROM estoque_materias_primas WHERE 1=1`;
+            let sql = `SELECT m.id, m.codigo_material as codigo, m.descricao,
+                        m.unidade_medida as unidade, m.estoque_minimo as estoque_min,
+                        COALESCE(e.quantidade_atual, 0) as estoque_atual,
+                        m.tipo, m.ativo, m.custo_unitario, m.ncm,
+                        CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END as vinculado_estoque
+                 FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id WHERE 1=1`;
             const params = [];
 
             if (busca) {
-                sql += ' AND (codigo LIKE ? OR descricao LIKE ?)';
+                sql += ' AND (m.codigo_material LIKE ? OR m.descricao LIKE ?)';
                 params.push(`%${busca}%`, `%${busca}%`);
             }
             if (tipo) {
-                sql += ' AND tipo = ?';
+                sql += ' AND m.tipo = ?';
                 params.push(tipo);
             }
-            if (ativo === '1') sql += ' AND ativo = 1';
-            else if (ativo === '0') sql += ' AND ativo = 0';
+            if (ativo === '1') sql += ' AND m.ativo = 1';
+            else if (ativo === '0') sql += ' AND m.ativo = 0';
 
-            // Count
             const countSql = sql.replace(/SELECT .* FROM/, 'SELECT COUNT(*) as total FROM');
             const [countRows] = await db.query(countSql, params);
             total = countRows[0]?.total || 0;
 
-            sql += ' ORDER BY descricao LIMIT ? OFFSET ?';
+            sql += ' ORDER BY m.descricao LIMIT ? OFFSET ?';
             params.push(limitNum, offset);
             const [rows] = await db.query(sql, params);
             materiais = rows;
 
-            // Get tipos
-            const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM estoque_materias_primas GROUP BY tipo ORDER BY tipo');
+            const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM materiais WHERE ativo = 1 GROUP BY tipo ORDER BY tipo');
             tipos = tiposRows;
         } catch (e) {
-            // Fallback to materiais table
+            // Fallback to estoque_materias_primas
             try {
-                let sql = `SELECT m.id, m.codigo_material as codigo, m.descricao,
-                            m.unidade_medida as unidade, m.estoque_minimo as estoque_min,
-                            COALESCE(e.quantidade_atual, 0) as estoque_atual,
-                            m.tipo, m.ativo,
-                            CASE WHEN e.id IS NOT NULL THEN 1 ELSE 0 END as vinculado_estoque
-                     FROM materiais m LEFT JOIN estoque e ON e.material_id = m.id WHERE 1=1`;
+                let sql = `SELECT id, codigo, descricao, unidade_medida as unidade,
+                            quantidade_minima as estoque_min,
+                            COALESCE(quantidade_atual, 0) as estoque_atual,
+                            localizacao, tipo, ativo,
+                            CASE WHEN EXISTS (SELECT 1 FROM estoque e2 WHERE e2.material_id = estoque_materias_primas.id) THEN 1 ELSE 0 END as vinculado_estoque
+                     FROM estoque_materias_primas WHERE 1=1`;
                 const params = [];
 
                 if (busca) {
-                    sql += ' AND (m.codigo_material LIKE ? OR m.descricao LIKE ?)';
+                    sql += ' AND (codigo LIKE ? OR descricao LIKE ?)';
                     params.push(`%${busca}%`, `%${busca}%`);
                 }
                 if (tipo) {
-                    sql += ' AND m.tipo = ?';
+                    sql += ' AND tipo = ?';
                     params.push(tipo);
                 }
-                if (ativo === '1') sql += ' AND m.ativo = 1';
-                else if (ativo === '0') sql += ' AND m.ativo = 0';
+                if (ativo === '1') sql += ' AND ativo = 1';
+                else if (ativo === '0') sql += ' AND ativo = 0';
 
                 const countSql = sql.replace(/SELECT .* FROM/, 'SELECT COUNT(*) as total FROM');
                 const [countRows] = await db.query(countSql, params);
                 total = countRows[0]?.total || 0;
 
-                sql += ' ORDER BY m.descricao LIMIT ? OFFSET ?';
+                sql += ' ORDER BY descricao LIMIT ? OFFSET ?';
                 params.push(limitNum, offset);
                 const [rows] = await db.query(sql, params);
                 materiais = rows;
 
-                const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM materiais GROUP BY tipo ORDER BY tipo');
+                const [tiposRows] = await db.query('SELECT tipo, COUNT(*) as count FROM estoque_materias_primas GROUP BY tipo ORDER BY tipo');
                 tipos = tiposRows;
             } catch (e2) {
                 materiais = [];

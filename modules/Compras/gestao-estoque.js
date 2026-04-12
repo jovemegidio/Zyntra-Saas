@@ -175,9 +175,9 @@ function renderizarTabela(materiais) {
         const checked = EST.selecionados.has(m.id) ? 'checked' : '';
         const selectedClass = EST.selecionados.has(m.id) ? 'row-selected' : '';
         const tipoLabel = m.tipo || '—';
-        const tipoClass = m.tipo ? `tipo-${m.tipo.toLowerCase()}` : 'tipo-default';
+        const tipoClass = m.tipo ? `tipo-${m.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'')}` : 'tipo-default';
         const custo = m.custo_unitario ? `R$ ${parseFloat(m.custo_unitario).toFixed(2)}` : '<span style="color:#94a3b8;">—</span>';
-        const codigo = m.codigo_material || m.id;
+        const codigo = m.codigo || m.codigo_material || m.id;
         const desc = (m.descricao || '—').replace(/"/g, '&quot;');
 
         const ativoHtml = m.ativo
@@ -193,7 +193,7 @@ function renderizarTabela(materiais) {
             <td><span style="font-family:monospace;font-size:12px;color:#64748b;">${codigo}</span></td>
             <td><span class="mat-desc" title="${desc}">${m.descricao || '—'}</span></td>
             <td style="text-align:center;"><span class="tipo-badge ${tipoClass}">${tipoLabel}</span></td>
-            <td style="text-align:center;font-size:12px;">${m.unidade_medida || '—'}</td>
+            <td style="text-align:center;font-size:12px;">${m.unidade_medida || m.unidade || '—'}</td>
             <td style="text-align:right;font-size:12px;font-family:monospace;">${custo}</td>
             <td style="text-align:center;">${ativoHtml}</td>
             <td style="text-align:center;">${vincHtml}</td>
@@ -891,7 +891,7 @@ function renderizarSeletor() {
     }
 
     container.innerHTML = materiais.slice(0, 100).map(m => {
-        const tipoClass = m.tipo ? `tipo-${m.tipo.toLowerCase()}` : 'tipo-default';
+        const tipoClass = m.tipo ? `tipo-${m.tipo.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/-+$/,'')}` : 'tipo-default';
         return `<div onclick="selecionarMaterial(${m.id})" style="padding:12px 20px;border-bottom:1px solid #f1f5f9;cursor:pointer;display:flex;align-items:center;gap:12px;transition:background .15s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
             <div style="flex:1;">
                 <div style="font-weight:600;color:#1e293b;font-size:14px;">${m.descricao || '—'}</div>

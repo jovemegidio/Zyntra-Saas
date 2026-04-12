@@ -51,13 +51,10 @@
     // ========================================================
 
     function applyRBAC(userRole) {
-        const buttons = document.querySelectorAll('.sidebar .sidebar-btn[data-rbac]');
-        buttons.forEach(btn => {
-            const allowed = btn.dataset.rbac.split(',').map(r => r.trim());
-            if (!allowed.includes('*') && !allowed.includes(userRole)) {
-                btn.style.display = 'none';
-            }
-        });
+        // RBAC de sidebar desabilitado: todos os itens de navegação devem
+        // permanecer visíveis independente do perfil do usuário.
+        // O controle de acesso às rotas e dados é feito no servidor.
+        void userRole;
     }
 
     // ========================================================

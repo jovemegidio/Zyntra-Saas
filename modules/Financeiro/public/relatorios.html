@@ -18,15 +18,69 @@
     <script src="/js/modal-title.js?v=20260408"></script>
 
     <style>
-        /* ===== RELATÓRIOS — ESTILOS ESPECÍFICOS ===== */
-        .page-header-section {
-            margin-bottom: 24px;
-        }
-        .page-header-title { font-size: 18px; font-weight: 800; color: var(--gray-800); margin: 0 0 4px; }
-        .page-header-subtitle { font-size: 13px; color: var(--gray-500); }
+        /* ===== RELATÓRIOS — ESTILOS ESPECÍFICOS (Padrão Zyntra) ===== */
 
+        /* Content Area — padding padrão igual contas_pagar */
+        .content-area { flex: 1; overflow-y: auto; overflow-x: hidden; min-height: 0; padding: 20px 24px; }
+
+        /* KPI Summary Cards — igual contas_pagar / fluxo_caixa */
+        .summary-cards {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px;
+        }
+        .summary-card {
+            background: white; border-radius: 12px; padding: 18px 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid var(--gray-100);
+            border-left: 4px solid; transition: all 0.2s;
+        }
+        .summary-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
+        .summary-icon { font-size: 14px; margin-bottom: 8px; }
+        .summary-value { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+        .summary-label { font-size: 12px; color: var(--gray-500); font-weight: 500; }
+
+        /* Section Title — padrão unificado */
+        .section-title {
+            font-size: 15px; font-weight: 700; color: var(--gray-800);
+            margin: 0 0 16px; display: flex; align-items: center; gap: 8px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--gray-100);
+        }
+        .section-title i { color: var(--info-500); font-size: 14px; }
+
+        /* Relatórios Rápidos Grid */
+        .reports-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-bottom: 28px;
+        }
+        .report-card {
+            background: white; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            border: 1px solid var(--gray-100); overflow: hidden; transition: all 0.2s; cursor: pointer;
+        }
+        .report-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: translateY(-2px); }
+        .report-card-body {
+            display: flex; align-items: center; gap: 14px; padding: 18px 20px;
+        }
+        .report-icon {
+            width: 44px; height: 44px; border-radius: 12px; display: flex;
+            align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+        }
+        .report-info { flex: 1; }
+        .report-title { font-size: 14px; font-weight: 700; color: var(--gray-800); margin: 0 0 3px; }
+        .report-desc { font-size: 11px; color: var(--gray-500); line-height: 1.4; }
+        .report-card-footer {
+            padding: 10px 20px; border-top: 1px solid var(--gray-100); background: var(--gray-50);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .report-badge {
+            font-size: 10px; font-weight: 600; padding: 3px 10px; border-radius: 20px;
+            background: #dbeafe; color: #1e40af;
+        }
+        .report-action {
+            font-size: 12px; font-weight: 600; color: var(--info-500); display: flex; align-items: center; gap: 4px;
+            background: none; border: none; cursor: pointer; transition: color 0.2s;
+        }
+        .report-action:hover { color: #0891b2; }
+
+        /* Operations Grid — melhorado */
         .operations-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 30px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; margin-bottom: 28px;
         }
         .operation-card {
             background: white; border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
@@ -50,39 +104,46 @@
         .operation-btn {
             padding: 8px 16px; border: none; border-radius: 8px; font-size: 12px;
             font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-            color: white;
+            color: white; transition: opacity 0.2s, transform 0.15s;
         }
+        .operation-btn:hover { opacity: 0.9; transform: scale(1.02); }
 
-        .section-title {
-            font-size: 16px; font-weight: 700; color: var(--gray-800);
-            margin: 0 0 16px; display: flex; align-items: center; gap: 8px;
-        }
-        .section-title i { color: var(--info-500); }
-
-        /* Templates Section */
+        /* Templates Grid — alinhado ao padrão */
         .templates-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; margin-bottom: 28px;
         }
         .template-card {
-            background: white; border: 1px solid var(--gray-200); border-radius: 10px;
-            padding: 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+            background: white; border: 1px solid var(--gray-200); border-radius: 14px;
+            padding: 20px 16px; text-align: center; cursor: pointer; transition: all 0.2s;
+            position: relative; overflow: hidden;
         }
-        .template-card:hover { border-color: var(--info-500); box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .template-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: var(--gray-200); transition: background 0.2s;
+        }
+        .template-card:hover { border-color: var(--info-500); box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+        .template-card:hover::before { background: var(--info-500); }
         .template-icon {
-            width: 40px; height: 40px; border-radius: 10px; margin: 0 auto 10px;
+            width: 44px; height: 44px; border-radius: 12px; margin: 0 auto 12px;
             display: flex; align-items: center; justify-content: center; font-size: 18px;
         }
-        .template-name { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
-        .template-desc { font-size: 11px; color: var(--gray-400); }
+        .template-name { font-size: 13px; font-weight: 700; color: var(--gray-700); margin-bottom: 4px; }
+        .template-desc { font-size: 11px; color: var(--gray-400); line-height: 1.4; }
+        .template-download {
+            margin-top: 10px; font-size: 11px; font-weight: 600; color: var(--info-500);
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+        }
 
         /* ===== MODAL OVERLAY STYLE ===== */
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.5); z-index: 10000; align-items: center; justify-content: center;
+            backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
         .modal-content {
             background: white; border-radius: 16px; width: 95%; max-height: 90vh; overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
         }
 
         /* Modal Desconto */
@@ -98,7 +159,8 @@
         .modal-desconto-header .info { flex: 1; }
         .modal-desconto-header .info h3 { font-size: 17px; font-weight: 700; margin: 0; }
         .modal-desconto-header .info p { font-size: 12px; opacity: 0.85; margin: 2px 0 0; }
-        .close-modal-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; opacity: 0.8; }
+        .close-modal-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s; }
+        .close-modal-btn:hover { opacity: 1; }
 
         .form-section { border: 1px solid var(--gray-100); border-radius: 10px; margin: 16px 24px; overflow: hidden; }
         .section-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--gray-50); border-bottom: 1px solid var(--gray-100); font-size: 13px; font-weight: 700; color: var(--gray-700); }
@@ -108,7 +170,7 @@
         .form-group { margin-bottom: 14px; }
         .form-group label { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
         .form-group label i { color: var(--gray-400); font-size: 12px; }
-        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: var(--gray-800); }
+        .form-input, .form-select { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-family: 'Inter', sans-serif; color: var(--gray-800); box-sizing: border-box; transition: border-color 0.2s; }
         .form-input:focus, .form-select:focus { outline: none; border-color: #8b5cf6; box-shadow: 0 0 0 3px rgba(139,92,246,0.1); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .input-with-prefix { display: flex; align-items: center; }
@@ -121,7 +183,6 @@
         }
         .resumo-title { font-size: 13px; font-weight: 700; color: #7c3aed; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
         .resumo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .resumo-item {}
         .resumo-label { font-size: 10px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; }
         .resumo-value { font-size: 14px; font-weight: 700; color: var(--gray-800); }
         .resumo-value.destaque { font-size: 18px; color: #7c3aed; font-weight: 800; }
@@ -130,8 +191,10 @@
             display: flex; justify-content: flex-end; gap: 10px; padding: 16px 24px;
             border-top: 1px solid var(--gray-100); background: var(--gray-50); border-radius: 0 0 16px 16px;
         }
-        .btn-cancel { padding: 10px 20px; background: white; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--gray-600); cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .btn-save { padding: 10px 20px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .btn-cancel { padding: 10px 20px; background: white; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--gray-600); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+        .btn-cancel:hover { background: var(--gray-50); border-color: var(--gray-300); }
+        .btn-save { padding: 10px 20px; background: linear-gradient(135deg, #7c3aed, #8b5cf6); border: none; border-radius: 8px; font-size: 13px; font-weight: 600; color: white; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: opacity 0.2s; }
+        .btn-save:hover { opacity: 0.9; }
 
         /* Modal Templates */
         .modal-templates { max-width: 700px; }
@@ -145,7 +208,7 @@
         .modal-templates-header .info p { font-size: 12px; opacity: 0.85; margin: 2px 0 0; }
         .modal-templates-body { padding: 24px; }
 
-        /* Toast */
+        /* Toast — padrão Zyntra */
         .toast-wrapper { position: fixed; top: 60px; right: 20px; z-index: 100000; }
         .toast {
             display: none; align-items: center; gap: 10px; padding: 12px 18px;
@@ -155,7 +218,17 @@
         .toast.show { display: flex; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-        @media (max-width: 768px) { .operations-grid { grid-template-columns: 1fr; } .templates-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } .resumo-grid { grid-template-columns: 1fr 1fr; } }
+        /* Responsivo */
+        @media (max-width: 1024px) { .summary-cards { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) {
+            .summary-cards { grid-template-columns: 1fr; }
+            .operations-grid { grid-template-columns: 1fr; }
+            .reports-grid { grid-template-columns: 1fr; }
+            .templates-grid { grid-template-columns: repeat(2, 1fr); }
+            .form-row { grid-template-columns: 1fr; }
+            .resumo-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) { .templates-grid { grid-template-columns: 1fr; } }
     </style>
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260408">
@@ -210,6 +283,100 @@
             </header>
 
             <div class="content-area">
+                <!-- KPI Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card" style="border-left-color:#3b82f6;">
+                        <div class="summary-icon" style="color:#3b82f6;"><i class="fas fa-file-alt"></i></div>
+                        <div class="summary-value" style="color:#1e40af;" id="kpi-relatorios">5</div>
+                        <div class="summary-label">Relatórios Disponíveis</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color:#8b5cf6;">
+                        <div class="summary-icon" style="color:#8b5cf6;"><i class="fas fa-tools"></i></div>
+                        <div class="summary-value" style="color:#7c3aed;" id="kpi-operacoes">1</div>
+                        <div class="summary-label">Operações Financeiras</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color:#10b981;">
+                        <div class="summary-icon" style="color:#10b981;"><i class="fas fa-download"></i></div>
+                        <div class="summary-value" style="color:#059669;" id="kpi-templates">5</div>
+                        <div class="summary-label">Templates de Importação</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color:#f59e0b;">
+                        <div class="summary-icon" style="color:#f59e0b;"><i class="fas fa-clock"></i></div>
+                        <div class="summary-value" style="color:#d97706;" id="kpi-ultimo">—</div>
+                        <div class="summary-label">Último Relatório Gerado</div>
+                    </div>
+                </div>
+
+                <!-- Relatórios Rápidos -->
+                <h3 class="section-title"><i class="fas fa-chart-bar"></i> Relatórios Rápidos</h3>
+                <div class="reports-grid">
+                    <div class="report-card" onclick="window.location.href='/Financeiro/fluxo_caixa.html'">
+                        <div class="report-card-body">
+                            <div class="report-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-chart-line"></i></div>
+                            <div class="report-info">
+                                <div class="report-title">Fluxo de Caixa</div>
+                                <div class="report-desc">Projeção de entradas e saídas por período</div>
+                            </div>
+                        </div>
+                        <div class="report-card-footer">
+                            <span class="report-badge">Financeiro</span>
+                            <button class="report-action"><i class="fas fa-arrow-right"></i> Acessar</button>
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="window.location.href='/Financeiro/contas_pagar.html'">
+                        <div class="report-card-body">
+                            <div class="report-icon" style="background:#fee2e2;color:#ef4444;"><i class="fas fa-file-invoice-dollar"></i></div>
+                            <div class="report-info">
+                                <div class="report-title">Contas a Pagar</div>
+                                <div class="report-desc">Títulos pendentes, vencidos e pagamentos realizados</div>
+                            </div>
+                        </div>
+                        <div class="report-card-footer">
+                            <span class="report-badge">Financeiro</span>
+                            <button class="report-action"><i class="fas fa-arrow-right"></i> Acessar</button>
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="window.location.href='/Financeiro/contas_receber.html'">
+                        <div class="report-card-body">
+                            <div class="report-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="report-info">
+                                <div class="report-title">Contas a Receber</div>
+                                <div class="report-desc">Recebíveis, inadimplência e previsão de recebimentos</div>
+                            </div>
+                        </div>
+                        <div class="report-card-footer">
+                            <span class="report-badge">Financeiro</span>
+                            <button class="report-action"><i class="fas fa-arrow-right"></i> Acessar</button>
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="window.location.href='/Financeiro/contas_bancarias.html'">
+                        <div class="report-card-body">
+                            <div class="report-icon" style="background:#e0e7ff;color:#4f46e5;"><i class="fas fa-university"></i></div>
+                            <div class="report-info">
+                                <div class="report-title">Extrato Bancário</div>
+                                <div class="report-desc">Saldos consolidados e movimentações por conta</div>
+                            </div>
+                        </div>
+                        <div class="report-card-footer">
+                            <span class="report-badge">Bancário</span>
+                            <button class="report-action"><i class="fas fa-arrow-right"></i> Acessar</button>
+                        </div>
+                    </div>
+                    <div class="report-card" onclick="window.location.href='/Financeiro/conciliacao.html'">
+                        <div class="report-card-body">
+                            <div class="report-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-balance-scale"></i></div>
+                            <div class="report-info">
+                                <div class="report-title">Conciliação</div>
+                                <div class="report-desc">Conciliação bancária e verificação de divergências</div>
+                            </div>
+                        </div>
+                        <div class="report-card-footer">
+                            <span class="report-badge">Bancário</span>
+                            <button class="report-action"><i class="fas fa-arrow-right"></i> Acessar</button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Operações Financeiras -->
                 <h3 class="section-title"><i class="fas fa-calculator"></i> Operações Financeiras</h3>
                 <div class="operations-grid">
@@ -234,26 +401,31 @@
                         <div class="template-icon" style="background:#fee2e2;color:#ef4444;"><i class="fas fa-file-invoice-dollar"></i></div>
                         <div class="template-name">Contas a Pagar</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
+                        <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
                     <div class="template-card" onclick="baixarTemplate('contas_receber')">
                         <div class="template-icon" style="background:#dcfce7;color:#16a34a;"><i class="fas fa-hand-holding-usd"></i></div>
                         <div class="template-name">Contas a Receber</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
+                        <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
                     <div class="template-card" onclick="baixarTemplate('bancos')">
                         <div class="template-icon" style="background:#dbeafe;color:#2563eb;"><i class="fas fa-university"></i></div>
                         <div class="template-name">Contas Bancárias</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
+                        <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
                     <div class="template-card" onclick="baixarTemplate('movimentacoes')">
                         <div class="template-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-exchange-alt"></i></div>
                         <div class="template-name">Movimentações</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
+                        <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
                     <div class="template-card" onclick="baixarTemplate('fluxo_caixa')">
                         <div class="template-icon" style="background:#ede9fe;color:#7c3aed;"><i class="fas fa-chart-line"></i></div>
                         <div class="template-name">Fluxo de Caixa</div>
                         <div class="template-desc">Modelo XLSX para importação</div>
+                        <div class="template-download"><i class="fas fa-download"></i> Baixar</div>
                     </div>
                 </div>
             </div>

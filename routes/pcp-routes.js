@@ -430,7 +430,7 @@ module.exports = function createPCPRoutes(deps) {
 
             // Detectar qual tabela existe
             let tabela = 'materiais';
-            let colunas = 'id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao';
+            let colunas = 'id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao, tipo, custo_unitario, ncm, gtin, ativo';
             try {
                 await pool.query("SELECT 1 FROM materiais LIMIT 1");
             } catch (e) {
@@ -3635,6 +3635,141 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 error: 'Erro interno do servidor ao gerar Excel'
             });
+        }
+    });
+
+    // ==================== ORDEM DE PRODUÇÃO → PDF (XSL-FO / Apache FOP) ====================
+    // Pipeline: dados → XML (xmlbuilder2) → XSLT transforma em XSL-FO → Apache FOP gera PDF
+    const { gerarOrdemXML } = require('../services/ordem-xml-generator');
+    const { gerarPdfComFop, verificarFop } = require('../services/fop-pdf-service');
+
+    // GET /api/ordem-pdf/status - Verifica se FOP está disponível
+    router.get('/api/ordem-pdf/status', authenticateToken, (req, res) => {
+        const status = verificarFop();
+        res.json({ fop: status });
+    });
+
+    // POST /api/gerar-ordem-pdf - Gera PDF da Ordem de Produção via XSL-FO
+    router.post('/api/gerar-ordem-pdf', authenticateToken, async (req, res) => {
+        try {
+            console.log('📄 Iniciando geração de Ordem de Produção em PDF (XSL-FO)...');
+
+            const dadosOrdem = req.body;
+
+            // Normalizar campos com cedilha (mesmo tratamento da rota Excel)
+            if (!dadosOrdem.numero_orcamento && dadosOrdem['num_orçamento']) {
+                dadosOrdem.numero_orcamento = dadosOrdem['num_orçamento'];
+            }
+            if (!dadosOrdem.numero_orcamento && dadosOrdem.num_orcamento) {
+                dadosOrdem.numero_orcamento = dadosOrdem.num_orcamento;
+            }
+            if (!dadosOrdem.numero_pedido && dadosOrdem.num_pedido) {
+                dadosOrdem.numero_pedido = dadosOrdem.num_pedido;
+            }
+
+            // Validar dados obrigatórios
+            if (!dadosOrdem.numero_orcamento || !dadosOrdem.cliente) {
+                return res.status(400).json({
+                    error: 'Dados obrigatórios não fornecidos (numero_orcamento, cliente)'
+                });
+            }
+
+            // Enriquecer dados do cliente via banco (se faltam campos)
+            if (dadosOrdem.cliente && (!dadosOrdem.cpf_cnpj || !dadosOrdem.contato_cliente || !dadosOrdem.fone_cliente)) {
+                try {
+                    const [clienteRows] = await pool.query(
+                        'SELECT cnpj_cpf, contato, telefone, email, endereco, bairro, cidade, estado, cep FROM clientes WHERE (nome = ? OR razao_social = ? OR nome_fantasia = ?) AND ativo = 1 LIMIT 1',
+                        [dadosOrdem.cliente, dadosOrdem.cliente, dadosOrdem.cliente]
+                    );
+                    if (clienteRows.length > 0) {
+                        const cli = clienteRows[0];
+                        if (!dadosOrdem.cpf_cnpj) dadosOrdem.cpf_cnpj = cli.cnpj_cpf || '';
+                        if (!dadosOrdem.contato_cliente) dadosOrdem.contato_cliente = cli.contato || '';
+                        if (!dadosOrdem.fone_cliente) dadosOrdem.fone_cliente = cli.telefone || '';
+                        if (!dadosOrdem.email_cliente) dadosOrdem.email_cliente = cli.email || '';
+                        if (!dadosOrdem.endereco) dadosOrdem.endereco = [cli.endereco, cli.bairro, cli.cidade, cli.estado].filter(Boolean).join(', ');
+                        if (!dadosOrdem.cep) dadosOrdem.cep = cli.cep || '';
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados do cliente para PDF:', dbErr.message);
+                }
+            }
+
+            // Enriquecer dados da transportadora via banco
+            if (dadosOrdem.transportadora_nome && (!dadosOrdem.transportadora_fone || !dadosOrdem.transportadora_cep)) {
+                try {
+                    const [transpRows] = await pool.query(
+                        'SELECT cnpj_cpf, telefone, email, bairro, cidade, estado, cep FROM transportadoras WHERE (razao_social = ? OR nome_fantasia = ?) LIMIT 1',
+                        [dadosOrdem.transportadora_nome, dadosOrdem.transportadora_nome]
+                    );
+                    if (transpRows.length > 0) {
+                        const tr = transpRows[0];
+                        if (!dadosOrdem.transportadora_fone) dadosOrdem.transportadora_fone = tr.telefone || '';
+                        if (!dadosOrdem.transportadora_cpf_cnpj) dadosOrdem.transportadora_cpf_cnpj = tr.cnpj_cpf || '';
+                        if (!dadosOrdem.transportadora_email_nfe) dadosOrdem.transportadora_email_nfe = tr.email || '';
+                        if (!dadosOrdem.transportadora_cep) dadosOrdem.transportadora_cep = tr.cep || '';
+                        if (!dadosOrdem.transportadora_endereco) dadosOrdem.transportadora_endereco = [tr.bairro, tr.cidade, tr.estado].filter(Boolean).join(', ');
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados da transportadora para PDF:', dbErr.message);
+                }
+            }
+
+            // 1. Gerar XML estruturado
+            const xmlContent = gerarOrdemXML(dadosOrdem);
+            console.log(`📝 XML gerado: ${xmlContent.length} bytes`);
+
+            // 2. Converter XML → PDF via Apache FOP (XSL-FO)
+            const pdfBuffer = await gerarPdfComFop(xmlContent);
+            console.log(`✅ PDF gerado: ${pdfBuffer.length} bytes`);
+
+            // 3. Enviar PDF
+            const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+            const nomeArquivo = `Ordem de Produção - ${nomeCliente}.pdf`;
+            const encodedFilename = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+            const asciiFilename = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+
+            res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Length', pdfBuffer.length);
+
+            res.send(pdfBuffer);
+            console.log(`✅ PDF da OP enviado: ${nomeArquivo}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao gerar PDF da ordem de produção:', error);
+            res.status(500).json({
+                error: 'Erro ao gerar PDF da Ordem de Produção',
+                detalhe: error.message
+            });
+        }
+    });
+
+    // POST /api/gerar-ordem-xml - Exporta apenas o XML da Ordem (para debug/integração)
+    router.post('/api/gerar-ordem-xml', authenticateToken, async (req, res) => {
+        try {
+            const dadosOrdem = req.body;
+            if (!dadosOrdem.numero_orcamento && dadosOrdem['num_orçamento']) {
+                dadosOrdem.numero_orcamento = dadosOrdem['num_orçamento'];
+            }
+            if (!dadosOrdem.numero_orcamento && dadosOrdem.num_orcamento) {
+                dadosOrdem.numero_orcamento = dadosOrdem.num_orcamento;
+            }
+
+            const xmlContent = gerarOrdemXML(dadosOrdem);
+
+            const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+            const nomeArquivo = `Ordem de Produção - ${nomeCliente}.xml`;
+            const encodedFilename = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+            const asciiFilename = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+
+            res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+
+            res.send(xmlContent);
+        } catch (error) {
+            console.error('❌ Erro ao gerar XML da ordem:', error);
+            res.status(500).json({ error: 'Erro ao gerar XML', detalhe: error.message });
         }
     });
 
