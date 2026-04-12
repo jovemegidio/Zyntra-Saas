@@ -643,7 +643,7 @@
         .empty-state-desc { font-size: 14px; color: #64748b; max-width: 400px; margin: 0 auto; }
 
         /* Resultado do Relatório */
-        .resultado-relatório { animation: fadeInRelatorio 0.3s ease; }
+        .resultado-relatorio { animation: fadeInRelatorio 0.3s ease; }
 
 
         /* ===== Abas Relatórios CP/CR ===== */
@@ -1182,7 +1182,7 @@
                         <i class="fas fa-chart-bar"></i>
                     </div>
                     <div>
-                        <h2 id="modalRelatorioTítulo">Relatório</h2>
+                        <h2 id="modalRelatorioTitulo">Relatório</h2>
                         <p class="subtitle">Visualização detalhada dos dados</p>
                     </div>
                 </div>
@@ -1192,13 +1192,13 @@
             </div>
             <div class="modal-body-padrão" id="modalRelatorioBody">
                 <!-- Loading State Inicial -->
-                <div class="loading-relatório" id="loading-relatório">
+                <div class="loading-relatório" id="loading-relatorio">
                     <div class="loading-spinner"></div>
                     <div class="loading-text">Carregando Relatório...</div>
                     <div class="loading-subtext">Processando dados, aguarde um momento</div>
                 </div>
                 <!-- Conteúdo Dinâmico -->
-                <div id="conteudo-relatório" style="display: none;"></div>
+                <div id="conteudo-relatorio" style="display: none;"></div>
             </div>
             <div class="modal-footer-padrão">
                 <button class="btn-padrão-ghost" onclick="fecharModal('modalRelatorio')">
@@ -2458,14 +2458,14 @@
                 // Atualizar período exibido
                 const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
                                'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-                const períodoEl = document.getElementById('periodoResumo');
-                if (períodoEl) {
+                const periodoEl = document.getElementById('periodoResumo');
+                if (periodoEl) {
                     const dI = new Date(primeiroDia + 'T00:00:00');
                     const dF = new Date(ultimoDia + 'T00:00:00');
                     if (dI.getMonth() === dF.getMonth() && dI.getFullYear() === dF.getFullYear()) {
-                        períodoEl.textContent = `${meses[dI.getMonth()]} ${dI.getFullYear()}`;
+                        periodoEl.textContent = `${meses[dI.getMonth()]} ${dI.getFullYear()}`;
                     } else {
-                        períodoEl.textContent = `${dI.toLocaleDateString('pt-BR')} a ${dF.toLocaleDateString('pt-BR')}`;
+                        periodoEl.textContent = `${dI.toLocaleDateString('pt-BR')} a ${dF.toLocaleDateString('pt-BR')}`;
                     }
                 }
 
@@ -3011,11 +3011,11 @@
         }
 
         function atualizarRelatorios() {
-            const período = document.getElementById('filtroPeriodo').value;
+            const periodo = document.getElementById('filtroPeriodo').value;
             const hoje = new Date();
             let dataInicio, dataFim;
 
-            switch (período) {
+            switch (periodo) {
                 case 'mes':
                     dataInicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1).toISOString().split('T')[0];
                     dataFim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).toISOString().split('T')[0];
@@ -3111,8 +3111,8 @@
             document.getElementById('modalRelatorioTitulo').textContent = titulos[tipo] || 'Relatório';
 
             // Mostrar loading
-            const loadingEl = document.getElementById('loading-relatório');
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const loadingEl = document.getElementById('loading-relatorio');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
 
@@ -3125,7 +3125,7 @@
                 if (conteudoEl) {
                     conteudoEl.innerHTML = html;
                     conteudoEl.style.display = 'block';
-                    conteudoEl.classList.add('resultado-relatório');
+                    conteudoEl.classList.add('resultado-relatorio');
                 } else {
                     document.getElementById('modalRelatorioBody').innerHTML = html;
                 }
@@ -3768,8 +3768,8 @@
         function fecharModal(id) {
             document.getElementById(id).classList.remove('active');
             // Resetar loading ao fechar
-            const loadingEl = document.getElementById('loading-relatório');
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const loadingEl = document.getElementById('loading-relatorio');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (loadingEl) loadingEl.style.display = 'flex';
             if (conteudoEl) conteudoEl.style.display = 'none';
         }
@@ -4212,9 +4212,9 @@
             const fmtMoeda = (v) => parseFloat(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             // Usar o conteúdo já renderizado no modal se disponível
-            const conteudoEl = document.getElementById('conteudo-relatório');
+            const conteudoEl = document.getElementById('conteudo-relatorio');
             if (conteudoEl && conteudoEl.innerHTML.trim().length > 100) {
-                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatorioTítulo')?.textContent || 'Relatório'}</div>
+                return `<div class="section"><div class="section-header">${document.getElementById('modalRelatorioTitulo')?.textContent || 'Relatório'}</div>
                 <div class="section-content">${conteudoEl.innerHTML}</div></div>`;
             }
 
@@ -4268,7 +4268,7 @@
             const titulo = titulos[tipo] || 'Relatório Financeiro';
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const período = document.getElementById('dataInicio')?.value && document.getElementById('dataFim')?.value
+            const periodo = document.getElementById('dataInicio')?.value && document.getElementById('dataFim')?.value
                 ? `${new Date(document.getElementById('dataInicio').value).toLocaleDateString('pt-BR')} a ${new Date(document.getElementById('dataFim').value).toLocaleDateString('pt-BR')}`
                 : dataAtual;
 
@@ -4322,7 +4322,7 @@
                 <html>
                 <head>
                     <meta charset="UTF-8">
-                    <title>Zyntra: ${título}</title>
+                    <title>Zyntra: ${titulo}</title>
                     <style>
                         @page { margin: 12mm 15mm; size: A4; }
                         @media print {
@@ -4439,8 +4439,8 @@
 
                         <!-- TÍTULO -->
                         <div class="doc-title">
-                            <h1>${título}</h1>
-                            <div class="período">Período: ${período} — Módulo Financeiro</div>
+                            <h1>${titulo}</h1>
+                            <div class="período">Período: ${periodo} — Módulo Financeiro</div>
                         </div>
 
                         <!-- CONTEÚDO DO RELATÓRIO -->
