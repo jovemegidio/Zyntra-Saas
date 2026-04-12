@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a2e">
@@ -816,7 +816,7 @@
                     </div>
                     <div class="filter-section">
                         <label><i class="fas fa-calendar-day"></i> De</label>
-                        <input type="date" id="dataInício">
+                        <input type="date" id="dataInicio">
                     </div>
                     <div class="filter-section">
                         <label><i class="fas fa-calendar-day"></i> Até</label>
@@ -1897,7 +1897,7 @@
     </div>
 
     <script>
-        let relatórioAtual = '';
+        let relatorioAtual = '';
         let dadosContasPagar = [];
         let dadosContasReceber = [];
         let fornecedores = [];
@@ -1929,7 +1929,7 @@
             document.getElementById('receber-data-fim').value = ultimoDia;
 
             // Definir datas no filtro principal
-            const elInicio = document.getElementById('dataInício');
+            const elInicio = document.getElementById('dataInicio');
             const elFim = document.getElementById('dataFim');
             if (elInicio) elInicio.value = primeiroDia;
             if (elFim) elFim.value = ultimoDia;
@@ -2639,11 +2639,11 @@
             const despesasAdmin = despesasPorCategoria['administrativas'] || despesasPorCategoria['despesas-fixas'] || despesasPorCategoria['administrativo'] || despesasPorCategoria['aluguel'] || 0;
             const despesasComerciais = despesasPorCategoria['comerciais'] || despesasPorCategoria['vendas'] || despesasPorCategoria['marketing'] || 0;
             const despesasFinanceiras = despesasPorCategoria['financeiras'] || despesasPorCategoria['juros'] || despesasPorCategoria['taxas'] || despesasPorCategoria['bancarias'] || 0;
-            
+
             // Outras despesas = total - (custos + admin + comerciais + financeiras + impostos)
             const despesasConhecidas = custosTotais + despesasAdmin + despesasComerciais + despesasFinanceiras + deducoes;
             const outrasDespesas = Math.max(0, despesasTotais - despesasConhecidas);
-            
+
             const despesasOp = despesasAdmin + despesasComerciais + despesasFinanceiras + outrasDespesas;
 
             const lucroOperacional = lucroBruto - despesasOp;
@@ -2831,15 +2831,17 @@
                         else if (hour >= 18 || hour < 5) greeting = 'Boa noite';
                         greetingTextEl.textContent = greeting;
                     }
-                    document.getElementById('user-name').textContent = primeiroNome;
-                    document.getElementById('user-initials').textContent = primeiroNome.charAt(0).toUpperCase();
+                    const userNameEl = document.getElementById('user-name');
+                    if (userNameEl) userNameEl.textContent = primeiroNome;
+                    const userInitials = document.getElementById('user-initials');
+                    if (userInitials) userInitials.textContent = primeiroNome.charAt(0).toUpperCase();
 
                     // Carregar foto do usuário - verificar mltiplos campos
                     const fotoUrl = user.avatar || user.foto || user.foto_perfil_url;
                     const fotoEl = document.getElementById('user-photo');
                     const inicialEl = document.getElementById('user-initials');
 
-                    if (fotoUrl && fotoUrl !== '/avatars/default.webp') {
+                    if (fotoEl && fotoUrl && fotoUrl !== '/avatars/default.webp') {
                         fotoEl.src = fotoUrl;
                         fotoEl.onload = () => {
                             fotoEl.classList.add('visible');
@@ -3034,7 +3036,7 @@
                     break;
                 case 'custom':
                 default:
-                    dataInicio = document.getElementById('dataInício')?.value;
+                    dataInicio = document.getElementById('dataInicio')?.value;
                     dataFim = document.getElementById('dataFim')?.value;
                     if (!dataInicio || !dataFim) {
                         mostrarToast('Selecione as datas de início e fim para o período personalizado.', 'warning');
@@ -3044,7 +3046,7 @@
             }
 
             // Atualizar inputs de data visíveis
-            const elInicio = document.getElementById('dataInício');
+            const elInicio = document.getElementById('dataInicio');
             const elFim = document.getElementById('dataFim');
             if (elInicio) elInicio.value = dataInicio;
             if (elFim) elFim.value = dataFim;
@@ -3067,7 +3069,7 @@
         }
 
         async function abrirRelatorio(tipo) {
-            relatórioAtual = tipo;
+            relatorioAtual = tipo;
             const titulos = {
                 'dre': 'DRE - Demonstrativo de Resultados',
                 'fluxo': 'Fluxo de Caixa',
@@ -3150,7 +3152,7 @@
         }
 
         async function gerarConteudoRelatorio(tipo) {
-            const dataInicio = document.getElementById('dataInício')?.value || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            const dataInicio = document.getElementById('dataInicio')?.value || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
             const dataFim = document.getElementById('dataFim')?.value || new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
             const hoje = new Date().toISOString().split('T')[0];
 
@@ -3987,9 +3989,9 @@
 
         async function exportarRelatorioAtual(formato) {
             if (formato === 'pdf') {
-                await imprimirRelatorioFormatado(relatórioAtual);
+                await imprimirRelatorioFormatado(relatorioAtual);
             } else {
-                exportarRelatorio(relatórioAtual, formato);
+                exportarRelatorio(relatorioAtual, formato);
             }
         }
 
@@ -4146,7 +4148,7 @@
             localStorage.setItem('fin_agendamentos', JSON.stringify(agendamentos));
 
             fecharModal('modalAgendamento');
-            mostrarToast(`✅ Agendamento criado! "${tipoLabels[tipo]}" será enviado ${freqLabels[freq]} às ${horário} para ${emailList.length} destinatário(s).`, 'success');
+            mostrarToast(`✅ Agendamento criado! "${tipoLabels[tipo]}" será enviado ${freqLabels[freq]} às ${horario} para ${emailList.length} destinatário(s).`, 'success');
         }
 
         // --- Exportação CSV/Excel ---
@@ -4230,7 +4232,7 @@
 
         // Função de impressão profissional - mesmo template de Vendas (Orçamento)
         async function imprimirRelatorioFormatado(tipo) {
-            const títulos = {
+            const titulos = {
                 'dre': 'DRE - Demonstrativo de Resultados',
                 'fluxo': 'Fluxo de Caixa',
                 'contas-pagar': 'Relatório de Contas a Pagar',
@@ -4266,8 +4268,8 @@
             const titulo = titulos[tipo] || 'Relatório Financeiro';
             const dataAtual = new Date().toLocaleDateString('pt-BR');
             const horaAtual = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const período = document.getElementById('dataInício')?.value && document.getElementById('dataFim')?.value
-                ? `${new Date(document.getElementById('dataInício').value).toLocaleDateString('pt-BR')} a ${new Date(document.getElementById('dataFim').value).toLocaleDateString('pt-BR')}`
+            const período = document.getElementById('dataInicio')?.value && document.getElementById('dataFim')?.value
+                ? `${new Date(document.getElementById('dataInicio').value).toLocaleDateString('pt-BR')} a ${new Date(document.getElementById('dataFim').value).toLocaleDateString('pt-BR')}`
                 : dataAtual;
 
             // Buscar dados da empresa do banco (Configurações > Dados da Empresa)

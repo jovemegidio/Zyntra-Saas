@@ -1274,7 +1274,7 @@
         let orçamentos = [];
         let chartOrcamento = null;
         let editandoId = null;
-        let orçamentoVisualizando = null;
+        let orcamentoVisualizando = null;
 
         // Helper de autenticação
         function getAuthHeaders(extra = {}) {
@@ -1457,7 +1457,7 @@
             const orc = orçamentos.find(o => o.id === id);
             if (!orc) return;
 
-            orçamentoVisualizando = orc;
+            orcamentoVisualizando = orc;
             const percentual = orc.limite > 0 ? ((orc.gasto / orc.limite) * 100).toFixed(1) : 0;
             const disponivel = Math.max(0, orc.limite - orc.gasto);
             const cor = coresCategorias[orc.categoria] || '#6366f1';
@@ -1548,14 +1548,14 @@
             document.getElementById('modal-visualizar').classList.remove('active');
             document.getElementById('modal-visualizar').style.display = 'none';
             document.body.style.overflow = '';
-            orçamentoVisualizando = null;
+            orcamentoVisualizando = null;
         }
 
         // Editar a partir do modal de visualização
         function editarOrcamentoFromView() {
-            if (orçamentoVisualizando) {
+            if (orcamentoVisualizando) {
                 fecharModalVisualizar();
-                editarOrcamento(orçamentoVisualizando.id);
+                editarOrcamento(orcamentoVisualizando.id);
             }
         }
 
