@@ -358,6 +358,15 @@
     min-height: calc(100vh - var(--fin-header-h));
 }
 
+/* Páginas que renderizam conteúdo direto em .main-area (sem .main-content).
+   Garante respiro abaixo do header fixo e deixa o layout um pouco mais compacto. */
+.main-area > .fin-content,
+.main-area > .content-area,
+.main-area > .page-content {
+    margin-top: var(--fin-header-h) !important;
+    padding: 14px 18px 18px !important;
+}
+
 /* ============================================================
    5. NOTIFICATION PANEL (dropdown)
    ============================================================ */
