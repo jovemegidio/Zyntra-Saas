@@ -863,7 +863,7 @@
                         <i class="fas fa-sitemap"></i>
                     </div>
                     <div class="modal-header-text-padrão">
-                        <h2 id="modal-título">Nova Conta</h2>
+                        <h2 id="modal-titulo">Nova Conta</h2>
                         <p>Configure a conta para o plano de contas</p>
                     </div>
                     <button class="modal-close-padrão" type="button" onclick="fecharModal()" title="Fechar">
@@ -947,7 +947,7 @@
                                     <i class="fas fa-align-left"></i>
                                     Descrição
                                 </label>
-                                <input type="text" id="conta-descrição" placeholder="Descrição detalhada (opcional)">
+                                <input type="text" id="conta-descricao" placeholder="Descrição detalhada (opcional)">
                             </div>
                             <div class="form-group-padrão">
                                 <label>
@@ -956,7 +956,7 @@
                                 </label>
                                 <div class="valor-destaque-padrão">
                                     <span class="currency-symbol">R$</span>
-                                    <input type="text" id="conta-orçamento" placeholder="0,00" oninput="formatarMoeda(this)">
+                                    <input type="text" id="conta-orcamento" placeholder="0,00" oninput="formatarMoeda(this)">
                                 </div>
                             </div>
                         </div>
@@ -1270,7 +1270,7 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-título').textContent = 'Nova Conta';
+            document.getElementById('modal-titulo').textContent = 'Nova Conta';
             document.getElementById('form-conta').reset();
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
             document.querySelector('.color-option[data-color="#22c55e"]').classList.add('selected');
@@ -1300,15 +1300,25 @@
             if (!conta) return;
 
             editandoId = id;
-            document.getElementById('modal-título').textContent = 'Editar Conta';
-            document.getElementById('conta-id').value = conta.id;
-            document.getElementById('conta-tipo').value = conta.tipo;
-            document.getElementById('conta-pai').value = conta.pai_id || '';
-            document.getElementById('conta-nome').value = conta.nome;
-            document.getElementById('conta-descrição').value = conta.descrição || conta.descrição || '';
-            document.getElementById('conta-icone').value = conta.icone || 'fa-folder';
-            document.getElementById('conta-orçamento').value = conta.orçamento_mensal ? (conta.orçamento_mensal / 1).toFixed(2).replace('.', ',') : '';
-            document.getElementById('conta-status').value = conta.ativo ? '1' : '0';
+            const el = (sel) => document.getElementById(sel);
+            const modalTitulo = el('modal-titulo');
+            if (modalTitulo) modalTitulo.textContent = 'Editar Conta';
+            const contaId = el('conta-id');
+            if (contaId) contaId.value = conta.id;
+            const contaTipo = el('conta-tipo');
+            if (contaTipo) contaTipo.value = conta.tipo;
+            const contaPai = el('conta-pai');
+            if (contaPai) contaPai.value = conta.pai_id || '';
+            const contaNome = el('conta-nome');
+            if (contaNome) contaNome.value = conta.nome;
+            const contaDesc = el('conta-descricao');
+            if (contaDesc) contaDesc.value = conta.descrição || '';
+            const contaIcone = el('conta-icone');
+            if (contaIcone) contaIcone.value = conta.icone || 'fa-folder';
+            const contaOrc = el('conta-orcamento');
+            if (contaOrc) contaOrc.value = conta.orçamento_mensal ? (conta.orçamento_mensal / 1).toFixed(2).replace('.', ',') : '';
+            const contaStatus = el('conta-status');
+            if (contaStatus) contaStatus.value = conta.ativo ? '1' : '0';
 
             // Selecionar cor
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
@@ -1326,9 +1336,9 @@
             const nome = document.getElementById('conta-nome').value.trim();
             const tipo = document.getElementById('conta-tipo').value;
             const pai_id = document.getElementById('conta-pai').value || null;
-            const descrição = document.getElementById('conta-descrição').value.trim();
+            const descrição = document.getElementById('conta-descricao').value.trim();
             const icone = document.getElementById('conta-icone').value;
-            const orçamento = parseFloat(document.getElementById('conta-orçamento').value.replace(',', '.')) || 0;
+            const orçamento = parseFloat(document.getElementById('conta-orcamento').value.replace(',', '.')) || 0;
             const ativo = document.getElementById('conta-status').value === '1';
 
             if (!nome) {

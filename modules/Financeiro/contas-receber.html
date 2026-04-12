@@ -365,6 +365,15 @@
             .tabs-conta { overflow-x:auto; padding:0 16px; }
             .recebimentos-layout { flex-direction:column; }
         }
+
+        /* ===== WORKBOOK-TAB PINNED LAYOUT FIX =====
+           global-header-sidebar.css define main-area com min-height:100vh e overflow-y:auto,
+           fazendo a page crescer — as abas ficam abaixo do fold.
+           Fixamos: main-area = 100vh exato, content-area não rola (a pane-view rola).
+        */
+        .main-area { height: 100vh !important; min-height: 0 !important; overflow: hidden !important; }
+        .content-area { overflow: hidden !important; }
+        .tab-pane-view.active { overflow-y: auto !important; }
     </style>
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">

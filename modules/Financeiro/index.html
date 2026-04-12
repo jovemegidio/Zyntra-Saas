@@ -1131,6 +1131,56 @@
             }
         }
 
+        /* ========================================
+           PAGINAÇÃO
+           ======================================== */
+        .fin-pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 16px;
+            border-top: 1px solid var(--gray-100, #f3f4f6);
+        }
+
+        .fin-pagination-info {
+            margin-right: auto;
+            font-size: 12px;
+            color: var(--gray-500, #6b7280);
+        }
+
+        .fin-pagination-btn {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid var(--gray-200, #e5e7eb);
+            background: white;
+            color: var(--gray-600, #4b5563);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            padding: 0 8px;
+        }
+
+        .fin-pagination-btn:hover:not(:disabled) {
+            background: var(--gray-50, #f9fafb);
+            border-color: var(--gray-300, #d1d5db);
+        }
+
+        .fin-pagination-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .fin-pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
     </style>
 
     <!-- Tooltips Profissionais -->
@@ -1159,43 +1209,46 @@
             </a>
 
             <nav class="sidebar-nav">
-                <a href="/" class="sidebar-btn active" title="Dashboard">
+                <a href="index.html" class="sidebar-btn active" title="Dashboard">
                     <i class="fas fa-chart-line"></i>
                 </a>
-                <a href="/contas-pagar" class="sidebar-btn" title="Contas a Pagar">
+                <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </a>
-                <a href="/contas-receber" class="sidebar-btn" title="Contas a Receber">
+                <a href="contas-receber.html" class="sidebar-btn" title="Contas a Receber">
                     <i class="fas fa-hand-holding-usd"></i>
                 </a>
-                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa">
+                <a href="fluxo-caixa.html" class="sidebar-btn" title="Fluxo de Caixa">
                     <i class="fas fa-chart-area"></i>
                 </a>
-                <a href="/bancos" class="sidebar-btn" title="Bancos">
+                <a href="bancos.html" class="sidebar-btn" title="Bancos">
                     <i class="fas fa-university"></i>
                 </a>
-                <a href="/plano-contas" class="sidebar-btn" title="Plano de Contas">
+                <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="/orcamentos" class="sidebar-btn" title="OrÃ§amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="/conciliacao" class="sidebar-btn" title="ConciliaÃ§Ã£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="/relatorios" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
 
             <div class="sidebar-bottom">
                 <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
-                <a href="/centros-custo" class="sidebar-btn" title="Centros de Custo" style="display:none">
+                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
                     <i class="fas fa-sitemap"></i>
                 </a>
-                <a href="/impostos" class="sidebar-btn" title="Impostos">
+                <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -1224,8 +1277,33 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
+                    <div class="notification-container">
+                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes(event)">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
+                        </button>
+                        <div class="notification-panel" id="notification-panel">
+                            <div class="notification-header">
+                                <h3><i class="fas fa-bell"></i> Notificações</h3>
+                                <div class="notification-actions">
+                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
+                                        <i class="fas fa-check-double"></i>
+                                    </button>
+                                    <button onclick="limparNotificacoes()" title="Limpar todas">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="notification-list" id="notification-list">
+                                <div class="notification-empty">
+                                    <i class="fas fa-check-circle"></i>
+                                    <p>Nenhuma notificação</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
@@ -1322,6 +1400,7 @@
                                     <p>Carregando...</p>
                                 </div>
                             </div>
+                            <div class="fin-pagination" id="paginacao-vencimentos" style="display:none;"></div>
                         </div>
                     </div>
 
@@ -1364,6 +1443,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="fin-pagination" id="paginacao-lancamentos" style="display:none;"></div>
                         </div>
                     </div>
 
@@ -1390,9 +1470,10 @@
             if (panel) panel.classList.toggle('active');
         }
 
-        // NotificaÃ§Ãµes removidas — funÃ§Ãµes stub para compatibilidade
+        // Notificações removidas — funções stub para compatibilidade
         function marcarTodasLidas() {}
         function limparNotificacoes() {}
+        function toggleConfiguracoes() {}
 
         // ======== Carregar usuÃ¡rio ========
         async function carregarUsuario() {
@@ -1527,8 +1608,8 @@
                     fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${perÃ­odoAnterior.inicio}&dataFim=${perÃ­odoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${perÃ­odoAnterior.inicio}&dataFim=${perÃ­odoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
-                    fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=6', { data: [] }),
-                    fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=10', { data: [] }),
+                    fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=30', { data: [] }),
+                    fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=50', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/resumo-kpis', { data: { vencidos: 0 } })
                 ]);
 
@@ -1813,70 +1894,121 @@
             return `Vence em ${diferencaDias} dia(s)`;
         }
 
+        // ======== Estado de Paginação ========
+        const paginacaoEstado = {
+            vencimentos: { pagina: 1, porPagina: 5, dados: [] },
+            lancamentos: { pagina: 1, porPagina: 20, dados: [] }
+        };
+
+        function renderizarControlePaginacao(containerId, estado, nomeFuncao) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const { pagina, porPagina, dados } = estado;
+            const totalPaginas = Math.ceil(dados.length / porPagina);
+            if (totalPaginas <= 1) { el.style.display = 'none'; return; }
+            const inicio = (pagina - 1) * porPagina + 1;
+            const fim = Math.min(pagina * porPagina, dados.length);
+            let html = `<span class="fin-pagination-info">${inicio}–${fim} de ${dados.length}</span>`;
+            html += `<button class="fin-pagination-btn" ${pagina === 1 ? 'disabled' : ''} onclick="${nomeFuncao}(${pagina - 1})"><i class="fas fa-chevron-left"></i></button>`;
+            const maxVisible = 5;
+            let startPage = Math.max(1, pagina - 2);
+            const endPage = Math.min(totalPaginas, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+            for (let p = startPage; p <= endPage; p++) {
+                html += `<button class="fin-pagination-btn${p === pagina ? ' active' : ''}" onclick="${nomeFuncao}(${p})">${p}</button>`;
+            }
+            html += `<button class="fin-pagination-btn" ${pagina === totalPaginas ? 'disabled' : ''} onclick="${nomeFuncao}(${pagina + 1})"><i class="fas fa-chevron-right"></i></button>`;
+            el.style.display = 'flex';
+            el.innerHTML = html;
+        }
+
+        function irParaPaginaVencimentos(p) {
+            paginacaoEstado.vencimentos.pagina = p;
+            renderizarPaginaVencimentos();
+        }
+
+        function irParaPaginaLancamentos(p) {
+            paginacaoEstado.lancamentos.pagina = p;
+            renderizarPaginaLancamentos();
+        }
+
         // ======== Vencimentos ========
-        async function carregarVencimentos() {
+        function renderizarPaginaVencimentos() {
             const lista = document.getElementById('lista-vencimentos');
             if (!lista) return;
-
-            try {
-                const dados = await carregarDadosDashboard();
-                const vencimentos = [...dados.proximosVencimentos]
-                    .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento))
-                    .slice(0, 6);
-
-                if (vencimentos.length === 0) {
-                    lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento prÃ³ximo</p></div>';
-                    return;
-                }
-
-                lista.innerHTML = vencimentos.map(item => `
+            const { pagina, porPagina, dados } = paginacaoEstado.vencimentos;
+            const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
+            if (paginados.length === 0) {
+                lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento próximo</p></div>';
+            } else {
+                lista.innerHTML = paginados.map(item => `
                     <div class="vencimento-item">
                         <div class="vencimento-left">
                             <div class="vencimento-icon ${item.tipo}">
                                 <i class="fas fa-${item.tipo === 'receber' ? 'arrow-down' : 'arrow-up'}"></i>
                             </div>
                             <div class="vencimento-info">
-                                <h4>${escapeHtml(item.descricao || item.descriÃ§Ã£o || 'Sem descriÃ§Ã£o')}</h4>
+                                <h4>${escapeHtml(item.descricao || item.descri\u00e7\u00e3o || 'Sem descri\u00e7\u00e3o')}</h4>
                                 <span>${obterTextoPrazo(item.data_vencimento)} — ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
                             </div>
                         </div>
                         <div class="vencimento-valor ${item.tipo === 'receber' ? 'green' : 'red'}">${formatarMoeda(item.valor)}</div>
                     </div>
                 `).join('');
+            }
+            renderizarControlePaginacao('paginacao-vencimentos', paginacaoEstado.vencimentos, 'irParaPaginaVencimentos');
+        }
+
+        async function carregarVencimentos() {
+            const lista = document.getElementById('lista-vencimentos');
+            if (!lista) return;
+            try {
+                const dados = await carregarDadosDashboard();
+                paginacaoEstado.vencimentos.dados = [...dados.proximosVencimentos]
+                    .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento));
+                paginacaoEstado.vencimentos.pagina = 1;
+                renderizarPaginaVencimentos();
             } catch (error) {
-                console.error('Erro ao carregar prÃ³ximos vencimentos:', error);
+                console.error('Erro ao carregar próximos vencimentos:', error);
                 lista.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Erro ao carregar vencimentos</p></div>';
             }
         }
 
-        // ======== LanÃ§amentos ========
-        async function carregarLancamentos() {
+        // ======== Lançamentos ========
+        function renderizarPaginaLancamentos() {
             const tbody = document.getElementById('tabela-lancamentos');
             if (!tbody) return;
-
-            try {
-                const dados = await carregarDadosDashboard();
-                const lancamentos = [...dados.ultimosLancamentos].slice(0, 10);
-
-                if (lancamentos.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lanÃ§amento</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = lancamentos.map(item => {
+            const { pagina, porPagina, dados } = paginacaoEstado.lancamentos;
+            const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
+            if (paginados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lançamento</td></tr>';
+            } else {
+                tbody.innerHTML = paginados.map(item => {
                     const tipo = item.tipo === 'Receber' ? 'Receber' : 'Pagar';
                     return `
                         <tr>
                             <td><span class="badge ${tipo === 'Receber' ? 'badge-success' : 'badge-danger'}">${tipo}</span></td>
-                            <td class="td-description">${escapeHtml(item.descricao || item.descriÃ§Ã£o || 'Sem descriÃ§Ã£o')}</td>
+                            <td class="td-description">${escapeHtml(item.descricao || item.descri\u00e7\u00e3o || 'Sem descri\u00e7\u00e3o')}</td>
                             <td>${formatarData(item.data_vencimento)}</td>
                             <td class="td-valor ${tipo === 'Receber' ? 'td-valor--success' : 'td-valor--danger'}">${formatarMoeda(item.valor)}</td>
                             <td><span class="badge ${getStatusClass(item.status)}">${formatarStatus(item.status)}</span></td>
                         </tr>
                     `;
                 }).join('');
+            }
+            renderizarControlePaginacao('paginacao-lancamentos', paginacaoEstado.lancamentos, 'irParaPaginaLancamentos');
+        }
+
+        async function carregarLancamentos() {
+            const tbody = document.getElementById('tabela-lancamentos');
+            if (!tbody) return;
+            try {
+                const dados = await carregarDadosDashboard();
+                paginacaoEstado.lancamentos.dados = [...dados.ultimosLancamentos];
+                paginacaoEstado.lancamentos.pagina = 1;
+                renderizarPaginaLancamentos();
             } catch (error) {
-                console.error('Erro ao carregar Ãšltimos lanÃ§amentos:', error);
+                console.error('Erro ao carregar Últimos lançamentos:', error);
                 tbody.innerHTML = '<tr><td colspan="5" class="td-loading td-valor--danger">Erro ao carregar</td></tr>';
             }
         }

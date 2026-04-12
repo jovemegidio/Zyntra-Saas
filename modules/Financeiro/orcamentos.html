@@ -125,8 +125,7 @@
         .alert-content .desc { font-size: 12px; color: var(--text-secondary); }
 
         /* MODAL - Design SaaS Empresarial */
-        -webkit-backdrop-filter: blur(8px); }
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15,23,42,0.7); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .modal-overlay.active { display: flex; }
         .modal { display: flex; flex-direction: column; background: white; border-radius: 20px; width: 100%; max-width: 720px; min-height: 580px; max-height: 90vh; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 10px 30px rgba(0,0,0,0.15); animation: modalFadeIn 0.3s ease-out; }
         @keyframes modalFadeIn { from { opacity: 0; transform: scale(0.95) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
@@ -754,6 +753,27 @@
             background: #34d399;
             color: white;
         }
+
+        /* ====== FIX: Overlay por ID (sem depender de acentos) ====== */
+        #modal-or\e7amento,
+        #modal-visualizar {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: rgba(15,23,42,0.75) !important;
+            display: none !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 99999 !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+        }
+        #modal-or\e7amento.active,
+        #modal-visualizar.active {
+            display: flex !important;
+        }
     </style>
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
     <!-- Tooltips Profissionais -->
@@ -986,7 +1006,7 @@
     </div>
 
     <!-- Modal Novo Orçamento - Design SaaS Empresarial Institucional -->
-    <div class="modal-overlay-padrão" id="modal-orçamento" onclick="fecharModal()">
+    <div class="modal-overlay-padrão" id="modal-orçamento" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onclick="fecharModal()">
         <div class="modal-padrão" onclick="event.stopPropagation()">
             <!-- HEADER PROFISSIONAL COM GRADIENT VERDE LIMA -->
             <div class="modal-header-padrão">
@@ -1160,8 +1180,8 @@
     </div>
 
     <!-- Modal Visualizar Orçamento - Design SaaS Expandido -->
-    <div class="modal-overlay-padrão" id="modal-visualizar">
-        <div class="modal-padrão" style="max-width: 700px;">
+    <div class="modal-overlay-padrão" id="modal-visualizar" style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.75);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);" onclick="fecharModalVisualizar()">
+        <div class="modal-padrão" style="max-width: 700px;" onclick="event.stopPropagation()">
             <div class="modal-header-padrão">
                 <div class="modal-header-content-padrão">
                     <div id="vis-icon" class="modal-header-icon-padrão">
@@ -1519,11 +1539,15 @@
             }
 
             document.getElementById('modal-visualizar').classList.add('active');
+            document.getElementById('modal-visualizar').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         // Fechar modal de visualização
         function fecharModalVisualizar() {
             document.getElementById('modal-visualizar').classList.remove('active');
+            document.getElementById('modal-visualizar').style.display = 'none';
+            document.body.style.overflow = '';
             orçamentoVisualizando = null;
         }
 
@@ -1657,13 +1681,19 @@
             editandoId = null;
             document.getElementById('modal-título').textContent = 'Novo Orçamento';
             document.getElementById('form-orçamento').reset();
-            document.getElementById('modal-orçamento').classList.add('active');
+            const m = document.getElementById('modal-orçamento');
+            m.classList.add('active');
+            m.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         // Fechar modal
         function fecharModal() {
-            document.getElementById('modal-orçamento').classList.remove('active');
+            const m = document.getElementById('modal-orçamento');
+            m.classList.remove('active');
+            m.style.display = 'none';
             editandoId = null;
+            document.body.style.overflow = '';
         }
 
         // Editar orçamento
@@ -1680,7 +1710,10 @@
             document.getElementById('orçamento-alerta-pct').value = orc.alerta_pct || 80;
             document.getElementById('orçamento-alerta-msg').value = orc.alerta || '';
 
-            document.getElementById('modal-orçamento').classList.add('active');
+            const m = document.getElementById('modal-orçamento');
+            m.classList.add('active');
+            m.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         }
 
         // Salvar orçamento

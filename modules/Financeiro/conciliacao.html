@@ -306,6 +306,71 @@
         @media (max-width: 1400px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .conciliação-grid { grid-template-columns: 1fr; } .match-column { flex-direction: row; padding: 20px; } }
         @media (max-width: 1100px) { .filters-bar { flex-wrap: wrap; } .filter-group { flex: 1; min-width: 250px; } .filters-bar .btn { width: 100%; justify-content: center; border-radius: 0 0 14px 14px; } }
         @media (max-width: 768px) { .kpi-grid { grid-template-columns: 1fr; } .filter-group { flex-direction: column; align-items: flex-start; min-width: 100%; } }
+
+        /* PAGINATION */
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-gray);
+            font-size: 12px;
+            color: var(--text-secondary);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .pagination-info {
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pagination-btn {
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: all 0.15s;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+        }
+        .pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .pagination-btn.active {
+            background: var(--primary-orange);
+            color: white;
+            border-color: var(--primary-orange);
+            font-weight: 700;
+        }
+        .pagination-per-page {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pagination-per-page select {
+            padding: 4px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+            cursor: pointer;
+        }
     </style>
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
     <script src="/js/anti-copy-protection.js"></script>
@@ -521,6 +586,7 @@
                         </div>
                         <div class="panel-body">
                             <ul class="item-list" id="listaSistema"></ul>
+                            <div class="pagination-bar" id="paginacaoSistema"></div>
                         </div>
                     </div>
 
@@ -548,6 +614,7 @@
                         </div>
                         <div class="panel-body">
                             <ul class="item-list" id="listaExtrato"></ul>
+                            <div class="pagination-bar" id="paginacaoExtrato"></div>
                         </div>
                     </div>
                 </div>
@@ -655,6 +722,11 @@
         let extratosSelecionados = [];
         let contaBancariaAtual = '';
 
+        // === Pagination State ===
+        let paginaSistema = 1;
+        let paginaExtrato = 1;
+        let itensPorPagina = 30;
+
         // === Init ===
         document.addEventListener('DOMContentLoaded', function() {
             const now = new Date();
@@ -704,6 +776,8 @@
         }
 
         async function carregarTudo() {
+            paginaSistema = 1;
+            paginaExtrato = 1;
             await Promise.all([carregarSistema(), carregarExtrato(), carregarHistorico()]);
             atualizarKPIs();
             renderizarListas();
@@ -790,37 +864,123 @@
         }
 
         function renderizarListas() {
+            renderizarPainelSistema();
+            renderizarPainelExtrato();
+        }
+
+        function renderizarPainelSistema() {
             const listaSistema = document.getElementById('listaSistema');
             if (lancamentosSistema.length === 0) {
                 listaSistema.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Nenhum lançamento no período</li>';
-            } else {
-                listaSistema.innerHTML = lancamentosSistema.map(item => `
-                    <li class="item-row ${item.conciliado ? 'conciliado' : ''} ${sistemasSelecionados.includes(item.id) ? 'selected' : ''}"
-                        onclick="toggleSelecaoSistema('${item.id}')" style="position:relative;">
-                        <div class="item-check ${sistemasSelecionados.includes(item.id) ? 'checked' : ''}">
-                            ${sistemasSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
-                        </div>
-                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
-                        <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
-                    </li>
-                `).join('');
+                document.getElementById('paginacaoSistema').innerHTML = '';
+                return;
             }
+            const total = lancamentosSistema.length;
+            const totalPags = Math.ceil(total / itensPorPagina);
+            if (paginaSistema > totalPags) paginaSistema = totalPags;
+            const inicio = (paginaSistema - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, total);
+            const paginados = lancamentosSistema.slice(inicio, fim);
 
+            listaSistema.innerHTML = paginados.map(item => `
+                <li class="item-row ${item.conciliado ? 'conciliado' : ''} ${sistemasSelecionados.includes(item.id) ? 'selected' : ''}"
+                    onclick="toggleSelecaoSistema('${item.id}')" style="position:relative;">
+                    <div class="item-check ${sistemasSelecionados.includes(item.id) ? 'checked' : ''}">
+                        ${sistemasSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
+                    </div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
+                    <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
+                </li>
+            `).join('');
+
+            renderizarPaginacao('paginacaoSistema', paginaSistema, totalPags, total, inicio, fim, 'sistema');
+        }
+
+        function renderizarPainelExtrato() {
             const listaExtrato = document.getElementById('listaExtrato');
             if (lancamentosExtrato.length === 0) {
                 listaExtrato.innerHTML = '<li style="padding:40px;text-align:center;color:var(--text-secondary)"><i class="fas fa-file-import" style="font-size:32px;margin-bottom:12px;display:block;color:#cbd5e1"></i>Importe um extrato OFX para começar</li>';
-            } else {
-                listaExtrato.innerHTML = lancamentosExtrato.map(item => `
-                    <li class="item-row ${item.conciliado ? 'conciliado' : ''} ${extratosSelecionados.includes(item.id) ? 'selected' : ''}"
-                        onclick="toggleSelecaoExtrato('${item.id}')" style="position:relative;">
-                        <div class="item-check ${extratosSelecionados.includes(item.id) ? 'checked' : ''}">
-                            ${extratosSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
-                        </div>
-                        <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
-                        <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
-                    </li>
-                `).join('');
+                document.getElementById('paginacaoExtrato').innerHTML = '';
+                return;
             }
+            const total = lancamentosExtrato.length;
+            const totalPags = Math.ceil(total / itensPorPagina);
+            if (paginaExtrato > totalPags) paginaExtrato = totalPags;
+            const inicio = (paginaExtrato - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, total);
+            const paginados = lancamentosExtrato.slice(inicio, fim);
+
+            listaExtrato.innerHTML = paginados.map(item => `
+                <li class="item-row ${item.conciliado ? 'conciliado' : ''} ${extratosSelecionados.includes(item.id) ? 'selected' : ''}"
+                    onclick="toggleSelecaoExtrato('${item.id}')" style="position:relative;">
+                    <div class="item-check ${extratosSelecionados.includes(item.id) ? 'checked' : ''}">
+                        ${extratosSelecionados.includes(item.id) ? '<i class="fas fa-check" style="font-size:12px;"></i>' : ''}
+                    </div>
+                    <div class="item-info"><div class="data">${formatarData(item.data)}</div><div class="descrição">${item.descrição}</div></div>
+                    <div class="item-valor ${item.tipo}">${item.tipo === 'entrada' ? '+' : '-'}${formatarMoeda(item.valor)}</div>
+                </li>
+            `).join('');
+
+            renderizarPaginacao('paginacaoExtrato', paginaExtrato, totalPags, total, inicio, fim, 'extrato');
+        }
+
+        function renderizarPaginacao(containerId, paginaAtual, totalPags, total, inicio, fim, tipo) {
+            const container = document.getElementById(containerId);
+            if (totalPags <= 1) {
+                container.innerHTML = `<div class="pagination-info">${total} lançamento${total !== 1 ? 's' : ''}</div>
+                    <div class="pagination-per-page"><span>Por página:</span>
+                    <select onchange="alterarItensPorPagina(this.value)">
+                        <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
+                        <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
+                        <option value="50" ${itensPorPagina===50?'selected':''}>50</option>
+                    </select></div>`;
+                return;
+            }
+
+            // Build page buttons (max 5 visible)
+            let pagBtns = '';
+            let startP = Math.max(1, paginaAtual - 2);
+            let endP = Math.min(totalPags, startP + 4);
+            if (endP - startP < 4) startP = Math.max(1, endP - 4);
+            for (let p = startP; p <= endP; p++) {
+                pagBtns += `<button class="pagination-btn ${p===paginaAtual?'active':''}" onclick="irParaPagina('${tipo}',${p})">${p}</button>`;
+            }
+
+            container.innerHTML = `
+                <div class="pagination-info">${inicio+1}-${fim} de ${total}</div>
+                <div class="pagination-controls">
+                    <button class="pagination-btn" onclick="irParaPagina('${tipo}',1)" ${paginaAtual===1?'disabled':''}><i class="fas fa-angle-double-left"></i></button>
+                    <button class="pagination-btn" onclick="irParaPagina('${tipo}',${paginaAtual-1})" ${paginaAtual===1?'disabled':''}><i class="fas fa-angle-left"></i></button>
+                    ${pagBtns}
+                    <button class="pagination-btn" onclick="irParaPagina('${tipo}',${paginaAtual+1})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-right"></i></button>
+                    <button class="pagination-btn" onclick="irParaPagina('${tipo}',${totalPags})" ${paginaAtual===totalPags?'disabled':''}><i class="fas fa-angle-double-right"></i></button>
+                </div>
+                <div class="pagination-per-page"><span>Por página:</span>
+                <select onchange="alterarItensPorPagina(this.value)">
+                    <option value="20" ${itensPorPagina===20?'selected':''}>20</option>
+                    <option value="30" ${itensPorPagina===30?'selected':''}>30</option>
+                    <option value="50" ${itensPorPagina===50?'selected':''}>50</option>
+                </select></div>
+            `;
+        }
+
+        function irParaPagina(tipo, pagina) {
+            if (tipo === 'sistema') {
+                const max = Math.ceil(lancamentosSistema.length / itensPorPagina);
+                paginaSistema = Math.max(1, Math.min(pagina, max));
+                renderizarPainelSistema();
+            } else {
+                const max = Math.ceil(lancamentosExtrato.length / itensPorPagina);
+                paginaExtrato = Math.max(1, Math.min(pagina, max));
+                renderizarPainelExtrato();
+            }
+        }
+
+        function alterarItensPorPagina(valor) {
+            itensPorPagina = parseInt(valor) || 30;
+            paginaSistema = 1;
+            paginaExtrato = 1;
+            renderizarListas();
         }
 
         function renderizarHistorico() {
