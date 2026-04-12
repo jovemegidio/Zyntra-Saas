@@ -1358,7 +1358,11 @@ app.get('/Financeiro', (req, res, next) => {
 
 // Aliases root-level para páginas do Financeiro (apenas habilitadas)
 const finRootAliases = {
-    'contas-receber': 'contas_receber'
+    'contas-pagar': 'contas_pagar',
+    'contas-receber': 'contas_receber',
+    'contas-bancarias': 'contas_bancarias',
+    'fluxo-caixa': 'fluxo_caixa',
+    'plano-contas': 'plano_contas'
 };
 Object.entries(finRootAliases).forEach(([alias, file]) => {
     app.get(`/${alias}`, (req, res, next) => {

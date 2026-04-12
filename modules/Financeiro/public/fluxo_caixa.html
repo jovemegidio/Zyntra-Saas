@@ -92,6 +92,15 @@
 
         .badge-entrada { background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
         .badge-saida { background: #fee2e2; color: #991b1b; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        tr.saldo-negativo td { background: #fef2f2; }
+        tr.saldo-negativo td:last-child { color: #ef4444 !important; font-weight: 800; }
+        .alert-recorrencia { background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #92400e; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+        .alert-recorrencia i { color: #f59e0b; }
+        .alert-erro { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #991b1b; margin-bottom: 16px; display: none; align-items: center; gap: 8px; }
+        .alert-erro i { color: #ef4444; }
+        .loading-overlay { position: relative; }
+        .loading-overlay::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,0.7); display: none; z-index: 10; }
+        .loading-overlay.loading::after { display: block; }
 
         @media (max-width: 1024px) { .kpi-cards { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 640px) { .kpi-cards { grid-template-columns: 1fr; } .period-selector { flex-direction: column; align-items: stretch; } .period-custom { margin-left: 0; } }
@@ -166,8 +175,13 @@
                     </div>
                 </div>
 
+                <!-- Alertas -->
+                <div class="alert-recorrencia" id="alert-recorrencia"><i class="fas fa-exclamation-triangle"></i> <span>Atenção: lançamentos recorrentes podem não ter sido processados para este período. A projeção pode estar incompleta.</span></div>
+                <div class="alert-erro" id="alert-erro"><i class="fas fa-times-circle"></i> <span id="alert-erro-msg">Erro ao carregar dados.</span></div>
+
                 <!-- Seletor de Período -->
                 <div class="period-selector">
+                    <button class="period-btn" data-periodo="semana" onclick="selecionarPeriodo('semana', this)">Semana</button>
                     <button class="period-btn active" data-periodo="mes" onclick="selecionarPeriodo('mes', this)">Este Mês</button>
                     <button class="period-btn" data-periodo="trimestre" onclick="selecionarPeriodo('trimestre', this)">Trimestre</button>
                     <button class="period-btn" data-periodo="semestre" onclick="selecionarPeriodo('semestre', this)">Semestre</button>
@@ -256,6 +270,7 @@
             const hoje = new Date();
             let inicio, fim;
             switch (periodo) {
+                case 'semana': inicio = new Date(hoje); inicio.setDate(hoje.getDate() - hoje.getDay()); fim = new Date(inicio); fim.setDate(inicio.getDate() + 6); break;
                 case 'mes': inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
                 case 'trimestre': inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 2, 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
                 case 'semestre': inicio = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1); fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0); break;
@@ -277,20 +292,53 @@
             const inicio = document.getElementById('data-inicio').value;
             const fim = document.getElementById('data-fim').value;
             if (!inicio || !fim) return;
+            const alertErro = document.getElementById('alert-erro');
+            const alertRec = document.getElementById('alert-recorrencia');
+            alertErro.style.display = 'none';
+            alertRec.style.display = 'none';
+            document.getElementById('tabela-movimentacoes').innerHTML = '<tr><td colspan="6" style="text-align:center;padding:60px;color:var(--gray-400);"><i class="fas fa-spinner fa-spin" style="font-size:48px;margin-bottom:16px;display:block;"></i>Carregando...</td></tr>';
             try {
-                const r = await fetch(`/api/financeiro/fluxo-caixa?inicio=${inicio}&fim=${fim}`, { credentials: 'include' });
-                if (r.ok) { fluxoData = await r.json(); fluxoData = fluxoData.data || fluxoData.movimentacoes || fluxoData; if (!Array.isArray(fluxoData)) fluxoData = []; atualizarResumo(); renderizarGrafico(); renderizarTabela(); }
-            } catch(e) { console.error('Erro fluxo:', e); }
+                const r = await fetch(`/api/financeiro/fluxo-caixa?inicio=${encodeURIComponent(inicio)}&fim=${encodeURIComponent(fim)}`, { credentials: 'include' });
+                if (r.status === 401) { window.location.href = '/login.html?expired=1'; return; }
+                if (r.status === 503) { alertErro.style.display = 'flex'; document.getElementById('alert-erro-msg').textContent = 'Serviço temporariamente indisponível. Tente novamente em instantes.'; fluxoData = []; renderizarTabela(); return; }
+                if (!r.ok) { alertErro.style.display = 'flex'; document.getElementById('alert-erro-msg').textContent = `Erro ao carregar dados (HTTP ${r.status}).`; fluxoData = []; renderizarTabela(); return; }
+                const payload = await r.json();
+                fluxoData = payload.data || payload.movimentacoes || payload;
+                if (!Array.isArray(fluxoData)) fluxoData = [];
+                if (payload.recorrencias_pendentes) alertRec.style.display = 'flex';
+                atualizarResumo(); renderizarGrafico(); renderizarTabela();
+            } catch(e) {
+                console.error('Erro fluxo:', e);
+                alertErro.style.display = 'flex';
+                document.getElementById('alert-erro-msg').textContent = 'Erro de conexão. Verifique sua rede e tente novamente.';
+                fluxoData = []; renderizarTabela();
+            }
         }
 
+        // ===== SANITIZAÇÃO HTML (prevenção XSS) =====
+        function escHtml(s) { const d = document.createElement('div'); d.textContent = String(s || ''); return d.innerHTML; }
+
         function atualizarResumo() {
+            const hoje = new Date();
+            hoje.setHours(23, 59, 59, 999);
             const entradas = fluxoData.filter(m => m.tipo === 'entrada' || m.tipo === 'receita').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
             const saidas = fluxoData.filter(m => m.tipo === 'saida' || m.tipo === 'despesa').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
             const saldo = entradas - saidas;
+            // T-B09: Saldo projetado — realizado (até hoje) + pendentes futuras
+            const entradasRealizadas = fluxoData.filter(m => (m.tipo === 'entrada' || m.tipo === 'receita') && new Date(m.data) <= hoje).reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            const saidasRealizadas = fluxoData.filter(m => (m.tipo === 'saida' || m.tipo === 'despesa') && new Date(m.data) <= hoje).reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            const saldoRealizado = entradasRealizadas - saidasRealizadas;
+            const entradasFut = fluxoData.filter(m => (m.tipo === 'entrada' || m.tipo === 'receita') && new Date(m.data) > hoje).reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            const saidasFut = fluxoData.filter(m => (m.tipo === 'saida' || m.tipo === 'despesa') && new Date(m.data) > hoje).reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            const saldoProjetado = saldoRealizado + entradasFut - saidasFut;
             document.getElementById('total-entradas').textContent = `R$ ${entradas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
             document.getElementById('total-saidas').textContent = `R$ ${saidas.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('saldo-periodo').textContent = `R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-            document.getElementById('saldo-projetado').textContent = `R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            const saldoEl = document.getElementById('saldo-periodo');
+            saldoEl.textContent = `R$ ${saldoRealizado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            saldoEl.style.color = saldoRealizado >= 0 ? '#3b82f6' : '#ef4444';
+            const projEl = document.getElementById('saldo-projetado');
+            projEl.textContent = `R$ ${saldoProjetado.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            projEl.style.color = saldoProjetado >= 0 ? '#8b5cf6' : '#ef4444';
         }
 
         function renderizarGrafico() {
@@ -344,10 +392,11 @@
                 const valor = parseFloat(m.valor) || 0;
                 const isEntrada = m.tipo === 'entrada' || m.tipo === 'receita';
                 saldoAcum += isEntrada ? valor : -valor;
-                return `<tr>
+                const rowClass = saldoAcum < 0 ? ' class="saldo-negativo"' : '';
+                return `<tr${rowClass}>
                     <td>${m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-'}</td>
-                    <td><strong>${m.descricao || m.descrição || '-'}</strong></td>
-                    <td>${m.categoria || m.categoria_nome || '-'}</td>
+                    <td><strong>${escHtml(m.descricao || m.descrição || '-')}</strong></td>
+                    <td>${escHtml(m.categoria || m.categoria_nome || '-')}</td>
                     <td><span class="${isEntrada ? 'badge-entrada' : 'badge-saida'}">${isEntrada ? 'Entrada' : 'Saída'}</span></td>
                     <td style="color:${isEntrada ? '#059669' : '#ef4444'};font-weight:700;">${isEntrada ? '+' : '-'} R$ ${valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
                     <td style="font-weight:700;color:${saldoAcum >= 0 ? '#059669' : '#ef4444'};">R$ ${saldoAcum.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
@@ -356,38 +405,47 @@
         }
 
         // ===== EXPORTAR =====
+        // ===== EXPORTAR CSV (com limite R16: >50k linhas = warning OOM) =====
         function exportarFluxo() {
-            if (fluxoData.length === 0) { alert('Nada para exportar'); return; }
-            const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor'];
-            const linhas = fluxoData.map(m => [
-                m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-',
-                `"${(m.descricao || m.descrição || '').replace(/"/g, '""')}"`,
-                m.categoria || '-',
-                m.tipo || '-',
-                (parseFloat(m.valor) || 0).toFixed(2).replace('.', ',')
-            ]);
+            if (fluxoData.length === 0) { alert('Nenhuma movimentação para exportar.'); return; }
+            if (fluxoData.length > 50000) {
+                if (!confirm(`Atenção: ${fluxoData.length.toLocaleString('pt-BR')} registros podem causar lentidão.\nDeseja filtrar um período menor ou continuar?`)) return;
+            }
+            const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor', 'Saldo Acumulado'];
+            let saldoAcum = 0;
+            const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
+            const linhas = sorted.map(m => {
+                const v = parseFloat(m.valor) || 0;
+                const isE = m.tipo === 'entrada' || m.tipo === 'receita';
+                saldoAcum += isE ? v : -v;
+                return [
+                    m.data ? new Date(m.data).toLocaleDateString('pt-BR') : '-',
+                    `"${(m.descricao || m.descrição || '').replace(/"/g, '""')}"`,
+                    `"${(m.categoria || m.categoria_nome || '-').replace(/"/g, '""')}"`,
+                    isE ? 'Entrada' : 'Saída',
+                    (isE ? '' : '-') + v.toFixed(2).replace('.', ','),
+                    saldoAcum.toFixed(2).replace('.', ',')
+                ];
+            });
             const csv = [headers.join(';'), ...linhas.map(l => l.join(';'))].join('\n');
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
             link.download = `fluxo_caixa_${new Date().toISOString().split('T')[0]}.csv`; link.click();
+            URL.revokeObjectURL(link.href);
         }
 
         function exportarFluxoPDF() {
+            if (fluxoData.length === 0) { alert('Nenhuma movimentação para imprimir.'); return; }
             const w = window.open('', '_blank');
+            if (!w) { alert('Popup bloqueado. Permita popups para imprimir.'); return; }
             const inicio = document.getElementById('data-inicio').value;
             const fim = document.getElementById('data-fim').value;
             let saldoAcum = 0;
             const sorted = [...fluxoData].sort((a, b) => new Date(a.data) - new Date(b.data));
-            // FIX BUG-21: escape HTML para prevenir XSS em document.write
             const esc = s => String(s||'-').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-            w.document.write(`<html><head><title>Fluxo de Caixa</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;}.entrada{color:#059669;}.saida{color:#ef4444;}</style></head><body><h2>Fluxo de Caixa</h2><p>Período: ${esc(inicio)} a ${esc(fim)}</p><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descrição)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'}">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table>    <!-- Chat Widget BOB AI -->
-    <script src="/chat/widget.js?v=20260408" defer></script>
-
-    <!-- Chat Corporativo (Teams) -->
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="/chat-teams/chat-widget.js?v=20260408" defer></script>
-    <script src="/js/user-dropdown.js?v=20260408" defer></script>
-</body></html>`);
+            const entradas = fluxoData.filter(m => m.tipo === 'entrada' || m.tipo === 'receita').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            const saidas = fluxoData.filter(m => m.tipo === 'saida' || m.tipo === 'despesa').reduce((s, m) => s + (parseFloat(m.valor) || 0), 0);
+            w.document.write(`<html><head><title>Fluxo de Caixa — Zyntra ERP</title><style>body{font-family:Arial,sans-serif;padding:20px;color:#1f2937;}h2{margin-bottom:4px;}table{width:100%;border-collapse:collapse;margin-top:16px;}th,td{padding:8px 12px;border:1px solid #ddd;text-align:left;font-size:12px;}th{background:#f3f4f6;font-weight:700;}.entrada{color:#059669;font-weight:700;}.saida{color:#ef4444;font-weight:700;}.negativo{background:#fef2f2;}.resumo{margin-top:8px;font-size:13px;}.resumo span{margin-right:24px;}@media print{body{padding:0;}}</style></head><body><h2>Fluxo de Caixa — Zyntra ERP</h2><p style="color:#6b7280;margin-top:0;">Período: ${esc(inicio)} a ${esc(fim)} &bull; Gerado em: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}</p><div class="resumo"><span style="color:#059669;">Entradas: R$ ${entradas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:#ef4444;">Saídas: R$ ${saidas.toLocaleString('pt-BR',{minimumFractionDigits:2})}</span><span style="color:${(entradas-saidas)>=0?'#059669':'#ef4444'};font-weight:700;">Saldo: R$ ${(entradas-saidas).toLocaleString('pt-BR',{minimumFractionDigits:2})}</span></div><table><thead><tr><th>Data</th><th>Descrição</th><th>Categoria</th><th>Tipo</th><th>Valor</th><th>Saldo Acumulado</th></tr></thead><tbody>${sorted.map(m => { const v = parseFloat(m.valor)||0; const isE = m.tipo==='entrada'||m.tipo==='receita'; saldoAcum += isE?v:-v; return `<tr class="${saldoAcum<0?'negativo':''}"><td>${m.data?new Date(m.data).toLocaleDateString('pt-BR'):'-'}</td><td>${esc(m.descricao||m.descrição)}</td><td>${esc(m.categoria)}</td><td class="${isE?'entrada':'saida'}">${isE?'Entrada':'Saída'}</td><td class="${isE?'entrada':'saida'}">${isE?'+':'-'} R$ ${v.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td style="color:${saldoAcum>=0?'#059669':'#ef4444'};font-weight:700;">R$ ${saldoAcum.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`; }).join('')}</tbody></table><p style="margin-top:24px;font-size:10px;color:#9ca3af;">Documento gerado automaticamente pelo Zyntra ERP. ${fluxoData.length} movimentações.</p></body></html>`);
             w.document.close(); w.print();
         }
 
@@ -401,6 +459,9 @@
     <script src="/js/popup-confirmacao.js"></script>
     <script src="/Financeiro/js/financeiro-sidebar.js?v=20260408"></script>
     <script src="/_shared/accessibility-widget.js?v=20260408"></script>
+
+    <!-- Chat Widget BOB AI -->
+    <script src="/chat/widget.js?v=20260408" defer></script>
 
     <!-- Chat Corporativo (Teams) -->
     <script src="/socket.io/socket.io.js"></script>

@@ -1386,41 +1386,56 @@
 
         async function confirmarPagamento(event) {
             event.preventDefault();
+            // T-B11: Debounce — desabilitar botão durante envio (UC-FIN-02)
+            const btnPagar = event.target.querySelector('.btn-save-pagar');
+            if (btnPagar) { if (btnPagar.disabled) return; btnPagar.disabled = true; btnPagar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...'; }
             const idStr = document.getElementById('pagar-conta-id').value;
             const ids = idStr.includes(',') ? idStr.split(',').map(Number).filter(Boolean) : [parseInt(idStr)];
             const dados = { valor_pago: parseFloat(document.getElementById('pagar-valor').value), data_pagamento: document.getElementById('pagar-data').value, forma_pagamento: document.getElementById('pagar-forma').value, observacoes: document.getElementById('pagar-obs').value };
 
-            if (ids.length === 1) {
-                try {
+            try {
+                if (ids.length === 1) {
                     const response = await fetch(`/api/financeiro/contas-pagar/${ids[0]}/baixa`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
-                    if (response.ok) { alert('Pagamento confirmado com sucesso!'); fecharModalPagar(); contasSelecionadas.clear(); await init(); } else { alert('Erro ao confirmar pagamento'); }
-                } catch (error) { console.error('Erro:', error); alert('Erro ao confirmar pagamento'); }
-            } else {
-                // Pagamento em lote
-                let ok = 0, fail = 0;
-                for (const id of ids) {
-                    const c = contas.find(x => x.id === id);
-                    const valorUnit = c ? parseFloat(c.valor_total || c.valor || 0) : dados.valor_pago / ids.length;
-                    try {
-                        const resp = await fetch(`/api/financeiro/contas-pagar/${id}/baixa`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({...dados, valor_pago: valorUnit}) });
-                        if (resp.ok) ok++; else fail++;
-                    } catch(e) { fail++; }
+                    if (response.ok) { alert('Pagamento confirmado com sucesso!'); fecharModalPagar(); contasSelecionadas.clear(); await init(); }
+                    else if (response.status === 409) { alert('Esta conta já foi baixada anteriormente.'); fecharModalPagar(); await init(); }
+                    else { alert('Erro ao confirmar pagamento'); }
+                } else {
+                    // Pagamento em lote
+                    let ok = 0, fail = 0;
+                    for (const id of ids) {
+                        const c = contas.find(x => x.id === id);
+                        const valorUnit = c ? parseFloat(c.valor_total || c.valor || 0) : dados.valor_pago / ids.length;
+                        try {
+                            const resp = await fetch(`/api/financeiro/contas-pagar/${id}/baixa`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify({...dados, valor_pago: valorUnit}) });
+                            if (resp.ok) ok++; else fail++;
+                        } catch(e) { fail++; }
+                    }
+                    alert('Pagamento em lote: ' + ok + ' confirmado(s)' + (fail > 0 ? ', ' + fail + ' erro(s)' : ''));
+                    fecharModalPagar(); contasSelecionadas.clear(); await init();
                 }
-                alert('Pagamento em lote: ' + ok + ' confirmado(s)' + (fail > 0 ? ', ' + fail + ' erro(s)' : ''));
-                fecharModalPagar(); contasSelecionadas.clear(); await init();
+            } catch (error) { console.error('Erro:', error); alert('Erro ao confirmar pagamento'); } finally {
+                if (btnPagar) { btnPagar.disabled = false; btnPagar.innerHTML = '<i class="fas fa-check"></i> Confirmar Pagamento'; }
             }
         }
 
         async function salvarConta(event) {
             event.preventDefault();
+            // T-B10: Debounce — desabilitar botão durante envio
+            const btnSave = event.target.querySelector('.btn-save');
+            if (btnSave) { if (btnSave.disabled) return; btnSave.disabled = true; btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...'; }
             const id = document.getElementById('conta-id').value;
             const dados = { descricao: document.getElementById('descrição').value, fornecedor_id: document.getElementById('fornecedor-id').value, categoria_id: document.getElementById('categoria-id').value, valor: parseMoeda(document.getElementById('conta-valor').value), data_vencimento: document.getElementById('conta-vencimento').value, forma_pagamento: document.getElementById('forma-pagamento').value, observacoes: document.getElementById('observacoes').value, numero_documento: document.getElementById('numero-documento').value, centro_custo_id: document.getElementById('centro-custo').value || null, num_parcelas: parseInt(document.getElementById('conta-parcelas').value) || 1 };
             try {
                 const url = id ? `/api/financeiro/contas-pagar/${id}` : '/api/financeiro/contas-pagar';
                 const method = id ? 'PUT' : 'POST';
-                const response = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
-                if (response.ok) { alert('Conta salva com sucesso!'); fecharModal(); await init(); } else { alert('Erro ao salvar conta'); }
-            } catch (error) { console.error('Erro:', error); alert('Erro ao salvar conta'); }
+                // T-B10: Idempotency-Key para prevenir duplicação (UC-FIN-01)
+                const headers = { 'Content-Type': 'application/json' };
+                if (!id) headers['X-Idempotency-Key'] = crypto.randomUUID();
+                const response = await fetch(url, { method, headers, credentials: 'include', body: JSON.stringify(dados) });
+                if (response.ok) { alert('Conta salva com sucesso!'); fecharModal(); await init(); } else if (response.status === 409) { alert('Esta conta já foi registrada (duplicação detectada).'); } else { alert('Erro ao salvar conta'); }
+            } catch (error) { console.error('Erro:', error); alert('Erro ao salvar conta'); } finally {
+                if (btnSave) { btnSave.disabled = false; btnSave.innerHTML = '<i class="fas fa-save"></i> Salvar Despesa'; }
+            }
         }
 
         function editarConta(id) { abrirModal(id); }
