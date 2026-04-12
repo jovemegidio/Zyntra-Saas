@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -13,7 +13,7 @@
     <title>Zyntra: Dashboard Financeiro</title>
 <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
 
-    <!-- AutenticaÃ§Ã£o -->
+    <!-- Autenticação -->
     <script src="/js/auth-unified.js?v=20260326" defer></script>
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
 
@@ -36,7 +36,7 @@
         integrity="sha384-9nhczxUqK87bcKHh20fSQcTGD4qq5GhayNYSYWqwBkINBhOfQLg/P5HG5lF1urn4"
         crossorigin="anonymous"></script>
 
-    <!-- Redirecionamento baseado em permissÃµes -->
+    <!-- Redirecionamento baseado em permissões -->
     <script>
         var _financeiroUserCache = null;
         (async function () {
@@ -46,7 +46,7 @@
                     : await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
                 _financeiroUserCache = response;
                 const user = response;
-                const permFinanceiro = user.permissÃµes_financeiro || [];
+                const permFinanceiro = user.permissoes_financeiro || [];
                 const isAdmin = user.is_admin === 1 || user.role === 'admin';
                 if (!isAdmin && permFinanceiro.length > 0) {
                     const temContasPagar = permFinanceiro.includes('contas_pagar');
@@ -58,9 +58,9 @@
         })();
     </script>
 
-    <!-- Estilos especÃ­ficos desta pÃ¡gina -->
+    <!-- Estilos específicos desta página -->
     <style>
-        /* Cards de resumo - padrÃ£o Compras */
+        /* Cards de resumo - padrão Compras */
 
 
         /* Chart */
@@ -433,8 +433,8 @@
             margin-bottom: 20px;
         }
 
-        /* OpÃ§Ã£o cards */
-        .opÃ§Ã£o-card {
+        /* Opção cards */
+        .opção-card {
             background: #f8fafc;
             border: 1px solid #e2e8f0;
             border-radius: 10px;
@@ -442,17 +442,17 @@
             overflow: hidden;
         }
 
-        .opÃ§Ã£o-card--clickable {
+        .opção-card--clickable {
             cursor: pointer;
             transition: all 0.2s;
         }
 
-        .opÃ§Ã£o-card--clickable:hover {
+        .opção-card--clickable:hover {
             border-color: #3b82f6;
             background: #eff6ff;
         }
 
-        .opÃ§Ã£o-card-header {
+        .opção-card-header {
             padding: 12px 16px;
             font-weight: 600;
             font-size: 14px;
@@ -460,24 +460,24 @@
             border-bottom: 1px solid #e2e8f0;
         }
 
-        .opÃ§Ã£o-card-body {
+        .opção-card-body {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 16px;
         }
 
-        .opÃ§Ã£o-card-left {
+        .opção-card-left {
             flex: 1;
         }
 
-        .opÃ§Ã£o-card-left p {
+        .opção-card-left p {
             color: #64748b;
             font-size: 13px;
             line-height: 1.5;
         }
 
-        .opÃ§Ã£o-card-right {
+        .opção-card-right {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -496,13 +496,13 @@
             font-weight: 600;
         }
 
-        .opÃ§Ã£o-card-input {
+        .opção-card-input {
             display: flex;
             gap: 8px;
             margin-top: 10px;
         }
 
-        .opÃ§Ã£o-card-input input {
+        .opção-card-input input {
             flex: 1;
             padding: 10px 14px;
             border: 1px solid #e2e8f0;
@@ -510,7 +510,7 @@
             font-size: 13px;
         }
 
-        .opÃ§Ã£o-card-input button {
+        .opção-card-input button {
             padding: 10px 16px;
             background: #3b82f6;
             color: white;
@@ -519,17 +519,17 @@
             cursor: pointer;
         }
 
-        .opÃ§Ã£o-pesquisas-info {
+        .opção-pesquisas-info {
             font-size: 12px;
             color: #64748b;
             margin-bottom: 8px;
         }
 
-        .opÃ§Ã£o-pesquisas-info a {
+        .opção-pesquisas-info a {
             color: #3b82f6;
         }
 
-        /* Campos e botÃµes de modal */
+        /* Campos e botões de modal */
         .campo-input {
             width: 100%;
             padding: 10px 14px;
@@ -1227,13 +1227,13 @@
                 <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="orcamentos.html" class="sidebar-btn" title="OrÃ§amentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
@@ -1257,7 +1257,7 @@
             <!-- HEADER - PADRÃƒO FINANCEIRO -->
             <header class="header">
                 <div class="header-left">
-                    <!-- BotÃ£o Menu Mobile -->
+                    <!-- Botão Menu Mobile -->
                     <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu">
                         <i class="fas fa-bars"></i>
                     </button>
@@ -1323,7 +1323,7 @@
                                 <button class="btn btn-primary" onclick="novoLancamento('pagar')"><i
                                         class="fas fa-plus-circle"></i> Nova Conta a Pagar</button>
                                 <button class="btn btn-secondary" onclick="location.href='/relatorios'"><i
-                                        class="fas fa-chart-bar"></i> RelatÃ³rios</button>
+                                        class="fas fa-chart-bar"></i> Relatórios</button>
                             </div>
                         </div>
                     </div>
@@ -1369,7 +1369,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">
-                                    <i class="fas fa-chart-area"></i> Fluxo de Caixa - PrÃ³ximos 30 dias
+                                    <i class="fas fa-chart-area"></i> Fluxo de Caixa - Próximos 30 dias
                                 </h3>
                                 <button class="btn btn-sm btn-secondary" onclick="location.href='fluxo-caixa.html'">Ver
                                     Detalhes <i class="fas fa-arrow-right"></i></button>
@@ -1380,7 +1380,7 @@
                                         <div class="chart-legend-dot green"></div> Entradas
                                     </div>
                                     <div class="chart-legend-item">
-                                        <div class="chart-legend-dot red"></div> SaÃ­das
+                                        <div class="chart-legend-dot red"></div> Saídas
                                     </div>
                                 </div>
                                 <div class="chart-container">
@@ -1391,7 +1391,7 @@
                         <div class="card">
                             <div class="card-header">
                                 <h3 class="card-title">
-                                    <i class="fas fa-calendar-alt"></i> PrÃ³ximos Vencimentos
+                                    <i class="fas fa-calendar-alt"></i> Próximos Vencimentos
                                 </h3>
                             </div>
                             <div class="card-body" id="lista-vencimentos">
@@ -1404,11 +1404,11 @@
                         </div>
                     </div>
 
-                    <!-- Ãšltimos LanÃ§amentos -->
+                    <!-- Últimos Lançamentos -->
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
-                                <i class="fas fa-list"></i> Ãšltimos LanÃ§amentos
+                                <i class="fas fa-list"></i> Últimos Lançamentos
                             </h3>
                             <div class="flex-row-gap-sm">
                                 <button class="lancamentos-nav-btn btn-pagar"
@@ -1427,7 +1427,7 @@
                                     <thead>
                                         <tr>
                                             <th style="width:90px">Tipo</th>
-                                            <th>DescriÃ§Ã£o</th>
+                                            <th>Descrição</th>
                                             <th style="width:120px">Vencimento</th>
                                             <th style="width:130px">Valor</th>
                                             <th style="width:110px">Status</th>
@@ -1437,7 +1437,7 @@
                                         <tr>
                                             <td colspan="5" class="td-loading">
                                                 <i class="fas fa-spinner fa-spin" style="margin-right:8px"></i>
-                                                Carregando lanÃ§amentos...
+                                                Carregando lançamentos...
                                             </td>
                                         </tr>
                                     </tbody>
@@ -1475,7 +1475,7 @@
         function limparNotificacoes() {}
         function toggleConfiguracoes() {}
 
-        // ======== Carregar usuÃ¡rio ========
+        // ======== Carregar usuário ========
         async function carregarUsuario() {
             try {
                 let user;
@@ -1487,7 +1487,7 @@
                     user = await response.json();
                     _financeiroUserCache = user;
                 }
-                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'UsuÃ¡rio');
+                const primeiroNome = user.apelido || (user.nome ? user.nome.split(' ')[0] : 'Usuário');
                 const hour = new Date().getHours();
                 let greeting = 'Bom dia';
                 if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
@@ -1507,7 +1507,7 @@
                     const initEl = document.getElementById('user-initials');
                     if (initEl) { initEl.textContent = primeiroNome.charAt(0).toUpperCase(); initEl.style.display = 'flex'; }
                 }
-            } catch (e) { console.error('Erro ao carregar usuÃ¡rio:', e); }
+            } catch (e) { console.error('Erro ao carregar usuário:', e); }
         }
 
         // ======== Dados do Dashboard ========
@@ -1538,8 +1538,8 @@
         }
 
         function converterNumero(valor) {
-            const nÃºmero = Number.parseFloat(valor);
-            return Number.isFinite(nÃºmero) ? nÃºmero : 0;
+            const número = Number.parseFloat(valor);
+            return Number.isFinite(número) ? número : 0;
         }
 
         function normalizarStatus(status) {
@@ -1589,8 +1589,8 @@
 
             const referenciaAtual = new Date();
             const referenciaAnterior = new Date(referenciaAtual.getFullYear(), referenciaAtual.getMonth() - 1, 1);
-            const perÃ­odoAtual = obterPeriodoMensal(referenciaAtual);
-            const perÃ­odoAnterior = obterPeriodoMensal(referenciaAnterior);
+            const periodoAtual = obterPeriodoMensal(referenciaAtual);
+            const periodoAnterior = obterPeriodoMensal(referenciaAnterior);
 
             dashboardCache.loadPromise = (async () => {
                 const [
@@ -1603,10 +1603,10 @@
                     lancamentosPayload,
                     resumoKpisPayload
                 ] = await Promise.all([
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${perÃ­odoAtual.inicio}&dataFim=${perÃ­odoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${perÃ­odoAtual.inicio}&dataFim=${perÃ­odoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${perÃ­odoAnterior.inicio}&dataFim=${perÃ­odoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${perÃ­odoAnterior.inicio}&dataFim=${perÃ­odoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
                     fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=30', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=50', { data: [] }),
@@ -1676,7 +1676,7 @@
                                     <i class="fas fa-exclamation-triangle" style="color:#ef4444;font-size:16px;"></i>
                                 </div>
                                 <div>
-                                    <strong style="color:#dc2626;font-size:15px;">${total} tÃ­tulo(s) vencido(s)</strong>
+                                    <strong style="color:#dc2626;font-size:15px;">${total} título(s) vencido(s)</strong>
                                     <p style="margin:3px 0 0;font-size:12px;color:#64748b;">Contas com vencimento ultrapassado</p>
                                 </div>
                             </div>
@@ -1770,7 +1770,7 @@
             }
         }
 
-        // ======== GrÃ¡fico ========
+        // ======== Gráfico ========
         let fluxoCaixaChartInstance = null;
         async function carregarGrafico() {
             const canvas = document.getElementById('fluxoCaixaChart');
@@ -1791,7 +1791,7 @@
                 const hoje = new Date();
                 hoje.setHours(0, 0, 0, 0);
 
-                // MÃªs atual: do dia 1 ao Ãºltimo dia do mÃªs
+                // Mês atual: do dia 1 ao último dia do mês
                 const primeiroDia = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
                 const ultimoDia = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
                 const totalDias = ultimoDia.getDate();
@@ -1830,7 +1830,7 @@
                                 pointBackgroundColor: '#22c55e'
                             },
                             {
-                                label: 'SaÃ­das',
+                                label: 'Saídas',
                                 data: saidas,
                                 borderColor: '#ef4444',
                                 backgroundColor: 'rgba(239,68,68,0.08)',
@@ -1875,7 +1875,7 @@
                     }
                 });
             } catch (error) {
-                console.error('Erro ao carregar grÃ¡fico do fluxo de caixa:', error);
+                console.error('Erro ao carregar gráfico do fluxo de caixa:', error);
             }
         }
 
@@ -1888,9 +1888,9 @@
             const data = new Date(`${String(dataVencimento).slice(0, 10)}T00:00:00`);
             const diferencaDias = Math.round((data - hoje) / 86400000);
 
-            if (diferencaDias < 0) return `Vencido hÃ¡ ${Math.abs(diferencaDias)} dia(s)`;
+            if (diferencaDias < 0) return `Vencido há ${Math.abs(diferencaDias)} dia(s)`;
             if (diferencaDias === 0) return 'Vence hoje';
-            if (diferencaDias === 1) return 'Vence amanhÃ£';
+            if (diferencaDias === 1) return 'Vence amanhã';
             return `Vence em ${diferencaDias} dia(s)`;
         }
 
@@ -2079,7 +2079,7 @@
             carregarUsuario();
             atualizarDashboard();
             window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
-            // Cleanup: pausar quando tab oculta, forÃ§ar refresh quando voltar
+            // Cleanup: pausar quando tab oculta, forçar refresh quando voltar
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
                     clearInterval(window._dashIntervalFin);
@@ -2097,7 +2097,7 @@
     <!-- MODAIS -->
     <!-- ============================================================ -->
 
-    <!-- MODAL: Escolha do MÃ©todo -->
+    <!-- MODAL: Escolha do Método -->
     <div class="modal-overlay-omie" id="modalEscolhaCliente">
         <div class="modal-omie modal-omie--sm">
             <div class="modal-omie-header">
@@ -2106,7 +2106,7 @@
                         class="fas fa-times"></i></button>
             </div>
             <div class="modal-omie-body">
-                <p class="modal-omie-subtitle">Utilize uma das opÃ§Ãµes de pesquisa abaixo para incluir digitando quase
+                <p class="modal-omie-subtitle">Utilize uma das opções de pesquisa abaixo para incluir digitando quase
                     nada</p>
 
                 <!-- Pesquisa AtÃ´mica -->
@@ -2114,12 +2114,12 @@
                     <div class="opcao-card-header">Pesquisa AtÃ´mica</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
-                            <div class="opcao-pesquisas-info">VocÃª ainda possui 3 pesquisas gratuitas<br><a
+                            <div class="opcao-pesquisas-info">Você ainda possui 3 pesquisas gratuitas<br><a
                                     href="#">Quero pesquisas ilimitadas</a></div>
                             <p>Digite aqui o que deseja pesquisar</p>
                             <div class="opcao-card-input">
                                 <input type="text" id="pesquisaAtomicaInput"
-                                    placeholder="CNPJ, CPF, Nome, RazÃ£o Social, Telefone, E-mail">
+                                    placeholder="CNPJ, CPF, Nome, Razão Social, Telefone, E-mail">
                                 <button onclick="pesquisaAtomica()"><i class="fas fa-search"></i></button>
                             </div>
                         </div>
@@ -2176,7 +2176,7 @@
                     <div class="opcao-card-header">Pesquisa no Google</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
-                            <p>Pesquise pelo nome, razÃ£o social e atÃ© mesmo pelo endereÃ§o. Use termos para refinar.</p>
+                            <p>Pesquise pelo nome, razão social e até mesmo pelo endereço. Use termos para refinar.</p>
                         </div>
                         <div class="opcao-card-right">
                             <div class="icon-wrapper"><span class="google-text">by<span class="g-blue">G</span><span
@@ -2187,9 +2187,9 @@
                     </div>
                 </div>
 
-                <!-- InserÃ§Ã£o Manual -->
+                <!-- Inserção Manual -->
                 <div class="opcao-card opcao-card--clickable" onclick="abrirModalInsercaoManual()">
-                    <div class="opcao-card-header">InserÃ§Ã£o Manual</div>
+                    <div class="opcao-card-header">Inserção Manual</div>
                     <div class="opcao-card-body">
                         <div class="opcao-card-left">
                             <p>Inclua os dados manualmente ou pesquisando pelo CEP.</p>
@@ -2271,7 +2271,7 @@
                 <p class="text-hint--sm">Digite o termo que deseja pesquisar:</p>
                 <div class="pos-relative">
                     <input type="text" id="googleSearchInput" class="campo-input google-search-input"
-                        placeholder="Pesquisar nome, razÃ£o social, endereÃ§o..."
+                        placeholder="Pesquisar nome, razão social, endereço..."
                         onkeypress="if(event.key==='Enter') executarPesquisaGoogle()">
                     <button onclick="executarPesquisaGoogle()" class="google-search-btn"><i
                             class="fas fa-search icon-white"></i></button>
@@ -2285,7 +2285,7 @@
                             class="fas fa-search"></i> Pesquisar</button>
                     <button onclick="fecharModalGoogle()" class="btn-google-cancel">Cancelar</button>
                 </div>
-                <p class="text-footnote">Os resultados serÃ£o exibidos para seleÃ§Ã£o</p>
+                <p class="text-footnote">Os resultados serão exibidos para seleção</p>
             </div>
         </div>
     </div>
@@ -2303,7 +2303,7 @@
                     <thead>
                         <tr>
                             <th><span class="resultados-filter">Localidade <i class="fas fa-filter"></i></span></th>
-                            <th><span class="resultados-filter">EndereÃ§o <i class="fas fa-filter"></i></span></th>
+                            <th><span class="resultados-filter">Endereço <i class="fas fa-filter"></i></span></th>
                         </tr>
                     </thead>
                     <tbody id="resultadosTableBody"></tbody>
@@ -2313,7 +2313,7 @@
                     <button><i class="fas fa-angle-double-left"></i></button>
                     <button>anterior</button>
                     <span class="current">1</span>
-                    <button>prÃ³ximo</button>
+                    <button>próximo</button>
                     <button><i class="fas fa-angle-double-right"></i></button>
                 </div>
                 <div class="text-center-pad">
@@ -2324,7 +2324,7 @@
         </div>
     </div>
 
-    <!-- MODAL: InserÃ§Ã£o Manual -->
+    <!-- MODAL: Inserção Manual -->
     <div class="modal-overlay-omie" id="modalInsercaoManual">
         <div class="modal-omie modal-omie--md">
             <div class="modal-omie-header">
@@ -2333,18 +2333,18 @@
                         class="fas fa-times"></i></button>
             </div>
             <div class="modal-omie-body">
-                <p class="text-hint">Informe o CEP e o NÃºmero do endereÃ§o para pesquisa</p>
+                <p class="text-hint">Informe o CEP e o Número do endereço para pesquisa</p>
                 <div class="flex-row-end">
                     <div><label class="campo-label">CEP</label><input type="text" id="cepInput"
                             class="campo-input campo-input--sm"></div>
-                    <div><label class="campo-label">NÃºmero do endereÃ§o</label><input type="text"
-                            id="nÃºmeroEnderecoInput" class="campo-input campo-input--sm"></div>
+                    <div><label class="campo-label">Número do endereço</label><input type="text"
+                            id="númeroEnderecoInput" class="campo-input campo-input--sm"></div>
                     <button class="btn-selecionar btn--flush-h40" onclick="pesquisarCEP()"><i class="fas fa-bolt"></i>
                         Pesquisar</button>
                 </div>
                 <br><br>
-                <p class="add-link" onclick="abrirCadastroCompleto()">Quero continuar a inclusÃ£o manualmente<br><small
-                        class="text-muted">(nÃ£o utilizarei a pesquisa por CEP agora)</small></p>
+                <p class="add-link" onclick="abrirCadastroCompleto()">Quero continuar a inclusão manualmente<br><small
+                        class="text-muted">(não utilizarei a pesquisa por CEP agora)</small></p>
             </div>
         </div>
     </div>
@@ -2364,7 +2364,7 @@
                                 class="cadastro-avatar-alterar">Alterar</span></div>
                         <div class="flex-1">
                             <div class="grid-cadastro-main">
-                                <div><label class="campo-label">RazÃ£o Social / Nome Completo</label><input type="text"
+                                <div><label class="campo-label">Razão Social / Nome Completo</label><input type="text"
                                         id="razaoSocialInput" class="campo-input"></div>
                                 <div><label class="campo-label">CNPJ / CPF <span class="campo-label-link">@ Pesquisar
                                             SEFAZ</span></label><input type="text" id="cnpjInput" class="campo-input">
@@ -2381,31 +2381,31 @@
                                         id="contatoInput" class="campo-input"></div>
                             </div>
                             <div class="text-right-mt"><span class="campo-label-link btn--flush">@ Consulta de
-                                    CrÃ©dito</span></div>
+                                    Crédito</span></div>
                         </div>
                     </div>
 
                     <div class="cadastro-tabs">
-                        <button class="cadastro-tab active" data-tab="endereco">EndereÃ§o</button>
+                        <button class="cadastro-tab active" data-tab="endereco">Endereço</button>
                         <button class="cadastro-tab" data-tab="telefones">Telefones e E-mail</button>
-                        <button class="cadastro-tab" data-tab="bancarios">Dados BancÃ¡rios</button>
-                        <button class="cadastro-tab" data-tab="inscricoes">InscriÃ§Ãµes, CNAE e Outros</button>
-                        <button class="cadastro-tab" data-tab="integraÃ§Ã£o"><i class="fas fa-cog"></i> IntegraÃ§Ã£o
-                            AutomÃ¡tica</button>
-                        <button class="cadastro-tab" data-tab="caracteristicas">CaracterÃ­sticas</button>
-                        <button class="cadastro-tab" data-tab="recomendacoes">RecomendaÃ§Ãµes</button>
-                        <button class="cadastro-tab" data-tab="faturamento">Faturamento e CrÃ©dito</button>
+                        <button class="cadastro-tab" data-tab="bancarios">Dados Bancários</button>
+                        <button class="cadastro-tab" data-tab="inscricoes">Inscrições, CNAE e Outros</button>
+                        <button class="cadastro-tab" data-tab="integração"><i class="fas fa-cog"></i> Integração
+                            Automática</button>
+                        <button class="cadastro-tab" data-tab="caracteristicas">Características</button>
+                        <button class="cadastro-tab" data-tab="recomendacoes">Recomendações</button>
+                        <button class="cadastro-tab" data-tab="faturamento">Faturamento e Crédito</button>
                         <button class="cadastro-tab" data-tab="mapa">Mapa</button>
                     </div>
 
                     <div class="cadastro-tab-content">
-                        <!-- EndereÃ§o -->
+                        <!-- Endereço -->
                         <div class="cadastro-tab-panel active" id="tab-endereco">
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>EndereÃ§o <span
-                                            class="campo-label-link">@ Pesquisar EndereÃ§o</span></label><input
+                                <div class="form-group form-group--span2"><label>Endereço <span
+                                            class="campo-label-link">@ Pesquisar Endereço</span></label><input
                                         type="text" id="enderecoInput" class="campo-input"></div>
-                                <div class="form-group"><label>NÃºmero</label><input type="text" id="nÃºmeroInput"
+                                <div class="form-group"><label>Número</label><input type="text" id="númeroInput"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
@@ -2456,7 +2456,7 @@
                                         class="campo-input"></div>
                             </div>
                             <p class="add-link"><i class="fas fa-plus"></i> Clique aqui para <strong>adicionar um
-                                    endereÃ§o de entrega diferente</strong> deste</p>
+                                    endereço de entrega diferente</strong> deste</p>
                             <div class="tags-area">
                                 <h4>Preencha quantas Tags quiser para este cadastro</h4>
                                 <p>Clique aqui para selecionar (ou criar uma nova)</p>
@@ -2481,7 +2481,7 @@
                                         type="email" class="campo-input" placeholder="email@empresa.com.br"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>E-mail para CobranÃ§a</label><input
+                                <div class="form-group form-group--span2"><label>E-mail para Cobrança</label><input
                                         type="email" class="campo-input" placeholder="financeiro@empresa.com.br"></div>
                             </div>
                             <div class="form-row">
@@ -2489,7 +2489,7 @@
                                         class="campo-input" placeholder="https://www.empresa.com.br"></div>
                             </div>
                         </div>
-                        <!-- BancÃ¡rios -->
+                        <!-- Bancários -->
                         <div class="cadastro-tab-panel" id="tab-bancarios">
                             <div class="form-row">
                                 <div class="form-group"><label>Banco</label><select class="campo-input">
@@ -2498,17 +2498,17 @@
                                         <option value="033">033 - Santander</option>
                                         <option value="104">104 - Caixa EconÃ´mica</option>
                                         <option value="237">237 - Bradesco</option>
-                                        <option value="341">341 - ItaÃº</option>
+                                        <option value="341">341 - Itaú</option>
                                         <option value="756">756 - Sicoob</option>
                                     </select></div>
                                 <div class="form-group"><label>Tipo de Conta</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                         <option value="corrente">Conta Corrente</option>
-                                        <option value="poupanca">Conta PoupanÃ§a</option>
+                                        <option value="poupanca">Conta Poupança</option>
                                     </select></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>AgÃªncia</label><input type="text" class="campo-input"
+                                <div class="form-group"><label>Agência</label><input type="text" class="campo-input"
                                         placeholder="0000"></div>
                                 <div class="form-group"><label>Conta</label><input type="text" class="campo-input"
                                         placeholder="00000-0"></div>
@@ -2516,25 +2516,25 @@
                             <div class="form-row">
                                 <div class="form-group form-group--span2"><label>Chave PIX</label><input type="text"
                                         class="campo-input"
-                                        placeholder="CPF, CNPJ, E-mail, Telefone ou Chave AleatÃ³ria"></div>
+                                        placeholder="CPF, CNPJ, E-mail, Telefone ou Chave Aleatória"></div>
                             </div>
                         </div>
-                        <!-- InscriÃ§Ãµes -->
+                        <!-- Inscrições -->
                         <div class="cadastro-tab-panel" id="tab-inscricoes">
                             <div class="form-row">
-                                <div class="form-group"><label>InscriÃ§Ã£o Estadual</label><input type="text"
+                                <div class="form-group"><label>Inscrição Estadual</label><input type="text"
                                         class="campo-input"></div>
-                                <div class="form-group"><label>InscriÃ§Ã£o Municipal</label><input type="text"
+                                <div class="form-group"><label>Inscrição Municipal</label><input type="text"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>InscriÃ§Ã£o SUFRAMA</label><input type="text"
+                                <div class="form-group"><label>Inscrição SUFRAMA</label><input type="text"
                                         class="campo-input"></div>
                                 <div class="form-group"><label>CNAE Principal</label><input type="text"
                                         class="campo-input"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Regime TributÃ¡rio</label><select class="campo-input">
+                                <div class="form-group"><label>Regime Tributário</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                         <option value="simples">Simples Nacional</option>
                                         <option value="presumido">Lucro Presumido</option>
@@ -2545,18 +2545,18 @@
                                         <option value="">Selecione</option>
                                         <option value="1">Contribuinte</option>
                                         <option value="2">Isento</option>
-                                        <option value="9">NÃ£o Contribuinte</option>
+                                        <option value="9">Não Contribuinte</option>
                                     </select></div>
                             </div>
                         </div>
-                        <!-- IntegraÃ§Ã£o -->
-                        <div class="cadastro-tab-panel" id="tab-integraÃ§Ã£o">
+                        <!-- Integração -->
+                        <div class="cadastro-tab-panel" id="tab-integração">
                             <div class="tab-placeholder"><i class="fas fa-cog icon-placeholder"></i>
-                                <h3 class="heading-placeholder">IntegraÃ§Ã£o AutomÃ¡tica</h3>
-                                <p>Configure integraÃ§Ãµes com sistemas externos aqui.</p>
+                                <h3 class="heading-placeholder">Integração Automática</h3>
+                                <p>Configure integrações com sistemas externos aqui.</p>
                             </div>
                         </div>
-                        <!-- CaracterÃ­sticas -->
+                        <!-- Características -->
                         <div class="cadastro-tab-panel" id="tab-caracteristicas">
                             <div class="form-row">
                                 <div class="form-group"><label>Tipo de Cliente</label><select class="campo-input">
@@ -2566,18 +2566,18 @@
                                         <option value="ambos">Cliente e Fornecedor</option>
                                     </select></div>
                                 <div class="form-group"><label>Segmento</label><input type="text" class="campo-input"
-                                        placeholder="Ex: IndÃºstria, ComÃ©rcio"></div>
+                                        placeholder="Ex: Indústria, Comércio"></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group form-group--span2"><label>ObservaÃ§Ãµes</label><textarea
+                                <div class="form-group form-group--span2"><label>Observações</label><textarea
                                         class="campo-input" rows="4"
-                                        placeholder="ObservaÃ§Ãµes gerais sobre o cliente/fornecedor"></textarea></div>
+                                        placeholder="Observações gerais sobre o cliente/fornecedor"></textarea></div>
                             </div>
                         </div>
-                        <!-- RecomendaÃ§Ãµes -->
+                        <!-- Recomendações -->
                         <div class="cadastro-tab-panel" id="tab-recomendacoes">
                             <div class="form-row">
-                                <div class="form-group"><label>Vendedor ResponsÃ¡vel</label><select class="campo-input">
+                                <div class="form-group"><label>Vendedor Responsável</label><select class="campo-input">
                                         <option value="">Selecione</option>
                                     </select></div>
                                 <div class="form-group"><label>Indicado Por</label><input type="text"
@@ -2587,9 +2587,9 @@
                         <!-- Faturamento -->
                         <div class="cadastro-tab-panel" id="tab-faturamento">
                             <div class="form-row">
-                                <div class="form-group"><label>Limite de CrÃ©dito</label><input type="text"
+                                <div class="form-group"><label>Limite de Crédito</label><input type="text"
                                         class="campo-input" placeholder="R$ 0,00"></div>
-                                <div class="form-group"><label>CondiÃ§Ã£o de Pagamento PadrÃ£o</label><select
+                                <div class="form-group"><label>Condição de Pagamento Padrão</label><select
                                         class="campo-input">
                                         <option value="">Selecione</option>
                                         <option value="avista">À Vista</option>
@@ -2602,10 +2602,10 @@
                                     </select></div>
                             </div>
                             <div class="form-row">
-                                <div class="form-group"><label>Desconto PadrÃ£o (%)</label><input type="text"
+                                <div class="form-group"><label>Desconto Padrão (%)</label><input type="text"
                                         class="campo-input" placeholder="0,00"></div>
-                                <div class="form-group"><label>Tabela de PreÃ§os</label><select class="campo-input">
-                                        <option value="">PadrÃ£o</option>
+                                <div class="form-group"><label>Tabela de Preços</label><select class="campo-input">
+                                        <option value="">Padrão</option>
                                     </select></div>
                             </div>
                         </div>
@@ -2613,7 +2613,7 @@
                         <div class="cadastro-tab-panel" id="tab-mapa">
                             <div class="map-placeholder">
                                 <div class="text-center"><i class="fas fa-map-marker-alt icon-placeholder"></i>
-                                    <p>Preencha o endereÃ§o para visualizar no mapa</p>
+                                    <p>Preencha o endereço para visualizar no mapa</p>
                                 </div>
                             </div>
                         </div>
@@ -2655,20 +2655,20 @@
         async function pesquisaAtomica() {
             const termo = document.getElementById('pesquisaAtomicaInput').value;
             if (!termo) { showToast('Digite um termo para pesquisar', 'warning'); return; }
-            showToast('Funcionalidade em implementaÃ§Ã£o', 'info');
+            showToast('Funcionalidade em implementação', 'info');
             return;
         }
 
         async function pesquisarCNPJ() {
             const cnpj = document.getElementById('cnpjCpfInput').value.replace(/\D/g, '');
-            if (!cnpj || (cnpj.length !== 11 && cnpj.length !== 14)) { showToast('Informe um CPF ou CNPJ vÃ¡lido', 'warning'); return; }
+            if (!cnpj || (cnpj.length !== 11 && cnpj.length !== 14)) { showToast('Informe um CPF ou CNPJ válido', 'warning'); return; }
             try {
                 if (cnpj.length === 14) {
                     const response = await fetch(`/api/proxy/cnpj/${cnpj}`, { credentials: 'include' });
                     if (response.ok) { const data = await response.json(); fecharModalCNPJ(); preencherDadosCNPJ(data); abrirCadastroCompleto(); return; }
                 }
-                showToast('NÃ£o foi possÃ­vel encontrar dados para este documento', 'warning');
-            } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar. Tente a inserÃ§Ã£o manual.', 'error'); }
+                showToast('Não foi possível encontrar dados para este documento', 'warning');
+            } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar. Tente a inserção manual.', 'error'); }
         }
 
         function preencherDadosCNPJ(data) {
@@ -2678,7 +2678,7 @@
             document.getElementById('dddInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(0, 2) : '';
             document.getElementById('telefoneInput').value = data.ddd_telefone_1 ? data.ddd_telefone_1.substring(2) : '';
             document.getElementById('enderecoInput').value = data.logradouro || '';
-            document.getElementById('nÃºmeroInput').value = data.nÃºmero || '';
+            document.getElementById('númeroInput').value = data.número || '';
             document.getElementById('bairroInput').value = data.bairro || '';
             document.getElementById('complementoInput').value = data.complemento || '';
             document.getElementById('cidadeInput').value = data.municipio || '';
@@ -2688,7 +2688,7 @@
 
         async function pesquisarCEP() {
             const cep = document.getElementById('cepInput').value.replace(/\D/g, '');
-            if (!cep || cep.length !== 8) { showToast('Informe um CEP vÃ¡lido', 'warning'); return; }
+            if (!cep || cep.length !== 8) { showToast('Informe um CEP válido', 'warning'); return; }
             try {
                 const response = await fetch(`/api/proxy/cep/${cep}`, { credentials: 'include' });
                 if (response.ok) {
@@ -2700,11 +2700,11 @@
                         document.getElementById('cidadeInput').value = data.localidade || '';
                         document.getElementById('estadoSelect').value = data.uf || '';
                         document.getElementById('cepCadastroInput').value = cep;
-                        document.getElementById('nÃºmeroInput').value = document.getElementById('nÃºmeroEnderecoInput').value || '';
+                        document.getElementById('númeroInput').value = document.getElementById('númeroEnderecoInput').value || '';
                         abrirCadastroCompleto(); return;
                     }
                 }
-                showToast('CEP nÃ£o encontrado', 'warning');
+                showToast('CEP não encontrado', 'warning');
             } catch (e) { console.error('Erro na consulta:', e); showToast('Erro ao consultar CEP', 'error'); }
         }
 
@@ -2722,21 +2722,21 @@
                 let resultados = [];
                 try {
                     const response = await fetch(`/api/financeiro/clientes-fornecedores/buscar?termo=${encodeURIComponent(termo)}`, { credentials: 'include' });
-                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereco: `${item.endereco || ''}, ${item.nÃºmero || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
-                } catch (e) { console.log('Busca interna nÃ£o disponÃ­vel'); }
+                    if (response.ok) { const data = await response.json(); const raw = data.data || data || []; const arr = Array.isArray(raw) ? raw : []; resultados = arr.map(item => ({ localidade: item.razao_social || item.nome_fantasia || item.nome || 'Sem nome', endereco: `${item.endereco || ''}, ${item.número || ''} - ${item.bairro || ''}, ${item.cidade || ''} - ${item.estado || ''}, ${item.cep || ''}, Brasil`.replace(/^, | - , |, , /g, ''), dados: item })); }
+                } catch (e) { console.log('Busca interna não disponível'); }
                 if (resultados.length === 0) {
                     const cnpjLimpo = termo.replace(/\D/g, '');
                     if (cnpjLimpo.length === 14) {
-                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereco: `${d.logradouro || ''}, ${d.nÃºmero || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereco: d.logradouro, nÃºmero: d.nÃºmero, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cnpj/${cnpjLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); resultados.push({ localidade: d.razao_social || d.nome_fantasia, endereco: `${d.logradouro || ''}, ${d.número || ''} - ${d.bairro || ''}, ${d.municipio || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { razao_social: d.razao_social, nome_fantasia: d.nome_fantasia, cnpj_cpf: d.cnpj, endereco: d.logradouro, número: d.número, bairro: d.bairro, cidade: d.municipio, estado: d.uf, cep: d.cep, telefone: d.ddd_telefone_1 } }); } } catch (e) { }
                     }
                 }
                 if (resultados.length === 0) {
                     const cepLimpo = termo.replace(/\D/g, '');
                     if (cepLimpo.length === 8) {
-                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `EndereÃ§o em ${d.localidade}`, endereco: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereco: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
+                        try { const r = await fetch(`/api/proxy/cep/${cepLimpo}`, { credentials: 'include' }); if (r.ok) { const d = await r.json(); if (!d.erro) { resultados.push({ localidade: `Endereço em ${d.localidade}`, endereco: `${d.logradouro || ''} - ${d.bairro || ''}, ${d.localidade || ''} - ${d.uf || ''}, ${d.cep || ''}, Brasil`, dados: { endereco: d.logradouro, bairro: d.bairro, cidade: d.localidade, estado: d.uf, cep: d.cep } }); } } } catch (e) { }
                     }
                 }
-                if (resultados.length === 0) { resultados = [{ localidade: termo, endereco: 'EndereÃ§o nÃ£o encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
+                if (resultados.length === 0) { resultados = [{ localidade: termo, endereco: 'Endereço não encontrado - Preencha manualmente', dados: { razao_social: termo } }]; }
                 resultadosPesquisa = resultados;
                 document.getElementById('googleSearchLoading').style.display = 'none';
                 document.getElementById('btnPesquisarGoogle').disabled = false;
@@ -2774,7 +2774,7 @@
                 document.getElementById('nomeFantasiaInput').value = d.nome_fantasia || '';
                 document.getElementById('cnpjInput').value = d.cnpj_cpf || d.cnpj || '';
                 document.getElementById('enderecoInput').value = d.endereco || d.logradouro || '';
-                document.getElementById('nÃºmeroInput').value = d.nÃºmero || '';
+                document.getElementById('númeroInput').value = d.número || '';
                 document.getElementById('bairroInput').value = d.bairro || '';
                 document.getElementById('complementoInput').value = d.complemento || '';
                 document.getElementById('cidadeInput').value = d.cidade || d.municipio || '';
@@ -2787,14 +2787,14 @@
 
         async function salvarClienteFornecedor() {
             if (window._guardSalvarCliFor) return;
-            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, nÃºmero: document.getElementById('nÃºmeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
-            if (!dados.razao_social) { showToast('Informe a RazÃ£o Social / Nome', 'warning'); return; }
+            const dados = { razao_social: document.getElementById('razaoSocialInput').value, nome_fantasia: document.getElementById('nomeFantasiaInput').value, cnpj_cpf: document.getElementById('cnpjInput').value, ddd: document.getElementById('dddInput').value, telefone: document.getElementById('telefoneInput').value, contato: document.getElementById('contatoInput').value, endereco: document.getElementById('enderecoInput').value, número: document.getElementById('númeroInput').value, bairro: document.getElementById('bairroInput').value, complemento: document.getElementById('complementoInput').value, cidade: document.getElementById('cidadeInput').value, estado: document.getElementById('estadoSelect').value, cep: document.getElementById('cepCadastroInput').value };
+            if (!dados.razao_social) { showToast('Informe a Razão Social / Nome', 'warning'); return; }
             window._guardSalvarCliFor = true;
             try {
                 const response = await fetch('/api/financeiro/clientes-fornecedores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(dados) });
                 if (response.ok) { showToast('Cliente/Fornecedor salvo com sucesso!', 'success'); fecharCadastroCompleto(); document.querySelectorAll('#modalCadastroCompleto input').forEach(i => i.value = ''); }
                 else { const err = await response.json(); showToast('Erro ao salvar. Tente novamente.', 'error'); }
-            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexÃ£o.', 'error'); } finally { window._guardSalvarCliFor = false; }
+            } catch (e) { console.error('Erro:', e); showToast('Erro ao salvar. Verifique a conexão.', 'error'); } finally { window._guardSalvarCliFor = false; }
         }
 
         // Tab navigation
@@ -2814,9 +2814,9 @@
         });
     </script>
 
-    <!-- Popup ConfirmaÃ§Ã£o -->
+    <!-- Popup Confirmação -->
     <script src="/js/popup-confirmacao.js?v=20260219"></script>
-    <!-- FunÃ§Ãµes Compartilhadas Financeiro -->
+    <!-- Funções Compartilhadas Financeiro -->
     <script src="public/js/financeiro-shared.js?v=20260217"></script>
     <!-- Chat Widget BOB AI -->
     <script src="/chat/widget.js?v=20260218" defer></script>
