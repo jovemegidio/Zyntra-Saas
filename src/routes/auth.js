@@ -248,7 +248,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 );
                 if (!funcRows.length) {
                     await recordFailedLogin('cpf:' + cpf);
-                    return res.status(401).json({ message: 'CPF ou senha incorretos.' });
+                    return res.status(401).json({ message: 'Login ou senha incorretos.' });
                 }
                 email = funcRows[0].email;
                 funcSenha = funcRows[0].senha || null;
@@ -431,7 +431,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             // ACCOUNT LOCKOUT: registrar tentativa falha mesmo sem usuário encontrado
             await recordFailedLogin(email);
             // AUDIT-FIX SEC-007: Generic message prevents user enumeration
-            return res.status(401).json({ message: isCpfLogin ? 'CPF ou senha incorretos.' : 'Email ou senha incorretos.' });
+            return res.status(401).json({ message: 'Login ou senha incorretos.' });
         }
         const user = rows[0];
 
@@ -536,7 +536,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
                 });
             }
             // AUDIT-FIX SEC-007: Same message as user-not-found to prevent enumeration
-            return res.status(401).json({ message: isCpfLogin ? 'CPF ou senha incorretos.' : 'Email ou senha incorretos.' });
+            return res.status(401).json({ message: 'Login ou senha incorretos.' });
         }
 
         // ACCOUNT LOCKOUT: login bem-sucedido, resetar contador
@@ -936,6 +936,16 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         })();
 
         auditLog('LOGIN_SUCCESS', user.id, `Login bem-sucedido: ${user.email}`, req);
+
+        // TC-AUTH-01-001: Registrar sessão no Redis para controle de inatividade
+        try {
+            const cacheService = require('../../services/cache');
+            const sessionKey = `session_activity:${user.id}:${deviceId}`;
+            await cacheService.cacheSet(sessionKey, Date.now(), 31 * 60 * 1000); // 31 min (30 min inatividade + margem)
+            console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
+        } catch (redisErr) {
+            console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
+        }
     } catch (error) {
         // Log completo no servidor (stack quando disponível)
         console.error('Erro detalhado no login:', error.stack || error);

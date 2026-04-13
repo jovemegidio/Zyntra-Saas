@@ -129,7 +129,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             }
     
             if (!user) {
-                return res.status(401).json({ message: 'Credenciais inválidas.' });
+                return res.status(401).json({ message: 'Login ou senha incorretos.' });
             }
     
             // Verificar senha
@@ -169,7 +169,7 @@ module.exports = function createAuthSectionRoutes(deps) {
             }
     
             if (!senhaValida) {
-                return res.status(401).json({ message: 'Credenciais inválidas.' });
+                return res.status(401).json({ message: 'Login ou senha incorretos.' });
             }
     
             // 🔒 MULTI-DEVICE: Gerar deviceId único para cada dispositivo
