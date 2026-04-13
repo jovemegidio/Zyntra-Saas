@@ -1,10 +1,10 @@
 /**
  * Auth Central — Middleware Único de Autenticação e Autorização
  * =============================================================
- * 
+ *
  * Este módulo é o PONTO ÚNICO de autenticação/autorização para todo o ERP.
  * Todos os outros middlewares de auth devem delegar para cá.
- * 
+ *
  * SUBSTITUI:
  * - server.js: authenticateToken (inline L2350), authorizeArea, authorizeAdmin, authorizeAction
  * - middleware/auth.js: authenticateToken, requireAdmin, checkPermission
@@ -12,7 +12,7 @@
  * - middleware/auth-refactored.js: authenticateToken, requireAdmin
  * - middleware/rbac-integration.js: factory createRBACIntegration
  * - routes/auth-rbac.js: adminOnly, checkModuleAccess (mantidos como alias)
- * 
+ *
  * Criado: 10/03/2026 — Refatoração Ponto 3
  */
 
@@ -29,8 +29,8 @@ if (!JWT_SECRET) {
     process.exit(1);
 }
 
-// Inactivity timeout: 30 minutos (em milissegundos)
-const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 30 * 60 * 1000;
+// TC-AUTH-03-001: Inactivity timeout — 4 horas (em milissegundos)
+const SESSION_INACTIVITY_MS = parseInt(process.env.SESSION_INACTIVITY_TIMEOUT_MS, 10) || 4 * 60 * 60 * 1000;
 
 // ============================================================
 // 1. AUTENTICAÇÃO — Verificação de JWT
@@ -87,7 +87,7 @@ function authenticateToken(req, res, next) {
             }
         }
 
-        // SPRINT-3: Inactivity timeout — 30 min sem atividade encerra a sessão
+        // TC-AUTH-03-001: Inactivity timeout — 4h sem atividade encerra a sessão
         if (_cacheService && user.id) {
             const sessionKey = `session_activity:${user.id}:${user.deviceId || 'default'}`;
             // SECURITY FIX: Requests com X-Activity-Check NÃO resetam o timer de inatividade.
@@ -99,7 +99,7 @@ function authenticateToken(req, res, next) {
                     // Sessão expirou por inatividade — limpar a chave
                     await _cacheService.cacheDelete(sessionKey).catch(() => {});
                     return res.status(401).json({
-                        message: 'Sessão expirada por inatividade. Faça login novamente.',
+                        message: 'Sessão encerrada por inatividade.',
                         code: 'AUTH_INACTIVE'
                     });
                 }
@@ -219,7 +219,7 @@ function requireAdminOrRH(req, res, next) {
  * Middleware de autorização por módulo.
  * DB-first com fallback hardcoded (período de transição).
  * Aplica flags de consultoria automaticamente.
- * 
+ *
  * @param {string} module - Código do módulo (vendas, rh, pcp, financeiro, etc)
  */
 function requireModule(module) {
@@ -259,7 +259,7 @@ function requireModule(module) {
 /**
  * Middleware de autorização por ação.
  * DB-first com fallback hardcoded.
- * 
+ *
  * @param {string} module - Código do módulo
  * @param {string|string[]} actions - Ação ou lista de ações necessárias
  */
@@ -371,7 +371,7 @@ function writeGuard(req, res, next) {
 /**
  * Verifica se o recurso pertence ao usuário autenticado (IDOR protection).
  * Roles com acesso global (admin, gerente, diretor) passam automaticamente.
- * 
+ *
  * @param {Object} pool - Pool MySQL
  * @param {string} table - Tabela do recurso
  * @param {string} ownerField - Campo que identifica o dono (ex: 'usuario_id')
@@ -414,7 +414,7 @@ function checkOwnership(pool, table, ownerField, paramName = 'id', options = {})
 
             if (String(ownerId) !== String(userId)) {
                 console.warn(`[IDOR] Tentativa de acesso: user ${userId} → ${table}#${resourceId} (owner: ${ownerId})`);
-                return res.status(403).json({ 
+                return res.status(403).json({
                     message: 'Acesso negado. Este recurso não pertence a você.',
                     code: 'IDOR_DENIED'
                 });

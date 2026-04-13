@@ -26,10 +26,12 @@
    // ═══════════════════════════════════════════════════════════
    var CONFIG = {
       // Tempo de inatividade até exibir o modal de aviso (em milissegundos)
-      WARNING_TIMEOUT_MS: 25 * 60 * 1000, // 25 minutos
+      // TC-AUTH-03-001: 4 horas de inatividade — aviso 5 min antes
+      WARNING_TIMEOUT_MS: 3 * 60 * 60 * 1000 + 55 * 60 * 1000, // 3h55min
 
       // Tempo total de inatividade até logout automático (em milissegundos)
-      LOGOUT_TIMEOUT_MS: 30 * 60 * 1000,  // 30 minutos
+      // TC-AUTH-03-001: sessão encerrada após 4 horas de inatividade
+      LOGOUT_TIMEOUT_MS: 4 * 60 * 60 * 1000,  // 4 horas
 
       // Intervalo de atualização do countdown no modal (em milissegundos)
       COUNTDOWN_INTERVAL_MS: 1000,

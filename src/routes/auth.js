@@ -941,7 +941,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
         try {
             const cacheService = require('../../services/cache');
             const sessionKey = `session_activity:${user.id}:${deviceId}`;
-            await cacheService.cacheSet(sessionKey, Date.now(), 31 * 60 * 1000); // 31 min (30 min inatividade + margem)
+            await cacheService.cacheSet(sessionKey, Date.now(), 4 * 60 * 60 * 1000 + 60000); // 4h + 1min margem (TC-AUTH-03-001)
             console.log(`[AUTH/LOGIN] 📡 Sessão registrada no Redis: ${sessionKey}`);
         } catch (redisErr) {
             console.warn('[AUTH/LOGIN] ⚠️ Redis session registration failed (non-blocking):', redisErr.message);
