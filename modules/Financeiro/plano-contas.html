@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1a2e">
@@ -794,6 +794,10 @@
                     </div>
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
+                        <div class="user-avatar" id="user-avatar">
+                            <img alt="Foto do usuário" id="user-photo" style="display:none">
+                            <span id="user-initials">U</span>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -1270,17 +1274,22 @@
         // Abrir modal
         function abrirModal() {
             editandoId = null;
-            document.getElementById('modal-titulo').textContent = 'Nova Conta';
-            document.getElementById('form-conta').reset();
+            const titulo = document.getElementById('modal-titulo');
+            if (titulo) titulo.textContent = 'Nova Conta';
+            const form = document.getElementById('form-conta');
+            if (form) form.reset();
             document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
-            document.querySelector('.color-option[data-color="#22c55e"]').classList.add('selected');
+            const corDefault = document.querySelector('.color-option[data-color="#22c55e"]');
+            if (corDefault) corDefault.classList.add('selected');
             corSelecionada = '#22c55e';
-            document.getElementById('modal-conta').classList.add('active');
+            const modal = document.getElementById('modal-conta');
+            if (modal) modal.classList.add('active');
         }
 
         // Fechar modal
         function fecharModal() {
-            document.getElementById('modal-conta').classList.remove('active');
+            const modal = document.getElementById('modal-conta');
+            if (modal) modal.classList.remove('active');
             editandoId = null;
         }
 
@@ -1290,8 +1299,10 @@
             if (!pai) return;
 
             abrirModal();
-            document.getElementById('conta-tipo').value = pai.tipo;
-            document.getElementById('conta-pai').value = paiId;
+            const tipoEl = document.getElementById('conta-tipo');
+            if (tipoEl) tipoEl.value = pai.tipo;
+            const paiEl = document.getElementById('conta-pai');
+            if (paiEl) paiEl.value = paiId;
         }
 
         // Editar conta
@@ -1328,18 +1339,26 @@
                 corSelecionada = conta.cor;
             }
 
-            document.getElementById('modal-conta').classList.add('active');
+            const modalEl = document.getElementById('modal-conta');
+            if (modalEl) modalEl.classList.add('active');
         }
 
         // Salvar conta
         async function salvarConta() {
-            const nome = document.getElementById('conta-nome').value.trim();
-            const tipo = document.getElementById('conta-tipo').value;
-            const pai_id = document.getElementById('conta-pai').value || null;
-            const descrição = document.getElementById('conta-descricao').value.trim();
-            const icone = document.getElementById('conta-icone').value;
-            const orçamento = parseFloat(document.getElementById('conta-orcamento').value.replace(',', '.')) || 0;
-            const ativo = document.getElementById('conta-status').value === '1';
+            const nomeEl = document.getElementById('conta-nome');
+            const tipoEl = document.getElementById('conta-tipo');
+            const paiEl = document.getElementById('conta-pai');
+            const descEl = document.getElementById('conta-descricao');
+            const iconeEl = document.getElementById('conta-icone');
+            const orcEl = document.getElementById('conta-orcamento');
+            const statusEl = document.getElementById('conta-status');
+            const nome = nomeEl ? nomeEl.value.trim() : '';
+            const tipo = tipoEl ? tipoEl.value : '';
+            const pai_id = paiEl ? (paiEl.value || null) : null;
+            const descrição = descEl ? descEl.value.trim() : '';
+            const icone = iconeEl ? iconeEl.value : 'fa-folder';
+            const orçamento = orcEl ? (parseFloat(orcEl.value.replace(',', '.')) || 0) : 0;
+            const ativo = statusEl ? statusEl.value === '1' : true;
 
             if (!nome) {
                 showToast('Preencha o nome da conta', 'error');

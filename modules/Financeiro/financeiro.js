@@ -9,6 +9,27 @@ let contasReceber = [];
 let contaSelecionada = null;
 let tipoModalAtual = null;
 
+// ===== FETCH COM RETRY PARA 429 =====
+async function fetchComRetry(url, options = {}, maxRetries = 3) {
+    // Garantir headers de autenticação
+    if (typeof getAuthHeaders === 'function') {
+        options.headers = { ...getAuthHeaders(), ...(options.headers || {}) };
+    }
+    if (!options.credentials) options.credentials = 'include';
+
+    for (let tentativa = 0; tentativa <= maxRetries; tentativa++) {
+        const response = await fetch(url, options);
+        if (response.status === 429 && tentativa < maxRetries) {
+            const retryAfter = response.headers.get('Retry-After');
+            const delay = retryAfter ? parseInt(retryAfter) * 1000 : (1000 * Math.pow(2, tentativa));
+            console.warn(`⏳ Rate limit (429) em ${url}, aguardando ${delay}ms... (tentativa ${tentativa + 1}/${maxRetries})`);
+            await new Promise(r => setTimeout(r, delay));
+            continue;
+        }
+        return response;
+    }
+}
+
 // ===== FUNÇÕES UTILITÁRIAS =====
 // Formata data ISO para formato yyyy-MM-dd (compatível com input type="date")
 function formatarDataParaInput(dataISO) {
@@ -28,24 +49,24 @@ async function verificarAutenticacao() {
     try {
         console.log('🔍 [Financeiro] Verificando autenticação...');
         const resp = await fetch('/api/me', { credentials: 'include' });
-        
+
         if (!resp.ok) {
             console.warn('⚠️ [Financeiro] Usuário não autenticado, redirecionando...');
             window.location.href = '/';
             return false;
         }
-        
+
         const user = await resp.json();
         usuarioAtual = user;
         window.usuarioAtual = user;
-        
+
         localStorage.setItem('userData', JSON.stringify(user));
         console.log('✅ [Financeiro] Usuário autenticado:', user.nome);
-        
+
         // Atualizar nome do usuário no header
         const userText = document.querySelector('.user-text');
         if (userText) userText.textContent = user.nome;
-        
+
         return true;
     } catch (error) {
         console.error('❌ [Financeiro] Erro na autenticação:', error);
@@ -60,13 +81,13 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Verificar autenticação primeiro
         const autenticado = await verificarAutenticacao();
         if (!autenticado) return;
-        
+
         // Carregar permissões e dados
         await carregarPermissoes();
         await carregarDadosFinanceiros();
         configurarEventListeners();
         inicializarModais();
-        
+
         console.log('✅ [Financeiro] Módulo inicializado com sucesso');
     } catch (error) {
         console.error('❌ Erro na inicialização:', error);
@@ -76,16 +97,16 @@ document.addEventListener('DOMContentLoaded', async function() {
 // ===== PERMISSÕES =====
 async function carregarPermissoes() {
     try {
-        const response = await fetch('/api/financeiro/permissoes', { credentials: 'include' });
+        const response = await fetchComRetry('/api/financeiro/permissoes');
         if (!response.ok) {
             console.warn('⚠️ API de permissões não disponível, usando permissões padrão');
             throw new Error('Erro ao carregar permissões');
         }
-        
+
         permissoesFinanceiro = await response.json();
         window.permissoesFinanceiro = permissoesFinanceiro;
         console.log('✅ Permissões carregadas:', permissoesFinanceiro);
-        
+
         // Ocultar botões sem permissão
         atualizarUIPermissoes();
     } catch (error) {
@@ -106,7 +127,7 @@ function atualizarUIPermissoes() {
         const linkPagar = document.querySelector('[data-section="contas-pagar"]');
         if (linkPagar) linkPagar.closest('li').style.display = 'none';
     }
-    
+
     if (!permissoesFinanceiro.contas_receber?.visualizar) {
         const linkReceber = document.querySelector('[data-section="contas-receber"]');
         if (linkReceber) linkReceber.closest('li').style.display = 'none';
@@ -117,23 +138,19 @@ function atualizarUIPermissoes() {
 async function carregarDadosFinanceiros() {
     try {
         console.log('📊 Carregando dados financeiros...');
-        
-        // Carregar contas a pagar e receber em paralelo
-        const promises = [];
-        
+
+        // Carregar contas sequencialmente para evitar rate limit (429)
         if (permissoesFinanceiro?.contas_pagar?.visualizar) {
-            promises.push(carregarContasPagar());
+            await carregarContasPagar();
         }
-        
+
         if (permissoesFinanceiro?.contas_receber?.visualizar) {
-            promises.push(carregarContasReceber());
+            await carregarContasReceber();
         }
-        
-        await Promise.all(promises);
-        
+
         // Atualizar dashboard
         atualizarDashboard();
-        
+
         console.log('✅ Dados financeiros carregados com sucesso');
     } catch (error) {
         console.error('❌ Erro ao carregar dados financeiros:', error);
@@ -143,7 +160,7 @@ async function carregarDadosFinanceiros() {
 
 async function carregarContasPagar() {
     try {
-        const response = await fetch('/api/financeiro/contas-pagar', { credentials: 'include' });
+        const response = await fetchComRetry('/api/financeiro/contas-pagar');
         if (!response.ok) {
             if (response.status === 403) {
                 console.warn('⚠️ Sem permissão para visualizar contas a pagar');
@@ -153,12 +170,12 @@ async function carregarContasPagar() {
             }
             throw new Error('Erro ao carregar contas a pagar');
         }
-        
+
         const data = await response.json();
         // Garantir que é um array
         contasPagar = Array.isArray(data) ? data : (data.contas || data.data || []);
         console.log(`📋 ${contasPagar.length} contas a pagar carregadas`);
-        
+
         renderizarContasPagar();
     } catch (error) {
         console.warn('⚠️ Não foi possível carregar contas a pagar:', error.message);
@@ -169,7 +186,7 @@ async function carregarContasPagar() {
 
 async function carregarContasReceber() {
     try {
-        const response = await fetch('/api/financeiro/contas-receber', { credentials: 'include' });
+        const response = await fetchComRetry('/api/financeiro/contas-receber');
         if (!response.ok) {
             if (response.status === 403) {
                 console.warn('⚠️ Sem permissão para visualizar contas a receber');
@@ -179,12 +196,12 @@ async function carregarContasReceber() {
             }
             throw new Error('Erro ao carregar contas a receber');
         }
-        
+
         const data = await response.json();
         // Garantir que é um array
         contasReceber = Array.isArray(data) ? data : (data.contas || data.data || []);
         console.log(`📋 ${contasReceber.length} contas a receber carregadas`);
-        
+
         renderizarContasReceber();
     } catch (error) {
         console.warn('⚠️ Não foi possível carregar contas a receber:', error.message);
@@ -197,7 +214,7 @@ async function carregarContasReceber() {
 function renderizarContasPagar() {
     const container = document.getElementById('contas-pagar-container');
     if (!container) return;
-    
+
     if (contasPagar.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -208,7 +225,7 @@ function renderizarContasPagar() {
         `;
         return;
     }
-    
+
     const html = `
         <div class="filters-container">
             <div class="filters-row">
@@ -236,7 +253,7 @@ function renderizarContasPagar() {
                 </div>
             </div>
         </div>
-        
+
         <table class="transactions-table">
             <thead>
                 <tr>
@@ -253,14 +270,14 @@ function renderizarContasPagar() {
             </tbody>
         </table>
     `;
-    
+
     container.innerHTML = html;
 }
 
 function renderizarContasReceber() {
     const container = document.getElementById('contas-receber-container');
     if (!container) return;
-    
+
     if (contasReceber.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -271,7 +288,7 @@ function renderizarContasReceber() {
         `;
         return;
     }
-    
+
     const html = `
         <div class="filters-container">
             <div class="filters-row">
@@ -299,7 +316,7 @@ function renderizarContasReceber() {
                 </div>
             </div>
         </div>
-        
+
         <table class="transactions-table">
             <thead>
                 <tr>
@@ -316,7 +333,7 @@ function renderizarContasReceber() {
             </tbody>
         </table>
     `;
-    
+
     container.innerHTML = html;
 }
 
@@ -326,22 +343,22 @@ function renderizarLinhaConta(conta, tipo) {
     const statusLower = (conta.status || '').toLowerCase();
     const statusFechado = ['pago', 'liquidada', 'recebido', 'recebida', 'cancelada'];
     const vencido = vencimento < hoje && !statusFechado.includes(statusLower);
-    
+
     const statusBadge = statusFechado.includes(statusLower) ? 'badge-pago' :
                         statusLower === 'cancelada' ? 'badge-secondary' :
                         vencido ? 'badge-atrasado' : 'badge-pendente';
-    
+
     const statusTexto = statusFechado.includes(statusLower) ? (statusLower === 'cancelada' ? 'Cancelada' : 'Pago') :
                         vencido ? 'Atrasado' : 'Pendente';
-    
-    const podeEditar = tipo === 'pagar' ? 
-        permissoesFinanceiro?.contas_pagar?.editar : 
+
+    const podeEditar = tipo === 'pagar' ?
+        permissoesFinanceiro?.contas_pagar?.editar :
         permissoesFinanceiro?.contas_receber?.editar;
-    
-    const podeExcluir = tipo === 'pagar' ? 
-        permissoesFinanceiro?.contas_pagar?.excluir : 
+
+    const podeExcluir = tipo === 'pagar' ?
+        permissoesFinanceiro?.contas_pagar?.excluir :
         permissoesFinanceiro?.contas_receber?.excluir;
-    
+
     return `
         <tr>
             <td><strong>${conta.descrição || '-'}</strong></td>
@@ -379,31 +396,31 @@ function atualizarDashboard() {
     const totalPagar = contasPagar
         .filter(c => statusAberto.includes((c.status || '').toLowerCase()))
         .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-    
+
     const totalReceber = contasReceber
         .filter(c => statusAberto.includes((c.status || '').toLowerCase()))
         .reduce((sum, c) => sum + parseFloat(c.valor || 0), 0);
-    
+
     const saldoAtual = totalReceber - totalPagar;
-    
+
     // Contar vencimentos de hoje
     const hoje = new Date().toISOString().split('T')[0];
     const vencendoHoje = [
         ...contasPagar.filter(c => c.vencimento === hoje && ['pendente', 'parcial', 'a_vencer', 'vencida'].includes((c.status || '').toLowerCase())),
         ...contasReceber.filter(c => c.vencimento === hoje && ['pendente', 'parcial', 'a_vencer', 'vencida'].includes((c.status || '').toLowerCase()))
     ].length;
-    
+
     // Atualizar UI (verificar se elementos existem)
     const saldoAtualEl = document.getElementById('saldo-atual');
     const totalReceberEl = document.getElementById('total-receber');
     const totalPagarEl = document.getElementById('total-pagar');
     const vencendoHojeEl = document.getElementById('vencendo-hoje');
-    
+
     if (saldoAtualEl) saldoAtualEl.textContent = formatarMoeda(saldoAtual);
     if (totalReceberEl) totalReceberEl.textContent = formatarMoeda(totalReceber);
     if (totalPagarEl) totalPagarEl.textContent = formatarMoeda(totalPagar);
     if (vencendoHojeEl) vencendoHojeEl.textContent = vencendoHoje;
-    
+
     // Renderizar movimentações recentes
     renderizarMovimentacoesRecentes();
 }
@@ -411,13 +428,13 @@ function atualizarDashboard() {
 function renderizarMovimentacoesRecentes() {
     const container = document.getElementById('movimentacoes-container');
     if (!container) return;
-    
+
     const todasContas = [
         ...contasPagar.map(c => ({ ...c, tipo: 'pagar' })),
         ...contasReceber.map(c => ({ ...c, tipo: 'receber' }))
     ].sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento))
      .slice(0, 10);
-    
+
     if (todasContas.length === 0) {
         container.innerHTML = `
             <div class="empty-state">
@@ -428,7 +445,7 @@ function renderizarMovimentacoesRecentes() {
         `;
         return;
     }
-    
+
     const html = `
         <table class="transactions-table">
             <thead>
@@ -461,7 +478,7 @@ function renderizarMovimentacoesRecentes() {
             </tbody>
         </table>
     `;
-    
+
     container.innerHTML = html;
 }
 
@@ -479,12 +496,12 @@ function inicializarModais() {
                     <form id="form-conta" onsubmit="salvarConta(event)">
                         <input type="hidden" id="conta-id">
                         <input type="hidden" id="conta-tipo">
-                        
+
                         <div class="form-group">
                             <label>Descrição <span>*</span></label>
                             <input type="text" id="conta-descrição" class="form-input" required>
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Valor <span>*</span></label>
@@ -495,12 +512,12 @@ function inicializarModais() {
                                 <input type="date" id="conta-vencimento" class="form-input" required>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label id="label-entidade">Fornecedor</label>
                             <input type="text" id="conta-entidade" class="form-input">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Categoria</label>
                             <select id="conta-categoria" class="form-select">
@@ -513,7 +530,7 @@ function inicializarModais() {
                                 <option value="outros">Outros</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Observações</label>
                             <textarea id="conta-observacoes" class="form-textarea"></textarea>
@@ -529,68 +546,68 @@ function inicializarModais() {
             </div>
         </div>
     `;
-    
+
     document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 function abrirModalNovaConta(tipo) {
-    const podeCriar = tipo === 'pagar' ? 
-        permissoesFinanceiro?.contas_pagar?.criar : 
+    const podeCriar = tipo === 'pagar' ?
+        permissoesFinanceiro?.contas_pagar?.criar :
         permissoesFinanceiro?.contas_receber?.criar;
-    
+
     if (!podeCriar) {
         mostrarAlerta('Você não tem permissão para criar contas', 'error');
         return;
     }
-    
+
     tipoModalAtual = tipo;
     contaSelecionada = null;
-    
+
     const tituloEl = document.getElementById('modal-conta-titulo');
     const labelEl = document.getElementById('label-entidade');
     const tipoEl = document.getElementById('conta-tipo');
     const formEl = document.getElementById('form-conta');
     const idEl = document.getElementById('conta-id');
-    
+
     if (tituloEl) tituloEl.textContent = tipo === 'pagar' ? 'Nova Conta a Pagar' : 'Nova Conta a Receber';
     if (labelEl) labelEl.textContent = tipo === 'pagar' ? 'Fornecedor' : 'Cliente';
     if (tipoEl) tipoEl.value = tipo;
     if (formEl) formEl.reset();
     if (idEl) idEl.value = '';
-    
+
     abrirModal('modal-conta');
 }
 
 function editarConta(id, tipo) {
     // Verificar permissões apenas se estiverem definidas
     if (permissoesFinanceiro) {
-        const podeEditar = tipo === 'pagar' ? 
-            permissoesFinanceiro?.contas_pagar?.editar : 
+        const podeEditar = tipo === 'pagar' ?
+            permissoesFinanceiro?.contas_pagar?.editar :
             permissoesFinanceiro?.contas_receber?.editar;
-        
+
         if (podeEditar === false) {
             mostrarAlerta('Você não tem permissão para editar contas', 'error');
             return;
         }
     }
-    
-    const conta = tipo === 'pagar' ? 
-        contasPagar.find(c => c.id === id) : 
+
+    const conta = tipo === 'pagar' ?
+        contasPagar.find(c => c.id === id) :
         contasReceber.find(c => c.id === id);
-    
+
     if (!conta) return;
-    
+
     tipoModalAtual = tipo;
     contaSelecionada = conta;
-    
+
     const tituloEl = document.getElementById('modal-conta-titulo');
     const labelEl = document.getElementById('label-entidade');
-    
+
     if (tituloEl) tituloEl.textContent = tipo === 'pagar' ? 'Editar Conta a Pagar' : 'Editar Conta a Receber';
     if (labelEl) labelEl.textContent = tipo === 'pagar' ? 'Fornecedor' : 'Cliente';
-    
+
     const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
-    
+
     setVal('conta-id', conta.id);
     setVal('conta-tipo', tipo);
     setVal('conta-descrição', conta.descrição || '');
@@ -599,7 +616,7 @@ function editarConta(id, tipo) {
     setVal('conta-entidade', conta.fornecedor || conta.cliente || '');
     setVal('conta-categoria', conta.categoria || '');
     setVal('conta-observacoes', conta.observacoes || '');
-    
+
     abrirModal('modal-conta');
 }
 
@@ -608,11 +625,11 @@ async function salvarConta(event) {
     if (event && event.preventDefault) {
         event.preventDefault();
     }
-    
+
     const id = document.getElementById('conta-id').value;
     const tipo = document.getElementById('conta-tipo').value;
     const isEdicao = !!id;
-    
+
     const dados = {
         descrição: document.getElementById('conta-descrição').value,
         valor: parseFloat(document.getElementById('conta-valor').value),
@@ -620,41 +637,41 @@ async function salvarConta(event) {
         categoria: document.getElementById('conta-categoria').value,
         observacoes: document.getElementById('conta-observacoes').value
     };
-    
+
     if (tipo === 'pagar') {
         dados.fornecedor_id = document.getElementById('conta-entidade').value;
     } else {
         dados.cliente_id = document.getElementById('conta-entidade').value;
     }
-    
+
     try {
-        const url = isEdicao ? 
-            `/api/financeiro/contas-${tipo}/${id}` : 
+        const url = isEdicao ?
+            `/api/financeiro/contas-${tipo}/${id}` :
             `/api/financeiro/contas-${tipo}`;
-        
+
         const method = isEdicao ? 'PUT' : 'POST';
-        
-        const response = await fetch(url, {
+
+        const response = await fetchComRetry(url, {
             method: method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dados)
         });
-        
+
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.message || 'Erro ao salvar conta');
         }
-        
+
         const result = await response.json();
-        
+
         mostrarAlerta(
             isEdicao ? 'Conta atualizada com sucesso!' : 'Conta criada com sucesso!',
             'success'
         );
-        
+
         fecharModal('modal-conta');
         await carregarDadosFinanceiros();
-        
+
     } catch (error) {
         console.error('❌ Erro ao salvar conta:', error);
         mostrarAlerta(error.message, 'error');
@@ -663,23 +680,23 @@ async function salvarConta(event) {
 
 async function marcarComoPago(id, tipo) {
     if (!confirm('Deseja marcar esta conta como paga?')) return;
-    
+
     try {
-        const conta = tipo === 'pagar' ? 
-            contasPagar.find(c => c.id === id) : 
+        const conta = tipo === 'pagar' ?
+            contasPagar.find(c => c.id === id) :
             contasReceber.find(c => c.id === id);
-        
-        const response = await fetch(`/api/financeiro/contas-${tipo}/${id}`, {
+
+        const response = await fetchComRetry(`/api/financeiro/contas-${tipo}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...conta, status: 'pago' })
         });
-        
+
         if (!response.ok) throw new Error('Erro ao atualizar status');
-        
+
         mostrarAlerta('Conta marcada como paga!', 'success');
         await carregarDadosFinanceiros();
-        
+
     } catch (error) {
         console.error('❌ Erro ao marcar como pago:', error);
         mostrarAlerta('Erro ao atualizar status da conta', 'error');
@@ -688,26 +705,26 @@ async function marcarComoPago(id, tipo) {
 
 async function excluirConta(id, tipo) {
     if (!confirm('Deseja realmente excluir esta conta? Esta ação não pode ser desfeita.')) return;
-    
-    const podeExcluir = tipo === 'pagar' ? 
-        permissoesFinanceiro?.contas_pagar?.excluir : 
+
+    const podeExcluir = tipo === 'pagar' ?
+        permissoesFinanceiro?.contas_pagar?.excluir :
         permissoesFinanceiro?.contas_receber?.excluir;
-    
+
     if (!podeExcluir) {
         mostrarAlerta('Você não tem permissão para excluir contas', 'error');
         return;
     }
-    
+
     try {
-        const response = await fetch(`/api/financeiro/contas-${tipo}/${id}`, {
+        const response = await fetchComRetry(`/api/financeiro/contas-${tipo}/${id}`, {
             method: 'DELETE'
         });
-        
+
         if (!response.ok) throw new Error('Erro ao excluir conta');
-        
+
         mostrarAlerta('Conta excluída com sucesso!', 'success');
         await carregarDadosFinanceiros();
-        
+
     } catch (error) {
         console.error('❌ Erro ao excluir conta:', error);
         mostrarAlerta('Erro ao excluir conta', 'error');
@@ -719,20 +736,20 @@ async function aplicarFiltrosPagar() {
     const status = document.getElementById('filter-status-pagar').value;
     const dataInicio = document.getElementById('filter-data-inicio-pagar').value;
     const dataFim = document.getElementById('filter-data-fim-pagar').value;
-    
+
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (dataInicio) params.append('data_inicio', dataInicio);
     if (dataFim) params.append('data_fim', dataFim);
-    
+
     try {
-        const response = await fetch(`/api/financeiro/contas-pagar?${params}`);
+        const response = await fetchComRetry(`/api/financeiro/contas-pagar?${params}`);
         if (!response.ok) throw new Error('Erro ao filtrar');
-        
+
         contasPagar = await response.json();
         renderizarContasPagar();
         atualizarDashboard();
-        
+
     } catch (error) {
         console.error('❌ Erro ao aplicar filtros:', error);
         mostrarAlerta('Erro ao aplicar filtros', 'error');
@@ -743,20 +760,20 @@ async function aplicarFiltrosReceber() {
     const status = document.getElementById('filter-status-receber').value;
     const dataInicio = document.getElementById('filter-data-inicio-receber').value;
     const dataFim = document.getElementById('filter-data-fim-receber').value;
-    
+
     const params = new URLSearchParams();
     if (status) params.append('status', status);
     if (dataInicio) params.append('data_inicio', dataInicio);
     if (dataFim) params.append('data_fim', dataFim);
-    
+
     try {
-        const response = await fetch(`/api/financeiro/contas-receber?${params}`);
+        const response = await fetchComRetry(`/api/financeiro/contas-receber?${params}`);
         if (!response.ok) throw new Error('Erro ao filtrar');
-        
+
         contasReceber = await response.json();
         renderizarContasReceber();
         atualizarDashboard();
-        
+
     } catch (error) {
         console.error('❌ Erro ao aplicar filtros:', error);
         mostrarAlerta('Erro ao aplicar filtros', 'error');
@@ -782,7 +799,7 @@ function fecharModal(modalId) {
         // Tentar fechar modalConta primeiro (usado em contas-pagar e contas-receber)
         modal = document.getElementById('modalConta');
     }
-    
+
     if (modal) {
         modal.classList.remove('show');
         modal.classList.remove('active');
@@ -794,17 +811,17 @@ function mostrarAlerta(mensagem, tipo = 'info') {
     // Remover alertas anteriores
     const alertaAnterior = document.querySelector('.alert');
     if (alertaAnterior) alertaAnterior.remove();
-    
+
     const alerta = document.createElement('div');
     alerta.className = `alert alert-${tipo}`;
     alerta.innerHTML = `
         <i class="fas fa-${tipo === 'success' ? 'check-circle' : tipo === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
         ${mensagem}
     `;
-    
+
     const container = document.querySelector('.app-container');
     container.insertBefore(alerta, container.firstChild);
-    
+
     setTimeout(() => alerta.remove(), 5000);
 }
 
@@ -841,20 +858,20 @@ function configurarEventListeners() {
         await carregarDadosFinanceiros();
         this.querySelector('i').classList.remove('fa-spin');
     });
-    
+
     // Navegação entre seções
     const navLinks = document.querySelectorAll('.nav-link[data-section]');
     const sections = document.querySelectorAll('.content-section');
-    
+
     navLinks.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             navLinks.forEach(l => l.classList.remove('active'));
             sections.forEach(s => s.classList.remove('active'));
-            
+
             this.classList.add('active');
-            
+
             const sectionId = this.getAttribute('data-section') + '-section';
             const targetSection = document.getElementById(sectionId);
             if (targetSection) {
@@ -862,7 +879,7 @@ function configurarEventListeners() {
             }
         });
     });
-    
+
     // Fechar modal ao clicar fora
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal-overlay')) {
@@ -875,7 +892,7 @@ function configurarEventListeners() {
 window.addEventListener('load', function() {
     const loaderWrapper = document.getElementById('loader-wrapper');
     const containerPrincipal = document.querySelector('.container-principal');
-    
+
     if (loaderWrapper) loaderWrapper.style.display = 'none';
     if (containerPrincipal) containerPrincipal.style.display = 'flex';
 });
