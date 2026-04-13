@@ -784,16 +784,20 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Parceiro / Portador</th>
-                                    <th>A Vencer</th>
-                                    <th>Vencido</th>
-                                    <th>Total em Aberto</th>
-                                    <th>Liquidado</th>
-                                    <th>% do Total</th>
+                                    <th>Parceiro</th>
+                                    <th class="th-right">A Vencer</th>
+                                    <th class="th-right">Vencido</th>
+                                    <th class="th-right">Total</th>
+                                    <th class="th-right">Liquidado</th>
+                                    <th class="th-right">Recomp. A Receber</th>
+                                    <th class="th-right">Recomp. Recebido</th>
+                                    <th class="th-right">Recomp. Total</th>
+                                    <th class="th-right">Cart. Fundo</th>
+                                    <th class="th-right">Cart. Aluforce</th>
                                 </tr>
                             </thead>
                             <tbody id="tabela-fundos-detail">
-                                <tr><td colspan="6" class="loading-cell-sm">Carregando...</td></tr>
+                                <tr><td colspan="10" class="loading-cell-sm">Carregando...</td></tr>
                             </tbody>
                         </table>
                         </div>
@@ -971,8 +975,8 @@
                     <div class="resumo-grid">
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title">Por Parceiro</h3></div>
-                            <div class="table-scroll-x"><table><thead><tr><th>Parceiro</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Total</th><th class="th-right">Liquidado</th></tr></thead>
-                            <tbody id="tab-resumo-parceiro-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody></table></div>
+                            <div class="table-scroll-x"><table><thead><tr><th>Parceiro</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Total</th><th class="th-right">Liquidado</th><th class="th-right">Recomprado</th><th class="th-right">A Receber</th><th class="th-right">Recebido</th><th class="th-right">Cart. Fundo</th><th class="th-right">Cart. Aluforce</th></tr></thead>
+                            <tbody id="tab-resumo-parceiro-body"><tr><td colspan="10" class="loading-cell-sm">Carregando...</td></tr></tbody></table></div>
                         </div>
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title">Mensal</h3></div>
@@ -1010,16 +1014,10 @@
                 </div><!-- /tab-fat-analise -->
                 <!-- Tab: DISPONIVEL -->
                 <div id="tab-disponivel" class="workbook-content" hidden>
-                    <h2 class="wb-title wb-title-sm"><i class="fas fa-wallet wb-icon teal"></i>Disponível do Dia <span id="disponivel-data-ref" class="disponivel-ref"></span></h2>
-                    <div class="disp-btn-bar">
-                        <button onclick="filtrarDisponivelDia('ontem')" id="btn-disp-ontem" class="disp-btn">Ontem</button>
-                        <button onclick="filtrarDisponivelDia('hoje')" id="btn-disp-hoje" class="disp-btn active">Hoje</button>
-                        <span class="disp-separator">ou</span>
-                        <input type="date" id="disponivel-data-input" onchange="filtrarDisponivelDia('custom')" class="disp-date-input">
-                    </div>
+                    <h2 class="wb-title wb-title-sm"><i class="fas fa-wallet wb-icon teal"></i>Disponível</h2>
                     <div class="table-container"><div class="table-scroll-x"><table>
-                        <thead><tr><th>Empresa</th><th class="th-right">NF</th><th class="th-right">F9</th><th class="th-right">Total Disponível</th><th class="th-right">Qtd Títulos</th></tr></thead>
-                        <tbody id="tab-disponivel-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody>
+                        <thead><tr><th>Empresa</th><th class="th-right">NF</th><th class="th-right">F9</th><th class="th-right">Total</th></tr></thead>
+                        <tbody id="tab-disponivel-body"><tr><td colspan="4" class="loading-cell-sm">Carregando...</td></tr></tbody>
                     </table></div></div>
                 </div><!-- /tab-disponivel -->
 
@@ -2436,11 +2434,20 @@
                 if(venc && !isNaN(venc.getTime())) venc.setHours(0,0,0,0);
                 var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
                 var vencido = !liquidado && venc && venc < hoje;
-                var parceiro = c.cliente_nome || c.portador || 'SEM NOME';
-                if(!porParceiro[parceiro]) porParceiro[parceiro] = {aVencer:0,vencido:0,total:0,liquidado:0};
+                var parceiro = c.portador || 'SEM PORTADOR';
+                var posicao = String(c.posicao||'').toUpperCase().trim();
+                var cartorio = String(c.cartorio||'').toUpperCase().trim();
+                if(!porParceiro[parceiro]) porParceiro[parceiro] = {aVencer:0,vencido:0,total:0,liquidado:0,recomprado:0,recompAReceber:0,recompRecebido:0,cartFundo:0,cartAluforce:0};
                 if(liquidado) porParceiro[parceiro].liquidado += recebido>0?recebido:bruto;
                 else if(vencido) { porParceiro[parceiro].vencido += valorAberto; porParceiro[parceiro].total += valorAberto; }
                 else { porParceiro[parceiro].aVencer += valorAberto; porParceiro[parceiro].total += valorAberto; }
+                if(posicao === 'RECOMPRADO') {
+                    porParceiro[parceiro].recomprado += bruto;
+                    if(liquidado) porParceiro[parceiro].recompRecebido += recebido>0?recebido:bruto;
+                    else porParceiro[parceiro].recompAReceber += valorAberto;
+                }
+                if(cartorio === 'FUNDO') porParceiro[parceiro].cartFundo += bruto;
+                else if(cartorio === 'ALUFORCE') porParceiro[parceiro].cartAluforce += bruto;
                 if(venc && !isNaN(venc.getTime())) {
                     var mKey = venc.getFullYear()+'-'+String(venc.getMonth()+1).padStart(2,'0');
                     if(!porMes[mKey]) porMes[mKey] = {nome:meses[venc.getMonth()]+'/'+venc.getFullYear(),aVencer:0,vencido:0,liquidado:0,total:0};
@@ -2451,7 +2458,7 @@
             });
             var pBody = document.getElementById('tab-resumo-parceiro-body');
             var pKeys = Object.keys(porParceiro).sort(function(a,b){ return porParceiro[b].total - porParceiro[a].total; });
-            pBody.innerHTML = pKeys.length ? pKeys.slice(0,50).map(function(n){ var it=porParceiro[n]; return '<tr><td><strong>'+_escFin(n)+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td></tr>'; }).join('') : '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
+            pBody.innerHTML = pKeys.length ? pKeys.map(function(n){ var it=porParceiro[n]; return '<tr><td><strong>'+_escFin(n)+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;">'+fmtMoeda(it.recomprado)+'</td><td style="text-align:right;">'+fmtMoeda(it.recompAReceber)+'</td><td style="text-align:right;">'+fmtMoeda(it.recompRecebido)+'</td><td style="text-align:right;">'+fmtMoeda(it.cartFundo)+'</td><td style="text-align:right;">'+fmtMoeda(it.cartAluforce)+'</td></tr>'; }).join('') : '<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
             var mBody = document.getElementById('tab-resumo-mensal-body');
             var mKeys = Object.keys(porMes).sort();
             mBody.innerHTML = mKeys.length ? mKeys.map(function(k){ var it=porMes[k]; return '<tr><td><strong>'+it.nome+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total+it.liquidado)+'</td></tr>'; }).join('') : '<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
@@ -2502,81 +2509,26 @@
             }).join('');
         }
 
-        var disponivelDataSelecionada = null; // null = hoje
-
-        function filtrarDisponivelDia(modo) {
-            var hoje = new Date(); hoje.setHours(0,0,0,0);
-            var btnOntem = document.getElementById('btn-disp-ontem');
-            var btnHoje = document.getElementById('btn-disp-hoje');
-            var inputData = document.getElementById('disponivel-data-input');
-            // Reset styles
-            btnOntem.style.background='#fff'; btnOntem.style.color='#374151'; btnOntem.style.borderColor='#d1d5db';
-            btnHoje.style.background='#fff'; btnHoje.style.color='#374151'; btnHoje.style.borderColor='#d1d5db';
-            if(modo === 'ontem') {
-                var ontem = new Date(hoje); ontem.setDate(ontem.getDate()-1);
-                disponivelDataSelecionada = ontem;
-                inputData.value = ontem.toISOString().slice(0,10);
-                btnOntem.style.background='#14b8a6'; btnOntem.style.color='#fff'; btnOntem.style.borderColor='#14b8a6';
-            } else if(modo === 'hoje') {
-                disponivelDataSelecionada = hoje;
-                inputData.value = hoje.toISOString().slice(0,10);
-                btnHoje.style.background='#14b8a6'; btnHoje.style.color='#fff'; btnHoje.style.borderColor='#14b8a6';
-            } else if(modo === 'custom') {
-                var val = inputData.value;
-                if(!val) { disponivelDataSelecionada = hoje; }
-                else { disponivelDataSelecionada = new Date(val+'T00:00:00'); }
-            }
-            renderizarDisponivelTab();
-        }
-
         function renderizarDisponivelTab() {
-            var hoje = new Date(); hoje.setHours(0,0,0,0);
-            var dataRef = disponivelDataSelecionada || hoje;
-            dataRef.setHours(0,0,0,0);
-            var dataRefStr = dataRef.toISOString().slice(0,10);
-            var dataRefEl = document.getElementById('disponivel-data-ref');
-            if(dataRefEl) dataRefEl.textContent = '(' + dataRef.toLocaleDateString('pt-BR') + ')';
-            // Set input value if not set
-            var inputData = document.getElementById('disponivel-data-input');
-            if(inputData && !inputData.value) inputData.value = dataRefStr;
-            // Highlight correct button
-            var btnOntem = document.getElementById('btn-disp-ontem');
-            var btnHoje = document.getElementById('btn-disp-hoje');
-            if(btnOntem && btnHoje) {
-                var ontem = new Date(hoje); ontem.setDate(ontem.getDate()-1);
-                btnOntem.style.background = dataRefStr===ontem.toISOString().slice(0,10) ? '#14b8a6' : '#fff';
-                btnOntem.style.color = dataRefStr===ontem.toISOString().slice(0,10) ? '#fff' : '#374151';
-                btnOntem.style.borderColor = dataRefStr===ontem.toISOString().slice(0,10) ? '#14b8a6' : '#d1d5db';
-                btnHoje.style.background = dataRefStr===hoje.toISOString().slice(0,10) ? '#14b8a6' : '#fff';
-                btnHoje.style.color = dataRefStr===hoje.toISOString().slice(0,10) ? '#fff' : '#374151';
-                btnHoje.style.borderColor = dataRefStr===hoje.toISOString().slice(0,10) ? '#14b8a6' : '#d1d5db';
-            }
             var porEmpresa = {};
-            var totalGeralDia = 0;
+            var empresaOrder = {'ALUFORCE':1,'ENERGY':2,'LABOR':3};
+            ['ALUFORCE','ENERGY','LABOR'].forEach(function(e){ porEmpresa[e] = {nf:0,f9:0,total:0}; });
             contas.forEach(function(c) {
+                var sit = String(c.situacao||'').toUpperCase().trim();
+                if(sit !== 'DISPONÍVEL' && sit !== 'DISPONIVEL') return;
                 var emp = (c.empresa||'SEM EMPRESA').toUpperCase().trim();
-                var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
-                var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido; if(valorAberto < 0) valorAberto = 0;
-                var status = String(c.status||'').toLowerCase();
-                var liquidado = status==='recebido'||status==='pago'||status==='liquidada'||status==='liquidado'||valorAberto===0;
-                if(liquidado) return;
-                var vencRaw = c.data_vencimento||c.vencimento;
-                if(!vencRaw) return;
-                var vencStr = String(vencRaw).slice(0,10);
-                if(vencStr !== dataRefStr) return;
-                if(!porEmpresa[emp]) porEmpresa[emp] = {nf:0,f9:0,totalDia:0,qtd:0};
-                var isNF = (c.nota_fiscal||'').toString().trim() !== '';
-                if(isNF) porEmpresa[emp].nf += valorAberto; else porEmpresa[emp].f9 += valorAberto;
-                porEmpresa[emp].totalDia += valorAberto; porEmpresa[emp].qtd++;
-                totalGeralDia += valorAberto;
+                var bruto = parseFloat(c.valor_total||c.valor||0)||0;
+                var tipoDoc = String(c.tipo_documento||c.categoria||'').toUpperCase().trim();
+                if(!porEmpresa[emp]) porEmpresa[emp] = {nf:0,f9:0,total:0};
+                if(tipoDoc === 'F9') porEmpresa[emp].f9 += bruto; else porEmpresa[emp].nf += bruto;
+                porEmpresa[emp].total += bruto;
             });
             var body = document.getElementById('tab-disponivel-body');
-            var eKeys = Object.keys(porEmpresa).sort();
-            if(!eKeys.length) { body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhuma conta a receber para ' + dataRef.toLocaleDateString('pt-BR') + '</td></tr>'; return; }
+            var eKeys = Object.keys(porEmpresa).sort(function(a,b){ return (empresaOrder[a]||99) - (empresaOrder[b]||99); });
             var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
-            var rows = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nf)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.totalDia)+'</td><td style="text-align:right;">'+e.qtd+'</td></tr>'; }).join('');
-            var totalQtd = eKeys.reduce(function(s,k){return s+porEmpresa[k].qtd;},0);
-            rows += '<tr style="background:#f0fdf4;font-weight:700;border-top:2px solid #059669;"><td>TOTAL</td><td></td><td></td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalGeralDia)+'</td><td style="text-align:right;">'+totalQtd+'</td></tr>';
+            var totalNF=0,totalF9=0,totalGeral=0;
+            var rows = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; totalNF+=e.nf; totalF9+=e.f9; totalGeral+=e.total; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nf)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.total)+'</td></tr>'; }).join('');
+            rows += '<tr style="background:#f0fdf4;font-weight:700;border-top:2px solid #059669;"><td>TOTAL</td><td style="text-align:right;">'+fmtMoeda(totalNF)+'</td><td style="text-align:right;">'+fmtMoeda(totalF9)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalGeral)+'</td></tr>';
             body.innerHTML = rows;
         }
 
@@ -2873,12 +2825,11 @@
             }
         }
 
-        // Dev Spec 1.3: Fundos detalhado
+        // Dev Spec 1.3: Fundos detalhado (match Excel FUNDOS sheet)
         function renderizarFundosDetalhado() {
             var hoje = new Date();
             hoje.setHours(0,0,0,0);
             var porPortador = {};
-            var totalGeral = 0;
 
             contas.forEach(function(c) {
                 var bruto = parseFloat(c.valor_total || c.valor || 0) || 0;
@@ -2895,28 +2846,40 @@
                 var liquidado = status === 'recebido' || status === 'pago' || status === 'liquidada' || status === 'liquidado' || valorAberto === 0;
                 var vencido = !liquidado && vencimento && vencimento < hoje;
                 var parceiro = c.portador || 'SEM PORTADOR';
+                var posicao = String(c.posicao||'').toUpperCase().trim();
+                var cartorio = String(c.cartorio||'').toUpperCase().trim();
 
-                if (!porPortador[parceiro]) porPortador[parceiro] = { aVencer: 0, vencido: 0, total: 0, liquidado: 0 };
+                if (!porPortador[parceiro]) porPortador[parceiro] = { aVencer:0, vencido:0, total:0, liquidado:0, recompAReceber:0, recompRecebido:0, recompTotal:0, cartFundo:0, cartAluforce:0 };
                 if (liquidado) { porPortador[parceiro].liquidado += recebido > 0 ? recebido : bruto; }
-                else if (vencido) { porPortador[parceiro].vencido += valorAberto; porPortador[parceiro].total += valorAberto; totalGeral += valorAberto; }
-                else { porPortador[parceiro].aVencer += valorAberto; porPortador[parceiro].total += valorAberto; totalGeral += valorAberto; }
+                else if (vencido) { porPortador[parceiro].vencido += valorAberto; porPortador[parceiro].total += valorAberto; }
+                else { porPortador[parceiro].aVencer += valorAberto; porPortador[parceiro].total += valorAberto; }
+                if (posicao === 'RECOMPRADO') {
+                    porPortador[parceiro].recompTotal += bruto;
+                    if (liquidado) porPortador[parceiro].recompRecebido += recebido > 0 ? recebido : bruto;
+                    else porPortador[parceiro].recompAReceber += valorAberto;
+                }
+                if (cartorio === 'FUNDO') porPortador[parceiro].cartFundo += bruto;
+                else if (cartorio === 'ALUFORCE') porPortador[parceiro].cartAluforce += bruto;
             });
 
             var fundosBody = document.getElementById('tabela-fundos-detail');
             var keys = Object.keys(porPortador).sort();
             if (keys.length === 0) {
-                fundosBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
+                fundosBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
             } else {
                 fundosBody.innerHTML = keys.map(function(nome) {
                     var item = porPortador[nome];
-                    var pct = totalGeral > 0 ? (item.total / totalGeral * 100).toFixed(1) : '0.0';
                     return '<tr>' +
-                        '<td><strong>' + nome + '</strong></td>' +
+                        '<td><strong>' + _escFin(nome) + '</strong></td>' +
                         '<td style="text-align:right;">' + fmtMoeda(item.aVencer) + '</td>' +
                         '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(item.vencido) + '</td>' +
                         '<td style="text-align:right;font-weight:700;">' + fmtMoeda(item.total) + '</td>' +
                         '<td style="text-align:right;color:#059669;">' + fmtMoeda(item.liquidado) + '</td>' +
-                        '<td style="text-align:center;">' + pct + '%</td></tr>';
+                        '<td style="text-align:right;">' + fmtMoeda(item.recompAReceber) + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.recompRecebido) + '</td>' +
+                        '<td style="text-align:right;font-weight:600;">' + fmtMoeda(item.recompTotal) + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.cartFundo) + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.cartAluforce) + '</td></tr>';
                 }).join('');
             }
         }
