@@ -776,6 +776,12 @@
                 <!-- Tab: FUNDOS -->
                 <div id="tab-fundos" class="workbook-content" hidden>
                     <h2 class="wb-title"><i class="fas fa-landmark wb-icon blue"></i>Posicao dos Fundos / Portadores</h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="fundos-filtro-empresa" onchange="renderizarFundosDetalhado()" class="filter-bar-select"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <input type="text" id="fundos-busca" placeholder="Buscar portador/parceiro..." oninput="renderizarFundosDetalhado()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="fundos-filtro-info"></div>
+                    </div>
                     <div class="table-container">
                         <div class="table-header">
                             <h3 class="table-title">Detalhamento por Portador</h3>
@@ -950,6 +956,11 @@
                 <!-- Tab: BASE (dados de referência) -->
                 <div id="tab-base" class="workbook-content" hidden>
                     <h2 class="wb-title"><i class="fas fa-database wb-icon green"></i>Dados de Referência</h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <input type="text" id="base-busca" placeholder="Buscar portador, status, situação..." oninput="carregarBase()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="base-filtro-info"></div>
+                    </div>
                     <div class="base-grid">
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title"><i class="fas fa-university th-icon red"></i> Portador</h3></div>
@@ -972,6 +983,12 @@
                 <!-- Tab: RESUMO -->
                 <div id="tab-resumo" class="workbook-content" hidden>
                     <h2 class="wb-title"><i class="fas fa-chart-bar wb-icon blue"></i>Resumo por Parceiro / Mensal</h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="resumo-filtro-empresa" onchange="renderizarResumoTab()" class="filter-bar-select"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <input type="text" id="resumo-busca" placeholder="Buscar parceiro..." oninput="renderizarResumoTab()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="resumo-filtro-info"></div>
+                    </div>
                     <div class="resumo-grid">
                         <div class="table-container">
                             <div class="table-header"><h3 class="table-title">Por Parceiro</h3></div>
@@ -1015,6 +1032,12 @@
                 <!-- Tab: DISPONIVEL -->
                 <div id="tab-disponivel" class="workbook-content" hidden>
                     <h2 class="wb-title wb-title-sm"><i class="fas fa-wallet wb-icon teal"></i>Disponível</h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="disp-filtro-empresa" onchange="renderizarDisponivelTab()" class="filter-bar-select"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <input type="text" id="disp-busca" placeholder="Buscar empresa..." oninput="renderizarDisponivelTab()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="disp-filtro-info"></div>
+                    </div>
                     <div class="table-container"><div class="table-scroll-x"><table>
                         <thead><tr><th>Empresa</th><th class="th-right">NF</th><th class="th-right">F9</th><th class="th-right">Total</th></tr></thead>
                         <tbody id="tab-disponivel-body"><tr><td colspan="4" class="loading-cell-sm">Carregando...</td></tr></tbody>
@@ -1024,6 +1047,13 @@
                 <!-- Tab: DIARIO -->
                 <div id="tab-diario" class="workbook-content" hidden>
                     <h2 class="wb-title"><i class="fas fa-calendar-day wb-icon red"></i>Contas a Receber — Diário <span id="diario-totais-pub" class="totais-span"></span></h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="diario-filtro-mes" onchange="renderizarDiarioTab()" class="filter-bar-select"><option value="">Todos os Meses</option></select>
+                        <select id="diario-filtro-tipo" onchange="renderizarDiarioTab()" class="filter-bar-select"><option value="">A Vencer + Vencido</option><option value="vencido">Só Vencido</option><option value="avencer">Só A Vencer</option></select>
+                        <input type="text" id="diario-busca" placeholder="Buscar data, dia da semana..." oninput="renderizarDiarioTab()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="diario-filtro-info"></div>
+                    </div>
                     <div class="table-container"><div class="table-scroll-x"><table>
                         <thead><tr><th>Dia da Semana</th><th>Data</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Total do Dia</th><th class="th-right">Qtd</th></tr></thead>
                         <tbody id="tab-diario-body"><tr><td colspan="6" class="loading-cell-sm">Carregando...</td></tr></tbody>
@@ -1039,6 +1069,7 @@
                         <select id="op-filtro-empresa-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todas Empresas</option></select>
                         <select id="op-filtro-instituicao-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todas Instituições</option></select>
                         <select id="op-filtro-tipo-pub" onchange="filtrarOperacoesPub()" class="filter-bar-select"><option value="">Todos Tipos</option></select>
+                        <input type="text" id="op-busca-pub" placeholder="Buscar borderô, instituição..." oninput="filtrarOperacoesPub()" class="filter-bar-search">
                         <div class="filter-bar-info" id="op-filtro-info-pub"></div>
                     </div>
                     <div class="table-container">
@@ -1069,6 +1100,12 @@
                 <!-- Tab: TD (Tabela Dinâmica) -->
                 <div id="tab-td" class="workbook-content" hidden>
                     <h2 class="wb-title"><i class="fas fa-table wb-icon green"></i>Tabela Dinâmica — Por Vencimento</h2>
+                    <div class="filter-bar-inline">
+                        <span class="filter-bar-label"><i class="fas fa-filter filter-bar-icon yellow"></i>Filtros</span>
+                        <select id="td-filtro-empresa" onchange="renderizarTDTab()" class="filter-bar-select"><option value="">Todas Empresas</option><option>ALUFORCE</option><option>LABOR</option><option>ENERGY</option></select>
+                        <input type="text" id="td-busca" placeholder="Buscar período..." oninput="renderizarTDTab()" class="filter-bar-search">
+                        <div class="filter-bar-info" id="td-filtro-info"></div>
+                    </div>
                     <div class="table-container"><div class="table-scroll-x"><table>
                         <thead><tr><th>Mês/Período</th><th class="th-right">A Vencer</th><th class="th-right">Vencido</th><th class="th-right">Liquidado</th><th class="th-right">Total Geral</th></tr></thead>
                         <tbody id="tab-td-body"><tr><td colspan="5" class="loading-cell-sm">Carregando...</td></tr></tbody>
@@ -2393,6 +2430,7 @@
         // ======= WORKBOOK TAB FUNCTIONS (dados reais) =======
 
         function carregarBase() {
+            var busca = ((document.getElementById('base-busca') || {}).value || '').toLowerCase().trim();
             var portadores = {}, statusSet = {}, situacoes = {}, posicoes = {}, recomprados = {}, cartorios = {};
             contas.forEach(function(c) {
                 if (c.portador) portadores[c.portador] = true;
@@ -2402,17 +2440,27 @@
                 if (c.recomprado != null && c.recomprado !== '') recomprados[c.recomprado] = true;
                 if (c.cartorio != null && c.cartorio !== '') cartorios[c.cartorio] = true;
             });
-            var portBody = document.getElementById('base-portador-body');
             var pKeys = Object.keys(portadores).sort();
+            var allSt = Object.keys(statusSet).sort(), allSit = Object.keys(situacoes).sort(), allPos = Object.keys(posicoes).sort();
+            var allR = Object.keys(recomprados).sort(), allC = Object.keys(cartorios).sort();
+            if (busca) {
+                pKeys = pKeys.filter(function(p){ return p.toLowerCase().indexOf(busca) !== -1; });
+                allSt = allSt.filter(function(s){ return s.toLowerCase().indexOf(busca) !== -1; });
+                allSit = allSit.filter(function(s){ return s.toLowerCase().indexOf(busca) !== -1; });
+                allPos = allPos.filter(function(s){ return s.toLowerCase().indexOf(busca) !== -1; });
+                allR = allR.filter(function(s){ return s.toLowerCase().indexOf(busca) !== -1; });
+                allC = allC.filter(function(s){ return s.toLowerCase().indexOf(busca) !== -1; });
+            }
+            var infoEl = document.getElementById('base-filtro-info');
+            if(infoEl) infoEl.textContent = busca ? 'Filtrado por: "'+busca+'"' : '';
+            var portBody = document.getElementById('base-portador-body');
             portBody.innerHTML = pKeys.length ? pKeys.map(function(p) { return '<tr><td>' + _escFin(p) + '</td></tr>'; }).join('') : '<tr><td style="text-align:center;color:var(--gray-400);">Nenhum</td></tr>';
             var statusBody = document.getElementById('base-status-body');
-            var allSt = Object.keys(statusSet).sort(), allSit = Object.keys(situacoes).sort(), allPos = Object.keys(posicoes).sort();
             var maxLen = Math.max(allSt.length, allSit.length, allPos.length, 1);
             var rows = '';
             for (var i = 0; i < maxLen; i++) rows += '<tr><td>' + _escFin(allSt[i]||'') + '</td><td>' + _escFin(allSit[i]||'') + '</td><td>' + _escFin(allPos[i]||'') + '</td></tr>';
             statusBody.innerHTML = rows;
             var recompBody = document.getElementById('base-recomprado-body');
-            var allR = Object.keys(recomprados).sort(), allC = Object.keys(cartorios).sort();
             var maxR = Math.max(allR.length, allC.length, 1);
             var rowsR = '';
             for (var j = 0; j < maxR; j++) rowsR += '<tr><td>' + _escFin(allR[j]||'-') + '</td><td>' + _escFin(allC[j]||'-') + '</td></tr>';
@@ -2420,10 +2468,13 @@
         }
 
         function renderizarResumoTab() {
+            var filtroEmpresa = ((document.getElementById('resumo-filtro-empresa') || {}).value || '').toUpperCase().trim();
+            var busca = ((document.getElementById('resumo-busca') || {}).value || '').toLowerCase().trim();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
             var porParceiro = {}, porMes = {};
             var meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
             contas.forEach(function(c) {
+                if (filtroEmpresa && (c.empresa||'').toUpperCase().trim() !== filtroEmpresa) return;
                 var bruto = parseFloat(c.valor_total||c.valor||0)||0;
                 var recebido = parseFloat(c.valor_recebido||0)||0;
                 var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido;
@@ -2458,6 +2509,9 @@
             });
             var pBody = document.getElementById('tab-resumo-parceiro-body');
             var pKeys = Object.keys(porParceiro).sort(function(a,b){ return porParceiro[b].total - porParceiro[a].total; });
+            if (busca) pKeys = pKeys.filter(function(n){ return n.toLowerCase().indexOf(busca) !== -1; });
+            var infoEl = document.getElementById('resumo-filtro-info');
+            if(infoEl) infoEl.textContent = pKeys.length + ' parceiros' + (filtroEmpresa || busca ? ' (filtrado)' : '');
             pBody.innerHTML = pKeys.length ? pKeys.map(function(n){ var it=porParceiro[n]; return '<tr><td><strong>'+_escFin(n)+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;">'+fmtMoeda(it.recomprado)+'</td><td style="text-align:right;">'+fmtMoeda(it.recompAReceber)+'</td><td style="text-align:right;">'+fmtMoeda(it.recompRecebido)+'</td><td style="text-align:right;">'+fmtMoeda(it.cartFundo)+'</td><td style="text-align:right;">'+fmtMoeda(it.cartAluforce)+'</td></tr>'; }).join('') : '<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
             var mBody = document.getElementById('tab-resumo-mensal-body');
             var mKeys = Object.keys(porMes).sort();
@@ -2510,6 +2564,8 @@
         }
 
         function renderizarDisponivelTab() {
+            var filtroEmpresa = ((document.getElementById('disp-filtro-empresa') || {}).value || '').toUpperCase().trim();
+            var busca = ((document.getElementById('disp-busca') || {}).value || '').toLowerCase().trim();
             var porEmpresa = {};
             var empresaOrder = {'ALUFORCE':1,'ENERGY':2,'LABOR':3};
             ['ALUFORCE','ENERGY','LABOR'].forEach(function(e){ porEmpresa[e] = {nf:0,f9:0,total:0}; });
@@ -2517,6 +2573,7 @@
                 var sit = String(c.situacao||'').toUpperCase().trim();
                 if(sit !== 'DISPONÍVEL' && sit !== 'DISPONIVEL') return;
                 var emp = (c.empresa||'SEM EMPRESA').toUpperCase().trim();
+                if(filtroEmpresa && emp !== filtroEmpresa) return;
                 var bruto = parseFloat(c.valor_total||c.valor||0)||0;
                 var tipoDoc = String(c.tipo_documento||c.categoria||'').toUpperCase().trim();
                 if(!porEmpresa[emp]) porEmpresa[emp] = {nf:0,f9:0,total:0};
@@ -2525,17 +2582,24 @@
             });
             var body = document.getElementById('tab-disponivel-body');
             var eKeys = Object.keys(porEmpresa).sort(function(a,b){ return (empresaOrder[a]||99) - (empresaOrder[b]||99); });
+            if(busca) eKeys = eKeys.filter(function(e){ return e.toLowerCase().indexOf(busca) !== -1; });
             var empresaColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
             var totalNF=0,totalF9=0,totalGeral=0;
+            var infoEl = document.getElementById('disp-filtro-info');
+            if(infoEl) infoEl.textContent = eKeys.length + ' empresas' + (filtroEmpresa || busca ? ' (filtrado)' : '');
             var rows = eKeys.map(function(emp){ var e=porEmpresa[emp]; var cor=empresaColors[emp]||'#374151'; totalNF+=e.nf; totalF9+=e.f9; totalGeral+=e.total; return '<tr><td><strong style="color:'+cor+';">'+emp+'</strong></td><td style="text-align:right;">'+fmtMoeda(e.nf)+'</td><td style="text-align:right;">'+fmtMoeda(e.f9)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(e.total)+'</td></tr>'; }).join('');
             rows += '<tr style="background:#f0fdf4;font-weight:700;border-top:2px solid #059669;"><td>TOTAL</td><td style="text-align:right;">'+fmtMoeda(totalNF)+'</td><td style="text-align:right;">'+fmtMoeda(totalF9)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(totalGeral)+'</td></tr>';
             body.innerHTML = rows;
         }
 
         function renderizarDiarioTab() {
+            var filtroMes = ((document.getElementById('diario-filtro-mes') || {}).value || '');
+            var filtroTipo = ((document.getElementById('diario-filtro-tipo') || {}).value || '');
+            var busca = ((document.getElementById('diario-busca') || {}).value || '').toLowerCase().trim();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
             var diasSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-            var porDia = {}, totalGeralDia = 0;
+            var mesesNome = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+            var porDia = {}, totalGeralDia = 0, mesesEncontrados = {};
             contas.forEach(function(c) {
                 var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
                 var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido;
@@ -2545,14 +2609,31 @@
                 var vencRaw = c.data_vencimento||c.vencimento; if(!vencRaw) return;
                 var diaStr = String(vencRaw).slice(0,10); var venc = new Date(diaStr+'T00:00:00');
                 if(isNaN(venc.getTime())) return; venc.setHours(0,0,0,0);
+                var mKey = venc.getFullYear()+'-'+String(venc.getMonth()+1).padStart(2,'0');
+                mesesEncontrados[mKey] = mesesNome[venc.getMonth()]+'/'+venc.getFullYear();
+                if(filtroMes && mKey !== filtroMes) return;
                 if(!porDia[diaStr]) porDia[diaStr] = {aVencer:0,vencido:0,total:0,qtd:0,dow:venc.getDay()};
                 if(venc < hoje) porDia[diaStr].vencido += valorAberto; else porDia[diaStr].aVencer += valorAberto;
                 porDia[diaStr].total += valorAberto; porDia[diaStr].qtd++; totalGeralDia += valorAberto;
             });
+            // Populate month select
+            var mesSelect = document.getElementById('diario-filtro-mes');
+            if(mesSelect) {
+                var curVal = mesSelect.value;
+                var mKeys = Object.keys(mesesEncontrados).sort();
+                mesSelect.innerHTML = '<option value="">Todos os Meses</option>' + mKeys.map(function(k){ return '<option value="'+k+'"'+(k===curVal?' selected':'')+'>'+mesesEncontrados[k]+'</option>'; }).join('');
+            }
             var spanTotais = document.getElementById('diario-totais-pub');
             if(spanTotais) spanTotais.textContent = Object.keys(porDia).length+' dias | Total: '+fmtMoeda(totalGeralDia);
             var body = document.getElementById('tab-diario-body');
             var dKeys = Object.keys(porDia).sort();
+            // Filter by tipo
+            if(filtroTipo === 'vencido') dKeys = dKeys.filter(function(d){ return porDia[d].vencido > 0; });
+            if(filtroTipo === 'avencer') dKeys = dKeys.filter(function(d){ return porDia[d].aVencer > 0; });
+            // Filter by text search
+            if(busca) dKeys = dKeys.filter(function(d){ var dt = new Date(d+'T00:00:00'); var txt = (diasSemana[porDia[d].dow]+' '+dt.toLocaleDateString('pt-BR')).toLowerCase(); return txt.indexOf(busca) !== -1; });
+            var infoEl = document.getElementById('diario-filtro-info');
+            if(infoEl) infoEl.textContent = dKeys.length + ' dias' + (filtroMes || filtroTipo || busca ? ' (filtrado)' : '');
             if(!dKeys.length) { body.innerHTML='<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
             body.innerHTML = dKeys.map(function(d){ var it=porDia[d]; var dt=new Date(d+'T00:00:00'); var bgColor=it.vencido>0?'background:#fef2f2;':''; return '<tr style="'+bgColor+'"><td>'+diasSemana[it.dow]+'</td><td>'+dt.toLocaleDateString('pt-BR')+'</td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td><td style="text-align:right;">'+it.qtd+'</td></tr>'; }).join('');
         }
@@ -2582,9 +2663,11 @@
             var fEmp = document.getElementById('op-filtro-empresa-pub').value;
             var fInst = document.getElementById('op-filtro-instituicao-pub').value;
             var fTipo = document.getElementById('op-filtro-tipo-pub').value;
+            var busca = ((document.getElementById('op-busca-pub') || {}).value || '').toLowerCase().trim();
             if(fEmp) data = data.filter(function(o){ return o.empresa === fEmp; });
             if(fInst) data = data.filter(function(o){ return o.instituicao === fInst; });
             if(fTipo) data = data.filter(function(o){ return o.tipo_operacao === fTipo; });
+            if(busca) data = data.filter(function(o){ var h = [o.bordero,o.empresa,o.instituicao,o.tipo_operacao,o.data_operacao,o.prorrogacao].join('|').toLowerCase(); return h.indexOf(busca) !== -1; });
             var totalBruto=0,totalLiq=0,totalDed=0,totalTit=0,countOps=data.length;
             data.forEach(function(o){ totalBruto+=parseFloat(o.vlr_bruto)||0; totalLiq+=parseFloat(o.liq_lib)||0; totalDed+=parseFloat(o.total_deducoes)||0; totalTit+=parseInt(o.qtde_titulos)||0; });
             document.getElementById('op-kpis-pub').innerHTML = [{label:'Operações',val:countOps,color:'#7c3aed'},{label:'Vlr Bruto',val:fmtMoeda(totalBruto),color:'#1e40af'},{label:'Títulos',val:totalTit,color:'#059669'},{label:'Deduções',val:fmtMoeda(totalDed),color:'#dc2626'},{label:'Líq Liberado',val:fmtMoeda(totalLiq),color:'#0891b2'}].map(function(k){ return '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:10px 12px;border-left:3px solid '+k.color+';"><div style="font-size:10px;color:#6b7280;text-transform:uppercase;">'+k.label+'</div><div style="font-size:16px;font-weight:800;color:'+k.color+';">'+k.val+'</div></div>'; }).join('');
@@ -2600,9 +2683,12 @@
         }
 
         function renderizarTDTab() {
+            var filtroEmpresa = ((document.getElementById('td-filtro-empresa') || {}).value || '').toUpperCase().trim();
+            var busca = ((document.getElementById('td-busca') || {}).value || '').toLowerCase().trim();
             var hoje = new Date(); hoje.setHours(0,0,0,0);
             var porPeriodo = {};
             contas.forEach(function(c) {
+                if(filtroEmpresa && (c.empresa||'').toUpperCase().trim() !== filtroEmpresa) return;
                 var bruto = parseFloat(c.valor_total||c.valor||0)||0; var recebido = parseFloat(c.valor_recebido||0)||0;
                 var valorAberto = parseFloat(c.a_receber); if(isNaN(valorAberto)) valorAberto = bruto - recebido; if(valorAberto < 0) valorAberto = 0;
                 var status = String(c.status||'').toLowerCase();
@@ -2620,6 +2706,9 @@
             });
             var body = document.getElementById('tab-td-body');
             var pKeys = Object.keys(porPeriodo).sort();
+            if(busca) pKeys = pKeys.filter(function(k){ return porPeriodo[k].nome.toLowerCase().indexOf(busca) !== -1; });
+            var infoEl = document.getElementById('td-filtro-info');
+            if(infoEl) infoEl.textContent = pKeys.length + ' períodos' + (filtroEmpresa || busca ? ' (filtrado)' : '');
             if(!pKeys.length) { body.innerHTML='<tr><td colspan="5" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>'; return; }
             var totalAV=0,totalVenc=0,totalLiq=0,totalGeral=0;
             body.innerHTML = pKeys.map(function(k){ var it=porPeriodo[k]; totalAV+=it.aVencer; totalVenc+=it.vencido; totalLiq+=it.liquidado; totalGeral+=it.total; return '<tr><td><strong>'+it.nome+'</strong></td><td style="text-align:right;">'+fmtMoeda(it.aVencer)+'</td><td style="text-align:right;color:#dc2626;">'+fmtMoeda(it.vencido)+'</td><td style="text-align:right;color:#059669;">'+fmtMoeda(it.liquidado)+'</td><td style="text-align:right;font-weight:700;">'+fmtMoeda(it.total)+'</td></tr>'; }).join('');
@@ -2827,11 +2916,14 @@
 
         // Dev Spec 1.3: Fundos detalhado (match Excel FUNDOS sheet)
         function renderizarFundosDetalhado() {
+            var filtroEmpresa = ((document.getElementById('fundos-filtro-empresa') || {}).value || '').toUpperCase().trim();
+            var busca = ((document.getElementById('fundos-busca') || {}).value || '').toLowerCase().trim();
             var hoje = new Date();
             hoje.setHours(0,0,0,0);
             var porPortador = {};
 
             contas.forEach(function(c) {
+                if(filtroEmpresa && (c.empresa||'').toUpperCase().trim() !== filtroEmpresa) return;
                 var bruto = parseFloat(c.valor_total || c.valor || 0) || 0;
                 var recebido = parseFloat(c.valor_recebido || 0) || 0;
                 var valorAberto = parseFloat(c.a_receber);
@@ -2864,6 +2956,9 @@
 
             var fundosBody = document.getElementById('tabela-fundos-detail');
             var keys = Object.keys(porPortador).sort();
+            if(busca) keys = keys.filter(function(n){ return n.toLowerCase().indexOf(busca) !== -1; });
+            var infoEl = document.getElementById('fundos-filtro-info');
+            if(infoEl) infoEl.textContent = keys.length + ' portadores' + (filtroEmpresa || busca ? ' (filtrado)' : '');
             if (keys.length === 0) {
                 fundosBody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum dado</td></tr>';
             } else {
