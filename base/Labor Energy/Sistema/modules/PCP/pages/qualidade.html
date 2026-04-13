@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <link rel="icon" type="image/jpeg" href="/images/favicon-zyntra.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta name="theme-color" content="#1a2744">
+    <title>Zyntra: Qualidade - PCP</title>
+    <script src="/js/auth-unified.js?v=20260214" defer></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha384-t1nt8BQoYMLFN5p42tRAtuAAFQaCQODekUVeKKZrEnEyp4H2R0RHFz0KWpmj7i8g" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/pcp-layout.css">
+    <link rel="stylesheet" href="../css/pcp-components.css">
+
+    <style>
+        .page-header-top { display: flex; justify-content: flex-end; margin-bottom: var(--space-6); }
+        .page-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+        .card-title { display: flex; align-items: center; gap: var(--space-2); font-size: 15px; font-weight: 600; color: var(--gray-800); }
+        .card-title i { color: var(--primary-500); }
+        .table-container { overflow-x: auto; }
+
+        .pcp-filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+        .filter-group { display: flex; flex-direction: column; gap: 4px; }
+        .filter-label { font-size: 12px; color: var(--gray-600); font-weight: 500; }
+        .filter-input, .filter-select { padding: 8px 12px; border: 1px solid var(--gray-200); border-radius: var(--radius-md); font-size: 14px; }
+
+        .pcp-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .pcp-table thead { background: linear-gradient(135deg, var(--primary-500), var(--primary-600)); color: white; }
+        .pcp-table th { padding: 10px 8px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; white-space: nowrap; }
+        .pcp-table td { padding: 8px; border-bottom: 1px solid var(--gray-100); }
+        .pcp-table tr:hover { background: var(--gray-50); }
+
+        /* Tabs de navegação interna */
+        .quality-tabs { display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 2px solid var(--gray-200); padding-bottom: 0; }
+        .quality-tab { padding: 10px 18px; font-size: 13px; font-weight: 500; color: var(--gray-500); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .quality-tab:hover { color: var(--gray-700); background: var(--gray-50); }
+        .quality-tab.active { color: #2563eb; border-bottom-color: #2563eb; font-weight: 600; }
+        .quality-tab i { font-size: 12px; }
+        .quality-tab .tab-badge { font-size: 10px; background: #ef4444; color: white; border-radius: 10px; padding: 1px 6px; font-weight: 700; }
+
+        .quality-view { display: none; }
+        .quality-view.active { display: block; }
+
+        /* Badges de status */
+        .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+        .badge-aprovado { background: #d1fae5; color: #065f46; }
+        .badge-reprovado { background: #fee2e2; color: #991b1b; }
+        .badge-pendente { background: #fef3c7; color: #92400e; }
+        .badge-em-andamento { background: #dbeafe; color: #1e3a8a; }
+        .badge-critica { background: #fee2e2; color: #991b1b; }
+        .badge-maior { background: #ffedd5; color: #9a3412; }
+        .badge-menor { background: #fef3c7; color: #92400e; }
+        .badge-observacao { background: #e0e7ff; color: #3730a3; }
+        .badge-aberta { background: #fef3c7; color: #92400e; }
+        .badge-resolvida { background: #d1fae5; color: #065f46; }
+
+        /* KPIs */
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .kpi-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid var(--gray-100); }
+        .kpi-card .kpi-value { font-size: 28px; font-weight: 700; color: var(--gray-800); }
+        .kpi-card .kpi-label { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+        .kpi-card .kpi-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+        .kpi-icon.blue { background: #dbeafe; color: #2563eb; }
+        .kpi-icon.green { background: #d1fae5; color: #059669; }
+        .kpi-icon.red { background: #fee2e2; color: #dc2626; }
+        .kpi-icon.amber { background: #fef3c7; color: #d97706; }
+        .kpi-icon.purple { background: #ede9fe; color: #7c3aed; }
+
+        /* Botão premium */
+        .btn-nova-premium { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(37,99,235,0.25); }
+        .btn-nova-premium:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 16px rgba(37,99,235,0.4); transform: translateY(-2px); }
+
+        /* Checklist visual */
+        .checklist-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1px solid var(--gray-100); border-radius: 8px; margin-bottom: 6px; background: white; }
+        .checklist-item input[type="checkbox"] { width: 18px; height: 18px; accent-color: #2563eb; }
+        .checklist-item .item-text { font-size: 13px; color: var(--gray-700); flex: 1; }
+        .checklist-item .item-result { font-size: 12px; font-weight: 600; }
+
+        /* Modal backdrop */
+        .modal-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: none; align-items: center; justify-content: center; }
+        .modal-backdrop.show { display: flex; }
+        .modal-box { background: white; border-radius: 16px; max-width: 700px; width: 95%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h3 { font-size: 18px; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+        .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: var(--gray-400); }
+        .modal-close:hover { color: var(--gray-700); }
+
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-600); margin-bottom: 6px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--gray-200); border-radius: 8px; font-size: 14px; font-family: 'Inter', sans-serif; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .btn-submit { padding: 12px 24px; background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; }
+        .btn-submit:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+
+        .btn-secondary { padding: 8px 16px; background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-200); border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+        .btn-secondary:hover { background: var(--gray-200); }
+
+        .btn-danger-sm { padding: 6px 12px; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; font-size: 12px; cursor: pointer; }
+        .btn-danger-sm:hover { background: #fecaca; }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--gray-400); }
+        .empty-state i { font-size: 48px; margin-bottom: 16px; }
+        .empty-state p { font-size: 14px; }
+
+        .table-actions { display: flex; gap: 6px; }
+        .table-actions button { padding: 5px 8px; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-view { background: #dbeafe; color: #2563eb; }
+        .btn-edit { background: #fef3c7; color: #d97706; }
+        .btn-delete { background: #fee2e2; color: #dc2626; }
+
+        @media (max-width: 768px) {
+            .quality-tabs { overflow-x: auto; }
+            .kpi-grid { grid-template-columns: 1fr 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .pcp-table { font-size: 11px; }
+            .pcp-table th, .pcp-table td { padding: 6px 4px; }
+            .hide-mobile { display: none; }
+        }
+    </style>
+
+    <!-- Tooltips -->
+    <link rel="stylesheet" href="/css/tooltips-professional.css?v=20260209">
+    <script src="/js/tooltips-professional.js?v=20260209"></script>
+
+    <!-- Global Header & Sidebar -->
+    <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260224">
+    <link rel="stylesheet" href="../css/pcp-header-sidebar.css?v=20260224">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar" id="mobile-sidebar">
+            <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
+                <i class="fas fa-home"></i>
+            </a>
+            <nav class="sidebar-nav">
+                <a href="../index.html" class="sidebar-btn" title="Dashboard PCP"><i class="fas fa-tachometer-alt"></i></a>
+                <a href="estoque.html" class="sidebar-btn" title="Estoque"><i class="fas fa-boxes"></i></a>
+                <a href="materiais.html" class="sidebar-btn" title="Materiais"><i class="fas fa-layer-group"></i></a>
+                <a href="ordem-compra.html" class="sidebar-btn" title="Ordem de Compra"><i class="fas fa-shopping-cart"></i></a>
+                <a href="../ordens-producao.html" class="sidebar-btn" title="Ordens de Produção"><i class="fas fa-clipboard-list"></i></a>
+                <a href="gestao-producao.html" class="sidebar-btn" title="Gestão de Produção"><i class="fas fa-industry"></i></a>
+                <a href="faturamento.html" class="sidebar-btn" title="Faturamento"><i class="fas fa-file-invoice-dollar"></i></a>
+                <a href="../apontamentos.html" class="sidebar-btn" title="Apontamentos"><i class="fas fa-stopwatch"></i></a>
+                <a href="qualidade.html" class="sidebar-btn active" title="Qualidade"><i class="fas fa-award"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Central de Relatórios"><i class="fas fa-chart-pie"></i></a>
+            </nav>
+            <div class="sidebar-bottom">
+                <button class="sidebar-btn" title="Configurações" id="btn-config"><i class="fas fa-cog"></i></button>
+            </div>
+        </aside>
+
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+        <main class="main-area">
+            <header class="header">
+                <div class="header-left">
+                    <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menu"><i class="fas fa-bars"></i></button>
+                    <div class="header-brand" style="display:flex;align-items:center;gap:10px;">
+                        <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
+                        <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;user-select:none;">|</span>
+                        <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
+                        <span class="page-title" style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;">Qualidade</span>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="header-btn" title="Notificações"><i class="fas fa-bell"></i></button>
+                </div>
+            </header>
+
+            <main class="main-content">
+                <div class="page-content">
+
+                    <!-- KPI Cards -->
+                    <div class="kpi-grid" id="kpi-grid">
+                        <div class="kpi-card">
+                            <div class="kpi-icon blue"><i class="fas fa-clipboard-check"></i></div>
+                            <div class="kpi-value" id="kpi-total-inspecoes">0</div>
+                            <div class="kpi-label">Inspeções este Mês</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
+                            <div class="kpi-value" id="kpi-taxa-aprovacao">0%</div>
+                            <div class="kpi-label">Taxa de Aprovação</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="kpi-value" id="kpi-nao-conformidades">0</div>
+                            <div class="kpi-label">Não Conformidades Abertas</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon amber"><i class="fas fa-clock"></i></div>
+                            <div class="kpi-value" id="kpi-pendentes">0</div>
+                            <div class="kpi-label">Inspeções Pendentes</div>
+                        </div>
+                        <div class="kpi-card">
+                            <div class="kpi-icon purple"><i class="fas fa-list-check"></i></div>
+                            <div class="kpi-value" id="kpi-checklists">0</div>
+                            <div class="kpi-label">Checklists Ativos</div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs de navegação -->
+                    <div class="quality-tabs">
+                        <button class="quality-tab active" onclick="showQualityView('inspections')" id="tab-inspections">
+                            <i class="fas fa-clipboard-check"></i> Inspeções
+                        </button>
+                        <button class="quality-tab" onclick="showQualityView('ncs')" id="tab-ncs">
+                            <i class="fas fa-exclamation-triangle"></i> Não Conformidades
+                            <span class="tab-badge" id="nc-badge" style="display:none;">0</span>
+                        </button>
+                        <button class="quality-tab" onclick="showQualityView('checklists')" id="tab-checklists">
+                            <i class="fas fa-list-check"></i> Checklists
+                        </button>
+                    </div>
+
+                    <!-- ========== VIEW: INSPEÇÕES ========== -->
+                    <div class="quality-view active" id="view-inspections">
+                        <div class="page-header-top">
+                            <div class="page-actions">
+                                <div class="pcp-filters">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Status</span>
+                                        <select class="filter-select" id="filtro-insp-status" onchange="carregarInspecoes()">
+                                            <option value="">Todos</option>
+                                            <option value="pendente">Pendente</option>
+                                            <option value="em_andamento">Em Andamento</option>
+                                            <option value="aprovado">Aprovado</option>
+                                            <option value="reprovado">Reprovado</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <span class="filter-label">Período</span>
+                                        <input type="date" class="filter-input" id="filtro-insp-de" onchange="carregarInspecoes()">
+                                    </div>
+                                    <div class="filter-group">
+                                        <span class="filter-label">Até</span>
+                                        <input type="date" class="filter-input" id="filtro-insp-ate" onchange="carregarInspecoes()">
+                                    </div>
+                                </div>
+                                <button class="btn-nova-premium" onclick="abrirModalInspecao()">
+                                    <i class="fas fa-plus"></i> Nova Inspeção
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="pcp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Tipo</th>
+                                        <th>Ordem/Lote</th>
+                                        <th>Produto</th>
+                                        <th>Data</th>
+                                        <th>Inspetor</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-inspecoes">
+                                    <tr><td colspan="8" class="empty-state"><i class="fas fa-clipboard-check"></i><p>Carregando inspeções...</p></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ========== VIEW: NÃO CONFORMIDADES ========== -->
+                    <div class="quality-view" id="view-ncs">
+                        <div class="page-header-top">
+                            <div class="page-actions">
+                                <div class="pcp-filters">
+                                    <div class="filter-group">
+                                        <span class="filter-label">Severidade</span>
+                                        <select class="filter-select" id="filtro-nc-severidade" onchange="carregarNaoConformidades()">
+                                            <option value="">Todas</option>
+                                            <option value="critica">Crítica</option>
+                                            <option value="maior">Maior</option>
+                                            <option value="menor">Menor</option>
+                                            <option value="observacao">Observação</option>
+                                        </select>
+                                    </div>
+                                    <div class="filter-group">
+                                        <span class="filter-label">Status</span>
+                                        <select class="filter-select" id="filtro-nc-status" onchange="carregarNaoConformidades()">
+                                            <option value="">Todos</option>
+                                            <option value="aberta">Aberta</option>
+                                            <option value="em_analise">Em Análise</option>
+                                            <option value="acao_corretiva">Ação Corretiva</option>
+                                            <option value="resolvida">Resolvida</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button class="btn-nova-premium" onclick="abrirModalNC()">
+                                    <i class="fas fa-plus"></i> Nova NC
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="pcp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Descrição</th>
+                                        <th>Severidade</th>
+                                        <th>Ordem/Lote</th>
+                                        <th>Responsável</th>
+                                        <th>Prazo</th>
+                                        <th>Status</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-ncs">
+                                    <tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Carregando não conformidades...</p></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ========== VIEW: CHECKLISTS ========== -->
+                    <div class="quality-view" id="view-checklists">
+                        <div class="page-header-top">
+                            <div class="page-actions">
+                                <button class="btn-nova-premium" onclick="abrirModalChecklist()">
+                                    <i class="fas fa-plus"></i> Novo Checklist
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-container">
+                            <table class="pcp-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo Inspeção</th>
+                                        <th>Itens</th>
+                                        <th>Ativo</th>
+                                        <th>Criado em</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-checklists">
+                                    <tr><td colspan="6" class="empty-state"><i class="fas fa-list-check"></i><p>Carregando checklists...</p></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </main>
+        </main>
+    </div>
+
+    <!-- ========== MODAL: NOVA INSPEÇÃO ========== -->
+    <div class="modal-backdrop" id="modal-inspecao">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-clipboard-check" style="color:#2563eb;"></i> <span id="modal-insp-titulo">Nova Inspeção</span></h3>
+                <button class="modal-close" onclick="fecharModal('modal-inspecao')">&times;</button>
+            </div>
+            <form onsubmit="salvarInspecao(event)" id="form-inspecao">
+                <input type="hidden" id="insp-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo de Inspeção</label>
+                        <select id="insp-tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="recebimento">Recebimento de Material</option>
+                            <option value="processo">Em Processo</option>
+                            <option value="final">Inspeção Final</option>
+                            <option value="dimensional">Dimensional</option>
+                            <option value="visual">Visual</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Checklist</label>
+                        <select id="insp-checklist">
+                            <option value="">Nenhum (livre)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ordem de Produção / Lote</label>
+                        <input type="text" id="insp-ordem" placeholder="Ex: OP-001 ou Lote 2026-01">
+                    </div>
+                    <div class="form-group">
+                        <label>Produto</label>
+                        <input type="text" id="insp-produto" placeholder="Nome ou código">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Quantidade Inspecionada</label>
+                        <input type="number" id="insp-qtd" min="0" step="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Quantidade Aprovada</label>
+                        <input type="number" id="insp-qtd-ok" min="0" step="1">
+                    </div>
+                </div>
+
+                <!-- Área do checklist dinâmico -->
+                <div id="checklist-area" style="display:none; margin-bottom: 16px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:8px;display:block;">
+                        <i class="fas fa-list-check"></i> Itens do Checklist
+                    </label>
+                    <div id="checklist-items"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Observações</label>
+                    <textarea id="insp-obs" placeholder="Observações da inspeção..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="insp-status" required>
+                            <option value="pendente">Pendente</option>
+                            <option value="em_andamento">Em Andamento</option>
+                            <option value="aprovado">Aprovado</option>
+                            <option value="reprovado">Reprovado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Data</label>
+                        <input type="date" id="insp-data" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Salvar Inspeção</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: NOVA NC ========== -->
+    <div class="modal-backdrop" id="modal-nc">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-exclamation-triangle" style="color:#dc2626;"></i> <span id="modal-nc-titulo">Nova Não Conformidade</span></h3>
+                <button class="modal-close" onclick="fecharModal('modal-nc')">&times;</button>
+            </div>
+            <form onsubmit="salvarNC(event)" id="form-nc">
+                <input type="hidden" id="nc-id">
+                <div class="form-group">
+                    <label>Descrição da Não Conformidade</label>
+                    <textarea id="nc-descricao" required placeholder="Descreva o problema encontrado..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Severidade</label>
+                        <select id="nc-severidade" required>
+                            <option value="observacao">Observação</option>
+                            <option value="menor">Menor</option>
+                            <option value="maior">Maior</option>
+                            <option value="critica">Crítica</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Origem</label>
+                        <select id="nc-origem">
+                            <option value="inspecao">Inspeção</option>
+                            <option value="cliente">Reclamação de Cliente</option>
+                            <option value="processo">Processo Interno</option>
+                            <option value="auditoria">Auditoria</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ordem de Produção / Lote</label>
+                        <input type="text" id="nc-ordem" placeholder="Ex: OP-001">
+                    </div>
+                    <div class="form-group">
+                        <label>Produto</label>
+                        <input type="text" id="nc-produto" placeholder="Nome ou código">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Causa Raiz (Análise)</label>
+                    <textarea id="nc-causa" placeholder="Análise de causa raiz..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Ação Corretiva</label>
+                    <textarea id="nc-acao" placeholder="Ação corretiva proposta..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Responsável</label>
+                        <input type="text" id="nc-responsavel" placeholder="Nome do responsável">
+                    </div>
+                    <div class="form-group">
+                        <label>Prazo</label>
+                        <input type="date" id="nc-prazo">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Salvar NC</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== MODAL: NOVO CHECKLIST ========== -->
+    <div class="modal-backdrop" id="modal-checklist">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fas fa-list-check" style="color:#7c3aed;"></i> <span id="modal-ck-titulo">Novo Checklist</span></h3>
+                <button class="modal-close" onclick="fecharModal('modal-checklist')">&times;</button>
+            </div>
+            <form onsubmit="salvarChecklist(event)" id="form-checklist">
+                <input type="hidden" id="ck-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nome do Checklist</label>
+                        <input type="text" id="ck-nome" required placeholder="Ex: Inspeção Visual Perfil">
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Inspeção</label>
+                        <select id="ck-tipo" required>
+                            <option value="recebimento">Recebimento</option>
+                            <option value="processo">Em Processo</option>
+                            <option value="final">Inspeção Final</option>
+                            <option value="dimensional">Dimensional</option>
+                            <option value="visual">Visual</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--gray-600);margin-bottom:8px;display:block;">
+                        Itens do Checklist
+                    </label>
+                    <div id="ck-items-list"></div>
+                    <button type="button" class="btn-secondary" onclick="adicionarItemChecklist()" style="margin-top: 8px;">
+                        <i class="fas fa-plus"></i> Adicionar Item
+                    </button>
+                </div>
+
+                <button type="submit" class="btn-submit"><i class="fas fa-save"></i> Salvar Checklist</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+    // ============================================
+    // QUALIDADE - JavaScript Principal
+    // ============================================
+    const API_BASE = '/api/pcp/qualidade';
+    let currentView = 'inspections';
+
+    // Sidebar toggle
+    function toggleMobileSidebar() {
+        const sidebar = document.getElementById('mobile-sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        if (sidebar && overlay) {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+    }
+
+    // Tabs
+    function showQualityView(viewName) {
+        document.querySelectorAll('.quality-view').forEach(v => v.classList.remove('active'));
+        document.querySelectorAll('.quality-tab').forEach(t => t.classList.remove('active'));
+        const view = document.getElementById('view-' + viewName);
+        const tab = document.getElementById('tab-' + viewName);
+        if (view) view.classList.add('active');
+        if (tab) tab.classList.add('active');
+        currentView = viewName;
+    }
+
+    // Modal helpers
+    function fecharModal(id) {
+        const m = document.getElementById(id);
+        if (m) m.classList.remove('show');
+    }
+
+    function abrirModal(id) {
+        const m = document.getElementById(id);
+        if (m) m.classList.add('show');
+    }
+
+    // ============================================
+    // INSPEÇÕES
+    // ============================================
+    async function carregarInspecoes() {
+        try {
+            const status = document.getElementById('filtro-insp-status')?.value || '';
+            const de = document.getElementById('filtro-insp-de')?.value || '';
+            const ate = document.getElementById('filtro-insp-ate')?.value || '';
+            const params = new URLSearchParams();
+            if (status) params.append('status', status);
+            if (de) params.append('data_inicio', de);
+            if (ate) params.append('data_fim', ate);
+
+            const resp = await fetch(`${API_BASE}/inspecoes?${params}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            const tbody = document.getElementById('tbody-inspecoes');
+            if (!data.data || data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-clipboard-check"></i><p>Nenhuma inspeção encontrada</p></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.data.map(i => `
+                <tr>
+                    <td><strong>INS-${String(i.id).padStart(4,'0')}</strong></td>
+                    <td>${tipoLabel(i.tipo)}</td>
+                    <td>${i.ordem_producao || '-'}</td>
+                    <td>${i.produto || '-'}</td>
+                    <td>${formatDate(i.data_inspecao)}</td>
+                    <td>${i.inspetor_nome || '-'}</td>
+                    <td><span class="badge badge-${i.status}">${statusLabel(i.status)}</span></td>
+                    <td class="table-actions">
+                        <button class="btn-view" onclick="verInspecao(${i.id})" title="Ver"><i class="fas fa-eye"></i></button>
+                        <button class="btn-edit" onclick="editarInspecao(${i.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="btn-delete" onclick="excluirInspecao(${i.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar inspeções:', err);
+        }
+    }
+
+    function abrirModalInspecao(id) {
+        document.getElementById('form-inspecao').reset();
+        document.getElementById('insp-id').value = '';
+        document.getElementById('insp-data').value = new Date().toISOString().split('T')[0];
+        document.getElementById('modal-insp-titulo').textContent = 'Nova Inspeção';
+        document.getElementById('checklist-area').style.display = 'none';
+        carregarChecklistsSelect();
+        abrirModal('modal-inspecao');
+    }
+
+    async function editarInspecao(id) {
+        try {
+            const resp = await fetch(`${API_BASE}/inspecoes/${encodeURIComponent(id)}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            if (!data.data) return;
+            const i = data.data;
+            document.getElementById('insp-id').value = i.id;
+            document.getElementById('insp-tipo').value = i.tipo || '';
+            document.getElementById('insp-ordem').value = i.ordem_producao || '';
+            document.getElementById('insp-produto').value = i.produto || '';
+            document.getElementById('insp-qtd').value = i.quantidade_inspecionada || '';
+            document.getElementById('insp-qtd-ok').value = i.quantidade_aprovada || '';
+            document.getElementById('insp-obs').value = i.observacoes || '';
+            document.getElementById('insp-status').value = i.status || 'pendente';
+            document.getElementById('insp-data').value = i.data_inspecao ? i.data_inspecao.split('T')[0] : '';
+            document.getElementById('modal-insp-titulo').textContent = 'Editar Inspeção INS-' + String(i.id).padStart(4, '0');
+            await carregarChecklistsSelect();
+            if (i.checklist_id) document.getElementById('insp-checklist').value = i.checklist_id;
+            abrirModal('modal-inspecao');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar inspeção:', err);
+        }
+    }
+
+    async function salvarInspecao(e) {
+        e.preventDefault();
+        const id = document.getElementById('insp-id').value;
+        const body = {
+            tipo: document.getElementById('insp-tipo').value,
+            checklist_id: document.getElementById('insp-checklist').value || null,
+            ordem_producao: document.getElementById('insp-ordem').value,
+            produto: document.getElementById('insp-produto').value,
+            quantidade_inspecionada: parseInt(document.getElementById('insp-qtd').value) || null,
+            quantidade_aprovada: parseInt(document.getElementById('insp-qtd-ok').value) || null,
+            observacoes: document.getElementById('insp-obs').value,
+            status: document.getElementById('insp-status').value,
+            data_inspecao: document.getElementById('insp-data').value,
+            checklist_respostas: coletarRespostasChecklist()
+        };
+        try {
+            const url = id ? `${API_BASE}/inspecoes/${encodeURIComponent(id)}` : `${API_BASE}/inspecoes`;
+            const method = id ? 'PUT' : 'POST';
+            const resp = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                body: JSON.stringify(body)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                fecharModal('modal-inspecao');
+                carregarInspecoes();
+                carregarKPIs();
+            } else {
+                alert(result.message || 'Erro ao salvar');
+            }
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao salvar inspeção:', err);
+            alert('Erro de conexão');
+        }
+    }
+
+    async function excluirInspecao(id) {
+        if (!confirm('Excluir esta inspeção?')) return;
+        try {
+            await fetch(`${API_BASE}/inspecoes/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            carregarInspecoes();
+            carregarKPIs();
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao excluir:', err);
+        }
+    }
+
+    async function verInspecao(id) {
+        await editarInspecao(id);
+    }
+
+    // ============================================
+    // NÃO CONFORMIDADES
+    // ============================================
+    async function carregarNaoConformidades() {
+        try {
+            const severidade = document.getElementById('filtro-nc-severidade')?.value || '';
+            const status = document.getElementById('filtro-nc-status')?.value || '';
+            const params = new URLSearchParams();
+            if (severidade) params.append('severidade', severidade);
+            if (status) params.append('status', status);
+
+            const resp = await fetch(`${API_BASE}/nao-conformidades?${params}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            const tbody = document.getElementById('tbody-ncs');
+            if (!data.data || data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>Nenhuma não conformidade encontrada</p></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.data.map(nc => `
+                <tr>
+                    <td><strong>NC-${String(nc.id).padStart(4,'0')}</strong></td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escapeHtml(nc.descricao)}">${escapeHtml(nc.descricao)}</td>
+                    <td><span class="badge badge-${nc.severidade}">${severidadeLabel(nc.severidade)}</span></td>
+                    <td>${nc.ordem_producao || '-'}</td>
+                    <td>${nc.responsavel || '-'}</td>
+                    <td>${nc.prazo ? formatDate(nc.prazo) : '-'}</td>
+                    <td><span class="badge badge-${nc.status}">${ncStatusLabel(nc.status)}</span></td>
+                    <td class="table-actions">
+                        <button class="btn-edit" onclick="editarNC(${nc.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="btn-delete" onclick="excluirNC(${nc.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar NCs:', err);
+        }
+    }
+
+    function abrirModalNC() {
+        document.getElementById('form-nc').reset();
+        document.getElementById('nc-id').value = '';
+        document.getElementById('modal-nc-titulo').textContent = 'Nova Não Conformidade';
+        abrirModal('modal-nc');
+    }
+
+    async function editarNC(id) {
+        try {
+            const resp = await fetch(`${API_BASE}/nao-conformidades/${encodeURIComponent(id)}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            if (!data.data) return;
+            const nc = data.data;
+            document.getElementById('nc-id').value = nc.id;
+            document.getElementById('nc-descricao').value = nc.descricao || '';
+            document.getElementById('nc-severidade').value = nc.severidade || 'menor';
+            document.getElementById('nc-origem').value = nc.origem || 'inspecao';
+            document.getElementById('nc-ordem').value = nc.ordem_producao || '';
+            document.getElementById('nc-produto').value = nc.produto || '';
+            document.getElementById('nc-causa').value = nc.causa_raiz || '';
+            document.getElementById('nc-acao').value = nc.acao_corretiva || '';
+            document.getElementById('nc-responsavel').value = nc.responsavel || '';
+            document.getElementById('nc-prazo').value = nc.prazo ? nc.prazo.split('T')[0] : '';
+            document.getElementById('modal-nc-titulo').textContent = 'Editar NC-' + String(nc.id).padStart(4, '0');
+            abrirModal('modal-nc');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar NC:', err);
+        }
+    }
+
+    async function salvarNC(e) {
+        e.preventDefault();
+        const id = document.getElementById('nc-id').value;
+        const body = {
+            descricao: document.getElementById('nc-descricao').value,
+            severidade: document.getElementById('nc-severidade').value,
+            origem: document.getElementById('nc-origem').value,
+            ordem_producao: document.getElementById('nc-ordem').value,
+            produto: document.getElementById('nc-produto').value,
+            causa_raiz: document.getElementById('nc-causa').value,
+            acao_corretiva: document.getElementById('nc-acao').value,
+            responsavel: document.getElementById('nc-responsavel').value,
+            prazo: document.getElementById('nc-prazo').value || null
+        };
+        try {
+            const url = id ? `${API_BASE}/nao-conformidades/${encodeURIComponent(id)}` : `${API_BASE}/nao-conformidades`;
+            const method = id ? 'PUT' : 'POST';
+            const resp = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                body: JSON.stringify(body)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                fecharModal('modal-nc');
+                carregarNaoConformidades();
+                carregarKPIs();
+            } else {
+                alert(result.message || 'Erro ao salvar');
+            }
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao salvar NC:', err);
+            alert('Erro de conexão');
+        }
+    }
+
+    async function excluirNC(id) {
+        if (!confirm('Excluir esta não conformidade?')) return;
+        try {
+            await fetch(`${API_BASE}/nao-conformidades/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            carregarNaoConformidades();
+            carregarKPIs();
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao excluir NC:', err);
+        }
+    }
+
+    // ============================================
+    // CHECKLISTS
+    // ============================================
+    let checklistItemCounter = 0;
+
+    async function carregarChecklists() {
+        try {
+            const resp = await fetch(`${API_BASE}/checklists`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            const tbody = document.getElementById('tbody-checklists');
+            if (!data.data || data.data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-list-check"></i><p>Nenhum checklist cadastrado</p></div></td></tr>';
+                return;
+            }
+            tbody.innerHTML = data.data.map(ck => `
+                <tr>
+                    <td><strong>${escapeHtml(ck.nome)}</strong></td>
+                    <td>${tipoLabel(ck.tipo_inspecao)}</td>
+                    <td>${ck.total_itens || 0} itens</td>
+                    <td><span class="badge ${ck.ativo ? 'badge-aprovado' : 'badge-reprovado'}">${ck.ativo ? 'Sim' : 'Não'}</span></td>
+                    <td>${formatDate(ck.created_at)}</td>
+                    <td class="table-actions">
+                        <button class="btn-edit" onclick="editarChecklist(${ck.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                        <button class="btn-delete" onclick="excluirChecklist(${ck.id})" title="Excluir"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar checklists:', err);
+        }
+    }
+
+    async function carregarChecklistsSelect() {
+        try {
+            const resp = await fetch(`${API_BASE}/checklists?ativo=1`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            const sel = document.getElementById('insp-checklist');
+            sel.innerHTML = '<option value="">Nenhum (livre)</option>';
+            if (data.data) {
+                data.data.forEach(ck => {
+                    sel.innerHTML += `<option value="${ck.id}">${escapeHtml(ck.nome)} (${tipoLabel(ck.tipo_inspecao)})</option>`;
+                });
+            }
+            sel.onchange = () => carregarChecklistItems(sel.value);
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar checklists para select:', err);
+        }
+    }
+
+    async function carregarChecklistItems(checklistId) {
+        const area = document.getElementById('checklist-area');
+        const container = document.getElementById('checklist-items');
+        if (!checklistId) {
+            area.style.display = 'none';
+            container.innerHTML = '';
+            return;
+        }
+        try {
+            const resp = await fetch(`${API_BASE}/checklists/${encodeURIComponent(checklistId)}/itens`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            if (data.data && data.data.length > 0) {
+                area.style.display = 'block';
+                container.innerHTML = data.data.map((item, idx) => `
+                    <div class="checklist-item" data-item-id="${item.id}">
+                        <input type="checkbox" id="ck-item-${idx}">
+                        <span class="item-text">${escapeHtml(item.descricao)}</span>
+                        <select style="width:auto;padding:4px 8px;font-size:11px;border-radius:6px;border:1px solid var(--gray-200);">
+                            <option value="conforme">Conforme</option>
+                            <option value="nao_conforme">Não Conforme</option>
+                            <option value="na">N/A</option>
+                        </select>
+                    </div>
+                `).join('');
+            } else {
+                area.style.display = 'none';
+            }
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar itens do checklist:', err);
+        }
+    }
+
+    function coletarRespostasChecklist() {
+        const items = document.querySelectorAll('#checklist-items .checklist-item');
+        if (!items.length) return null;
+        const respostas = [];
+        items.forEach(item => {
+            respostas.push({
+                item_id: item.dataset.itemId,
+                conforme: item.querySelector('select').value
+            });
+        });
+        return JSON.stringify(respostas);
+    }
+
+    function abrirModalChecklist() {
+        document.getElementById('form-checklist').reset();
+        document.getElementById('ck-id').value = '';
+        document.getElementById('ck-items-list').innerHTML = '';
+        document.getElementById('modal-ck-titulo').textContent = 'Novo Checklist';
+        checklistItemCounter = 0;
+        adicionarItemChecklist();
+        adicionarItemChecklist();
+        adicionarItemChecklist();
+        abrirModal('modal-checklist');
+    }
+
+    function adicionarItemChecklist() {
+        checklistItemCounter++;
+        const div = document.createElement('div');
+        div.className = 'checklist-item';
+        div.innerHTML = `
+            <span style="font-size:12px;color:var(--gray-400);width:24px;">${checklistItemCounter}.</span>
+            <input type="text" class="ck-item-desc" placeholder="Descrição do item de verificação..." style="flex:1;padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;">
+            <button type="button" class="btn-danger-sm" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-times"></i></button>
+        `;
+        document.getElementById('ck-items-list').appendChild(div);
+    }
+
+    async function editarChecklist(id) {
+        try {
+            const resp = await fetch(`${API_BASE}/checklists/${encodeURIComponent(id)}`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            if (!data.data) return;
+            const ck = data.data;
+            document.getElementById('ck-id').value = ck.id;
+            document.getElementById('ck-nome').value = ck.nome;
+            document.getElementById('ck-tipo').value = ck.tipo_inspecao;
+            document.getElementById('modal-ck-titulo').textContent = 'Editar Checklist';
+
+            // Carregar itens
+            const respItens = await fetch(`${API_BASE}/checklists/${encodeURIComponent(id)}/itens`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const dataItens = await respItens.json();
+            const list = document.getElementById('ck-items-list');
+            list.innerHTML = '';
+            checklistItemCounter = 0;
+            if (dataItens.data) {
+                dataItens.data.forEach(item => {
+                    checklistItemCounter++;
+                    const div = document.createElement('div');
+                    div.className = 'checklist-item';
+                    div.innerHTML = `
+                        <span style="font-size:12px;color:var(--gray-400);width:24px;">${checklistItemCounter}.</span>
+                        <input type="text" class="ck-item-desc" value="${escapeHtml(item.descricao)}" style="flex:1;padding:8px;border:1px solid var(--gray-200);border-radius:6px;font-size:13px;">
+                        <button type="button" class="btn-danger-sm" onclick="this.parentElement.remove()" title="Remover"><i class="fas fa-times"></i></button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+            abrirModal('modal-checklist');
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar checklist:', err);
+        }
+    }
+
+    async function salvarChecklist(e) {
+        e.preventDefault();
+        const id = document.getElementById('ck-id').value;
+        const itens = [];
+        document.querySelectorAll('#ck-items-list .ck-item-desc').forEach((input, idx) => {
+            if (input.value.trim()) itens.push({ descricao: input.value.trim(), ordem: idx + 1 });
+        });
+        const body = {
+            nome: document.getElementById('ck-nome').value,
+            tipo_inspecao: document.getElementById('ck-tipo').value,
+            itens
+        };
+        try {
+            const url = id ? `${API_BASE}/checklists/${encodeURIComponent(id)}` : `${API_BASE}/checklists`;
+            const method = id ? 'PUT' : 'POST';
+            const resp = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                body: JSON.stringify(body)
+            });
+            const result = await resp.json();
+            if (result.success) {
+                fecharModal('modal-checklist');
+                carregarChecklists();
+                carregarKPIs();
+            } else {
+                alert(result.message || 'Erro ao salvar');
+            }
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao salvar checklist:', err);
+            alert('Erro de conexão');
+        }
+    }
+
+    async function excluirChecklist(id) {
+        if (!confirm('Excluir este checklist e todos os seus itens?')) return;
+        try {
+            await fetch(`${API_BASE}/checklists/${encodeURIComponent(id)}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            carregarChecklists();
+            carregarKPIs();
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao excluir checklist:', err);
+        }
+    }
+
+    // ============================================
+    // KPIs
+    // ============================================
+    async function carregarKPIs() {
+        try {
+            const resp = await fetch(`${API_BASE}/kpis`, {
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+            });
+            const data = await resp.json();
+            if (data.data) {
+                const d = data.data;
+                document.getElementById('kpi-total-inspecoes').textContent = d.total_inspecoes || 0;
+                document.getElementById('kpi-taxa-aprovacao').textContent = (d.taxa_aprovacao || 0) + '%';
+                document.getElementById('kpi-nao-conformidades').textContent = d.ncs_abertas || 0;
+                document.getElementById('kpi-pendentes').textContent = d.inspecoes_pendentes || 0;
+                document.getElementById('kpi-checklists').textContent = d.checklists_ativos || 0;
+
+                // Badge de NCs
+                const badge = document.getElementById('nc-badge');
+                if (d.ncs_abertas > 0) {
+                    badge.style.display = 'inline';
+                    badge.textContent = d.ncs_abertas;
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        } catch (err) {
+            console.error('[QUALIDADE] Erro ao carregar KPIs:', err);
+        }
+    }
+
+    // ============================================
+    // UTILS
+    // ============================================
+    function formatDate(d) {
+        if (!d) return '-';
+        const dt = new Date(d);
+        return dt.toLocaleDateString('pt-BR');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function tipoLabel(tipo) {
+        const map = { recebimento: 'Recebimento', processo: 'Em Processo', final: 'Inspeção Final', dimensional: 'Dimensional', visual: 'Visual' };
+        return map[tipo] || tipo || '-';
+    }
+
+    function statusLabel(s) {
+        const map = { pendente: 'Pendente', em_andamento: 'Em Andamento', aprovado: 'Aprovado', reprovado: 'Reprovado' };
+        return map[s] || s || '-';
+    }
+
+    function severidadeLabel(s) {
+        const map = { critica: 'Crítica', maior: 'Maior', menor: 'Menor', observacao: 'Observação' };
+        return map[s] || s || '-';
+    }
+
+    function ncStatusLabel(s) {
+        const map = { aberta: 'Aberta', em_analise: 'Em Análise', acao_corretiva: 'Ação Corretiva', resolvida: 'Resolvida' };
+        return map[s] || s || '-';
+    }
+
+    // ============================================
+    // INIT
+    // ============================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        await carregarKPIs();
+        await carregarInspecoes();
+        await carregarNaoConformidades();
+        await carregarChecklists();
+    });
+    </script>
+</body>
+</html>

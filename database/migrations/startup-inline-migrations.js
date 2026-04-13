@@ -25,7 +25,7 @@ async function runInlineMigrations(pool) {
             cofins DECIMAL(10,2) DEFAULT 0,
             irrf DECIMAL(10,2) DEFAULT 0,
             csll DECIMAL(10,2) DEFAULT 0,
-            status ENUM('pendente', 'autorizada', 'cancelada', 'rejeitada') DEFAULT 'pendente',
+            status ENUM('pendente', 'autorizada', 'cancelada', 'rejeitada', 'denegada') DEFAULT 'pendente',
             data_emissao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             observacoes TEXT,
             email_enviado BOOLEAN DEFAULT FALSE,
@@ -42,6 +42,51 @@ async function runInlineMigrations(pool) {
                 console.log(`✅ Coluna ${col} adicionada a nfe`);
             } catch (e) { /* already exists */ }
         }
+
+        // Colunas adicionais para integração completa
+        const nfeExtraCols = [
+            { col: 'valor_total', type: 'DECIMAL(10,2) DEFAULT 0' },
+            { col: 'pedido_id', type: 'INT NULL' },
+            { col: 'serie', type: "VARCHAR(5) DEFAULT '1'" },
+            { col: 'chave_acesso', type: 'VARCHAR(60) NULL' },
+            { col: 'protocolo', type: 'VARCHAR(30) NULL' },
+            { col: 'natureza_operacao', type: "VARCHAR(100) DEFAULT 'Venda de mercadoria'" },
+        ];
+        for (const { col, type } of nfeExtraCols) {
+            try {
+                await pool.query(`ALTER TABLE nfe ADD COLUMN ${col} ${type}`);
+                console.log(`✅ Coluna ${col} adicionada a nfe`);
+            } catch (e) { /* already exists */ }
+        }
+
+        // Tabela nfe_itens
+        await pool.query(`CREATE TABLE IF NOT EXISTS nfe_itens (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            nfe_id INT NOT NULL,
+            produto_id INT NULL,
+            descricao VARCHAR(255),
+            ncm VARCHAR(10),
+            cfop VARCHAR(10),
+            unidade VARCHAR(10) DEFAULT 'UN',
+            quantidade DECIMAL(12,4) DEFAULT 1,
+            valor_unitario DECIMAL(12,4) DEFAULT 0,
+            valor_total DECIMAL(12,2) DEFAULT 0,
+            icms_base DECIMAL(12,2) DEFAULT 0,
+            icms_aliquota DECIMAL(5,2) DEFAULT 0,
+            icms_valor DECIMAL(12,2) DEFAULT 0,
+            ipi_aliquota DECIMAL(5,2) DEFAULT 0,
+            ipi_valor DECIMAL(12,2) DEFAULT 0,
+            pis_valor DECIMAL(12,2) DEFAULT 0,
+            cofins_valor DECIMAL(12,2) DEFAULT 0,
+            FOREIGN KEY (nfe_id) REFERENCES nfe(id) ON DELETE CASCADE
+        )`);
+        console.log('✅ Tabela nfe_itens verificada/criada.');
+
+        // Atualizar ENUM de status para incluir 'denegada'
+        try {
+            await pool.query(`ALTER TABLE nfe MODIFY COLUMN status ENUM('pendente', 'autorizada', 'cancelada', 'rejeitada', 'denegada') DEFAULT 'pendente'`);
+        } catch (e) { /* ignore if already correct */ }
+
         console.log('✅ Tabela nfe verificada/criada.');
     } catch (e) {
         console.warn('⚠️ Falha ao criar/verificar tabela nfe:', e.message || e);

@@ -2051,6 +2051,305 @@ apiVendasRouter.get('/pedidos/:id', async (req, res, next) => {
     }
 });
 
+// DANFE de ambiente para pedido faturado - gera HTML de visualização
+apiVendasRouter.get('/pedidos/:id/danfe', authenticateToken, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+        const pedido = rows[0];
+
+        // Carregar itens do pedido
+        let itens = [];
+        try {
+            const [itensRows] = await pool.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+            itens = itensRows;
+        } catch(e) { /* tabela pode não existir */ }
+
+        // Carregar dados da empresa emitente
+        let empresa = {};
+        try {
+            const [empRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+            if (empRows.length > 0) empresa = empRows[0];
+        } catch(e) {}
+
+        // Carregar dados do cliente
+        let cliente = {};
+        if (pedido.cliente_id) {
+            try {
+                const [cliRows] = await pool.query('SELECT * FROM clientes WHERE id = ?', [pedido.cliente_id]);
+                if (cliRows.length > 0) cliente = cliRows[0];
+            } catch(e) {}
+        }
+
+        const nfNumero = pedido.nf || pedido.nfe_numero || pedido.numero_nf || 'S/N';
+        const dataEmissao = pedido.data_faturamento || pedido.faturado_em || pedido.updated_at || new Date();
+        const dataFormatada = new Date(dataEmissao).toLocaleDateString('pt-BR');
+        const horaFormatada = new Date(dataEmissao).toLocaleTimeString('pt-BR');
+        const valorTotal = parseFloat(pedido.valor) || 0;
+
+        // Gerar tabela de itens
+        let itensHTML = '';
+        if (itens.length > 0) {
+            itensHTML = itens.map((item, i) => {
+                const qtd = parseFloat(item.quantidade) || 0;
+                const vUnit = parseFloat(item.preco_unitario || item.valor_unitario) || 0;
+                const vTotal = parseFloat(item.valor_total || item.subtotal) || (qtd * vUnit);
+                return `<tr>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:center;">${i+1}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;">${item.codigo || ''}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;">${item.descricao || item.produto || ''}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:center;">${item.ncm || ''}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:center;">${item.unidade || 'UN'}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:right;">${qtd.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:right;">R$ ${vUnit.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                    <td style="padding:4px 6px;border:1px solid #ccc;text-align:right;">R$ ${vTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                </tr>`;
+            }).join('');
+        } else {
+            itensHTML = `<tr><td colspan="8" style="padding:10px;text-align:center;color:#999;">Sem itens detalhados</td></tr>`;
+        }
+
+        const danfeHTML = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>DANFE - Pedido ${pedido.id}</title>
+<style>
+@page { size: A4 portrait; margin: 8mm; }
+@media print { body { -webkit-print-color-adjust: exact !important; } .no-print { display:none!important; } }
+body { font-family: Arial, sans-serif; font-size: 10px; color: #000; margin: 0; padding: 10px; }
+.danfe-container { max-width: 780px; margin: 0 auto; border: 2px solid #000; }
+.danfe-header { display: grid; grid-template-columns: 1fr 180px 1fr; border-bottom: 2px solid #000; }
+.danfe-header > div { padding: 8px; border-right: 2px solid #000; }
+.danfe-header > div:last-child { border-right: none; }
+.danfe-section { border-bottom: 1px solid #000; padding: 6px 8px; }
+.danfe-section-title { font-weight: bold; font-size: 8px; color: #333; text-transform: uppercase; margin-bottom: 3px; }
+.danfe-field { display: inline-block; margin-right: 20px; margin-bottom: 4px; }
+.danfe-field label { display: block; font-size: 7px; color: #666; text-transform: uppercase; }
+.danfe-field span { font-size: 10px; font-weight: 600; }
+table.itens { width: 100%; border-collapse: collapse; font-size: 9px; }
+table.itens th { background: #e5e7eb; padding: 4px 6px; border: 1px solid #ccc; font-size: 8px; text-transform: uppercase; }
+.ambiente-badge { background: #fef3c7; border: 2px solid #f59e0b; color: #92400e; padding: 6px 12px; text-align: center; font-weight: 700; font-size: 11px; margin: 6px 0; border-radius: 4px; }
+.print-btn { background: #1e40af; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; margin: 10px; }
+.print-btn:hover { background: #1e3a8a; }
+</style></head><body>
+<div class="no-print" style="text-align:center;padding:10px;background:#f8fafc;border-bottom:2px solid #e5e7eb;">
+    <button class="print-btn" onclick="window.print()"><i class="fas fa-print"></i> Imprimir DANFE</button>
+    <button class="print-btn" style="background:#059669;" onclick="window.close()">Fechar</button>
+</div>
+<div class="danfe-container">
+    <!-- HEADER -->
+    <div class="danfe-header">
+        <div>
+            <div style="font-size:14px;font-weight:700;">${empresa.razao_social || empresa.nome || 'EMPRESA'}</div>
+            <div style="font-size:9px;margin-top:4px;">${empresa.endereco || ''} ${empresa.numero || ''} ${empresa.bairro || ''}</div>
+            <div style="font-size:9px;">${empresa.cidade || ''} - ${empresa.uf || ''} CEP: ${empresa.cep || ''}</div>
+            <div style="font-size:9px;">CNPJ: ${empresa.cnpj || ''} IE: ${empresa.ie || empresa.inscricao_estadual || ''}</div>
+            <div style="font-size:9px;">Fone: ${empresa.telefone || ''}</div>
+        </div>
+        <div style="text-align:center;">
+            <div style="font-size:16px;font-weight:900;letter-spacing:2px;">DANFE</div>
+            <div style="font-size:7px;margin-top:2px;">DOCUMENTO AUXILIAR DA NOTA FISCAL ELETRÔNICA</div>
+            <div style="margin-top:6px;">
+                <div style="font-size:8px;">ENTRADA</div>
+                <div style="border:1px solid #000;width:20px;height:20px;display:inline-block;font-size:14px;font-weight:700;">0</div>
+                <div style="font-size:8px;">SAÍDA</div>
+                <div style="border:1px solid #000;width:20px;height:20px;display:inline-block;font-size:14px;font-weight:700;">1</div>
+            </div>
+            <div style="margin-top:6px;font-size:9px;">Nº ${nfNumero}</div>
+            <div style="font-size:8px;">SÉRIE 1 - FOLHA 1/1</div>
+        </div>
+        <div>
+            <div class="ambiente-badge">⚠ DANFE DE AMBIENTE - SEM VALOR FISCAL</div>
+            <div style="font-size:9px;margin-top:6px;">CHAVE DE ACESSO</div>
+            <div style="font-size:8px;word-break:break-all;font-family:monospace;margin-top:2px;">Pendente emissão SEFAZ</div>
+            <div style="margin-top:6px;font-size:9px;">Pedido: <b>${pedido.id}</b></div>
+        </div>
+    </div>
+
+    <!-- DESTINATÁRIO -->
+    <div class="danfe-section">
+        <div class="danfe-section-title">Destinatário / Remetente</div>
+        <div class="danfe-field"><label>Nome / Razão Social</label><span>${cliente.razao_social || cliente.nome || pedido.cliente || pedido.cliente_nome || ''}</span></div>
+        <div class="danfe-field"><label>CNPJ/CPF</label><span>${cliente.cnpj || cliente.cpf || ''}</span></div>
+        <div class="danfe-field"><label>Data Emissão</label><span>${dataFormatada}</span></div>
+        <br>
+        <div class="danfe-field"><label>Endereço</label><span>${cliente.endereco || ''} ${cliente.numero || ''}</span></div>
+        <div class="danfe-field"><label>Bairro</label><span>${cliente.bairro || ''}</span></div>
+        <div class="danfe-field"><label>CEP</label><span>${cliente.cep || ''}</span></div>
+        <div class="danfe-field"><label>Município</label><span>${cliente.cidade || ''}</span></div>
+        <div class="danfe-field"><label>UF</label><span>${cliente.uf || cliente.estado || ''}</span></div>
+        <div class="danfe-field"><label>IE</label><span>${cliente.ie || cliente.inscricao_estadual || ''}</span></div>
+        <div class="danfe-field"><label>Hora Emissão</label><span>${horaFormatada}</span></div>
+    </div>
+
+    <!-- FATURA -->
+    <div class="danfe-section">
+        <div class="danfe-section-title">Fatura / Duplicatas</div>
+        <div class="danfe-field"><label>Condição Pagamento</label><span>${pedido.condicao_pagamento || pedido.parcelas || 'À Vista'}</span></div>
+        <div class="danfe-field"><label>Valor Total</label><span>R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+    </div>
+
+    <!-- ITENS -->
+    <div class="danfe-section" style="padding:0;">
+        <table class="itens">
+            <thead>
+                <tr>
+                    <th style="width:30px;">#</th>
+                    <th style="width:80px;">Código</th>
+                    <th>Descrição do Produto</th>
+                    <th style="width:70px;">NCM</th>
+                    <th style="width:30px;">UN</th>
+                    <th style="width:60px;">Qtd</th>
+                    <th style="width:80px;">V. Unit</th>
+                    <th style="width:80px;">V. Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${itensHTML}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- TOTAIS -->
+    <div class="danfe-section">
+        <div class="danfe-section-title">Cálculo do Imposto</div>
+        <div class="danfe-field"><label>Base Cálc. ICMS</label><span>R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+        <div class="danfe-field"><label>Valor ICMS</label><span>R$ 0,00</span></div>
+        <div class="danfe-field"><label>Valor Frete</label><span>R$ ${(parseFloat(pedido.frete) || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+        <div class="danfe-field"><label>Valor Seguro</label><span>R$ ${(parseFloat(pedido.valor_seguro) || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+        <div class="danfe-field"><label>Valor Total NF</label><span style="font-size:13px;color:#1e40af;">R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
+    </div>
+
+    <!-- TRANSPORTADOR -->
+    <div class="danfe-section">
+        <div class="danfe-section-title">Transportador / Volumes</div>
+        <div class="danfe-field"><label>Transportadora</label><span>${pedido.transportadora || ''}</span></div>
+        <div class="danfe-field"><label>Frete</label><span>${pedido.tipo_frete || ''}</span></div>
+        <div class="danfe-field"><label>Placa</label><span>${pedido.placa_veiculo || ''}</span></div>
+        <div class="danfe-field"><label>UF</label><span>${pedido.veiculo_uf || ''}</span></div>
+        <div class="danfe-field"><label>Qtd Volumes</label><span>${pedido.qtd_volumes || ''}</span></div>
+        <div class="danfe-field"><label>Peso Liq.</label><span>${pedido.peso_liquido || ''} kg</span></div>
+        <div class="danfe-field"><label>Peso Bruto</label><span>${pedido.peso_bruto || ''} kg</span></div>
+    </div>
+
+    <!-- OBS -->
+    <div class="danfe-section">
+        <div class="danfe-section-title">Dados Adicionais</div>
+        <div style="font-size:9px;min-height:30px;">${pedido.observacao || pedido.mensagem || 'Nenhuma observação.'}</div>
+        <div style="font-size:8px;color:#666;margin-top:4px;">Vendedor: ${pedido.vendedor_nome || pedido.vendedor || ''} | Pedido: ${pedido.id} | Origem: ${pedido.origem || 'Sistema'}</div>
+    </div>
+</div>
+<div style="text-align:center;margin-top:8px;font-size:8px;color:#999;">DANFE de ambiente — documento gerado pelo sistema Zyntra ERP para visualização interna</div>
+</body></html>`;
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(danfeHTML);
+    } catch (error) {
+        console.error('[VENDAS] Erro ao gerar DANFE:', error);
+        next(error);
+    }
+});
+
+// Recibo de pedido faturado
+apiVendasRouter.get('/pedidos/:id/recibo', authenticateToken, async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const [rows] = await pool.query('SELECT * FROM pedidos WHERE id = ?', [id]);
+        if (rows.length === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
+        const pedido = rows[0];
+
+        // Carregar itens
+        let itens = [];
+        try {
+            const [itensRows] = await pool.query('SELECT * FROM pedido_itens WHERE pedido_id = ?', [id]);
+            itens = itensRows;
+        } catch(e) {}
+
+        // Carregar empresa
+        let empresa = {};
+        try {
+            const [empRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+            if (empRows.length > 0) empresa = empRows[0];
+        } catch(e) {}
+
+        let cliente = {};
+        if (pedido.cliente_id) {
+            try {
+                const [cliRows] = await pool.query('SELECT * FROM clientes WHERE id = ?', [pedido.cliente_id]);
+                if (cliRows.length > 0) cliente = cliRows[0];
+            } catch(e) {}
+        }
+
+        const valorTotal = parseFloat(pedido.valor) || 0;
+        const dataFormatada = new Date(pedido.data_faturamento || pedido.updated_at || new Date()).toLocaleDateString('pt-BR');
+
+        let itensHTML = itens.map((item, i) => {
+            const qtd = parseFloat(item.quantidade) || 0;
+            const vUnit = parseFloat(item.preco_unitario || item.valor_unitario) || 0;
+            const vTotal = parseFloat(item.valor_total || item.subtotal) || (qtd * vUnit);
+            return `<tr>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${i+1}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${item.codigo || ''}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;">${item.descricao || item.produto || ''}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:center;">${qtd.toLocaleString('pt-BR')}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:right;">R$ ${vUnit.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                <td style="padding:6px 8px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;">R$ ${vTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+            </tr>`;
+        }).join('');
+        if (!itensHTML) itensHTML = '<tr><td colspan="6" style="padding:10px;text-align:center;color:#999;">Sem itens</td></tr>';
+
+        const reciboHTML = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Recibo - Pedido ${pedido.id}</title>
+<style>
+@page { size: A4 portrait; margin: 15mm; }
+@media print { .no-print { display:none!important; } }
+body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px; color: #1e293b; margin: 0; padding: 10px; }
+.recibo { max-width: 700px; margin: 0 auto; }
+.header { text-align: center; border-bottom: 3px solid #1e40af; padding-bottom: 16px; margin-bottom: 20px; }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f1f5f9; padding: 8px; text-align: left; font-size: 11px; text-transform: uppercase; color: #64748b; border-bottom: 2px solid #e2e8f0; }
+.total-row { background: #eff6ff; font-weight: 700; font-size: 14px; }
+.print-btn { background: #1e40af; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-size: 13px; cursor: pointer; margin: 5px; }
+</style></head><body>
+<div class="no-print" style="text-align:center;padding:10px;background:#f8fafc;border-bottom:2px solid #e5e7eb;">
+    <button class="print-btn" onclick="window.print()">🖨 Imprimir Recibo</button>
+    <button class="print-btn" style="background:#059669;" onclick="window.close()">Fechar</button>
+</div>
+<div class="recibo">
+    <div class="header">
+        <h1 style="margin:0;font-size:22px;color:#1e40af;">${empresa.razao_social || empresa.nome || 'EMPRESA'}</h1>
+        <p style="margin:4px 0;color:#64748b;">CNPJ: ${empresa.cnpj || ''} | ${empresa.endereco || ''} ${empresa.cidade || ''}-${empresa.uf || ''}</p>
+        <p style="margin:4px 0;color:#64748b;">Fone: ${empresa.telefone || ''}</p>
+    </div>
+    <h2 style="text-align:center;color:#1e40af;border:2px solid #1e40af;padding:8px;border-radius:8px;">RECIBO DE VENDA Nº ${pedido.id}</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;padding:12px;background:#f8fafc;border-radius:8px;">
+        <div><strong>Cliente:</strong> ${cliente.razao_social || cliente.nome || pedido.cliente || pedido.cliente_nome || ''}</div>
+        <div><strong>CNPJ/CPF:</strong> ${cliente.cnpj || cliente.cpf || ''}</div>
+        <div><strong>Data:</strong> ${dataFormatada}</div>
+        <div><strong>Condição:</strong> ${pedido.condicao_pagamento || pedido.parcelas || 'À Vista'}</div>
+        <div><strong>Vendedor:</strong> ${pedido.vendedor_nome || pedido.vendedor || ''}</div>
+        <div><strong>Frete:</strong> ${pedido.tipo_frete || ''}</div>
+    </div>
+    <table>
+        <thead><tr><th>#</th><th>Código</th><th>Descrição</th><th>Qtd</th><th>V.Unit</th><th>V.Total</th></tr></thead>
+        <tbody>${itensHTML}</tbody>
+        <tfoot><tr class="total-row"><td colspan="5" style="padding:10px;text-align:right;">VALOR TOTAL:</td><td style="padding:10px;text-align:right;">R$ ${valorTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr></tfoot>
+    </table>
+    <div style="margin-top:40px;display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+        <div style="text-align:center;border-top:1px solid #000;padding-top:8px;">Assinatura do Vendedor</div>
+        <div style="text-align:center;border-top:1px solid #000;padding-top:8px;">Assinatura do Cliente</div>
+    </div>
+    <p style="text-align:center;margin-top:20px;font-size:9px;color:#999;">Documento gerado pelo sistema Zyntra ERP em ${new Date().toLocaleString('pt-BR')}</p>
+</div>
+</body></html>`;
+
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.send(reciboHTML);
+    } catch (error) {
+        console.error('[VENDAS] Erro ao gerar recibo:', error);
+        next(error);
+    }
+});
+
 // Cria pedido: atribui automaticamente ao usuário logado
 // USA TRANSAÇÃO para garantir integridade (pedido + itens)
 apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, next) => {
@@ -2971,6 +3270,13 @@ apiVendasRouter.patch('/pedidos/:id', async (req, res, next) => {
             fieldsToUpdate.push('condicoes_pagamento = ?');
             values.push(condicaoValor);
             if (DEBUG) console.log(`✅ Condição de pagamento atualizada para: ${condicaoValor}`);
+        }
+
+        // Tipo de Venda (revenda/consumidor)
+        if (updates.tipo_venda !== undefined) {
+            fieldsToUpdate.push('tipo_venda = ?');
+            values.push(updates.tipo_venda);
+            if (DEBUG) console.log(`✅ Tipo de venda atualizado para: ${updates.tipo_venda}`);
         }
 
         // ========== CAMPOS ADICIONAIS DE TRANSPORTE ==========

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -114,6 +114,8 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="css/fin-pagination.css?v=20260715">
+    <script src="js/fin-pagination.js?v=20260715" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -191,31 +193,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -314,6 +292,13 @@
                             <button class="btn btn-secondary" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
                         </div>
                     </div>
+                    <div class="fp-search-bar">
+                        <div class="fp-search-wrap">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="fp-search-fluxo" placeholder="Pesquisar descrição, categoria..." oninput="if(window.pgFluxo)window.pgFluxo.search(this.value)">
+                        </div>
+                        <span class="fp-count" id="fp-info-fluxo"></span>
+                    </div>
                     <div class="table-container">
                         <table class="data-table">
                             <thead>
@@ -337,6 +322,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="fp-pagination" id="fp-pg-fluxo"></div>
                 </div>
             </div>
 
@@ -352,6 +338,8 @@
         let chartFluxo = null;
         let períodoAtual = 'mes';
         let dadosFluxo = { entradas: [], saidas: [] };
+        var fluxoMovimentacoes = []; // combined & sorted with pre-calculated saldo
+        var pgFluxo; // FinPagination instance
 
         // ========================================
         // HELPERS
@@ -709,36 +697,36 @@
                 ...saidas.map(s => ({ ...s, tipo: 'saida', data: s.data_vencimento }))
             ].sort((a, b) => new Date(a.data) - new Date(b.data));
 
-            if (movimentacoes.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                            <i class="fas fa-inbox" style="font-size: 32px; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
-                            Nenhuma movimentação encontrada
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-
-            let saldoAcumulado = 0;
-            tbody.innerHTML = movimentacoes.slice(0, 20).map(m => {
+            // Pre-calculate saldoAcumulado for each row
+            let saldoAcc = 0;
+            fluxoMovimentacoes = movimentacoes.map(m => {
                 const valor = parseFloat(m.valor) || 0;
                 const saldoDia = m.tipo === 'entrada' ? valor : -valor;
-                saldoAcumulado += saldoDia;
+                saldoAcc += saldoDia;
+                return { ...m, _valor: valor, _saldoDia: saldoDia, _saldoAcumulado: saldoAcc };
+            });
 
-                return `
-                    <tr>
-                        <td class="data">${formatarData(m.data)}</td>
-                        <td>${m.descricao || m.descrição || m.cliente_nome || m.fornecedor_nome || m.numero_documento || '-'}</td>
-                        <td>${m.categoria || m.categoria_nome || '-'}</td>
-                        <td class="valor ${m.tipo === 'entrada' ? 'entrada' : ''}">${m.tipo === 'entrada' ? formatarMoeda(valor) : '-'}</td>
-                        <td class="valor ${m.tipo === 'saida' ? 'saida' : ''}">${m.tipo === 'saida' ? formatarMoeda(valor) : '-'}</td>
-                        <td class="valor ${saldoDia >= 0 ? 'entrada' : 'saida'}">${saldoDia >= 0 ? '+' : ''}${formatarMoeda(saldoDia)}</td>
-                        <td><span class="badge-saldo ${saldoAcumulado >= 0 ? 'positivo' : 'negativo'}">${formatarMoeda(saldoAcumulado)}</span></td>
-                    </tr>
-                `;
-            }).join('');
+            if (pgFluxo) { pgFluxo.page = 1; pgFluxo.render(); } else { _renderFluxoRows(fluxoMovimentacoes); }
+        }
+
+        function _renderFluxoRows(items) {
+            const tbody = document.getElementById('fluxo-body');
+            if (!tbody) return;
+            if (items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-secondary);"><i class="fas fa-inbox" style="font-size:32px;margin-bottom:10px;display:block;opacity:0.5;"></i>Nenhuma movimentação encontrada</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(m => `
+                <tr>
+                    <td class="data">${formatarData(m.data)}</td>
+                    <td>${m.descricao || m.descrição || m.cliente_nome || m.fornecedor_nome || m.numero_documento || '-'}</td>
+                    <td>${m.categoria || m.categoria_nome || '-'}</td>
+                    <td class="valor ${m.tipo === 'entrada' ? 'entrada' : ''}">${m.tipo === 'entrada' ? formatarMoeda(m._valor) : '-'}</td>
+                    <td class="valor ${m.tipo === 'saida' ? 'saida' : ''}">${m.tipo === 'saida' ? formatarMoeda(m._valor) : '-'}</td>
+                    <td class="valor ${m._saldoDia >= 0 ? 'entrada' : 'saida'}">${m._saldoDia >= 0 ? '+' : ''}${formatarMoeda(m._saldoDia)}</td>
+                    <td><span class="badge-saldo ${m._saldoAcumulado >= 0 ? 'positivo' : 'negativo'}">${formatarMoeda(m._saldoAcumulado)}</span></td>
+                </tr>
+            `).join('');
         }
 
         // ========================================
@@ -969,6 +957,19 @@
         // INIT
         // ========================================
         document.addEventListener('DOMContentLoaded', () => {
+            pgFluxo = new FinPagination({
+                containerId: 'fp-pg-fluxo',
+                searchId: 'fp-search-fluxo',
+                infoId: 'fp-info-fluxo',
+                perPage: 30,
+                getData: function() { return fluxoMovimentacoes; },
+                renderRows: function(pageData) { _renderFluxoRows(pageData); },
+                searchFields: [
+                    function(m) { return m.descricao || m.descrição || m.cliente_nome || m.fornecedor_nome || ''; },
+                    function(m) { return m.categoria || m.categoria_nome || ''; },
+                    function(m) { return m.numero_documento || ''; }
+                ]
+            });
             carregarUsuarioLogado();
             carregarDados();
         });

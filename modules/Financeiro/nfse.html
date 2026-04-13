@@ -13,6 +13,8 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="css/fin-pagination.css">
+    <script src="js/fin-pagination.js"></script>
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
@@ -220,6 +222,15 @@
                             <h3><i class="fas fa-list"></i> Notas Fiscais Emitidas</h3>
                             <span id="count-nfse" style="font-size:13px;color:var(--text-secondary)">0 registros</span>
                         </div>
+                        <div style="padding: 0 20px;">
+                            <div class="fp-search-bar">
+                                <div class="fp-search-wrap">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="fp-search-nfse" placeholder="Pesquisar por número, tomador, serviço..." oninput="window._finPg['fp-pg-nfse'].search(this.value)">
+                                </div>
+                                <span class="fp-count" id="fp-info-nfse"></span>
+                            </div>
+                        </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
                                 <thead><tr><th>Número</th><th>Tomador</th><th>Serviço</th><th>Emissão</th><th>Valor</th><th>ISS</th><th>Líquido</th><th>Status</th><th style="width:80px">Ações</th></tr></thead>
@@ -228,6 +239,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div style="padding: 12px 20px;"><div class="fp-pagination" id="fp-pg-nfse"></div></div>
                     </div>
                 </div>
             </div>
@@ -298,6 +310,45 @@
 
         let notas = [];
 
+        // Paginação
+        const pgNfse = new FinPagination({
+            containerId: 'fp-pg-nfse',
+            searchId: 'fp-search-nfse',
+            infoId: 'fp-info-nfse',
+            perPage: 30,
+            getData: () => notas,
+            searchFields: [
+                n => n.número_nfse,
+                n => n.tomador_nome,
+                n => n.descrição_servico,
+                n => n.status
+            ],
+            renderRows: (pageData, allFiltered) => {
+                const tb = document.getElementById('tbody-nfse');
+                if (allFiltered.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><h4>Nenhuma NFS-e encontrada</h4></div></td></tr>';
+                    return;
+                }
+                tb.innerHTML = pageData.map(n => `
+                    <tr>
+                        <td><strong>${esc(n.número_nfse || '-')}</strong></td>
+                        <td>${esc(n.tomador_nome)}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.descrição_servico)}</td>
+                        <td>${fmtData(n.data_emissao)}</td>
+                        <td class="valor">${fmtMoeda(n.valor_servico)}</td>
+                        <td class="valor">${fmtMoeda(n.valor_iss)}</td>
+                        <td class="valor" style="color:var(--success)">${fmtMoeda(n.valor_liquido)}</td>
+                        <td><span class="badge badge-${n.status}">${n.status}</span></td>
+                        <td>
+                            <button class="btn-icon view" onclick="verNfse(${n.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
+                            ${n.status === 'emitida' ? `<button class="btn-icon delete" onclick="cancelarNfse(${n.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        });
+        window._finPg['fp-pg-nfse'] = pgNfse;
+
         function mostrarToast(msg, tipo) {
             const colors = { success:'#10b981', error:'#ef4444', warning:'#f59e0b', info:'#3b82f6' };
             const icons = { success:'fa-check-circle', error:'fa-times-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
@@ -339,28 +390,7 @@
         }
 
         function renderizar() {
-            const tb = document.getElementById('tbody-nfse');
-            document.getElementById('count-nfse').textContent = `${notas.length} registro(s)`;
-            if (notas.length === 0) {
-                tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><h4>Nenhuma NFS-e encontrada</h4><p>Emita sua primeira nota</p></div></td></tr>';
-                return;
-            }
-            tb.innerHTML = notas.map(n => `
-                <tr>
-                    <td><strong>${esc(n.número_nfse || '-')}</strong></td>
-                    <td>${esc(n.tomador_nome)}</td>
-                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(n.descrição_servico)}</td>
-                    <td>${fmtData(n.data_emissao)}</td>
-                    <td class="valor">${fmtMoeda(n.valor_servico)}</td>
-                    <td class="valor">${fmtMoeda(n.valor_iss)}</td>
-                    <td class="valor" style="color:var(--success)">${fmtMoeda(n.valor_liquido)}</td>
-                    <td><span class="badge badge-${n.status}">${n.status}</span></td>
-                    <td>
-                        <button class="btn-icon view" onclick="verNfse(${n.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
-                        ${n.status === 'emitida' ? `<button class="btn-icon delete" onclick="cancelarNfse(${n.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+            pgNfse.render();
         }
 
         function verNfse(id) {

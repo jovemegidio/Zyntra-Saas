@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,8 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="css/fin-pagination.css">
+    <script src="js/fin-pagination.js"></script>
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
@@ -202,31 +204,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -274,9 +252,14 @@
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-sitemap icon-primary"></i> Lista de Centros de Custo</h3>
-                        <div class="search-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="searchInput" placeholder="Buscar centro de custo..." class="search-input-card" onkeyup="filtrarCentros()">
+                    </div>
+                    <div style="padding: 0 20px;">
+                        <div class="fp-search-bar">
+                            <div class="fp-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="fp-search-centros" placeholder="Buscar por nome, departamento, responsável..." oninput="window._finPg['fp-pg-centros'].search(this.value)">
+                            </div>
+                            <span class="fp-count" id="fp-info-centros"></span>
                         </div>
                     </div>
                     <div class="table-container">
@@ -302,6 +285,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div style="padding: 12px 20px;"><div class="fp-pagination" id="fp-pg-centros"></div></div>
                 </div>
             </div>
             </div> <!-- /main-content -->
@@ -415,6 +399,56 @@
         let centrosCusto = [];
         let editandoId = null;
 
+        // Paginação
+        const pgCentros = new FinPagination({
+            containerId: 'fp-pg-centros',
+            searchId: 'fp-search-centros',
+            infoId: 'fp-info-centros',
+            perPage: 30,
+            getData: () => centrosCusto,
+            searchFields: [
+                c => c.nome || c.descrição,
+                c => c.código,
+                c => c.departamento,
+                c => c.responsavel || c.responsavel_nome
+            ],
+            renderRows: (pageData, allFiltered) => {
+                const tbody = document.getElementById('tabela-centros');
+                if (allFiltered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhum centro de custo encontrado</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = pageData.map(c => {
+                    const utilizacao = c.orçamento_mensal > 0 ? Math.min((c.utilizado / c.orçamento_mensal) * 100, 100) : 0;
+                    const corBarra = utilizacao > 90 ? 'red' : utilizacao > 70 ? 'yellow' : 'green';
+                    return `
+                        <tr>
+                            <td><strong>${c.código || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
+                            <td>${c.nome || c.descrição || '-'}</td>
+                            <td>${c.departamento || '-'}</td>
+                            <td>${c.responsavel || c.responsavel_nome || '-'}</td>
+                            <td>${formatarMoeda(c.orçamento_mensal || c.orçamento || 0)}</td>
+                            <td style="min-width: 120px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="progress-bar" style="flex: 1;">
+                                        <div class="fill ${corBarra}" style="width: ${utilizacao}%"></div>
+                                    </div>
+                                    <span style="font-size: 12px; font-weight: 600;">${utilizacao.toFixed(0)}%</span>
+                                </div>
+                            </td>
+                            <td><span class="badge ${(c.ativo == 1 || c.ativo === true) ? 'badge-success' : 'badge-danger'}">${(c.ativo == 1 || c.ativo === true) ? 'Ativo' : 'Inativo'}</span></td>
+                            <td>
+                                <button class="btn-action view" title="Ver" onclick="verCentro(${c.id})"><i class="fas fa-eye"></i></button>
+                                <button class="btn-action edit" title="Editar" onclick="editarCentro(${c.id})"><i class="fas fa-edit"></i></button>
+                                <button class="btn-action delete" title="Excluir" onclick="excluirCentro(${c.id})"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        });
+        window._finPg['fp-pg-centros'] = pgCentros;
+
         // Carregar usuário
         async function carregarUsuario() {
             try {
@@ -466,41 +500,7 @@
         }
 
         function renderizarTabela() {
-            const tbody = document.getElementById('tabela-centros');
-
-            if (centrosCusto.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhum centro de custo cadastrado</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = centrosCusto.map(c => {
-                const utilizacao = c.orçamento_mensal > 0 ? Math.min((c.utilizado / c.orçamento_mensal) * 100, 100) : 0;
-                const corBarra = utilizacao > 90 ? 'red' : utilizacao > 70 ? 'yellow' : 'green';
-
-                return `
-                    <tr>
-                        <td><strong>${c.código || 'CC' + String(c.id).padStart(3, '0')}</strong></td>
-                        <td>${c.nome || c.descrição || '-'}</td>
-                        <td>${c.departamento || '-'}</td>
-                        <td>${c.responsavel || c.responsavel_nome || '-'}</td>
-                        <td>${formatarMoeda(c.orçamento_mensal || c.orçamento || 0)}</td>
-                        <td style="min-width: 120px;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <div class="progress-bar" style="flex: 1;">
-                                    <div class="fill ${corBarra}" style="width: ${utilizacao}%"></div>
-                                </div>
-                                <span style="font-size: 12px; font-weight: 600;">${utilizacao.toFixed(0)}%</span>
-                            </div>
-                        </td>
-                        <td><span class="badge ${(c.ativo == 1 || c.ativo === true) ? 'badge-success' : 'badge-danger'}">${(c.ativo == 1 || c.ativo === true) ? 'Ativo' : 'Inativo'}</span></td>
-                        <td>
-                            <button class="btn-action view" title="Ver" onclick="verCentro(${c.id})"><i class="fas fa-eye"></i></button>
-                            <button class="btn-action edit" title="Editar" onclick="editarCentro(${c.id})"><i class="fas fa-edit"></i></button>
-                            <button class="btn-action delete" title="Excluir" onclick="excluirCentro(${c.id})"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
+            pgCentros.render();
         }
 
         function atualizarStats() {

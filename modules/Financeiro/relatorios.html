@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -684,6 +684,8 @@
 
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="css/fin-pagination.css?v=20260715">
+    <script src="js/fin-pagination.js?v=20260715" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -760,31 +762,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -1456,6 +1434,7 @@
                             </tfoot>
                         </table>
                     </div>
+                    <div class="fp-pagination" id="fp-pg-rel-pagar"></div>
                 </div>
             </div>
             <div class="modal-footer-padrão">
@@ -1583,6 +1562,7 @@
                             </tfoot>
                         </table>
                     </div>
+                    <div class="fp-pagination" id="fp-pg-rel-receber"></div>
                 </div>
             </div>
             <div class="modal-footer-padrão">
@@ -1903,9 +1883,32 @@
         let fornecedores = [];
         let clientes = [];
         let bancos = [];
+        var pgRelPagar, pgRelReceber; // FinPagination instances
 
         // Init
         document.addEventListener('DOMContentLoaded', function() {
+            pgRelPagar = new FinPagination({
+                containerId: 'fp-pg-rel-pagar',
+                perPage: 30,
+                getData: function() { return dadosContasPagar; },
+                renderRows: function(pageData) { _renderRowsPagar(pageData); },
+                searchFields: [
+                    function(c) { return c.fornecedor_nome || c.fornecedor || ''; },
+                    function(c) { return c.número_documento || c.documento || ''; },
+                    function(c) { return c.categoria || ''; }
+                ]
+            });
+            pgRelReceber = new FinPagination({
+                containerId: 'fp-pg-rel-receber',
+                perPage: 30,
+                getData: function() { return dadosContasReceber; },
+                renderRows: function(pageData) { _renderRowsReceber(pageData); },
+                searchFields: [
+                    function(c) { return c.cliente_nome || c.cliente || ''; },
+                    function(c) { return c.número_documento || c.documento || ''; },
+                    function(c) { return c.categoria || ''; }
+                ]
+            });
             // Carregar dados em paralelo para reduzir tempo de carregamento
             Promise.all([
                 carregarUsuario(),
@@ -2076,63 +2079,20 @@
         }
 
         function renderizarTabelaContasPagar(contas) {
-            const tbody = document.getElementById('tbody-rel-pagar');
+            // Compute totals from ALL data
             const hoje = new Date().toISOString().split('T')[0];
-
-            let totalValor = 0;
-            let totalPago = 0;
-            let totalVencidos = 0;
-            let totalPagos = 0;
-
-            tbody.innerHTML = contas.map(c => {
+            let totalValor = 0, totalPago = 0, totalVencidos = 0, totalPagos = 0;
+            contas.forEach(c => {
                 const valor = parseFloat(c.valor_total || c.valor || 0);
                 const pago = parseFloat(c.valor_pago || 0);
                 const saldo = valor - pago;
-                const vencOriginal = c.data_vencimento_original || c.data_vencimento || c.vencimento;
                 const vencAtual = c.data_vencimento || c.vencimento;
-
                 totalValor += valor;
                 totalPago += pago;
-
                 let status = normalizarStatus(c.status) || 'pendente';
-                if (status !== 'pago' && vencAtual && vencAtual < hoje) {
-                    status = 'vencido';
-                    totalVencidos += saldo;
-                }
+                if (status !== 'pago' && vencAtual && vencAtual < hoje) totalVencidos += saldo;
                 if (status === 'pago') totalPagos += valor;
-
-                const statusClass = {
-                    'pago': 'color: #22c55e',
-                    'vencido': 'color: #ef4444',
-                    'parcial': 'color: #f59e0b',
-                    'pendente': 'color: #64748b'
-                }[status] || 'color: #64748b';
-
-                const statusLabel = {
-                    'pago': 'Pago',
-                    'vencido': 'Vencido',
-                    'parcial': 'Parcial',
-                    'pendente': 'Pendente'
-                }[status] || status;
-
-                const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
-
-                return `
-                    <tr>
-                        <td>${c.número_documento || c.documento || '-'}</td>
-                        <td>${c.fornecedor_nome || c.fornecedor || '-'}</td>
-                        <td>${formatarData(vencOriginal)}</td>
-                        <td>${formatarData(vencAtual)}</td>
-                        <td class="valor-cell negativo">${formatarMoeda(valor)}</td>
-                        <td>${formatarMoeda(pago)}</td>
-                        <td>${formatarMoeda(saldo)}</td>
-                        <td>${bancoNome}</td>
-                        <td><span style="${statusClass}; font-weight: 600;">${statusLabel}</span></td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Atualizar totais
+            });
             document.getElementById('pagar-total').textContent = formatarMoeda(totalValor);
             document.getElementById('pagar-qtd').textContent = contas.length;
             document.getElementById('pagar-vencidos').textContent = formatarMoeda(totalVencidos);
@@ -2140,7 +2100,27 @@
             document.getElementById('pagar-total-valor').innerHTML = `<strong>${formatarMoeda(totalValor)}</strong>`;
             document.getElementById('pagar-total-pago').innerHTML = `<strong>${formatarMoeda(totalPago)}</strong>`;
             document.getElementById('pagar-total-saldo').innerHTML = `<strong>${formatarMoeda(totalValor - totalPago)}</strong>`;
+            // Render paginated rows
+            if (pgRelPagar) { pgRelPagar.page = 1; pgRelPagar.render(); }
+            else { _renderRowsPagar(contas); }
         }
+
+        function _renderRowsPagar(items) {
+            const tbody = document.getElementById('tbody-rel-pagar');
+            const hoje = new Date().toISOString().split('T')[0];
+            tbody.innerHTML = items.map(c => {
+                const valor = parseFloat(c.valor_total || c.valor || 0);
+                const pago = parseFloat(c.valor_pago || 0);
+                const saldo = valor - pago;
+                const vencOriginal = c.data_vencimento_original || c.data_vencimento || c.vencimento;
+                const vencAtual = c.data_vencimento || c.vencimento;
+                let status = normalizarStatus(c.status) || 'pendente';
+                if (status !== 'pago' && vencAtual && vencAtual < hoje) status = 'vencido';
+                const statusClass = {'pago':'color:#22c55e','vencido':'color:#ef4444','parcial':'color:#f59e0b','pendente':'color:#64748b'}[status] || 'color:#64748b';
+                const statusLabel = {'pago':'Pago','vencido':'Vencido','parcial':'Parcial','pendente':'Pendente'}[status] || status;
+                const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
+                return `<tr><td>${c.número_documento||c.documento||'-'}</td><td>${c.fornecedor_nome||c.fornecedor||'-'}</td><td>${formatarData(vencOriginal)}</td><td>${formatarData(vencAtual)}</td><td class="valor-cell negativo">${formatarMoeda(valor)}</td><td>${formatarMoeda(pago)}</td><td>${formatarMoeda(saldo)}</td><td>${bancoNome}</td><td><span style="${statusClass};font-weight:600;">${statusLabel}</span></td></tr>`;
+            }).join('');
 
         function exportarRelContasPagar(formato) {
             if (dadosContasPagar.length === 0) {
@@ -2217,65 +2197,20 @@
         }
 
         function renderizarTabelaContasReceber(contas) {
-            const tbody = document.getElementById('tbody-rel-receber');
+            // Compute totals from ALL data
             const hoje = new Date().toISOString().split('T')[0];
-
-            let totalValor = 0;
-            let totalRecebido = 0;
-            let totalVencidos = 0;
-            let totalRecebidos = 0;
-
-            tbody.innerHTML = contas.map(c => {
+            let totalValor = 0, totalRecebido = 0, totalVencidos = 0, totalRecebidos = 0;
+            contas.forEach(c => {
                 const valor = parseFloat(c.valor_total || c.valor || 0);
                 const recebido = parseFloat(c.valor_recebido || c.valor_pago || 0);
                 const saldo = valor - recebido;
-                const vencOriginal = c.data_vencimento_original || c.data_vencimento || c.vencimento;
                 const vencAtual = c.data_vencimento || c.vencimento;
-
                 totalValor += valor;
                 totalRecebido += recebido;
-
                 let status = normalizarStatus(c.status) || 'pendente';
-                if (status !== 'recebido' && status !== 'pago' && vencAtual && vencAtual < hoje) {
-                    status = 'vencido';
-                    totalVencidos += saldo;
-                }
+                if (status !== 'recebido' && status !== 'pago' && vencAtual && vencAtual < hoje) totalVencidos += saldo;
                 if (status === 'recebido' || status === 'pago') totalRecebidos += valor;
-
-                const statusClass = {
-                    'recebido': 'color: #22c55e',
-                    'pago': 'color: #22c55e',
-                    'vencido': 'color: #ef4444',
-                    'parcial': 'color: #f59e0b',
-                    'pendente': 'color: #64748b'
-                }[status] || 'color: #64748b';
-
-                const statusLabel = {
-                    'recebido': 'Recebido',
-                    'pago': 'Recebido',
-                    'vencido': 'Vencido',
-                    'parcial': 'Parcial',
-                    'pendente': 'Pendente'
-                }[status] || status;
-
-                const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
-
-                return `
-                    <tr>
-                        <td>${c.número_documento || c.documento || '-'}</td>
-                        <td>${c.cliente_nome || c.cliente || '-'}</td>
-                        <td>${formatarData(vencOriginal)}</td>
-                        <td>${formatarData(vencAtual)}</td>
-                        <td class="valor-cell positivo">${formatarMoeda(valor)}</td>
-                        <td>${formatarMoeda(recebido)}</td>
-                        <td>${formatarMoeda(saldo)}</td>
-                        <td>${bancoNome}</td>
-                        <td><span style="${statusClass}; font-weight: 600;">${statusLabel}</span></td>
-                    </tr>
-                `;
-            }).join('');
-
-            // Atualizar totais
+            });
             document.getElementById('receber-total').textContent = formatarMoeda(totalValor);
             document.getElementById('receber-qtd').textContent = contas.length;
             document.getElementById('receber-vencidos').textContent = formatarMoeda(totalVencidos);
@@ -2283,7 +2218,27 @@
             document.getElementById('receber-total-valor').innerHTML = `<strong>${formatarMoeda(totalValor)}</strong>`;
             document.getElementById('receber-total-recebido').innerHTML = `<strong>${formatarMoeda(totalRecebido)}</strong>`;
             document.getElementById('receber-total-saldo').innerHTML = `<strong>${formatarMoeda(totalValor - totalRecebido)}</strong>`;
+            // Render paginated rows
+            if (pgRelReceber) { pgRelReceber.page = 1; pgRelReceber.render(); }
+            else { _renderRowsReceber(contas); }
         }
+
+        function _renderRowsReceber(items) {
+            const tbody = document.getElementById('tbody-rel-receber');
+            const hoje = new Date().toISOString().split('T')[0];
+            tbody.innerHTML = items.map(c => {
+                const valor = parseFloat(c.valor_total || c.valor || 0);
+                const recebido = parseFloat(c.valor_recebido || c.valor_pago || 0);
+                const saldo = valor - recebido;
+                const vencOriginal = c.data_vencimento_original || c.data_vencimento || c.vencimento;
+                const vencAtual = c.data_vencimento || c.vencimento;
+                let status = normalizarStatus(c.status) || 'pendente';
+                if (status !== 'recebido' && status !== 'pago' && vencAtual && vencAtual < hoje) status = 'vencido';
+                const statusClass = {'recebido':'color:#22c55e','pago':'color:#22c55e','vencido':'color:#ef4444','parcial':'color:#f59e0b','pendente':'color:#64748b'}[status] || 'color:#64748b';
+                const statusLabel = {'recebido':'Recebido','pago':'Recebido','vencido':'Vencido','parcial':'Parcial','pendente':'Pendente'}[status] || status;
+                const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
+                return `<tr><td>${c.número_documento||c.documento||'-'}</td><td>${c.cliente_nome||c.cliente||'-'}</td><td>${formatarData(vencOriginal)}</td><td>${formatarData(vencAtual)}</td><td class="valor-cell positivo">${formatarMoeda(valor)}</td><td>${formatarMoeda(recebido)}</td><td>${formatarMoeda(saldo)}</td><td>${bancoNome}</td><td><span style="${statusClass};font-weight:600;">${statusLabel}</span></td></tr>`;
+            }).join('');
 
         function exportarRelContasReceber(formato) {
             if (dadosContasReceber.length === 0) {

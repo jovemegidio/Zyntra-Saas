@@ -9193,5 +9193,181 @@ tr:nth-child(even){background:#f8fafc}
         }
     });
 
+    // ============================================================
+    // QUALIDADE - Inspeções, Não Conformidades, Checklists
+    // ============================================================
+
+    // --- KPIs ---
+    router.get('/qualidade/kpis', authenticateToken, asyncHandler(async (req, res) => {
+        const now = new Date();
+        const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+        const [[insp]] = await pool.query(
+            `SELECT COUNT(*) as total, SUM(status='aprovado') as aprovados, SUM(status='pendente') as pendentes
+             FROM qualidade_inspecoes WHERE data_inspecao >= ?`, [firstDay]);
+        const [[ncs]] = await pool.query(
+            `SELECT COUNT(*) as abertas FROM qualidade_nao_conformidades WHERE status IN ('aberta','em_analise','acao_corretiva')`);
+        const [[cks]] = await pool.query(
+            `SELECT COUNT(*) as ativos FROM qualidade_checklists WHERE ativo = 1`);
+        const total = insp.total || 0;
+        const aprovados = insp.aprovados || 0;
+        const taxa = total > 0 ? Math.round((aprovados / total) * 100) : 0;
+        res.json({ success: true, data: {
+            total_inspecoes: total,
+            taxa_aprovacao: taxa,
+            ncs_abertas: ncs.abertas || 0,
+            inspecoes_pendentes: insp.pendentes || 0,
+            checklists_ativos: cks.ativos || 0
+        }});
+    }));
+
+    // --- INSPEÇÕES: CRUD ---
+    router.get('/qualidade/inspecoes', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = 'SELECT * FROM qualidade_inspecoes WHERE 1=1';
+        const params = [];
+        if (req.query.status) { sql += ' AND status = ?'; params.push(req.query.status); }
+        if (req.query.data_inicio) { sql += ' AND data_inspecao >= ?'; params.push(req.query.data_inicio); }
+        if (req.query.data_fim) { sql += ' AND data_inspecao <= ?'; params.push(req.query.data_fim); }
+        sql += ' ORDER BY data_inspecao DESC, id DESC LIMIT 200';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_inspecoes WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Inspeção não encontrada' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.post('/qualidade/inspecoes', authenticateToken, asyncHandler(async (req, res) => {
+        const { tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao } = req.body;
+        const inspetor_id = req.user?.id || null;
+        const inspetor_nome = req.user?.nome || req.user?.username || null;
+        const [result] = await pool.query(
+            `INSERT INTO qualidade_inspecoes (tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao, inspetor_id, inspetor_nome)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status || 'pendente', data_inspecao, inspetor_id, inspetor_nome]
+        );
+        console.log('[PCP/QUALIDADE] Inspeção criada:', result.insertId);
+        res.json({ success: true, id: result.insertId });
+    }));
+
+    router.put('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao } = req.body;
+        await pool.query(
+            `UPDATE qualidade_inspecoes SET tipo=?, checklist_id=?, ordem_producao=?, produto=?, quantidade_inspecionada=?, quantidade_aprovada=?, observacoes=?, checklist_respostas=?, status=?, data_inspecao=? WHERE id=?`,
+            [tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao, req.params.id]
+        );
+        console.log('[PCP/QUALIDADE] Inspeção atualizada:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_inspecoes WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] Inspeção excluída:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    // --- NÃO CONFORMIDADES: CRUD ---
+    router.get('/qualidade/nao-conformidades', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = 'SELECT * FROM qualidade_nao_conformidades WHERE 1=1';
+        const params = [];
+        if (req.query.severidade) { sql += ' AND severidade = ?'; params.push(req.query.severidade); }
+        if (req.query.status) { sql += ' AND status = ?'; params.push(req.query.status); }
+        sql += ' ORDER BY created_at DESC LIMIT 200';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_nao_conformidades WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'NC não encontrada' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.post('/qualidade/nao-conformidades', authenticateToken, asyncHandler(async (req, res) => {
+        const { descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo } = req.body;
+        const registrado_por = req.user?.id || null;
+        const registrado_nome = req.user?.nome || req.user?.username || null;
+        const [result] = await pool.query(
+            `INSERT INTO qualidade_nao_conformidades (descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, registrado_por, registrado_nome)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, registrado_por, registrado_nome]
+        );
+        console.log('[PCP/QUALIDADE] NC criada:', result.insertId);
+        res.json({ success: true, id: result.insertId });
+    }));
+
+    router.put('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, status } = req.body;
+        await pool.query(
+            `UPDATE qualidade_nao_conformidades SET descricao=?, severidade=?, origem=?, ordem_producao=?, produto=?, causa_raiz=?, acao_corretiva=?, responsavel=?, prazo=?, status=? WHERE id=?`,
+            [descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, status, req.params.id]
+        );
+        console.log('[PCP/QUALIDADE] NC atualizada:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_nao_conformidades WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] NC excluída:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    // --- CHECKLISTS: CRUD ---
+    router.get('/qualidade/checklists', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = `SELECT c.*, (SELECT COUNT(*) FROM qualidade_checklist_itens WHERE checklist_id = c.id) as total_itens
+                    FROM qualidade_checklists c WHERE 1=1`;
+        const params = [];
+        if (req.query.ativo) { sql += ' AND c.ativo = ?'; params.push(req.query.ativo); }
+        sql += ' ORDER BY c.nome';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_checklists WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Checklist não encontrado' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.get('/qualidade/checklists/:id/itens', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_checklist_itens WHERE checklist_id = ? ORDER BY ordem', [req.params.id]);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.post('/qualidade/checklists', authenticateToken, asyncHandler(async (req, res) => {
+        const { nome, tipo_inspecao, itens } = req.body;
+        const [result] = await pool.query(
+            'INSERT INTO qualidade_checklists (nome, tipo_inspecao) VALUES (?, ?)', [nome, tipo_inspecao]
+        );
+        const checklistId = result.insertId;
+        if (itens && itens.length > 0) {
+            const values = itens.map(i => [checklistId, i.descricao, i.ordem || 0]);
+            await pool.query('INSERT INTO qualidade_checklist_itens (checklist_id, descricao, ordem) VALUES ?', [values]);
+        }
+        console.log('[PCP/QUALIDADE] Checklist criado:', checklistId);
+        res.json({ success: true, id: checklistId });
+    }));
+
+    router.put('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { nome, tipo_inspecao, itens } = req.body;
+        await pool.query('UPDATE qualidade_checklists SET nome=?, tipo_inspecao=? WHERE id=?', [nome, tipo_inspecao, req.params.id]);
+        // Rebuild itens
+        await pool.query('DELETE FROM qualidade_checklist_itens WHERE checklist_id = ?', [req.params.id]);
+        if (itens && itens.length > 0) {
+            const values = itens.map(i => [req.params.id, i.descricao, i.ordem || 0]);
+            await pool.query('INSERT INTO qualidade_checklist_itens (checklist_id, descricao, ordem) VALUES ?', [values]);
+        }
+        console.log('[PCP/QUALIDADE] Checklist atualizado:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_checklist_itens WHERE checklist_id = ?', [req.params.id]);
+        await pool.query('DELETE FROM qualidade_checklists WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] Checklist excluído:', req.params.id);
+        res.json({ success: true });
+    }));
+
     return router;
 };

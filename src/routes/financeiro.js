@@ -1,7 +1,7 @@
 /**
  * Rotas de API - Módulo Financeiro
  * Controle de Contas a Pagar e Contas a Receber com permissões por usuário
- * 
+ *
  * Usa pool centralizado (database/pool.js) e auth centralizado (middleware/auth-central.js)
  */
 
@@ -34,7 +34,7 @@ function authorizeFinanceiro(section) {
         try {
             const userEmail = req.user?.email?.toLowerCase();
             const userRole = req.user?.role;
-            
+
             if (!userEmail) {
                 return res.status(401).json({ error: 'Usuário não identificado' });
             }
@@ -105,9 +105,9 @@ function authorizeFinanceiro(section) {
                 'dashboard': 'o Dashboard Financeiro'
             };
             const sectionName = sectionMessages[section] || 'o módulo financeiro';
-            
-            return res.status(403).json({ 
-                error: `Acesso negado. Você não tem permissão para acessar ${sectionName}.` 
+
+            return res.status(403).json({
+                error: `Acesso negado. Você não tem permissão para acessar ${sectionName}.`
             });
         } catch (error) {
             console.error('[Financeiro] Erro no middleware de autorização:', error);
@@ -159,12 +159,12 @@ function sanitizeString(str) {
  */
 function validateContaInput(data, tipo = 'receber') {
     const errors = [];
-    
+
     // Campos obrigatórios
     if (!data.descricao || data.descricao.trim() === '') {
         errors.push('Descrição é obrigatória');
     }
-    
+
     // Validação de valor
     if (data.valor === undefined || data.valor === null || data.valor === '') {
         errors.push('Valor é obrigatório');
@@ -173,7 +173,7 @@ function validateContaInput(data, tipo = 'receber') {
     } else if (parseFloat(data.valor) <= 0) {
         errors.push('Valor deve ser maior que zero');
     }
-    
+
     // Validação de data de vencimento
     const vencimento = data.vencimento || data.data_vencimento;
     if (!vencimento) {
@@ -181,12 +181,12 @@ function validateContaInput(data, tipo = 'receber') {
     } else if (!isValidDate(vencimento)) {
         errors.push('Data de vencimento inválida. Use o formato YYYY-MM-DD');
     }
-    
+
     // Validação específica por tipo
     if (tipo === 'receber' && !data.cliente) {
         errors.push('Cliente é obrigatório para contas a receber');
     }
-    
+
     return {
         isValid: errors.length === 0,
         errors
@@ -203,10 +203,10 @@ function validateContaInput(data, tipo = 'receber') {
  */
 function optionalAuth(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = (authHeader && authHeader.split(' ')[1]) || 
-                 req.cookies?.authToken || 
+    const token = (authHeader && authHeader.split(' ')[1]) ||
+                 req.cookies?.authToken ||
                  req.cookies?.token;
-    
+
     if (token) {
         jwt.verify(token, JWT_SECRET, { algorithms: ['HS256'] }, (err, user) => {
             if (!err) {
@@ -227,28 +227,28 @@ function optionalAuth(req, res, next) {
 router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando resumo KPIs...');
-        
+
         // Total a receber (com corte temporal 2026)
         const corte = req.financeiroCorteTemporal;
         const [receberTotal] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(SUM(valor), 0) as total,
                 COUNT(*) as quantidade
             FROM contas_receber cr
             WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corte.crClause('cr')}
         `);
-        
+
         // Total a pagar (com corte temporal 2026)
         const [pagarTotal] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(SUM(valor), 0) as total,
                 COUNT(*) as quantidade
             FROM contas_pagar cp
             WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corte.cpClause('cp')}
         `);
-        
+
         // Vencidos - com contagem e valor separados por tipo (com corte temporal 2026)
         const [vencidosReceber] = await pool.execute(`
             SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
@@ -257,7 +257,7 @@ router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visuali
             AND cr.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corte.crClause('cr')}
         `);
-        
+
         const [vencidosPagar] = await pool.execute(`
             SELECT COUNT(*) as quantidade, COALESCE(SUM(valor), 0) as valor_total
             FROM contas_pagar cp
@@ -265,16 +265,16 @@ router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visuali
             AND cp.status IN ('vencida', 'a_vencer', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corte.cpClause('cp')}
         `);
-        
+
         const totalReceber = parseFloat(receberTotal[0]?.total || 0);
         const totalPagar = parseFloat(pagarTotal[0]?.total || 0);
         const saldo = totalReceber - totalPagar;
         const vencReceber = vencidosReceber[0]?.quantidade || 0;
         const vencPagar = vencidosPagar[0]?.quantidade || 0;
         const totalVencidos = vencReceber + vencPagar;
-        
+
         console.log('[Financeiro] KPIs:', { totalReceber, totalPagar, saldo, totalVencidos });
-        
+
         res.json({
             success: true,
             data: {
@@ -303,10 +303,10 @@ router.get('/resumo-kpis', authenticateToken, checkFinanceiroPermission('visuali
 router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         const limite = Math.min(Math.max(parseInt(req.query.limite) || 5, 1), 100);
-        
+
         // Buscar próximos vencimentos de contas a receber (últimos 30 dias vencidos + futuros)
         const [receber] = await pool.query(`
-            SELECT 
+            SELECT
                 cr.id,
                 'receber' as tipo,
                 COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'N/D') as descricao,
@@ -320,10 +320,10 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
             ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC
             LIMIT ?
         `, [limite]);
-        
+
         // Buscar próximos vencimentos de contas a pagar (últimos 30 dias vencidos + futuros)
         const [pagar] = await pool.query(`
-            SELECT 
+            SELECT
                 cp.id,
                 'pagar' as tipo,
                 COALESCE(f.nome_fantasia, f.razao_social, f.nome, cp.descricao, 'N/D') as descricao,
@@ -337,12 +337,12 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
             ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC
             LIMIT ?
         `, [limite]);
-        
+
         // Combinar e ordenar por data
         const todas = [...receber, ...pagar]
             .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento))
             .slice(0, limite);
-        
+
         res.json({ success: true, data: todas });
     } catch (error) {
         console.error('[Financeiro] Erro ao buscar vencimentos:', error);
@@ -357,10 +357,10 @@ router.get('/proximos-vencimentos', authenticateToken, checkFinanceiroPermission
 router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission('visualizar'), async (req, res) => {
     try {
         const limite = Math.min(Math.max(parseInt(req.query.limite) || 10, 1), 100);
-        
+
         // Buscar últimos lançamentos de receber
         const [receber] = await pool.query(`
-            SELECT 
+            SELECT
                 cr.id,
                 'Receber' as tipo,
                 COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'N/D') as descricao,
@@ -373,10 +373,10 @@ router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission(
             ORDER BY cr.data_criacao DESC
             LIMIT ?
         `, [limite]);
-        
+
         // Buscar últimos lançamentos de pagar
         const [pagar] = await pool.query(`
-            SELECT 
+            SELECT
                 cp.id,
                 'Pagar' as tipo,
                 COALESCE(f.nome_fantasia, f.razao_social, f.nome, cp.descricao, 'N/D') as descricao,
@@ -389,12 +389,12 @@ router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission(
             ORDER BY cp.data_criacao DESC
             LIMIT ?
         `, [limite]);
-        
+
         // Combinar e ordenar por data de criação
         const todas = [...receber, ...pagar]
             .sort((a, b) => new Date(b.data_criacao || b.data_vencimento) - new Date(a.data_criacao || a.data_vencimento))
             .slice(0, limite);
-        
+
         res.json({ success: true, data: todas });
     } catch (error) {
         console.error('[Financeiro] Erro ao buscar lançamentos:', error);
@@ -409,13 +409,13 @@ router.get('/ultimos-lancamentos', authenticateToken, checkFinanceiroPermission(
 router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('fluxo_caixa'), async (req, res) => {
     try {
         console.log('[Financeiro] Buscando fluxo de caixa...');
-        
+
         const { dataInicio, dataFim, periodo } = req.query;
-        
+
         // Definir período baseado no parâmetro
         let inicio, fim;
         const hoje = new Date();
-        
+
         switch(periodo) {
             case '7d':
                 inicio = new Date(hoje);
@@ -437,7 +437,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
                 fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
                 break;
         }
-        
+
         const inicioStr = dataInicio || inicio.toISOString().split('T')[0];
         const fimStr = dataFim || fim.toISOString().split('T')[0];
 
@@ -448,7 +448,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
 
         // Contas a receber projetadas
         const [receber] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(COALESCE(data_vencimento, vencimento)) as data,
                 SUM(valor - COALESCE(valor_recebido, 0)) as valor,
                 'entrada' as tipo,
@@ -464,7 +464,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
 
         // Contas a pagar projetadas
         const [pagar] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(COALESCE(data_vencimento, vencimento)) as data,
                 SUM(valor - COALESCE(valor_pago, 0)) as valor,
                 'saida' as tipo,
@@ -508,7 +508,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
 
         // Lista de movimentações detalhadas
         const [movimentacoesReceber] = await pool.execute(`
-            SELECT 
+            SELECT
                 'entrada' as tipo,
                 COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'Recebimento') as descricao,
                 COALESCE(cat.nome, cr.categoria_nome, 'Vendas') as categoria,
@@ -524,7 +524,7 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
         `, [inicioStr, fimStr]);
 
         const [movimentacoesPagar] = await pool.execute(`
-            SELECT 
+            SELECT
                 'saida' as tipo,
                 COALESCE(f.nome_fantasia, f.nome, cp.descricao, 'Pagamento') as descricao,
                 COALESCE(cat.nome, 'Fornecedores') as categoria,
@@ -551,11 +551,11 @@ router.get('/fluxo-caixa-resumo', authenticateToken, checkFinanceiroPermission('
         const totalPagar = pagar.reduce((acc, p) => acc + (parseFloat(p.valor) || 0), 0);
         const saldoInicialNum = parseFloat(saldoInicial[0]?.saldo) || 0;
 
-        console.log('[Financeiro] Fluxo de caixa:', { 
-            saldoInicial: saldoInicialNum, 
-            totalReceber, 
-            totalPagar, 
-            diasComMovimento: fluxoArray.length 
+        console.log('[Financeiro] Fluxo de caixa:', {
+            saldoInicial: saldoInicialNum,
+            totalReceber,
+            totalPagar,
+            diasComMovimento: fluxoArray.length
         });
 
         res.json({
@@ -585,20 +585,20 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
     try {
         console.log('[Financeiro] Buscando dados de conciliação...');
         const corte = req.financeiroCorteTemporal;
-        
+
         // Buscar contas bancárias
         const [contas] = await pool.execute(`
-            SELECT 
+            SELECT
                 id, banco, agencia, conta, tipo, saldo_atual, ativo,
                 DATE_FORMAT(updated_at, '%d/%m/%Y') as ultima_atualizacao
-            FROM contas_bancarias 
+            FROM contas_bancarias
             WHERE ativo = 1
             ORDER BY banco
         `);
 
         // Calcular totais por status
         const [pendentes] = await pool.execute(`
-            SELECT 
+            SELECT
                 'receber' as tipo,
                 COUNT(*) as quantidade,
                 COALESCE(SUM(valor), 0) as total
@@ -606,7 +606,7 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
             WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
               ${corte.crClause('cr')}
             UNION ALL
-            SELECT 
+            SELECT
                 'pagar' as tipo,
                 COUNT(*) as quantidade,
                 COALESCE(SUM(valor), 0) as total
@@ -617,7 +617,7 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
 
         // Movimentações recentes para conciliar
         const [movimentacoes] = await pool.execute(`
-            (SELECT 
+            (SELECT
                 'entrada' as tipo,
                 cr.id,
                 COALESCE(c.nome_fantasia, c.razao_social, cr.descricao, 'Recebimento') as descricao,
@@ -632,7 +632,7 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
             ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC
             LIMIT 20)
             UNION ALL
-            (SELECT 
+            (SELECT
                 'saida' as tipo,
                 cp.id,
                 COALESCE(f.nome_fantasia, f.nome, cp.descricao, 'Pagamento') as descricao,
@@ -652,7 +652,7 @@ router.get('/conciliacao-resumo', authenticateToken, checkFinanceiroPermission('
 
         // Saldo total das contas
         const saldoTotal = contas.reduce((acc, c) => acc + (parseFloat(c.saldo_atual) || 0), 0);
-        
+
         // Pendentes
         const pendenteReceber = pendentes.find(p => p.tipo === 'receber') || { quantidade: 0, total: 0 };
         const pendentePagar = pendentes.find(p => p.tipo === 'pagar') || { quantidade: 0, total: 0 };
@@ -782,7 +782,7 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
         const dataInicio = req.query.dataInicio || req.query.data_inicio;
         const dataFim = req.query.dataFim || req.query.data_fim;
         let query = `
-            SELECT 
+            SELECT
                 cr.id,
                 cr.cliente_id,
                 COALESCE(c.nome_fantasia, c.razao_social, cr.cliente_nome, cr.descricao, 'N/D') as cliente_nome,
@@ -811,6 +811,14 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
                 3 as dias_lembrete,
                 NULL as recorrencia,
                 cr.empresa,
+                CASE UPPER(TRIM(cr.empresa))
+                    WHEN 'ALUFORCE' THEN '08.192.479/0001-60'
+                    WHEN 'LABOR' THEN '35.165.246/0001-06'
+                    WHEN 'LABOR ELETRIC' THEN '35.165.246/0001-06'
+                    WHEN 'ENERGY' THEN '53.937.474/0001-20'
+                    WHEN 'LABOR ENERGY' THEN '53.937.474/0001-20'
+                    ELSE ''
+                END as cnpj_empresa,
                 cr.portador,
                 cr.nota_fiscal,
                 cr.parcela_info,
@@ -864,7 +872,7 @@ router.get('/contas-receber', authenticateToken, authorizeFinanceiro('receber'),
         }
 
         query += ' ORDER BY COALESCE(cr.data_vencimento, cr.vencimento) ASC';
-        
+
         if (limite) {
             query += ' LIMIT ?';
             params.push(Math.min(Math.max(parseInt(limite), 1), 100));
@@ -888,7 +896,7 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
         const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
         const corteStat = req.financeiroCorteTemporal;
-        
+
         // Total a receber (a_vencer + vencida — novo domínio)
         const [totalReceber] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as total_receber
@@ -896,7 +904,7 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
             WHERE cr.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corteStat.crClause('cr')}
         `);
-        
+
         // Vencendo em 7 dias
         const [vencendo] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencendo
@@ -905,7 +913,7 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
             AND COALESCE(cr.data_vencimento, cr.vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
             ${corteStat.crClause('cr')}
         `, [hoje, hoje]);
-        
+
         // Vencidas
         const [vencidas] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencidas
@@ -914,7 +922,7 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
             AND COALESCE(cr.data_vencimento, cr.vencimento) < ?
             ${corteStat.crClause('cr')}
         `, [hoje]);
-        
+
         // Liquidadas no mês atual (novo domínio)
         const [recebidasMes] = await pool.execute(`
             SELECT COALESCE(SUM(COALESCE(valor_recebido, valor)), 0) as recebidas_mes
@@ -923,7 +931,7 @@ router.get('/contas-receber/estatisticas', authenticateToken, authorizeFinanceir
             AND COALESCE(cr.data_recebimento, cr.pago_no_dia) BETWEEN ? AND ?
             ${corteStat.crClause('cr')}
         `, [inicioMes, fimMes]);
-        
+
         res.json({
             success: true,
             total_receber: parseFloat(totalReceber[0]?.total_receber || 0),
@@ -945,7 +953,7 @@ router.get('/contas-receber/:id', authenticateToken, authorizeFinanceiro('recebe
     try {
         const { id } = req.params;
         const [rows] = await pool.execute('SELECT * FROM contas_receber WHERE id = ?', [id]);
-        
+
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
@@ -1026,9 +1034,9 @@ router.post('/contas-receber', authenticateToken, authorizeFinanceiro('receber')
         // Validação robusta dos dados de entrada
         const validation = validateContaInput({ cliente, descricao, valor, vencimento }, 'receber');
         if (!validation.isValid) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Dados inválidos',
-                details: validation.errors 
+                details: validation.errors
             });
         }
 
@@ -1042,9 +1050,9 @@ router.post('/contas-receber', authenticateToken, authorizeFinanceiro('receber')
             [sanitizeString(cliente), descricaoSanitizada, valorNumerico, dataVencimento, dataVencimento, tipo || 'VENDA']
         );
 
-        res.status(201).json({ 
+        res.status(201).json({
             message: 'Conta a receber criada com sucesso',
-            id: result.insertId 
+            id: result.insertId
         });
     } catch (error) {
         console.error('[Financeiro] Erro ao criar conta a receber:', error);
@@ -1252,24 +1260,24 @@ router.get('/status-dominio/:tipo', authenticateToken, async (req, res) => {
 router.delete('/contas-receber/:id', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Verificar se a conta existe e seu status
         const [conta] = await pool.execute('SELECT * FROM contas_receber WHERE id = ?', [id]);
         if (conta.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
-        
+
         // Não permitir exclusão de contas já pagas
         if (['liquidada', 'PAGO', 'pago'].includes(conta[0].status)) {
-            return res.status(400).json({ 
-                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.' 
+            return res.status(400).json({
+                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.'
             });
         }
-        
+
         // Soft delete: marcar como cancelada ao invés de deletar
         const [result] = await pool.execute(
-            `UPDATE contas_receber 
-             SET status = 'cancelada', 
+            `UPDATE contas_receber
+             SET status = 'cancelada',
                  deleted_at = NOW(),
                  deleted_by = ?,
                  observacoes = CONCAT(COALESCE(observacoes, ''), ' [CANCELADO] Excluído por ', ?, ' em ', NOW())
@@ -1302,7 +1310,7 @@ router.get('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), asy
         const dataInicio = req.query.dataInicio || req.query.data_inicio;
         const dataFim = req.query.dataFim || req.query.data_fim;
         let query = `
-            SELECT 
+            SELECT
                 cp.id,
                 cp.fornecedor_id,
                 COALESCE(f.nome, f.razao_social, cp.fornecedor_nome, cp.cnpj_cpf, 'N/D') as fornecedor_nome,
@@ -1361,7 +1369,7 @@ router.get('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), asy
         }
 
         query += ' ORDER BY COALESCE(cp.data_vencimento, cp.vencimento) ASC';
-        
+
         if (limite) {
             query += ' LIMIT ?';
             params.push(Math.min(Math.max(parseInt(limite), 1), 100));
@@ -1385,7 +1393,7 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
         const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
         const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
         const corteStat = req.financeiroCorteTemporal;
-        
+
         // Total a pagar (a_vencer + vencida — novo domínio, compat legado)
         const [totalPagar] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as total_pagar
@@ -1393,7 +1401,7 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
             WHERE cp.status IN ('a_vencer', 'vencida', 'pendente', 'parcial', 'PENDENTE', 'PARCIAL')
             ${corteStat.cpClause('cp')}
         `);
-        
+
         // Vencendo em 7 dias
         const [vencendo] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencendo
@@ -1402,7 +1410,7 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
             AND COALESCE(cp.data_vencimento, cp.vencimento) BETWEEN ? AND DATE_ADD(?, INTERVAL 7 DAY)
             ${corteStat.cpClause('cp')}
         `, [hoje, hoje]);
-        
+
         // Vencidas
         const [vencidas] = await pool.execute(`
             SELECT COALESCE(SUM(valor), 0) as vencidas
@@ -1411,7 +1419,7 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
             AND COALESCE(cp.data_vencimento, cp.vencimento) < ?
             ${corteStat.cpClause('cp')}
         `, [hoje]);
-        
+
         // Liquidadas no mês atual (novo domínio)
         const [pagasMes] = await pool.execute(`
             SELECT COALESCE(SUM(COALESCE(valor_pago, valor)), 0) as pagas_mes
@@ -1420,7 +1428,7 @@ router.get('/contas-pagar/estatisticas', authenticateToken, authorizeFinanceiro(
             AND COALESCE(cp.data_pagamento, cp.data_recebimento) BETWEEN ? AND ?
             ${corteStat.cpClause('cp')}
         `, [inicioMes, fimMes]);
-        
+
         res.json({
             success: true,
             total_pagar: parseFloat(totalPagar[0]?.total_pagar || 0),
@@ -1442,7 +1450,7 @@ router.get('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
     try {
         const { id } = req.params;
         const [rows] = await pool.execute('SELECT * FROM contas_pagar WHERE id = ?', [id]);
-        
+
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
@@ -1471,9 +1479,9 @@ router.post('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), as
         // Validação robusta dos dados de entrada
         const validation = validateContaInput({ descricao: descricao || fornecedor, valor: valorFinal, vencimento: dataVencOriginal }, 'pagar');
         if (!validation.isValid) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 error: 'Dados inválidos',
-                details: validation.errors 
+                details: validation.errors
             });
         }
 
@@ -1485,14 +1493,14 @@ router.post('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), as
         const obsSanitizada = sanitizeString(observacoes);
 
         const [result] = await pool.execute(
-            `INSERT INTO contas_pagar (fornecedor_id, fornecedor_nome, descricao, valor, data_vencimento, data_vencimento_original, categoria_id, categoria_nome, banco_id, forma_pagamento, observacoes, numero_documento, codigo_barras_boleto, data_emissao, status) 
+            `INSERT INTO contas_pagar (fornecedor_id, fornecedor_nome, descricao, valor, data_vencimento, data_vencimento_original, categoria_id, categoria_nome, banco_id, forma_pagamento, observacoes, numero_documento, codigo_barras_boleto, data_emissao, status)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "pendente")`,
             [fornecedor_id || null, fornecedor || null, descricaoSanitizada, valorNumerico, dataVencimento, dataVencimentoOriginal, categoria_id || null, categoria || null, bancoId || null, forma_pagamento || null, obsSanitizada || null, numero_documento || null, codigo_barras || null, data_emissao || null]
         );
 
-        res.status(201).json({ 
+        res.status(201).json({
             message: 'Conta a pagar criada com sucesso',
-            id: result.insertId 
+            id: result.insertId
         });
     } catch (error) {
         console.error('[Financeiro] Erro ao criar conta a pagar:', error);
@@ -1507,7 +1515,7 @@ router.post('/contas-pagar', authenticateToken, authorizeFinanceiro('pagar'), as
 router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     try {
         const { id } = req.params;
-        const { 
+        const {
             fornecedor, descricao, valor, vencimento, data_vencimento, data_vencimento_original,
             status, tipo, categoria, numero_documento, observacoes, forma_pagamento, valor_total,
             codigo_barras, conta_bancaria_id, data_emissao
@@ -1515,11 +1523,11 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
 
         const dataVenc = data_vencimento || vencimento;
         const valorFinal = valor_total || valor;
-        
+
         // Build dynamic update query
         const updates = [];
         const params = [];
-        
+
         if (fornecedor !== undefined) { updates.push('fornecedor_nome = ?'); params.push(fornecedor); }
         if (descricao !== undefined) { updates.push('descricao = ?'); params.push(descricao); }
         if (valorFinal !== undefined) { updates.push('valor = ?'); params.push(valorFinal); }
@@ -1534,11 +1542,11 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
         if (codigo_barras !== undefined) { updates.push('codigo_barras_boleto = ?'); params.push(codigo_barras); }
         if (conta_bancaria_id !== undefined) { updates.push('banco_id = ?'); params.push(conta_bancaria_id || null); }
         if (data_emissao !== undefined) { updates.push('data_emissao = ?'); params.push(data_emissao); }
-        
+
         if (updates.length === 0) {
             return res.status(400).json({ error: 'Nenhum campo para atualizar' });
         }
-        
+
         // AUDIT-FIX R2: Guard de idempotência — impedir pagamento duplo
         if (status && ['liquidada', 'pago'].includes(status.toLowerCase())) {
             const [current] = await pool.execute('SELECT status FROM contas_pagar WHERE id = ?', [id]);
@@ -1579,24 +1587,24 @@ router.put('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'),
 router.delete('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         // Verificar se a conta existe e seu status
         const [conta] = await pool.execute('SELECT * FROM contas_pagar WHERE id = ?', [id]);
         if (conta.length === 0) {
             return res.status(404).json({ error: 'Conta não encontrada' });
         }
-        
+
         // Não permitir exclusão de contas já liquidadas
         if (['liquidada', 'pago', 'PAGO'].includes(conta[0].status)) {
-            return res.status(400).json({ 
-                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.' 
+            return res.status(400).json({
+                error: 'Não é possível excluir uma conta já liquidada. Use o estorno primeiro.'
             });
         }
-        
+
         // Soft delete: marcar como cancelada ao invés de deletar
         const [result] = await pool.execute(
-            `UPDATE contas_pagar 
-             SET status = 'cancelada', 
+            `UPDATE contas_pagar
+             SET status = 'cancelada',
                  deleted_at = NOW(),
                  deleted_by = ?,
                  observacoes = CONCAT(COALESCE(observacoes, ''), ' [CANCELADO] Excluído por ', ?, ' em ', NOW())
@@ -1627,12 +1635,12 @@ router.delete('/contas-pagar/:id', authenticateToken, authorizeFinanceiro('pagar
 router.get('/contas-bancarias', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT id, nome, banco, tipo, agencia, conta as numero_conta, 
+            SELECT id, nome, banco, tipo, agencia, conta as numero_conta,
                    saldo_atual as saldo, observacoes, ativo as ativa, created_at
-            FROM contas_bancarias 
+            FROM contas_bancarias
             ORDER BY nome
         `);
-        
+
         res.json(rows);
     } catch (error) {
         console.error('[Financeiro] Erro ao listar contas bancárias:', error);
@@ -1648,13 +1656,13 @@ router.get('/contas-bancarias', authenticateToken, authorizeFinanceiro('bancos')
 router.post('/contas-bancarias', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const { nome, banco, tipo, agencia, numero_conta, saldo, observacoes } = req.body;
-        
+
         const [result] = await pool.query(
             `INSERT INTO contas_bancarias (nome, banco, tipo, agencia, conta, saldo_inicial, saldo_atual, observacoes)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
             [nome, banco, tipo || 'corrente', agencia, numero_conta, saldo || 0, saldo || 0, observacoes]
         );
-        
+
         res.status(201).json({ id: result.insertId, message: 'Conta bancária criada com sucesso' });
     } catch (error) {
         console.error('[Financeiro] Erro ao criar conta bancária:', error);
@@ -1671,15 +1679,15 @@ router.put('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('banc
     try {
         const { id } = req.params;
         const { nome, banco, tipo, agencia, numero_conta, saldo, observacoes, ativa } = req.body;
-        
+
         await pool.query(
-            `UPDATE contas_bancarias 
-             SET nome = ?, banco = ?, tipo = ?, agencia = ?, conta = ?, 
+            `UPDATE contas_bancarias
+             SET nome = ?, banco = ?, tipo = ?, agencia = ?, conta = ?,
                  saldo_atual = ?, observacoes = ?, ativo = ?
              WHERE id = ?`,
             [nome, banco, tipo, agencia, numero_conta, saldo, observacoes, ativa, id]
         );
-        
+
         res.json({ message: 'Conta bancária atualizada com sucesso' });
     } catch (error) {
         console.error('[Financeiro] Erro ao atualizar conta bancária:', error);
@@ -1697,11 +1705,11 @@ router.delete('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('b
         const { id } = req.params;
         // AUDIT-FIX R3: Soft delete em vez de hard DELETE
         const [result] = await pool.query('UPDATE contas_bancarias SET ativo = 0 WHERE id = ?', [id]);
-        
+
         if (result.affectedRows === 0) {
             return res.status(404).json({ error: 'Conta bancária não encontrada' });
         }
-        
+
         res.json({ message: 'Conta bancária removida com sucesso' });
     } catch (error) {
         console.error('[Financeiro] Erro ao remover conta bancária:', error);
@@ -1719,16 +1727,16 @@ router.delete('/contas-bancarias/:id', authenticateToken, authorizeFinanceiro('b
  */
 router.post('/contas-pagar/:id/baixa', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         await connection.beginTransaction();
-        
+
         const { id } = req.params;
-        const { 
-            valor_pago, 
-            data_pagamento, 
-            forma_pagamento, 
-            conta_bancaria_id, 
+        const {
+            valor_pago,
+            data_pagamento,
+            forma_pagamento,
+            conta_bancaria_id,
             observacoes,
             baixa_parcial
         } = req.body;
@@ -1754,7 +1762,7 @@ router.post('/contas-pagar/:id/baixa', authenticateToken, authorizeFinanceiro('p
 
         // Atualizar conta (dentro da transação)
         await connection.execute(
-            `UPDATE contas_pagar 
+            `UPDATE contas_pagar
              SET valor_pago = ?,
                  status = ?,
                  data_recebimento = ?,
@@ -1776,7 +1784,7 @@ router.post('/contas-pagar/:id/baixa', authenticateToken, authorizeFinanceiro('p
         // Commit da transação - todas as operações são atômicas
         await connection.commit();
 
-        res.json({ 
+        res.json({
             success: true,
             message: `Baixa registrada com sucesso. Status: ${novoStatus}`,
             valor_pago: novoValorPago,
@@ -1797,16 +1805,16 @@ router.post('/contas-pagar/:id/baixa', authenticateToken, authorizeFinanceiro('p
  */
 router.post('/contas-receber/:id/baixa', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         await connection.beginTransaction();
-        
+
         const { id } = req.params;
-        const { 
-            valor_recebido, 
-            data_recebimento, 
-            forma_recebimento, 
-            conta_bancaria_id, 
+        const {
+            valor_recebido,
+            data_recebimento,
+            forma_recebimento,
+            conta_bancaria_id,
             observacoes,
             baixa_parcial
         } = req.body;
@@ -1832,7 +1840,7 @@ router.post('/contas-receber/:id/baixa', authenticateToken, authorizeFinanceiro(
 
         // Atualizar conta (dentro da transação)
         await connection.execute(
-            `UPDATE contas_receber 
+            `UPDATE contas_receber
              SET valor_recebido = ?,
                  status = ?,
                  data_recebimento = ?,
@@ -1854,7 +1862,7 @@ router.post('/contas-receber/:id/baixa', authenticateToken, authorizeFinanceiro(
         // Commit da transação
         await connection.commit();
 
-        res.json({ 
+        res.json({
             success: true,
             message: `Recebimento registrado com sucesso. Status: ${novoStatus}`,
             valor_recebido: novoValorRecebido,
@@ -1875,12 +1883,12 @@ router.post('/contas-receber/:id/baixa', authenticateToken, authorizeFinanceiro(
  */
 router.post('/contas-pagar/:id/estornar', authenticateToken, authorizeFinanceiro('pagar'), async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         await connection.beginTransaction();
-        
+
         const { id } = req.params;
-        
+
         const [conta] = await connection.execute('SELECT * FROM contas_pagar WHERE id = ? FOR UPDATE', [id]);
         if (conta.length === 0) {
             await connection.rollback();
@@ -1901,7 +1909,7 @@ router.post('/contas-pagar/:id/estornar', authenticateToken, authorizeFinanceiro
 
         // Resetar conta (dentro da transação)
         await connection.execute(
-            `UPDATE contas_pagar 
+            `UPDATE contas_pagar
              SET valor_pago = 0,
                  status = 'pendente',
                  data_recebimento = NULL,
@@ -1927,12 +1935,12 @@ router.post('/contas-pagar/:id/estornar', authenticateToken, authorizeFinanceiro
  */
 router.post('/contas-receber/:id/estornar', authenticateToken, authorizeFinanceiro('receber'), async (req, res) => {
     const connection = await pool.getConnection();
-    
+
     try {
         await connection.beginTransaction();
-        
+
         const { id } = req.params;
-        
+
         const [conta] = await connection.execute('SELECT * FROM contas_receber WHERE id = ? FOR UPDATE', [id]);
         if (conta.length === 0) {
             await connection.rollback();
@@ -1953,7 +1961,7 @@ router.post('/contas-receber/:id/estornar', authenticateToken, authorizeFinancei
 
         // Resetar conta (dentro da transação)
         await connection.execute(
-            `UPDATE contas_receber 
+            `UPDATE contas_receber
              SET valor_recebido = 0,
                  status = 'pendente',
                  data_recebimento = NULL,
@@ -1984,7 +1992,7 @@ router.post('/contas-receber/:id/estornar', authenticateToken, authorizeFinancei
 router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
     try {
         const { dataInicio, dataFim, tipo } = req.query;
-        
+
         // Data padrão: próximos 30 dias
         const inicio = dataInicio || new Date().toISOString().split('T')[0];
         const fim = dataFim || new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0];
@@ -1997,7 +2005,7 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
 
         // Contas a receber projetadas
         const [receber] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(COALESCE(data_vencimento, vencimento)) as data,
                 SUM(valor - COALESCE(valor_recebido, 0)) as valor,
                 'receber' as tipo,
@@ -2012,7 +2020,7 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
 
         // Contas a pagar projetadas
         const [pagar] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(COALESCE(data_vencimento, vencimento)) as data,
                 SUM(valor - COALESCE(valor_pago, 0)) as valor,
                 'pagar' as tipo,
@@ -2027,7 +2035,7 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
 
         // Movimentações realizadas (baixas)
         const [realizadoReceber] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(data_recebimento) as data,
                 SUM(valor_recebido) as valor,
                 'recebido' as tipo
@@ -2039,7 +2047,7 @@ router.get('/fluxo-caixa', authenticateToken, async (req, res) => {
         `, [inicio, fim]);
 
         const [realizadoPagar] = await pool.execute(`
-            SELECT 
+            SELECT
                 DATE(data_recebimento) as data,
                 SUM(valor_pago) as valor,
                 'pago' as tipo
@@ -2106,19 +2114,19 @@ router.get('/dre', authenticateToken, async (req, res) => {
         const { mes, ano } = req.query;
         const mesAtual = mes || new Date().getMonth() + 1;
         const anoAtual = ano || new Date().getFullYear();
-        
+
         const dataInicio = `${anoAtual}-${String(mesAtual).padStart(2, '0')}-01`;
         const dataFim = new Date(anoAtual, mesAtual, 0).toISOString().split('T')[0];
         const corte = req.financeiroCorteTemporal;
 
         // Receitas por categoria
         const [receitas] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(cat.nome, 'Sem Categoria') as categoria,
                 SUM(cr.valor_recebido) as valor
             FROM contas_receber cr
             LEFT JOIN categorias_financeiro cat ON cr.categoria_id = cat.id
-            WHERE cr.status IN ('liquidada', 'pago') 
+            WHERE cr.status IN ('liquidada', 'pago')
               AND cr.data_recebimento BETWEEN ? AND ?
               ${corte.crClause('cr')}
             GROUP BY cat.nome
@@ -2127,12 +2135,12 @@ router.get('/dre', authenticateToken, async (req, res) => {
 
         // Despesas por categoria
         const [despesas] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(cat.nome, 'Sem Categoria') as categoria,
                 SUM(cp.valor_pago) as valor
             FROM contas_pagar cp
             LEFT JOIN categorias_financeiro cat ON cp.categoria_id = cat.id
-            WHERE cp.status IN ('liquidada', 'pago') 
+            WHERE cp.status IN ('liquidada', 'pago')
               AND cp.data_recebimento BETWEEN ? AND ?
               ${corte.cpClause('cp')}
             GROUP BY cat.nome
@@ -2182,7 +2190,7 @@ router.get('/fundos/posicao', authenticateToken, authorizeFinanceiro('receber'),
         const hoje = new Date().toISOString().split('T')[0];
 
         const [posicao] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(cr.portador, 'Sem Portador') as portador,
                 COUNT(*) as total_titulos,
                 SUM(cr.valor) as valor_total,
@@ -2228,13 +2236,13 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
         const hoje = new Date().toISOString().split('T')[0];
         const corte = req.financeiroCorteTemporal;
         const [pagarVencidas] = await pool.execute(`
-            SELECT 
-                id, descricao, valor, 
+            SELECT
+                id, descricao, valor,
                 COALESCE(data_vencimento, vencimento) as vencimento,
                 DATEDIFF(?, COALESCE(data_vencimento, vencimento)) as dias_atraso,
                 'pagar' as tipo
             FROM contas_pagar cp
-            WHERE cp.status = 'pendente' 
+            WHERE cp.status = 'pendente'
               AND COALESCE(cp.data_vencimento, cp.vencimento) < ?
               ${corte.cpClause('cp')}
             ORDER BY vencimento
@@ -2242,13 +2250,13 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
 
         // Contas a receber vencidas
         const [receberVencidas] = await pool.execute(`
-            SELECT 
+            SELECT
                 id, descricao, valor,
                 COALESCE(data_vencimento, vencimento) as vencimento,
                 DATEDIFF(?, COALESCE(data_vencimento, vencimento)) as dias_atraso,
                 'receber' as tipo
             FROM contas_receber cr
-            WHERE cr.status = 'pendente' 
+            WHERE cr.status = 'pendente'
               AND COALESCE(cr.data_vencimento, cr.vencimento) < ?
               ${corte.crClause('cr')}
             ORDER BY vencimento
@@ -2256,11 +2264,11 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
 
         // Contas vencendo nos próximos 7 dias
         const em7dias = new Date(Date.now() + 7*24*60*60*1000).toISOString().split('T')[0];
-        
+
         const [pagarProximas] = await pool.execute(`
             SELECT id, descricao, valor, COALESCE(data_vencimento, vencimento) as vencimento, 'pagar' as tipo
             FROM contas_pagar cp
-            WHERE cp.status = 'pendente' 
+            WHERE cp.status = 'pendente'
               AND COALESCE(cp.data_vencimento, cp.vencimento) BETWEEN ? AND ?
               ${corte.cpClause('cp')}
             ORDER BY vencimento
@@ -2269,7 +2277,7 @@ router.get('/relatorios/vencimentos', authenticateToken, async (req, res) => {
         const [receberProximas] = await pool.execute(`
             SELECT id, descricao, valor, COALESCE(data_vencimento, vencimento) as vencimento, 'receber' as tipo
             FROM contas_receber cr
-            WHERE cr.status = 'pendente' 
+            WHERE cr.status = 'pendente'
               AND COALESCE(cr.data_vencimento, cr.vencimento) BETWEEN ? AND ?
               ${corte.crClause('cr')}
             ORDER BY vencimento
@@ -2304,7 +2312,7 @@ router.get('/relatorios/por-fornecedor', authenticateToken, async (req, res) => 
     try {
         const corte = req.financeiroCorteTemporal;
         const [resultado] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(f.razao_social, f.nome, cp.cnpj_cpf, 'Não Identificado') as fornecedor,
                 COUNT(*) as quantidade,
                 SUM(cp.valor) as total,
@@ -2333,7 +2341,7 @@ router.get('/relatorios/por-cliente', authenticateToken, async (req, res) => {
     try {
         const corte = req.financeiroCorteTemporal;
         const [resultado] = await pool.execute(`
-            SELECT 
+            SELECT
                 COALESCE(c.razao_social, c.nome_fantasia, cr.descricao, 'Não Identificado') as cliente,
                 COUNT(*) as quantidade,
                 SUM(cr.valor) as total,
@@ -2361,8 +2369,8 @@ router.get('/relatorios/por-cliente', authenticateToken, async (req, res) => {
 router.get('/categorias', authenticateToken, async (req, res) => {
     try {
         const [categorias] = await pool.execute(`
-            SELECT id, nome, tipo 
-            FROM categorias_financeiro 
+            SELECT id, nome, tipo
+            FROM categorias_financeiro
             ORDER BY tipo, nome
         `);
         res.json({ success: true, data: categorias });
@@ -2481,7 +2489,7 @@ router.post('/centros-custo', authenticateToken, authorizeFinanceiro('config'), 
     try {
         const { codigo, nome, departamento, responsavel_id, orcamento, ativo } = req.body;
         const [result] = await pool.query(
-            `INSERT INTO centros_custo (codigo, nome, departamento, responsavel_id, orcamento, ativo, created_at) 
+            `INSERT INTO centros_custo (codigo, nome, departamento, responsavel_id, orcamento, ativo, created_at)
              VALUES (?, ?, ?, ?, ?, ?, NOW())`,
             [codigo, nome, departamento, responsavel_id || null, orcamento || 0, ativo !== false ? 1 : 0]
         );
@@ -2717,7 +2725,7 @@ router.delete('/impostos/:id', authenticateToken, authorizeFinanceiro('config'),
 router.get('/bancos', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const [rows] = await pool.query(`
-            SELECT b.*, 
+            SELECT b.*,
                    COALESCE((SELECT SUM(valor) FROM movimentacoes_bancarias WHERE banco_id = b.id AND tipo = 'entrada' AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())), 0) as entradas_mes,
                    COALESCE((SELECT SUM(valor) FROM movimentacoes_bancarias WHERE banco_id = b.id AND tipo = 'saida' AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())), 0) as saidas_mes
             FROM bancos b
@@ -2738,13 +2746,13 @@ router.get('/bancos/:id', authenticateToken, authorizeFinanceiro('bancos'), asyn
     try {
         const { id } = req.params;
         const [rows] = await pool.query(`
-            SELECT b.*, 
+            SELECT b.*,
                    COALESCE((SELECT SUM(valor) FROM movimentacoes_bancarias WHERE banco_id = b.id AND tipo = 'entrada' AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())), 0) as entradas_mes,
                    COALESCE((SELECT SUM(valor) FROM movimentacoes_bancarias WHERE banco_id = b.id AND tipo = 'saida' AND MONTH(data) = MONTH(CURDATE()) AND YEAR(data) = YEAR(CURDATE())), 0) as saidas_mes
             FROM bancos b
             WHERE b.id = ?
         `, [id]);
-        
+
         if (rows.length === 0) {
             return res.status(404).json({ error: 'Banco não encontrado' });
         }
@@ -2761,10 +2769,10 @@ router.post('/bancos', authenticateToken, authorizeFinanceiro('bancos'), async (
         const { codigo, nome, agencia, conta, tipo, apelido, saldo_inicial, observacoes, ativo,
                 categoria, limite_credito, conta_vinculada, nao_considerar_resumo, data_saldo_inicial } = req.body;
         const [result] = await pool.query(
-            `INSERT INTO bancos (nome, instituicao, tipo_conta, agencia, conta_corrente, saldo_inicial, saldo_atual, limite_credito, status, considera_fluxo, emite_boleto, created_at) 
+            `INSERT INTO bancos (nome, instituicao, tipo_conta, agencia, conta_corrente, saldo_inicial, saldo_atual, limite_credito, status, considera_fluxo, emite_boleto, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NOW())`,
-            [apelido || nome || 'Conta', nome || apelido || '', tipo || categoria || 'Conta Corrente', agencia || '', conta || '', 
-             saldo_inicial || 0, saldo_inicial || 0, limite_credito || 0, 
+            [apelido || nome || 'Conta', nome || apelido || '', tipo || categoria || 'Conta Corrente', agencia || '', conta || '',
+             saldo_inicial || 0, saldo_inicial || 0, limite_credito || 0,
              ativo !== false ? 'ativo' : 'inativo', nao_considerar_resumo ? 0 : 1]
         );
         res.json({ id: result.insertId, message: 'Banco cadastrado com sucesso' });
@@ -2781,9 +2789,9 @@ router.put('/bancos/:id', authenticateToken, authorizeFinanceiro('bancos'), asyn
         const { codigo, nome, agencia, conta, tipo, apelido, observacoes, ativo,
                 categoria, limite_credito, nao_considerar_resumo } = req.body;
         await pool.query(
-            `UPDATE bancos SET nome=?, instituicao=?, tipo_conta=?, agencia=?, conta_corrente=?, 
+            `UPDATE bancos SET nome=?, instituicao=?, tipo_conta=?, agencia=?, conta_corrente=?,
              limite_credito=?, status=?, considera_fluxo=?, updated_at=NOW() WHERE id=?`,
-            [apelido || nome, nome || apelido || '', tipo || categoria || 'Conta Corrente', 
+            [apelido || nome, nome || apelido || '', tipo || categoria || 'Conta Corrente',
              agencia, conta, limite_credito || 0,
              ativo !== false ? 'ativo' : 'inativo', nao_considerar_resumo ? 0 : 1, id]
         );
@@ -2834,22 +2842,48 @@ router.get('/bancos/:id/movimentacoes', authenticateToken, async (req, res) => {
     }
 });
 
+// Extrato bancário (usado pelo modal extrato em bancos.html)
+router.get('/bancos/:id/extrato', authenticateToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { data_inicio, data_fim, limit = 500 } = req.query;
+        let sql = `
+            SELECT m.*, m.cliente_fornecedor as descricao, m.cliente_fornecedor as descrição, m.saldo as saldo_apos,
+                   b.nome as banco_nome, b.apelido as banco_apelido
+            FROM movimentacoes_bancarias m
+            JOIN bancos b ON m.banco_id = b.id
+            WHERE m.banco_id = ?
+        `;
+        const params = [id];
+        if (data_inicio) { sql += ' AND m.data >= ?'; params.push(data_inicio); }
+        if (data_fim) { sql += ' AND m.data <= ?'; params.push(data_fim); }
+        sql += ' ORDER BY m.data DESC, m.id DESC LIMIT ?';
+        params.push(parseInt(limit));
+        const [movimentacoes] = await pool.execute(sql, params);
+        res.json(movimentacoes);
+    } catch (error) {
+        console.error('[Financeiro] Erro ao buscar extrato:', error);
+        if (error.code === 'ER_NO_SUCH_TABLE') return res.json([]);
+        res.status(500).json({ error: 'Erro ao buscar extrato' });
+    }
+});
+
 // Listar todas as movimentações bancárias
 // [SEGURANÇA] Rota protegida com autenticação - Corrigido em 2026-01-21
 router.get('/movimentacoes-bancarias', authenticateToken, authorizeFinanceiro('bancos'), async (req, res) => {
     try {
         const { limit = 50, conta_id } = req.query;
-        
+
         // Verificar se tabela movimentacoes_bancarias existe
         const [tables] = await pool.query("SHOW TABLES LIKE 'movimentacoes_bancarias'");
-        
+
         if (tables.length > 0) {
             let query = `
-                SELECT 
+                SELECT
                     m.id,
                     m.data,
                     m.banco_id,
-                    COALESCE(b.nome, 'Conta Bancária') as banco_nome, 
+                    COALESCE(b.nome, 'Conta Bancária') as banco_nome,
                     COALESCE(b.nome, 'Conta Bancária') as banco_apelido,
                     COALESCE(m.cliente_fornecedor, m.categoria, 'Movimentação') as descricao,
                     m.tipo,
@@ -2862,22 +2896,22 @@ router.get('/movimentacoes-bancarias', authenticateToken, authorizeFinanceiro('b
                 LEFT JOIN bancos b ON m.banco_id = b.id
             `;
             const params = [];
-            
+
             if (conta_id) {
                 query += ' WHERE m.banco_id = ?';
                 params.push(conta_id);
             }
-            
+
             query += ' ORDER BY m.data DESC, m.id DESC LIMIT ?';
             params.push(parseInt(limit));
-            
+
             const [rows] = await pool.query(query, params);
-            
+
             if (rows.length > 0) {
                 return res.json(rows);
             }
         }
-        
+
         // Se não tem movimentações na tabela principal, retornar array vazio
         res.json([]);
     } catch (error) {
@@ -2894,36 +2928,36 @@ router.post('/movimentacoes-bancarias', authenticateToken, async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
-        
+
         const { banco_id, tipo, valor, data, descricao, categoria } = req.body;
-        
+
         // Buscar saldo atual do banco
         const [bancoRows] = await connection.query('SELECT saldo FROM bancos WHERE id = ?', [banco_id]);
         if (bancoRows.length === 0) {
             await connection.rollback();
             return res.status(404).json({ error: 'Banco não encontrado' });
         }
-        
+
         let saldoAtual = parseFloat(bancoRows[0].saldo) || 0;
         const valorMovimento = parseFloat(valor);
-        
+
         // Calcular novo saldo
         if (tipo === 'entrada') {
             saldoAtual += valorMovimento;
         } else {
             saldoAtual -= valorMovimento;
         }
-        
+
         // Inserir movimentação
         const [result] = await connection.query(
-            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo_apos, data, descricao, categoria, created_at) 
+            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo_apos, data, descricao, categoria, created_at)
              VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
             [banco_id, tipo, valorMovimento, saldoAtual, data, descricao, categoria || null]
         );
-        
+
         // Atualizar saldo do banco
         await connection.query('UPDATE bancos SET saldo = ?, updated_at = NOW() WHERE id = ?', [saldoAtual, banco_id]);
-        
+
         await connection.commit();
         res.json({ id: result.insertId, saldo: saldoAtual, message: 'Movimentação registrada com sucesso' });
     } catch (error) {
@@ -2940,48 +2974,48 @@ router.post('/transferencia-bancaria', authenticateToken, async (req, res) => {
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
-        
+
         const { conta_origem, conta_destino, valor, data, descricao } = req.body;
         const valorTransf = parseFloat(valor);
-        
+
         // Buscar bancos
         const [origemRows] = await connection.query('SELECT * FROM bancos WHERE id = ?', [conta_origem]);
         const [destinoRows] = await connection.query('SELECT * FROM bancos WHERE id = ?', [conta_destino]);
-        
+
         if (origemRows.length === 0 || destinoRows.length === 0) {
             await connection.rollback();
             return res.status(404).json({ error: 'Conta bancária não encontrada' });
         }
-        
+
         const bancoOrigem = origemRows[0];
         const bancoDestino = destinoRows[0];
-        
+
         if (parseFloat(bancoOrigem.saldo) < valorTransf) {
             await connection.rollback();
             return res.status(400).json({ error: 'Saldo insuficiente na conta de origem' });
         }
-        
+
         const novoSaldoOrigem = parseFloat(bancoOrigem.saldo_atual || 0) - valorTransf;
         const novoSaldoDestino = parseFloat(bancoDestino.saldo_atual || 0) + valorTransf;
-        
+
         // Movimentação de saída na origem
         await connection.query(
-            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo, data, categoria, observacoes, created_at) 
+            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo, data, categoria, observacoes, created_at)
              VALUES (?, 'saida', ?, ?, ?, 'transferencia', ?, NOW())`,
             [conta_origem, valorTransf, novoSaldoOrigem, data, descricao || `Transferência para ${bancoDestino.nome}`]
         );
-        
+
         // Movimentação de entrada no destino
         await connection.query(
-            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo, data, categoria, observacoes, created_at) 
+            `INSERT INTO movimentacoes_bancarias (banco_id, tipo, valor, saldo, data, categoria, observacoes, created_at)
              VALUES (?, 'entrada', ?, ?, ?, 'transferencia', ?, NOW())`,
             [conta_destino, valorTransf, novoSaldoDestino, data, descricao || `Transferência de ${bancoOrigem.nome}`]
         );
-        
+
         // Atualizar saldos
         await connection.query('UPDATE bancos SET saldo_atual = ?, updated_at = NOW() WHERE id = ?', [novoSaldoOrigem, conta_origem]);
         await connection.query('UPDATE bancos SET saldo_atual = ?, updated_at = NOW() WHERE id = ?', [novoSaldoDestino, conta_destino]);
-        
+
         await connection.commit();
         res.json({ message: 'Transferência realizada com sucesso' });
     } catch (error) {
@@ -3038,7 +3072,7 @@ router.post('/importar/contas-pagar', authenticateToken, authorizeFinanceiro('pa
                 }
 
                 await pool.execute(
-                    `INSERT INTO contas_pagar (descricao, valor, data_vencimento, data_vencimento_original, categoria_nome, forma_pagamento, observacoes, numero_documento, status) 
+                    `INSERT INTO contas_pagar (descricao, valor, data_vencimento, data_vencimento_original, categoria_nome, forma_pagamento, observacoes, numero_documento, status)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                     [fornecedor + (descricao && descricao !== fornecedor ? ' - ' + descricao : ''), valor, dataVenc, dataVenc, categoria, forma_pagamento, (empresa + ' ' + observacoes).trim(), numero_documento, status]
                 );
@@ -3346,7 +3380,7 @@ router.get('/prazo-medio', authenticateToken, async (req, res) => {
 
         // === CONTAS A RECEBER - por empresa ===
         const crQuery = `
-            SELECT 
+            SELECT
                 COALESCE(UPPER(TRIM(cr.empresa)), 'SEM EMPRESA') as empresa,
                 DATE_FORMAT(COALESCE(cr.data_vencimento, cr.vencimento), '%Y-%m-%d') as dia_vencimento,
                 COUNT(*) as qtd_titulos,
@@ -3365,7 +3399,7 @@ router.get('/prazo-medio', authenticateToken, async (req, res) => {
 
         // === CONTAS A PAGAR - por empresa ===
         const cpQuery = `
-            SELECT 
+            SELECT
                 COALESCE(UPPER(TRIM(cp.minha_empresa_nome_fantasia)), 'SEM EMPRESA') as empresa,
                 DATE_FORMAT(COALESCE(cp.data_vencimento, cp.vencimento), '%Y-%m-%d') as dia_vencimento,
                 COUNT(*) as qtd_titulos,

@@ -430,7 +430,7 @@ module.exports = function createPCPRoutes(deps) {
 
             // Detectar qual tabela existe
             let tabela = 'materiais';
-            let colunas = 'id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao';
+            let colunas = 'id, codigo_material, descricao, unidade_medida, quantidade_estoque, fornecedor_padrao, tipo, custo_unitario, ncm, gtin, ativo';
             try {
                 await pool.query("SELECT 1 FROM materiais LIMIT 1");
             } catch (e) {
@@ -1784,64 +1784,8 @@ module.exports = function createPCPRoutes(deps) {
         }
     });
 
-    // API para dashboard do PCP - Contadores
-    // SECURITY: Requer autenticação
-    router.get('/dashboard', authenticateToken, async (req, res) => {
-        try {
-            console.log('📊 Carregando dashboard PCP...');
-
-            // Total de produtos ALUFORCE (marca = 'Aluforce')
-            const [produtosResult] = await pool.query("SELECT COUNT(*) as total FROM produtos WHERE marca = 'Aluforce'");
-            const totalProdutos = produtosResult[0]?.total || 0;
-
-            // Ordens em produção
-            const [ordensResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status IN ('em_producao', 'a_produzir', 'em_andamento', 'iniciado')
-            `);
-            const ordensEmProducao = ordensResult[0]?.total || 0;
-
-            // Estoque baixo (produtos com estoque abaixo do mínimo)
-            const [estoqueBaixoResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM produtos
-                WHERE quantidade_estoque < COALESCE(estoque_minimo, 10)
-                AND quantidade_estoque >= 0
-                AND marca = 'Aluforce'
-            `);
-            const estoqueBaixo = estoqueBaixoResult[0]?.total || 0;
-
-            // Entregas pendentes (esta semana) - usando data_prevista que existe na tabela
-            const [entregasResult] = await pool.query(`
-                SELECT COUNT(*) as total FROM ordens_producao
-                WHERE status NOT IN ('entregue', 'concluido', 'cancelado', 'finalizado')
-                AND data_prevista BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 7 DAY)
-            `);
-            const entregasPendentes = entregasResult[0]?.total || 0;
-
-            // Total de materiais
-            const [materiaisResult] = await pool.query('SELECT COUNT(*) as total FROM materiais');
-            const totalMateriais = materiaisResult[0]?.total || 0;
-
-            console.log(`📊 Dashboard PCP: Produtos=${totalProdutos}, Ordens=${ordensEmProducao}, Estoque Baixo=${estoqueBaixo}, Entregas=${entregasPendentes}, Materiais=${totalMateriais}`);
-
-            res.json({
-                totalProdutos,
-                ordensEmProducao,
-                estoqueBaixo,
-                entregasPendentes,
-                totalMateriais
-            });
-        } catch (error) {
-            console.error('❌ Erro ao carregar dashboard PCP:', error);
-            res.json({
-                totalProdutos: 0,
-                ordensEmProducao: 0,
-                estoqueBaixo: 0,
-                entregasPendentes: 0,
-                totalMateriais: 0
-            });
-        }
-    });
+    // [REMOVIDA] Rota /dashboard duplicada com queries hardcoded para 'Aluforce'.
+    // A rota principal /dashboard (linha ~138) é genérica e funciona para todas as empresas.
 
     // [REFACTORED] Diario de Producao (registro diario, CRUD)
     require('./pcp/diario-producao-routes')(router, deps);
@@ -3661,19 +3605,29 @@ module.exports = function createPCPRoutes(deps) {
             } catch (excelError) {
                 console.error('[XLSX] Erro ao gerar:', excelError.message);
 
-                // Fallback para CSV
-                const csvBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
+                // 🔧 FIX BUG-R5-31: Wrap CSV fallback em try/catch para não crashar silenciosamente
+                try {
+                    const csvBuffer = await gerarExcelOrdemProducaoFallback(dadosOrdem);
 
-                const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
-                const nomeArquivo = `Ordem de Produção - ${nomeCliente} - ERP.csv`;
+                    const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+                    const nomeArquivo = `Ordem de Produção - ${nomeCliente} - ERP.csv`;
+                    const encodedCsvName = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+                    const asciiCsvName = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
 
-                res.setHeader('Content-Disposition', `attachment; filename="${nomeArquivo}"`);
-                res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-                res.setHeader('Content-Length', csvBuffer.length);
+                    res.setHeader('Content-Disposition', `attachment; filename="${asciiCsvName}"; filename*=UTF-8''${encodedCsvName}`);
+                    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+                    res.setHeader('Content-Length', csvBuffer.length);
 
-                res.send(csvBuffer);
+                    res.send(csvBuffer);
 
-                console.log(`✅ CSV gerado com sucesso como fallback: ${nomeArquivo}`);
+                    console.log(`✅ CSV gerado com sucesso como fallback: ${nomeArquivo}`);
+                } catch (csvError) {
+                    console.error('[CSV Fallback] Também falhou:', csvError.message);
+                    res.status(500).json({
+                        error: 'Erro ao gerar Excel e CSV. Contate o suporte.',
+                        detalhe: excelError.message
+                    });
+                }
             }
 
         } catch (error) {
@@ -3681,6 +3635,141 @@ module.exports = function createPCPRoutes(deps) {
             res.status(500).json({
                 error: 'Erro interno do servidor ao gerar Excel'
             });
+        }
+    });
+
+    // ==================== ORDEM DE PRODUÇÃO → PDF (XSL-FO / Apache FOP) ====================
+    // Pipeline: dados → XML (xmlbuilder2) → XSLT transforma em XSL-FO → Apache FOP gera PDF
+    const { gerarOrdemXML } = require('../services/ordem-xml-generator');
+    const { gerarPdfComFop, verificarFop } = require('../services/fop-pdf-service');
+
+    // GET /api/ordem-pdf/status - Verifica se FOP está disponível
+    router.get('/api/ordem-pdf/status', authenticateToken, (req, res) => {
+        const status = verificarFop();
+        res.json({ fop: status });
+    });
+
+    // POST /api/gerar-ordem-pdf - Gera PDF da Ordem de Produção via XSL-FO
+    router.post('/api/gerar-ordem-pdf', authenticateToken, async (req, res) => {
+        try {
+            console.log('📄 Iniciando geração de Ordem de Produção em PDF (XSL-FO)...');
+
+            const dadosOrdem = req.body;
+
+            // Normalizar campos com cedilha (mesmo tratamento da rota Excel)
+            if (!dadosOrdem.numero_orcamento && dadosOrdem['num_orçamento']) {
+                dadosOrdem.numero_orcamento = dadosOrdem['num_orçamento'];
+            }
+            if (!dadosOrdem.numero_orcamento && dadosOrdem.num_orcamento) {
+                dadosOrdem.numero_orcamento = dadosOrdem.num_orcamento;
+            }
+            if (!dadosOrdem.numero_pedido && dadosOrdem.num_pedido) {
+                dadosOrdem.numero_pedido = dadosOrdem.num_pedido;
+            }
+
+            // Validar dados obrigatórios
+            if (!dadosOrdem.numero_orcamento || !dadosOrdem.cliente) {
+                return res.status(400).json({
+                    error: 'Dados obrigatórios não fornecidos (numero_orcamento, cliente)'
+                });
+            }
+
+            // Enriquecer dados do cliente via banco (se faltam campos)
+            if (dadosOrdem.cliente && (!dadosOrdem.cpf_cnpj || !dadosOrdem.contato_cliente || !dadosOrdem.fone_cliente)) {
+                try {
+                    const [clienteRows] = await pool.query(
+                        'SELECT cnpj_cpf, contato, telefone, email, endereco, bairro, cidade, estado, cep FROM clientes WHERE (nome = ? OR razao_social = ? OR nome_fantasia = ?) AND ativo = 1 LIMIT 1',
+                        [dadosOrdem.cliente, dadosOrdem.cliente, dadosOrdem.cliente]
+                    );
+                    if (clienteRows.length > 0) {
+                        const cli = clienteRows[0];
+                        if (!dadosOrdem.cpf_cnpj) dadosOrdem.cpf_cnpj = cli.cnpj_cpf || '';
+                        if (!dadosOrdem.contato_cliente) dadosOrdem.contato_cliente = cli.contato || '';
+                        if (!dadosOrdem.fone_cliente) dadosOrdem.fone_cliente = cli.telefone || '';
+                        if (!dadosOrdem.email_cliente) dadosOrdem.email_cliente = cli.email || '';
+                        if (!dadosOrdem.endereco) dadosOrdem.endereco = [cli.endereco, cli.bairro, cli.cidade, cli.estado].filter(Boolean).join(', ');
+                        if (!dadosOrdem.cep) dadosOrdem.cep = cli.cep || '';
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados do cliente para PDF:', dbErr.message);
+                }
+            }
+
+            // Enriquecer dados da transportadora via banco
+            if (dadosOrdem.transportadora_nome && (!dadosOrdem.transportadora_fone || !dadosOrdem.transportadora_cep)) {
+                try {
+                    const [transpRows] = await pool.query(
+                        'SELECT cnpj_cpf, telefone, email, bairro, cidade, estado, cep FROM transportadoras WHERE (razao_social = ? OR nome_fantasia = ?) LIMIT 1',
+                        [dadosOrdem.transportadora_nome, dadosOrdem.transportadora_nome]
+                    );
+                    if (transpRows.length > 0) {
+                        const tr = transpRows[0];
+                        if (!dadosOrdem.transportadora_fone) dadosOrdem.transportadora_fone = tr.telefone || '';
+                        if (!dadosOrdem.transportadora_cpf_cnpj) dadosOrdem.transportadora_cpf_cnpj = tr.cnpj_cpf || '';
+                        if (!dadosOrdem.transportadora_email_nfe) dadosOrdem.transportadora_email_nfe = tr.email || '';
+                        if (!dadosOrdem.transportadora_cep) dadosOrdem.transportadora_cep = tr.cep || '';
+                        if (!dadosOrdem.transportadora_endereco) dadosOrdem.transportadora_endereco = [tr.bairro, tr.cidade, tr.estado].filter(Boolean).join(', ');
+                    }
+                } catch (dbErr) {
+                    console.warn('⚠️ Erro ao buscar dados da transportadora para PDF:', dbErr.message);
+                }
+            }
+
+            // 1. Gerar XML estruturado
+            const xmlContent = gerarOrdemXML(dadosOrdem);
+            console.log(`📝 XML gerado: ${xmlContent.length} bytes`);
+
+            // 2. Converter XML → PDF via Apache FOP (XSL-FO)
+            const pdfBuffer = await gerarPdfComFop(xmlContent);
+            console.log(`✅ PDF gerado: ${pdfBuffer.length} bytes`);
+
+            // 3. Enviar PDF
+            const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+            const nomeArquivo = `Ordem de Produção - ${nomeCliente}.pdf`;
+            const encodedFilename = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+            const asciiFilename = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+
+            res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
+            res.setHeader('Content-Type', 'application/pdf');
+            res.setHeader('Content-Length', pdfBuffer.length);
+
+            res.send(pdfBuffer);
+            console.log(`✅ PDF da OP enviado: ${nomeArquivo}`);
+
+        } catch (error) {
+            console.error('❌ Erro ao gerar PDF da ordem de produção:', error);
+            res.status(500).json({
+                error: 'Erro ao gerar PDF da Ordem de Produção',
+                detalhe: error.message
+            });
+        }
+    });
+
+    // POST /api/gerar-ordem-xml - Exporta apenas o XML da Ordem (para debug/integração)
+    router.post('/api/gerar-ordem-xml', authenticateToken, async (req, res) => {
+        try {
+            const dadosOrdem = req.body;
+            if (!dadosOrdem.numero_orcamento && dadosOrdem['num_orçamento']) {
+                dadosOrdem.numero_orcamento = dadosOrdem['num_orçamento'];
+            }
+            if (!dadosOrdem.numero_orcamento && dadosOrdem.num_orcamento) {
+                dadosOrdem.numero_orcamento = dadosOrdem.num_orcamento;
+            }
+
+            const xmlContent = gerarOrdemXML(dadosOrdem);
+
+            const nomeCliente = (dadosOrdem.cliente || 'Cliente').replace(/[/\\:*?"<>|]/g, '_').trim();
+            const nomeArquivo = `Ordem de Produção - ${nomeCliente}.xml`;
+            const encodedFilename = encodeURIComponent(nomeArquivo).replace(/'/g, '%27');
+            const asciiFilename = nomeArquivo.replace(/[^\x20-\x7E]/g, '_').replace(/["\\]/g, '_');
+
+            res.setHeader('Content-Disposition', `attachment; filename="${asciiFilename}"; filename*=UTF-8''${encodedFilename}`);
+            res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+
+            res.send(xmlContent);
+        } catch (error) {
+            console.error('❌ Erro ao gerar XML da ordem:', error);
+            res.status(500).json({ error: 'Erro ao gerar XML', detalhe: error.message });
         }
     });
 
@@ -3722,7 +3811,12 @@ module.exports = function createPCPRoutes(deps) {
 
         // C4 - Número do Orçamento (como número se possível)
         const numOrcamento = dados.numero_orcamento || '';
-        abaVendas.getCell('C4').value = isNaN(numOrcamento) ? numOrcamento : parseFloat(numOrcamento);
+        // 🔧 FIX BUG-R4-23: isNaN('') → false, parseFloat('') → NaN → célula com NaN
+        if (numOrcamento === '') {
+            abaVendas.getCell('C4').value = '';
+        } else {
+            abaVendas.getCell('C4').value = isNaN(numOrcamento) ? numOrcamento : parseFloat(numOrcamento);
+        }
 
         // 🔧 FIX BUG-OP-04: E4 - Revisão (campo existente no modal mas nunca escrito no template)
         abaVendas.getCell('E4').value = dados.revisao || '';
@@ -3747,7 +3841,9 @@ module.exports = function createPCPRoutes(deps) {
                     const [d, m, y] = dataStr.split('/');
                     dataObj = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
                 } else if (dataStr.includes('-')) {
-                    dataObj = new Date(dataStr);
+                    // 🔧 FIX BUG-R4-21: new Date('yyyy-mm-dd') cria data UTC → off-by-one em BRT
+                    const [y2, m2, d2] = dataStr.split('-');
+                    dataObj = new Date(parseInt(y2), parseInt(m2) - 1, parseInt(d2));
                 } else {
                     dataObj = new Date();
                 }
@@ -3758,6 +3854,12 @@ module.exports = function createPCPRoutes(deps) {
         } else {
             abaVendas.getCell('J4').value = new Date();
             abaVendas.getCell('J4').numFmt = 'dd/mm/yyyy';
+        }
+
+        // 🔧 FIX: Garantir largura mínima da coluna J para exibir data sem *******
+        const colJ = abaVendas.getColumn('J');
+        if (!colJ.width || colJ.width < 14) {
+            colJ.width = 14;
         }
 
         // Vendedor (linha 6)
@@ -3771,6 +3873,10 @@ module.exports = function createPCPRoutes(deps) {
             } else if (typeof dados.prazo_entrega === 'string' && dados.prazo_entrega.includes('/')) {
                 // Tentar parsear data no formato dd/mm/yyyy
                 const [d, m, y] = dados.prazo_entrega.split('/');
+                abaVendas.getCell('H6').value = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
+            } else if (typeof dados.prazo_entrega === 'string' && dados.prazo_entrega.includes('-')) {
+                // 🔧 FIX BUG-R4-22: <input type="date"> envia yyyy-mm-dd → parsear sem UTC
+                const [y, m, d] = dados.prazo_entrega.split('-');
                 abaVendas.getCell('H6').value = new Date(parseInt(y), parseInt(m) - 1, parseInt(d));
             } else {
                 abaVendas.getCell('H6').value = dados.prazo_entrega;
@@ -3791,10 +3897,12 @@ module.exports = function createPCPRoutes(deps) {
         abaVendas.getCell('C7').value = dados.cliente || '';
         abaVendas.getCell('C8').value = dados.contato || dados.contato_cliente || '';
 
-        // H8 - Telefone (como número se possível, sem formatação)
+        // H8 - Telefone (como texto formatado, NÃO parseFloat — perde precisão em 11+ dígitos)
         const telefone = dados.telefone || dados.fone_cliente || '';
-        const telefoneNum = String(telefone).replace(/\D/g, ''); // Remove não-dígitos
-        abaVendas.getCell('H8').value = telefoneNum ? parseFloat(telefoneNum) : telefone;
+        const telefoneNum = String(telefone).replace(/\D/g, '');
+        // 🔧 FIX BUG-R5-30: parseFloat('11999887766') → 11999887766 OK, mas parseFloat('119998877660') → perde dígitos
+        // Manter como string para números com 11+ dígitos
+        abaVendas.getCell('H8').value = telefoneNum || telefone;
 
         abaVendas.getCell('C9').value = dados.email || dados.email_cliente || '';
         abaVendas.getCell('J9').value = dados.frete || dados.tipo_frete || '';
@@ -3808,11 +3916,11 @@ module.exports = function createPCPRoutes(deps) {
         abaVendas.getCell('C12').value = nomeTransp;
         console.log(`   Transportadora Nome: ${nomeTransp}`);
 
-        // 🔧 H12 - Telefone da transportadora (calcular ao invés de fórmula)
+        // 🔧 H12 - Telefone da transportadora (manter como string — NÃO parseFloat)
         const telefoneTransp = dados.transportadora_fone || dados.transportadora?.fone || telefone || '';
         if (telefoneTransp) {
             const telefoneTranspNum = String(telefoneTransp).replace(/\D/g, '');
-            abaVendas.getCell('H12').value = telefoneTranspNum ? parseFloat(telefoneTranspNum) : telefoneTransp;
+            abaVendas.getCell('H12').value = telefoneTranspNum || telefoneTransp;
             console.log(`   Transportadora Fone: ${telefoneTransp}`);
         } else {
             abaVendas.getCell('H12').value = '';
@@ -3951,8 +4059,8 @@ module.exports = function createPCPRoutes(deps) {
                 const cellC = abaVendas.getCell(`C${linhaAtual}`);
                 cellC.value = descricaoCatalogo || prod.descricao || prod['descrição'] || prod.nome || '';
 
-                // F - Embalagem
-                abaVendas.getCell(`F${linhaAtual}`).value = prod.embalagem || '';
+                // F - Embalagem (default 'Bobina' conforme dropdown do frontend)
+                abaVendas.getCell(`F${linhaAtual}`).value = prod.embalagem || 'Bobina';
 
                 // G - Lance(s)
                 abaVendas.getCell(`G${linhaAtual}`).value = prod.lances || '';
@@ -3975,6 +4083,20 @@ module.exports = function createPCPRoutes(deps) {
                 linhaAtual++;
             }
         });
+
+        // 🔧 FIX BUG-R5-27: Limpar linhas de produto não utilizadas (stale template data)
+        for (let i = linhaAtual; i <= LINHA_MAXIMA_PRODUTOS; i++) {
+            for (const col of ['A', 'B', 'C', 'F', 'G', 'H', 'I', 'J']) {
+                const cell = abaVendas.getCell(`${col}${i}`);
+                // Preservar fórmulas, limpar apenas valores diretos
+                if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                    cell.value = { formula: cell.value.formula, result: '' };
+                } else {
+                    cell.value = null;
+                }
+            }
+        }
+
         // Reforçar formatação de I18-I32 e J18-J32 após o preenchimento dos produtos
         // Linha 17 é cabeçalho, produtos começam na 18
         for (let i = 18; i <= 32; i++) {
@@ -4050,6 +4172,20 @@ module.exports = function createPCPRoutes(deps) {
                 abaVendas.getCell('E46').value = perc2;
                 abaVendas.getCell('E46').numFmt = '0%';
                 abaVendas.getCell('F46').value = formasPag[1].metodo || '';
+                // 🔧 FIX BUG-R5-28: Valor da 2ª forma de pagamento nunca era preenchido
+                const valor2 = totalGeral * perc2;
+                abaVendas.getCell('I46').value = valor2;
+                abaVendas.getCell('I46').numFmt = 'R$ #,##0.00';
+            }
+
+            // 🔧 FIX BUG-R5-28b: 3ª forma de pagamento (frontend coleta 3, backend só escrevia 2)
+            if (formasPag.length > 2) {
+                // Condições extras de pagamento vão para observações (template tem apenas 2 linhas)
+                const perc3 = parseFloat(formasPag[2].percentual || 0);
+                const valor3 = totalGeral * (perc3 / 100);
+                const pag3Texto = `3ª Pag: ${formasPag[2].forma || ''} ${perc3}% ${formasPag[2].metodo || ''} R$ ${valor3.toFixed(2)}`;
+                const obsExistente = abaVendas.getCell('A37').value || '';
+                abaVendas.getCell('A37').value = obsExistente ? `${obsExistente}\n${pag3Texto}` : pag3Texto;
             }
         } else {
             // Fallback: usar campos legados
@@ -4125,7 +4261,8 @@ module.exports = function createPCPRoutes(deps) {
         let cnpjStrFinal = String(cnpjClienteFinal).replace(/\D/g, '');
         if (cnpjStrFinal && cnpjStrFinal.length >= 11) {
             const cellC15Final = abaVendas.getCell('C15');
-            cellC15Final.value = cnpjStrFinal;
+            // 🔧 FIX BUG-R4-24: Usar Number() em vez de string para que numFmt funcione
+            cellC15Final.value = Number(cnpjStrFinal);
             cellC15Final.numFmt = '[<=99999999999]000.000.000-00;00.000.000/0000-00';
         }
         // ========================================
@@ -4133,6 +4270,84 @@ module.exports = function createPCPRoutes(deps) {
         // ========================================
         if (abaProducao) {
             console.log('\n🔧 Atualizando aba PRODUÇÃO...');
+
+            // ========================================
+            // 🔧 FIX BUG-OP-PAGE2: Replicar cabeçalho/dados do cliente na aba PRODUÇÃO
+            // A aba PRODUÇÃO tem cabeçalho (linhas 1-12) com fórmulas referenciando VENDAS_PCP.
+            // ExcelJS NÃO recalcula fórmulas, então os "result" ficam vazios/stale.
+            // Solução: atualizar o result de cada fórmula E/OU preencher diretamente.
+            // ========================================
+            console.log('📋 Replicando cabeçalho na aba PRODUÇÃO (FIX page 2)...');
+
+            // Percorrer linhas 1-12 da aba PRODUÇÃO e atualizar results de fórmulas
+            // 🔧 R2 FIX BUG-14: Regex expandido para suportar 'VENDAS_PCP'!$C$4, espaços, etc.
+            const formulaRefRegex = /(?:'?VENDAS_PCP'?)\s*!\s*\$?([A-Z]{1,3})\$?(\d+)/i;
+            for (let row = 1; row <= 12; row++) {
+                for (const colLetter of ['A','B','C','D','E','F','G','H','I','J','K']) {
+                    const cell = abaProducao.getCell(`${colLetter}${row}`);
+                    if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                        const formula = cell.value.formula;
+                        const match = formula.match(formulaRefRegex);
+                        if (match) {
+                            const refCol = match[1];
+                            const refRow = match[2];
+                            const sourceCell = abaVendas.getCell(`${refCol}${refRow}`);
+                            const sourceValue = sourceCell.value;
+                            // Preservar fórmula e injetar result calculado
+                            cell.value = { formula: formula, result: sourceValue || '' };
+                            if (sourceValue) {
+                                console.log(`   📋 PRODUÇÃO ${colLetter}${row}: fórmula=${formula} → result=${String(sourceValue).substring(0, 30)}`);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Fallback direto: garantir que dados-chave estejam preenchidos APENAS se célula vazia
+            // 🔧 R2 FIX BUG-15: Não sobrescrever fórmulas — só preencher células realmente vazias
+            const headerMapping = [
+                { cell: 'C4', value: dados.numero_orcamento || numOrcamento, desc: 'Nº Orçamento' },
+                { cell: 'G4', value: numPedidoFinal, desc: 'Nº Pedido' },
+                { cell: 'C6', value: dados.vendedor || '', desc: 'Vendedor' },
+                { cell: 'C7', value: dados.cliente || '', desc: 'Cliente' },
+                { cell: 'C8', value: dados.contato || dados.contato_cliente || '', desc: 'Contato' },
+                { cell: 'H8', value: dados.telefone || dados.fone_cliente || '', desc: 'Telefone' },
+                { cell: 'C9', value: dados.email || dados.email_cliente || '', desc: 'Email' },
+                { cell: 'J9', value: dados.frete || dados.tipo_frete || '', desc: 'Tipo Frete' },
+                { cell: 'C12', value: dados.transportadora_nome || '', desc: 'Transportadora' },
+                { cell: 'H12', value: dados.transportadora_fone || '', desc: 'Transp. Fone' },
+                { cell: 'C13', value: dados.transportadora_cep || '', desc: 'Transp. CEP' },
+                { cell: 'F13', value: dados.transportadora_endereco || '', desc: 'Transp. Endereço' },
+            ];
+
+            for (const mapping of headerMapping) {
+                const cell = abaProducao.getCell(mapping.cell);
+                // 🔧 R2: Só preencher se a célula estiver REALMENTE vazia (sem valor algum)
+                const val = cell.value;
+                const isEmpty = !val || (typeof val === 'string' && val.trim() === '');
+                if (isEmpty && mapping.value) {
+                    cell.value = mapping.value;
+                    console.log(`   📋 PRODUÇÃO ${mapping.cell} (${mapping.desc}): ${String(mapping.value).substring(0, 30)}`);
+                }
+            }
+
+            // 🔧 R2 FIX BUG-16: Data de liberação na PRODUÇÃO — só se célula vazia
+            const cellJ4Prod = abaProducao.getCell('J4');
+            const j4Val = cellJ4Prod.value;
+            const j4Empty = !j4Val || (typeof j4Val === 'string' && j4Val.trim() === '');
+            if (j4Empty) {
+                cellJ4Prod.value = abaVendas.getCell('J4').value || new Date();
+                cellJ4Prod.numFmt = 'dd/mm/yyyy';
+                console.log(`   📋 PRODUÇÃO J4 (Data): ${cellJ4Prod.value}`);
+            }
+
+            // 🔧 FIX: Garantir largura mínima da coluna J na PRODUÇÃO
+            const colJProd = abaProducao.getColumn('J');
+            if (!colJProd.width || colJProd.width < 14) {
+                colJProd.width = 14;
+            }
+
+            console.log('   ✅ Cabeçalho da aba PRODUÇÃO atualizado!\n');
 
             // A aba PRODUÇÃO tem suas próprias fórmulas VLOOKUP na coluna C
             // As linhas de produtos são: 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46, 49, 52 (de 3 em 3)
@@ -4196,15 +4411,71 @@ module.exports = function createPCPRoutes(deps) {
                         cellPeso.numFmt = '#,##0.00';
                     }
 
+                    // F - Código de Cores
+                    const codigoCores = prod.codigo_cores || prod.cores || '';
+                    if (codigoCores) {
+                        const cellCodCores = abaProducao.getCell(`F${linhaProd}`);
+                        if (cellCodCores.value && typeof cellCodCores.value === 'object' && cellCodCores.value.formula) {
+                            cellCodCores.value = { formula: cellCodCores.value.formula, result: codigoCores };
+                        } else {
+                            cellCodCores.value = codigoCores;
+                        }
+                    }
+
+                    // G - Embalagem (default 'Bobina')
+                    const embalagemProd = prod.embalagem || 'Bobina';
+                    const cellEmb = abaProducao.getCell(`G${linhaProd}`);
+                    if (cellEmb.value && typeof cellEmb.value === 'object' && cellEmb.value.formula) {
+                        cellEmb.value = { formula: cellEmb.value.formula, result: embalagemProd };
+                    } else {
+                        cellEmb.value = embalagemProd;
+                    }
+
+                    // H - Lance(s)
+                    const lancesProd = prod.lances || '';
+                    if (lancesProd) {
+                        const cellLances = abaProducao.getCell(`H${linhaProd}`);
+                        if (cellLances.value && typeof cellLances.value === 'object' && cellLances.value.formula) {
+                            cellLances.value = { formula: cellLances.value.formula, result: lancesProd };
+                        } else {
+                            cellLances.value = lancesProd;
+                        }
+                    }
+
                     // Preencher LOTE na coluna G da linha seguinte (linhaProd + 1)
                     if (prod.lote) {
                         const cellLote = abaProducao.getCell(`G${linhaProd + 1}`);
                         cellLote.value = prod.lote;
                     }
 
-                    console.log(`   📦 PRODUÇÃO Linha ${linhaProd}: ${codigoProd} = ${descricaoCatalogo.substring(0, 40)}...`);
+                    console.log(`   📦 PRODUÇÃO Linha ${linhaProd}: ${codigoProd} = ${descricaoCatalogo.substring(0, 40)}... | CodCores=${codigoCores} | Emb=${embalagemProd} | Lances=${lancesProd}`);
                 }
             });
+
+            // 🔧 FIX BUG-R5-29: Limpar linhas de produto não utilizadas na aba PRODUÇÃO
+            const prodCount = Math.min(produtos.length, linhasProducao.length);
+            for (let idx = prodCount; idx < linhasProducao.length; idx++) {
+                const linhaClear = linhasProducao[idx];
+                for (const col of ['B', 'C', 'F', 'G', 'H', 'J']) {
+                    const cell = abaProducao.getCell(`${col}${linhaClear}`);
+                    if (cell.value && typeof cell.value === 'object' && cell.value.formula) {
+                        cell.value = { formula: cell.value.formula, result: '' };
+                    } else {
+                        cell.value = null;
+                    }
+                }
+                // Limpar também linhas +1 e +2 (peso, lote)
+                for (let offset = 1; offset <= 2; offset++) {
+                    for (const col of ['E', 'G']) {
+                        const cellExtra = abaProducao.getCell(`${col}${linhaClear + offset}`);
+                        if (cellExtra.value && typeof cellExtra.value === 'object' && cellExtra.value.formula) {
+                            cellExtra.value = { formula: cellExtra.value.formula, result: '' };
+                        } else if (cellExtra.value) {
+                            cellExtra.value = null;
+                        }
+                    }
+                }
+            }
 
             console.log(`   ✅ ${Math.min(produtos.length, linhasProducao.length)} produtos atualizados na aba PRODUÇÃO`);
         }
@@ -5001,13 +5272,14 @@ module.exports = function createPCPRoutes(deps) {
     router.get('/vendedores', async (req, res, next) => {
         try {
             const query = req.query.q || '';
-            const limit = parseInt(req.query.limit) || 10;
+            const limit = Math.min(parseInt(req.query.limit) || 50, 200);
 
             if (!query) {
                 const [rows] = await pool.query(`
                     SELECT id, nome_completo as nome, cargo, departamento
                     FROM funcionarios
-                    WHERE status = 'ativo' AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                    WHERE status = 'ativo' AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR cargo LIKE '%representante%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                    ORDER BY nome_completo
                     LIMIT ?
                 `, [limit]);
                 return res.json(rows);
@@ -5018,8 +5290,9 @@ module.exports = function createPCPRoutes(deps) {
                 SELECT id, nome_completo as nome, cargo, departamento
                 FROM funcionarios
                 WHERE status = 'ativo'
-                AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
+                AND (cargo LIKE '%vendedor%' OR cargo LIKE '%comercial%' OR cargo LIKE '%representante%' OR departamento LIKE '%vendas%' OR departamento LIKE '%comercial%')
                 AND (nome_completo LIKE ? OR cargo LIKE ?)
+                ORDER BY nome_completo
                 LIMIT ?
             `, [searchPattern, searchPattern, limit]);
             res.json(rows);
@@ -8919,6 +9192,182 @@ tr:nth-child(even){background:#f8fafc}
             res.status(500).json({ success: false, message: 'Erro ao excluir apontamento' });
         }
     });
+
+    // ============================================================
+    // QUALIDADE - Inspeções, Não Conformidades, Checklists
+    // ============================================================
+
+    // --- KPIs ---
+    router.get('/qualidade/kpis', authenticateToken, asyncHandler(async (req, res) => {
+        const now = new Date();
+        const firstDay = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
+        const [[insp]] = await pool.query(
+            `SELECT COUNT(*) as total, SUM(status='aprovado') as aprovados, SUM(status='pendente') as pendentes
+             FROM qualidade_inspecoes WHERE data_inspecao >= ?`, [firstDay]);
+        const [[ncs]] = await pool.query(
+            `SELECT COUNT(*) as abertas FROM qualidade_nao_conformidades WHERE status IN ('aberta','em_analise','acao_corretiva')`);
+        const [[cks]] = await pool.query(
+            `SELECT COUNT(*) as ativos FROM qualidade_checklists WHERE ativo = 1`);
+        const total = insp.total || 0;
+        const aprovados = insp.aprovados || 0;
+        const taxa = total > 0 ? Math.round((aprovados / total) * 100) : 0;
+        res.json({ success: true, data: {
+            total_inspecoes: total,
+            taxa_aprovacao: taxa,
+            ncs_abertas: ncs.abertas || 0,
+            inspecoes_pendentes: insp.pendentes || 0,
+            checklists_ativos: cks.ativos || 0
+        }});
+    }));
+
+    // --- INSPEÇÕES: CRUD ---
+    router.get('/qualidade/inspecoes', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = 'SELECT * FROM qualidade_inspecoes WHERE 1=1';
+        const params = [];
+        if (req.query.status) { sql += ' AND status = ?'; params.push(req.query.status); }
+        if (req.query.data_inicio) { sql += ' AND data_inspecao >= ?'; params.push(req.query.data_inicio); }
+        if (req.query.data_fim) { sql += ' AND data_inspecao <= ?'; params.push(req.query.data_fim); }
+        sql += ' ORDER BY data_inspecao DESC, id DESC LIMIT 200';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_inspecoes WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Inspeção não encontrada' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.post('/qualidade/inspecoes', authenticateToken, asyncHandler(async (req, res) => {
+        const { tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao } = req.body;
+        const inspetor_id = req.user?.id || null;
+        const inspetor_nome = req.user?.nome || req.user?.username || null;
+        const [result] = await pool.query(
+            `INSERT INTO qualidade_inspecoes (tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao, inspetor_id, inspetor_nome)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status || 'pendente', data_inspecao, inspetor_id, inspetor_nome]
+        );
+        console.log('[PCP/QUALIDADE] Inspeção criada:', result.insertId);
+        res.json({ success: true, id: result.insertId });
+    }));
+
+    router.put('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao } = req.body;
+        await pool.query(
+            `UPDATE qualidade_inspecoes SET tipo=?, checklist_id=?, ordem_producao=?, produto=?, quantidade_inspecionada=?, quantidade_aprovada=?, observacoes=?, checklist_respostas=?, status=?, data_inspecao=? WHERE id=?`,
+            [tipo, checklist_id, ordem_producao, produto, quantidade_inspecionada, quantidade_aprovada, observacoes, checklist_respostas, status, data_inspecao, req.params.id]
+        );
+        console.log('[PCP/QUALIDADE] Inspeção atualizada:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/inspecoes/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_inspecoes WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] Inspeção excluída:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    // --- NÃO CONFORMIDADES: CRUD ---
+    router.get('/qualidade/nao-conformidades', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = 'SELECT * FROM qualidade_nao_conformidades WHERE 1=1';
+        const params = [];
+        if (req.query.severidade) { sql += ' AND severidade = ?'; params.push(req.query.severidade); }
+        if (req.query.status) { sql += ' AND status = ?'; params.push(req.query.status); }
+        sql += ' ORDER BY created_at DESC LIMIT 200';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_nao_conformidades WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'NC não encontrada' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.post('/qualidade/nao-conformidades', authenticateToken, asyncHandler(async (req, res) => {
+        const { descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo } = req.body;
+        const registrado_por = req.user?.id || null;
+        const registrado_nome = req.user?.nome || req.user?.username || null;
+        const [result] = await pool.query(
+            `INSERT INTO qualidade_nao_conformidades (descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, registrado_por, registrado_nome)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, registrado_por, registrado_nome]
+        );
+        console.log('[PCP/QUALIDADE] NC criada:', result.insertId);
+        res.json({ success: true, id: result.insertId });
+    }));
+
+    router.put('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, status } = req.body;
+        await pool.query(
+            `UPDATE qualidade_nao_conformidades SET descricao=?, severidade=?, origem=?, ordem_producao=?, produto=?, causa_raiz=?, acao_corretiva=?, responsavel=?, prazo=?, status=? WHERE id=?`,
+            [descricao, severidade, origem, ordem_producao, produto, causa_raiz, acao_corretiva, responsavel, prazo, status, req.params.id]
+        );
+        console.log('[PCP/QUALIDADE] NC atualizada:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/nao-conformidades/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_nao_conformidades WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] NC excluída:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    // --- CHECKLISTS: CRUD ---
+    router.get('/qualidade/checklists', authenticateToken, asyncHandler(async (req, res) => {
+        let sql = `SELECT c.*, (SELECT COUNT(*) FROM qualidade_checklist_itens WHERE checklist_id = c.id) as total_itens
+                    FROM qualidade_checklists c WHERE 1=1`;
+        const params = [];
+        if (req.query.ativo) { sql += ' AND c.ativo = ?'; params.push(req.query.ativo); }
+        sql += ' ORDER BY c.nome';
+        const [rows] = await pool.query(sql, params);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.get('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_checklists WHERE id = ?', [req.params.id]);
+        if (!rows.length) return res.status(404).json({ success: false, message: 'Checklist não encontrado' });
+        res.json({ success: true, data: rows[0] });
+    }));
+
+    router.get('/qualidade/checklists/:id/itens', authenticateToken, asyncHandler(async (req, res) => {
+        const [rows] = await pool.query('SELECT * FROM qualidade_checklist_itens WHERE checklist_id = ? ORDER BY ordem', [req.params.id]);
+        res.json({ success: true, data: rows });
+    }));
+
+    router.post('/qualidade/checklists', authenticateToken, asyncHandler(async (req, res) => {
+        const { nome, tipo_inspecao, itens } = req.body;
+        const [result] = await pool.query(
+            'INSERT INTO qualidade_checklists (nome, tipo_inspecao) VALUES (?, ?)', [nome, tipo_inspecao]
+        );
+        const checklistId = result.insertId;
+        if (itens && itens.length > 0) {
+            const values = itens.map(i => [checklistId, i.descricao, i.ordem || 0]);
+            await pool.query('INSERT INTO qualidade_checklist_itens (checklist_id, descricao, ordem) VALUES ?', [values]);
+        }
+        console.log('[PCP/QUALIDADE] Checklist criado:', checklistId);
+        res.json({ success: true, id: checklistId });
+    }));
+
+    router.put('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        const { nome, tipo_inspecao, itens } = req.body;
+        await pool.query('UPDATE qualidade_checklists SET nome=?, tipo_inspecao=? WHERE id=?', [nome, tipo_inspecao, req.params.id]);
+        // Rebuild itens
+        await pool.query('DELETE FROM qualidade_checklist_itens WHERE checklist_id = ?', [req.params.id]);
+        if (itens && itens.length > 0) {
+            const values = itens.map(i => [req.params.id, i.descricao, i.ordem || 0]);
+            await pool.query('INSERT INTO qualidade_checklist_itens (checklist_id, descricao, ordem) VALUES ?', [values]);
+        }
+        console.log('[PCP/QUALIDADE] Checklist atualizado:', req.params.id);
+        res.json({ success: true });
+    }));
+
+    router.delete('/qualidade/checklists/:id', authenticateToken, asyncHandler(async (req, res) => {
+        await pool.query('DELETE FROM qualidade_checklist_itens WHERE checklist_id = ?', [req.params.id]);
+        await pool.query('DELETE FROM qualidade_checklists WHERE id = ?', [req.params.id]);
+        console.log('[PCP/QUALIDADE] Checklist excluído:', req.params.id);
+        res.json({ success: true });
+    }));
 
     return router;
 };

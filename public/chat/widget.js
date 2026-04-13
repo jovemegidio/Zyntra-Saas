@@ -481,11 +481,13 @@
     const btnSend = $('afw-btn-send');
     const btnMic = $('afw-btn-mic');
 
+    if (!input || !btnSend) return;
+
     input.addEventListener('input', () => {
       autoResize(input);
       const hasText = input.value.trim().length > 0;
       btnSend.classList.toggle('hidden', !hasText);
-      btnMic.classList.toggle('hidden', hasText);
+      if (btnMic) btnMic.classList.toggle('hidden', hasText);
 
       if (hasText) {
         W.socket.emit('typing:start', { conversationId: W.conversationId });
@@ -504,7 +506,8 @@
     });
 
     btnSend.addEventListener('click', () => sendText());
-    $('afw-btn-minimize').addEventListener('click', toggleWidget);
+    const btnMinimize = $('afw-btn-minimize');
+    if (btnMinimize) btnMinimize.addEventListener('click', toggleWidget);
   }
 
   function sendText(customText) {

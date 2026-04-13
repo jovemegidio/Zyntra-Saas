@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -41,7 +41,7 @@
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4); }
 
         /* ===== CONTAS A RECEBER é ESTILOS ESPECÍFICOS ===== */
-        .content-area { padding: 20px 24px; display: flex; flex-direction: column; }
+        .content-area { padding: 0; display: flex; flex-direction: column; }
 
         /* ===============================================
            STANDARD SCROLLABLE LAYOUT (match contas-pagar)
@@ -365,27 +365,22 @@
             .tabs-conta { overflow-x:auto; padding:0 16px; }
             .recebimentos-layout { flex-direction:column; }
         }
-
-        /* ===== WORKBOOK-TAB PINNED LAYOUT FIX =====
-           global-header-sidebar.css define main-area com min-height:100vh e overflow-y:auto,
-           fazendo a page crescer — as abas ficam abaixo do fold.
-           Fixamos: main-area = 100vh exato, content-area não rola (a pane-view rola).
-        */
-        .main-area { height: 100vh !important; min-height: 0 !important; overflow: hidden !important; }
-        .content-area { overflow: hidden !important; }
-        .tab-pane-view.active { overflow-y: auto !important; }
     </style>
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <link rel="stylesheet" href="css/fin-pagination.css?v=20260715">
+    <script src="js/fin-pagination.js?v=20260715" defer></script>
 </head>
 <body>
     <div class="toast-container" id="toast-container"></div>
     <div class="app-container">
         <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+        <!-- SIDEBAR -->
         <aside class="sidebar" id="mobile-sidebar">
             <a href="/dashboard" class="sidebar-logo" title="Voltar ao Painel">
                 <i class="fas fa-home"></i>
             </a>
+
             <nav class="sidebar-nav">
                 <a href="index.html" class="sidebar-btn" title="Dashboard">
                     <i class="fas fa-chart-line"></i>
@@ -415,6 +410,7 @@
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
+
             <div class="sidebar-bottom">
                 <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
                     <i class="fas fa-sitemap"></i>
@@ -442,12 +438,7 @@
                 <div class="header-right">
                     <button class="header-btn" title="Nova Receita" onclick="abrirModal()"><i class="fas fa-plus"></i></button>
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display:none;">0</span>
-                        </button>
-                    </div>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -626,6 +617,7 @@
                         </tbody>
                     </table>
                     </div>
+                    <div class="fp-pagination" id="fp-pg-cr"></div>
                 </div>
 
                 </div><!-- /pane-receber -->
@@ -1176,6 +1168,8 @@
         const fmtMoeda = (v) => 'R$ ' + (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
         const fmtData = (d) => { if(!d) return '-'; var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; var dt=new Date(s+'T00:00:00'); return isNaN(dt.getTime())?'-':dt.toLocaleDateString('pt-BR'); };
 
+        var pgCR; // FinPagination instance - initialized after DOM ready
+
         function showToast(message, type) {
             type = type || 'success';
             var container = document.getElementById('toast-container');
@@ -1419,7 +1413,7 @@
             var clientes = []; contas.forEach(function(c){ if(c.cliente_nome && clientes.indexOf(c.cliente_nome)===-1) clientes.push(c.cliente_nome); }); clientes.sort();
             var selCli = document.getElementById('filtro-cliente-select');
             if (selCli) { selCli.innerHTML = '<option value="">Todos</option>' + clientes.map(function(c){ return '<option value="'+c+'">'+c+'</option>'; }).join(''); }
-
+            
             // Popular meses dinamicamente
             var selPer = document.getElementById('filtro-período');
             if (selPer) {
@@ -1457,6 +1451,11 @@
         }
 
         function renderizarTabela(dados, pesquisa) {
+            if (pgCR) { pgCR.page = 1; pgCR.render(); return; }
+            _renderTabelaCR(dados || [], pesquisa);
+        }
+
+        function _renderTabelaCR(dados, pesquisa) {
             pesquisa = pesquisa || '';
             var headers = getTableHeaders();
             var thead = document.getElementById('tabela-header');
@@ -1487,7 +1486,7 @@
 
         async function carregarClientes() {
             try {
-                var response = await fetch('/api/financeiro/clientes', { credentials: 'include' });
+                var response = await fetch('/api/clientes', { credentials: 'include' });
                 if (response.ok) {
                     var rawClientes = await response.json();
                     clientesList = Array.isArray(rawClientes) ? rawClientes : (Array.isArray(rawClientes && rawClientes.data) ? rawClientes.data : []);
@@ -1691,8 +1690,8 @@
             window._guardEnviarCobrancas = true;
             try {
                 var ids = pendentes.map(function(c){return c.id;});
-                showToast('Envio de cobranças em lote ainda não disponível nesta versão.', 'warning');
-                return;
+                var r = await fetch('/api/financeiro/enviar-cobranca-lote', { method:'POST', headers:{'Content-Type':'application/json'}, credentials:'include', body:JSON.stringify({ ids: ids }) });
+                if (r.ok) { showToast('Cobrancas enviadas para '+pendentes.length+' conta(s)!'); } else { showToast('Erro ao enviar cobrancas em lote', 'error'); }
             } catch(e) { showToast('Erro ao enviar cobrancas', 'error'); } finally { window._guardEnviarCobrancas = false; }
         }
         function getFilteredContas() {
@@ -1959,7 +1958,7 @@
 
                 if (dados.length === 0) throw new Error('Nenhum registro válido encontrado na planilha (verifique coluna VALOR P e VCTO)');
 
-                var r = await fetch('/api/financeiro/contas-receber/importar-json', {
+                var r = await fetch('/api/financeiro/importar/contas-receber', {
                     method: 'POST', credentials: 'include',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ dados: dados })
@@ -1987,7 +1986,19 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function(){ initTabsCR(); init().catch(function(e){ console.error(e); }); });
+        document.addEventListener('DOMContentLoaded', function(){
+            pgCR = new FinPagination({
+                containerId: 'fp-pg-cr',
+                perPage: 30,
+                getData: function() { return getFilteredContas(); },
+                renderRows: function(pageData) {
+                    var pesquisa = (document.getElementById('pesquisa-global') ? document.getElementById('pesquisa-global').value : '').toLowerCase();
+                    _renderTabelaCR(pageData, pesquisa);
+                },
+                searchFields: []
+            });
+            initTabsCR(); init().catch(function(e){ console.error(e); });
+        });
     </script>
 
     <script src="/js/chat-suporte-widgets.js?v=20260319"></script>

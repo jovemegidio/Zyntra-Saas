@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
@@ -1765,6 +1765,8 @@
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
     <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
+    <link rel="stylesheet" href="css/fin-pagination.css?v=20260715">
+    <script src="js/fin-pagination.js?v=20260715" defer></script>
 </head>
 <body>
     <div class="app-container">
@@ -1841,34 +1843,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                    </div>
+                    
                 </div>
             </header>
 
@@ -1945,6 +1920,13 @@
                             <h3><i class="fas fa-history"></i> últimas Movimentações</h3>
                             <button class="btn btn-secondary btn-sm" onclick="abrirModalMovimento()"><i class="fas fa-plus"></i> Nova Movimentação</button>
                         </div>
+                        <div class="fp-search-bar">
+                            <div class="fp-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="fp-search-mov" placeholder="Pesquisar movimentações..." oninput="if(window.pgMov)window.pgMov.search(this.value)">
+                            </div>
+                            <span class="fp-count" id="fp-info-mov"></span>
+                        </div>
                         <table class="data-table">
                             <thead>
                                 <tr>
@@ -1958,6 +1940,7 @@
                             </thead>
                             <tbody id="movimentacoesBody"></tbody>
                         </table>
+                        <div class="fp-pagination" id="fp-pg-mov"></div>
                     </div>
                 </div>
             </div>
@@ -3272,6 +3255,7 @@
         let bancos = [];
         let movimentacoes = [];
         let bancoVisualizando = null;
+        var pgMov; // FinPagination instance
 
         // Funo para formatar moeda nos inputs dos modais
         function formatarMoedaBanco(input) {
@@ -3408,6 +3392,20 @@
 
         // Init
         document.addEventListener('DOMContentLoaded', async function() {
+            pgMov = new FinPagination({
+                containerId: 'fp-pg-mov',
+                searchId: 'fp-search-mov',
+                infoId: 'fp-info-mov',
+                perPage: 20,
+                getData: function() { return movimentacoes; },
+                renderRows: function(pageData) { _renderMovRows(pageData); },
+                searchFields: [
+                    function(m) { return m.descrição || ''; },
+                    function(m) { return m.bancoNome || ''; },
+                    function(m) { return m.tipo || ''; },
+                    function(m) { return m.categoria || ''; }
+                ]
+            });
             await carregarUsuario();
             await carregarBancos();
             await carregarMovimentacoes();
@@ -3701,9 +3699,14 @@
         }
 
         function renderizarMovimentacoes() {
+            if (pgMov) { pgMov.page = 1; pgMov.render(); return; }
+            _renderMovRows(movimentacoes);
+        }
+
+        function _renderMovRows(items) {
             const tbody = document.getElementById('movimentacoesBody');
 
-            if (movimentacoes.length === 0) {
+            if (items.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="6" style="text-align: center; padding: 40px; color: #64748b;">
@@ -3715,7 +3718,7 @@
                 return;
             }
 
-            tbody.innerHTML = movimentacoes.slice(0, 10).map(mov => {
+            tbody.innerHTML = items.map(mov => {
                 const banco = bancos.find(b => b.id === mov.bancoId);
                 const bancoNome = mov.bancoNome || (banco ? (banco.apelido || bancosConfig[banco.codigo]?.nome) : '-');
                 return `
@@ -3854,7 +3857,7 @@
                     document.getElementById('conta').value = banco.conta;
                     document.getElementById('apelido').value = banco.apelido || '';
                     document.getElementById('observacoes').value = banco.observacoes || '';
-                    document.getElementById('modalBancoTitulo').textContent = 'Editar Conta Bancária';
+                    document.getElementById('modalBancoTítulo').textContent = 'Editar Conta Bancária';
                     // Carregar dados da integração bancária
                     carregarIntegracaoBancaria(banco.id);
                     // Webhook URL com ID do banco

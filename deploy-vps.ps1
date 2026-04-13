@@ -9,7 +9,7 @@ param(
     [string[]]$Arquivos
 )
 
-$VPS_HOST  = "root@YOUR_VPS_IP"
+$VPS_HOST  = "root@31.97.64.102"
 $VPS_PATH  = "/var/www/aluforce"
 $LOCAL     = if ($PSScriptRoot) { $PSScriptRoot } else { "G:\Outros computadores\Meu laptop (2)\Zyntra" }
 $SSH_KEY   = "$env:USERPROFILE\.ssh\id_ed25519_vps"

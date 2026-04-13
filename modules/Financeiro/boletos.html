@@ -13,6 +13,8 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="css/fin-pagination.css">
+    <script src="js/fin-pagination.js"></script>
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
@@ -225,6 +227,13 @@
                             <h3><i class="fas fa-list"></i> Lista de Boletos</h3>
                             <span id="count-boletos" style="font-size:13px;color:var(--text-secondary)">0 registros</span>
                         </div>
+                        <div class="fp-search-bar">
+                            <div class="fp-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="fp-search-boletos" placeholder="Pesquisar por sacado, documento, status..." oninput="window._finPg['fp-pg-boletos'].search(this.value)">
+                            </div>
+                            <span class="fp-count" id="fp-info-boletos"></span>
+                        </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
                                 <thead>
@@ -243,6 +252,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="fp-pagination" id="fp-pg-boletos"></div>
                     </div>
                 </div>
             </div>
@@ -306,6 +316,44 @@
 
         let boletos = [];
 
+        // Paginação
+        const pgBoletos = new FinPagination({
+            containerId: 'fp-pg-boletos',
+            searchId: 'fp-search-boletos',
+            infoId: 'fp-info-boletos',
+            perPage: 30,
+            getData: () => boletos,
+            searchFields: [
+                b => b.número_documento,
+                b => b.sacado_nome,
+                b => b.status,
+                b => b.data_vencimento
+            ],
+            renderRows: (pageData, allFiltered) => {
+                const tbody = document.getElementById('tbody-boletos');
+                if (allFiltered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>';
+                    return;
+                }
+                tbody.innerHTML = pageData.map(b => `
+                    <tr>
+                        <td><strong>${esc(b.número_documento || '-')}</strong></td>
+                        <td>${esc(b.sacado_nome)}</td>
+                        <td>${formatarData(b.data_emissao)}</td>
+                        <td>${formatarData(b.data_vencimento)}</td>
+                        <td class="valor entrada">${formatarMoeda(b.valor)}</td>
+                        <td><span class="badge badge-${b.status}">${b.status}</span></td>
+                        <td>
+                            <button class="btn-icon view" onclick="verBoleto(${b.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
+                            ${b.status === 'emitido' ? `<button class="btn-icon edit" onclick="marcarPago(${b.id})" title="Baixa manual"><i class="fas fa-check"></i></button>` : ''}
+                            ${b.status !== 'cancelado' && b.status !== 'pago' ? `<button class="btn-icon delete" onclick="cancelarBoleto(${b.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        });
+        window._finPg['fp-pg-boletos'] = pgBoletos;
+
         function formatarMoeda(v) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v); }
         function formatarData(d) { if (!d) return '-'; try { var s=String(d).slice(0,10); if(!/^\d{4}-\d{2}-\d{2}$/.test(s)) return '-'; return new Date(s+'T00:00:00').toLocaleDateString('pt-BR'); } catch(e) { return '-'; } }
         // AUDIT-FIX S2.5: XSS protection
@@ -353,29 +401,7 @@
         }
 
         function renderizarBoletos() {
-            const tbody = document.getElementById('tbody-boletos');
-            document.getElementById('count-boletos').textContent = `${boletos.length} registro(s)`;
-
-            if (boletos.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-barcode"></i><h4>Nenhum boleto encontrado</h4><p>Emita seu primeiro boleto clicando no botão acima</p></div></td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = boletos.map(b => `
-                <tr>
-                    <td><strong>${esc(b.número_documento || '-')}</strong></td>
-                    <td>${esc(b.sacado_nome)}</td>
-                    <td>${formatarData(b.data_emissao)}</td>
-                    <td>${formatarData(b.data_vencimento)}</td>
-                    <td class="valor entrada">${formatarMoeda(b.valor)}</td>
-                    <td><span class="badge badge-${b.status}">${b.status}</span></td>
-                    <td>
-                        <button class="btn-icon view" onclick="verBoleto(${b.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
-                        ${b.status === 'emitido' ? `<button class="btn-icon edit" onclick="marcarPago(${b.id})" title="Baixa manual"><i class="fas fa-check"></i></button>` : ''}
-                        ${b.status !== 'cancelado' && b.status !== 'pago' ? `<button class="btn-icon delete" onclick="cancelarBoleto(${b.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
-                    </td>
-                </tr>
-            `).join('');
+            pgBoletos.render();
         }
 
         function verBoleto(id) {

@@ -560,10 +560,6 @@
                 <div class="header-right">
                     <button class="header-btn" title="Nova Receita" onclick="abrirModal()"><i class="fas fa-plus"></i></button>
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
-
-                    <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuario</strong></span>
-                    </div>
                 </div>
             </header>
             <!-- Workbook Tabs -->
@@ -2180,19 +2176,33 @@
             if (tabId === 'tab-fat-analise') renderizarFatAnalise();
         }
 
-        // Dev Spec 1.3: Simulador de Prazo Médio
+        // Dev Spec 1.3: Simulador de Prazo Médio (Completo: Empresa + Dia + Portador)
+        function renderizarPM() { calcularPM(); }
+        function carregarPMDados() {
+            // Recarregar dados reais da API e recalcular
+            fetch('/api/financeiro/contas-receber', { credentials: 'include' })
+                .then(function(r){ return r.json(); })
+                .then(function(d){ contas = d.data || d.contas || []; calcularPM(); showToast('Dados PM atualizados', 'success'); })
+                .catch(function(e){ console.error('[PM] Erro ao recarregar:', e); calcularPM(); });
+        }
+
         function calcularPM() {
             var hoje = new Date();
             hoje.setHours(0,0,0,0);
             var taxaMensal = parseFloat(document.getElementById('pm-taxa-mensal').value) || 1.5;
             var prazoSimulado = parseInt(document.getElementById('pm-prazo-simulado').value) || 30;
             var valorSimulacao = parseMoeda(document.getElementById('pm-valor-simulacao').value) || 0;
+            var filtroEmpresa = (document.getElementById('pm-filtro-empresa') || {}).value || '';
+            var filtroModulo = (document.getElementById('pm-filtro-modulo') || {}).value || 'receber';
 
             var somaValorDias = 0;
             var somaValor = 0;
             var qtdAberto = 0;
             var porPortador = {};
+            var porEmpresa = {};
+            var porDia = {};
             var totalGeral = 0;
+            var empresasSet = {};
 
             contas.forEach(function(c) {
                 var bruto = parseFloat(c.valor_total || c.valor || 0) || 0;
@@ -2203,6 +2213,12 @@
 
                 var status = String(c.status || '').toLowerCase();
                 if (status === 'recebido' || status === 'pago' || status === 'liquidada' || status === 'liquidado' || status === 'cancelada') return;
+
+                var emp = (c.empresa || 'SEM EMPRESA').toUpperCase().trim();
+                empresasSet[emp] = true;
+
+                // Filtro por empresa
+                if (filtroEmpresa && emp !== filtroEmpresa.toUpperCase().trim()) return;
 
                 var vencimentoRaw = c.data_vencimento || c.vencimento;
                 var vencimento = vencimentoRaw ? new Date(String(vencimentoRaw).slice(0,10) + 'T00:00:00') : null;
@@ -2217,25 +2233,122 @@
                 qtdAberto++;
                 totalGeral += valorAberto;
 
+                // Por Portador
                 var portador = c.portador || 'SEM PORTADOR';
-                if (!porPortador[portador]) {
-                    porPortador[portador] = { qtd: 0, valor: 0, somaVD: 0 };
-                }
+                if (!porPortador[portador]) porPortador[portador] = { qtd: 0, valor: 0, somaVD: 0 };
                 porPortador[portador].qtd++;
                 porPortador[portador].valor += valorAberto;
                 porPortador[portador].somaVD += valorAberto * diasAteVenc;
+
+                // Por Empresa
+                if (!porEmpresa[emp]) porEmpresa[emp] = { qtd: 0, valor: 0, somaVD: 0 };
+                porEmpresa[emp].qtd++;
+                porEmpresa[emp].valor += valorAberto;
+                porEmpresa[emp].somaVD += valorAberto * diasAteVenc;
+
+                // Por Dia de Vencimento
+                var diaKey = String(vencimentoRaw).slice(0,10);
+                if (!porDia[diaKey]) porDia[diaKey] = { data: vencimento, qtd: 0, valor: 0, diasAteVenc: diasAteVenc, empresas: {} };
+                porDia[diaKey].qtd++;
+                porDia[diaKey].valor += valorAberto;
+                porDia[diaKey].empresas[emp] = true;
             });
+
+            // Popular select de empresas (una vez)
+            var selEmpresa = document.getElementById('pm-filtro-empresa');
+            if (selEmpresa && selEmpresa.options.length <= 1) {
+                Object.keys(empresasSet).sort().forEach(function(e) {
+                    var opt = document.createElement('option');
+                    opt.value = e; opt.textContent = e;
+                    selEmpresa.appendChild(opt);
+                });
+            }
 
             var pmDias = somaValor > 0 ? Math.round(somaValorDias / somaValor) : 0;
             var taxaDiaria = taxaMensal / 30 / 100;
             var custoFinanceiro = somaValor * taxaDiaria * pmDias;
 
+            // Cards globais
             document.getElementById('pm-recebimento').textContent = pmDias + ' dias';
             document.getElementById('pm-total-ponderado').textContent = fmtMoeda(somaValor);
             document.getElementById('pm-titulos-aberto').textContent = qtdAberto;
             document.getElementById('pm-custo-financeiro').textContent = fmtMoeda(custoFinanceiro);
 
-            // Tabela PM por portador
+            // === TABELA PM POR EMPRESA ===
+            var empBody = document.getElementById('tabela-pm-empresa');
+            var empKeys = Object.keys(porEmpresa).sort();
+            var empColors = {'ALUFORCE':'#1e40af','LABOR':'#059669','ENERGY':'#dc2626'};
+            if (empKeys.length === 0) {
+                empBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum título em aberto</td></tr>';
+            } else {
+                empBody.innerHTML = empKeys.map(function(nome) {
+                    var item = porEmpresa[nome];
+                    var pmEmp = item.valor > 0 ? Math.round(item.somaVD / item.valor) : 0;
+                    var custoEmp = item.valor * taxaDiaria * pmEmp;
+                    var pctVolume = totalGeral > 0 ? (item.valor / totalGeral * 100).toFixed(1) : '0.0';
+                    var cor = empColors[nome] || '#374151';
+                    return '<tr>' +
+                        '<td><strong style="color:'+cor+';">' + _escFin(nome) + '</strong></td>' +
+                        '<td style="text-align:center;">' + item.qtd + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.valor) + '</td>' +
+                        '<td style="text-align:center;font-weight:700;color:#7c3aed;">' + pmEmp + '</td>' +
+                        '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(custoEmp) + '</td>' +
+                        '<td style="text-align:center;">' + pctVolume + '%</td>' +
+                    '</tr>';
+                }).join('');
+                empBody.innerHTML += '<tr style="background:#f5f3ff;font-weight:700;">' +
+                    '<td>TOTAL</td><td style="text-align:center;">' + qtdAberto + '</td>' +
+                    '<td style="text-align:right;">' + fmtMoeda(somaValor) + '</td>' +
+                    '<td style="text-align:center;color:#7c3aed;">' + pmDias + '</td>' +
+                    '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(custoFinanceiro) + '</td>' +
+                    '<td style="text-align:center;">100%</td></tr>';
+            }
+
+            // Cards PM por Empresa
+            var cardsEmpresa = document.getElementById('pm-cards-empresa');
+            if (cardsEmpresa) {
+                if (empKeys.length === 0) {
+                    cardsEmpresa.innerHTML = '';
+                } else {
+                    cardsEmpresa.innerHTML = '<div class="pm-cards" style="margin-bottom:20px;">' + empKeys.map(function(nome) {
+                        var item = porEmpresa[nome];
+                        var pmEmp = item.valor > 0 ? Math.round(item.somaVD / item.valor) : 0;
+                        var cor = empColors[nome] || '#6b7280';
+                        return '<div class="pm-card" style="border-top:3px solid '+cor+';">' +
+                            '<div class="pm-card-label" style="color:'+cor+';font-weight:700;">'+_escFin(nome)+'</div>' +
+                            '<div class="pm-card-value" style="color:'+cor+';">'+pmEmp+' dias</div>' +
+                            '<div style="font-size:11px;color:var(--gray-500);margin-top:4px;">'+item.qtd+' títulos | '+fmtMoeda(item.valor)+'</div>' +
+                        '</div>';
+                    }).join('') + '</div>';
+                }
+            }
+
+            // === TABELA PM POR DIA DE VENCIMENTO ===
+            var diaBody = document.getElementById('tabela-pm-diario');
+            var diaKeys = Object.keys(porDia).sort();
+            var diasSemana = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+            if (diaKeys.length === 0) {
+                diaBody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">Nenhum título em aberto</td></tr>';
+            } else {
+                diaBody.innerHTML = diaKeys.map(function(dKey) {
+                    var item = porDia[dKey];
+                    var custoD = item.valor * taxaDiaria * item.diasAteVenc;
+                    var diaSemana = item.data ? diasSemana[item.data.getDay()] : '-';
+                    var empresasStr = Object.keys(item.empresas).sort().join(', ');
+                    var dataFormatada = item.data ? item.data.toLocaleDateString('pt-BR') : dKey;
+                    var diasColor = item.diasAteVenc === 0 ? 'color:#dc2626;font-weight:700;' : '';
+                    return '<tr>' +
+                        '<td><strong>' + dataFormatada + '</strong> <span style="color:var(--gray-400);font-size:11px;">(' + diaSemana + ')</span></td>' +
+                        '<td style="text-align:center;">' + item.qtd + '</td>' +
+                        '<td style="text-align:right;">' + fmtMoeda(item.valor) + '</td>' +
+                        '<td style="text-align:center;'+diasColor+'">' + item.diasAteVenc + '</td>' +
+                        '<td style="text-align:right;color:#dc2626;">' + fmtMoeda(custoD) + '</td>' +
+                        '<td>' + _escFin(empresasStr) + '</td>' +
+                    '</tr>';
+                }).join('');
+            }
+
+            // === TABELA PM POR PORTADOR ===
             var pmBody = document.getElementById('tabela-pm-body');
             var portadorKeys = Object.keys(porPortador).sort();
             if (portadorKeys.length === 0) {
@@ -2255,7 +2368,6 @@
                         '<td style="text-align:center;">' + pctVolume + '%</td>' +
                     '</tr>';
                 }).join('');
-                // Linha total
                 pmBody.innerHTML += '<tr style="background:#f5f3ff;font-weight:700;">' +
                     '<td>TOTAL</td>' +
                     '<td style="text-align:center;">' + qtdAberto + '</td>' +

@@ -1091,7 +1091,7 @@
                     const codigo = p.codigo || p.id || '';
                     const descricao = p.nome || p.descricao || '';
                     const sku = p.sku || '-';
-                    const categoria = detectarCategoria(descricao) || p.categoria || 'OUTROS';
+                    const categoria = (p.categoria && p.categoria.trim()) ? p.categoria.trim().toUpperCase() : detectarCategoria(descricao);
                     const estoque = Number(p.estoque_atual || 0);
                     const estoqueMinimo = Number(p.estoque_minimo || 10);
                     const preco = Number(p.preco_venda || p.preco || p.preco_custo || 0);
@@ -1217,25 +1217,43 @@
             }
         }
 
-        // Popular dropdown de categorias com dados reais
-        function atualizarDropdownCategorias() {
+        // Popular dropdown de categorias com dados reais (DB + detecção)
+        async function atualizarDropdownCategorias() {
             const select = document.getElementById('filter-categoria');
             const valorAtual = select.value;
-            const categorias = {};
+
+            // Coletar categorias dos produtos carregados
+            const categoriasLocal = {};
             todosProdutos.forEach(p => {
                 const cat = (p.categoria || 'OUTROS').toUpperCase();
-                categorias[cat] = (categorias[cat] || 0) + 1;
+                categoriasLocal[cat] = (categoriasLocal[cat] || 0) + 1;
             });
+
+            // Tentar buscar categorias distintas do banco também
+            try {
+                const resp = await fetch('/api/estoque/categorias', { credentials: 'include' });
+                if (resp.ok) {
+                    const data = await resp.json();
+                    const categoriasDB = data.categorias || [];
+                    categoriasDB.forEach(c => {
+                        const nome = (c.nome || c.categoria || '').toUpperCase().trim();
+                        if (nome && !categoriasLocal[nome]) {
+                            categoriasLocal[nome] = c.total || 0;
+                        }
+                    });
+                }
+            } catch(e) { /* fallback para categorias locais */ }
+
             // Manter "Todas" + adicionar categorias reais ordenadas por quantidade
             let html = '<option value="">Todas as Categorias</option>';
-            Object.entries(categorias)
+            Object.entries(categoriasLocal)
                 .sort((a, b) => b[1] - a[1])
                 .forEach(([cat, qtd]) => {
                     html += `<option value="${cat}">${cat} (${qtd})</option>`;
                 });
             select.innerHTML = html;
             // Restaurar seleção se ainda existir
-            if (valorAtual && categorias[valorAtual]) {
+            if (valorAtual && categoriasLocal[valorAtual]) {
                 select.value = valorAtual;
             }
         }

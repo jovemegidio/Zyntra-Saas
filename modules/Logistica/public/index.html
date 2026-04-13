@@ -129,6 +129,14 @@
                         Pedidos</button>
                     <button class="tab-btn" onclick="mostrarTab('transportadoras',this)"><i
                             class="fas fa-truck-moving"></i> Transportadoras</button>
+                    <button class="tab-btn" onclick="mostrarTab('cotacao',this)"><i
+                            class="fas fa-calculator"></i> Cotação Frete</button>
+                    <button class="tab-btn" onclick="mostrarTab('rastreamento',this)"><i
+                            class="fas fa-map-marker-alt"></i> Rastreamento</button>
+                    <button class="tab-btn" onclick="mostrarTab('cte',this); carregarCTes()"><i
+                            class="fas fa-file-invoice"></i> CT-e</button>
+                    <button class="tab-btn" onclick="mostrarTab('mdfe',this); carregarMDFes()"><i
+                            class="fas fa-file-alt"></i> MDF-e</button>
                 </div>
 
                 <!-- Tab Pedidos -->
@@ -205,17 +213,164 @@
                                             <th>CNPJ</th>
                                             <th>Telefone</th>
                                             <th>E-mail</th>
+                                            <th>API</th>
                                             <th>Ações</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td colspan="6">
+                                            <td colspan="7">
                                                 <div class="empty-state"><i class="fas fa-truck-moving"></i>
                                                     <p>Carregando transportadoras...</p>
                                                 </div>
                                             </td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Cotação de Frete -->
+                <div class="tab-content" id="tab-cotacao">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-calculator"></i> Simulador de Cotação de Frete</h3>
+                        </div>
+                        <div class="card-body">
+                            <form id="form-cotacao" onsubmit="event.preventDefault(); cotarFrete();">
+                                <div class="form-row">
+                                    <div class="form-group"><label>UF Destino *</label>
+                                        <select class="form-control" id="cot-uf-destino" required>
+                                            <option value="">Selecione</option>
+                                            <option value="AC">AC</option><option value="AL">AL</option><option value="AM">AM</option><option value="AP">AP</option>
+                                            <option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option>
+                                            <option value="GO">GO</option><option value="MA">MA</option><option value="MG">MG</option><option value="MS">MS</option>
+                                            <option value="MT">MT</option><option value="PA">PA</option><option value="PB">PB</option><option value="PE">PE</option>
+                                            <option value="PI">PI</option><option value="PR">PR</option><option value="RJ">RJ</option><option value="RN">RN</option>
+                                            <option value="RO">RO</option><option value="RR">RR</option><option value="RS">RS</option><option value="SC">SC</option>
+                                            <option value="SE">SE</option><option value="SP">SP</option><option value="TO">TO</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group"><label>Cidade Destino</label><input type="text" class="form-control" id="cot-cidade" placeholder="Ex: São Paulo"></div>
+                                    <div class="form-group"><label>CEP Destino</label><input type="text" class="form-control" id="cot-cep" placeholder="00000-000"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>Peso (kg)</label><input type="number" step="0.1" class="form-control" id="cot-peso" placeholder="0.0"></div>
+                                    <div class="form-group"><label>Valor NF-e (R$)</label><input type="number" step="0.01" class="form-control" id="cot-valor" placeholder="0.00"></div>
+                                    <div class="form-group"><label>Cubagem (m³)</label><input type="number" step="0.001" class="form-control" id="cot-cubagem" placeholder="0.000"></div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group"><label>Transportadora (opcional)</label>
+                                        <select class="form-control" id="cot-transportadora"><option value="">Todas</option></select>
+                                    </div>
+                                    <div class="form-group" style="display:flex;align-items:flex-end;">
+                                        <button type="submit" class="btn btn-primary"><i class="fas fa-search-dollar"></i> Cotar Frete</button>
+                                    </div>
+                                </div>
+                            </form>
+                            <div id="cotacao-resultado" style="margin-top:20px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Rastreamento -->
+                <div class="tab-content" id="tab-rastreamento">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-map-marker-alt"></i> Rastreamento de Pedidos</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row" style="margin-bottom:16px;">
+                                <div class="form-group" style="flex:1;">
+                                    <label>ID do Pedido</label>
+                                    <input type="number" class="form-control" id="rastr-pedido-id" placeholder="Digite o ID do pedido">
+                                </div>
+                                <div class="form-group" style="display:flex;align-items:flex-end;gap:8px;">
+                                    <button class="btn btn-primary" onclick="rastrearPedido()"><i class="fas fa-search-location"></i> Rastrear</button>
+                                    <button class="btn btn-secondary" onclick="consultarApiTransportadora()"><i class="fas fa-satellite-dish"></i> Consultar API</button>
+                                </div>
+                            </div>
+                            <div id="rastreamento-resultado"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab CT-e -->
+                <div class="tab-content" id="tab-cte">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-file-invoice"></i> Conhecimento de Transporte Eletrônico (CT-e)</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-cte')"><i class="fas fa-plus"></i> Novo CT-e</button>
+                        </div>
+                        <div class="card-body" style="padding:0;">
+                            <div class="filters-bar" style="padding:12px 16px;">
+                                <select class="filter-btn" id="cte-filtro-status" onchange="carregarCTes()">
+                                    <option value="">Todos</option>
+                                    <option value="digitacao">Digitação</option>
+                                    <option value="autorizado">Autorizado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="tabela-ctes">
+                                    <thead>
+                                        <tr>
+                                            <th>Nº</th>
+                                            <th>Transportadora</th>
+                                            <th>Remetente</th>
+                                            <th>Destinatário</th>
+                                            <th>Origem</th>
+                                            <th>Destino</th>
+                                            <th>Valor Frete</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><p>Selecione a aba CT-e para carregar</p></div></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab MDF-e -->
+                <div class="tab-content" id="tab-mdfe">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title"><i class="fas fa-file-alt"></i> Manifesto de Documentos Fiscais (MDF-e)</h3>
+                            <button class="btn btn-primary btn-sm" onclick="openModal('modal-novo-mdfe')"><i class="fas fa-plus"></i> Novo MDF-e</button>
+                        </div>
+                        <div class="card-body" style="padding:0;">
+                            <div class="filters-bar" style="padding:12px 16px;">
+                                <select class="filter-btn" id="mdfe-filtro-status" onchange="carregarMDFes()">
+                                    <option value="">Todos</option>
+                                    <option value="digitacao">Digitação</option>
+                                    <option value="autorizado">Autorizado</option>
+                                    <option value="encerrado">Encerrado</option>
+                                    <option value="cancelado">Cancelado</option>
+                                </select>
+                            </div>
+                            <div style="overflow-x:auto;">
+                                <table class="data-table" id="tabela-mdfes">
+                                    <thead>
+                                        <tr>
+                                            <th>Nº</th>
+                                            <th>Transportadora</th>
+                                            <th>Percurso</th>
+                                            <th>Condutor</th>
+                                            <th>Veículo</th>
+                                            <th>Docs</th>
+                                            <th>Valor Carga</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-alt"></i><p>Selecione a aba MDF-e para carregar</p></div></td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -307,6 +462,13 @@
                     <div class="form-group"><label>Estado</label><input type="text" class="form-control" id="transp-estado" maxlength="2" placeholder="SP"></div>
                     <div class="form-group"><label>CEP</label><input type="text" class="form-control" id="transp-cep" placeholder="00000-000"></div>
                 </div>
+                <hr style="margin:16px 0;border-color:var(--border-color);">
+                <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;"><i class="fas fa-satellite-dish"></i> Integração API Rastreamento</h4>
+                <div class="form-group"><label>URL API Rastreamento</label><input type="url" class="form-control" id="transp-api-url" placeholder="https://api.transportadora.com/rastreio/{codigo}"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Token API</label><input type="text" class="form-control" id="transp-api-token" placeholder="Bearer token ou chave"></div>
+                    <div class="form-group"><label>Código Integração</label><input type="text" class="form-control" id="transp-cod-integracao" placeholder="Código na API"></div>
+                </div>
                 <input type="hidden" id="transp-edit-id" value="">
             </div>
             <div class="modal-footer">
@@ -391,6 +553,162 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('modal-detalhes')">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo CT-e -->
+    <div class="modal-overlay" id="modal-novo-cte">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-invoice"></i> Novo CT-e</h3>
+                <button class="modal-close" onclick="closeModal('modal-novo-cte')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-novo-cte">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Dados Gerais</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Transportadora *</label>
+                            <select class="form-control" id="cte-transportadora" required><option value="">Selecione</option></select>
+                        </div>
+                        <div class="form-group"><label>Tipo CT-e</label>
+                            <select class="form-control" id="cte-tipo"><option value="0">Normal</option><option value="1">Complementar</option><option value="2">Anulação</option><option value="3">Substituto</option></select>
+                        </div>
+                        <div class="form-group"><label>Modal</label>
+                            <select class="form-control" id="cte-modal"><option value="01">Rodoviário</option><option value="02">Aéreo</option><option value="03">Aquaviário</option><option value="04">Ferroviário</option></select>
+                        </div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Remetente</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Nome/Razão Social</label><input type="text" class="form-control" id="cte-rem-nome"></div>
+                        <div class="form-group"><label>CNPJ/CPF</label><input type="text" class="form-control" id="cte-rem-cnpj"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Município Origem</label><input type="text" class="form-control" id="cte-mun-origem"></div>
+                        <div class="form-group"><label>UF Origem</label><input type="text" class="form-control" id="cte-uf-origem" maxlength="2" placeholder="SP"></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Destinatário</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Nome/Razão Social</label><input type="text" class="form-control" id="cte-dest-nome"></div>
+                        <div class="form-group"><label>CNPJ/CPF</label><input type="text" class="form-control" id="cte-dest-cnpj"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Município Destino</label><input type="text" class="form-control" id="cte-mun-destino"></div>
+                        <div class="form-group"><label>UF Destino</label><input type="text" class="form-control" id="cte-uf-destino" maxlength="2" placeholder="RJ"></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Carga e Valores</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Produto Predominante</label><input type="text" class="form-control" id="cte-produto" placeholder="Ex: Esquadrias de alumínio"></div>
+                        <div class="form-group"><label>Peso Bruto (kg)</label><input type="number" step="0.001" class="form-control" id="cte-peso" placeholder="0.000"></div>
+                        <div class="form-group"><label>Qtd Volumes</label><input type="number" class="form-control" id="cte-volumes" placeholder="0"></div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Valor da Carga (R$) *</label><input type="number" step="0.01" class="form-control" id="cte-valor-carga" placeholder="0.00" required></div>
+                        <div class="form-group"><label>Valor do Frete (R$) *</label><input type="number" step="0.01" class="form-control" id="cte-valor-frete" placeholder="0.00" required></div>
+                        <div class="form-group"><label>Valor a Receber (R$)</label><input type="number" step="0.01" class="form-control" id="cte-valor-receber" placeholder="0.00"></div>
+                    </div>
+                </form>
+                <input type="hidden" id="cte-edit-id" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-novo-cte')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarCTe()"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Novo MDF-e -->
+    <div class="modal-overlay" id="modal-novo-mdfe">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <h3><i class="fas fa-file-alt"></i> Novo MDF-e</h3>
+                <button class="modal-close" onclick="closeModal('modal-novo-mdfe')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-novo-mdfe">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Dados Gerais</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Transportadora *</label>
+                            <select class="form-control" id="mdfe-transportadora" required><option value="">Selecione</option></select>
+                        </div>
+                        <div class="form-group"><label>UF Início *</label><input type="text" class="form-control" id="mdfe-uf-inicio" maxlength="2" placeholder="SP" required></div>
+                        <div class="form-group"><label>UF Fim *</label><input type="text" class="form-control" id="mdfe-uf-fim" maxlength="2" placeholder="RJ" required></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Condutor</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Nome do Condutor</label><input type="text" class="form-control" id="mdfe-condutor-nome"></div>
+                        <div class="form-group"><label>CPF</label><input type="text" class="form-control" id="mdfe-condutor-cpf" placeholder="000.000.000-00"></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Veículo</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Placa</label><input type="text" class="form-control" id="mdfe-placa" placeholder="ABC1D23" maxlength="8"></div>
+                        <div class="form-group"><label>UF</label><input type="text" class="form-control" id="mdfe-veiculo-uf" maxlength="2" placeholder="SP"></div>
+                        <div class="form-group"><label>RNTRC</label><input type="text" class="form-control" id="mdfe-rntrc"></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Carga</h4>
+                    <div class="form-row">
+                        <div class="form-group"><label>Peso Bruto (kg)</label><input type="number" step="0.001" class="form-control" id="mdfe-peso" placeholder="0.000"></div>
+                        <div class="form-group"><label>Valor da Carga (R$)</label><input type="number" step="0.01" class="form-control" id="mdfe-valor-carga" placeholder="0.00"></div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Documentos Vinculados</h4>
+                    <div id="mdfe-documentos-lista"></div>
+                    <div class="form-row" style="margin-top:8px;">
+                        <div class="form-group"><label>Tipo</label>
+                            <select class="form-control" id="mdfe-doc-tipo"><option value="nfe">NF-e</option><option value="cte">CT-e</option></select>
+                        </div>
+                        <div class="form-group" style="flex:2;"><label>Chave de Acesso (44 dígitos)</label><input type="text" class="form-control" id="mdfe-doc-chave" maxlength="44" placeholder="Chave de acesso do documento"></div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarDocMdfe()"><i class="fas fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                    <hr style="margin:12px 0;border-color:var(--border-color);">
+                    <h4 style="font-size:13px;font-weight:600;color:var(--primary);margin-bottom:12px;">Percurso (UFs intermediárias)</h4>
+                    <div id="mdfe-percursos-lista"></div>
+                    <div class="form-row" style="margin-top:8px;">
+                        <div class="form-group"><label>UF</label><input type="text" class="form-control" id="mdfe-percurso-uf" maxlength="2" placeholder="MG"></div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="adicionarPercursoMdfe()"><i class="fas fa-plus"></i> Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-novo-mdfe')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarMDFe()"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rastreamento Timeline -->
+    <div class="modal-overlay" id="modal-rastreamento-add">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-map-pin"></i> Adicionar Evento de Rastreamento</h3>
+                <button class="modal-close" onclick="closeModal('modal-rastreamento-add')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Descrição *</label><input type="text" class="form-control" id="rastr-desc" placeholder="Ex: Mercadoria saiu para entrega"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Cidade</label><input type="text" class="form-control" id="rastr-cidade"></div>
+                    <div class="form-group"><label>UF</label><input type="text" class="form-control" id="rastr-uf" maxlength="2" placeholder="SP"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Latitude</label><input type="number" step="0.00000001" class="form-control" id="rastr-lat" placeholder="-23.550520"></div>
+                    <div class="form-group"><label>Longitude</label><input type="number" step="0.00000001" class="form-control" id="rastr-lng" placeholder="-46.633308"></div>
+                </div>
+                <div class="form-group"><label>Unidade/CD</label><input type="text" class="form-control" id="rastr-unidade" placeholder="Centro de Distribuição X"></div>
+                <input type="hidden" id="rastr-add-pedido-id" value="">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('modal-rastreamento-add')">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarEventoRastreamento()"><i class="fas fa-save"></i> Salvar</button>
             </div>
         </div>
     </div>
@@ -676,16 +994,16 @@
                     transportadoras = await r.json();
                     transportadoras = Array.isArray(transportadoras) ? transportadoras : transportadoras.data || [];
                     atualizarLista();
-                    // Populate selects (limpar antes)
-                    const sel1 = document.getElementById('filtro-transportadora');
-                    const sel2 = document.getElementById('exp-transportadora');
-                    // Manter apenas a primeira opção
-                    while (sel1.options.length > 1) sel1.remove(1);
-                    while (sel2.options.length > 1) sel2.remove(1);
-                    transportadoras.forEach(t => {
-                        const nome = t.nome_fantasia || t.fantasia || t.razao_social;
-                        sel1.appendChild(new Option(nome, nome));
-                        sel2.appendChild(new Option(nome, t.id));
+                    // Populate all transportadora selects
+                    const selects = ['filtro-transportadora', 'exp-transportadora', 'cot-transportadora', 'cte-transportadora', 'mdfe-transportadora'];
+                    selects.forEach(selId => {
+                        const sel = document.getElementById(selId);
+                        if (!sel) return;
+                        while (sel.options.length > 1) sel.remove(1);
+                        transportadoras.forEach(t => {
+                            const nome = t.nome_fantasia || t.fantasia || t.razao_social;
+                            sel.appendChild(new Option(nome, selId === 'filtro-transportadora' ? nome : t.id));
+                        });
                     });
                 }
             } catch (e) { console.error('[LOGISTICA] Erro ao carregar transportadoras:', e); }
@@ -693,7 +1011,7 @@
 
         function atualizarLista() {
             const tbody = document.querySelector('#tabela-transportadoras tbody');
-            if (!transportadoras.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><i class="fas fa-truck-moving"></i><p>Nenhuma transportadora cadastrada</p></div></td></tr>'; return; }
+            if (!transportadoras.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="fas fa-truck-moving"></i><p>Nenhuma transportadora cadastrada</p></div></td></tr>'; return; }
             tbody.innerHTML = transportadoras.map(t => `
         <tr>
             <td><strong>${esc(t.razao_social || '-')}</strong></td>
@@ -701,10 +1019,12 @@
             <td><span class="code">${esc(t.cnpj_cpf || t.cnpj || '-')}</span></td>
             <td>${esc(t.telefone || '-')}</td>
             <td>${esc(t.email || '-')}</td>
+            <td>${t.api_rastreamento_url ? '<span class="badge success" title="API configurada"><i class="fas fa-check"></i> Sim</span>' : '<span class="badge pending">Não</span>'}</td>
             <td>
                 <div style="display:flex;gap:4px;">
                     <button class="action-btn view" onclick="verTransportadora(${t.id})" title="Ver detalhes"><i class="fas fa-eye"></i></button>
                     <button class="action-btn edit" onclick="editarTransportadora(${t.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                    <button class="action-btn" onclick="configApiTransportadora(${t.id})" title="Config API" style="color:var(--info);"><i class="fas fa-satellite-dish"></i></button>
                     <button class="action-btn" onclick="excluirTransportadora(${t.id},'${(t.nome_fantasia || t.razao_social || '').replace(/'/g, '\\\'')}')" title="Excluir" style="color:var(--danger);"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
@@ -737,9 +1057,20 @@
                 });
                 const data = await r.json().catch(() => ({}));
                 if (r.ok) {
+                    // Salvar config API se preenchida
+                    if (editId) {
+                        const apiUrl = document.getElementById('transp-api-url').value;
+                        const apiToken = document.getElementById('transp-api-token').value;
+                        const codInteg = document.getElementById('transp-cod-integracao').value;
+                        if (apiUrl || apiToken || codInteg) {
+                            await fetch(`/api/logistica/transportadoras/${editId}/api-config`, {
+                                method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                                body: JSON.stringify({ api_rastreamento_url: apiUrl, api_rastreamento_token: apiToken, codigo_integracao: codInteg })
+                            });
+                        }
+                    }
                     closeModal('modal-transportadoras');
-                    // Limpar campos
-                    ['transp-razao', 'transp-fantasia', 'transp-cnpj', 'transp-telefone', 'transp-email', 'transp-endereco', 'transp-cidade', 'transp-estado', 'transp-cep'].forEach(id => document.getElementById(id).value = '');
+                    ['transp-razao', 'transp-fantasia', 'transp-cnpj', 'transp-telefone', 'transp-email', 'transp-endereco', 'transp-cidade', 'transp-estado', 'transp-cep', 'transp-api-url', 'transp-api-token', 'transp-cod-integracao'].forEach(id => document.getElementById(id).value = '');
                     document.getElementById('transp-edit-id').value = '';
                     carregarTransportadoras();
                 } else {
@@ -750,7 +1081,7 @@
 
         function adicionarTransportadora() {
             document.getElementById('transp-edit-id').value = '';
-            ['transp-razao', 'transp-fantasia', 'transp-cnpj', 'transp-telefone', 'transp-email', 'transp-endereco', 'transp-cidade', 'transp-estado', 'transp-cep'].forEach(id => document.getElementById(id).value = '');
+            ['transp-razao', 'transp-fantasia', 'transp-cnpj', 'transp-telefone', 'transp-email', 'transp-endereco', 'transp-cidade', 'transp-estado', 'transp-cep', 'transp-api-url', 'transp-api-token', 'transp-cod-integracao'].forEach(id => document.getElementById(id).value = '');
             document.querySelector('#modal-transportadoras .modal-header h3').innerHTML = '<i class="fas fa-truck-moving"></i> Nova Transportadora';
             openModal('modal-transportadoras');
         }
@@ -768,8 +1099,22 @@
             document.getElementById('transp-cidade').value = t.cidade || '';
             document.getElementById('transp-estado').value = t.estado || '';
             document.getElementById('transp-cep').value = t.cep || '';
+            document.getElementById('transp-api-url').value = t.api_rastreamento_url || '';
+            document.getElementById('transp-api-token').value = t.api_rastreamento_token || '';
+            document.getElementById('transp-cod-integracao').value = t.codigo_integracao || '';
             document.querySelector('#modal-transportadoras .modal-header h3').innerHTML = '<i class="fas fa-pen"></i> Editar Transportadora';
             openModal('modal-transportadoras');
+        }
+
+        function configApiTransportadora(id) {
+            const t = transportadoras.find(tr => tr.id === id);
+            if (!t) return;
+            editarTransportadora(id);
+            // Scroll to API section
+            setTimeout(() => {
+                const apiSection = document.querySelector('#modal-transportadoras h4');
+                if (apiSection) apiSection.scrollIntoView({ behavior: 'smooth' });
+            }, 200);
         }
 
         async function excluirTransportadora(id, nome) {
@@ -856,6 +1201,394 @@
         </div>
     `;
             openModal('modal-detalhes');
+        }
+
+        // ========== COTAÇÃO DE FRETE ==========
+        async function cotarFrete() {
+            const uf = document.getElementById('cot-uf-destino').value;
+            if (!uf) { alert('Selecione a UF de destino'); return; }
+            const div = document.getElementById('cotacao-resultado');
+            div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Calculando cotações...</p>';
+            try {
+                const r = await fetch('/api/logistica/cotacao-frete', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({
+                        uf_destino: uf,
+                        cidade_destino: document.getElementById('cot-cidade').value || null,
+                        cep_destino: document.getElementById('cot-cep').value || null,
+                        peso: document.getElementById('cot-peso').value || null,
+                        valor_nf: document.getElementById('cot-valor').value || null,
+                        cubagem: document.getElementById('cot-cubagem').value || null,
+                        transportadora_id: document.getElementById('cot-transportadora').value || null
+                    })
+                });
+                const data = await r.json();
+                if (!data.cotacoes || !data.cotacoes.length) {
+                    div.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-search-dollar"></i><p>' + esc(data.mensagem || 'Nenhuma cotação encontrada para os parâmetros informados') + '</p></div>';
+                    return;
+                }
+                div.innerHTML = `<h4 style="margin-bottom:12px;font-size:14px;"><i class="fas fa-check-circle" style="color:var(--success);"></i> ${data.total_opcoes} cotação(ões) encontrada(s)</h4>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;">
+                    ${data.cotacoes.map((c, i) => `
+                        <div class="card" style="border:${i === 0 ? '2px solid var(--success)' : '1px solid var(--border-color)'};padding:16px;">
+                            ${i === 0 ? '<span class="badge success" style="margin-bottom:8px;">Melhor preço</span>' : ''}
+                            <h4 style="font-size:14px;margin-bottom:8px;">${esc(c.transportadora)}</h4>
+                            <p style="font-size:11px;color:var(--text-secondary);">${esc(c.tabela_nome)} • ${c.tipo_calculo}</p>
+                            <p style="font-size:24px;font-weight:700;color:var(--primary);margin:8px 0;">R$ ${c.valor_frete.toFixed(2)}</p>
+                            <p style="font-size:12px;color:var(--text-secondary);">Prazo: ${c.prazo_dias ? c.prazo_dias + ' dia(s)' : '-'} ${c.prazo_horas ? '/ ' + c.prazo_horas + 'h' : ''}</p>
+                            ${c.detalhes.length ? '<ul style="font-size:11px;color:var(--text-secondary);margin-top:8px;padding-left:16px;">' + c.detalhes.map(d => '<li>' + esc(d) + '</li>').join('') + '</ul>' : ''}
+                        </div>
+                    `).join('')}
+                    </div>`;
+            } catch (e) { div.innerHTML = '<p style="color:var(--danger);">Erro ao calcular cotação: ' + esc(e.message) + '</p>'; }
+        }
+
+        // ========== RASTREAMENTO ==========
+        async function rastrearPedido() {
+            const pedidoId = document.getElementById('rastr-pedido-id').value;
+            if (!pedidoId) { alert('Informe o ID do pedido'); return; }
+            const div = document.getElementById('rastreamento-resultado');
+            div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Buscando rastreamento...</p>';
+            try {
+                const r = await fetch(`/api/logistica/pedidos/${encodeURIComponent(pedidoId)}/rastreamento`, { credentials: 'include' });
+                const data = await r.json();
+                if (!data.eventos || !data.eventos.length) {
+                    div.innerHTML = '<div class="empty-state" style="padding:24px;"><i class="fas fa-map-marker-alt"></i><p>Nenhum evento de rastreamento encontrado</p></div>';
+                    return;
+                }
+                div.innerHTML = `
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <h4 style="font-size:14px;">Pedido #${esc(pedidoId)} — ${data.eventos.length} evento(s)</h4>
+                        <button class="btn btn-secondary btn-sm" onclick="abrirAddRastreamento(${pedidoId})"><i class="fas fa-plus"></i> Adicionar Evento</button>
+                    </div>
+                    <div style="position:relative;padding-left:28px;">
+                        <div style="position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--border-color);"></div>
+                        ${data.eventos.map(ev => `
+                            <div style="position:relative;margin-bottom:20px;">
+                                <div style="position:absolute;left:-22px;top:4px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--bg-card);z-index:1;"></div>
+                                <div class="card" style="padding:12px 16px;">
+                                    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+                                        <div>
+                                            <p style="font-weight:600;font-size:13px;">${esc(ev.descricao)}</p>
+                                            ${ev.detalhes ? '<p style="font-size:12px;color:var(--text-secondary);">' + esc(ev.detalhes) + '</p>' : ''}
+                                        </div>
+                                        <span style="font-size:11px;color:var(--text-muted);white-space:nowrap;">${ev.data_evento ? new Date(ev.data_evento).toLocaleString('pt-BR') : '-'}</span>
+                                    </div>
+                                    <div style="display:flex;gap:16px;margin-top:6px;font-size:11px;color:var(--text-secondary);flex-wrap:wrap;">
+                                        ${ev.cidade || ev.uf ? '<span><i class="fas fa-map-marker-alt"></i> ' + esc((ev.cidade || '') + (ev.uf ? '/' + ev.uf : '')) + '</span>' : ''}
+                                        ${ev.unidade ? '<span><i class="fas fa-warehouse"></i> ' + esc(ev.unidade) + '</span>' : ''}
+                                        ${ev.transportadora ? '<span><i class="fas fa-truck"></i> ' + esc(ev.transportadora) + '</span>' : ''}
+                                        ${ev.codigo_rastreio ? '<span><i class="fas fa-barcode"></i> ' + esc(ev.codigo_rastreio) + '</span>' : ''}
+                                        ${ev.latitude && ev.longitude ? '<a href="https://www.google.com/maps?q=' + ev.latitude + ',' + ev.longitude + '" target="_blank" style="color:var(--primary);text-decoration:none;"><i class="fas fa-map"></i> Ver no mapa (' + Number(ev.latitude).toFixed(4) + ', ' + Number(ev.longitude).toFixed(4) + ')</a>' : ''}
+                                        ${ev.recebedor ? '<span><i class="fas fa-user-check"></i> Recebedor: ' + esc(ev.recebedor) + '</span>' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } catch (e) { div.innerHTML = '<p style="color:var(--danger);">Erro: ' + esc(e.message) + '</p>'; }
+        }
+
+        async function consultarApiTransportadora() {
+            const pedidoId = document.getElementById('rastr-pedido-id').value;
+            if (!pedidoId) { alert('Informe o ID do pedido'); return; }
+            const div = document.getElementById('rastreamento-resultado');
+            div.innerHTML = '<p style="color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Consultando API da transportadora...</p>';
+            try {
+                const r = await fetch('/api/logistica/rastreamento/consultar-api', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({ pedido_id: pedidoId })
+                });
+                const data = await r.json();
+                if (!data.success) {
+                    div.innerHTML = `<div class="card" style="padding:16px;border-left:4px solid var(--warning);"><p style="font-weight:600;"><i class="fas fa-exclamation-triangle" style="color:var(--warning);"></i> ${esc(data.mensagem || data.error)}</p></div>`;
+                    return;
+                }
+                div.innerHTML = `
+                    <div class="card" style="padding:16px;">
+                        <h4 style="margin-bottom:8px;"><i class="fas fa-satellite-dish" style="color:var(--primary);"></i> Resposta API — ${esc(data.transportadora)}</h4>
+                        <p style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Código: ${esc(data.codigo_rastreio || '-')} • Status HTTP: ${data.status_code}</p>
+                        <pre style="background:var(--bg-secondary);padding:12px;border-radius:8px;font-size:12px;overflow-x:auto;max-height:400px;">${esc(JSON.stringify(data.api_response, null, 2))}</pre>
+                    </div>`;
+            } catch (e) { div.innerHTML = '<p style="color:var(--danger);">Erro: ' + esc(e.message) + '</p>'; }
+        }
+
+        function abrirAddRastreamento(pedidoId) {
+            document.getElementById('rastr-add-pedido-id').value = pedidoId;
+            ['rastr-desc', 'rastr-cidade', 'rastr-uf', 'rastr-lat', 'rastr-lng', 'rastr-unidade'].forEach(id => document.getElementById(id).value = '');
+            openModal('modal-rastreamento-add');
+        }
+
+        async function salvarEventoRastreamento() {
+            const pedidoId = document.getElementById('rastr-add-pedido-id').value;
+            const descricao = document.getElementById('rastr-desc').value.trim();
+            if (!descricao) { alert('Descrição é obrigatória'); return; }
+            try {
+                const r = await fetch(`/api/logistica/pedidos/${encodeURIComponent(pedidoId)}/rastreamento`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({
+                        descricao, cidade: document.getElementById('rastr-cidade').value || null,
+                        uf: document.getElementById('rastr-uf').value || null,
+                        latitude: document.getElementById('rastr-lat').value || null,
+                        longitude: document.getElementById('rastr-lng').value || null,
+                        unidade_rastreio: document.getElementById('rastr-unidade').value || null
+                    })
+                });
+                if (r.ok) { closeModal('modal-rastreamento-add'); rastrearPedido(); }
+                else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro ao salvar'); }
+            } catch (e) { alert('Erro de conexão'); }
+        }
+
+        // ========== CT-e ==========
+        let ctesData = [];
+        async function carregarCTes() {
+            const status = document.getElementById('cte-filtro-status')?.value || '';
+            try {
+                const r = await fetch(`/api/logistica/ctes?status=${encodeURIComponent(status)}`, { credentials: 'include' });
+                const data = await r.json();
+                ctesData = data.data || [];
+                renderizarCTes();
+            } catch (e) { console.error(e); }
+        }
+
+        function getCteStatusBadge(status) {
+            const m = { digitacao: 'pending', autorizado: 'success', cancelado: 'danger', inutilizado: 'info', denegado: 'warning' };
+            const l = { digitacao: 'Digitação', autorizado: 'Autorizado', cancelado: 'Cancelado', inutilizado: 'Inutilizado', denegado: 'Denegado' };
+            return `<span class="badge ${m[status] || 'info'}">${l[status] || status}</span>`;
+        }
+
+        function renderizarCTes() {
+            const tbody = document.querySelector('#tabela-ctes tbody');
+            if (!ctesData.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-invoice"></i><p>Nenhum CT-e encontrado</p></div></td></tr>'; return; }
+            tbody.innerHTML = ctesData.map(c => `
+                <tr>
+                    <td><strong>${c.numero || '-'}</strong></td>
+                    <td>${esc(c.transportadora_nome || c.transportadora_razao || '-')}</td>
+                    <td>${esc(c.remetente_nome || '-')}</td>
+                    <td>${esc(c.destinatario_nome || '-')}</td>
+                    <td>${esc((c.municipio_origem || '') + (c.uf_origem ? '/' + c.uf_origem : ''))}</td>
+                    <td>${esc((c.municipio_destino || '') + (c.uf_destino ? '/' + c.uf_destino : ''))}</td>
+                    <td>${formatarMoeda(c.valor_frete)}</td>
+                    <td>${getCteStatusBadge(c.status)}</td>
+                    <td>
+                        <div style="display:flex;gap:4px;">
+                            ${c.status === 'digitacao' ? `<button class="action-btn edit" onclick="editarCTe(${c.id})" title="Editar"><i class="fas fa-pen"></i></button>` : ''}
+                            ${c.status === 'digitacao' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirCTe(${c.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function salvarCTe() {
+            const transportadora_id = document.getElementById('cte-transportadora').value;
+            const valor_frete = document.getElementById('cte-valor-frete').value;
+            if (!transportadora_id || !valor_frete) { alert('Transportadora e valor do frete são obrigatórios'); return; }
+            if (window._guardSalvarCTe) return;
+            window._guardSalvarCTe = true;
+            const editId = document.getElementById('cte-edit-id').value;
+            const payload = {
+                transportadora_id, tipo_cte: document.getElementById('cte-tipo').value,
+                modal: document.getElementById('cte-modal').value,
+                remetente_nome: document.getElementById('cte-rem-nome').value,
+                remetente_cnpj_cpf: document.getElementById('cte-rem-cnpj').value,
+                municipio_origem: document.getElementById('cte-mun-origem').value,
+                uf_origem: document.getElementById('cte-uf-origem').value,
+                destinatario_nome: document.getElementById('cte-dest-nome').value,
+                destinatario_cnpj_cpf: document.getElementById('cte-dest-cnpj').value,
+                municipio_destino: document.getElementById('cte-mun-destino').value,
+                uf_destino: document.getElementById('cte-uf-destino').value,
+                produto_predominante: document.getElementById('cte-produto').value,
+                peso_bruto: document.getElementById('cte-peso').value || 0,
+                quantidade_volumes: document.getElementById('cte-volumes').value || 0,
+                valor_carga: document.getElementById('cte-valor-carga').value || 0,
+                valor_frete, valor_receber: document.getElementById('cte-valor-receber').value || valor_frete
+            };
+            try {
+                const url = editId ? `/api/logistica/ctes/${editId}` : '/api/logistica/ctes';
+                const method = editId ? 'PUT' : 'POST';
+                const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: JSON.stringify(payload) });
+                const data = await r.json();
+                if (r.ok) { closeModal('modal-novo-cte'); carregarCTes(); }
+                else { alert(data.error || 'Erro ao salvar CT-e'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarCTe = false; }
+        }
+
+        function editarCTe(id) {
+            const c = ctesData.find(x => x.id === id);
+            if (!c) return;
+            document.getElementById('cte-edit-id').value = c.id;
+            document.getElementById('cte-transportadora').value = c.transportadora_id || '';
+            document.getElementById('cte-tipo').value = c.tipo_cte || '0';
+            document.getElementById('cte-modal').value = c.modal || '01';
+            document.getElementById('cte-rem-nome').value = c.remetente_nome || '';
+            document.getElementById('cte-rem-cnpj').value = c.remetente_cnpj_cpf || '';
+            document.getElementById('cte-mun-origem').value = c.municipio_origem || '';
+            document.getElementById('cte-uf-origem').value = c.uf_origem || '';
+            document.getElementById('cte-dest-nome').value = c.destinatario_nome || '';
+            document.getElementById('cte-dest-cnpj').value = c.destinatario_cnpj_cpf || '';
+            document.getElementById('cte-mun-destino').value = c.municipio_destino || '';
+            document.getElementById('cte-uf-destino').value = c.uf_destino || '';
+            document.getElementById('cte-produto').value = c.produto_predominante || '';
+            document.getElementById('cte-peso').value = c.peso_bruto || '';
+            document.getElementById('cte-volumes').value = c.quantidade_volumes || '';
+            document.getElementById('cte-valor-carga').value = c.valor_carga || '';
+            document.getElementById('cte-valor-frete').value = c.valor_frete || '';
+            document.getElementById('cte-valor-receber').value = c.valor_receber || '';
+            openModal('modal-novo-cte');
+        }
+
+        async function excluirCTe(id) {
+            if (!confirm('Deseja excluir este CT-e?')) return;
+            try {
+                const r = await fetch(`/api/logistica/ctes/${id}`, { method: 'DELETE', credentials: 'include' });
+                if (r.ok) carregarCTes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
+            } catch (e) { alert('Erro de conexão'); }
+        }
+
+        // ========== MDF-e ==========
+        let mdfesData = [], mdfeDocumentos = [], mdfePercursos = [];
+
+        async function carregarMDFes() {
+            const status = document.getElementById('mdfe-filtro-status')?.value || '';
+            try {
+                const r = await fetch(`/api/logistica/mdfes?status=${encodeURIComponent(status)}`, { credentials: 'include' });
+                const data = await r.json();
+                mdfesData = data.data || [];
+                renderizarMDFes();
+            } catch (e) { console.error(e); }
+        }
+
+        function getMdfeStatusBadge(status) {
+            const m = { digitacao: 'pending', autorizado: 'success', encerrado: 'info', cancelado: 'danger' };
+            const l = { digitacao: 'Digitação', autorizado: 'Autorizado', encerrado: 'Encerrado', cancelado: 'Cancelado' };
+            return `<span class="badge ${m[status] || 'info'}">${l[status] || status}</span>`;
+        }
+
+        function renderizarMDFes() {
+            const tbody = document.querySelector('#tabela-mdfes tbody');
+            if (!mdfesData.length) { tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-file-alt"></i><p>Nenhum MDF-e encontrado</p></div></td></tr>'; return; }
+            tbody.innerHTML = mdfesData.map(m => `
+                <tr>
+                    <td><strong>${m.numero || '-'}</strong></td>
+                    <td>${esc(m.transportadora_nome || m.transportadora_razao || '-')}</td>
+                    <td>${esc(m.uf_inicio)} → ${esc(m.uf_fim)}</td>
+                    <td>${esc(m.condutor_nome || '-')}</td>
+                    <td>${esc(m.veiculo_placa || '-')}</td>
+                    <td>${(m.total_documentos || m.quantidade_nfes + m.quantidade_ctes) || 0}</td>
+                    <td>${formatarMoeda(m.valor_carga)}</td>
+                    <td>${getMdfeStatusBadge(m.status)}</td>
+                    <td>
+                        <div style="display:flex;gap:4px;">
+                            ${m.status === 'autorizado' ? `<button class="action-btn success" onclick="encerrarMDFe(${m.id})" title="Encerrar"><i class="fas fa-check-double"></i></button>` : ''}
+                            ${['digitacao','autorizado'].includes(m.status) ? `<button class="action-btn" style="color:var(--danger);" onclick="cancelarMDFe(${m.id})" title="Cancelar"><i class="fas fa-ban"></i></button>` : ''}
+                            ${m.status === 'digitacao' ? `<button class="action-btn" style="color:var(--danger);" onclick="excluirMDFe(${m.id})" title="Excluir"><i class="fas fa-trash"></i></button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function adicionarDocMdfe() {
+            const tipo = document.getElementById('mdfe-doc-tipo').value;
+            const chave = document.getElementById('mdfe-doc-chave').value.trim();
+            if (!chave || chave.length !== 44) { alert('Chave de acesso deve ter 44 dígitos'); return; }
+            mdfeDocumentos.push({ tipo, chave_acesso: chave });
+            document.getElementById('mdfe-doc-chave').value = '';
+            renderizarDocsMdfe();
+        }
+
+        function removerDocMdfe(idx) { mdfeDocumentos.splice(idx, 1); renderizarDocsMdfe(); }
+
+        function renderizarDocsMdfe() {
+            const div = document.getElementById('mdfe-documentos-lista');
+            if (!mdfeDocumentos.length) { div.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">Nenhum documento adicionado</p>'; return; }
+            div.innerHTML = mdfeDocumentos.map((d, i) => `
+                <div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--bg-secondary);border-radius:6px;margin-bottom:4px;">
+                    <span class="badge ${d.tipo === 'cte' ? 'info' : 'success'}" style="font-size:10px;">${d.tipo.toUpperCase()}</span>
+                    <span class="code" style="font-size:11px;flex:1;">${d.chave_acesso}</span>
+                    <button class="action-btn" onclick="removerDocMdfe(${i})" style="color:var(--danger);"><i class="fas fa-times"></i></button>
+                </div>
+            `).join('');
+        }
+
+        function adicionarPercursoMdfe() {
+            const uf = document.getElementById('mdfe-percurso-uf').value.trim().toUpperCase();
+            if (!uf || uf.length !== 2) { alert('UF deve ter 2 caracteres'); return; }
+            mdfePercursos.push(uf);
+            document.getElementById('mdfe-percurso-uf').value = '';
+            renderizarPercursosMdfe();
+        }
+
+        function removerPercursoMdfe(idx) { mdfePercursos.splice(idx, 1); renderizarPercursosMdfe(); }
+
+        function renderizarPercursosMdfe() {
+            const div = document.getElementById('mdfe-percursos-lista');
+            if (!mdfePercursos.length) { div.innerHTML = '<p style="font-size:12px;color:var(--text-muted);">Nenhum percurso intermediário</p>'; return; }
+            div.innerHTML = mdfePercursos.map((uf, i) => `
+                <span class="badge info" style="margin:2px 4px;cursor:pointer;" onclick="removerPercursoMdfe(${i})" title="Remover">${uf} <i class="fas fa-times" style="font-size:9px;margin-left:4px;"></i></span>
+            `).join('');
+        }
+
+        async function salvarMDFe() {
+            const transportadora_id = document.getElementById('mdfe-transportadora').value;
+            const uf_inicio = document.getElementById('mdfe-uf-inicio').value.trim().toUpperCase();
+            const uf_fim = document.getElementById('mdfe-uf-fim').value.trim().toUpperCase();
+            if (!transportadora_id || !uf_inicio || !uf_fim) { alert('Transportadora, UF início e UF fim são obrigatórios'); return; }
+            if (window._guardSalvarMDFe) return;
+            window._guardSalvarMDFe = true;
+            try {
+                const r = await fetch('/api/logistica/mdfes', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({
+                        transportadora_id, uf_inicio, uf_fim,
+                        condutor_nome: document.getElementById('mdfe-condutor-nome').value,
+                        condutor_cpf: document.getElementById('mdfe-condutor-cpf').value,
+                        veiculo_placa: document.getElementById('mdfe-placa').value,
+                        veiculo_uf: document.getElementById('mdfe-veiculo-uf').value,
+                        veiculo_rntrc: document.getElementById('mdfe-rntrc').value,
+                        peso_bruto: document.getElementById('mdfe-peso').value || 0,
+                        valor_carga: document.getElementById('mdfe-valor-carga').value || 0,
+                        documentos: mdfeDocumentos,
+                        percursos: mdfePercursos
+                    })
+                });
+                const data = await r.json();
+                if (r.ok) {
+                    closeModal('modal-novo-mdfe');
+                    mdfeDocumentos = []; mdfePercursos = [];
+                    carregarMDFes();
+                } else { alert(data.error || 'Erro ao salvar MDF-e'); }
+            } catch (e) { alert('Erro de conexão'); } finally { window._guardSalvarMDFe = false; }
+        }
+
+        async function encerrarMDFe(id) {
+            const uf = prompt('UF de encerramento (ex: SP):');
+            if (!uf) return;
+            const municipio = prompt('Município de encerramento:');
+            try {
+                const r = await fetch(`/api/logistica/mdfes/${id}/encerrar`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
+                    body: JSON.stringify({ uf_encerramento: uf.toUpperCase(), municipio_encerramento: municipio })
+                });
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
+            } catch (e) { alert('Erro de conexão'); }
+        }
+
+        async function cancelarMDFe(id) {
+            if (!confirm('Deseja cancelar este MDF-e?')) return;
+            try {
+                const r = await fetch(`/api/logistica/mdfes/${id}/cancelar`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, credentials: 'include', body: '{}' });
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
+            } catch (e) { alert('Erro de conexão'); }
+        }
+
+        async function excluirMDFe(id) {
+            if (!confirm('Deseja excluir este MDF-e?')) return;
+            try {
+                const r = await fetch(`/api/logistica/mdfes/${id}`, { method: 'DELETE', credentials: 'include' });
+                if (r.ok) carregarMDFes(); else { const d = await r.json().catch(() => ({})); alert(d.error || 'Erro'); }
+            } catch (e) { alert('Erro de conexão'); }
         }
 
         function carregarDadosUsuario() {

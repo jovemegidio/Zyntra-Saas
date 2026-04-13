@@ -360,6 +360,53 @@
             color: var(--text-primary);
         }
 
+        /* Context Menu do Card */
+        .card-context-menu {
+            position: absolute;
+            top: 36px;
+            right: 8px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            z-index: 2000;
+            min-width: 180px;
+            padding: 4px 0;
+            animation: menuFadeIn 0.15s ease;
+        }
+        @keyframes menuFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-context-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 13px;
+            color: #334155;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+        }
+        .card-context-menu-item:hover {
+            background: #f1f5f9;
+        }
+        .card-context-menu-item i {
+            width: 16px;
+            text-align: center;
+            color: #64748b;
+        }
+        .card-context-menu-item.danger { color: #ef4444; }
+        .card-context-menu-item.danger i { color: #ef4444; }
+        .card-context-menu-separator {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 4px 0;
+        }
+
         .card-title {
             font-size: 13px;
             font-weight: 600;
@@ -1605,6 +1652,9 @@
                 </a>
                 <a href="apontamentos.html" class="sidebar-btn" title="Apontamentos">
                     <i class="fas fa-stopwatch"></i>
+                </a>
+                <a href="pages/qualidade.html" class="sidebar-btn" title="Qualidade">
+                    <i class="fas fa-award"></i>
                 </a>
                 <a href="pages/relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-pie"></i>
@@ -3092,11 +3142,11 @@
 
             if (!isLocalOrder) {
                 try {
-                    const response = await fetch(`/api/pcp/ordens-kanban/${ordemId}`, { credentials: 'include', method: 'PUT',
+                    const response = await fetch(`/api/pcp/ordens-kanban/${ordemId}`, {
                         credentials: 'include',
+                        method: 'PUT',
                         headers: {
-                            'Content-Type': 'application/json',
-
+                            'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({ status: novoStatus, origem: ordem.origem || 'kanban' })
                     });
@@ -3168,11 +3218,40 @@
             card.draggable = true;
             card.dataset.id = ordem.id;
 
-            // Adiciona evento de duplo clique para abrir modal de visualização
-            card.ondblclick = function(e) {
-                e.stopPropagation();
-                abrirModalOrdem(ordem.id);
-            };
+            // Duplo clique para abrir modal - usa pointerdown/pointerup pois click pode ser engolido pelo drag
+            let _lastPointerUp = 0;
+            let _pointerMoved = false;
+            let _pointerDownPos = null;
+
+            card.addEventListener('pointerdown', function(e) {
+                if (e.target.closest('.card-menu') || e.target.closest('.card-context-menu')) return;
+                _pointerMoved = false;
+                _pointerDownPos = { x: e.clientX, y: e.clientY };
+            });
+
+            card.addEventListener('pointermove', function(e) {
+                if (_pointerDownPos) {
+                    const dx = Math.abs(e.clientX - _pointerDownPos.x);
+                    const dy = Math.abs(e.clientY - _pointerDownPos.y);
+                    if (dx > 5 || dy > 5) _pointerMoved = true;
+                }
+            });
+
+            card.addEventListener('pointerup', function(e) {
+                if (e.button !== 0) return;
+                if (e.target.closest('.card-menu') || e.target.closest('.card-context-menu')) return;
+                if (_pointerMoved) { _pointerDownPos = null; return; }
+                _pointerDownPos = null;
+
+                const now = Date.now();
+                if (now - _lastPointerUp < 400) {
+                    _lastPointerUp = 0;
+                    fecharCardMenuGlobal();
+                    abrirModalOrdem(ordem.id);
+                } else {
+                    _lastPointerUp = now;
+                }
+            });
 
             const badgeStatusClass = ordem.statusTexto === 'Atrasada' ? 'atrasada' :
                                ordem.statusTexto === 'Concluída' ? 'concluida' : 'em-dia';
@@ -3440,7 +3519,7 @@
 
         function abrirModalOrdem(ordemId) {
             ordemAtualId = ordemId;
-            const ordem = ordensProducao.find(o => o.id === ordemId);
+            const ordem = ordensProducao.find(o => o.id == ordemId);
 
             if (!ordem) {
                 showNotification('Ordem não encontrada', 'error');
@@ -3500,16 +3579,18 @@
             if (obsEl) obsEl.value = ordem.observacoes || '';
 
             // Atualizar status no footer
-            const statusFooter = document.getElementById('modal-status-footer');
+            const statusFooter = document.querySelector('#modalOrdemView .modal-ordem-footer');
             const statusText = document.getElementById('modal-status-text');
             if (statusText) statusText.textContent = ordem.statusTexto || 'Em andamento';
 
-            if (ordem.statusTexto === 'Atrasada') {
-                statusFooter.style.background = 'linear-gradient(135deg, #dc2626, #f87171)';
-            } else if (ordem.statusTexto === 'Concluída') {
-                statusFooter.style.background = 'linear-gradient(135deg, #22c55e, #86efac)';
-            } else {
-                statusFooter.style.background = 'linear-gradient(135deg, #3b82f6, #93c5fd)';
+            if (statusFooter) {
+                if (ordem.statusTexto === 'Atrasada') {
+                    statusFooter.style.background = 'linear-gradient(135deg, #dc2626, #f87171)';
+                } else if (ordem.statusTexto === 'Concluída') {
+                    statusFooter.style.background = 'linear-gradient(135deg, #22c55e, #86efac)';
+                } else {
+                    statusFooter.style.background = 'linear-gradient(135deg, #3b82f6, #93c5fd)';
+                }
             }
 
             // Reset tabs
@@ -3833,14 +3914,15 @@
                     showNotification('Item incluído com sucesso!', 'success');
                     document.getElementById('modal-incluir-item').remove();
                     // Recarregar itens da ordem
-                    carregarItensOrdem(ordemAtualId);
+                    const ordemObj = ordensProducao.find(o => o.id === ordemAtualId);
+                    if (ordemObj) carregarItensOrdem(ordemObj);
                 } else {
                     throw new Error('Erro ao incluir item');
                 }
             } catch (error) {
                 console.error('Erro:', error);
                 // Adicionar localmente na tabela
-                const tbody = document.getElementById('tabela-itens-ordem');
+                const tbody = document.getElementById('modal-itens-tbody');
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="text-align:center;"><i class="fas fa-edit" style="cursor:pointer;color:#2563eb;"></i> <i class="fas fa-trash" style="cursor:pointer;color:#dc2626;"></i></td>
@@ -4706,7 +4788,6 @@
 
             // Buscar anexos da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -4827,9 +4908,9 @@
             }
 
             try {
-                const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, { credentials: 'include', method: 'POST',
+                const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}/anexos`, {
                     credentials: 'include',
-                    credentials: 'include',
+                    method: 'POST',
                     body: formData
                 });
 
@@ -4850,9 +4931,9 @@
             if (!confirm('Confirma exclusão do anexo?')) return;
 
             try {
-                await fetch(`/api/pcp/anexos/${anexoId}`, { credentials: 'include', method: 'DELETE',
+                await fetch(`/api/pcp/anexos/${anexoId}`, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'DELETE'
                 });
                 showNotification('Anexo excluído!', 'success');
                 document.getElementById('modal-anexos').remove();
@@ -4869,7 +4950,6 @@
 
             // Buscar histórico da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/historico`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -4998,7 +5078,6 @@
 
             // Buscar tarefas da API
             fetch(`/api/pcp/ordens-producao/${ordemAtualId}/tarefas`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : { data: [] })
@@ -5150,9 +5229,9 @@
             if (!confirm('Confirma exclusão da tarefa?')) return;
 
             try {
-                await fetch(`/api/pcp/tarefas/${tarefaId}`, { credentials: 'include', method: 'DELETE',
+                await fetch(`/api/pcp/tarefas/${tarefaId}`, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'DELETE'
                 });
                 showNotification('Tarefa excluída!', 'success');
                 document.getElementById('modal-tarefas').remove();
@@ -5192,8 +5271,9 @@
 
                     if (!isLocalOrder) {
                         // Atualizar no banco de dados
-                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, { credentials: 'include', method: 'PUT',
+                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, {
                             credentials: 'include',
+                            method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
@@ -5267,7 +5347,6 @@
 
             // Buscar dados do pedido na API
             fetch(`/api/pedidos/${pedidoId}`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => {
@@ -5534,8 +5613,9 @@
 
                     if (!isLocalOrder) {
                         // Tentar excluir do banco de dados
-                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, { credentials: 'include', method: 'DELETE',
+                        const response = await fetch(`/api/pcp/ordens-producao/${ordemAtualId}`, {
                             credentials: 'include',
+                            method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json'
                             }
@@ -5571,7 +5651,126 @@
         }
 
         function editarItemOrdem(index) {
-            showNotification('Edição de item em desenvolvimento', 'info');
+            if (!ordemAtualId) return;
+            const ordem = ordensProducao.find(o => o.id === ordemAtualId);
+            if (!ordem) return;
+
+            const rows = document.querySelectorAll('#modal-itens-tbody tr');
+            const row = rows[index];
+            if (!row) { showNotification('Item não encontrado', 'error'); return; }
+
+            const cells = row.querySelectorAll('td');
+            const descAtual = cells[1]?.textContent?.trim() || '';
+            const codAtual = cells[2]?.textContent?.trim() || '';
+            const qtdTexto = cells[3]?.textContent?.trim() || '0';
+            const qtdAtual = parseFloat(qtdTexto.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+            const unidAtual = qtdTexto.replace(/[\d.,\s]/g, '').trim() || 'UN';
+            const localAtual = cells[5]?.textContent?.trim() || 'ALMOXARIFADO';
+            const tipoAtual = cells[6]?.textContent?.trim() || 'MATÉRIA-PRIMA';
+
+            const modalHtml = `
+                <div id="modal-editar-item" style="position:fixed;inset:0;background:rgba(15,23,42,0.7);display:flex;align-items:center;justify-content:center;z-index:10005;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);">
+                    <div style="background:#fff;border-radius:16px;width:550px;max-width:95vw;box-shadow:0 25px 50px -12px rgba(0,0,0,0.4);overflow:hidden;">
+                        <div style="background:linear-gradient(135deg,#2563eb,#3b82f6);padding:20px;color:#fff;">
+                            <div style="display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <h3 style="margin:0;font-size:18px;"><i class="fas fa-edit"></i> Editar Item</h3>
+                                    <p style="margin:5px 0 0;opacity:0.9;font-size:14px;">${ordem.numero || 'OP-' + ordem.id}</p>
+                                </div>
+                                <button onclick="document.getElementById('modal-editar-item').remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:18px;">&times;</button>
+                            </div>
+                        </div>
+                        <div style="padding:24px;">
+                            <div style="margin-bottom:20px;">
+                                <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Código do Material</label>
+                                <input type="text" id="edit-item-codigo" value="${codAtual}" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                            </div>
+                            <div style="margin-bottom:20px;">
+                                <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Descrição</label>
+                                <input type="text" id="edit-item-descricao" value="${descAtual}" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Quantidade</label>
+                                    <input type="number" id="edit-item-quantidade" value="${qtdAtual}" step="0.001" min="0" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;">
+                                </div>
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Unidade</label>
+                                    <select id="edit-item-unidade" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="KG" ${unidAtual === 'KG' ? 'selected' : ''}>KG</option>
+                                        <option value="M" ${unidAtual === 'M' ? 'selected' : ''}>M (Metro)</option>
+                                        <option value="UN" ${unidAtual === 'UN' ? 'selected' : ''}>UN (Unidade)</option>
+                                        <option value="L" ${unidAtual === 'L' ? 'selected' : ''}>L (Litro)</option>
+                                        <option value="PC" ${unidAtual === 'PC' ? 'selected' : ''}>PC (Peça)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Tipo do Item</label>
+                                    <select id="edit-item-tipo" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="MATÉRIA-PRIMA" ${tipoAtual.includes('PRIMA') ? 'selected' : ''}>Matéria-Prima</option>
+                                        <option value="COMPONENTE" ${tipoAtual === 'COMPONENTE' ? 'selected' : ''}>Componente</option>
+                                        <option value="EMBALAGEM" ${tipoAtual === 'EMBALAGEM' ? 'selected' : ''}>Embalagem</option>
+                                        <option value="INSUMO" ${tipoAtual === 'INSUMO' ? 'selected' : ''}>Insumo</option>
+                                        <option value="PRODUTO ACABADO" ${tipoAtual.includes('ACABADO') ? 'selected' : ''}>Produto Acabado</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="display:block;margin-bottom:8px;font-weight:600;color:#374151;">Local de Estoque</label>
+                                    <select id="edit-item-local" style="width:100%;padding:12px 16px;border:2px solid #e5e7eb;border-radius:10px;font-size:14px;box-sizing:border-box;background:#fff;">
+                                        <option value="ALMOXARIFADO" ${localAtual === 'ALMOXARIFADO' ? 'selected' : ''}>Almoxarifado</option>
+                                        <option value="PRODUÇÃO" ${localAtual === 'PRODUÇÃO' ? 'selected' : ''}>Produção</option>
+                                        <option value="DEPOSITO" ${localAtual === 'DEPOSITO' || localAtual === 'DEPÓSITO' ? 'selected' : ''}>Depósito</option>
+                                        <option value="EXTERNO" ${localAtual === 'EXTERNO' ? 'selected' : ''}>Externo</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="padding:20px;background:#f8f9fa;border-top:1px solid #e5e7eb;display:flex;justify-content:flex-end;gap:12px;">
+                            <button onclick="document.getElementById('modal-editar-item').remove()" style="padding:12px 24px;background:#6b7280;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                <i class="fas fa-times"></i> Cancelar
+                            </button>
+                            <button onclick="salvarEdicaoItem(${index})" style="padding:12px 24px;background:#2563eb;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600;">
+                                <i class="fas fa-check"></i> Salvar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        async function salvarEdicaoItem(index) {
+            const codigo = document.getElementById('edit-item-codigo').value.trim();
+            const descricao = document.getElementById('edit-item-descricao').value.trim();
+            const quantidade = parseFloat(document.getElementById('edit-item-quantidade').value) || 0;
+            const unidade = document.getElementById('edit-item-unidade').value;
+            const tipo = document.getElementById('edit-item-tipo').value;
+            const local = document.getElementById('edit-item-local').value;
+
+            if (quantidade <= 0) {
+                showNotification('Informe uma quantidade válida', 'error');
+                return;
+            }
+
+            // Atualizar na tabela visual
+            const rows = document.querySelectorAll('#modal-itens-tbody tr');
+            const row = rows[index];
+            if (row) {
+                const cells = row.querySelectorAll('td');
+                if (cells[1]) cells[1].textContent = descricao || codigo;
+                if (cells[2]) cells[2].textContent = codigo || '-';
+                if (cells[3]) cells[3].textContent = `${quantidade.toLocaleString('pt-BR', {minimumFractionDigits: 3})} ${unidade}`;
+                if (cells[5]) cells[5].textContent = local;
+                if (cells[6]) {
+                    const tipoClasse = tipo.toLowerCase().replace(/[^a-z]/g, '');
+                    cells[6].innerHTML = `<span class="tipo-badge tipo-${tipoClasse}">${tipo}</span>`;
+                }
+            }
+
+            document.getElementById('modal-editar-item').remove();
+            showNotification('Item atualizado com sucesso!', 'success');
         }
 
         async function removerItemOrdem(index) {
@@ -5584,6 +5783,15 @@
             });
 
             if (confirmado) {
+                const rows = document.querySelectorAll('#modal-itens-tbody tr');
+                const row = rows[index];
+                if (row) {
+                    row.remove();
+                    // Atualizar contador
+                    const remaining = document.querySelectorAll('#modal-itens-tbody tr').length;
+                    const countEl = document.getElementById('modal-itens-count');
+                    if (countEl) countEl.textContent = remaining > 0 ? `1 - ${remaining} de ${remaining} registros` : '0 registros';
+                }
                 showNotification('Item removido!', 'success');
             }
         }
@@ -5602,7 +5810,6 @@
 
             // Buscar itens da estrutura da API
             fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : Promise.reject('Erro na API'))
@@ -5846,7 +6053,6 @@
 
             // Buscar itens da estrutura com custos
             fetch(`/api/pcp/ordens-producao/${ordem.id}/itens`, {
-                credentials: 'include',
                 credentials: 'include'
             })
             .then(response => response.ok ? response.json() : Promise.reject('Erro na API'))
@@ -6683,9 +6889,9 @@
             try {
                 showNotification('Gerando arquivo Excel...', 'info');
 
-                const response = await fetch(endpoint, { credentials: 'include', method: 'GET',
+                const response = await fetch(endpoint, {
                     credentials: 'include',
-                    credentials: 'include'
+                    method: 'GET'
                 });
 
                 if (!response.ok) {
@@ -6789,8 +6995,74 @@
         // UTILITÁRIOS
         // ========================================
         function showCardMenu(ordemId) {
-            // TODO: Implementar menu de contexto
-            console.log('Menu do card:', ordemId);
+            // Fechar menu existente
+            fecharCardMenuGlobal();
+
+            const ordem = ordensProducao.find(o => o.id == ordemId);
+            if (!ordem) return;
+
+            // Localizar o card e o botão de menu
+            const card = document.querySelector(`.kanban-card[data-id="${ordemId}"]`);
+            if (!card) return;
+
+            // Criar menu de contexto
+            const menu = document.createElement('div');
+            menu.className = 'card-context-menu';
+            menu.id = 'activeCardMenu';
+            menu.onclick = function(e) { e.stopPropagation(); };
+
+            menu.innerHTML = `
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); abrirModalOrdem(${ordemId})">
+                    <i class="fas fa-eye"></i> Visualizar / Editar
+                </button>
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); duplicarOrdem(${ordemId})">
+                    <i class="fas fa-copy"></i> Duplicar Ordem
+                </button>
+                <div class="card-context-menu-separator"></div>
+                <button class="card-context-menu-item" onclick="fecharCardMenuGlobal(); imprimirOrdemCard(${ordemId})">
+                    <i class="fas fa-print"></i> Imprimir OP
+                </button>
+                <div class="card-context-menu-separator"></div>
+                <button class="card-context-menu-item danger" onclick="fecharCardMenuGlobal(); excluirOrdem(${ordemId})">
+                    <i class="fas fa-trash-alt"></i> Excluir Ordem
+                </button>
+            `;
+
+            card.style.position = 'relative';
+            card.appendChild(menu);
+
+            // Fechar ao clicar fora
+            setTimeout(() => {
+                document.addEventListener('click', fecharCardMenuGlobal, { once: true });
+            }, 10);
+        }
+
+        function fecharCardMenuGlobal() {
+            const menu = document.getElementById('activeCardMenu');
+            if (menu) menu.remove();
+        }
+
+        function duplicarOrdem(ordemId) {
+            const ordem = ordensProducao.find(o => o.id == ordemId);
+            if (!ordem) return;
+            const nova = { ...ordem, id: Date.now(), numero: 'NOVA-' + (ordem.numero || ''), status: 'a_produzir', statusKanban: 'a_produzir', produzido: 0 };
+            ordensProducao.push(nova);
+            salvarOrdensLocais();
+            renderizarKanban();
+            showNotification('Ordem duplicada com sucesso', 'success');
+        }
+
+        function imprimirOrdemCard(ordemId) {
+            abrirModalOrdem(ordemId);
+            setTimeout(() => imprimirOrdem(), 300);
+        }
+
+        function excluirOrdem(ordemId) {
+            if (!confirm('Tem certeza que deseja excluir esta ordem de produção?')) return;
+            ordensProducao = ordensProducao.filter(o => o.id != ordemId);
+            salvarOrdensLocais();
+            renderizarKanban();
+            showNotification('Ordem excluída', 'success');
         }
 
         function showNotification(message, type = 'info') {

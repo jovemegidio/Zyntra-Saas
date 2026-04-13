@@ -11290,6 +11290,11 @@
                 document.getElementById('edit-tipo-entrega').value = pedido.tipo_entrega || '';
             }
 
+            // Restaurar tipo de venda (revenda/consumidor) do pedido
+            if (pedido.tipo_venda) {
+                setTipoVendaEdit(pedido.tipo_venda);
+            }
+
             // Desconto geral em %
             if (document.getElementById('edit-desconto-pct')) {
                 document.getElementById('edit-desconto-pct').value = pedido.desconto_pct || 0;
@@ -11552,6 +11557,25 @@
                 return;
             }
 
+            // Validar Tipo de Venda (Revenda/Consumidor Final) obrigatório
+            const tipoVenda = document.getElementById('edit-tipo-venda')?.value || '';
+            if (!tipoVenda || (tipoVenda !== 'consumidor' && tipoVenda !== 'revenda')) {
+                showNotification('Selecione o Tipo de Venda: Revenda ou Consumidor Final', 'warning');
+                switchModalTab('principal');
+                window._salvandoPedido = false;
+                return;
+            }
+
+            // Validar Condição de Pagamento obrigatória
+            const condicaoPagamentoPreCheck = document.getElementById('edit-condicao-pagamento')?.value || '';
+            if (!condicaoPagamentoPreCheck || condicaoPagamentoPreCheck === '' || condicaoPagamentoPreCheck === 'Selecione...') {
+                showNotification('Selecione uma Condição de Pagamento para fechar o pedido', 'warning');
+                switchModalTab('principal');
+                document.getElementById('edit-condicao-pagamento-header')?.focus();
+                window._salvandoPedido = false;
+                return;
+            }
+
             const valorFrete = parseFloat(document.getElementById('edit-valor-frete')?.value) || 0;
             const placaVeiculo = document.getElementById('edit-placa-veiculo')?.value || '';
             const veiculoUf = document.getElementById('edit-veiculo-uf')?.value || '';
@@ -11581,6 +11605,7 @@
                 observacao: novaObs,
                 transportadora: novaTransp,
                 nf: novaNF,
+                tipo_venda: tipoVenda,
                 // Campos de transporte e frete
                 tipo_frete: tipoFrete,
                 frete: valorFrete,
@@ -11939,15 +11964,32 @@
             showNotification('Gerando Recibo...', 'info');
 
             try {
-                // Tentar buscar dados completos do pedido para o recibo
-                await carregarDadosCompletosCliente();
+                // Tentar buscar recibo do servidor primeiro
+                const response = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}/recibo`, {
+                    credentials: 'include'
+                });
 
-                // Gerar recibo com dados reais
-                gerarReciboHTML();
-                showNotification('Recibo gerado com sucesso!', 'success');
+                if (response.ok) {
+                    const html = await response.text();
+                    const blob = new Blob([html], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    window.open(url, '_blank');
+                    showNotification('Recibo gerado com sucesso!', 'success');
+                } else {
+                    // Fallback: gerar recibo client-side
+                    await carregarDadosCompletosCliente();
+                    gerarReciboHTML();
+                    showNotification('Recibo gerado com sucesso!', 'success');
+                }
             } catch (error) {
                 console.error('Erro ao gerar recibo:', error);
-                showNotification('Não foi possível gerar o recibo. Tente novamente.', 'error');
+                // Fallback client-side
+                try {
+                    gerarReciboHTML();
+                    showNotification('Recibo gerado com sucesso!', 'success');
+                } catch(e2) {
+                    showNotification('Não foi possível gerar o recibo. Tente novamente.', 'error');
+                }
             }
         }
 
@@ -15845,7 +15887,13 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
             let valorTotal = 0;
             const valorTotalEl = document.getElementById('edit-valor-total');
             if (valorTotalEl) {
-                valorTotal = parseFloat(valorTotalEl.value.replace(/[^\d,.-]/g, '').replace(',', '.')) || 0;
+                // Fix: remover separador de milhar (.) antes de converter vírgula decimal
+                let raw = valorTotalEl.value.replace(/[^\d,.-]/g, '');
+                // Detectar formato pt-BR: remove pontos de milhar, troca vírgula por ponto
+                if (raw.includes(',')) {
+                    raw = raw.replace(/\./g, '').replace(',', '.');
+                }
+                valorTotal = parseFloat(raw) || 0;
             }
 
             // Gerar tabela de parcelas
@@ -20207,13 +20255,10 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         }
 
         // Verificar permissão para ver documentos fiscais (DANFE/Recibo)
+        // Todos os usuários autenticados podem ver DANFE/Recibo de pedidos faturados
         function verificarPermissaoDocumentosFiscais(user) {
             if (!user) return false;
-            // Admin tem acesso
-            if (verificarSeAdmin(user)) return true;
-            // Verificar pelo email
-            if (user.email && EMAILS_DOCUMENTOS_FISCAIS.includes(user.email.toLowerCase())) return true;
-            return false;
+            return true;
         }
 
         // Atualizar visibilidade dos botões de documentos fiscais
@@ -20244,16 +20289,16 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
                     const tipoFaturamento = pedidoAtual.tipo_faturamento || '';
                     const temNF = pedidoAtual.nf || pedidoAtual.numero_nf || pedidoAtual.nf_numero;
 
-                    // REGRAS DE VISIBILIDADE (corrigido):
-                    // DANFE: faturamento normal (status 'faturado') OU meia nota F9 (parcial_50)
-                    // Recibo: NUNCA sozinho, SOMENTE junto com DANFE na meia nota F9
-                    const isMeiaNota = tipoFaturamento === 'parcial_50';
+                    // REGRAS DE VISIBILIDADE:
+                    // DANFE: qualquer pedido faturado/recibo/entregue
+                    // Recibo: qualquer pedido faturado/recibo/entregue
                     const mostrarDanfe = statusAtual === 'faturado' ||
-                        (statusAtual === 'recibo' && isMeiaNota) ||
+                        statusAtual === 'recibo' ||
                         (statusAtual === 'entregue' && temNF);
 
-                    // Recibo SOMENTE na meia nota (F9/parcial_50) - nunca sozinho
-                    const mostrarRecibo = isMeiaNota && (statusAtual === 'recibo' || statusAtual === 'faturado' || (statusAtual === 'entregue' && temNF));
+                    const mostrarRecibo = statusAtual === 'faturado' ||
+                        statusAtual === 'recibo' ||
+                        statusAtual === 'entregue';
 
                     // Esconder botão "Faturar Agora" quando já faturado/recibo/entregue
                     const jaFaturado = statusAtual === 'faturado' || statusAtual === 'recibo' || statusAtual === 'entregue';

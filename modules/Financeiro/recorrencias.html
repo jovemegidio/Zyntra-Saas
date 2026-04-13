@@ -201,6 +201,15 @@
                             <h3><i class="fas fa-list"></i> Recorrências Cadastradas</h3>
                             <span id="count-rec" style="font-size:13px;color:var(--text-secondary)">0 registros</span>
                         </div>
+                        <div style="padding: 0 20px;">
+                            <div class="fp-search-bar">
+                                <div class="fp-search-wrap">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="fp-search-rec" placeholder="Pesquisar por descrição, fornecedor, tipo..." oninput="window._finPg['fp-pg-rec'].search(this.value)">
+                                </div>
+                                <span class="fp-count" id="fp-info-rec"></span>
+                            </div>
+                        </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
                                 <thead><tr><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Frequência</th><th>Dia Venc.</th><th>Próximo Venc.</th><th>Geradas</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>
@@ -209,6 +218,7 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div style="padding: 12px 20px;"><div class="fp-pagination" id="fp-pg-rec"></div></div>
                     </div>
                 </div>
             </div>
@@ -280,6 +290,49 @@
 
         let recorrências = [];
 
+        // Paginação
+        const pgRec = new FinPagination({
+            containerId: 'fp-pg-rec',
+            searchId: 'fp-search-rec',
+            infoId: 'fp-info-rec',
+            perPage: 30,
+            getData: () => recorrências,
+            searchFields: [
+                r => r.descrição,
+                r => r.fornecedor_cliente,
+                r => r.tipo,
+                r => r.frequencia,
+                r => r.categoria
+            ],
+            renderRows: (pageData, allFiltered) => {
+                const tb = document.getElementById('tbody-rec');
+                if (allFiltered.length === 0) {
+                    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência encontrada</h4></div></td></tr>';
+                    return;
+                }
+                tb.innerHTML = pageData.map(r => {
+                    const proxDate = r.proximo_vencimento ? new Date(String(r.proximo_vencimento).slice(0,10) + 'T00:00:00') : null;
+                    const isVencido = proxDate && proxDate < new Date();
+                    return `
+                    <tr>
+                        <td><strong>${r.descrição}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
+                        <td><span class="badge badge-${r.tipo}">${r.tipo === 'pagar' ? '\u2B07 Pagar' : '\u2B06 Receber'}</span></td>
+                        <td class="valor" style="color:${r.tipo === 'pagar' ? 'var(--danger)' : 'var(--success)'}">${fmtMoeda(r.valor)}</td>
+                        <td><span class="freq-badge"><i class="fas ${freqIcons[r.frequencia]||'fa-calendar'}"></i> ${freqLabels[r.frequencia]||r.frequencia}</span></td>
+                        <td>${r.dia_vencimento || '-'}</td>
+                        <td style="${isVencido ? 'color:var(--danger);font-weight:600' : ''}">${fmtData(r.proximo_vencimento)}${isVencido ? ' <i class="fas fa-exclamation-circle" style="color:var(--danger)"></i>' : ''}</td>
+                        <td>${r.total_geradas || 0}</td>
+                        <td><span class="badge badge-${r.ativo == 1 ? 'ativo' : 'inativo'}">${r.ativo == 1 ? 'Ativa' : 'Inativa'}</span></td>
+                        <td>
+                            <button class="btn-icon edit" onclick="editarRecorrencia(${r.id})" title="Editar"><i class="fas fa-pen"></i></button>
+                            <button class="btn-icon delete" onclick="excluirRecorrencia(${r.id})" title="Desativar"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            }
+        });
+        window._finPg['fp-pg-rec'] = pgRec;
+
         function mostrarToast(msg, tipo) {
             const colors = { success:'#10b981', error:'#ef4444', warning:'#f59e0b', info:'#3b82f6' };
             const icons = { success:'fa-check-circle', error:'fa-times-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
@@ -326,31 +379,7 @@
         }
 
         function renderizar() {
-            const tb = document.getElementById('tbody-rec');
-            document.getElementById('count-rec').textContent = `${recorrências.length} registro(s)`;
-            if (recorrências.length === 0) {
-                tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência</h4><p>Crie sua primeira recorrência</p></div></td></tr>';
-                return;
-            }
-            tb.innerHTML = recorrências.map(r => {
-                const proxDate = r.proximo_vencimento ? new Date(String(r.proximo_vencimento).slice(0,10) + 'T00:00:00') : null;
-                const isVencido = proxDate && proxDate < new Date();
-                return `
-                <tr>
-                    <td><strong>${r.descrição}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
-                    <td><span class="badge badge-${r.tipo}">${r.tipo === 'pagar' ? '? Pagar' : '? Receber'}</span></td>
-                    <td class="valor" style="color:${r.tipo === 'pagar' ? 'var(--danger)' : 'var(--success)'}">${fmtMoeda(r.valor)}</td>
-                    <td><span class="freq-badge"><i class="fas ${freqIcons[r.frequencia]||'fa-calendar'}"></i> ${freqLabels[r.frequencia]||r.frequencia}</span></td>
-                    <td>${r.dia_vencimento || '-'}</td>
-                    <td style="${isVencido ? 'color:var(--danger);font-weight:600' : ''}">${fmtData(r.proximo_vencimento)}${isVencido ? ' <i class="fas fa-exclamation-circle" style="color:var(--danger)"></i>' : ''}</td>
-                    <td>${r.total_geradas || 0}</td>
-                    <td><span class="badge badge-${r.ativo == 1 ? 'ativo' : 'inativo'}">${r.ativo == 1 ? 'Ativa' : 'Inativa'}</span></td>
-                    <td>
-                        <button class="btn-icon edit" onclick="editarRecorrencia(${r.id})" title="Editar"><i class="fas fa-pen"></i></button>
-                        <button class="btn-icon delete" onclick="excluirRecorrencia(${r.id})" title="Desativar"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-            }).join('');
+            pgRec.render();
         }
 
         function abrirModalCriar() {

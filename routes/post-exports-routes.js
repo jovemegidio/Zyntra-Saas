@@ -3069,6 +3069,36 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     });
 
     // ============================================================
+    // API CATEGORIAS DO ESTOQUE (dados reais do banco)
+    // ============================================================
+    router.get('/estoque/categorias', authenticateToken, async (req, res) => {
+        try {
+            const [categorias] = await pool.query(`
+                SELECT
+                    COALESCE(UPPER(TRIM(p.categoria)), 'OUTROS') as categoria,
+                    COUNT(*) as total
+                FROM produtos p
+                WHERE (p.ativo = 1 OR p.status = 'ativo' OR p.status IS NULL)
+                  AND p.categoria IS NOT NULL
+                  AND TRIM(p.categoria) != ''
+                GROUP BY UPPER(TRIM(p.categoria))
+                ORDER BY total DESC
+            `);
+
+            res.json({
+                success: true,
+                categorias: categorias.map(c => ({
+                    nome: c.categoria,
+                    total: c.total
+                }))
+            });
+        } catch (err) {
+            console.error('[ESTOQUE] Erro ao listar categorias:', err);
+            res.status(500).json({ success: false, message: 'Erro ao listar categorias' });
+        }
+    });
+
+    // ============================================================
     // API BOBINAS DO ESTOQUE
     // ============================================================
 

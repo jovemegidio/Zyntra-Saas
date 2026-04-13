@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,8 @@
     <script src="/js/inactivity-manager.js?v=20260324" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="css/fin-pagination.css">
+    <script src="js/fin-pagination.js"></script>
     <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
     <link rel="stylesheet" href="css/fin-components.css?v=20260215">
     <style>
@@ -272,31 +274,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display: none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas">
-                                        <i class="fas fa-check-double"></i>
-                                    </button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -364,7 +342,15 @@
                 <div class="card">
                     <div class="card-header">
                         <h3><i class="fas fa-list"></i> Lista de Impostos</h3>
-                        <input type="text" id="searchInput" placeholder="Buscar..." style="padding: 8px 16px; border: 1px solid var(--border-color); border-radius: 8px; width: 250px;" onkeyup="filtrarImpostos()">
+                    </div>
+                    <div style="padding: 0 20px;">
+                        <div class="fp-search-bar">
+                            <div class="fp-search-wrap">
+                                <i class="fas fa-search"></i>
+                                <input type="text" id="fp-search-impostos" placeholder="Pesquisar por código, nome, tipo..." oninput="window._finPg['fp-pg-impostos'].search(this.value)">
+                            </div>
+                            <span class="fp-count" id="fp-info-impostos"></span>
+                        </div>
                     </div>
                     <div class="table-container">
                         <table>
@@ -388,6 +374,7 @@
                             </tbody>
                         </table>
                     </div>
+                    <div style="padding: 12px 20px;"><div class="fp-pagination" id="fp-pg-impostos"></div></div>
                 </div>
             </div>
             </div> <!-- /main-content -->
@@ -508,6 +495,48 @@
         let tabAtual = 'todos';
         let editandoId = null;
 
+        // Paginação
+        const pgImpostos = new FinPagination({
+            containerId: 'fp-pg-impostos',
+            searchId: 'fp-search-impostos',
+            infoId: 'fp-info-impostos',
+            perPage: 30,
+            getData: () => {
+                if (tabAtual === 'todos') return impostos;
+                const tipoMap = { 'federais': 'federal', 'estaduais': 'estadual', 'municipais': 'municipal' };
+                return impostos.filter(i => i.tipo === tipoMap[tabAtual]);
+            },
+            searchFields: [
+                i => i.codigo || i.código,
+                i => i.nome,
+                i => i.tipo,
+                i => i.base || i.base_calculo
+            ],
+            renderRows: (pageData, allFiltered) => {
+                const tbody = document.getElementById('tabela-impostos');
+                if (allFiltered.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhum imposto encontrado</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = pageData.map(i => `
+                    <tr>
+                        <td><strong>${i.codigo || i.código || '-'}</strong></td>
+                        <td>${i.nome}</td>
+                        <td><span class="badge badge-purple">${(i.tipo || '').charAt(0).toUpperCase() + (i.tipo || '').slice(1)}</span></td>
+                        <td><strong>${i.aliquota}%</strong></td>
+                        <td>${formatarBase(i.base || i.base_calculo)}</td>
+                        <td><span class="badge ${i.ativo ? 'badge-success' : 'badge-danger'}">${i.ativo ? 'Ativo' : 'Inativo'}</span></td>
+                        <td>
+                            <button class="btn-action view" title="Ver" onclick="verImposto(${i.id})"><i class="fas fa-eye"></i></button>
+                            <button class="btn-action edit" title="Editar" onclick="editarImposto(${i.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-action delete" title="Excluir" onclick="excluirImposto(${i.id})"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        });
+        window._finPg['fp-pg-impostos'] = pgImpostos;
+
         // Dados mockados (substituir por API real)
         const impostosIniciais = [
             { id: 1, codigo: 'ICMS', nome: 'Imposto sobre Circulação de Mercadorias', tipo: 'estadual', aliquota: 18, base: 'mercadorias', ativo: true },
@@ -585,34 +614,8 @@
         }
 
         function renderizarTabela() {
-            const tbody = document.getElementById('tabela-impostos');
-            let dados = impostos;
-
-            if (tabAtual !== 'todos') {
-                const tipoMap = { 'federais': 'federal', 'estaduais': 'estadual', 'municipais': 'municipal' };
-                dados = impostos.filter(i => i.tipo === tipoMap[tabAtual]);
-            }
-
-            if (dados.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;"><i class="fas fa-inbox" style="font-size:32px;color:#e2e8f0;display:block;margin-bottom:12px;"></i>Nenhum imposto encontrado</td></tr>';
-                return;
-            }
-
-            tbody.innerHTML = dados.map(i => `
-                <tr>
-                    <td><strong>${i.codigo || i.código || '-'}</strong></td>
-                    <td>${i.nome}</td>
-                    <td><span class="badge badge-purple">${(i.tipo || '').charAt(0).toUpperCase() + (i.tipo || '').slice(1)}</span></td>
-                    <td><strong>${i.aliquota}%</strong></td>
-                    <td>${formatarBase(i.base || i.base_calculo)}</td>
-                    <td><span class="badge ${i.ativo ? 'badge-success' : 'badge-danger'}">${i.ativo ? 'Ativo' : 'Inativo'}</span></td>
-                    <td>
-                        <button class="btn-action view" title="Ver" onclick="verImposto(${i.id})"><i class="fas fa-eye"></i></button>
-                        <button class="btn-action edit" title="Editar" onclick="editarImposto(${i.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn-action delete" title="Excluir" onclick="excluirImposto(${i.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>
-            `).join('');
+            pgImpostos.page = 1;
+            pgImpostos.render();
         }
 
         function formatarBase(base) {
