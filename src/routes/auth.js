@@ -449,7 +449,7 @@ router.post('/login', validate(schemas.login), async (req, res) => {
             await auditLog('login_blocked_inactive', user.id, `Login bloqueado - status=${statusUsuario}: ${user.email}`, req);
             console.log(`🚫 Login bloqueado - Usuário inativo (status=${statusUsuario}): ${user.email}`);
             return res.status(403).json({
-                message: 'Acesso negado. Seu usuário foi desativado. Entre em contato com o departamento de TI.'
+                message: 'Conta desativada. Contate o administrador.'
             });
         }
         // ========================================

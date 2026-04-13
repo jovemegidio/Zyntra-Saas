@@ -54,7 +54,7 @@ const generalLimiter = rateLimit({
 const authStore = createRedisStore('auth');
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: isDev ? 100 : 20, // 20 tentativas em produção, 100 em dev
+    max: isDev ? 500 : 100, // TC-AUTH-01-003: 100 tentativas em produção por IP / 15 min
     ...(authStore ? { store: authStore } : {}),
     // AUDIT-FIX S4.3: Auth bloqueia por segurança se store falhar (deny-by-default)
     passOnStoreError: false,
@@ -373,7 +373,7 @@ function csrfProtection(req, res, next) {
         // Content-Type: application/json) já são protegidos contra CSRF simples,
         // pois cross-origin requests com custom headers disparam preflight CORS.
         const contentType = req.headers['content-type'] || '';
-        const hasCustomHeader = req.headers['x-requested-with'] || 
+        const hasCustomHeader = req.headers['x-requested-with'] ||
             contentType.includes('application/json') ||
             req.headers['accept']?.includes('application/json');
         if (hasCustomHeader) {
