@@ -301,64 +301,64 @@
         const $ = id => document.getElementById(id);
 
         // Toggle
-        $('ct-fab').addEventListener('click', togglePanel);
-        $('ct-close').addEventListener('click', togglePanel);
-        $('ct-backdrop').addEventListener('click', togglePanel);
+        $('ct-fab')?.addEventListener('click', togglePanel);
+        $('ct-close')?.addEventListener('click', togglePanel);
+        $('ct-backdrop')?.addEventListener('click', togglePanel);
 
         // Send
-        $('ct-btn-send').addEventListener('click', sendMessage);
+        $('ct-btn-send')?.addEventListener('click', sendMessage);
         const input = $('ct-input');
-        input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-        input.addEventListener('input', () => {
+        input?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+        input?.addEventListener('input', () => {
             input.style.height = 'auto';
             input.style.height = Math.min(input.scrollHeight, 120) + 'px';
             emitTyping();
         });
 
         // Search
-        $('ct-search').addEventListener('input', e => { searchQuery = e.target.value.trim().toLowerCase(); renderChannelList(); renderDMList(); });
+        $('ct-search')?.addEventListener('input', e => { searchQuery = e.target.value.trim().toLowerCase(); renderChannelList(); renderDMList(); });
 
         // File
-        $('ct-btn-file').addEventListener('click', () => $('ct-file-input').click());
-        $('ct-file-input').addEventListener('change', handleFileSelect);
-        $('ct-preview-remove').addEventListener('click', clearPendingFile);
+        $('ct-btn-file')?.addEventListener('click', () => $('ct-file-input')?.click());
+        $('ct-file-input')?.addEventListener('change', handleFileSelect);
+        $('ct-preview-remove')?.addEventListener('click', clearPendingFile);
 
         // Emoji
-        $('ct-btn-emoji').addEventListener('click', e => { e.stopPropagation(); toggleEmoji(); });
-        $('ct-emoji-grid').addEventListener('click', e => {
+        $('ct-btn-emoji')?.addEventListener('click', e => { e.stopPropagation(); toggleEmoji(); });
+        $('ct-emoji-grid')?.addEventListener('click', e => {
             const emoji = e.target.dataset?.emoji;
             if (emoji) { $('ct-input').value += emoji; $('ct-input').focus(); closeEmoji(); }
         });
-        $('ct-emoji-search-input').addEventListener('input', filterEmojis);
+        $('ct-emoji-search-input')?.addEventListener('input', filterEmojis);
         document.addEventListener('click', e => { if (!e.target.closest('.ct-emoji-picker') && !e.target.closest('#ct-btn-emoji')) closeEmoji(); });
 
         // Audio
-        $('ct-btn-mic').addEventListener('click', toggleRecording);
-        $('ct-rec-cancel').addEventListener('click', cancelRecording);
-        $('ct-rec-send').addEventListener('click', sendRecording);
+        $('ct-btn-mic')?.addEventListener('click', toggleRecording);
+        $('ct-rec-cancel')?.addEventListener('click', cancelRecording);
+        $('ct-rec-send')?.addEventListener('click', sendRecording);
 
         // Image preview
-        $('ct-img-overlay').addEventListener('click', () => $('ct-img-overlay').classList.remove('open'));
+        $('ct-img-overlay')?.addEventListener('click', () => $('ct-img-overlay')?.classList.remove('open'));
 
         // Modal
-        $('ct-btn-new-channel').addEventListener('click', () => { $('ct-modal').classList.remove('hidden'); $('ct-new-ch-name').value = ''; $('ct-new-ch-desc').value = ''; $('ct-new-ch-name').focus(); });
-        $('ct-modal-cancel').addEventListener('click', () => $('ct-modal').classList.add('hidden'));
-        $('ct-modal').addEventListener('click', e => { if (e.target.id === 'ct-modal') $('ct-modal').classList.add('hidden'); });
-        $('ct-modal-create').addEventListener('click', createChannel);
-        $('ct-new-ch-name').addEventListener('keydown', e => { if (e.key === 'Enter') createChannel(); });
+        $('ct-btn-new-channel')?.addEventListener('click', () => { $('ct-modal')?.classList.remove('hidden'); $('ct-new-ch-name').value = ''; $('ct-new-ch-name')?.focus(); });
+        $('ct-modal-cancel')?.addEventListener('click', () => $('ct-modal')?.classList.add('hidden'));
+        $('ct-modal')?.addEventListener('click', e => { if (e.target.id === 'ct-modal') $('ct-modal')?.classList.add('hidden'); });
+        $('ct-modal-create')?.addEventListener('click', createChannel);
+        $('ct-new-ch-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') createChannel(); });
 
         // Status dropdown
         document.querySelectorAll('.ct-status-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 myStatus = btn.dataset.status;
                 updateMyStatus();
-                $('ct-status-dropdown').classList.remove('open');
+                $('ct-status-dropdown')?.classList.remove('open');
             });
         });
-        document.addEventListener('click', e => { if (!e.target.closest('.ct-status-btn') && !e.target.closest('.ct-status-dropdown')) $('ct-status-dropdown').classList.remove('open'); });
+        document.addEventListener('click', e => { if (!e.target.closest('.ct-status-btn') && !e.target.closest('.ct-status-dropdown')) $('ct-status-dropdown')?.classList.remove('open'); });
 
         // Paste (clipboard images)
-        $('ct-input').addEventListener('paste', handlePaste);
+        $('ct-input')?.addEventListener('paste', handlePaste);
     }
 
     // ═══════════════════════════════════════════════════════

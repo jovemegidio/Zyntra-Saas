@@ -762,7 +762,7 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    
+
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -2121,6 +2121,7 @@
                 const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
                 return `<tr><td>${c.número_documento||c.documento||'-'}</td><td>${c.fornecedor_nome||c.fornecedor||'-'}</td><td>${formatarData(vencOriginal)}</td><td>${formatarData(vencAtual)}</td><td class="valor-cell negativo">${formatarMoeda(valor)}</td><td>${formatarMoeda(pago)}</td><td>${formatarMoeda(saldo)}</td><td>${bancoNome}</td><td><span style="${statusClass};font-weight:600;">${statusLabel}</span></td></tr>`;
             }).join('');
+        }
 
         function exportarRelContasPagar(formato) {
             if (dadosContasPagar.length === 0) {
@@ -2239,6 +2240,7 @@
                 const bancoNome = bancos.find(b => b.id == (c.conta_bancaria_id || c.banco_id))?.banco || '-';
                 return `<tr><td>${c.número_documento||c.documento||'-'}</td><td>${c.cliente_nome||c.cliente||'-'}</td><td>${formatarData(vencOriginal)}</td><td>${formatarData(vencAtual)}</td><td class="valor-cell positivo">${formatarMoeda(valor)}</td><td>${formatarMoeda(recebido)}</td><td>${formatarMoeda(saldo)}</td><td>${bancoNome}</td><td><span style="${statusClass};font-weight:600;">${statusLabel}</span></td></tr>`;
             }).join('');
+        }
 
         function exportarRelContasReceber(formato) {
             if (dadosContasReceber.length === 0) {
