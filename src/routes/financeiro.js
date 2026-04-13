@@ -19,6 +19,20 @@ const comprovanteUpload = multer({
     }
 });
 
+// Multer para upload de Excel (memoryStorage)
+const excelUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+    fileFilter: (_req, file, cb) => {
+        const excelTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'application/octet-stream'
+        ];
+        cb(null, excelTypes.includes(file.mimetype) || /\.(xlsx|xls)$/i.test(file.originalname));
+    }
+});
+
 // Pool e Auth centralizados — sem duplicações
 const pool = require('../../database/pool');
 const { authenticateToken } = require('../../middleware/auth-central');
@@ -3099,6 +3113,214 @@ router.post('/importar/contas-pagar', authenticateToken, authorizeFinanceiro('pa
     } catch (error) {
         console.error('[Financeiro] Erro na importação contas-pagar:', error);
         res.status(500).json({ error: 'Erro na importação de contas a pagar' });
+    }
+});
+
+// =====================================================
+// IMPORTAÇÃO EXCEL (FILE UPLOAD) - Contas a Receber
+// =====================================================
+router.post('/contas-receber/importar-excel', authenticateToken, authorizeFinanceiro('receber'), excelUpload.single('arquivo'), async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+        }
+
+        const XLSX = require('xlsx');
+        const workbook = XLSX.read(req.file.buffer, { type: 'buffer' });
+
+        // Auto-detect best sheet: prefer FATURAMENTO, then first sheet
+        const preferredSheets = ['FATURAMENTO', 'A RECEBER', 'CONTAS A RECEBER'];
+        let sheetName = workbook.SheetNames[0];
+        for (const pref of preferredSheets) {
+            if (workbook.SheetNames.includes(pref)) { sheetName = pref; break; }
+        }
+        const sheet = workbook.Sheets[sheetName];
+        console.log('[IMPORTAR-CR] Usando aba:', sheetName, '| Abas disponíveis:', workbook.SheetNames.join(', '));
+
+        const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: true });
+        if (!rawData || rawData.length < 2) {
+            throw new Error('Arquivo vazio ou sem dados');
+        }
+
+        // Detect header row
+        const HEADER_KEYWORDS = ['EMPRESA', 'CLIENTE', 'CNPJ', 'VALOR', 'VCTO', 'NFe', 'EMISSÃO', 'EMISSAO', 'Empresa', 'Cliente', 'Vencimento'];
+        let headerRowIdx = 0;
+        for (let i = 0; i < Math.min(rawData.length, 15); i++) {
+            const row = rawData[i];
+            if (!row) continue;
+            const rowStr = row.map(c => String(c || '')).join('|').toUpperCase();
+            const matches = HEADER_KEYWORDS.filter(kw => rowStr.includes(kw.toUpperCase()));
+            if (matches.length >= 3) { headerRowIdx = i; break; }
+        }
+        const headers = (rawData[headerRowIdx] || []).map(h => String(h || '').trim());
+        console.log('[IMPORTAR-CR] Header na linha:', headerRowIdx + 1, '| Colunas:', headers.join(', '));
+
+        // Column name mapping: Excel header → DB field
+        const COLUMN_MAP = {
+            'EMPRESA': 'empresa', 'Empresa': 'empresa', 'empresa': 'empresa',
+            'EMISSÃO': 'data_emissao', 'Emissão': 'data_emissao', 'Emissao': 'data_emissao', 'emissao': 'data_emissao', 'Data de Emissão': 'data_emissao',
+            'TIPO': 'tipo_documento', 'Tipo': 'tipo_documento', 'tipo': 'tipo_documento', 'Tipo de Documento': 'tipo_documento',
+            'NFe': 'nota_fiscal', 'nfe': 'nota_fiscal', 'Nota Fiscal': 'nota_fiscal', 'NF': 'nota_fiscal',
+            'P': 'parcela_info', 'Parcela': 'parcela_info', 'parcela': 'parcela_info',
+            'CLIENTE': 'cliente_nome', 'Cliente': 'cliente_nome', 'cliente': 'cliente_nome',
+            'CNPJ': 'cnpj_cliente', 'cnpj': 'cnpj_cliente', 'CNPJ/CPF': 'cnpj_cliente',
+            'VALOR P': 'valor', 'Valor': 'valor', 'valor': 'valor', 'Valor da Conta': 'valor',
+            'VCTO': 'data_vencimento', 'Vencimento': 'data_vencimento', 'vencimento': 'data_vencimento', 'Data de Vencimento': 'data_vencimento',
+            'SITUAÇÃO': 'situacao', 'Situação': 'situacao', 'Situacao': 'situacao', 'situacao': 'situacao',
+            'PORTADOR': 'portador', 'Portador': 'portador', 'portador': 'portador',
+            'DATA': 'data_operacao',
+            'STATUS': 'status', 'Status': 'status', 'status': 'status',
+            'DIAS': 'dias_vencido',
+            'POSIÇÃO': 'posicao', 'Posição': 'posicao',
+            'RECOMPRADO': 'recomprado',
+            'CARTORIO': 'cartorio',
+            'OBSERVAÇÃO': 'observacoes', 'Observação': 'observacoes', 'Observacao': 'observacoes', 'Observações': 'observacoes',
+            'ACEITA TROCA  FACTORY': 'aceita_troca', 'ACEITA TROCA FACTORY': 'aceita_troca',
+            'COMISSÁRIA': 'comissaria', 'COMISSARIA': 'comissaria',
+            'Vendedor': 'vendedor', 'VENDEDOR': 'vendedor',
+            'Conta Corrente': 'conta_corrente_nome', 'CONTA CORRENTE': 'conta_corrente_nome',
+            'Categoria': 'categoria_nome', 'CATEGORIA': 'categoria_nome',
+            'Número do Documento': 'numero_documento', 'DOCUMENTO': 'numero_documento',
+            'Número do Boleto': 'numero_boleto', 'BOLETO': 'numero_boleto',
+            'Projeto': 'projeto', 'PROJETO': 'projeto',
+            'PIS': 'valor_pis', 'COFINS': 'valor_cofins', 'CSLL': 'valor_csll',
+            'IR': 'valor_ir', 'ISS': 'valor_iss', 'INSS': 'valor_inss'
+        };
+
+        const colMap = {};
+        for (let i = 0; i < headers.length; i++) {
+            const mapped = COLUMN_MAP[headers[i]];
+            if (mapped && !(mapped in colMap)) colMap[mapped] = i;
+        }
+        console.log('[IMPORTAR-CR] Mapeamento:', JSON.stringify(colMap));
+
+        const getVal = (row, field) => {
+            if (!(field in colMap)) return null;
+            const v = row[colMap[field]];
+            return (v !== undefined && v !== null && v !== '') ? v : null;
+        };
+
+        const parseData = (d) => {
+            if (!d) return null;
+            if (d instanceof Date) return d.toISOString().slice(0, 10);
+            if (typeof d === 'number') {
+                const dt = XLSX.SSF.parse_date_code(d);
+                if (dt) return `${dt.y}-${String(dt.m).padStart(2,'0')}-${String(dt.d).padStart(2,'0')}`;
+            }
+            const s = String(d).trim();
+            const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+            if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0,10);
+            return null;
+        };
+
+        const parseValor = (v) => {
+            if (!v) return 0;
+            if (typeof v === 'number') return v;
+            const s = String(v).replace(/[^\d,.-]/g, '').replace(',', '.');
+            return parseFloat(s) || 0;
+        };
+
+        // Delete previous imports
+        const [delResult] = await pool.execute(`DELETE FROM contas_receber WHERE
+            origem_integracao = 'importacao_excel'
+            OR (empresa IS NULL AND nota_fiscal IS NULL AND cnpj_cliente IS NULL AND data_emissao IS NULL AND origem_integracao = 'manual')`);
+        console.log('[IMPORTAR-CR] Registros anteriores removidos:', delResult.affectedRows);
+
+        let importados = 0;
+        let erros = 0;
+        let erroDetalhe = [];
+
+        for (let i = headerRowIdx + 1; i < rawData.length; i++) {
+            const row = rawData[i];
+            if (!row || row.length === 0) continue;
+
+            try {
+                const cliente = getVal(row, 'cliente_nome');
+                const valorRaw = getVal(row, 'valor');
+                const valor = parseValor(valorRaw);
+
+                if (!cliente && !valor) continue;
+                if (String(cliente || '').toUpperCase() === 'CLIENTE') continue;
+                if (String(getVal(row, 'empresa') || '').toUpperCase() === 'DADOS DA NF') continue;
+
+                const empresa = String(getVal(row, 'empresa') || '').trim();
+                const nfe = String(getVal(row, 'nota_fiscal') || '').trim();
+                const parcela = String(getVal(row, 'parcela_info') || '').trim();
+                const cnpj = String(getVal(row, 'cnpj_cliente') || '').trim();
+                const emissao = parseData(getVal(row, 'data_emissao'));
+                const vencimento = parseData(getVal(row, 'data_vencimento'));
+                const situacao = String(getVal(row, 'situacao') || '').trim();
+                const portador = String(getVal(row, 'portador') || '').trim();
+                const dataOp = parseData(getVal(row, 'data_operacao'));
+                const statusRaw = String(getVal(row, 'status') || '').trim().toUpperCase();
+                const diasRaw = getVal(row, 'dias_vencido');
+                const dias = diasRaw ? parseInt(diasRaw) || 0 : null;
+                const posicao = String(getVal(row, 'posicao') || '').trim();
+                const recomprado = String(getVal(row, 'recomprado') || '').trim();
+                const cartorio = String(getVal(row, 'cartorio') || '').trim();
+                const obs = String(getVal(row, 'observacoes') || '').trim();
+                const aceitaTroca = String(getVal(row, 'aceita_troca') || '').trim();
+                const comissaria = String(getVal(row, 'comissaria') || '').trim();
+                const tipoDoc = String(getVal(row, 'tipo_documento') || '').trim();
+                const vendedor = String(getVal(row, 'vendedor') || '').trim();
+                const contaCorrente = String(getVal(row, 'conta_corrente_nome') || '').trim();
+                const categoria = String(getVal(row, 'categoria_nome') || '').trim();
+                const numDocumento = String(getVal(row, 'numero_documento') || '').trim();
+                const numBoleto = String(getVal(row, 'numero_boleto') || '').trim();
+                const projeto = String(getVal(row, 'projeto') || '').trim();
+
+                const pis = parseValor(getVal(row, 'valor_pis'));
+                const cofins = parseValor(getVal(row, 'valor_cofins'));
+                const csll = parseValor(getVal(row, 'valor_csll'));
+                const ir = parseValor(getVal(row, 'valor_ir'));
+                const iss = parseValor(getVal(row, 'valor_iss'));
+                const inss = parseValor(getVal(row, 'valor_inss'));
+
+                let statusFinal = 'a_vencer';
+                if (statusRaw === 'LIQUIDADO' || statusRaw === 'LIQUIDADA') statusFinal = 'liquidada';
+                else if (statusRaw === 'VENCIDO' || statusRaw === 'VENCIDA') statusFinal = 'vencida';
+                else if (statusRaw === 'A VENCER') statusFinal = 'a_vencer';
+                else if (statusRaw === 'RECOMPRADO' || statusRaw === 'RECOMPRADA') statusFinal = 'liquidada';
+                else if (statusRaw) statusFinal = statusRaw.toLowerCase().replace(/ /g, '_');
+
+                const emissaoFinal = emissao || new Date().toISOString().slice(0,10);
+                const vencimentoFinal = vencimento || emissaoFinal;
+                const valorLiquido = valor - pis - cofins - csll - ir - iss - inss;
+
+                await pool.execute(
+                    `INSERT INTO contas_receber
+                     (empresa, nota_fiscal, parcela_info, cliente_nome, cnpj_cliente,
+                      data_emissao, data_vencimento, valor, tipo_documento,
+                      situacao, portador, data_operacao, status, dias_vencido,
+                      posicao, recomprado, cartorio, observacoes,
+                      aceita_troca, comissaria, vendedor,
+                      conta_corrente_nome, categoria_nome, numero_documento, numero_boleto, projeto,
+                      valor_pis, valor_cofins, valor_csll, valor_ir, valor_iss, valor_inss,
+                      valor_liquido, a_receber, origem_integracao)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,'importacao_excel')`,
+                    [empresa || null, nfe || null, parcela || null, cliente || null, cnpj || null,
+                     emissaoFinal, vencimentoFinal, valor, tipoDoc || null,
+                     situacao || null, portador || null, dataOp, statusFinal, dias,
+                     posicao || null, recomprado || null, cartorio || null, obs || null,
+                     aceitaTroca || null, comissaria || null, vendedor || null,
+                     contaCorrente || null, categoria || tipoDoc || null, numDocumento || null, numBoleto || null, projeto || null,
+                     pis, cofins, csll, ir, iss, inss,
+                     valorLiquido, valorLiquido]
+                );
+                importados++;
+            } catch (e) {
+                erros++;
+                erroDetalhe.push({ linha: i + 1, erro: e.message });
+                console.error(`Erro importando linha ${i + 1}:`, e.message);
+            }
+        }
+
+        console.log('[IMPORTAR-CR] Concluído:', importados, 'importados |', erros, 'erros | Aba:', sheetName);
+        res.json({ success: true, importados, erros, sheet: sheetName, erroDetalhe: erroDetalhe.slice(0, 10) });
+    } catch (error) {
+        console.error('❌ Erro ao importar Excel:', error);
+        res.status(500).json({ error: 'Erro ao importar arquivo', message: process.env.NODE_ENV === 'development' ? error.message : undefined });
     }
 });
 
