@@ -11920,6 +11920,12 @@
                     if (contentType.includes('text/html')) {
                         // Abrir HTML da DANFE em nova aba
                         const html = await response.text();
+                        // Validar que o HTML é realmente uma DANFE (não uma página de login ou recibo)
+                        if (!html.includes('DANFE') && !html.includes('danfe')) {
+                            console.warn('[DANFE] Resposta HTML não contém identificador DANFE');
+                            showNotification('Erro: a resposta do servidor não é uma DANFE válida. Tente novamente.', 'error');
+                            return;
+                        }
                         const blob = new Blob([html], { type: 'text/html' });
                         const url = URL.createObjectURL(blob);
                         window.open(url, '_blank');
@@ -11939,7 +11945,7 @@
                         showNotification('Abrindo DANFE externa...', 'success');
                     } else {
                         const errData = await response.json().catch(() => ({}));
-                        showNotification(errData.message || 'DANFE não disponível para este pedido', 'warning');
+                        showNotification(errData.message || 'DANFE não disponível para este pedido. Verifique se a NF foi emitida.', 'warning');
                     }
                 }
             } catch (error) {

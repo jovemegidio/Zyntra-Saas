@@ -5166,9 +5166,24 @@ module.exports = function createVendasRoutes(deps) {
                 } catch (e) { itens = []; }
             }
 
+            // Resolver logo da empresa como data-URI para embutir no HTML
+            const { resolverCaminhoLogo } = require('../modules/_shared/services/empresa-config.service');
+            let logoDataUri = '';
+            try {
+                const logoAbsPath = resolverCaminhoLogo(cfgEmpresa || {});
+                if (logoAbsPath && fs.existsSync(logoAbsPath)) {
+                    const logoBuffer = fs.readFileSync(logoAbsPath);
+                    const ext = path.extname(logoAbsPath).toLowerCase().replace('.', '');
+                    const mime = ext === 'png' ? 'image/png' : (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : ext === 'svg' ? 'image/svg+xml' : 'image/png';
+                    logoDataUri = `data:${mime};base64,${logoBuffer.toString('base64')}`;
+                }
+            } catch (logoErr) {
+                console.warn('[DANFE] Falha ao resolver logo:', logoErr.message);
+            }
+
             // Gerar HTML da DANFE usando template oficial (routes/danfe-renderer.js)
             const { renderDanfe, buildDanfeCtx } = require('./danfe-renderer');
-            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview, cfgFiscal }));
+            const danfeHTML = renderDanfe(buildDanfeCtx(pedido, itens, { preview: isPreview, cfgFiscal, logoDataUri }));
 
             res.setHeader('Content-Type', 'text/html; charset=utf-8');
             res.setHeader('Content-Disposition', `inline; filename="danfe-pedido-${id}.html"`);

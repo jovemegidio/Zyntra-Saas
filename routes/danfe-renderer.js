@@ -891,15 +891,18 @@ function buildDanfeCtx(pedido, itens, opts = {}) {
     const transportadoraCnpj = transportadoraDigits.length > 11 ? transportadoraDoc : '';
     const transportadoraCpf = transportadoraDigits.length > 0 && transportadoraDigits.length <= 11 ? transportadoraDoc : '';
 
+    // Priorizar logo embutido (data:URI) para funcionar em blob URLs
+    const resolvedLogo = opts.logoDataUri || pedido.emitenteLogoUrl || '';
+
     return {
         marcaAguaClasse: opts.preview ? 'watermark-logo' : '',
-        marcaAguaTexto: opts.preview ? '<img src="' + (pedido.emitenteLogoUrl || '/api/empresa/' + (pedido.empresa_id || 1) + '/logo') + '" alt="ALUFORCE">' : '',
+        marcaAguaTexto: opts.preview && resolvedLogo ? '<img src="' + resolvedLogo + '" alt="ALUFORCE">' : '',
         avisoTopo: opts.preview ? 'DOCUMENTO DE PRÉVIA — NÃO POSSUI VALOR FISCAL' : '',
         _isPreview: opts.preview || false,
         paginaAtual: '1',
         paginaTotal: '1',
         codigoBarrasUrl: chave ? `https://barcodeapi.org/api/128/${chave}` : '',
-        emitenteLogoUrl: `/api/empresa/${pedido.empresa_id || 1}/logo`,
+        emitenteLogoUrl: resolvedLogo,
         portalConsultaUrl: 'www.nfe.fazenda.gov.br/portal',
 
         NFe: {
