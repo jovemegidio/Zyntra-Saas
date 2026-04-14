@@ -6334,7 +6334,7 @@
 
                     <!-- Campo oculto para ID -->
                     <input type="hidden" id="edit-pedido-id">
-                    <input type="hidden" id="edit-parcelas">
+                    <input type="hidden" id="edit-parcelas" name="condicao_pagamento">
                     <input type="hidden" id="edit-condicao-pagamento">
                 </div>
 
@@ -11901,17 +11901,17 @@
 
             // Verificar se tem número de NF (checar todos os campos possíveis)
             const nfNumero = pedidoAtual.nf || pedidoAtual.nfe_numero || pedidoAtual.nfe_faturamento_numero || pedidoAtual.numero_nf;
-            if (!nfNumero) {
-                // Pedido faturado mas sem NF emitida no sistema — gerar recibo de entrega como fallback
-                showNotification('NF-e não encontrada. Gerando recibo de entrega...', 'info');
-                setTimeout(() => gerarReciboHTML(), 300);
-                return;
-            }
+            const danfeEndpoint = nfNumero
+                ? `/api/vendas/pedidos/${pedidoAtual.id}/danfe`
+                : `/api/vendas/pedidos/${pedidoAtual.id}/danfe?preview=1`;
 
-            showNotification('Gerando DANFE...', 'info');
+            showNotification(
+                nfNumero ? 'Gerando DANFE...' : 'NF-e ainda não encontrada. Abrindo prévia da DANFE...',
+                'info'
+            );
 
             try {
-                const response = await fetch(`/api/vendas/pedidos/${pedidoAtual.id}/danfe`, {
+                const response = await fetch(danfeEndpoint, {
                     credentials: 'include'
                 });
 

@@ -1563,7 +1563,7 @@
                     <button class="header-btn" title="Atualizar" onclick="carregarPedidos()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    
+
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
@@ -2298,7 +2298,7 @@
                                         <label>Condição de Pagamento</label>
                                         <div class="parcelas-field-container">
                                             <div class="parcelas-input-group">
-                                                <input type="text" id="edit-parcelas" value="Pesquise ou selecione..." readonly placeholder="Pesquise ou selecione...">
+                                                <input type="text" id="edit-parcelas" name="condicao_pagamento" value="Pesquise ou selecione..." readonly placeholder="Pesquise ou selecione...">
                                                 <button type="button" class="btn-search-parcelas" onclick="abrirModalParcelas()" title="Buscar condição de pagamento"><i class="fas fa-search"></i></button>
                                             </div>
                                             <button type="button" class="btn-add-parcelas" onclick="abrirModalNovaParcela()" title="Cadastrar nova condição de pagamento"><i class="fas fa-plus"></i></button>
@@ -3067,7 +3067,9 @@
                 desconto: parseFloat(document.getElementById('edit-desconto')?.value?.replace(',', '.')) || 0,
 
                 // Condições de pagamento
+                condicao_pagamento: condicaoPagamento,
                 condicoes_pagamento: condicaoPagamento,
+                parcelas: condicaoPagamento,
 
                 // ===== FRETE E TRANSPORTE =====
                 transportadora: document.getElementById('edit-transportadora')?.value || '',

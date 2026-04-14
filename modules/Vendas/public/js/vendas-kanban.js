@@ -745,6 +745,8 @@ function salvarNovoPedido(event) {
     const id = form.dataset.pedidoId || null;
 
     // Construir payload com campos corretos da tabela
+    const condicaoPagamento = dados.condicao_pagamento || dados.condicoes_pagamento || dados.parcelas || null;
+
     const payload = {
         cliente_id: dados.cliente_id ? Number(dados.cliente_id) : null,
         empresa_id: dados.empresa_id ? Number(dados.empresa_id) : null,
@@ -757,6 +759,8 @@ function salvarNovoPedido(event) {
         endereco_entrega: dados.endereco_entrega || null,
         municipio_entrega: dados.municipio_entrega || null,
         metodo_envio: dados.transportadora || null,
+        condicao_pagamento: condicaoPagamento,
+        parcelas: condicaoPagamento,
         produtos: dados.produtos ? safeParseJSON(dados.produtos, []) : []
     };
 

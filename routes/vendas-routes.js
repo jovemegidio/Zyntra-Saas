@@ -70,6 +70,44 @@ module.exports = function createVendasRoutes(deps) {
         )
     `).catch(e => console.error('Erro ao criar tabela notificacoes:', e.message));
 
+    // Correção pontual dos pedidos afetados pela falha de persistência de condição de pagamento
+    const sincronizarCondicoesPedidosAfetados = async () => {
+        try {
+            const pedidosAfetados = [
+                { numero: 4, condicao: '28 / 35 / 42 dias' },
+                { numero: 5, condicao: '28 / 35 / 42 / 49 dias' }
+            ];
+
+            for (const pedido of pedidosAfetados) {
+                await pool.query(`
+                    UPDATE pedidos
+                    SET condicao_pagamento = ?,
+                        condicoes_pagamento = ?,
+                        parcelas = ?,
+                        updated_at = NOW()
+                    WHERE (id = ? OR numero_pedido = ?)
+                      AND (
+                          COALESCE(condicao_pagamento, '') <> ? OR
+                          COALESCE(condicoes_pagamento, '') <> ? OR
+                          COALESCE(parcelas, '') <> ?
+                      )
+                `, [
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.numero,
+                    pedido.numero,
+                    pedido.condicao,
+                    pedido.condicao,
+                    pedido.condicao
+                ]);
+            }
+        } catch (e) {
+            console.warn('[VENDAS] Falha ao sincronizar condições dos pedidos afetados:', e.message);
+        }
+    };
+    sincronizarCondicoesPedidosAfetados();
+
     // Precificação: retorna fatores de preço por tipo de venda e UF
     router.get('/precificacao', async (req, res) => {
         try {
@@ -411,7 +449,7 @@ module.exports = function createVendasRoutes(deps) {
                 empresa_id, cliente_id, cliente_nome, cliente,
                 valor, descricao, observacao, observacoes,
                 status = 'orcamento',
-                condicao_pagamento, cenario_fiscal,
+                condicao_pagamento, condicoes_pagamento, cenario_fiscal,
                 transportadora, transportadora_nome,
                 tipo_frete, frete = 0,
                 placa_veiculo, veiculo_uf, rntrc,
@@ -511,7 +549,7 @@ module.exports = function createVendasRoutes(deps) {
                 obs,
                 'orcamento',
                 numeroPedido,
-                sanitize(condicao_pagamento),
+                sanitize(condicao_pagamento) || sanitize(condicoes_pagamento),
                 sanitize(cenario_fiscal),
                 sanitize(transportadora_nome) || sanitize(transportadora),
                 sanitize(tipo_frete),
@@ -607,7 +645,7 @@ module.exports = function createVendasRoutes(deps) {
                 empresa_id, cliente_id, cliente_nome, cliente,
                 valor, descricao, observacao, observacoes,
                 status,
-                condicao_pagamento, cenario_fiscal,
+                condicao_pagamento, condicoes_pagamento, cenario_fiscal,
                 transportadora, transportadora_nome,
                 tipo_frete, frete,
                 placa_veiculo, veiculo_uf, rntrc,
@@ -634,7 +672,8 @@ module.exports = function createVendasRoutes(deps) {
             if (status !== undefined && sanitize(status)) {
                 return res.status(400).json({ message: 'Alteração de status não permitida via PUT. Use PUT /pedidos/:id/status para garantir validação de transição.' });
             }
-            if (condicao_pagamento !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicao_pagamento)); }
+            const condicaoPagamentoFinal = condicao_pagamento !== undefined ? condicao_pagamento : condicoes_pagamento;
+            if (condicaoPagamentoFinal !== undefined) { sets.push('condicao_pagamento = ?'); params.push(sanitize(condicaoPagamentoFinal)); }
             if (cenario_fiscal !== undefined) { sets.push('cenario_fiscal = ?'); params.push(sanitize(cenario_fiscal)); }
             if (transportadora_nome !== undefined || transportadora !== undefined) {
                 sets.push('transportadora_nome = ?'); params.push(sanitize(transportadora_nome) || sanitize(transportadora));
@@ -1033,8 +1072,8 @@ module.exports = function createVendasRoutes(deps) {
             }
 
             // Parcelas/Condição de Pagamento - salvar em múltiplos campos
-            if (updates.parcelas !== undefined || updates.condicao_pagamento !== undefined) {
-                const condicaoValor = updates.condicao_pagamento || updates.parcelas;
+            if (updates.parcelas !== undefined || updates.condicao_pagamento !== undefined || updates.condicoes_pagamento !== undefined) {
+                const condicaoValor = updates.condicao_pagamento || updates.condicoes_pagamento || updates.parcelas;
                 fieldsToUpdate.push('condicao_pagamento = ?');
                 values.push(condicaoValor);
                 fieldsToUpdate.push('condicoes_pagamento = ?');
@@ -2892,20 +2931,38 @@ module.exports = function createVendasRoutes(deps) {
 
     router.get('/comissoes', authorizeAdminOrComercial, async (req, res, next) => {
         try {
-            const { periodo } = req.query; // Ex: '2025-08'
-            let where = 'p.status IN ("faturado", "recibo")';
-            let params = [];
-            if (periodo) {
-                where += ' AND DATE_FORMAT(p.created_at, "%Y-%m") = ?';
-                params.push(periodo);
+            const { periodo, vendedor_id } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            // Verificar se usuário é admin de comissões
+            const ADMINS_COMISSAO_DET = ['ti', 'douglas', 'andreia', 'fernando', 'consultoria', 'admin', 'antonio', 'tialuforce'];
+            const currentUser = req.user;
+            const usernameDet = (currentUser.email || '').split('@')[0].toLowerCase();
+            const isAdminDet = currentUser.is_admin === 1 || currentUser.role === 'admin' || ADMINS_COMISSAO_DET.includes(usernameDet);
+
+            let whereExtra = '';
+            let params = [periodoAtual];
+
+            if (!isAdminDet) {
+                whereExtra = ' AND p.vendedor_id = ?';
+                params.push(currentUser.id);
+            } else if (vendedor_id) {
+                whereExtra = ' AND p.vendedor_id = ?';
+                params.push(vendedor_id);
             }
+
             const [rows] = await pool.query(`
-                SELECT p.id AS pedido_id, p.valor, p.created_at, u.id AS vendedor_id, u.nome AS vendedor_nome, u.comissao_percentual,
-                (p.valor * u.comissao_percentual / 100) AS valor_comissao
+                SELECT p.id AS pedido_id, p.numero_pedido, p.valor, p.status, p.created_at,
+                       u.id AS vendedor_id, u.nome AS vendedor_nome, u.email AS vendedor_email,
+                       COALESCE(u.comissao_percentual, 1.0) AS comissao_percentual,
+                       (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) AS valor_comissao,
+                       c.razao_social AS cliente_nome
                 FROM pedidos p
                 LEFT JOIN usuarios u ON p.vendedor_id = u.id
-                WHERE ${where}
-                ORDER BY u.nome, p.created_at DESC
+                LEFT JOIN clientes c ON p.cliente_id = c.id
+                WHERE p.status NOT IN ('cancelado')
+                  AND DATE_FORMAT(p.created_at, '%Y-%m') = ?${whereExtra}
+                ORDER BY p.created_at DESC
             `, params);
             res.json(rows);
         } catch (error) { next(error); }
@@ -3008,6 +3065,38 @@ module.exports = function createVendasRoutes(deps) {
             const [rows] = await pool.query(query, params);
 
             res.json(rows);
+        } catch (error) { next(error); }
+    });
+
+    // Exportar comissões em CSV
+    router.get('/comissoes/exportar', authorizeAdminOrComercial, async (req, res, next) => {
+        try {
+            const { periodo } = req.query;
+            const periodoAtual = periodo || new Date().toISOString().substring(0, 7);
+
+            const [rows] = await pool.query(`
+                SELECT
+                    u.nome as vendedor,
+                    u.email,
+                    COALESCE(u.comissao_percentual, 1.0) as percentual,
+                    COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as vendas_faturadas,
+                    COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_faturado,
+                    COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao
+                FROM usuarios u
+                LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
+                WHERE (u.role IN ('comercial', 'vendedor') OR u.departamento IN ('Comercial', 'Vendas')) AND u.status = 'ativo'
+                GROUP BY u.id, u.nome, u.email, u.comissao_percentual
+                ORDER BY u.nome
+            `, [periodoAtual]);
+
+            const header = 'Vendedor;Email;Percentual;Vendas Faturadas;Valor Faturado;Comissao\n';
+            const csvRows = rows.map(r =>
+                `${r.vendedor};${r.email};${r.percentual}%;${r.vendas_faturadas};${parseFloat(r.valor_faturado).toFixed(2)};${parseFloat(r.comissao).toFixed(2)}`
+            ).join('\n');
+
+            res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+            res.setHeader('Content-Disposition', `attachment; filename="comissoes-${periodoAtual}.csv"`);
+            res.send('\uFEFF' + header + csvRows);
         } catch (error) { next(error); }
     });
 
@@ -5044,7 +5133,7 @@ module.exports = function createVendasRoutes(deps) {
             let itens = [];
             try {
                 const [rows] = await pool.query(`
-                    SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario, 
+                    SELECT pi.codigo, pi.descricao, pi.quantidade, pi.unidade, pi.preco_unitario,
                            pi.desconto, pi.subtotal, pi.produto_id,
                            pi.icms_percent, pi.icms_value, pi.aliquota_icms, pi.aliquota_ipi,
                            pi.valor_ipi, pi.valor_icms_st, pi.cfop,
