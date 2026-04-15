@@ -32,10 +32,10 @@ const RATE_LIMITS = {
         skipSuccessfulRequests: true
     },
 
-    // Rotas financeiras - restritivo (dados sensíveis)
+    // Rotas financeiras - permissivo (múltiplas chamadas simultâneas no carregamento)
     financial: {
         windowMs: 1 * 60 * 1000, // 1 minuto
-        max: 30, // 30 requisições por minuto
+        max: 200, // 200 requisições por minuto (páginas fazem 6-10 chamadas simultâneas)
         message: {
             error: 'Too many requests to financial API',
             message: 'Limite de requisições financeiras excedido. Aguarde 1 minuto.'
