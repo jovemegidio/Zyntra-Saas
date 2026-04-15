@@ -4,6 +4,33 @@ Todas as alterações notáveis do projeto serão documentadas neste arquivo.
 
 ---
 
+## [2.5.1] — 2026-07-14
+
+### Corrigido — Configurações do Sistema
+- **Encoding Categorias (DB)**: Corrigidos nomes corrompidos no banco de dados — "Log??stica" → "Logística", "Manuten????o" → "Manutenção", "Mat??ria-Prima" → "Matéria-Prima", "Servi??os" → "Serviços"
+- **Dados Empresa Hardcoded**: Removidos todos os valores fixos de CNPJ, telefone, endereço, CEP do HTML — formulário agora carrega dinamicamente da API
+- **Encoding HTML**: Corrigido "CONFIGURAÇÍO" → "CONFIGURAÇÃO" e "VILA SÍO JOÍO" removido do campo bairro
+- **Campo Número**: Corrigido `name="número"` → `name="numero"` para consistência com backend
+- **Favicon Display**: Alterado texto fixo "Favicon Aluforce.webp" → "Nenhum favicon selecionado"
+
+### Adicionado — Configurações do Sistema
+- **Propagação Logo/Favicon**: Função `aplicarBrandingEmpresa()` em auth-unified.js aplica logo e favicon em TODAS as páginas automaticamente via localStorage + fallback API
+- **Preview Logo/Favicon**: Modal empresa agora exibe preview da logo e favicon atuais ao abrir
+- **Certificado Digital — Detalhes**: Modal exibe nome, CNPJ formatado, status (válido/expirando/expirado), dias restantes com indicador visual colorido
+- **Certificado Digital — Remover**: Botão "Remover Certificado" + endpoint DELETE `/api/configuracoes/certificado` para exclusão completa do certificado
+
+### Alterado — Configurações do Sistema
+- **Upload Area Visual**: Redesign CSS com borda tracejada, fundo hover, botão sólido azul com efeito de elevação
+- **displayCertificadoInfo()**: Reescrita completa com card visual (ícone status, CNPJ formatado, badge de validade)
+
+### Implantação
+- 5 arquivos deployados: config-modals.html, config-modals.js, modal-configuracoes-v4.css, auth-unified.js, configuracoes-routes.js
+- SQL fix executado na VPS (categorias encoding)
+- PM2 reiniciado (aluforce-v2-production, labor-eletric-demo, labor-energy-demo)
+- Sincronizado com Base/Sistema, Base/Labor Eletric, Base/Labor Energy
+
+---
+
 ## [2.5.0] — 2026-04-08
 
 ### Adicionado
