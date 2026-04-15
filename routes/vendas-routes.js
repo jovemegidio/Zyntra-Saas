@@ -635,9 +635,23 @@ module.exports = function createVendasRoutes(deps) {
             connection.release();
         }
     });
+    // Statuses bloqueados para edição — somente ti@aluforce.ind.br pode editar
+    const STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+    const EMAIL_EDICAO_LIBERADO = 'ti@aluforce.ind.br';
+
     router.put('/pedidos/:id', pedidoOwnership, async (req, res, next) => {
         try {
             const { id } = req.params;
+
+            // Lock: verificar status do pedido antes de permitir edição
+            const [[pedidoLock]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoLock && STATUS_BLOQUEADO_EDICAO.includes((pedidoLock.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoLock.status}" não pode ser editado. Somente TI pode editar pedidos neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             const sanitize = (v) => (v === 'null' || v === 'undefined' || v === '' || v === undefined ? null : v);
             const sanitizeNum = (v) => { const n = parseFloat(v); return isNaN(n) ? null : n; };
 
@@ -924,6 +938,16 @@ module.exports = function createVendasRoutes(deps) {
             const existing = existingRows[0];
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+
+            // Lock: pedidos em status bloqueado só podem ser editados por ti@aluforce.ind.br
+            const statusAtualPatch = (existing.status || '').toLowerCase().trim();
+            if (STATUS_BLOQUEADO_EDICAO.includes(statusAtualPatch)) {
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    await patchConn.rollback();
+                    return res.status(403).json({ message: `Pedido com status "${existing.status}" não pode ser editado. Somente TI pode editar pedidos neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
 
             // Verificar permissão
             if (!isAdmin && existing.vendedor_id && Number(existing.vendedor_id) !== Number(user.id)) {
@@ -3327,6 +3351,16 @@ module.exports = function createVendasRoutes(deps) {
         try {
             await ensurePedidoItensTable();
             const { id } = req.params;
+
+            // Lock: verificar status do pedido antes de permitir adicionar item
+            const [[pedidoStatusCheck]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoStatusCheck && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusCheck.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusCheck.status}" não pode ser editado. Somente TI pode adicionar itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             const b = req.body;
             // Accept both accented and unaccented keys from frontend
             const codigo = b.codigo || b['código'] || '';
@@ -3419,6 +3453,15 @@ module.exports = function createVendasRoutes(deps) {
             await ensurePedidoItensTable();
             const { pedidoId, itemId } = req.params;
 
+            // Lock: verificar status do pedido antes de permitir edição de item
+            const [[pedidoStatusCheck]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(pedidoId)]);
+            if (pedidoStatusCheck && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusCheck.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusCheck.status}" não pode ser editado. Somente TI pode editar itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             // AUDIT-FIX R3: Ownership check — vendedor só edita itens de seus próprios pedidos
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
@@ -3501,6 +3544,17 @@ module.exports = function createVendasRoutes(deps) {
             // AUDIT-FIX R3: Ownership check — vendedor só exclui itens de seus próprios pedidos
             const user = req.user || {};
             const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
+
+            // Lock: verificar status do pedido antes de permitir exclusão de item
+            const [[pedidoStatusDel]] = await pool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(pedidoId)]);
+            if (pedidoStatusDel && STATUS_BLOQUEADO_EDICAO.includes((pedidoStatusDel.status || '').toLowerCase())) {
+                const userEmail = (user.email || '').toLowerCase();
+                if (userEmail !== EMAIL_EDICAO_LIBERADO) {
+                    connection.release();
+                    return res.status(403).json({ message: `Pedido com status "${pedidoStatusDel.status}" não pode ser editado. Somente TI pode excluir itens neste status.`, code: 'EDIT_LOCKED_BY_STATUS' });
+                }
+            }
+
             if (!isAdmin) {
                 const [ownerCheck] = await pool.query('SELECT vendedor_id FROM pedidos WHERE id = ?', [pedidoId]);
                 if (!ownerCheck.length) { connection.release(); return res.status(404).json({ error: 'Pedido não encontrado' }); }

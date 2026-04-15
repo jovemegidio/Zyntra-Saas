@@ -1166,6 +1166,17 @@ module.exports = function createVendasExtendedRoutes(deps) {
     router.put('/pedidos/:id', authenticateToken, authorizeArea('vendas'), async (req, res) => {
         try {
             const { id } = req.params;
+
+            // Lock: pedidos em status bloqueado só podem ser editados por ti@aluforce.ind.br
+            const STATUS_BLOQUEADO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+            const [[pedidoLock]] = await vendasPool.query('SELECT status FROM pedidos WHERE id = ?', [parseInt(id)]);
+            if (pedidoLock && STATUS_BLOQUEADO.includes((pedidoLock.status || '').toLowerCase())) {
+                const userEmail = (req.user && req.user.email || '').toLowerCase();
+                if (userEmail !== 'ti@aluforce.ind.br') {
+                    return res.status(403).json({ error: `Pedido com status "${pedidoLock.status}" não pode ser editado. Somente TI pode editar pedidos neste status.` });
+                }
+            }
+
             const {
                 cliente_id, empresa_id, produtos, valor, descricao, status,
                 frete, prioridade, prazo_entrega, endereco_entrega,

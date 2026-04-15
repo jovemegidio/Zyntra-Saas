@@ -672,6 +672,17 @@ async function abrirModalEditarPedido(id) {
         const pedidoLocal = pedidos.find(p => p.id == id);
         console.log('[Kanban] Pedido local encontrado:', pedidoLocal);
 
+        // Lock: verificar se pedido está bloqueado por status
+        const STATUS_BLOQUEADO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+        if (pedidoLocal && STATUS_BLOQUEADO.includes((pedidoLocal.status || '').toLowerCase())) {
+            const emailTI = 'ti@aluforce.ind.br';
+            const userEmail = (window.usuarioLogado && window.usuarioLogado.email || '').toLowerCase();
+            if (userEmail !== emailTI) {
+                mostrarNotificacao(`Pedido com status "${pedidoLocal.status}" está bloqueado para edição. Somente TI pode editar.`, 'error');
+                return;
+            }
+        }
+
         // Tenta buscar dados atualizados da API
         let pedidoDetalhe = pedidoLocal || {};
 

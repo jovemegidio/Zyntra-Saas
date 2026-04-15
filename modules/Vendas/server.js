@@ -2627,6 +2627,16 @@ apiVendasRouter.put('/pedidos/:id', upload.array('anexos', 8), async (req, res, 
         const [existingRows] = await pool.query('SELECT vendedor_id, status FROM pedidos WHERE id = ?', [id]);
         if (existingRows.length === 0) return res.status(404).json({ message: 'Pedido não encontrado.' });
         const existing = existingRows[0];
+
+        // Lock: pedidos em status bloqueado só podem ser editados por ti@aluforce.ind.br
+        const STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+        if (STATUS_BLOQUEADO_EDICAO.includes((existing.status || '').toLowerCase())) {
+            const userEmail = (req.user && req.user.email || '').toLowerCase();
+            if (userEmail !== 'ti@aluforce.ind.br') {
+                return res.status(403).json({ message: `Pedido com status "${existing.status}" não pode ser editado. Somente TI pode editar pedidos neste status.` });
+            }
+        }
+
         const user = req.user || {};
         const isAdmin = user.is_admin === true || user.is_admin === 1 || (user.role && user.role.toString().toLowerCase() === 'admin');
         if (!isAdmin && Number(existing.vendedor_id) !== Number(user.id)) {

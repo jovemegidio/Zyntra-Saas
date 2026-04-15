@@ -20274,7 +20274,7 @@ body{font-family:Inter,'Segoe UI',Arial,Helvetica,sans-serif;color:var(--text);b
         function pedidoBloqueadoParaEdicao(pedido) {
             if (!pedido) return false;
             const status = (pedido.status || '').toLowerCase();
-            const statusBloqueados = ['faturado', 'recibo'];
+            const statusBloqueados = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
             return statusBloqueados.includes(status);
         }
 

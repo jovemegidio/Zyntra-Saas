@@ -1903,12 +1903,13 @@
             tbody.innerHTML = pedidosPagina.map(p => {
                 const isChecked = selectedIds.has(p.id) ? 'checked' : '';
                 // Verificar se o usuário pode editar este pedido específico
-                const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
+                const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
+                const podeEditar = podeEditarOwner && !pedidoBloqueadoPorStatus(p);
 
                 // Botão de editar: desabilitado se não pode editar, ou mostra dica
                 const btnEditar = podeEditar
                     ? `<button class="action-btn" title="Editar" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i></button>`
-                    : `<button class="action-btn" title="Sem permissão para editar este pedido" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-edit"></i></button>`;
+                    : `<button class="action-btn" title="${pedidoBloqueadoPorStatus(p) ? 'Pedido bloqueado para edição neste status' : 'Sem permissão para editar este pedido'}" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-${pedidoBloqueadoPorStatus(p) ? 'lock' : 'edit'}"></i></button>`;
 
                 // Quick status change dropdown
                 const statusOptions = ['orcamento','aprovado','faturado','entregue','cancelado'];
@@ -1970,7 +1971,8 @@
 
             // Verificar permissões do usuário logado
             const perms = window.ALUFORCE_PERMISSIONS || {};
-            const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditar = podeEditarOwner && !pedidoBloqueadoPorStatus(pedido);
 
             // Criar modal de visualização se não existir
             let modal = document.getElementById('modal-visualizar');
@@ -2199,9 +2201,15 @@
             // VERIFICAÇÃO DE SEGURANÇA: Checar permissão antes de abrir edição
             // ========================================
             const perms = window.ALUFORCE_PERMISSIONS || {};
-            const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
+            const podeEditarOwner = perms.podeEditarPedido ? perms.podeEditarPedido(pedido.vendedor_id) : true;
 
-            if (!podeEditar) {
+            // Verificar bloqueio por status (só ti@aluforce.ind.br pode editar)
+            if (pedidoBloqueadoPorStatus(pedido)) {
+                showToast(`Pedido com status "${pedido.status}" está bloqueado para edição. Somente TI pode editar.`, 'warning');
+                return;
+            }
+
+            if (!podeEditarOwner) {
                 // Mostrar alerta de que não pode editar
                 const isSupervisor = perms.isSupervisor || false;
                 if (isSupervisor) {
@@ -3857,6 +3865,15 @@
         }
 
         // Carregar dados do usuário logado via API
+        let _pedidosUserEmail = '';
+        const _STATUS_BLOQUEADO_EDICAO = ['faturado', 'faturar', 'aprovado', 'pedido-aprovado', 'orcamento', 'orçamento', 'analise', 'analise-credito', 'recibo', 'entregue'];
+        const _EMAIL_EDICAO_LIBERADO = 'ti@aluforce.ind.br';
+        function pedidoBloqueadoPorStatus(pedido) {
+            if (!pedido) return false;
+            const st = (pedido.status || '').toLowerCase();
+            if (!_STATUS_BLOQUEADO_EDICAO.includes(st)) return false;
+            return _pedidosUserEmail !== _EMAIL_EDICAO_LIBERADO;
+        }
         async function carregarUsuarioLogado() {
             try {
                 const response = await fetchWithTimeout('/api/me', { headers: getAuthHeaders() }, 15000);
@@ -3870,6 +3887,7 @@
                 if (response.ok) {
                     const user = await response.json();
                     console.log('[Pedidos] Usuário carregado:', user.nome);
+                    _pedidosUserEmail = (user.email || '').toLowerCase();
 
                     // Usar apelido se disponível, senão primeiro+último nome
                     const userName = user.apelido || user.nome || 'Usuário';
