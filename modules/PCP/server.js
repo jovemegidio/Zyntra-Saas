@@ -473,6 +473,10 @@ function requireProductionRole(...allowedCategories) {
 const mrpApi = require('./api/mrp-api');
 app.use('/api/pcp/mrp', authRequired, mrpApi);
 
+// === Integração da API Qualidade COM AUTENTICAÇÃO ===
+const qualidadeApi = require('./api/qualidade-api');
+app.use('/api/pcp/qualidade', authRequired, qualidadeApi);
+
 // --- ROTAS DA API ---
 
 // Rota de Login
@@ -8952,6 +8956,9 @@ app.get('/api/pcp/pedidos/:id/materiais', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/itens', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/etiqueta-bobina', proxyToMainApp);
 app.get('/api/pcp/ordens-producao/:id/etiqueta-produto', proxyToMainApp);
+
+// Serve shared assets from root _shared directory
+app.use('/_shared', express.static(path.join(__dirname, '../../_shared'), { dotfiles: 'deny', index: false }));
 
 // Serve static files (after ALL API routes) so API endpoints are not shadowed by static fallback
 app.use(express.static(__dirname, { dotfiles: 'deny', index: false }));

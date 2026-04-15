@@ -1374,13 +1374,46 @@ module.exports = (pool, authenticateToken) => {
         try {
             const { id } = req.params;
 
-            const [nfes] = await pool.query(`SELECT * FROM nfes WHERE id = ?`, [id]);
+            const [nfes] = await pool.query(`
+                SELECT n.*,
+                       c.nome AS cli_nome, c.razao_social AS cli_razao_social,
+                       c.cpf_cnpj AS cli_cnpj, c.ie AS cli_ie,
+                       c.endereco AS cli_endereco, c.bairro AS cli_bairro,
+                       c.cidade AS cli_cidade, c.uf AS cli_uf, c.cep AS cli_cep,
+                       c.telefone AS cli_telefone
+                FROM nfes n
+                LEFT JOIN clientes c ON c.id = n.cliente_id
+                WHERE n.id = ?
+            `, [id]);
 
             if (nfes.length === 0) {
                 return res.status(404).json({ success: false, message: 'NFe não encontrada' });
             }
 
             const nfe = nfes[0];
+
+            // Buscar itens da NF-e
+            const [itens] = await pool.query('SELECT * FROM nfe_itens WHERE nfe_id = ?', [id]);
+            nfe.itens = itens;
+
+            // Buscar dados do emitente
+            try {
+                const [ceRows] = await pool.query('SELECT * FROM configuracoes_empresa LIMIT 1');
+                if (ceRows && ceRows[0] && (ceRows[0].cnpj || ceRows[0].razao_social)) {
+                    const e = ceRows[0];
+                    nfe.emitente = {
+                        razaoSocial: e.razao_social || 'ALUFORCE INDÚSTRIA E COMÉRCIO LTDA',
+                        nomeFantasia: e.nome_fantasia || 'ALUFORCE',
+                        cnpj: e.cnpj || '', ie: e.inscricao_estadual || '',
+                        logradouro: e.endereco || '', numero: e.numero || '',
+                        bairro: e.bairro || '', municipio: e.cidade || '',
+                        uf: e.estado || 'SP', cep: e.cep || '',
+                        telefone: e.telefone || '',
+                        logo_url: e.logo_path || ''
+                    };
+                }
+            } catch (_) {}
+
             const caminhoDANFE = path.join(__dirname, '../storage/nfe/danfes', `danfe_${nfe.numero}.pdf`);
 
             // Gerar DANFE

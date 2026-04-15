@@ -136,7 +136,7 @@
 
         async function carregarCanceladas() {
             try {
-                const r = await fetch('/api/nfe/listar?status=cancelada&limite=100', { credentials: 'include' });
+                const r = await fetch('/api/faturamento/nfes?status=cancelada&limite=100', { credentials: 'include' });
                 if (r.ok) {
                     const data = await r.json();
                     const items = Array.isArray(data) ? data : (data.data || data.nfes || []);
