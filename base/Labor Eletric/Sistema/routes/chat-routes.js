@@ -314,10 +314,7 @@ module.exports = function registerChatRoutes(app, deps) {
             const otherId = parseInt(req.params.outroUsuarioId);
             const limit = Math.min(parseInt(req.query.limit) || 100, 500);
 
-            // Se for DM com o bot (id=-1), retornar vazio (bot responde em tempo real via socket)
-            if (otherId === -1) {
-                return res.json([]);
-            }
+            // Bot messages are now persisted, load them from DB like normal DMs
 
             let rows;
             try {
@@ -1315,16 +1312,16 @@ function handleBotMessage(socket, chatNs, pool, fromId, userMessage) {
         socket.emit('chat:typing:start', { toId: fromId, user: 'BOB I.A.', isBot: true });
     }, 300);
 
-    // Gerar resposta com delay natural
-    const delay = 1000 + Math.random() * 1500;
+    // Gerar resposta (async due to OpenAI fallback)
+    const delay = 800 + Math.random() * 700;
     setTimeout(async () => {
-        socket.emit('chat:typing:stop', { toId: fromId, user: 'BOB I.A.' });
-
         const tiOnline = Array.from(onlineUsers.values()).some(ou =>
             ou.user.department === 'TI' && ou.user.id !== -1
         );
 
-        const response = generateBotResponse(userMessage, tiOnline);
+        const response = await generateBotResponse(userMessage, tiOnline, pool, fromId);
+
+        socket.emit('chat:typing:stop', { toId: fromId, user: 'BOB I.A.' });
 
         // Persistir resposta do bot no MySQL
         let insertId = Date.now();
@@ -1351,7 +1348,73 @@ function handleBotMessage(socket, chatNs, pool, fromId, userMessage) {
     }, delay);
 }
 
-function generateBotResponse(userMessage, tiIsOnline) {
+// ═══════════════════════════════════════════════════════════
+// OpenAI Integration for BOB I.A.
+// ═══════════════════════════════════════════════════════════
+let _openai = null;
+function getOpenAI() {
+    if (_openai) return _openai;
+    try {
+        const OpenAI = require('openai');
+        _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+        return _openai;
+    } catch(e) {
+        console.error('[BOB] Erro ao inicializar OpenAI:', e.message);
+        return null;
+    }
+}
+
+const BOB_SYSTEM_PROMPT = `Você é o BOB I.A., assistente virtual do sistema Aluforce ERP.
+Você ajuda colaboradores com dúvidas sobre os módulos do sistema: Vendas, Compras, Financeiro, NF-e/NFS-e, PCP, RH, Estoque, Relatórios, Logística e WhatsApp Business.
+Responda sempre em português brasileiro, de forma profissional mas amigável.
+Use emojis moderadamente para tornar a conversa mais agradável.
+Quando não souber a resposta exata, oriente o usuário a acessar a Central de Ajuda em https://aluforce.api.br/ajuda.
+Seja conciso — respostas curtas e diretas são preferidas. Máximo 300 palavras.
+Nunca invente funcionalidades que o sistema não tem.
+Módulos disponíveis: Vendas (pedidos, orçamentos, comissões, prospecção), Compras (pedidos, cotações, fornecedores, recebimento), Financeiro (contas a pagar/receber, fluxo de caixa, conciliação, PIX, boletos), NF-e/NFS-e (emissão, cancelamento, carta de correção, DANFE), PCP (ordens de produção, kanban, BOM), RH (holerite, férias, ponto, treinamentos), Estoque (saldos, movimentações, inventário), Relatórios, Logística (entregas, rastreamento), WhatsApp Business.`;
+
+async function askOpenAI(userMessage, pool, userId) {
+    const openai = getOpenAI();
+    if (!openai) return null;
+
+    try {
+        // Load recent conversation history for context
+        const messages = [{ role: 'system', content: BOB_SYSTEM_PROMPT }];
+
+        try {
+            const [history] = await pool.query(
+                `SELECT de_usuario_id, conteudo FROM chat_mensagens_diretas
+                 WHERE (de_usuario_id = ? AND para_usuario_id = -1) OR (de_usuario_id = -1 AND para_usuario_id = ?)
+                 ORDER BY criado_em DESC LIMIT 10`,
+                [userId, userId]
+            );
+            // Reverse to chronological order (oldest first)
+            history.reverse().forEach(row => {
+                messages.push({
+                    role: row.de_usuario_id === -1 ? 'assistant' : 'user',
+                    content: row.conteudo
+                });
+            });
+        } catch(e) { /* ignore history load errors */ }
+
+        // Add current message
+        messages.push({ role: 'user', content: userMessage });
+
+        const completion = await openai.chat.completions.create({
+            model: 'gpt-4o-mini',
+            messages,
+            max_tokens: 500,
+            temperature: 0.7
+        });
+
+        return completion.choices[0]?.message?.content || null;
+    } catch(e) {
+        console.error('[BOB] Erro OpenAI:', e.message);
+        return null;
+    }
+}
+
+async function generateBotResponse(userMessage, tiIsOnline, pool, userId) {
     const msg = userMessage.toLowerCase().trim();
 
     // ── Saudações ──
@@ -1409,11 +1472,12 @@ function generateBotResponse(userMessage, tiIsOnline) {
         }
     }
 
-    // ── Fallback inteligente — tentar encontrar módulo mencionado ──
-    if (/como|onde|qual|quero|preciso|posso|consigo|fa[çc]o|fazer/i.test(msg)) {
-        return `🤖 Entendi! Vou tentar te ajudar.\n\nPara uma orientação mais precisa, me diga **em qual módulo** está sua dúvida:\n\n🛒 Vendas\n📦 Compras\n💰 Financeiro\n📄 NF-e\n🏭 PCP\n👥 RH\n📦 Estoque\n\nOu acesse a **Central de Ajuda** com tutoriais completos:\n📖 https://aluforce.api.br/ajuda\n\n💡 Dica: Seja específico! Ex: *"como emitir nota fiscal"* ou *"como consultar fluxo de caixa"*`;
+    // ── Fallback: usar OpenAI para respostas inteligentes ──
+    if (pool && userId) {
+        const aiResponse = await askOpenAI(userMessage, pool, userId);
+        if (aiResponse) return aiResponse;
     }
 
-    // ── Fallback geral ──
+    // ── Fallback geral (sem OpenAI disponível) ──
     return `🤖 Não encontrei uma resposta exata para isso, mas posso te orientar!\n\n**Opções:**\n• Digite **"ajuda"** para ver todos os tópicos\n• Acesse a Central de Ajuda: https://aluforce.api.br/ajuda\n• Acesse os Tutoriais: https://aluforce.api.br/ajuda/colecoes/tutoriais.html\n${tiIsOnline ? '\n✅ Ou fale com o **TI online** para questões técnicas!' : '\n⏰ TI disponível: Seg-Sex, 8h às 18h'}`;
 }

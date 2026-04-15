@@ -119,6 +119,7 @@ app.use(cookieParser());
 app.use(express.static(__dirname));
 app.use('/css', express.static(path.join(__dirname, '../../css')));
 app.use('/js', express.static(path.join(__dirname, '../../js')));
+app.use('/_shared', express.static(path.join(__dirname, '../../_shared'), { dotfiles: 'deny', index: false }));
 
 // Rotas de páginas
 app.get('/', (req, res) => {

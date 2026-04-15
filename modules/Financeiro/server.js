@@ -176,6 +176,7 @@ app.post('/api/auth/refresh', async (req, res) => {
 });
 
 // Servir arquivos estáticos (HTML sem cache para deploy imediato)
+app.use('/_shared', express.static(path.join(__dirname, '../../_shared'), { dotfiles: 'deny', index: false }));
 app.use('/modules/Financeiro', express.static(__dirname, { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 app.use('/modules/Financeiro/public', express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false, setHeaders(res, filePath) { if (filePath.endsWith('.html')) { res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate'); res.setHeader('Pragma', 'no-cache'); } } }));
 

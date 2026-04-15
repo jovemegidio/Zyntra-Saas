@@ -211,160 +211,279 @@
         .tab-action-btn:hover { background: #f5f5f5; }
 
         /* CONTENT */
-        .content-area { flex: 1; overflow-y: auto; padding: 20px; background: var(--bg-gray); }
+        .content-area {
+            flex: 1; overflow-y: auto; padding: 24px 28px;
+            background: linear-gradient(135deg, #f0f2f5 0%, #e8ecf1 100%);
+        }
 
         .page-header-section {
-            background: white; border-radius: 12px;
-            padding: 20px 24px; margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 24px 28px; margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
             display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(0,0,0,0.04);
         }
 
         .page-header-left h1 {
-            font-size: 24px; font-weight: 700; color: #1a1a1a;
-            margin-bottom: 4px; display: flex; align-items: center; gap: 12px;
+            font-size: 22px; font-weight: 800; color: #0f172a;
+            margin-bottom: 6px; display: flex; align-items: center; gap: 12px;
+            letter-spacing: -0.3px;
         }
-        .page-header-left h1 i { color: var(--primary-orange); }
-        .page-header-left p { font-size: 14px; color: #7f8c8d; }
-        .page-header-right { display: flex; gap: 12px; }
+        .page-header-left h1 i {
+            color: var(--primary-orange);
+            background: linear-gradient(135deg, rgba(34,92,250,0.1), rgba(34,92,250,0.05));
+            width: 40px; height: 40px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 18px;
+        }
+        .page-header-left p { font-size: 13px; color: #94a3b8; font-weight: 400; }
+        .page-header-right { display: flex; gap: 10px; }
 
         .btn-primary {
-            background: linear-gradient(135deg, #225cfa, #1a47c9);
+            background: linear-gradient(135deg, #225cfa 0%, #1a47c9 100%);
             color: white; border: none;
-            padding: 10px 20px; border-radius: 8px;
-            font-size: 14px; font-weight: 600; cursor: pointer;
+            padding: 11px 22px; border-radius: 10px;
+            font-size: 13px; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(34,92,250,0.25);
+            letter-spacing: 0.2px;
         }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34, 92, 250, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(34, 92, 250, 0.35); }
+        .btn-primary:active { transform: translateY(0); }
 
         .btn-secondary {
-            background: white; color: #374151;
-            border: 1px solid #e5e7eb;
-            padding: 10px 20px; border-radius: 8px;
-            font-size: 14px; font-weight: 500; cursor: pointer;
+            background: white; color: #475569;
+            border: 1px solid #e2e8f0;
+            padding: 11px 22px; border-radius: 10px;
+            font-size: 13px; font-weight: 500; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
-            transition: all 0.2s;
+            transition: all 0.25s ease;
         }
-        .btn-secondary:hover { background: #f9fafb; border-color: #d1d5db; }
-
+        .btn-secondary:hover { background: #f8fafc; border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
         .filters-bar {
-            background: white; border-radius: 12px;
+            background: white; border-radius: 14px;
             padding: 16px 20px; margin-bottom: 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+            display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+            border: 1px solid rgba(0,0,0,0.04);
         }
 
-        .filter-group { display: flex; align-items: center; gap: 8px; }
-        .filter-group label { font-size: 13px; color: #6b7280; font-weight: 500; }
+        .filter-group { display: flex; align-items: center; gap: 6px; }
+        .filter-group label { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
         .filter-group input, .filter-group select {
-            padding: 8px 12px; border: 1px solid #e5e7eb;
-            border-radius: 6px; font-size: 13px; min-width: 150px;
+            padding: 9px 12px; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; font-size: 13px; min-width: 140px;
+            background: #f8fafc; transition: all 0.2s; color: #334155;
         }
-        .filter-group input:focus, .filter-group select:focus { outline: none; border-color: var(--primary-orange); }
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none; border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(34,92,250,0.08); background: white;
+        }
 
         .search-box {
             display: flex; align-items: center;
-            background: #f5f5f5; border-radius: 8px;
-            padding: 0 12px; width: 250px;
+            background: #f1f5f9; border-radius: 10px;
+            padding: 0 14px; width: 280px;
+            border: 1.5px solid transparent;
+            transition: all 0.25s;
         }
-        .search-box i { color: #999; font-size: 14px; }
+        .search-box:focus-within { border-color: var(--primary-orange); background: white; box-shadow: 0 0 0 3px rgba(34,92,250,0.08); }
+        .search-box i { color: #94a3b8; font-size: 14px; }
         .search-box input {
             border: none; background: transparent;
-            padding: 10px 12px; font-size: 14px; width: 100%; outline: none;
+            padding: 10px 12px; font-size: 13px; width: 100%; outline: none;
+            color: #334155;
         }
+        .search-box input::placeholder { color: #94a3b8; }
 
         .table-container {
-            background: white; border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden;
+            background: white; border-radius: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
+            overflow: hidden; border: 1px solid rgba(0,0,0,0.04);
         }
 
         .table-header {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; border-bottom: 1px solid #e5e7eb;
+            padding: 18px 24px; border-bottom: 1px solid #f1f5f9;
         }
-        .table-header h3 { font-size: 16px; font-weight: 600; color: #1a1a1a; }
+        .table-header h3 { font-size: 15px; font-weight: 700; color: #0f172a; letter-spacing: -0.2px; }
 
-        .table-tabs { display: flex; gap: 4px; }
+        .table-tabs { display: flex; gap: 4px; background: #f1f5f9; border-radius: 10px; padding: 3px; }
         .table-tab {
-            padding: 6px 12px; border: none; background: #f3f4f6;
-            border-radius: 6px; font-size: 12px; font-weight: 500;
-            cursor: pointer; transition: all 0.2s;
+            padding: 7px 14px; border: none; background: transparent;
+            border-radius: 8px; font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; color: #64748b;
         }
-        .table-tab.active { background: var(--primary-orange); color: white; }
+        .table-tab:hover { color: #334155; background: rgba(255,255,255,0.5); }
+        .table-tab.active { background: white; color: var(--primary-orange); box-shadow: 0 1px 3px rgba(0,0,0,0.08); font-weight: 600; }
 
         .pedidos-table { width: 100%; border-collapse: collapse; }
         .pedidos-table th, .pedidos-table td {
-            padding: 14px 16px; text-align: left;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 14px 18px; text-align: left;
         }
         .pedidos-table th {
-            background: #f9fafb; font-size: 12px; font-weight: 600;
-            color: #6b7280; text-transform: uppercase;
+            background: #f8fafc; font-size: 11px; font-weight: 700;
+            color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;
+            cursor: pointer; user-select: none; position: relative;
+            transition: all 0.15s; border-bottom: 2px solid #f1f5f9;
         }
-        .pedidos-table tbody tr:hover { background: #f9fafb; }
+        .pedidos-table th:hover { background: #f1f5f9; color: #475569; }
+        .pedidos-table th .sort-icon { margin-left: 4px; font-size: 10px; opacity: 0.3; transition: all 0.2s; }
+        .pedidos-table th.sorted .sort-icon { opacity: 1; color: var(--primary-orange); }
+        .pedidos-table th:first-child { cursor: default; }
+        .pedidos-table th:first-child:hover { background: #f8fafc; }
+        .pedidos-table tbody tr { transition: all 0.15s; border-bottom: 1px solid #f1f5f9; }
+        .pedidos-table tbody tr:hover { background: linear-gradient(90deg, #f8fafc, #f0f7ff); }
+        .pedidos-table tbody tr:last-child { border-bottom: none; }
 
-        .pedido-número { font-weight: 600; color: var(--primary-orange); }
+        .pedido-número { font-weight: 700; color: var(--primary-orange); font-size: 13px; }
         .cliente-nome {
-            font-weight: 600; color: #1a1a1a; max-width: 200px;
+            font-weight: 600; color: #1e293b; max-width: 220px;
             overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
 
         .status-badge {
-            padding: 4px 10px; border-radius: 20px;
-            font-size: 11px; font-weight: 600; display: inline-block;
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 11px; font-weight: 600; display: inline-flex;
+            align-items: center; gap: 5px; letter-spacing: 0.2px;
         }
-        .status-badge.orcamento { background: #dbeafe; color: #1e40af; }
-        .status-badge.aprovado { background: #dcfce7; color: #166534; }
-        .status-badge.faturado { background: #f3e8ff; color: #7e22ce; }
-        .status-badge.entregue { background: #d1fae5; color: #065f46; }
-        .status-badge.pendente { background: #fef3c7; color: #92400e; }
-        .status-badge.cancelado { background: #fee2e2; color: #991b1b; }
+        .status-badge.orcamento { background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #1e40af; }
+        .status-badge.aprovado { background: linear-gradient(135deg, #dcfce7, #f0fdf4); color: #166534; }
+        .status-badge.faturado { background: linear-gradient(135deg, #f3e8ff, #faf5ff); color: #7e22ce; }
+        .status-badge.entregue { background: linear-gradient(135deg, #d1fae5, #ecfdf5); color: #065f46; }
+        .status-badge.pendente { background: linear-gradient(135deg, #fef3c7, #fffbeb); color: #92400e; }
+        .status-badge.cancelado { background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #991b1b; }
 
-        .valor-cell { font-weight: 600; color: #1a4fd4; }
+        .valor-cell { font-weight: 700; color: #1a4fd4; font-variant-numeric: tabular-nums; }
 
         .action-btn {
-            width: 32px; height: 32px;
-            border: 1px solid #e5e7eb; background: white;
-            border-radius: 6px; cursor: pointer;
+            width: 34px; height: 34px;
+            border: 1.5px solid #e2e8f0; background: white;
+            border-radius: 8px; cursor: pointer;
             display: inline-flex; align-items: center; justify-content: center;
-            color: #6b7280; transition: all 0.2s; margin-right: 4px;
+            color: #94a3b8; transition: all 0.2s; margin-right: 4px;
+            font-size: 13px;
         }
-        .action-btn:hover { background: #f3f4f6; color: var(--primary-orange); }
+        .action-btn:hover { background: #f0f7ff; color: var(--primary-orange); border-color: rgba(34,92,250,0.2); transform: translateY(-1px); }
 
         .pagination {
             display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px; background: #f9fafb;
-            border-top: 1px solid #e5e7eb;
+            padding: 16px 24px; background: #fafbfc;
+            border-top: 1px solid #f1f5f9;
         }
-        .pagination-info { font-size: 13px; color: #6b7280; }
-        .pagination-buttons { display: flex; gap: 8px; }
+        .pagination-info { font-size: 13px; color: #64748b; font-weight: 500; }
+        .pagination-buttons { display: flex; gap: 6px; }
         .page-btn {
-            padding: 8px 12px; border: 1px solid #e5e7eb;
-            background: white; border-radius: 6px; font-size: 13px; cursor: pointer;
+            padding: 8px 14px; border: 1.5px solid #e2e8f0;
+            background: white; border-radius: 8px; font-size: 13px; cursor: pointer;
+            transition: all 0.2s; font-weight: 500; color: #475569;
         }
-        .page-btn.active { background: var(--primary-orange); color: white; border-color: var(--primary-orange); }
-        .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .page-btn:hover { background: #f8fafc; border-color: #cbd5e1; }
+        .page-btn.active { background: var(--primary-orange); color: white; border-color: var(--primary-orange); box-shadow: 0 2px 8px rgba(34,92,250,0.25); }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .loading-container { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; }
+        .loading-container { display: flex; flex-direction: column; align-items: center; padding: 80px 20px; }
         .loading-spinner {
-            width: 48px; height: 48px;
-            border: 4px solid #e5e7eb; border-top-color: var(--primary-orange);
-            border-radius: 50%; animation: spin 1s linear infinite;
+            width: 44px; height: 44px;
+            border: 3px solid #e2e8f0; border-top-color: var(--primary-orange);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .loading-text { margin-top: 16px; color: #6b7280; }
+        .loading-text { margin-top: 16px; color: #94a3b8; font-size: 13px; font-weight: 500; }
 
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-state i { font-size: 64px; color: #d1d5db; margin-bottom: 20px; }
-        .empty-state h3 { font-size: 18px; color: #374151; margin-bottom: 8px; }
-        .empty-state p { color: #6b7280; }
+        .empty-state { text-align: center; padding: 80px 20px; }
+        .empty-state i { font-size: 56px; color: #cbd5e1; margin-bottom: 20px; display: block; }
+        .empty-state h3 { font-size: 17px; color: #334155; margin-bottom: 8px; font-weight: 700; }
+        .empty-state p { color: #94a3b8; font-size: 13px; }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f5f5f5; }
-        ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: #aaa; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr);
+            gap: 16px; margin-bottom: 20px;
+        }
+        @media (max-width: 1100px) { .metrics-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 700px) { .metrics-grid { grid-template-columns: repeat(2, 1fr); } }
+        .metric-card {
+            background: white; border-radius: 14px; padding: 20px 22px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.03);
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            border: 1.5px solid transparent; position: relative; overflow: hidden;
+        }
+        .metric-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--primary-orange), #7c3aed);
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .metric-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .metric-card:hover::before { opacity: 1; }
+        .metric-card.active-filter { border-color: var(--primary-orange); box-shadow: 0 0 0 3px rgba(34, 92, 250, 0.12), 0 4px 16px rgba(0,0,0,0.06); }
+        .metric-card.active-filter::before { opacity: 1; }
+        .metric-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .metric-icon {
+            width: 42px; height: 42px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 17px;
+        }
+        .metric-icon.blue { background: linear-gradient(135deg, #dbeafe, #eff6ff); color: #2563eb; }
+        .metric-icon.purple { background: linear-gradient(135deg, #ede9fe, #f5f3ff); color: #7c3aed; }
+        .metric-icon.orange { background: linear-gradient(135deg, #ffedd5, #fff7ed); color: #ea580c; }
+        .metric-icon.green { background: linear-gradient(135deg, #dcfce7, #f0fdf4); color: #16a34a; }
+        .metric-icon.red { background: linear-gradient(135deg, #fee2e2, #fef2f2); color: #dc2626; }
+        .metric-value { font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.5px; }
+        .metric-label { font-size: 12px; color: #94a3b8; margin-top: 4px; font-weight: 500; }
+        .metric-trend { font-size: 11px; font-weight: 600; margin-top: 6px; }
+        .metric-trend.up { color: #16a34a; }
+        .metric-trend.down { color: #dc2626; }
+
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            display: none; align-items: center; gap: 12px;
+            padding: 14px 22px; background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-radius: 12px; margin-bottom: 16px; color: white;
+            animation: slideDown 0.25s ease;
+            box-shadow: 0 4px 16px rgba(15,23,42,0.3);
+        }
+        .bulk-actions-bar.visible { display: flex; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        .bulk-count { font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .bulk-btn {
+            padding: 7px 16px; border: 1px solid rgba(255,255,255,0.15);
+            background: rgba(255,255,255,0.08); color: white;
+            border-radius: 8px; font-size: 12px; font-weight: 500;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .bulk-btn:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.25); }
+        .bulk-btn.danger { border-color: rgba(239,68,68,0.3); }
+        .bulk-btn.danger:hover { background: rgba(239,68,68,0.2); }
+        .bulk-close { margin-left: auto; background: none; border: none; color: rgba(255,255,255,0.5); cursor: pointer; font-size: 16px; transition: color 0.2s; }
+        .bulk-close:hover { color: white; }
+
+        /* Quick Status Dropdown */
+        .quick-status-select {
+            padding: 4px 8px; border: 1.5px solid #e2e8f0; border-radius: 6px;
+            font-size: 11px; background: white; cursor: pointer;
+            max-width: 110px; color: #475569; transition: all 0.2s;
+        }
+        .quick-status-select:focus { outline: none; border-color: var(--primary-orange); box-shadow: 0 0 0 2px rgba(34,92,250,0.1); }
+
+        /* Checkbox in table */
+        .row-checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--primary-orange); }
+
+        /* Table tab badge */
+        .table-tab .tab-count {
+            display: inline-flex; min-width: 20px; height: 18px; line-height: 18px;
+            text-align: center; font-size: 10px; font-weight: 700;
+            border-radius: 9px; margin-left: 4px; padding: 0 6px;
+            background: rgba(0,0,0,0.06); color: #94a3b8;
+            align-items: center; justify-content: center;
+        }
+        .table-tab.active .tab-count { background: rgba(34,92,250,0.15); color: var(--primary-orange); }
 
         /* Modal Styles */
         .modal-overlay {
@@ -1444,33 +1563,9 @@
                     <button class="header-btn" title="Atualizar" onclick="carregarPedidos()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
-                    <div class="notification-container">
-                        <button class="header-btn notification-btn" title="Notificações" onclick="toggleNotificacoes()">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" id="notification-count" style="display:none;">0</span>
-                        </button>
-                        <div class="notification-panel" id="notification-panel">
-                            <div class="notification-header">
-                                <h3><i class="fas fa-bell"></i> Notificações</h3>
-                                <div class="notification-actions">
-                                    <button onclick="marcarTodasLidas()" title="Marcar todas como lidas"><i class="fas fa-check-double"></i></button>
-                                    <button onclick="limparNotificacoes()" title="Limpar todas"><i class="fas fa-trash-alt"></i></button>
-                                </div>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <div class="notification-empty">
-                                    <i class="fas fa-check-circle"></i>
-                                    <p>Nenhuma notificação</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img src="" alt="Foto do usuário" id="user-photo">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1487,62 +1582,67 @@
 
             <!-- Content -->
             <div class="content-area">
+                <!-- Page Header -->
                 <div class="page-header-section">
                     <div class="page-header-left">
                         <h1><i class="fas fa-file-alt"></i> Gestão de Pedidos</h1>
-                        <p>Visualize e gerencie todos os pedidos de venda</p>
+                        <p>Acompanhe orçamentos, aprovações e faturamentos em tempo real</p>
                     </div>
                     <div class="page-header-right">
-                        <button class="btn-secondary" onclick="exportarPedidos()"><i class="fas fa-download"></i> Exportar</button>
-                        <button class="btn-primary" onclick="window.location.href='index.html?novo=true'"><i class="fas fa-plus"></i> Incluir Orçamento</button>
+                        <button class="btn-secondary" onclick="exportarPedidos()"><i class="fas fa-file-export"></i> Exportar</button>
+                        <button class="btn-primary" onclick="window.location.href='index.html?novo=true'"><i class="fas fa-plus"></i> Novo Orçamento</button>
                     </div>
                 </div>
 
+                <!-- KPI Metrics -->
                 <div class="metrics-grid">
-                    <div class="metric-card blue">
+                    <div class="metric-card" onclick="filtrarPorMetrica('')" id="metric-total">
                         <div class="metric-header">
                             <div class="metric-icon blue"><i class="fas fa-dollar-sign"></i></div>
                         </div>
                         <div class="metric-value" id="valorTotal">R$ 0</div>
-                        <div class="metric-label">Valor Total (Mês)</div>
+                        <div class="metric-label">Faturamento do Mês</div>
+                        <div class="metric-trend" id="trendValor"></div>
                     </div>
-                    <div class="metric-card purple">
+                    <div class="metric-card" onclick="filtrarPorMetrica('')" id="metric-qtd">
                         <div class="metric-header">
-                            <div class="metric-icon purple"><i class="fas fa-file-alt"></i></div>
+                            <div class="metric-icon purple"><i class="fas fa-layer-group"></i></div>
                         </div>
                         <div class="metric-value" id="totalPedidos">0</div>
                         <div class="metric-label">Total de Pedidos</div>
+                        <div class="metric-trend" id="trendTotal"></div>
                     </div>
-                    <div class="metric-card orange">
+                    <div class="metric-card" onclick="filtrarPorMetrica('orcamento')" id="metric-pendentes">
                         <div class="metric-header">
-                            <div class="metric-icon orange"><i class="fas fa-clock"></i></div>
+                            <div class="metric-icon orange"><i class="fas fa-hourglass-half"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosPendentes">0</div>
-                        <div class="metric-label">Pendentes</div>
+                        <div class="metric-label">Orçamentos Pendentes</div>
                     </div>
-                    <div class="metric-card green">
+                    <div class="metric-card" onclick="filtrarPorMetrica('aprovado')" id="metric-aprovados">
                         <div class="metric-header">
                             <div class="metric-icon green"><i class="fas fa-check-circle"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosAprovados">0</div>
                         <div class="metric-label">Aprovados</div>
                     </div>
-                    <div class="metric-card orange">
+                    <div class="metric-card" onclick="filtrarPorMetrica('faturado')" id="metric-faturados">
                         <div class="metric-header">
-                            <div class="metric-icon orange"><i class="fas fa-file-invoice"></i></div>
+                            <div class="metric-icon blue"><i class="fas fa-file-invoice-dollar"></i></div>
                         </div>
                         <div class="metric-value" id="pedidosFaturados">0</div>
                         <div class="metric-label">Faturados</div>
                     </div>
                 </div>
 
+                <!-- Filters -->
                 <div class="filters-bar">
                     <div class="search-box">
                         <i class="fas fa-search"></i>
-                        <input type="text" id="searchInput" placeholder="Buscar pedido ou cliente..." oninput="debounceFiltrar()">
+                        <input type="text" id="searchInput" placeholder="Buscar por pedido, cliente ou vendedor..." oninput="debounceFiltrar()">
                     </div>
                     <div class="filter-group">
-                        <label>Status:</label>
+                        <label>Status</label>
                         <select id="filterStatus" onchange="filtrarPedidos()">
                             <option value="">Todos</option>
                             <option value="orcamento">Orçamento</option>
@@ -1554,48 +1654,72 @@
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Período:</label>
-                        <select id="filterPeriodo" onchange="filtrarPedidos()">
+                        <label>De</label>
+                        <input type="date" id="filterDataInicio" onchange="filtrarPedidos()" style="min-width:135px;">
+                    </div>
+                    <div class="filter-group">
+                        <label>Até</label>
+                        <input type="date" id="filterDataFim" onchange="filtrarPedidos()" style="min-width:135px;">
+                    </div>
+                    <div class="filter-group">
+                        <label>Vendedor</label>
+                        <select id="filterVendedor" onchange="filtrarPedidos()" style="min-width:160px;">
                             <option value="">Todos</option>
-                            <option value="7">últimos 7 dias</option>
-                            <option value="30">últimos 30 dias</option>
-                            <option value="90">últimos 90 dias</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label>Exibir:</label>
+                        <label>Exibir</label>
                         <select id="filterLimit" onchange="carregarPedidos()">
                             <option value="25">25 por página</option>
-                            <option value="50">50 por página</option>
+                            <option value="50" selected>50 por página</option>
                             <option value="100">100 por página</option>
+                            <option value="500">500</option>
                         </select>
                     </div>
+                    <button onclick="limparFiltros()" title="Limpar Filtros" style="padding:9px 16px;border:1.5px solid #e2e8f0;background:white;border-radius:8px;cursor:pointer;color:#64748b;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:all 0.2s;" onmouseover="this.style.borderColor='#cbd5e1';this.style.background='#f8fafc'" onmouseout="this.style.borderColor='#e2e8f0';this.style.background='white'">
+                        <i class="fas fa-times-circle"></i> Limpar
+                    </button>
                 </div>
 
+                <!-- Bulk Actions Bar -->
+                <div class="bulk-actions-bar" id="bulkActionsBar">
+                    <span class="bulk-count"><i class="fas fa-check-square" style="margin-right:6px;opacity:0.7;"></i><span id="bulkCount">0</span> pedido(s) selecionado(s)</span>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('aprovado')"><i class="fas fa-check"></i> Aprovar</button>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('faturado')"><i class="fas fa-file-invoice"></i> Faturar</button>
+                    <button class="bulk-btn" onclick="bulkChangeStatus('entregue')"><i class="fas fa-truck"></i> Entregue</button>
+                    <button class="bulk-btn danger" onclick="bulkChangeStatus('cancelado')"><i class="fas fa-ban"></i> Cancelar</button>
+                    <button class="bulk-btn" onclick="bulkExportar()"><i class="fas fa-download"></i> Exportar</button>
+                    <button class="bulk-close" onclick="limparSelecao()" title="Limpar seleção"><i class="fas fa-times"></i></button>
+                </div>
+
+                <!-- Orders Table -->
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>Lista de Pedidos</h3>
+                        <h3><i class="fas fa-clipboard-list" style="color:var(--primary-orange);margin-right:8px;font-size:14px;"></i>Pedidos <span id="tableCountLabel" style="font-size:12px;color:#94a3b8;font-weight:400;margin-left:6px;"></span></h3>
                         <div class="table-tabs">
-                            <button class="table-tab active" onclick="setTab(this, '')">Todos</button>
-                            <button class="table-tab" onclick="setTab(this, 'orcamento')">Orçamentos</button>
-                            <button class="table-tab" onclick="setTab(this, 'aprovado')">Aprovados</button>
-                            <button class="table-tab" onclick="setTab(this, 'faturado')">Faturados</button>
+                            <button class="table-tab active" onclick="setTab(this, '')">Todos <span class="tab-count" id="countAll">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'orcamento')">Orçamentos <span class="tab-count" id="countOrcamento">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'aprovado')">Aprovados <span class="tab-count" id="countAprovado">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'faturado')">Faturados <span class="tab-count" id="countFaturado">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'entregue')">Entregues <span class="tab-count" id="countEntregue">0</span></button>
+                            <button class="table-tab" onclick="setTab(this, 'cancelado')">Cancelados <span class="tab-count" id="countCancelado">0</span></button>
                         </div>
                     </div>
                     <table class="pedidos-table">
                         <thead>
                             <tr>
-                                <th>Nº Pedido</th>
-                                <th>Cliente</th>
-                                <th>Data</th>
-                                <th>Status</th>
-                                <th>Valor</th>
-                                <th>Vendedor</th>
-                                <th>Ações</th>
+                                <th style="width:40px;cursor:default;" onclick="event.stopPropagation()"><input type="checkbox" class="row-checkbox" id="checkAll" onchange="toggleSelectAll(this)"></th>
+                                <th onclick="sortColumn('numero')">Nº Pedido <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('cliente_nome')">Cliente <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('data_pedido')">Data <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('status')">Status <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('valor_total')">Valor <i class="fas fa-sort sort-icon"></i></th>
+                                <th onclick="sortColumn('vendedor_nome')">Vendedor <i class="fas fa-sort sort-icon"></i></th>
+                                <th style="cursor:default;">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="pedidosTableBody">
-                            <tr><td colspan="7"><div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Carregando pedidos...</div></div></td></tr>
+                            <tr><td colspan="8"><div class="loading-container"><div class="loading-spinner"></div><div class="loading-text">Carregando pedidos...</div></div></td></tr>
                         </tbody>
                     </table>
                     <div class="pagination" id="paginationContainer" style="display: none;">
@@ -1608,7 +1732,10 @@
     </div>
 
     <script>
-        let todosPedidos = [], pedidosFiltrados = [], paginaAtual = 1, itensPorPagina = 25, tabAtiva = '';
+        let todosPedidos = [], pedidosFiltrados = [], paginaAtual = 1, itensPorPagina = 50, tabAtiva = '';
+        let selectedIds = new Set();
+        let sortState = { column: 'data_pedido', direction: 'desc' };
+        let usuarioInfo = { isAdmin: false, role: '', id: null };
 
         // Função para obter headers de autenticação (cookie-based)
         function getAuthHeaders() {
@@ -1680,9 +1807,33 @@
             const valorTotal = todosPedidos.reduce((sum, p) => sum + (parseFloat(p.valor_total) || 0), 0);
             document.getElementById('valorTotal').textContent = `R$ ${valorTotal.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
             document.getElementById('totalPedidos').textContent = total;
-            document.getElementById('pedidosPendentes').textContent = todosPedidos.filter(p => p.status === 'pendente' || p.status === 'orcamento').length;
-            document.getElementById('pedidosAprovados').textContent = todosPedidos.filter(p => p.status === 'aprovado').length;
-            document.getElementById('pedidosFaturados').textContent = todosPedidos.filter(p => p.status === 'faturado').length;
+            const pendentes = todosPedidos.filter(p => p.status === 'pendente' || p.status === 'orcamento').length;
+            const aprovados = todosPedidos.filter(p => p.status === 'aprovado').length;
+            const faturados = todosPedidos.filter(p => p.status === 'faturado').length;
+            const entregues = todosPedidos.filter(p => p.status === 'entregue').length;
+            const cancelados = todosPedidos.filter(p => p.status === 'cancelado').length;
+            document.getElementById('pedidosPendentes').textContent = pendentes;
+            document.getElementById('pedidosAprovados').textContent = aprovados;
+            document.getElementById('pedidosFaturados').textContent = faturados;
+            // Tab counts
+            const setCount = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+            setCount('countAll', total);
+            setCount('countOrcamento', pendentes);
+            setCount('countAprovado', aprovados);
+            setCount('countFaturado', faturados);
+            setCount('countEntregue', entregues);
+            setCount('countCancelado', cancelados);
+            // Populate vendedor filter
+            const vendedorSelect = document.getElementById('filterVendedor');
+            if (vendedorSelect && vendedorSelect.options.length <= 1) {
+                const vendedores = [...new Set(todosPedidos.map(p => p.vendedor_nome).filter(Boolean))].sort();
+                vendedores.forEach(v => {
+                    const opt = document.createElement('option');
+                    opt.value = v;
+                    opt.textContent = v;
+                    vendedorSelect.appendChild(opt);
+                });
+            }
         }
 
         function setTab(btn, status) {
@@ -1703,13 +1854,28 @@
         function filtrarPedidos() {
             const busca = document.getElementById('searchInput').value.toLowerCase();
             const statusFiltro = document.getElementById('filterStatus').value || tabAtiva;
+            const dataInicio = document.getElementById('filterDataInicio').value;
+            const dataFim = document.getElementById('filterDataFim').value;
+            const vendedorFiltro = document.getElementById('filterVendedor').value;
             itensPorPagina = parseInt(document.getElementById('filterLimit').value);
             paginaAtual = 1;
             pedidosFiltrados = todosPedidos.filter(p => {
-                const matchBusca = !busca || (p.numero && p.numero.toString().includes(busca)) || (p.cliente_nome && p.cliente_nome.toLowerCase().includes(busca));
+                const matchBusca = !busca || (p.numero && p.numero.toString().includes(busca)) || (p.cliente_nome && p.cliente_nome.toLowerCase().includes(busca)) || (p.vendedor_nome && p.vendedor_nome.toLowerCase().includes(busca));
                 const matchStatus = !statusFiltro || p.status === statusFiltro;
-                return matchBusca && matchStatus;
+                const matchVendedor = !vendedorFiltro || p.vendedor_nome === vendedorFiltro;
+                let matchData = true;
+                if (dataInicio || dataFim) {
+                    const dataPedido = p.data_pedido || p.created_at;
+                    if (dataPedido) {
+                        const d = new Date(dataPedido).toISOString().split('T')[0];
+                        if (dataInicio && d < dataInicio) matchData = false;
+                        if (dataFim && d > dataFim) matchData = false;
+                    }
+                }
+                return matchBusca && matchStatus && matchVendedor && matchData;
             });
+            // Apply sort
+            aplicarOrdenacao();
             renderizarTabela();
         }
 
@@ -1723,8 +1889,11 @@
             const inicio = (paginaAtual - 1) * itensPorPagina;
             const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
             const pedidosPagina = pedidosFiltrados.slice(inicio, fim);
+            // Update count label
+            const countLabel = document.getElementById('tableCountLabel');
+            if (countLabel) countLabel.textContent = `(${pedidosFiltrados.length} resultado${pedidosFiltrados.length !== 1 ? 's' : ''})`;
             if (!pedidosPagina.length) {
-                tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><i class="fas fa-file-alt"></i><h3>Nenhum pedido encontrado</h3><p>Tente alterar os filtros</p></div></td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><i class="fas fa-file-alt"></i><h3>Nenhum pedido encontrado</h3><p>Tente alterar os filtros</p></div></td></tr>`;
                 document.getElementById('paginationContainer').style.display = 'none';
                 return;
             }
@@ -1733,6 +1902,7 @@
             const perms = window.ALUFORCE_PERMISSIONS || {};
 
             tbody.innerHTML = pedidosPagina.map(p => {
+                const isChecked = selectedIds.has(p.id) ? 'checked' : '';
                 // Verificar se o usuário pode editar este pedido específico
                 const podeEditar = perms.podeEditarPedido ? perms.podeEditarPedido(p.vendedor_id) : true;
 
@@ -1741,22 +1911,31 @@
                     ? `<button class="action-btn" title="Editar" onclick="editarPedido(${p.id})"><i class="fas fa-edit"></i></button>`
                     : `<button class="action-btn" title="Sem permissão para editar este pedido" disabled style="opacity: 0.4; cursor: not-allowed;"><i class="fas fa-edit"></i></button>`;
 
+                // Quick status change dropdown
+                const statusOptions = ['orcamento','aprovado','faturado','entregue','cancelado'];
+                const statusSelectHtml = podeEditar
+                    ? `<select class="quick-status-select" onchange="quickStatusChange(${p.id}, this.value)" title="Alterar status rapidamente">
+                        ${statusOptions.map(s => `<option value="${s}" ${p.status === s ? 'selected' : ''}>${getStatusLabel(s)}</option>`).join('')}
+                       </select>`
+                    : '';
+
                 return `
-                <tr>
+                <tr class="${isChecked ? 'selected-row' : ''}" style="${isChecked ? 'background:#f0f7ff;' : ''}">
+                    <td onclick="event.stopPropagation()"><input type="checkbox" class="row-checkbox" ${isChecked} onchange="toggleRowSelect(${p.id}, this)"></td>
                     <td><span class="pedido-número">#${p.numero || p.id}</span></td>
                     <td><span class="cliente-nome" title="${p.cliente_nome || ''}">${p.cliente_nome || 'Cliente não informado'}</span></td>
                     <td>${formatarData(p.data_pedido || p.created_at)}</td>
-                    <td><span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span></td>
+                    <td>${statusSelectHtml || `<span class="status-badge ${getStatusClass(p.status)}">${getStatusLabel(p.status)}</span>`}</td>
                     <td class="valor-cell">${formatarValor(p.valor_total)}</td>
                     <td>${p.vendedor_nome || '-'}</td>
                     <td>
-                        <button class="action-btn" title="Ver" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" title="Ver Detalhes" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
                         ${btnEditar}
-                        <button class="action-btn" title="Imprimir" onclick="imprimirPedido(${p.id})"><i class="fas fa-print"></i></button>
                     </td>
                 </tr>
             `}).join('');
             atualizarPaginacao(inicio, fim);
+            atualizarBulkBar();
         }
 
         function atualizarPaginacao(inicio, fim) {
@@ -1960,10 +2139,9 @@
                     <div style="font-size:11px;color:#888;margin-top:4px;">Pedido #${pedido.numero || pedido.id}</div>
                 </div>
                 ${podeEditar ? `<button class="sidebar-action-btn primary" onclick="editarPedido(${id})"><i class="fas fa-edit"></i> Editar</button>` : `<button class="sidebar-action-btn" disabled style="opacity:0.5;"><i class="fas fa-lock"></i> Somente Leitura</button>`}
-                <button class="sidebar-action-btn" onclick="imprimirPedido(${id})"><i class="fas fa-print"></i> Imprimir</button>
                 <button class="sidebar-action-btn" onclick="duplicarPedidoFromView(${id})"><i class="fas fa-copy"></i> Duplicar</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
-                <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/orcamento-pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
+                <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
                 <button class="sidebar-action-btn" onclick="verHistoricoPedido(${id})"><i class="fas fa-history"></i> Histórico</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
                 <button class="sidebar-action-btn" onclick="fecharModalVisualizar()" style="color:#6b7280;"><i class="fas fa-times"></i> Fechar</button>
@@ -2118,7 +2296,7 @@
                                         <label>Condição de Pagamento</label>
                                         <div class="parcelas-field-container">
                                             <div class="parcelas-input-group">
-                                                <input type="text" id="edit-parcelas" value="Pesquise ou selecione..." readonly placeholder="Pesquise ou selecione...">
+                                                <input type="text" id="edit-parcelas" name="condicao_pagamento" value="Pesquise ou selecione..." readonly placeholder="Pesquise ou selecione...">
                                                 <button type="button" class="btn-search-parcelas" onclick="abrirModalParcelas()" title="Buscar condição de pagamento"><i class="fas fa-search"></i></button>
                                             </div>
                                             <button type="button" class="btn-add-parcelas" onclick="abrirModalNovaParcela()" title="Cadastrar nova condição de pagamento"><i class="fas fa-plus"></i></button>
@@ -2378,9 +2556,6 @@
                             <div class="modal-sidebar-actions">
                                 <button class="sidebar-action-btn primary" onclick="salvarEdicaoPedido()">
                                     <i class="fas fa-save"></i> Salvar
-                                </button>
-                                <button class="sidebar-action-btn" onclick="imprimirPedidoModal()">
-                                    <i class="fas fa-print"></i> Imprimir
                                 </button>
                                 <button class="sidebar-action-btn" onclick="duplicarPedidoModal()">
                                     <i class="fas fa-copy"></i> Duplicar
@@ -2887,7 +3062,9 @@
                 desconto: parseFloat(document.getElementById('edit-desconto')?.value?.replace(',', '.')) || 0,
 
                 // Condições de pagamento
+                condicao_pagamento: condicaoPagamento,
                 condicoes_pagamento: condicaoPagamento,
+                parcelas: condicaoPagamento,
 
                 // ===== FRETE E TRANSPORTE =====
                 transportadora: document.getElementById('edit-transportadora')?.value || '',
@@ -3458,13 +3635,189 @@
         }
 
         function exportarPedidos() {
-            let csv = 'Número;Cliente;Data;Status;Valor;Vendedor';
-            pedidosFiltrados.forEach(p => { csv += `"${p.numero || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"`; });
+            const lista = selectedIds.size > 0 ? pedidosFiltrados.filter(p => selectedIds.has(p.id)) : pedidosFiltrados;
+            let csv = 'Número;Cliente;Data;Status;Valor;Vendedor\n';
+            lista.forEach(p => { csv += `"${p.numero || p.id}";"${p.cliente_nome || ''}";"${formatarData(p.data_pedido)}";"${getStatusLabel(p.status)}";"${p.valor_total || 0}";"${p.vendedor_nome || ''}"\n`; });
             const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = `pedidos_${new Date().toISOString().split('T')[0]}.csv`;
             link.click();
+        }
+
+        // ============ SORTING ============
+        function sortColumn(column) {
+            if (sortState.column === column) {
+                sortState.direction = sortState.direction === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortState.column = column;
+                sortState.direction = column === 'data_pedido' || column === 'valor_total' ? 'desc' : 'asc';
+            }
+            // Update header visual
+            document.querySelectorAll('.pedidos-table th').forEach(th => th.classList.remove('sorted'));
+            const headers = document.querySelectorAll('.pedidos-table th');
+            const colMap = {1:'numero',2:'cliente_nome',3:'data_pedido',4:'status',5:'valor_total',6:'vendedor_nome'};
+            headers.forEach((th, idx) => {
+                if (colMap[idx] === column) {
+                    th.classList.add('sorted');
+                    const icon = th.querySelector('.sort-icon');
+                    if (icon) icon.className = `fas fa-sort-${sortState.direction === 'asc' ? 'up' : 'down'} sort-icon`;
+                }
+            });
+            aplicarOrdenacao();
+            renderizarTabela();
+        }
+
+        function aplicarOrdenacao() {
+            const { column, direction } = sortState;
+            pedidosFiltrados.sort((a, b) => {
+                let va = a[column], vb = b[column];
+                if (column === 'valor_total') {
+                    va = parseFloat(va) || 0; vb = parseFloat(vb) || 0;
+                } else if (column === 'data_pedido') {
+                    va = va ? new Date(va).getTime() : 0; vb = vb ? new Date(vb).getTime() : 0;
+                } else if (column === 'numero') {
+                    va = parseInt(va) || 0; vb = parseInt(vb) || 0;
+                } else {
+                    va = String(va || '').toLowerCase(); vb = String(vb || '').toLowerCase();
+                }
+                if (va < vb) return direction === 'asc' ? -1 : 1;
+                if (va > vb) return direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // ============ BULK SELECTION ============
+        function toggleSelectAll(el) {
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
+            const paginaIds = pedidosFiltrados.slice(inicio, fim).map(p => p.id);
+            if (el.checked) {
+                paginaIds.forEach(id => selectedIds.add(id));
+            } else {
+                paginaIds.forEach(id => selectedIds.delete(id));
+            }
+            renderizarTabela();
+        }
+
+        function toggleRowSelect(id, el) {
+            if (el.checked) selectedIds.add(id); else selectedIds.delete(id);
+            atualizarBulkBar();
+            // Update select-all checkbox state
+            const checkAll = document.getElementById('checkAll');
+            if (checkAll) {
+                const inicio = (paginaAtual - 1) * itensPorPagina;
+                const fim = Math.min(inicio + itensPorPagina, pedidosFiltrados.length);
+                const paginaIds = pedidosFiltrados.slice(inicio, fim).map(p => p.id);
+                checkAll.checked = paginaIds.length > 0 && paginaIds.every(id => selectedIds.has(id));
+            }
+            // Highlight row
+            el.closest('tr').style.background = el.checked ? '#f0f7ff' : '';
+        }
+
+        function atualizarBulkBar() {
+            const bar = document.getElementById('bulkActionsBar');
+            const count = document.getElementById('bulkCount');
+            if (selectedIds.size > 0) {
+                bar.classList.add('visible');
+                count.textContent = selectedIds.size;
+            } else {
+                bar.classList.remove('visible');
+            }
+        }
+
+        function limparSelecao() {
+            selectedIds.clear();
+            document.getElementById('checkAll').checked = false;
+            renderizarTabela();
+        }
+
+        async function bulkChangeStatus(novoStatus) {
+            if (selectedIds.size === 0) return;
+            const label = getStatusLabel(novoStatus);
+            const confirmado = await showConfirmModal({
+                type: novoStatus === 'cancelado' ? 'danger' : 'info',
+                title: `Alterar ${selectedIds.size} pedido(s)`,
+                message: `Alterar o status de <strong>${selectedIds.size}</strong> pedido(s) para <strong>${label}</strong>?`,
+                confirmText: 'Confirmar',
+                cancelText: 'Cancelar'
+            });
+            if (!confirmado) return;
+
+            let sucesso = 0, falha = 0;
+            for (const id of selectedIds) {
+                try {
+                    const res = await fetch(`/api/vendas/pedidos/${id}/status`, {
+                        credentials: 'include', method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: novoStatus })
+                    });
+                    if (res.ok) sucesso++; else falha++;
+                } catch { falha++; }
+            }
+            showToast(`${sucesso} pedido(s) atualizado(s)${falha ? `, ${falha} falha(s)` : ''}`, sucesso > 0 ? 'success' : 'error');
+            selectedIds.clear();
+            await carregarPedidos();
+        }
+
+        function bulkExportar() { exportarPedidos(); }
+
+        // ============ QUICK STATUS CHANGE ============
+        async function quickStatusChange(id, novoStatus) {
+            try {
+                const res = await fetch(`/api/vendas/pedidos/${id}/status`, {
+                    credentials: 'include', method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: novoStatus })
+                });
+                if (res.ok) {
+                    // Update local data
+                    const p = todosPedidos.find(p => p.id === id);
+                    if (p) p.status = novoStatus;
+                    atualizarEstatisticas();
+                    showToast(`Pedido #${id} → ${getStatusLabel(novoStatus)}`, 'success');
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    showToast(err.message || 'Erro ao alterar status', 'error');
+                    renderizarTabela(); // Revert visual
+                }
+            } catch (e) {
+                showToast('Erro de conexão', 'error');
+                renderizarTabela();
+            }
+        }
+
+        // ============ FILTER HELPERS ============
+        function filtrarPorMetrica(status) {
+            // Highlight active metric card
+            document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+            if (status) {
+                const mapId = { orcamento: 'metric-pendentes', aprovado: 'metric-aprovados', faturado: 'metric-faturados' };
+                const el = document.getElementById(mapId[status]);
+                if (el) el.classList.add('active-filter');
+            }
+            document.getElementById('filterStatus').value = status;
+            tabAtiva = status;
+            // Sync tab buttons
+            document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.table-tab').forEach(t => {
+                const tabStatus = t.getAttribute('onclick')?.match(/setTab\(this,\s*'([^']*)'\)/)?.[1] ?? '';
+                if (tabStatus === status) t.classList.add('active');
+            });
+            filtrarPedidos();
+        }
+
+        function limparFiltros() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('filterStatus').value = '';
+            document.getElementById('filterDataInicio').value = '';
+            document.getElementById('filterDataFim').value = '';
+            document.getElementById('filterVendedor').value = '';
+            tabAtiva = '';
+            document.querySelectorAll('.table-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('.table-tab').classList.add('active');
+            document.querySelectorAll('.metric-card').forEach(c => c.classList.remove('active-filter'));
+            filtrarPedidos();
         }
 
         // Mapeamento de avatares por nome de usuário

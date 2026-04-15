@@ -43,7 +43,7 @@
                 try { _origSet.call(window.sessionStorage, _authKeyMap[key], value); } catch (e) { }
             }
         };
-
+        console.log('🔒 Storage Isolator v1.0 ativo - localStorage interceptado para isolamento por aba');
         // SECURITY A4: Limpar tokens legados do localStorage real
         // Tokens JWT NÃO devem ficar em localStorage (vulnerável a XSS)
         // A autenticação agora usa httpOnly cookies exclusivamente
@@ -52,6 +52,7 @@
                 var val = _origGet.call(window.localStorage, k);
                 if (val && val !== 'null' && val !== 'undefined') {
                     window.localStorage.removeItem(k);
+                    console.log('[SECURITY] 🗑️ Token legado removido do localStorage:', k);
                 }
             });
         } catch (cleanErr) {
@@ -65,7 +66,7 @@
 (function () {
     'use strict';
 
-
+    console.log('🔐 Sistema de Autenticação Unificado ALUFORCE v7.5 (Tab-Isolated + Server Validation + Token Refresh)');
 
     // Configurações
     const AUTH_CONFIG = {
@@ -76,31 +77,11 @@
         timeout: 5000,
         accessTokenLifetimeMs: 15 * 60 * 1000, // 15 min
         refreshBeforeExpiryMs: 2 * 60 * 1000,  // Refresh 2 min antes de expirar
-        debug: false
+        debug: true
     };
 
     // Flag para evitar múltiplos redirecionamentos
     let isRedirecting = false;
-    let hasShownSessionExpiryNotice = false;
-
-    function notifySessionExpired(message = 'Sessão expirada, faça login novamente.') {
-        if (hasShownSessionExpiryNotice) return;
-        hasShownSessionExpiryNotice = true;
-
-        try {
-            if (typeof window.showToast === 'function') {
-                window.showToast('warning', 'Sessão expirada', message, 5000);
-                return;
-            }
-            if (window.AluforceAlerts && typeof window.AluforceAlerts.warning === 'function') {
-                window.AluforceAlerts.warning(message);
-                return;
-            }
-            window.alert(message);
-        } catch (err) {
-            console.warn('⚠️ Não foi possível exibir aviso de sessão expirada:', err);
-        }
-    }
 
     // =========================================================================
     // 🔄 TOKEN REFRESH INTERCEPTOR
@@ -110,7 +91,6 @@
     let _isRefreshing = false;
     let _refreshQueue = []; // Requests aguardando refresh
     let _refreshTimer = null;
-    let _sessionDead = false; // Circuit-breaker: bloqueia ALL requests após logout fatal
 
     const _originalFetch = window.fetch.bind(window);
 
@@ -179,22 +159,6 @@
         const url = (typeof input === 'string') ? input : (input?.url || '');
         init = init || {};
 
-        // CIRCUIT-BREAKER: Se a sessão morreu (401 fatal), bloquear ALL requests novas
-        // Evita cascata de erros undefined enquanto o redirect para login acontece
-        // FIX: Permitir /api/login e endpoints de auth pública — são ações de login, não sessão
-        const _isAuthPublicUrl = url.includes('/api/login') || url.includes('/api/auth/forgot-password') || url.includes('/api/auth/change-password') || url.includes('/api/auth/verify-user-data') || url.includes('/api/verify-2fa') || url.includes('/api/resend-2fa');
-        if (_sessionDead && !url.includes('/api/logout') && !url.includes('/api/auth/refresh') && !_isAuthPublicUrl) {
-            return new Response(JSON.stringify({ code: 'SESSION_DEAD', message: 'Sessão encerrada' }), {
-                status: 401,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // FIX: Na página de login, resetar _sessionDead para permitir novo login
-        if (_isAuthPublicUrl && _sessionDead) {
-            _sessionDead = false;
-        }
-
         // v7.4 FIX: Sempre injetar credentials:'include' para enviar httpOnly cookies
         // Sem isso, requests sem credentials explícito não enviam o authToken cookie
         // v7.5 FIX: também cobrir URLs absolutas do mesmo origin (ex: https://aluforce.api.br/api/...)
@@ -202,9 +166,8 @@
             init.credentials = 'include';
         }
 
-        // Nunca interceptar rotas de refresh ou de login (evita loop infinito e falsos positivos)
-        // FIX: 401 de /api/login é erro de credencial, NÃO sessão expirada
-        if (url.includes('/api/auth/refresh') || _isAuthPublicUrl) {
+        // Nunca interceptar a própria rota de refresh (evita loop infinito)
+        if (url.includes('/api/auth/refresh')) {
             return _originalFetch(input, init);
         }
 
@@ -251,7 +214,6 @@
                 // Códigos irrecuperáveis — redirect direto
                 if (code === 'AUTH_REVOKED' || code === 'AUTH_MISSING' || code === 'AUTH_INVALID') {
                     debugLog('🔒 Sessão encerrada — ' + (body.message || code));
-                    _sessionDead = true;
                     clearAuthData();
                     redirectToLogin(body.message || 'Sessão encerrada');
                 } else if (code === 'AUTH_INACTIVE') {
@@ -276,7 +238,6 @@
                         if (refreshOk) {
                             return _originalFetch(input, init);
                         }
-                        _sessionDead = true;
                         clearAuthData();
                         redirectToLogin(body.message || 'Sessão expirada por inatividade');
                     }
@@ -289,9 +250,7 @@
                     }
                     // Refresh falhou — redirecionar para login
                     debugLog('❌ Refresh falhou — redirecionando para login');
-                    _sessionDead = true;
                     clearAuthData();
-                    notifySessionExpired('Sua sessão expirou por inatividade. Faça login novamente.');
                     redirectToLogin('Sessão expirada');
                 } else if (!code) {
                     // v7.5 FIX: Módulos com authMiddleware local podem retornar 401 sem campo `code`.
@@ -304,10 +263,8 @@
                     }
                     // Refresh falhou — sessão realmente expirada
                     debugLog('❌ Refresh preventivo falhou — sessão expirada');
-                    _sessionDead = true;
                     clearAuthData();
-                    notifySessionExpired('Sua sessão expirou por inatividade. Faça login novamente.');
-                    redirectToLogin('Sessão expirada');
+                    redirectToLogin(body.message || 'Sessão expirada');
                 }
             } catch (e) {
                 // Body não era JSON — tentar refresh como último recurso
@@ -481,12 +438,9 @@
         const returnTo = encodeURIComponent(currentPath);
 
         let loginUrl = AUTH_CONFIG.loginUrl;
-        const params = new URLSearchParams();
-        params.set('reason', 'session_expired');
         if (currentPath !== '/' && currentPath !== '/index.html' && currentPath.length > 1) {
-            params.set('returnTo', currentPath);
+            loginUrl = `${AUTH_CONFIG.loginUrl}?returnTo=${returnTo}`;
         }
-        loginUrl = `${AUTH_CONFIG.loginUrl}?${params.toString()}`;
 
         window.location.href = loginUrl;
     }
@@ -568,6 +522,15 @@
                 return userData;
             } else {
                 debugLog(`❌ Falha na autenticação: ${response.status}`);
+                // v7.6 FIX: Diferenciar erros de servidor (500/502/503) de erros de auth (401/403)
+                // Erros de servidor devem usar fallback local, não forçar logout
+                if (response.status >= 500) {
+                    const tabUser = getTabUserData();
+                    if (tabUser) {
+                        debugLog('⚠️ Erro de servidor — usando dados da aba como fallback');
+                        return tabUser;
+                    }
+                }
                 return null;
             }
 
@@ -614,15 +577,15 @@
             document.body?.classList?.remove('auth-loading');
 
             // Verificar servidor em background (usando token DESTA aba)
-            checkAuthentication().then(serverUser => {
+            checkAuthentication({ passive: true }).then(serverUser => {
                 if (serverUser) {
                     setTabUserData(serverUser);
                     debugLog('🔄 Dados atualizados do servidor');
                 } else {
-                    debugLog('⚠️ Sessão expirada no servidor - redirecionando para login');
-                    _sessionDead = true;
-                    clearAuthData();
-                    redirectToLogin('Sessão expirada no servidor');
+                    // v7.6 FIX: Não redirecionar imediatamente em background check.
+                    // Pode ser um blip de rede ou erro transitório do servidor.
+                    // O check periódico (3 falhas consecutivas) já trata isso.
+                    debugLog('⚠️ Background check falhou — aguardando check periódico');
                 }
             }).catch(() => {
                 debugLog('⚠️ Não foi possível verificar servidor (offline?)');
@@ -687,7 +650,6 @@
                     debugLog(`⚠️ Check periódico falhou (${_periodicFailCount}/${MAX_PERIODIC_FAILURES})`);
                     if (_periodicFailCount >= MAX_PERIODIC_FAILURES) {
                         debugLog('❌ Múltiplas falhas consecutivas — sessão expirada');
-                        _sessionDead = true;
                         clearAuthData();
                         redirectToLogin('Sessão expirada');
                     }
@@ -718,30 +680,6 @@
             return await checkAuthentication();
         },
         getLocalUserData: getLocalUserData,
-        /**
-         * 🛡️ v8.0: Verifica se o usuário tem acesso ao módulo.
-         * Se NÃO tiver, redireciona para /403.html automaticamente.
-         * @param {string} module - Ex: 'vendas', 'financeiro', 'rh', 'pcp', 'compras', 'nfe'
-         * @returns {Promise<boolean>} true se tem acesso, false se redirecionou
-         */
-        checkModuleAccess: async (module) => {
-            try {
-                const userData = await checkAuthentication();
-                if (!userData) return false; // sem auth → interceptor já cuida
-                // Admin tem acesso total
-                if (userData.is_admin) return true;
-                // Verificar array de áreas
-                const areas = userData.areas || [];
-                if (areas.includes(module.toLowerCase())) return true;
-                // Sem acesso → redirecionar para 403
-                debugLog(`🚫 Acesso negado ao módulo "${module}" para usuário ${userData.nome || userData.email}`);
-                window.location.replace('/403.html');
-                return false;
-            } catch (err) {
-                debugLog('Erro ao verificar acesso ao módulo:', err.message);
-                return true; // em caso de erro de rede, não bloquear (backend já protege)
-            }
-        },
         logout: async () => {
             try {
                 await _originalFetch('/api/logout', { method: 'POST', credentials: 'include' });

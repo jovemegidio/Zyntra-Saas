@@ -367,28 +367,36 @@ router.put('/:id/encerrar', async (req, res) => {
     }
 });
 
-// ============ CANCELAR COTAÇÃO ============
+// ============ CANCELAR/EXCLUIR COTAÇÃO ============
 router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
         
-        // SECURITY FIX (COT-AUTHZ-001): Verificar que cotação está aberta antes de cancelar
-        const [result] = await db.query(
-            "UPDATE cotacoes SET status = 'cancelada' WHERE id = ? AND status NOT IN ('encerrada', 'cancelada')",
-            [req.params.id]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(409).json({ error: 'Cotação não pode ser cancelada (já encerrada, já cancelada, ou não encontrada)' });
+        // Verificar se cotação existe
+        const [rows] = await db.query('SELECT id, status FROM cotacoes WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Cotação não encontrada' });
         }
+        
+        const cotacao = rows[0];
+        
+        // Se já cancelada ou encerrada, permitir exclusão permanente
+        if (cotacao.status === 'cancelada' || cotacao.status === 'encerrada') {
+            await db.query('DELETE FROM propostas_cotacao WHERE cotacao_id = ?', [req.params.id]);
+            await db.query('DELETE FROM cotacoes WHERE id = ?', [req.params.id]);
+            return res.json({ success: true, message: 'Cotação excluída permanentemente' });
+        }
+        
+        // Se aberta ou em análise, cancelar (soft-delete)
+        await db.query("UPDATE cotacoes SET status = 'cancelada' WHERE id = ?", [req.params.id]);
         
         res.json({
             success: true,
             message: 'Cotação cancelada com sucesso'
         });
     } catch (error) {
-        console.error('Erro ao cancelar cotação:', error);
-        res.status(500).json({ error: 'Erro ao cancelar cotação' });
+        console.error('Erro ao excluir cotação:', error);
+        res.status(500).json({ error: 'Erro ao excluir cotação' });
     }
 });
 

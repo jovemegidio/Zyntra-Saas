@@ -17,9 +17,7 @@ module.exports = function createPostExportsRoutes(deps) {
     const path = require('path');
     const multer = require('multer');
     const fs = require('fs');
-    const SAFE_MIMES = new Set(['image/jpeg','image/png','image/gif','image/webp','application/pdf','text/csv','text/plain','application/vnd.ms-excel','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet','application/xml','text/xml']);
-    const safeFileFilter = (req, file, cb) => SAFE_MIMES.has(file.mimetype) ? cb(null, true) : cb(new multer.MulterError('LIMIT_UNEXPECTED_FILE', file.fieldname));
-    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: safeFileFilter });
+    const upload = multer({ dest: path.join(__dirname, '..', 'uploads'), limits: { fileSize: 10 * 1024 * 1024 } });
     const asyncHandler = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
     const validate = (req, res, next) => {
         const errors = validationResult(req);
@@ -3071,6 +3069,36 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     });
 
     // ============================================================
+    // API CATEGORIAS DO ESTOQUE (dados reais do banco)
+    // ============================================================
+    router.get('/estoque/categorias', authenticateToken, async (req, res) => {
+        try {
+            const [categorias] = await pool.query(`
+                SELECT
+                    COALESCE(UPPER(TRIM(p.categoria)), 'OUTROS') as categoria,
+                    COUNT(*) as total
+                FROM produtos p
+                WHERE (p.ativo = 1 OR p.status = 'ativo' OR p.status IS NULL)
+                  AND p.categoria IS NOT NULL
+                  AND TRIM(p.categoria) != ''
+                GROUP BY COALESCE(UPPER(TRIM(p.categoria)), 'OUTROS')
+                ORDER BY total DESC
+            `);
+
+            res.json({
+                success: true,
+                categorias: categorias.map(c => ({
+                    nome: c.categoria,
+                    total: c.total
+                }))
+            });
+        } catch (err) {
+            console.error('[ESTOQUE] Erro ao listar categorias:', err);
+            res.status(500).json({ success: false, message: 'Erro ao listar categorias' });
+        }
+    });
+
+    // ============================================================
     // API BOBINAS DO ESTOQUE
     // ============================================================
 
@@ -3773,7 +3801,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (error) {
             console.error('Erro ao renovar token:', error);
-            res.status(401).json({ error: 'Falha ao renovar token', code: 'REFRESH_FAILED' });
+            res.status(401).json({ error: error.message, code: 'REFRESH_FAILED' });
         }
     });
     
@@ -3903,7 +3931,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
         } catch (error) {
             await connection.rollback();
             console.error('Erro ao faturar pedido:', error);
-            res.status(400).json({ error: 'Erro ao faturar pedido' });
+            res.status(400).json({ error: error.message });
         } finally {
             connection.release();
         }
@@ -3952,7 +3980,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (error) {
             console.error('Erro ao aprovar:', error);
-            res.status(400).json({ error: 'Erro ao processar aprovação' });
+            res.status(400).json({ error: error.message });
         }
     });
     
@@ -3970,7 +3998,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
     
         } catch (error) {
             console.error('Erro ao rejeitar:', error);
-            res.status(400).json({ error: 'Erro ao processar rejeição' });
+            res.status(400).json({ error: error.message });
         }
     });
     
@@ -3981,8 +4009,7 @@ let query = 'SELECT id, nome, tipo, icone, ativo FROM formas_pagamento WHERE 1=1
             const result = await acquireEditLock(pool, tabela, registro_id, req.user.userId, req.user.nome || req.user.username);
             res.json(result);
         } catch (error) {
-            console.error('Erro ao adquirir lock:', error);
-            res.status(409).json({ error: 'Falha ao adquirir lock de edição', code: 'LOCK_FAILED' });
+            res.status(409).json({ error: error.message, code: 'LOCK_FAILED' });
         }
     });
     

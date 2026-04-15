@@ -84,8 +84,6 @@
 
     // ── Helpers ───────────────────────────────────────────
     function esc(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
-    function safeUrl(u) { const s = String(u || ''); return /^(\/[^\/]|https?:\/\/)/.test(s) ? esc(s) : ''; }
-    function safeColor(c) { const s = String(c || ''); return /^(#[0-9a-f]{3,8}|rgb|hsl|linear-gradient|var\(--)/i.test(s) ? s.replace(/[;"'<>]/g, '') : '#4F46E5'; }
     function initials(name) { return (name || '?').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase(); }
     function getFirstName(name) { return (name || 'Usuário').trim().split(/\s+/)[0]; }
     function fmtTime(iso) { return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
@@ -204,6 +202,9 @@
                         </div>
                     </div>
                     <div class="ct-header-right">
+                        <button class="ct-toolbar-btn ct-btn-theme" id="ct-btn-theme" title="Alternar tema claro/escuro">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+                        </button>
                         <span class="ct-online-badge" id="ct-online-count">0 online</span>
                     </div>
                 </div>
@@ -281,6 +282,7 @@
         for (let i = 0; i < 40; i++) { const bar = document.createElement('div'); bar.className = 'ct-rec-bar'; bar.style.height = '4px'; wavesEl.appendChild(bar); }
 
         bindEvents();
+        applySavedTheme();
     }
 
     function buildEmojiPicker() {
@@ -303,64 +305,67 @@
         const $ = id => document.getElementById(id);
 
         // Toggle
-        $('ct-fab').addEventListener('click', togglePanel);
-        $('ct-close').addEventListener('click', togglePanel);
-        $('ct-backdrop').addEventListener('click', togglePanel);
+        $('ct-fab')?.addEventListener('click', togglePanel);
+        $('ct-close')?.addEventListener('click', togglePanel);
+        $('ct-backdrop')?.addEventListener('click', togglePanel);
 
         // Send
-        $('ct-btn-send').addEventListener('click', sendMessage);
+        $('ct-btn-send')?.addEventListener('click', sendMessage);
         const input = $('ct-input');
-        input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
-        input.addEventListener('input', () => {
+        input?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+        input?.addEventListener('input', () => {
             input.style.height = 'auto';
             input.style.height = Math.min(input.scrollHeight, 120) + 'px';
             emitTyping();
         });
 
         // Search
-        $('ct-search').addEventListener('input', e => { searchQuery = e.target.value.trim().toLowerCase(); renderChannelList(); renderDMList(); });
+        $('ct-search')?.addEventListener('input', e => { searchQuery = e.target.value.trim().toLowerCase(); renderChannelList(); renderDMList(); });
 
         // File
-        $('ct-btn-file').addEventListener('click', () => $('ct-file-input').click());
-        $('ct-file-input').addEventListener('change', handleFileSelect);
-        $('ct-preview-remove').addEventListener('click', clearPendingFile);
+        $('ct-btn-file')?.addEventListener('click', () => $('ct-file-input')?.click());
+        $('ct-file-input')?.addEventListener('change', handleFileSelect);
+        $('ct-preview-remove')?.addEventListener('click', clearPendingFile);
 
         // Emoji
-        $('ct-btn-emoji').addEventListener('click', e => { e.stopPropagation(); toggleEmoji(); });
-        $('ct-emoji-grid').addEventListener('click', e => {
+        $('ct-btn-emoji')?.addEventListener('click', e => { e.stopPropagation(); toggleEmoji(); });
+
+        // Theme toggle
+        $('ct-btn-theme')?.addEventListener('click', toggleChatTheme);
+        $('ct-emoji-grid')?.addEventListener('click', e => {
             const emoji = e.target.dataset?.emoji;
             if (emoji) { $('ct-input').value += emoji; $('ct-input').focus(); closeEmoji(); }
         });
-        $('ct-emoji-search-input').addEventListener('input', filterEmojis);
+        $('ct-emoji-search-input')?.addEventListener('input', filterEmojis);
         document.addEventListener('click', e => { if (!e.target.closest('.ct-emoji-picker') && !e.target.closest('#ct-btn-emoji')) closeEmoji(); });
 
         // Audio
-        $('ct-btn-mic').addEventListener('click', toggleRecording);
-        $('ct-rec-cancel').addEventListener('click', cancelRecording);
-        $('ct-rec-send').addEventListener('click', sendRecording);
+        $('ct-btn-mic')?.addEventListener('click', toggleRecording);
+        $('ct-rec-cancel')?.addEventListener('click', cancelRecording);
+        $('ct-rec-send')?.addEventListener('click', sendRecording);
 
         // Image preview
-        $('ct-img-overlay').addEventListener('click', () => $('ct-img-overlay').classList.remove('open'));
+        $('ct-img-overlay')?.addEventListener('click', () => $('ct-img-overlay')?.classList.remove('open'));
 
         // Modal
-        $('ct-btn-new-channel').addEventListener('click', () => { $('ct-modal').classList.remove('hidden'); $('ct-new-ch-name').value = ''; $('ct-new-ch-desc').value = ''; $('ct-new-ch-name').focus(); });
-        $('ct-modal-cancel').addEventListener('click', () => $('ct-modal').classList.add('hidden'));
-        $('ct-modal').addEventListener('click', e => { if (e.target.id === 'ct-modal') $('ct-modal').classList.add('hidden'); });
-        $('ct-modal-create').addEventListener('click', createChannel);
-        $('ct-new-ch-name').addEventListener('keydown', e => { if (e.key === 'Enter') createChannel(); });
+        $('ct-btn-new-channel')?.addEventListener('click', () => { $('ct-modal')?.classList.remove('hidden'); $('ct-new-ch-name').value = ''; $('ct-new-ch-name')?.focus(); });
+        $('ct-modal-cancel')?.addEventListener('click', () => $('ct-modal')?.classList.add('hidden'));
+        $('ct-modal')?.addEventListener('click', e => { if (e.target.id === 'ct-modal') $('ct-modal')?.classList.add('hidden'); });
+        $('ct-modal-create')?.addEventListener('click', createChannel);
+        $('ct-new-ch-name')?.addEventListener('keydown', e => { if (e.key === 'Enter') createChannel(); });
 
         // Status dropdown
         document.querySelectorAll('.ct-status-option').forEach(btn => {
             btn.addEventListener('click', () => {
                 myStatus = btn.dataset.status;
                 updateMyStatus();
-                $('ct-status-dropdown').classList.remove('open');
+                $('ct-status-dropdown')?.classList.remove('open');
             });
         });
-        document.addEventListener('click', e => { if (!e.target.closest('.ct-status-btn') && !e.target.closest('.ct-status-dropdown')) $('ct-status-dropdown').classList.remove('open'); });
+        document.addEventListener('click', e => { if (!e.target.closest('.ct-status-btn') && !e.target.closest('.ct-status-dropdown')) $('ct-status-dropdown')?.classList.remove('open'); });
 
         // Paste (clipboard images)
-        $('ct-input').addEventListener('paste', handlePaste);
+        $('ct-input')?.addEventListener('paste', handlePaste);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -454,35 +459,37 @@
         }
         const authToken = getAuthToken();
         socket = io('/chat-teams', {
-            transports: ['polling', 'websocket'],
-            upgrade: true,
+            transports: ['websocket'],
+            upgrade: false,
             withCredentials: true,
-            auth: authToken ? { token: authToken } : {},
-            reconnectionAttempts: 5,
-            reconnectionDelay: 2000
+            auth: authToken ? { token: authToken } : {}
         });
-        socket.on('connect', () => { if (currentUser) socket.emit('chat:online', { ...currentUser, status: myStatus }); });
+        socket.on('connect', () => { console.log('[CHAT] Socket conectado'); if (currentUser) socket.emit('chat:online', { ...currentUser, status: myStatus }); });
 
         socket.on('connect_error', async (error) => {
-            // Se token expirou ou não foi enviado, tentar refresh e reconectar
+            console.warn('[CHAT] Erro de conexão Socket:', error.message);
+            // Se token expirou, tentar refresh via auth-unified e reconectar
             if (error.message === 'Token inválido ou expirado' || error.message === 'Autenticação necessária') {
                 try {
+                    // v7.5 FIX: Tentar refresh antes de pegar o token fresco
                     if (window.AluforceAuth && window.AluforceAuth.refreshToken) {
                         await window.AluforceAuth.refreshToken();
                     }
                     const freshToken = getAuthToken();
                     if (freshToken) {
                         socket.auth = { token: freshToken };
-                        socket.disconnect();
+                        // Forçar reconexão com novo token
                         socket.connect();
                     }
                 } catch (e) {
-                    // Silencioso — cookie auth será tentada no handshake automaticamente
+                    console.error('[CHAT] Falha ao renovar token para socket:', e);
                 }
             }
         });
 
-        socket.on('disconnect', () => {});
+        socket.on('disconnect', (reason) => {
+            console.log('[CHAT] Socket desconectado:', reason);
+        });
 
         socket.on('chat:channel:message', msg => {
             if (activeView.type === 'channel' && activeView.id === msg.channelId) { appendMessage(msg, 'channel'); }
@@ -844,10 +851,10 @@
                 rightEl.innerHTML = `<span class="ct-status-text bot" style="color:var(--ct-purple);background:rgba(168,85,247,0.08);border:1px solid rgba(168,85,247,0.12)">Sempre Online</span>`;
             } else {
                 const avatarInner = user.foto
-                    ? `<img src="${safeUrl(user.foto.startsWith('/') ? user.foto : '/avatars/' + user.foto)}" onerror="this.parentElement.textContent='${esc(initials(user.displayName))}'" />`
+                    ? `<img src="${user.foto.startsWith('/') ? user.foto : '/avatars/' + user.foto}" onerror="this.parentElement.textContent='${initials(user.displayName)}'" />`
                     : initials(user.displayName);
                 avatarEl.className = 'ct-header-avatar';
-                avatarEl.style.background = safeColor(user.avatarColor);
+                avatarEl.style.background = user.avatarColor;
                 avatarEl.innerHTML = `${avatarInner}<span class="ct-status-dot ${status}"></span>`;
                 titleEl.textContent = user.displayName;
                 descEl.textContent = user.department || 'Geral';
@@ -898,19 +905,19 @@
         let attachmentHtml = '';
         if (msg.fileUrl) {
             if (isImageUrl(msg.fileUrl)) {
-                attachmentHtml = `<img class="ct-msg-image" src="${safeUrl(msg.fileUrl)}" alt="${esc(msg.fileName || 'imagem')}" data-full="${safeUrl(msg.fileUrl)}" loading="lazy" />`;
+                attachmentHtml = `<img class="ct-msg-image" src="${msg.fileUrl}" alt="${esc(msg.fileName || 'imagem')}" data-full="${msg.fileUrl}" loading="lazy" />`;
             } else if (isAudioUrl(msg.fileUrl)) {
                 attachmentHtml = renderAudioPlayer(msg.fileUrl, msg.fileName);
             } else {
-                attachmentHtml = `<a class="ct-msg-file" href="${safeUrl(msg.fileUrl)}" target="_blank" download><div class="ct-file-icon">${fileIcon(msg.fileName)}</div><div class="ct-file-info"><span class="ct-file-name">${esc(msg.fileName || 'arquivo')}</span><span class="ct-file-size">${fmtSize(msg.fileSize || 0)}</span></div></a>`;
+                attachmentHtml = `<a class="ct-msg-file" href="${msg.fileUrl}" target="_blank" download><div class="ct-file-icon">${fileIcon(msg.fileName)}</div><div class="ct-file-info"><span class="ct-file-name">${esc(msg.fileName || 'arquivo')}</span><span class="ct-file-size">${fmtSize(msg.fileSize || 0)}</span></div></a>`;
             }
         }
 
         // Avatar
         let avatarHtml;
         if (isBot) avatarHtml = `<div class="ct-msg-avatar bot-avatar" style="background:linear-gradient(135deg,#a855f7,#6366f1)"><img src="/chat-teams/BobAI.png" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='🤖'" /></div>`;
-        else if (msg.foto) { const url = msg.foto.startsWith('/') ? msg.foto : `/avatars/${msg.foto}`; avatarHtml = `<div class="ct-msg-avatar" style="background:${safeColor(color)}"><img src="${safeUrl(url)}" onerror="this.parentElement.textContent='${esc(initials(name))}'" /></div>`; }
-        else avatarHtml = `<div class="ct-msg-avatar" style="background:${safeColor(color)}">${initials(name)}</div>`;
+        else if (msg.foto) { const url = msg.foto.startsWith('/') ? msg.foto : `/avatars/${msg.foto}`; avatarHtml = `<div class="ct-msg-avatar" style="background:${color}"><img src="${url}" onerror="this.parentElement.textContent='${initials(name)}'" /></div>`; }
+        else avatarHtml = `<div class="ct-msg-avatar" style="background:${color}">${initials(name)}</div>`;
 
         const displayName = isBot ? 'BOB I.A.' : name;
         const isMine = !isBot && (msg.userId === currentUser?.id || msg.fromId === currentUser?.id);
@@ -926,7 +933,7 @@
 
     function renderAudioPlayer(url, name) {
         const bars = Array.from({ length: 30 }, () => 4 + Math.random() * 18).map(h => `<div class="ct-wave-bar" style="height:${h}px"></div>`).join('');
-        return `<div class="ct-msg-audio" data-audio-url="${safeUrl(url)}"><button class="ct-audio-play" data-playing="false">▶</button><div class="ct-audio-wave">${bars}</div><span class="ct-audio-duration">--:--</span></div>`;
+        return `<div class="ct-msg-audio" data-audio-url="${url}"><button class="ct-audio-play" data-playing="false">▶</button><div class="ct-audio-wave">${bars}</div><span class="ct-audio-duration">--:--</span></div>`;
     }
 
     function appendMessage(msg, type) {
@@ -1344,6 +1351,34 @@
         _initAttempts++;
         if (_initAttempts < MAX_INIT_ATTEMPTS) {
             setTimeout(init, 2000);
+        }
+    }
+
+    // ── Theme toggle (Light/Dark mode) ──────────────────────
+    function toggleChatTheme() {
+        const panel = document.getElementById('ct-panel');
+        if (!panel) return;
+        const isLight = panel.classList.toggle('ct-light');
+        localStorage.setItem('ct-theme', isLight ? 'light' : 'dark');
+        const btn = document.getElementById('ct-btn-theme');
+        if (btn) {
+            btn.innerHTML = isLight
+                ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
+            btn.title = isLight ? 'Modo escuro' : 'Modo claro';
+        }
+    }
+
+    function applySavedTheme() {
+        const saved = localStorage.getItem('ct-theme');
+        if (saved === 'light') {
+            const panel = document.getElementById('ct-panel');
+            if (panel) panel.classList.add('ct-light');
+            const btn = document.getElementById('ct-btn-theme');
+            if (btn) {
+                btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+                btn.title = 'Modo escuro';
+            }
         }
     }
 

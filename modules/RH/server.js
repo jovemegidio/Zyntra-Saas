@@ -257,6 +257,7 @@ app.get('/favicon.ico', (req, res) => {
 });
 
 app.use(express.static(path.join(__dirname, 'public'), { dotfiles: 'deny', index: false }))
+app.use('/_shared', express.static(path.join(__dirname, '../../_shared'), { dotfiles: 'deny', index: false }));
 
 // === Integração da API eSocial ===
 const esocialApi = require('./api/esocial-api');

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
@@ -10,7 +10,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Dashboard Financeiro</title>
+    <title>Zyntra: Dashboard</title>
 <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
 
     <!-- Autenticação -->
@@ -26,8 +26,10 @@
     <link rel="stylesheet" href="/css/popup-confirmacao.css?v=20260324">
 
     <!-- Financeiro Design System -->
-    <link rel="stylesheet" href="css/fin-layout.css?v=20260215">
-    <link rel="stylesheet" href="css/fin-components.css?v=20260215">
+    <link rel="stylesheet" href="css/fin-layout.css?v=20260411a">
+    <link rel="stylesheet" href="css/fin-components.css?v=20260411a">
+    <!-- ?? R2 FIX: Tema verde do financeiro (--fin-primary) — faltava no carregamento -->
+    <link rel="stylesheet" href="css/financeiro.css?v=20260411">
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1"
@@ -44,7 +46,7 @@
                     : await fetch('/api/me', { credentials: 'include' }).then(r => r.json());
                 _financeiroUserCache = response;
                 const user = response;
-                const permFinanceiro = user.permissões_financeiro || [];
+                const permFinanceiro = user.permissoes_financeiro || [];
                 const isAdmin = user.is_admin === 1 || user.role === 'admin';
                 if (!isAdmin && permFinanceiro.length > 0) {
                     const temContasPagar = permFinanceiro.includes('contas_pagar');
@@ -58,8 +60,161 @@
 
     <!-- Estilos específicos desta página -->
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
         /* Cards de resumo - padrão Compras */
 
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+            background: #cbd5e1;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10);
+            border-color: #dbe3ef;
+        }
+
+        .metric-card.green::before {
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .metric-card.red::before {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .metric-card.blue::before {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .metric-icon.green {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+        }
+
+        .metric-icon.red {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+
+        .metric-icon.blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #2563eb;
+        }
+
+        .metric-trend {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 72px;
+            min-height: 30px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .metric-trend.up {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+
+        .metric-trend.down {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .metric-trend.neutral {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+
+        .metric-value {
+            margin-bottom: 6px;
+            color: #0f172a;
+            font-size: clamp(28px, 2.4vw, 34px);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-value.negative {
+            color: #dc2626;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card {
+                padding: 20px;
+            }
+        }
 
         /* Chart */
         .chart-container {
@@ -100,8 +255,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
         }
 
         .vencimento-item:last-child {
@@ -115,13 +270,13 @@
         }
 
         .vencimento-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 16px;
         }
 
         .vencimento-icon.receber {
@@ -136,18 +291,18 @@
 
         .vencimento-info h4 {
             font-size: 14px;
-            font-weight: 500;
-            color: #1e293b;
+            font-weight: 600;
+            color: var(--gray-900, #111827);
         }
 
         .vencimento-info span {
             font-size: 12px;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
         }
 
         .vencimento-valor {
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .vencimento-valor.green {
@@ -160,16 +315,20 @@
 
         /* Page actions */
         .page-header {
+            margin-bottom: var(--space-8, 2rem);
+        }
+
+        .page-header-top {
             display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: var(--space-6, 1.5rem);
+        }
+
+        .page-actions {
+            display: flex;
+            gap: var(--space-3, 0.75rem);
             flex-wrap: wrap;
-            align-items: center;
-            background: white;
-            padding: 16px 24px;
-            border-radius: 16px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
-            border: 1px solid #e2e8f0;
         }
 
         .page-header .btn {
@@ -177,20 +336,6 @@
             font-size: 14px;
             font-weight: 600;
             border-radius: 10px;
-        }
-
-        .page-header .btn-secondary {
-            border: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-
-        .page-header .btn-secondary:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-
-        .page-header .btn-relatorios {
-            margin-left: auto;
         }
 
         /* Table helpers */
@@ -213,12 +358,12 @@
             padding: 14px 18px;
             text-align: left;
             font-weight: 600;
-            font-size: 11px;
+            font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #64748b;
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
+            letter-spacing: 0.05em;
+            color: var(--gray-500, #6b7280);
+            background: var(--gray-100, #f3f4f6);
+            border-bottom: 2px solid var(--gray-200, #e5e7eb);
             white-space: nowrap;
         }
 
@@ -232,8 +377,8 @@
 
         .table-container td {
             padding: 14px 18px;
-            border-bottom: 1px solid #f1f5f9;
-            color: #374151;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
+            color: var(--gray-700, #374151);
             vertical-align: middle;
         }
 
@@ -242,7 +387,7 @@
         }
 
         .table-container tbody tr:hover {
-            background: #f0f7ff;
+            background: var(--gray-50, #f9fafb);
         }
 
         .table-container tbody tr:last-child td {
@@ -291,12 +436,12 @@
         /* Lancamentos nav buttons */
         .lancamentos-nav-btn {
             padding: 7px 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 12px;
             font-weight: 600;
-            border: 1px solid #e2e8f0;
+            border: 1.5px solid var(--gray-200, #e5e7eb);
             background: white;
-            color: #475569;
+            color: var(--gray-600, #4b5563);
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
@@ -305,9 +450,10 @@
         }
 
         .lancamentos-nav-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-            color: #1e293b;
+            background: var(--gray-50, #f9fafb);
+            border-color: var(--gray-300, #d1d5db);
+            color: var(--gray-900, #111827);
+            transform: translateY(-1px);
         }
 
         .lancamentos-nav-btn i {
@@ -338,8 +484,8 @@
             z-index: 10000;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(2px);
-            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .modal-overlay-omie.active {
@@ -348,10 +494,22 @@
 
         .modal-omie {
             background: white;
-            border-radius: 12px;
+            border-radius: 18px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.04);
+            animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
         .modal-omie--sm {
@@ -375,15 +533,18 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 18px 24px;
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 12px 12px 0 0;
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-radius: 18px 18px 0 0;
         }
 
         .modal-omie-header h2 {
             color: white;
             font-size: 16px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .modal-omie-close {
@@ -391,13 +552,15 @@
             align-items: center;
             gap: 6px;
             background: rgba(255, 255, 255, 0.1);
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: rgba(255, 255, 255, 0.7);
             padding: 6px 14px;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
             transition: all 0.2s;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
 
         .modal-omie-close:hover {
@@ -406,7 +569,7 @@
         }
 
         .modal-omie-body {
-            padding: 24px;
+            padding: 18px 20px;
         }
 
         .modal-omie-body--spacious {
@@ -419,104 +582,217 @@
 
         .modal-omie-subtitle {
             color: #64748b;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        /* Opção cards */
-        .opção-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            overflow: hidden;
-        }
-
-        .opção-card--clickable {
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .opção-card--clickable:hover {
-            border-color: #3b82f6;
-            background: #eff6ff;
-        }
-
-        .opção-card-header {
-            padding: 12px 16px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #1e293b;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .opção-card-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px;
-        }
-
-        .opção-card-left {
-            flex: 1;
-        }
-
-        .opção-card-left p {
-            color: #64748b;
             font-size: 13px;
+            margin-bottom: 14px;
             line-height: 1.5;
         }
 
-        .opção-card-right {
+        .modal-omie {
+            width: min(760px, calc(100vw - 32px));
+            max-width: calc(100vw - 32px);
+        }
+
+        .modal-omie--sm {
+            width: min(760px, calc(100vw - 32px));
+        }
+
+        .modal-omie-body {
+            background:
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .opcao-card {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 8px;
+            border: 1px solid #dbe3ef;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        }
+
+        .opcao-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .opcao-card--clickable {
+            cursor: pointer;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .opcao-card--clickable:hover {
+            transform: translateY(-3px);
+            border-color: #93c5fd;
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.10);
+        }
+
+        .opcao-card:hover::before,
+        .opcao-card--clickable:hover::before {
+            opacity: 1;
+        }
+
+        .opcao-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px 0;
+            border-bottom: none;
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .opcao-card-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            padding: 8px 16px 12px;
+        }
+
+        .opcao-card-left {
+            flex: 1;
+        }
+
+        .opcao-card-left p {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .opcao-card-right {
+            flex: 0 0 80px;
             display: flex;
             align-items: center;
             justify-content: center;
+            align-self: stretch;
+            border-left: 1px solid #e2e8f0;
+            padding-left: 14px;
         }
 
         .icon-wrapper {
+            width: 100%;
+            min-height: 56px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 4px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
         }
 
         .icon-label {
             font-size: 11px;
-            color: #3b82f6;
-            font-weight: 600;
+            color: #2563eb;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
         }
 
-        .opção-card-input {
+        .opcao-pesquisas-info {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+            border: 1px solid #bfdbfe;
+            font-size: 11px;
+            color: #1e3a8a;
+        }
+
+        .opcao-pesquisas-info a {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .opcao-pesquisas-info a:hover {
+            text-decoration: underline;
+        }
+
+        .opcao-card-input {
             display: flex;
             gap: 8px;
-            margin-top: 10px;
+            margin-top: 8px;
         }
 
-        .opção-card-input input {
+        .opcao-card-input input {
             flex: 1;
-            padding: 10px 14px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            min-height: 38px;
+            padding: 0 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #ffffff;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
             font-size: 13px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .opção-card-input button {
-            padding: 10px 16px;
-            background: #3b82f6;
-            color: white;
+        .opcao-card-input input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .opcao-card-input button {
+            min-width: 40px;
+            min-height: 38px;
+            padding: 0 14px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
             cursor: pointer;
+            box-shadow: 0 12px 20px rgba(37, 99, 235, 0.20);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
         }
 
-        .opção-pesquisas-info {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 8px;
+        .opcao-card-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(37, 99, 235, 0.28);
+            filter: brightness(1.02);
         }
 
-        .opção-pesquisas-info a {
-            color: #3b82f6;
+        @media (max-width: 768px) {
+            .modal-omie-header {
+                padding: 18px 20px;
+            }
+
+            .modal-omie-body {
+                padding: 20px;
+            }
+
+            .opcao-card-body {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .opcao-card-right {
+                width: 100%;
+                flex: 1 1 auto;
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+                padding: 14px 0 0;
+            }
+
+            .icon-wrapper {
+                min-height: 76px;
+            }
+
+            .opcao-card-input {
+                width: 100%;
+            }
         }
 
         /* Campos e botões de modal */
@@ -755,22 +1031,24 @@
         .resultados-table th {
             padding: 12px 16px;
             text-align: left;
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
-            font-size: 13px;
+            background: var(--gray-100, #f3f4f6);
+            border-bottom: 2px solid var(--gray-200, #e5e7eb);
+            font-size: 12px;
             font-weight: 600;
-            color: #374151;
+            color: var(--gray-600, #4b5563);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .resultados-table td {
             padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--gray-100, #f3f4f6);
             font-size: 13px;
-            color: #374151;
+            color: var(--gray-700, #374151);
         }
 
         .resultados-table tr:hover {
-            background: #eff6ff;
+            background: var(--gray-50, #f9fafb);
         }
 
         .resultados-table tr.selected {
@@ -841,32 +1119,40 @@
         .btn-salvar-sidebar {
             width: 42px;
             height: 42px;
-            background: #3b82f6;
+            background: linear-gradient(135deg, var(--primary-500, #3b82f6), var(--primary-600, #2563eb));
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-size: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
 
         .btn-salvar-sidebar:hover {
-            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .nav-arrow {
             width: 42px;
             height: 42px;
             background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
+            border: 1.5px solid var(--gray-200, #e5e7eb);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
             cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-arrow:hover {
+            border-color: var(--gray-300, #d1d5db);
+            color: var(--gray-600, #4b5563);
         }
 
         .cadastro-avatar-area {
@@ -878,16 +1164,21 @@
         .cadastro-avatar {
             width: 80px;
             height: 80px;
-            background: #f1f5f9;
-            border-radius: 12px;
+            background: var(--gray-100, #f3f4f6);
+            border-radius: 16px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
+            color: var(--gray-400, #9ca3af);
             font-size: 28px;
             cursor: pointer;
             position: relative;
+            transition: all var(--transition-base, 0.2s);
+        }
+
+        .cadastro-avatar:hover {
+            background: var(--gray-200, #e5e7eb);
         }
 
         .cadastro-avatar-alterar {
@@ -924,22 +1215,23 @@
             padding: 10px 16px;
             border: none;
             background: none;
-            color: #64748b;
+            color: var(--gray-500, #6b7280);
             font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
             border-bottom: 2px solid transparent;
             margin-bottom: -2px;
             transition: all 0.2s;
+            font-weight: 500;
         }
 
         .cadastro-tab:hover {
-            color: #3b82f6;
+            color: var(--primary-500, #3b82f6);
         }
 
         .cadastro-tab.active {
-            color: #3b82f6;
-            border-bottom-color: #3b82f6;
+            color: var(--primary-600, #2563eb);
+            border-bottom-color: var(--primary-500, #3b82f6);
             font-weight: 600;
         }
 
@@ -1105,6 +1397,56 @@
             }
         }
 
+        /* ========================================
+           PAGINAÇÃO
+           ======================================== */
+        .fin-pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 10px 16px;
+            border-top: 1px solid var(--gray-100, #f3f4f6);
+        }
+
+        .fin-pagination-info {
+            margin-right: auto;
+            font-size: 12px;
+            color: var(--gray-500, #6b7280);
+        }
+
+        .fin-pagination-btn {
+            min-width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 1px solid var(--gray-200, #e5e7eb);
+            background: white;
+            color: var(--gray-600, #4b5563);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.15s ease;
+            padding: 0 8px;
+        }
+
+        .fin-pagination-btn:hover:not(:disabled) {
+            background: var(--gray-50, #f9fafb);
+            border-color: var(--gray-300, #d1d5db);
+        }
+
+        .fin-pagination-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+        }
+
+        .fin-pagination-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
     </style>
 
     <!-- Tooltips Profissionais -->
@@ -1112,12 +1454,12 @@
     <script src="/js/tooltips-professional.js?v=20260209"></script>
 
     <!-- Header & Sidebar refinado -->
-    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260215">
+    <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260411a">
     <!-- Global Header & Sidebar — override final unificado -->
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
 </head>
 
@@ -1133,43 +1475,46 @@
             </a>
 
             <nav class="sidebar-nav">
-                <a href="/" class="sidebar-btn active" title="Dashboard">
+                <a href="index.html" class="sidebar-btn active" title="Dashboard">
                     <i class="fas fa-chart-line"></i>
                 </a>
-                <a href="/contas-pagar" class="sidebar-btn" title="Contas a Pagar">
+                <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar">
                     <i class="fas fa-file-invoice-dollar"></i>
                 </a>
-                <a href="/contas-receber" class="sidebar-btn" title="Contas a Receber">
+                <a href="contas-receber.html" class="sidebar-btn" title="Contas a Receber">
                     <i class="fas fa-hand-holding-usd"></i>
                 </a>
-                <a href="/fluxo-caixa" class="sidebar-btn" title="Fluxo de Caixa">
+                <a href="fluxo-caixa.html" class="sidebar-btn" title="Fluxo de Caixa">
                     <i class="fas fa-chart-area"></i>
                 </a>
-                <a href="/bancos" class="sidebar-btn" title="Bancos">
+                <a href="bancos.html" class="sidebar-btn" title="Bancos">
                     <i class="fas fa-university"></i>
                 </a>
-                <a href="/plano-contas" class="sidebar-btn" title="Plano de Contas">
+                <a href="plano-contas.html" class="sidebar-btn" title="Plano de Contas">
                     <i class="fas fa-list-alt"></i>
                 </a>
-                <a href="/orcamentos" class="sidebar-btn" title="Orçamentos">
+                <a href="orcamentos.html" class="sidebar-btn" title="Orçamentos">
                     <i class="fas fa-calculator"></i>
                 </a>
-                <a href="/conciliacao" class="sidebar-btn" title="Conciliação">
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação">
                     <i class="fas fa-balance-scale"></i>
                 </a>
-                <a href="/relatorios" class="sidebar-btn" title="Relatórios">
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios">
                     <i class="fas fa-chart-bar"></i>
                 </a>
             </nav>
 
             <div class="sidebar-bottom">
                 <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
-                <a href="/centros-custo" class="sidebar-btn" title="Centros de Custo" style="display:none">
+                <a href="centros-custo.html" class="sidebar-btn" title="Centros de Custo" style="display:none">
                     <i class="fas fa-sitemap"></i>
                 </a>
-                <a href="/impostos" class="sidebar-btn" title="Impostos">
+                <a href="impostos.html" class="sidebar-btn" title="Impostos">
                     <i class="fas fa-percent"></i>
                 </a>
+                <button class="sidebar-btn" title="Configurações" id="btn-config" onclick="toggleConfiguracoes()">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </aside>
 
@@ -1198,12 +1543,9 @@
                     <button class="header-btn" title="Atualizar" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
                     </button>
+                    
                     <div class="user-greeting">
                         <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
-                        <div class="user-avatar" id="user-avatar">
-                            <img alt="Foto do usuário" id="user-photo" style="display:none">
-                            <span id="user-initials">U</span>
-                        </div>
                     </div>
                 </div>
             </header>
@@ -1214,21 +1556,25 @@
 
                     <!-- Page Actions -->
                     <div class="page-header">
-                        <button class="btn btn-secondary" onclick="abrirModalClienteFornecedor()"><i
-                                class="fas fa-user-plus"></i> Incluir Cliente/Fornecedor</button>
-                        <button class="btn btn-success" onclick="novoLancamento('receber')"><i
-                                class="fas fa-plus-circle"></i> Nova Conta a Receber</button>
-                        <button class="btn btn-primary" onclick="novoLancamento('pagar')"><i
-                                class="fas fa-plus-circle"></i> Nova Conta a Pagar</button>
-                        <button class="btn btn-secondary btn-relatorios" onclick="location.href='/relatorios'"><i
-                                class="fas fa-chart-bar"></i> Relatórios</button>
+                        <div class="page-header-top" style="justify-content: flex-end; width: 100%;">
+                            <div class="page-actions">
+                                <button class="btn btn-secondary" onclick="abrirModalClienteFornecedor()"><i
+                                        class="fas fa-user-plus"></i> Incluir Cliente/Fornecedor</button>
+                                <button class="btn btn-success" onclick="novoLancamento('receber')"><i
+                                        class="fas fa-plus-circle"></i> Nova Conta a Receber</button>
+                                <button class="btn btn-primary" onclick="novoLancamento('pagar')"><i
+                                        class="fas fa-plus-circle"></i> Nova Conta a Pagar</button>
+                                <button class="btn btn-secondary" onclick="location.href='/relatorios'"><i
+                                        class="fas fa-chart-bar"></i> Relatórios</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Resumo Financeiro -->
                     <div class="metrics-grid">
                         <div class="metric-card green">
                             <div class="metric-header">
-                                <div class="metric-icon green"><i class="fas fa-hand-holding-usd"></i></div>
+                                <div class="metric-icon green"><i class="fas fa-hand-holding-dollar"></i></div>
                                 <span class="metric-trend neutral" id="changeReceber">&mdash;</span>
                             </div>
                             <div class="metric-value" id="statTotalReceber">R$ 0,00</div>
@@ -1252,7 +1598,7 @@
                         </div>
                         <div class="metric-card blue">
                             <div class="metric-header">
-                                <div class="metric-icon blue"><i class="fas fa-university"></i></div>
+                                <div class="metric-icon blue"><i class="fas fa-building-columns"></i></div>
                                 <span class="metric-trend up" id="changeContas">&mdash;</span>
                             </div>
                             <div class="metric-value" id="statSaldoContas">R$ 0,00</div>
@@ -1264,9 +1610,11 @@
                     <div class="grid-2">
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-chart-area"></i> Fluxo de Caixa - Próximos 30 dias</h3>
-                                <button class="btn btn-secondary" onclick="location.href='fluxo-caixa.html'">Ver
-                                    Detalhes</button>
+                                <h3 class="card-title">
+                                    <i class="fas fa-chart-area"></i> Fluxo de Caixa - Próximos 30 dias
+                                </h3>
+                                <button class="btn btn-sm btn-secondary" onclick="location.href='fluxo-caixa.html'">Ver
+                                    Detalhes <i class="fas fa-arrow-right"></i></button>
                             </div>
                             <div class="card-body">
                                 <div class="chart-legend">
@@ -1284,7 +1632,9 @@
                         </div>
                         <div class="card">
                             <div class="card-header">
-                                <h3><i class="fas fa-calendar-alt"></i> Próximos Vencimentos</h3>
+                                <h3 class="card-title">
+                                    <i class="fas fa-calendar-alt"></i> Próximos Vencimentos
+                                </h3>
                             </div>
                             <div class="card-body" id="lista-vencimentos">
                                 <div class="empty-state">
@@ -1292,14 +1642,16 @@
                                     <p>Carregando...</p>
                                 </div>
                             </div>
+                            <div class="fin-pagination" id="paginacao-vencimentos" style="display:none;"></div>
                         </div>
                     </div>
 
                     <!-- Últimos Lançamentos -->
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-list" style="color: #3b82f6; margin-right: 6px;"></i> Últimos
-                                Lançamentos</h3>
+                            <h3 class="card-title">
+                                <i class="fas fa-list"></i> Últimos Lançamentos
+                            </h3>
                             <div class="flex-row-gap-sm">
                                 <button class="lancamentos-nav-btn btn-pagar"
                                     onclick="location.href='contas-pagar.html'">
@@ -1333,6 +1685,7 @@
                                     </tbody>
                                 </table>
                             </div>
+                            <div class="fin-pagination" id="paginacao-lancamentos" style="display:none;"></div>
                         </div>
                     </div>
 
@@ -1362,6 +1715,7 @@
         // Notificações removidas — funções stub para compatibilidade
         function marcarTodasLidas() {}
         function limparNotificacoes() {}
+        function toggleConfiguracoes() {}
 
         // ======== Carregar usuário ========
         async function carregarUsuario() {
@@ -1434,15 +1788,25 @@
             return String(status || '').trim().toLowerCase();
         }
 
-        async function fetchJsonSeguro(url, fallback) {
+        async function fetchJsonSeguro(url, fallback, tentativa = 0) {
             try {
                 const response = await fetch(url, { credentials: 'include' });
+                if (response.status === 429) {
+                    if (tentativa < 3) {
+                        const espera = Math.pow(2, tentativa) * 1000;
+                        console.warn(`[Dashboard] Rate limit (429) em ${url}, aguardando ${espera}ms...`);
+                        await new Promise(r => setTimeout(r, espera));
+                        return fetchJsonSeguro(url, fallback, tentativa + 1);
+                    }
+                    console.warn(`[Dashboard] Rate limit persistente em ${url}, usando fallback`);
+                    return fallback;
+                }
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}`);
                 }
                 return await response.json();
             } catch (error) {
-                console.warn(`[Dashboard Financeiro] Falha ao carregar ${url}:`, error.message);
+                console.warn(`[Dashboard] Falha ao carregar ${url}:`, error.message);
                 return fallback;
             }
         }
@@ -1477,8 +1841,8 @@
 
             const referenciaAtual = new Date();
             const referenciaAnterior = new Date(referenciaAtual.getFullYear(), referenciaAtual.getMonth() - 1, 1);
-            const períodoAtual = obterPeriodoMensal(referenciaAtual);
-            const períodoAnterior = obterPeriodoMensal(referenciaAnterior);
+            const periodoAtual = obterPeriodoMensal(referenciaAtual);
+            const periodoAnterior = obterPeriodoMensal(referenciaAnterior);
 
             dashboardCache.loadPromise = (async () => {
                 const [
@@ -1491,13 +1855,13 @@
                     lancamentosPayload,
                     resumoKpisPayload
                 ] = await Promise.all([
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAtual.inicio}&dataFim=${períodoAtual.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
-                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${períodoAnterior.inicio}&dataFim=${períodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAtual.inicio}&dataFim=${periodoAtual.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-receber?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
+                    fetchJsonSeguro(`/api/financeiro/contas-pagar?dataInicio=${periodoAnterior.inicio}&dataFim=${periodoAnterior.fim}`, { data: [] }),
                     fetchJsonSeguro('/api/financeiro/fluxo-caixa-resumo?periodo=mes', { saldoInicial: 0, fluxoDiario: [] }),
-                    fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=6', { data: [] }),
-                    fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=10', { data: [] }),
+                    fetchJsonSeguro('/api/financeiro/proximos-vencimentos?limite=30', { data: [] }),
+                    fetchJsonSeguro('/api/financeiro/ultimos-lancamentos?limite=50', { data: [] }),
                     fetchJsonSeguro('/api/financeiro/resumo-kpis', { data: { vencidos: 0 } })
                 ]);
 
@@ -1782,36 +2146,80 @@
             return `Vence em ${diferencaDias} dia(s)`;
         }
 
+        // ======== Estado de Paginação ========
+        const paginacaoEstado = {
+            vencimentos: { pagina: 1, porPagina: 5, dados: [] },
+            lancamentos: { pagina: 1, porPagina: 20, dados: [] }
+        };
+
+        function renderizarControlePaginacao(containerId, estado, nomeFuncao) {
+            const el = document.getElementById(containerId);
+            if (!el) return;
+            const { pagina, porPagina, dados } = estado;
+            const totalPaginas = Math.ceil(dados.length / porPagina);
+            if (totalPaginas <= 1) { el.style.display = 'none'; return; }
+            const inicio = (pagina - 1) * porPagina + 1;
+            const fim = Math.min(pagina * porPagina, dados.length);
+            let html = `<span class="fin-pagination-info">${inicio}–${fim} de ${dados.length}</span>`;
+            html += `<button class="fin-pagination-btn" ${pagina === 1 ? 'disabled' : ''} onclick="${nomeFuncao}(${pagina - 1})"><i class="fas fa-chevron-left"></i></button>`;
+            const maxVisible = 5;
+            let startPage = Math.max(1, pagina - 2);
+            const endPage = Math.min(totalPaginas, startPage + maxVisible - 1);
+            if (endPage - startPage < maxVisible - 1) startPage = Math.max(1, endPage - maxVisible + 1);
+            for (let p = startPage; p <= endPage; p++) {
+                html += `<button class="fin-pagination-btn${p === pagina ? ' active' : ''}" onclick="${nomeFuncao}(${p})">${p}</button>`;
+            }
+            html += `<button class="fin-pagination-btn" ${pagina === totalPaginas ? 'disabled' : ''} onclick="${nomeFuncao}(${pagina + 1})"><i class="fas fa-chevron-right"></i></button>`;
+            el.style.display = 'flex';
+            el.innerHTML = html;
+        }
+
+        function irParaPaginaVencimentos(p) {
+            paginacaoEstado.vencimentos.pagina = p;
+            renderizarPaginaVencimentos();
+        }
+
+        function irParaPaginaLancamentos(p) {
+            paginacaoEstado.lancamentos.pagina = p;
+            renderizarPaginaLancamentos();
+        }
+
         // ======== Vencimentos ========
-        async function carregarVencimentos() {
+        function renderizarPaginaVencimentos() {
             const lista = document.getElementById('lista-vencimentos');
             if (!lista) return;
-
-            try {
-                const dados = await carregarDadosDashboard();
-                const vencimentos = [...dados.proximosVencimentos]
-                    .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento))
-                    .slice(0, 6);
-
-                if (vencimentos.length === 0) {
-                    lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento próximo</p></div>';
-                    return;
-                }
-
-                lista.innerHTML = vencimentos.map(item => `
+            const { pagina, porPagina, dados } = paginacaoEstado.vencimentos;
+            const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
+            if (paginados.length === 0) {
+                lista.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle"></i><p>Nenhum vencimento próximo</p></div>';
+            } else {
+                lista.innerHTML = paginados.map(item => `
                     <div class="vencimento-item">
                         <div class="vencimento-left">
                             <div class="vencimento-icon ${item.tipo}">
                                 <i class="fas fa-${item.tipo === 'receber' ? 'arrow-down' : 'arrow-up'}"></i>
                             </div>
                             <div class="vencimento-info">
-                                <h4>${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</h4>
-                                <span>${obterTextoPrazo(item.data_vencimento)} • ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
+                                <h4>${escapeHtml(item.descricao || item.descri\u00e7\u00e3o || 'Sem descri\u00e7\u00e3o')}</h4>
+                                <span>${obterTextoPrazo(item.data_vencimento)} — ${item.tipo === 'receber' ? 'A Receber' : 'A Pagar'}</span>
                             </div>
                         </div>
                         <div class="vencimento-valor ${item.tipo === 'receber' ? 'green' : 'red'}">${formatarMoeda(item.valor)}</div>
                     </div>
                 `).join('');
+            }
+            renderizarControlePaginacao('paginacao-vencimentos', paginacaoEstado.vencimentos, 'irParaPaginaVencimentos');
+        }
+
+        async function carregarVencimentos() {
+            const lista = document.getElementById('lista-vencimentos');
+            if (!lista) return;
+            try {
+                const dados = await carregarDadosDashboard();
+                paginacaoEstado.vencimentos.dados = [...dados.proximosVencimentos]
+                    .sort((a, b) => new Date(a.data_vencimento) - new Date(b.data_vencimento));
+                paginacaoEstado.vencimentos.pagina = 1;
+                renderizarPaginaVencimentos();
             } catch (error) {
                 console.error('Erro ao carregar próximos vencimentos:', error);
                 lista.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle"></i><p>Erro ao carregar vencimentos</p></div>';
@@ -1819,33 +2227,40 @@
         }
 
         // ======== Lançamentos ========
-        async function carregarLancamentos() {
+        function renderizarPaginaLancamentos() {
             const tbody = document.getElementById('tabela-lancamentos');
             if (!tbody) return;
-
-            try {
-                const dados = await carregarDadosDashboard();
-                const lancamentos = [...dados.ultimosLancamentos].slice(0, 10);
-
-                if (lancamentos.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lançamento</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = lancamentos.map(item => {
+            const { pagina, porPagina, dados } = paginacaoEstado.lancamentos;
+            const paginados = dados.slice((pagina - 1) * porPagina, pagina * porPagina);
+            if (paginados.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="td-loading"><i class="fas fa-inbox icon-empty"></i>Nenhum lançamento</td></tr>';
+            } else {
+                tbody.innerHTML = paginados.map(item => {
                     const tipo = item.tipo === 'Receber' ? 'Receber' : 'Pagar';
                     return `
                         <tr>
                             <td><span class="badge ${tipo === 'Receber' ? 'badge-success' : 'badge-danger'}">${tipo}</span></td>
-                            <td class="td-description">${escapeHtml(item.descricao || item.descrição || 'Sem descrição')}</td>
+                            <td class="td-description">${escapeHtml(item.descricao || item.descri\u00e7\u00e3o || 'Sem descri\u00e7\u00e3o')}</td>
                             <td>${formatarData(item.data_vencimento)}</td>
                             <td class="td-valor ${tipo === 'Receber' ? 'td-valor--success' : 'td-valor--danger'}">${formatarMoeda(item.valor)}</td>
                             <td><span class="badge ${getStatusClass(item.status)}">${formatarStatus(item.status)}</span></td>
                         </tr>
                     `;
                 }).join('');
+            }
+            renderizarControlePaginacao('paginacao-lancamentos', paginacaoEstado.lancamentos, 'irParaPaginaLancamentos');
+        }
+
+        async function carregarLancamentos() {
+            const tbody = document.getElementById('tabela-lancamentos');
+            if (!tbody) return;
+            try {
+                const dados = await carregarDadosDashboard();
+                paginacaoEstado.lancamentos.dados = [...dados.ultimosLancamentos];
+                paginacaoEstado.lancamentos.pagina = 1;
+                renderizarPaginaLancamentos();
             } catch (error) {
-                console.error('Erro ao carregar últimos lançamentos:', error);
+                console.error('Erro ao carregar Últimos lançamentos:', error);
                 tbody.innerHTML = '<tr><td colspan="5" class="td-loading td-valor--danger">Erro ao carregar</td></tr>';
             }
         }
@@ -1916,11 +2331,14 @@
             carregarUsuario();
             atualizarDashboard();
             window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
-            // Cleanup: pausar quando tab oculta
+            // Cleanup: pausar quando tab oculta, forçar refresh quando voltar
             document.addEventListener('visibilitychange', function() {
                 if (document.hidden) {
                     clearInterval(window._dashIntervalFin);
                 } else {
+                    // ?? R2 FIX BUG-20: Invalidar cache ao retornar — tab para garantir dados frescos
+                    invalidarCacheDashboard();
+                    atualizarDashboard(true);
                     window._dashIntervalFin = setInterval(() => atualizarDashboard(true), 300000);
                 }
             });

@@ -148,7 +148,15 @@ class CotacoesManager {
     }
 
     async excluirCotacao(id) {
-        if (!confirm('Deseja realmente excluir esta cotação?')) return;
+        const ok = await ConfirmDialog.show({
+            title: 'Excluir Cotação',
+            message: 'Tem certeza que deseja excluir esta cotação?<br><small style="color:#9CA3AF;margin-top:6px;display:block">Esta ação não pode ser desfeita.</small>',
+            type: 'danger',
+            confirmText: 'Excluir',
+            confirmIcon: 'fa-trash-alt',
+            danger: true
+        });
+        if (!ok) return;
 
         try {
             const response = await fetch(`/api/compras/cotacoes/${id}`, { credentials: 'include', method: 'DELETE',
@@ -880,12 +888,12 @@ class CotacoesManager {
                                 <td><strong>${mat.materialCodigo}</strong><br>${mat.materialDescricao}</td>
                                 <td>${mat.quantidade} ${mat.unidade}</td>
                                 ${cotacao.propostas.map(p => {
-                                    const item = p.itens[idx];
-                                    const preco = parseFloat(item.precoUnitario);
-                                    const precos = cotacao.propostas.map(prop => parseFloat(prop.itens[idx].precoUnitario));
+                                    const item = p.itens && p.itens[idx] ? p.itens[idx] : {};
+                                    const preco = parseFloat(item.precoUnitario || 0);
+                                    const precos = cotacao.propostas.map(prop => parseFloat((prop.itens && prop.itens[idx] ? prop.itens[idx].precoUnitario : 0) || 0));
                                     const menorPreco = Math.min(...precos);
                                     const isMelhor = preco === menorPreco;
-                                    return `<td class="${isMelhor ? 'melhor-preco' : ''}">${this.formatarMoeda(preco)}<br><small>Total: ${this.formatarMoeda(item.total)}</small></td>`;
+                                    return `<td class="${isMelhor ? 'melhor-preco' : ''}">${this.formatarMoeda(preco)}<br><small>Total: ${this.formatarMoeda(item.total || 0)}</small></td>`;
                                 }).join('')}
                             </tr>
                         `).join('')}
@@ -912,7 +920,7 @@ class CotacoesManager {
 
             <div class="comparacao-footer">
                 <div class="alert alert-success">
-                    <i class="fas fa-trophy"></i> <strong>Melhor Proposta:</strong> ${cotacao.melhorProposta.fornecedorNome} - ${this.formatarMoeda(cotacao.melhorProposta.total)}
+                    <i class="fas fa-trophy"></i> <strong>Melhor Proposta:</strong> ${cotacao.melhorProposta ? cotacao.melhorProposta.fornecedorNome + ' - ' + this.formatarMoeda(cotacao.melhorProposta.total) : 'Não definida'}
                 </div>
             </div>
         `;

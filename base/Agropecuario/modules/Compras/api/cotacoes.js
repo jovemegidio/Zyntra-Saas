@@ -148,16 +148,6 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Número/descrição da cotação é obrigatório' });
         }
         
-        // COMPRAS-11 FIX: Validar data_limite não está no passado
-        if (dataLimite) {
-            const hoje = new Date();
-            hoje.setHours(0, 0, 0, 0);
-            if (new Date(dataLimite) < hoje) {
-                await connection.rollback();
-                return res.status(400).json({ error: 'Data limite não pode ser no passado' });
-            }
-        }
-        
         // Inserir cotação
         const [result] = await connection.query(
             `INSERT INTO cotacoes (
@@ -168,12 +158,9 @@ router.post('/', async (req, res) => {
         
         const cotacao_id = result.insertId;
         
-        // COMPRAS-09 FIX: Deduplicar fornecedores_ids
-        const fornecedoresUnicos = [...new Set(fornecedores_ids.map(Number).filter(Boolean))];
-        
         // Criar propostas vazias para fornecedores selecionados
-        if (fornecedoresUnicos.length > 0) {
-            for (const fornecedor_id of fornecedoresUnicos) {
+        if (fornecedores_ids.length > 0) {
+            for (const fornecedor_id of fornecedores_ids) {
                 await connection.query(
                     `INSERT INTO propostas_cotacao (
                         cotacao_id, fornecedor_id, valor_total
@@ -219,13 +206,6 @@ router.post('/:id/proposta', async (req, res) => {
         if (!fornecedor_id) {
             await connection.rollback();
             return res.status(400).json({ error: 'Fornecedor é obrigatório' });
-        }
-        
-        // COMPRAS-02 FIX: Validar valor_total não-negativo
-        const valorTotalNum = parseFloat(valor_total);
-        if (valor_total !== undefined && valor_total !== null && (!Number.isFinite(valorTotalNum) || valorTotalNum < 0)) {
-            await connection.rollback();
-            return res.status(400).json({ error: 'Valor total deve ser um número >= 0' });
         }
         
         // Verificar se cotação está aberta
@@ -387,28 +367,36 @@ router.put('/:id/encerrar', async (req, res) => {
     }
 });
 
-// ============ CANCELAR COTAÇÃO ============
+// ============ CANCELAR/EXCLUIR COTAÇÃO ============
 router.delete('/:id', async (req, res) => {
     try {
         const db = getDatabase();
         
-        // SECURITY FIX (COT-AUTHZ-001): Verificar que cotação está aberta antes de cancelar
-        const [result] = await db.query(
-            "UPDATE cotacoes SET status = 'cancelada' WHERE id = ? AND status NOT IN ('encerrada', 'cancelada')",
-            [req.params.id]
-        );
-        
-        if (result.affectedRows === 0) {
-            return res.status(409).json({ error: 'Cotação não pode ser cancelada (já encerrada, já cancelada, ou não encontrada)' });
+        // Verificar se cotação existe
+        const [rows] = await db.query('SELECT id, status FROM cotacoes WHERE id = ?', [req.params.id]);
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Cotação não encontrada' });
         }
+        
+        const cotacao = rows[0];
+        
+        // Se já cancelada ou encerrada, permitir exclusão permanente
+        if (cotacao.status === 'cancelada' || cotacao.status === 'encerrada') {
+            await db.query('DELETE FROM propostas_cotacao WHERE cotacao_id = ?', [req.params.id]);
+            await db.query('DELETE FROM cotacoes WHERE id = ?', [req.params.id]);
+            return res.json({ success: true, message: 'Cotação excluída permanentemente' });
+        }
+        
+        // Se aberta ou em análise, cancelar (soft-delete)
+        await db.query("UPDATE cotacoes SET status = 'cancelada' WHERE id = ?", [req.params.id]);
         
         res.json({
             success: true,
             message: 'Cotação cancelada com sucesso'
         });
     } catch (error) {
-        console.error('Erro ao cancelar cotação:', error);
-        res.status(500).json({ error: 'Erro ao cancelar cotação' });
+        console.error('Erro ao excluir cotação:', error);
+        res.status(500).json({ error: 'Erro ao excluir cotação' });
     }
 });
 
