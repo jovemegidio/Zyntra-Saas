@@ -448,6 +448,13 @@ try {
         } catch (adminErr) {
             console.warn('[ADMIN-MIGRATION] ⚠️ Migration não executada:', adminErr.message);
         }
+        // FIX: Restore missing CNPJ data for transportadoras (one-time, idempotent)
+        try {
+            const { fixTransportadorasCnpj } = require('./database/migrations/fix-transportadoras-cnpj');
+            await fixTransportadorasCnpj(pool);
+        } catch (cnpjErr) {
+            console.warn('[FIX-CNPJ] ⚠️ Migration não executada:', cnpjErr.message);
+        }
     }).catch((err) => {
         console.error('⚠️  Aviso: Pool criado mas teste de conexão falhou:', err.message);
         console.log('➡️  Sistema continuará e tentará reconectar automaticamente');

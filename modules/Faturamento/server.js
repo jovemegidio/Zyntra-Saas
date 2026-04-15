@@ -89,7 +89,7 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     status: 'online',
     endpoints: {
-      interface: `http://localhost:${PORT}/modules/Faturamento/public/index.html`,
+      interface: `http://localhost:${PORT}/modules/Faturamento/public/dashboard.html`,
       api: `http://localhost:${PORT}/api/faturamento`,
       docs: `http://localhost:${PORT}/api/faturamento/docs`
     }
@@ -170,7 +170,7 @@ app.listen(PORT, async () => {
   console.log('🚀 Sistema de Faturamento NFe - ALUFORCE');
   console.log('🚀 ========================================');
   console.log(`📡 Servidor rodando na porta ${PORT}`);
-  console.log(`🌐 Interface: http://localhost:${PORT}/modules/Faturamento/public/index.html`);
+  console.log(`🌐 Interface: http://localhost:${PORT}/modules/Faturamento/public/dashboard.html`);
   console.log(`📊 API: http://localhost:${PORT}/api/faturamento`);
   console.log(`📖 Docs: http://localhost:${PORT}/api/faturamento/docs`);
   console.log('🚀 ========================================');

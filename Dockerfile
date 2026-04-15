@@ -12,7 +12,9 @@ WORKDIR /app
 COPY package.json package-lock.json* ./
 
 # Install production dependencies only
-RUN npm ci --production --ignore-scripts \
+# Fallback to npm install when package-lock is temporarily out of sync
+RUN npm ci --omit=dev --ignore-scripts --legacy-peer-deps \
+    || npm install --omit=dev --ignore-scripts --legacy-peer-deps \
     && npm cache clean --force
 
 # ── Stage 2: Production ─────────────────────────

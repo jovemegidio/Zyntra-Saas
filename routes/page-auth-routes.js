@@ -279,7 +279,7 @@ module.exports = function mountPageRoutes(app, { authenticatePage, userPermissio
     // Faturamento
     app.get('/modules/Faturamento/index.html', authenticatePage, (req, res) => {
         if (req.user && req.user.permissoes && req.user.permissoes.includes('nfe')) {
-            res.sendFile(path.join(__dirname, '..', 'modules', 'Faturamento', 'public', 'index.html'));
+            res.sendFile(path.join(__dirname, '..', 'modules', 'Faturamento', 'public', 'dashboard.html'));
         } else {
             res.status(403).send('<h1>Acesso Negado</h1><p>Você não tem permissão para acessar o módulo de Faturamento.</p>');
         }

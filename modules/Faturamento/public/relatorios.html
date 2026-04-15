@@ -33,8 +33,6 @@
                 <a href="consultar.html" class="sidebar-btn" title="Consultar"><i class="fas fa-search"></i></a>
                 <a href="eventos.html" class="sidebar-btn" title="Eventos"><i class="fas fa-calendar-check"></i></a>
                 <a href="inutilizacao.html" class="sidebar-btn" title="Inutilização"><i class="fas fa-ban"></i></a>
-                <a href="regua.html" class="sidebar-btn" title="Régua Cobrança"><i class="fas fa-bell"></i></a>
-                <a href="pix.html" class="sidebar-btn" title="PIX"><i class="fas fa-qrcode"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <a href="relatorios.html" class="sidebar-btn active" title="Relatórios"><i
@@ -229,7 +227,7 @@
             <div style="display:flex;align-items:center;gap:12px;">
                 <button class="btn btn-secondary btn-sm" onclick="fecharPreview()"><i class="fas fa-arrow-left"></i>
                     Voltar</button>
-                <h3 id="preview-título" style="margin:0;color:#1e293b;font-size:16px;">Relatório</h3>
+                <h3 id="preview-titulo" style="margin:0;color:#1e293b;font-size:16px;">Relatório</h3>
             </div>
             <div style="display:flex;gap:8px;">
                 <button class="btn btn-outline btn-sm" onclick="exportarPDF()"><i class="fas fa-file-pdf"></i>
@@ -581,6 +579,390 @@ document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 
     document.getElementById('filtro-data-fim').value = hoje.toISOString().split('T')[0];
     document.getElementById('filtro-data-inicio').value = mesPassado.toISOString().split('T')[0];
     });
+    </script>
+    <script>
+        (function () {
+            const relatorioNomesSeguro = {
+                os_abertas: 'Ordens de Servico Abertas',
+                os_concluidas: 'OS Concluidas',
+                os_pendentes: 'OS Pendentes',
+                os_por_tecnico: 'OS por Tecnico',
+                os_faturamento: 'Faturamento OS',
+                contratos_ativos: 'Contratos Ativos',
+                contratos_vencer: 'Contratos a Vencer',
+                contratos_vencidos: 'Contratos Vencidos',
+                contratos_receita: 'Receita de Contratos',
+                contratos_clientes: 'Contratos por Cliente',
+                nfe_emitidas: 'NF-e Emitidas',
+                nfe_canceladas: 'NF-e Canceladas',
+                faturamento_mensal: 'Faturamento Mensal',
+                impostos: 'Resumo de Impostos',
+                faturamento_cliente: 'Faturamento por Cliente',
+                logistica: 'Relatorio de Logistica',
+                inadimplencia: 'Inadimplencia'
+            };
+
+            function tituloPreview() {
+                return document.getElementById('preview-titulo') || document.getElementById('preview-título');
+            }
+
+            function formatarMoedaSeguro(valor) {
+                return (Number(valor) || 0).toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                });
+            }
+
+            function escaparHtml(valor) {
+                return String(valor ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function montarCabecalhoRelatorio(titulo, di, df) {
+                const periodoInicio = di && di !== '-' ? new Date(di).toLocaleDateString('pt-BR') : '-';
+                const periodoFim = df && df !== '-' ? new Date(df).toLocaleDateString('pt-BR') : '-';
+
+                return `
+                    <div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:3px solid #1e40af;margin-bottom:20px;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:28px;filter:invert(1) brightness(0);" onerror="this.style.display='none'">
+                            <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;filter:invert(1) brightness(0);margin-left:6px;" onerror="this.style.display='none'">
+                            <div style="border-left:2px solid #e2e8f0;padding-left:12px;">
+                                <h2 style="margin:0;font-size:16px;color:#1e293b;font-weight:700;">ALUFORCE SISTEMAS</h2>
+                                <p style="margin:0;font-size:10px;color:#94a3b8;letter-spacing:1px;">ZYNTRA ERP - GESTAO EMPRESARIAL INTEGRADA</p>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <h3 style="margin:0;font-size:14px;color:#1e40af;font-weight:700;">${escaparHtml(titulo)}</h3>
+                            <p style="margin:2px 0 0;font-size:11px;color:#64748b;">Periodo: ${periodoInicio} a ${periodoFim}</p>
+                            <p style="margin:2px 0 0;font-size:10px;color:#94a3b8;">Emitido em: ${new Date().toLocaleString('pt-BR')}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            function montarTabelaNfe(lista, titulo, di, df) {
+                const totalValor = lista.reduce((soma, item) => soma + (Number(item.valor) || Number(item.valor_total) || 0), 0);
+                const tabelaStyle = 'width:100%;border-collapse:collapse;font-size:12px;';
+                const thStyle = 'padding:10px 8px;text-align:left;border-bottom:2px solid #cbd5e1;background:#f8fafc;color:#334155;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;';
+                const tdStyle = 'padding:8px;border-bottom:1px solid #f1f5f9;color:#475569;';
+                const tdRightStyle = 'padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;color:#475569;';
+
+                return (
+                    montarCabecalhoRelatorio(titulo, di, df) +
+                    `
+                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+                        <div style="background:#f0f9ff;padding:12px;border-radius:6px;text-align:center;border:1px solid #bae6fd;">
+                            <div style="font-size:22px;font-weight:700;color:#0369a1;">${lista.length}</div>
+                            <div style="font-size:11px;color:#64748b;">Total de Notas</div>
+                        </div>
+                        <div style="background:#f0fdf4;padding:12px;border-radius:6px;text-align:center;border:1px solid #bbf7d0;">
+                            <div style="font-size:22px;font-weight:700;color:#15803d;">${formatarMoedaSeguro(totalValor)}</div>
+                            <div style="font-size:11px;color:#64748b;">Valor Total</div>
+                        </div>
+                        <div style="background:#faf5ff;padding:12px;border-radius:6px;text-align:center;border:1px solid #e9d5ff;">
+                            <div style="font-size:22px;font-weight:700;color:#7e22ce;">${lista.length ? formatarMoedaSeguro(totalValor / lista.length) : 'R$ 0,00'}</div>
+                            <div style="font-size:11px;color:#64748b;">Ticket Medio</div>
+                        </div>
+                    </div>
+                    <table style="${tabelaStyle}">
+                        <thead>
+                            <tr>
+                                <th style="${thStyle}">Numero</th>
+                                <th style="${thStyle}">Serie</th>
+                                <th style="${thStyle}">Destinatario</th>
+                                <th style="${thStyle}">Data</th>
+                                <th style="${thStyle}">Status</th>
+                                <th style="${thStyle}text-align:right;">Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${lista.length ? lista.map((item) => `
+                                <tr>
+                                    <td style="${tdStyle}"><strong>${escaparHtml(item.numero || '-')}</strong></td>
+                                    <td style="${tdStyle}">${escaparHtml(item.serie || '1')}</td>
+                                    <td style="${tdStyle}">${escaparHtml(item.destinatario || item.cliente || '-')}</td>
+                                    <td style="${tdStyle}">${item.data_emissao ? new Date(item.data_emissao).toLocaleDateString('pt-BR') : '-'}</td>
+                                    <td style="${tdStyle}">${escaparHtml(item.status || '-')}</td>
+                                    <td style="${tdRightStyle}"><strong>${formatarMoedaSeguro(item.valor || item.valor_total)}</strong></td>
+                                </tr>
+                            `).join('') : '<tr><td colspan="6" style="padding:24px;text-align:center;color:#94a3b8;">Nenhum registro encontrado no periodo</td></tr>'}
+                        </tbody>
+                        <tfoot>
+                            <tr style="background:#f8fafc;font-weight:700;">
+                                <td colspan="5" style="padding:10px 8px;border-top:2px solid #cbd5e1;">Total: ${lista.length} nota(s)</td>
+                                <td style="padding:10px 8px;text-align:right;border-top:2px solid #cbd5e1;color:#1e40af;">${formatarMoedaSeguro(totalValor)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    `
+                );
+            }
+
+            async function carregarDadosRelatorioSeguro(tipo, titulo, di, df) {
+                const content = document.getElementById('preview-content');
+                if (!content) return;
+
+                const tabelaStyle = 'width:100%;border-collapse:collapse;font-size:12px;';
+                const thStyle = 'padding:10px 8px;text-align:left;border-bottom:2px solid #cbd5e1;background:#f8fafc;color:#334155;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:0.5px;';
+                const tdStyle = 'padding:8px;border-bottom:1px solid #f1f5f9;color:#475569;';
+                const tdRightStyle = 'padding:8px;border-bottom:1px solid #f1f5f9;text-align:right;color:#475569;';
+
+                try {
+                    if (['nfe_emitidas', 'nfe_canceladas', 'faturamento_mensal', 'faturamento_cliente', 'impostos'].includes(tipo)) {
+                        const params = new URLSearchParams();
+                        if (di && di !== '-') params.set('data_inicio', di);
+                        if (df && df !== '-') params.set('data_fim', df);
+                        const status = document.getElementById('filtro-status')?.value || '';
+                        if (tipo === 'nfe_canceladas') params.set('status', 'cancelada');
+                        else if (status) params.set('status', status);
+                        params.set('limite', '500');
+
+                        const response = await fetch('/api/faturamento/nfes?' + params.toString(), { credentials: 'include' });
+                        const data = response.ok ? await response.json() : [];
+                        const lista = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+
+                        if (tipo === 'nfe_emitidas' || tipo === 'nfe_canceladas') {
+                            content.innerHTML = montarTabelaNfe(lista, titulo, di, df);
+                            return;
+                        }
+
+                        if (tipo === 'faturamento_mensal') {
+                            const porMes = {};
+                            lista.forEach((item) => {
+                                const dataRef = item.data_emissao ? new Date(item.data_emissao) : new Date();
+                                const chave = dataRef.getFullYear() + '-' + String(dataRef.getMonth() + 1).padStart(2, '0');
+                                if (!porMes[chave]) porMes[chave] = { total: 0, qtd: 0 };
+                                porMes[chave].total += Number(item.valor) || Number(item.valor_total) || 0;
+                                porMes[chave].qtd += 1;
+                            });
+
+                            const meses = Object.keys(porMes).sort();
+                            const totalGeral = lista.reduce((soma, item) => soma + (Number(item.valor) || Number(item.valor_total) || 0), 0);
+                            const nomesMes = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+                            content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `
+                                <div style="background:#f0f9ff;padding:16px;border-radius:8px;text-align:center;margin-bottom:20px;border:1px solid #bae6fd;">
+                                    <div style="font-size:28px;font-weight:700;color:#0369a1;">${formatarMoedaSeguro(totalGeral)}</div>
+                                    <div style="font-size:12px;color:#64748b;">Faturamento Total no Periodo</div>
+                                </div>
+                                <table style="${tabelaStyle}">
+                                    <thead><tr><th style="${thStyle}">Mes/Ano</th><th style="${thStyle}text-align:right;">Qtd Notas</th><th style="${thStyle}text-align:right;">Valor Faturado</th></tr></thead>
+                                    <tbody>${meses.map((mes) => {
+                                        const [ano, indiceMes] = mes.split('-');
+                                        return `<tr><td style="${tdStyle}">${nomesMes[parseInt(indiceMes, 10)]}/${ano}</td><td style="${tdRightStyle}">${porMes[mes].qtd}</td><td style="${tdRightStyle}"><strong>${formatarMoedaSeguro(porMes[mes].total)}</strong></td></tr>`;
+                                    }).join('')}</tbody>
+                                </table>
+                            `;
+                            return;
+                        }
+
+                        if (tipo === 'faturamento_cliente') {
+                            const porCliente = {};
+                            lista.forEach((item) => {
+                                const cliente = item.destinatario || item.cliente || 'Nao informado';
+                                if (!porCliente[cliente]) porCliente[cliente] = { total: 0, qtd: 0 };
+                                porCliente[cliente].total += Number(item.valor) || Number(item.valor_total) || 0;
+                                porCliente[cliente].qtd += 1;
+                            });
+
+                            const clientes = Object.entries(porCliente).sort((a, b) => b[1].total - a[1].total);
+                            const totalGeral = lista.reduce((soma, item) => soma + (Number(item.valor) || Number(item.valor_total) || 0), 0);
+
+                            content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `
+                                <table style="${tabelaStyle}">
+                                    <thead><tr><th style="${thStyle}">#</th><th style="${thStyle}">Cliente</th><th style="${thStyle}text-align:right;">Notas</th><th style="${thStyle}text-align:right;">Valor</th><th style="${thStyle}text-align:right;">% do Total</th></tr></thead>
+                                    <tbody>${clientes.map(([nome, dados], indice) => `
+                                        <tr>
+                                            <td style="${tdStyle}">${indice + 1}</td>
+                                            <td style="${tdStyle}"><strong>${escaparHtml(nome)}</strong></td>
+                                            <td style="${tdRightStyle}">${dados.qtd}</td>
+                                            <td style="${tdRightStyle}"><strong>${formatarMoedaSeguro(dados.total)}</strong></td>
+                                            <td style="${tdRightStyle}">${totalGeral ? ((dados.total / totalGeral) * 100).toFixed(1) + '%' : '-'}</td>
+                                        </tr>
+                                    `).join('')}</tbody>
+                                </table>
+                            `;
+                            return;
+                        }
+
+                        content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `
+                            <div style="text-align:center;padding:32px;color:#64748b;">
+                                <i class="fas fa-percentage" style="font-size:40px;color:#cbd5e1;margin-bottom:12px;display:block;"></i>
+                                <p>Relatorio de impostos requer integracao com o modulo fiscal.</p>
+                                <p style="font-size:12px;">Total de notas no periodo: <strong>${lista.length}</strong></p>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    if (tipo === 'logistica') {
+                        const response = await fetch('/api/logistica/pedidos?limit=500', { credentials: 'include' });
+                        const data = response.ok ? await response.json() : [];
+                        const pedidos = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+
+                        content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `
+                            <table style="${tabelaStyle}">
+                                <thead><tr><th style="${thStyle}">Pedido</th><th style="${thStyle}">Cliente</th><th style="${thStyle}">Transportadora</th><th style="${thStyle}">Status</th><th style="${thStyle}">Previsao</th></tr></thead>
+                                <tbody>${pedidos.length ? pedidos.map((pedido) => `
+                                    <tr>
+                                        <td style="${tdStyle}">#${escaparHtml(pedido.pedido_id || pedido.id || '-')}</td>
+                                        <td style="${tdStyle}">${escaparHtml(pedido.cliente || '-')}</td>
+                                        <td style="${tdStyle}">${escaparHtml(pedido.transportadora || '-')}</td>
+                                        <td style="${tdStyle}">${escaparHtml(pedido.status || '-')}</td>
+                                        <td style="${tdStyle}">${pedido.previsao ? new Date(pedido.previsao).toLocaleDateString('pt-BR') : '-'}</td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="5" style="padding:24px;text-align:center;color:#94a3b8;">Nenhum registro encontrado</td></tr>'}</tbody>
+                            </table>
+                        `;
+                        return;
+                    }
+
+                    content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `
+                        <div style="text-align:center;padding:40px;color:#64748b;">
+                            <i class="fas fa-chart-pie" style="font-size:48px;color:#cbd5e1;margin-bottom:16px;display:block;"></i>
+                            <h3 style="margin:0 0 8px;color:#334155;">Relatorio em Desenvolvimento</h3>
+                            <p style="font-size:13px;">O relatorio <strong>${escaparHtml(titulo)}</strong> sera habilitado quando o modulo correspondente estiver integrado a API.</p>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('[Relatorios] Erro:', error);
+                    content.innerHTML = montarCabecalhoRelatorio(titulo, di, df) + `<div style="text-align:center;padding:24px;color:#ef4444;"><i class="fas fa-exclamation-triangle"></i> Erro ao carregar dados: ${escaparHtml(error.message)}</div>`;
+                }
+            }
+
+            window.toggleMobileSidebar = function toggleMobileSidebarSeguro() {
+                document.getElementById('mobile-sidebar')?.classList.toggle('open');
+                document.getElementById('sidebar-overlay')?.classList.toggle('active');
+            };
+
+            window.gerarRelatorio = function gerarRelatorioSeguro(tipo) {
+                const titulo = relatorioNomesSeguro[tipo] || tipo;
+                const preview = document.getElementById('report-preview');
+                const content = document.getElementById('preview-content');
+                const tituloEl = tituloPreview();
+                const dataInicio = document.getElementById('filtro-data-inicio')?.value || '-';
+                const dataFim = document.getElementById('filtro-data-fim')?.value || '-';
+
+                if (tituloEl) tituloEl.textContent = titulo;
+                if (content) {
+                    content.innerHTML = `
+                        <div style="text-align:center;padding:24px;">
+                            <i class="fas fa-spinner fa-spin" style="font-size:32px;color:#2563eb;"></i>
+                            <p style="margin-top:12px;color:#64748b;">Carregando dados...</p>
+                        </div>
+                    `;
+                }
+                preview?.classList.add('active');
+                carregarDadosRelatorioSeguro(tipo, titulo, dataInicio, dataFim);
+            };
+
+            window.fecharPreview = function fecharPreviewSeguro() {
+                document.getElementById('report-preview')?.classList.remove('active');
+            };
+
+            window.exportarExcel = function exportarExcelSeguro() {
+                if (typeof XLSX === 'undefined') {
+                    alert('Biblioteca XLSX nao carregada.');
+                    return;
+                }
+
+                const content = document.getElementById('preview-content');
+                const tables = content ? content.querySelectorAll('table') : [];
+                if (!tables.length) {
+                    alert('Nenhuma tabela para exportar');
+                    return;
+                }
+
+                const titulo = tituloPreview()?.textContent || 'Relatorio';
+                const wb = XLSX.utils.book_new();
+                tables.forEach((table, index) => {
+                    const ws = XLSX.utils.table_to_sheet(table, { raw: false });
+                    XLSX.utils.book_append_sheet(wb, ws, 'Dados' + (tables.length > 1 ? '_' + (index + 1) : ''));
+                });
+                XLSX.writeFile(wb, 'relatorio_' + titulo.replace(/[^a-zA-Z0-9]/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+            };
+
+            window.exportarPDF = function exportarPDFSeguro() {
+                window.imprimirRelatorioProfissional();
+            };
+
+            window.imprimirRelatorioProfissional = function imprimirRelatorioProfissionalSeguro() {
+                const content = document.getElementById('preview-content')?.innerHTML || '';
+                const titulo = tituloPreview()?.textContent || 'Relatorio';
+                const printWindow = window.open('', '_blank');
+                if (!printWindow) return;
+
+                printWindow.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo} - Zyntra ERP</title><style>
+                    * { margin:0; padding:0; box-sizing:border-box; }
+                    body { font-family: Inter, Arial, sans-serif; padding:15mm; color:#1e293b; font-size:11px; line-height:1.5; }
+                    table { width:100%; border-collapse:collapse; font-size:11px; margin-top:16px; }
+                    th { background:#1e40af; color:#fff; padding:7px 8px; text-align:left; font-size:10px; }
+                    td { padding:6px 8px; border-bottom:1px solid #f1f5f9; }
+                    tr:nth-child(even) td { background:#f8fafc; }
+                    @page { margin:8mm; size:A4 portrait; }
+                </style></head><body>${content}</body></html>`);
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 400);
+            };
+
+            window.carregarDadosUsuario = function carregarDadosUsuarioSeguro() {
+                const hour = new Date().getHours();
+                const greeting = hour < 12 ? 'Bom dia' : (hour < 18 ? 'Boa tarde' : 'Boa noite');
+                const greetingEl = document.getElementById('greeting-text');
+                if (greetingEl) greetingEl.textContent = greeting;
+
+                fetch('/api/me', { credentials: 'include' })
+                    .then((response) => {
+                        if (!response.ok) throw new Error(String(response.status));
+                        return response.json();
+                    })
+                    .then((user) => {
+                        const nome = user.nome || user.name || 'Usuario';
+                        const nomeCurto = nome.split(' ')[0];
+                        const userNameEl = document.getElementById('user-name');
+                        const userInitialsEl = document.getElementById('user-initials');
+                        const userPhotoEl = document.getElementById('user-photo');
+
+                        if (userNameEl) userNameEl.textContent = nomeCurto;
+                        if (userInitialsEl) userInitialsEl.textContent = nomeCurto.substring(0, 2).toUpperCase();
+
+                        if ((user.foto || user.avatar) && userPhotoEl && userInitialsEl) {
+                            userPhotoEl.src = user.foto || user.avatar;
+                            userPhotoEl.style.display = 'block';
+                            userInitialsEl.style.display = 'none';
+                        }
+                    })
+                    .catch((error) => {
+                        console.warn('Erro ao carregar usuario:', error);
+                    });
+            };
+
+            function inicializarRelatoriosSeguro() {
+                window.carregarDadosUsuario();
+                const hoje = new Date();
+                const mesPassado = new Date(hoje);
+                mesPassado.setMonth(mesPassado.getMonth() - 1);
+
+                const dataFim = document.getElementById('filtro-data-fim');
+                const dataInicio = document.getElementById('filtro-data-inicio');
+                if (dataFim && !dataFim.value) dataFim.value = hoje.toISOString().split('T')[0];
+                if (dataInicio && !dataInicio.value) dataInicio.value = mesPassado.toISOString().split('T')[0];
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', inicializarRelatoriosSeguro, { once: true });
+            } else {
+                inicializarRelatoriosSeguro();
+            }
+        })();
     </script>
     <script src="/js/tooltips-professional.js?v=20260209"></script>
     <script src="/js/mobile-auto-enhance.js?v=20260202" defer></script>

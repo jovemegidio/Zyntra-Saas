@@ -166,6 +166,10 @@ module.exports = function createLogisticaRoutes(deps) {
                 previsao: row.data_prevista || row.prazo_entrega || '-',
                 prioridade: row.prioridade || 'normal',
                 valor: row.valor,
+                frete: row.frete || null,
+                descricao: row.descricao || null,
+                data_pedido: row.created_at || null,
+                data_faturamento: row.faturado_em || null,
                 observacao: row.observacao
             }));
     

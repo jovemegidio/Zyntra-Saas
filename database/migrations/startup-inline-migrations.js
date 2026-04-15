@@ -147,6 +147,14 @@ async function runInlineMigrations(pool) {
     }
 
     // ============================================================
+    // Comissão percentual por vendedor (default 1%)
+    // ============================================================
+    try {
+        await pool.query('ALTER TABLE usuarios ADD COLUMN comissao_percentual DECIMAL(5,2) DEFAULT 1.0');
+        console.log('✅ Coluna comissao_percentual adicionada a usuarios');
+    } catch (e) { /* already exists */ }
+
+    // ============================================================
     // Seed funcionarios (example + admin + test users)
     // ============================================================
     try {
