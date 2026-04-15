@@ -1,4 +1,4 @@
-ï»¿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: RecorrÃªncias</title>
+    <title>Zyntra: Recorrências</title>
     <link rel="icon" type="image/jpeg" href="/favicon-zyntra.jpg">
     
     <script src="/js/auth-unified.js?v=20260326" defer></script>
@@ -108,7 +108,7 @@
     <link rel="stylesheet" href="css/fin-counter-standard.css?v=20260313">
     <link rel="stylesheet" href="css/fin-header-sidebar.css?v=20260211">
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260320">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
 </head>
 <body>
@@ -121,9 +121,9 @@
                 <a href="contas-pagar.html" class="sidebar-btn" title="Contas a Pagar"><i class="fas fa-file-invoice-dollar"></i></a>
                 <a href="contas-receber.html" class="sidebar-btn" title="Contas a Receber"><i class="fas fa-hand-holding-usd"></i></a>
                 <a href="bancos.html" class="sidebar-btn" title="Bancos"><i class="fas fa-university"></i></a>
-                <a href="recorrencias.html" class="sidebar-btn active" title="RecorrÃªncias"><i class="fas fa-redo"></i></a>
-                <a href="conciliacao.html" class="sidebar-btn" title="ConciliaÃ§Ã£o"><i class="fas fa-balance-scale"></i></a>
-                <a href="relatorios.html" class="sidebar-btn" title="RelatÃ³rios"><i class="fas fa-chart-bar"></i></a>
+                <a href="recorrencias.html" class="sidebar-btn active" title="Recorrências"><i class="fas fa-redo"></i></a>
+                <a href="conciliacao.html" class="sidebar-btn" title="Conciliação"><i class="fas fa-balance-scale"></i></a>
+                <a href="relatorios.html" class="sidebar-btn" title="Relatórios"><i class="fas fa-chart-bar"></i></a>
             </nav>
             <div class="sidebar-bottom">
                 <!-- [DEV SPEC 2.1] Centro de Custos oculto -->
@@ -139,21 +139,21 @@
                         <img src="/images/Logo Monocromatico - Branco - Aluforce.png" alt="ALUFORCE" style="height:22px;object-fit:contain;">
                         <span style="color:rgba(255,255,255,0.2);font-weight:300;font-size:18px;">|</span>
                         <img src="/images/zyntra-branco.png" alt="Zyntra" style="height:22px;object-fit:contain;">
-                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;margin-left:6px;">RecorrÃªncias</span>
+                        <span style="font-size:13px;font-weight:500;color:rgba(255,255,255,0.85);letter-spacing:0.3px;margin-left:6px;">Recorrências</span>
                     </div>
                 </div>
                 <div class="header-right">
                     <button class="header-btn" title="Atualizar" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
                     <div class="user-greeting">
-                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">UsuÃ¡rio</strong></span>
+                        <span><span id="greeting-text">Bom dia</span>, <strong id="user-name">Usuário</strong></span>
                     </div>
                 </div>
             </header>
             <div class="main-content">
                 <div class="page-content">
                     <div style="display:flex; justify-content:flex-end; gap:10px; margin-bottom:16px;">
-                        <button class="btn-processar" onclick="processarPendentes()" title="Gera os lanÃ§amentos de todas as recorrÃªncias vencidas"><i class="fas fa-play-circle"></i> Processar Pendentes</button>
-                        <button class="btn btn-primary" onclick="abrirModalCriar()"><i class="fas fa-plus"></i> Nova RecorrÃªncia</button>
+                        <button class="btn-processar" onclick="processarPendentes()" title="Gera os lançamentos de todas as recorrências vencidas"><i class="fas fa-play-circle"></i> Processar Pendentes</button>
+                        <button class="btn btn-primary" onclick="abrirModalCriar()"><i class="fas fa-plus"></i> Nova Recorrência</button>
                     </div>
 
                     <div class="kpi-grid">
@@ -163,21 +163,21 @@
                         </div>
                         <div class="kpi-card accent-red">
                             <div class="kpi-header"><div class="kpi-icon red"><i class="fas fa-arrow-up"></i></div></div>
-                            <div class="kpi-content"><h3>A Pagar / mÃªs</h3><div class="kpi-value" id="kpi-pagar">R$ 0</div><div class="kpi-sub">despesas recorrentes</div></div>
+                            <div class="kpi-content"><h3>A Pagar / mês</h3><div class="kpi-value" id="kpi-pagar">R$ 0</div><div class="kpi-sub">despesas recorrentes</div></div>
                         </div>
                         <div class="kpi-card accent-green">
                             <div class="kpi-header"><div class="kpi-icon green"><i class="fas fa-arrow-down"></i></div></div>
-                            <div class="kpi-content"><h3>A Receber / mÃªs</h3><div class="kpi-value" id="kpi-receber">R$ 0</div><div class="kpi-sub">receitas recorrentes</div></div>
+                            <div class="kpi-content"><h3>A Receber / mês</h3><div class="kpi-value" id="kpi-receber">R$ 0</div><div class="kpi-sub">receitas recorrentes</div></div>
                         </div>
                         <div class="kpi-card accent-orange">
                             <div class="kpi-header"><div class="kpi-icon orange"><i class="fas fa-clock"></i></div></div>
-                            <div class="kpi-content"><h3>PrÃ³ximos 7 dias</h3><div class="kpi-value" id="kpi-proximas">0</div><div class="kpi-sub">vencimentos</div></div>
+                            <div class="kpi-content"><h3>Próximos 7 dias</h3><div class="kpi-value" id="kpi-proximas">0</div><div class="kpi-sub">vencimentos</div></div>
                         </div>
                     </div>
 
                     <div class="alert-info">
                         <i class="fas fa-info-circle"></i>
-                        <div><strong>Processamento automÃ¡tico:</strong> Clique em "Processar Pendentes" para gerar lanÃ§amentos de todas as recorrÃªncias com prÃ³ximo vencimento jÃ¡ passado. Cada recorrÃªncia gerarÃ¡ um Conta a Pagar ou Conta a Receber automaticamente.</div>
+                        <div><strong>Processamento automático:</strong> Clique em "Processar Pendentes" para gerar lançamentos de todas as recorrências com próximo vencimento já passado. Cada recorrência gerará um Conta a Pagar ou Conta a Receber automaticamente.</div>
                     </div>
 
                     <div class="filters-bar">
@@ -198,23 +198,23 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <h3><i class="fas fa-list"></i> RecorrÃªncias Cadastradas</h3>
+                            <h3><i class="fas fa-list"></i> Recorrências Cadastradas</h3>
                             <span id="count-rec" style="font-size:13px;color:var(--text-secondary)">0 registros</span>
                         </div>
                         <div style="padding: 0 20px;">
                             <div class="fp-search-bar">
                                 <div class="fp-search-wrap">
                                     <i class="fas fa-search"></i>
-                                    <input type="text" id="fp-search-rec" placeholder="Pesquisar por descriÃ§Ã£o, fornecedor, tipo..." oninput="window._finPg['fp-pg-rec'].search(this.value)">
+                                    <input type="text" id="fp-search-rec" placeholder="Pesquisar por descrição, fornecedor, tipo..." oninput="window._finPg['fp-pg-rec'].search(this.value)">
                                 </div>
                                 <span class="fp-count" id="fp-info-rec"></span>
                             </div>
                         </div>
                         <div style="overflow-x:auto">
                             <table class="data-table">
-                                <thead><tr><th>DescriÃ§Ã£o</th><th>Tipo</th><th>Valor</th><th>FrequÃªncia</th><th>Dia Venc.</th><th>PrÃ³ximo Venc.</th><th>Geradas</th><th>Status</th><th style="width:100px">AÃ§Ãµes</th></tr></thead>
+                                <thead><tr><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Frequência</th><th>Dia Venc.</th><th>Próximo Venc.</th><th>Geradas</th><th>Status</th><th style="width:100px">Ações</th></tr></thead>
                                 <tbody id="tbody-rec">
-                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrÃªncia</h4><p>Crie sua primeira recorrÃªncia clicando no botÃ£o acima</p></div></td></tr>
+                                    <tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência</h4><p>Crie sua primeira recorrência clicando no botão acima</p></div></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -229,7 +229,7 @@
     <div class="modal-overlay" id="modal-criar">
         <div class="modal">
             <div class="modal-header">
-                <h2 id="modal-tÃ­tulo"><i class="fas fa-redo"></i> Nova RecorrÃªncia</h2>
+                <h2 id="modal-título"><i class="fas fa-redo"></i> Nova Recorrência</h2>
                 <button class="modal-close" onclick="fecharModal('modal-criar')"><i class="fas fa-times"></i></button>
             </div>
             <div class="modal-body">
@@ -237,7 +237,7 @@
                 <div class="form-section">
                     <h4><i class="fas fa-info-circle"></i> Dados Gerais</h4>
                     <div class="form-grid">
-                        <div class="form-group full"><label><i class="fas fa-tag"></i> DescriÃ§Ã£o <span class="req">*</span></label><input type="text" id="rec-descriÃ§Ã£o" placeholder="Ex: Aluguel do galpÃ£o, Mensalidade cliente X"></div>
+                        <div class="form-group full"><label><i class="fas fa-tag"></i> Descrição <span class="req">*</span></label><input type="text" id="rec-descrição" placeholder="Ex: Aluguel do galpão, Mensalidade cliente X"></div>
                         <div class="form-group"><label><i class="fas fa-exchange-alt"></i> Tipo <span class="req">*</span></label>
                             <select id="rec-tipo"><option value="pagar">A Pagar (despesa)</option><option value="receber">A Receber (receita)</option></select>
                         </div>
@@ -247,7 +247,7 @@
                 <div class="form-section">
                     <h4><i class="fas fa-calendar-alt"></i> Periodicidade</h4>
                     <div class="form-grid">
-                        <div class="form-group"><label><i class="fas fa-sync"></i> FrequÃªncia <span class="req">*</span></label>
+                        <div class="form-group"><label><i class="fas fa-sync"></i> Frequência <span class="req">*</span></label>
                             <select id="rec-frequencia">
                                 <option value="semanal">Semanal</option>
                                 <option value="quinzenal">Quinzenal</option>
@@ -259,7 +259,7 @@
                             </select>
                         </div>
                         <div class="form-group"><label><i class="fas fa-calendar-day"></i> Dia Vencimento</label><input type="number" id="rec-dia" min="1" max="31" value="1" placeholder="1-31"></div>
-                        <div class="form-group"><label><i class="fas fa-play"></i> Data InÃ­cio</label><input type="date" id="rec-inicio"></div>
+                        <div class="form-group"><label><i class="fas fa-play"></i> Data Início</label><input type="date" id="rec-inicio"></div>
                         <div class="form-group"><label><i class="fas fa-stop"></i> Data Fim (opcional)</label><input type="date" id="rec-fim"></div>
                     </div>
                 </div>
@@ -288,17 +288,17 @@
         const freqLabels = { semanal:'Semanal', quinzenal:'Quinzenal', mensal:'Mensal', bimestral:'Bimestral', trimestral:'Trimestral', semestral:'Semestral', anual:'Anual' };
         const freqIcons = { semanal:'fa-calendar-week', quinzenal:'fa-calendar-check', mensal:'fa-calendar', bimestral:'fa-calendar-plus', trimestral:'fa-calendar-alt', semestral:'fa-calendar-minus', anual:'fa-calendar-day' };
 
-        let recorrÃªncias = [];
+        let recorrências = [];
 
-        // PaginaÃ§Ã£o
+        // Paginação
         const pgRec = new FinPagination({
             containerId: 'fp-pg-rec',
             searchId: 'fp-search-rec',
             infoId: 'fp-info-rec',
             perPage: 30,
-            getData: () => recorrÃªncias,
+            getData: () => recorrências,
             searchFields: [
-                r => r.descriÃ§Ã£o,
+                r => r.descrição,
                 r => r.fornecedor_cliente,
                 r => r.tipo,
                 r => r.frequencia,
@@ -307,7 +307,7 @@
             renderRows: (pageData, allFiltered) => {
                 const tb = document.getElementById('tbody-rec');
                 if (allFiltered.length === 0) {
-                    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrÃªncia encontrada</h4></div></td></tr>';
+                    tb.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-redo"></i><h4>Nenhuma recorrência encontrada</h4></div></td></tr>';
                     return;
                 }
                 tb.innerHTML = pageData.map(r => {
@@ -315,7 +315,7 @@
                     const isVencido = proxDate && proxDate < new Date();
                     return `
                     <tr>
-                        <td><strong>${r.descriÃ§Ã£o}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
+                        <td><strong>${r.descrição}</strong>${r.fornecedor_cliente ? `<br><small style="color:var(--text-secondary)">${r.fornecedor_cliente}</small>` : ''}</td>
                         <td><span class="badge badge-${r.tipo}">${r.tipo === 'pagar' ? '\u2B07 Pagar' : '\u2B06 Receber'}</span></td>
                         <td class="valor" style="color:${r.tipo === 'pagar' ? 'var(--danger)' : 'var(--success)'}">${fmtMoeda(r.valor)}</td>
                         <td><span class="freq-badge"><i class="fas ${freqIcons[r.frequencia]||'fa-calendar'}"></i> ${freqLabels[r.frequencia]||r.frequencia}</span></td>
@@ -356,14 +356,14 @@
                 if (ativo) url += `ativo=${ativo}&`;
                 const r = await fetch(url, { credentials: 'include', headers: hdrs() });
                 const data = await r.json();
-                recorrÃªncias = data.data || [];
+                recorrências = data.data || [];
                 renderizar();
                 atualizarKPIs();
             } catch (e) { console.error('Erro:', e); }
         }
 
         function atualizarKPIs() {
-            const ativas = recorrÃªncias.filter(r => r.ativo == 1);
+            const ativas = recorrências.filter(r => r.ativo == 1);
             document.getElementById('kpi-ativas').textContent = ativas.length;
             const pagar = ativas.filter(r => r.tipo === 'pagar').reduce((s, r) => s + Number(r.valor), 0);
             document.getElementById('kpi-pagar').textContent = fmtMoeda(pagar);
@@ -383,7 +383,7 @@
         }
 
         function abrirModalCriar() {
-            document.getElementById('modal-tÃ­tulo').innerHTML = '<i class="fas fa-redo"></i> Nova RecorrÃªncia';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-redo"></i> Nova Recorrência';
             document.getElementById('rec-id').value = '';
             document.querySelectorAll('#modal-criar input[type="text"], #modal-criar input[type="number"]').forEach(el => el.value = '');
             document.getElementById('rec-tipo').value = 'pagar';
@@ -395,11 +395,11 @@
         }
 
         function editarRecorrencia(id) {
-            const r = recorrÃªncias.find(x => x.id === id);
+            const r = recorrências.find(x => x.id === id);
             if (!r) return;
-            document.getElementById('modal-tÃ­tulo').innerHTML = '<i class="fas fa-pen"></i> Editar RecorrÃªncia';
+            document.getElementById('modal-título').innerHTML = '<i class="fas fa-pen"></i> Editar Recorrência';
             document.getElementById('rec-id').value = r.id;
-            document.getElementById('rec-descriÃ§Ã£o').value = r.descriÃ§Ã£o || '';
+            document.getElementById('rec-descrição').value = r.descrição || '';
             document.getElementById('rec-tipo').value = r.tipo || 'pagar';
             document.getElementById('rec-valor').value = r.valor || '';
             document.getElementById('rec-frequencia').value = r.frequencia || 'mensal';
@@ -414,7 +414,7 @@
         async function salvarRecorrencia() {
             const id = document.getElementById('rec-id').value;
             const payload = {
-                descriÃ§Ã£o: document.getElementById('rec-descriÃ§Ã£o').value,
+                descrição: document.getElementById('rec-descrição').value,
                 tipo: document.getElementById('rec-tipo').value,
                 valor: parseFloat(document.getElementById('rec-valor').value),
                 frequencia: document.getElementById('rec-frequencia').value,
@@ -424,8 +424,8 @@
                 fornecedor_cliente: document.getElementById('rec-entidade').value,
                 categoria: document.getElementById('rec-categoria').value
             };
-            if (!payload.descriÃ§Ã£o || !payload.valor) {
-                mostrarToast('Preencha descriÃ§Ã£o e valor', 'warning'); return;
+            if (!payload.descrição || !payload.valor) {
+                mostrarToast('Preencha descrição e valor', 'warning'); return;
             }
             try {
                 const url = id ? `${API}/transacoes-recorrentes/${id}` : `${API}/transacoes-recorrentes`;
@@ -433,33 +433,33 @@
                 const r = await fetch(url, { method, headers: hdrs(), body: JSON.stringify(payload) });
                 const data = await r.json();
                 if (data.success) {
-                    mostrarToast(id ? 'RecorrÃªncia atualizada!' : 'RecorrÃªncia criada!', 'success');
+                    mostrarToast(id ? 'Recorrência atualizada!' : 'Recorrência criada!', 'success');
                     fecharModal('modal-criar');
                     carregarRecorrencias();
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
-            } catch (e) { mostrarToast('Erro de conexÃ£o', 'error'); }
+            } catch (e) { mostrarToast('Erro de conexão', 'error'); }
         }
 
         async function excluirRecorrencia(id) {
-            if (!confirm('Deseja desativar esta recorrÃªncia?')) return;
+            if (!confirm('Deseja desativar esta recorrência?')) return;
             try {
                 const r = await fetch(`${API}/transacoes-recorrentes/${id}`, { credentials: 'include', method: 'DELETE', headers: hdrs() });
                 const data = await r.json();
-                if (data.success) { mostrarToast('RecorrÃªncia desativada', 'success'); carregarRecorrencias(); }
+                if (data.success) { mostrarToast('Recorrência desativada', 'success'); carregarRecorrencias(); }
             } catch (e) { mostrarToast('Erro', 'error'); }
         }
 
         async function processarPendentes() {
-            if (!confirm('Isso gerarÃ¡ lanÃ§amentos (Contas a Pagar/Receber) para todas as recorrÃªncias com vencimento passado.\n\nDeseja continuar?')) return;
+            if (!confirm('Isso gerará lançamentos (Contas a Pagar/Receber) para todas as recorrências com vencimento passado.\n\nDeseja continuar?')) return;
             try {
                 const r = await fetch(`${API}/transacoes-recorrentes/processar`, { credentials: 'include', method: 'POST', headers: hdrs() });
                 const data = await r.json();
                 if (data.success) {
                     const total = data.processados || 0;
                     if (total > 0) {
-                        mostrarToast(`${total} lanÃ§amento(s) gerado(s) com sucesso!`, 'success');
+                        mostrarToast(`${total} lançamento(s) gerado(s) com sucesso!`, 'success');
                     } else {
-                        mostrarToast('Nenhuma recorrÃªncia pendente para processar', 'info');
+                        mostrarToast('Nenhuma recorrência pendente para processar', 'info');
                     }
                     carregarRecorrencias();
                 } else { mostrarToast(data.message || 'Erro', 'error'); }
@@ -473,7 +473,7 @@
                 const r = await fetch('/api/me', { credentials: 'include' });
                 if (r.ok) {
                     const u = await r.json();
-                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'UsuÃ¡rio');
+                    const nome = u.apelido || (u.nome ? u.nome.split(' ')[0] : 'Usuário');
                     const h = new Date().getHours();
                     document.getElementById('greeting-text').textContent = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
                     document.getElementById('user-name').textContent = (nome || '').split(' ')[0];

@@ -10,7 +10,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Zyntra: Dashboard Financeiro</title>
+    <title>Zyntra: Dashboard</title>
 <script>if(location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'){console.log=function(){}}</script>
 
     <!-- Autenticação -->
@@ -60,8 +60,161 @@
 
     <!-- Estilos específicos desta página -->
     <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
         /* Cards de resumo - padrão Compras */
 
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .metric-card {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        }
+
+        .metric-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            border-radius: 20px 20px 0 0;
+            background: #cbd5e1;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10);
+            border-color: #dbe3ef;
+        }
+
+        .metric-card.green::before {
+            background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+        }
+
+        .metric-card.red::before {
+            background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .metric-card.blue::before {
+            background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+        }
+
+        .metric-icon.green {
+            background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+            color: #15803d;
+        }
+
+        .metric-icon.red {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #dc2626;
+        }
+
+        .metric-icon.blue {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            color: #2563eb;
+        }
+
+        .metric-trend {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 72px;
+            min-height: 30px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .metric-trend.up {
+            background: #ecfdf5;
+            border-color: #bbf7d0;
+            color: #15803d;
+        }
+
+        .metric-trend.down {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #dc2626;
+        }
+
+        .metric-trend.neutral {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #64748b;
+        }
+
+        .metric-value {
+            margin-bottom: 6px;
+            color: #0f172a;
+            font-size: clamp(28px, 2.4vw, 34px);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -0.04em;
+        }
+
+        .metric-value.negative {
+            color: #dc2626;
+        }
+
+        .metric-label {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        @media (max-width: 1200px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card {
+                padding: 20px;
+            }
+        }
 
         /* Chart */
         .chart-container {
@@ -431,6 +584,215 @@
             color: #64748b;
             font-size: 14px;
             margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .modal-omie {
+            width: min(760px, calc(100vw - 32px));
+            max-width: calc(100vw - 32px);
+        }
+
+        .modal-omie--sm {
+            width: min(760px, calc(100vw - 32px));
+        }
+
+        .modal-omie-body {
+            background:
+                radial-gradient(circle at top right, rgba(59, 130, 246, 0.08), transparent 28%),
+                linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+
+        .opcao-card {
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 14px;
+            border: 1px solid #dbe3ef;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+        }
+
+        .opcao-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 0 auto 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .opcao-card--clickable {
+            cursor: pointer;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+        }
+
+        .opcao-card--clickable:hover {
+            transform: translateY(-3px);
+            border-color: #93c5fd;
+            box-shadow: 0 18px 34px rgba(37, 99, 235, 0.10);
+        }
+
+        .opcao-card:hover::before,
+        .opcao-card--clickable:hover::before {
+            opacity: 1;
+        }
+
+        .opcao-card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 18px 0;
+            border-bottom: none;
+            color: #0f172a;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .opcao-card-body {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+            padding: 14px 18px 18px;
+        }
+
+        .opcao-card-left {
+            flex: 1;
+        }
+
+        .opcao-card-left p {
+            color: #475569;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .opcao-card-right {
+            flex: 0 0 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            align-self: stretch;
+            border-left: 1px solid #e2e8f0;
+            padding-left: 18px;
+        }
+
+        .icon-wrapper {
+            width: 100%;
+            min-height: 86px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(239, 246, 255, 0.95) 0%, rgba(248, 250, 252, 0.9) 100%);
+        }
+
+        .icon-label {
+            font-size: 11px;
+            color: #2563eb;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .opcao-pesquisas-info {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 3px;
+            margin-bottom: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+            border: 1px solid #bfdbfe;
+            font-size: 12px;
+            color: #1e3a8a;
+        }
+
+        .opcao-pesquisas-info a {
+            color: #2563eb;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .opcao-pesquisas-info a:hover {
+            text-decoration: underline;
+        }
+
+        .opcao-card-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .opcao-card-input input {
+            flex: 1;
+            min-height: 46px;
+            padding: 0 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: #ffffff;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+            font-size: 13px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .opcao-card-input input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.12);
+        }
+
+        .opcao-card-input button {
+            min-width: 48px;
+            min-height: 46px;
+            padding: 0 16px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 12px 20px rgba(37, 99, 235, 0.20);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .opcao-card-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 28px rgba(37, 99, 235, 0.28);
+            filter: brightness(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .modal-omie-header {
+                padding: 18px 20px;
+            }
+
+            .modal-omie-body {
+                padding: 20px;
+            }
+
+            .opcao-card-body {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .opcao-card-right {
+                width: 100%;
+                flex: 1 1 auto;
+                border-left: none;
+                border-top: 1px solid #e2e8f0;
+                padding: 14px 0 0;
+            }
+
+            .icon-wrapper {
+                min-height: 76px;
+            }
+
+            .opcao-card-input {
+                width: 100%;
+            }
         }
 
         /* Opção cards */
@@ -1193,7 +1555,7 @@
     <link rel="stylesheet" href="/css/global-header-sidebar.css?v=20260216">
     <!-- Chat Widget BOB AI -->
     <link rel="stylesheet" href="/chat/widget.css?v=20260218">
-    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260326">
+    <link rel="stylesheet" href="/css/counter-global-standard.css?v=20260414">
     <link rel="stylesheet" href="/css/modal-standard-compat.css?v=20260614">
 </head>
 
@@ -1530,7 +1892,7 @@
                 }
                 return await response.json();
             } catch (error) {
-                console.warn(`[Dashboard Financeiro] Falha ao carregar ${url}:`, error.message);
+                console.warn(`[Dashboard] Falha ao carregar ${url}:`, error.message);
                 return fallback;
             }
         }
