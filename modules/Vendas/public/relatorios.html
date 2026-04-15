@@ -837,9 +837,6 @@
                 </button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações">
-                    <i class="fas fa-cog"></i>
-                </button>
             </div>
         </aside>
 
@@ -2356,13 +2353,16 @@
                 console.log('?? Carregando dados de múltiplas APIs...');
                 console.time('Carregamento Relatório');
 
+                // Montar parâmetro de vendedor
+                const vendedorParam = vendedor ? `&vendedor_id=${vendedor}` : '';
+
                 // Executar todas as chamadas em paralelo
                 const [adminRes, vendedoresRes, topVendRes, topProdRes, monthlyRes] = await Promise.allSettled([
-                    fetchAutenticado(`/api/vendas/dashboard/admin?periodo=${diffDays}`),
+                    fetchAutenticado(`/api/vendas/dashboard-stats?periodo=${diffDays}${vendedorParam}`),
                     fetchAutenticado('/api/vendas/vendedores'),
-                    fetchAutenticado(`/api/vendas/dashboard/top-vendedores?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10`),
-                    fetchAutenticado(`/api/vendas/dashboard/top-produtos?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10`),
-                    fetchAutenticado('/api/vendas/dashboard/monthly?months=6')
+                    fetchAutenticado(`/api/vendas/dashboard/top-vendedores?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10${vendedorParam}`),
+                    fetchAutenticado(`/api/vendas/dashboard/top-produtos?data_inicio=${dataInicio}&data_fim=${dataFim}&limit=10${vendedorParam}`),
+                    fetchAutenticado(`/api/vendas/dashboard/monthly?months=6${vendedorParam}`)
                 ]);
 
                 console.timeEnd('Carregamento Relatório');
@@ -2377,7 +2377,7 @@
                     // Fallback: tentar dashboard-stats
                     console.warn('?? dashboard/admin falhou, tentando fallback...');
                     try {
-                        const fallback = await fetchAutenticado('/api/vendas/dashboard-stats');
+                        const fallback = await fetchAutenticado(`/api/vendas/dashboard-stats${vendedorParam ? '?' + vendedorParam.substring(1) : ''}`);
                         if (fallback.ok) {
                             const fb = await fallback.json();
                             statsData = {

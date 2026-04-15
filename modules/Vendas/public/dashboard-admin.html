@@ -1058,9 +1058,6 @@
                 </button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações">
-                    <i class="fas fa-cog"></i>
-                </button>
             </div>
         </aside>
 
@@ -1305,28 +1302,6 @@
                         </div>
                     </div>
 
-                    <!-- Relatório de Ligações (Ramais) -->
-                    <div class="section-card full-width-section">
-                        <div class="section-header">
-                            <h3><i class="fas fa-phone-alt"></i> Relatório de Ligações (Ramais)</h3>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <span class="ligacoes-online-badge" id="ligacoesOnlineBadge" style="display:none;">
-                                    <span class="pulse"></span>
-                                    <span id="ligacoesOnlineCount">0</span> em andamento
-                                </span>
-                                <button class="btn-secondary" onclick="carregarLigacoes()" title="Atualizar">
-                                    <i class="fas fa-sync-alt"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="section-content" id="ligacoesContent">
-                            <!-- Carregado via JS -->
-                            <div class="ligacoes-api-msg" id="ligacoesLoading">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <p>Verificando conexão com PABX...</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </main>
@@ -1848,7 +1823,7 @@
                 }
 
                 container.innerHTML = pedidos.map(p => {
-                    const cliente = p.cliente || p.empresa_nome || p.nome_fantasia || p.razao_social || 'Cliente';
+                    const cliente = p.cliente_nome || p.cliente || p.empresa_nome || p.nome_fantasia || 'Cliente';
                     const vendedor = p.vendedor_nome || p.vendedor || p.created_by_nome || 'Vendedor';
                     const tempo = formatarTempoRelativo(p.created_at || p.data);
                     const valor = parseFloat(p.valor) || parseFloat(p.valor_total) || 0;

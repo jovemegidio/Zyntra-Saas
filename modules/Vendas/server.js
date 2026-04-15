@@ -58,6 +58,9 @@ app.use(cors(corsOptions));
 app.use(generalLimiter);
 app.use(sanitizeInput);
 
+// Serve shared assets from root _shared directory
+app.use('/_shared', express.static(path.join(__dirname, '../../_shared'), { dotfiles: 'deny', index: false }));
+
 // Serve static frontend assets (must be before API routes and catch-all)
 app.use(express.static(path.join(__dirname, 'public'), {
     extensions: ['html', 'htm'],
@@ -505,11 +508,20 @@ apiVendasRouter.get('/kanban/pedidos', authenticateToken, async (req, res) => {
         let whereConditions = [];
         let queryParams = [];
 
-        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos (supervisores veem todos)
+        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos + vinculados (supervisores veem todos)
         const isSupervisor = isKanbanSupervisor(currentUser);
         if (currentUser && !isAdmin && !isSupervisor) {
-            whereConditions.push('p.vendedor_id = ?');
-            queryParams.push(currentUser.id);
+            // Buscar vendedores vinculados
+            const [vincRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [currentUser.id]);
+            const vinculados = vincRows[0]?.vendedores_vinculados;
+            if (vinculados) {
+                const ids = [currentUser.id, ...vinculados.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v))];
+                whereConditions.push(`p.vendedor_id IN (${ids.map(() => '?').join(',')})`);
+                queryParams.push(...ids);
+            } else {
+                whereConditions.push('p.vendedor_id = ?');
+                queryParams.push(currentUser.id);
+            }
             if (DEBUG) console.log(`👤 Filtrando pedidos do vendedor: ${currentUser.nome} (ID: ${currentUser.id})`);    
         }
 
@@ -1440,7 +1452,10 @@ apiVendasRouter.get('/comissoes', async (req, res, next) => {
         }
 
         if (status === 'faturado') {
-            query += " AND p.status IN ('faturado', 'recibo')";
+            query += " AND p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo')";
+        } else {
+            // Comissão só conta a partir de aprovado
+            query += " AND p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo')";
         }
 
         query += ' ORDER BY u.nome, p.created_at DESC';
@@ -1478,12 +1493,12 @@ apiVendasRouter.get('/comissoes/resumo', async (req, res, next) => {
                 u.nome as vendedor_nome,
                 u.email,
                 COALESCE(u.comissao_percentual, 1.0) as percentual_comissao,
-                COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as qtd_faturados,
-                COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_faturado,
-                COALESCE(SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao_faturada,
-                COUNT(CASE WHEN p.status NOT IN ('cancelado', 'faturado', 'recibo') THEN 1 END) as qtd_pendentes,
-                COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_pendente,
-                COALESCE(SUM(CASE WHEN p.status NOT IN ('cancelado', 'faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao_pendente
+                COUNT(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN 1 END) as qtd_faturados,
+                COALESCE(SUM(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN p.valor ELSE 0 END), 0) as valor_faturado,
+                COALESCE(SUM(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao_faturada,
+                COUNT(CASE WHEN p.status IN ('orcamento', 'analise', 'analise-credito') THEN 1 END) as qtd_pendentes,
+                COALESCE(SUM(CASE WHEN p.status IN ('orcamento', 'analise', 'analise-credito') THEN p.valor ELSE 0 END), 0) as valor_pendente,
+                COALESCE(SUM(CASE WHEN p.status IN ('orcamento', 'analise', 'analise-credito') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END), 0) as comissao_pendente
             FROM usuarios u
             LEFT JOIN departamentos d ON u.departamento_id = d.id
             LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
@@ -1560,10 +1575,10 @@ apiVendasRouter.get('/comissoes/exportar', async (req, res, next) => {
             SELECT
                 u.nome as 'Vendedor',
                 u.email as 'Email',
-                COUNT(CASE WHEN p.status IN ('faturado', 'recibo') THEN 1 END) as 'Qtd Vendas',
-                SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN p.valor ELSE 0 END) as 'Valor Total',
+                COUNT(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN 1 END) as 'Qtd Vendas',
+                SUM(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN p.valor ELSE 0 END) as 'Valor Total',
                 COALESCE(u.comissao_percentual, 1.0) as 'Percentual (%)',
-                SUM(CASE WHEN p.status IN ('faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END) as 'Comissão (R$)'
+                SUM(CASE WHEN p.status IN ('aprovado', 'pedido-aprovado', 'faturar', 'faturado', 'recibo') THEN (p.valor * COALESCE(u.comissao_percentual, 1.0) / 100) ELSE 0 END) as 'Comissão (R$)'
             FROM usuarios u
             LEFT JOIN departamentos d ON u.departamento_id = d.id
             LEFT JOIN pedidos p ON u.id = p.vendedor_id AND DATE_FORMAT(p.created_at, '%Y-%m') = ?
@@ -1973,10 +1988,19 @@ apiVendasRouter.get('/pedidos', async (req, res, next) => {
         let where = [];
         let params = [];
 
-        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos (igual ao Kanban)
+        // FILTRO POR USUÁRIO: Vendedores só veem seus próprios pedidos + vendedores vinculados
         if (currentUser && !isAdmin) {
-            where.push('p.vendedor_id = ?');
-            params.push(currentUser.id);
+            // Buscar vendedores vinculados
+            const [vincRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [currentUser.id]);
+            const vinculados = vincRows[0]?.vendedores_vinculados;
+            if (vinculados) {
+                const ids = [currentUser.id, ...vinculados.split(',').map(v => parseInt(v.trim())).filter(v => !isNaN(v))];
+                where.push(`p.vendedor_id IN (${ids.map(() => '?').join(',')})`);
+                params.push(...ids);
+            } else {
+                where.push('p.vendedor_id = ?');
+                params.push(currentUser.id);
+            }
             if (DEBUG) console.log(`👤 Filtrando pedidos do vendedor: ${currentUser.nome} (ID: ${currentUser.id})`);
         }
 
@@ -2371,6 +2395,7 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
 
         // Suporte a JSON e multipart - TODOS OS CAMPOS DA TABELA
         const empresa_id = sanitize(req.body.empresa_id || req.body.empresaId) || null;
+        const cliente_id = sanitize(req.body.cliente_id || req.body.clienteId) || null;
         const cliente_nome = sanitize(req.body.cliente_nome || req.body.clienteNome || req.body.cliente) || null;
         const valor = 0; // F1-01/F2-03: Valor será recalculado server-side via atualizarTotalPedido() após inserir itens
         const descrição = sanitize(req.body.descrição || req.body.descricao) || null;
@@ -2458,7 +2483,7 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
         // Inserir pedido (dentro da transação) - TODOS OS CAMPOS
         const [result] = await connection.query(
             `INSERT INTO pedidos (
-                empresa_id, vendedor_id, valor, descricao, frete, redespacho, observacao, status,
+                empresa_id, cliente_id, vendedor_id, valor, descricao, frete, redespacho, observacao, status,
                 condicao_pagamento, cenario_fiscal, data_previsao, departamento,
                 transportadora_nome, tipo_frete, metodo_envio, endereco_entrega, municipio_entrega,
                 prazo_entrega, placa_veiculo, veiculo_uf, rntrc, qtd_volumes, especie_volumes,
@@ -2466,9 +2491,9 @@ apiVendasRouter.post('/pedidos', upload.array('anexos', 8), async (req, res, nex
                 outras_despesas, numero_lacre, codigo_rastreio, observacao_cliente, info_complementar,
                 campos_obs_nfe, dados_adicionais_nf, projeto, contato, categoria, prioridade,
                 conta_corrente, pedido_cliente, contrato_venda, nf, desconto_pct
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                empresaFinalId, vendedor_id, valor, descrição, frete || 0.00, redespacho || false, observacao, status,
+                empresaFinalId, cliente_id, vendedor_id, valor, descrição, frete || 0.00, redespacho || false, observacao, status,
                 condicao_pagamento, cenario_fiscal, previsao_faturamento, departamento,
                 transportadora_nome, tipo_frete, metodo_envio, endereco_entrega, municipio_entrega,
                 prazo_entrega, placa_veiculo, veiculo_uf, rntrc, qtd_volumes, especie_volumes,
@@ -5151,27 +5176,45 @@ apiVendasRouter.get('/clientes/:id/details', async (req, res, next) => {
 
 apiVendasRouter.post('/clientes', async (req, res, next) => {
     try {
-        const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
-                endereco, numero, complemento, bairro, cidade, uf, cep,
-                inscricao_estadual, inscricao_municipal, limite_credito, ativo, empresa_id } = req.body;
-        if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
-
-        // Montar endereço completo
-        let enderecoFinal = endereco || null;
-        if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-        if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
+        const b = req.body;
+        if (!b.nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
         const [result] = await pool.query(
-            `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, email,
-             endereco, bairro, cidade, estado, cep, inscricao_estadual, inscricao_municipal,
-             credito_total, ativo, empresa_id, data_cadastro, incluido_por)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?)`,
-            [nome, nome_fantasia || null, nome || null, cnpj || null, contato || null,
-             telefone || null, email || null, enderecoFinal, bairro || null,
-             cidade || null, uf || null, cep || null, inscricao_estadual || null,
-             inscricao_municipal || null, limite_credito ? parseFloat(limite_credito) : 0,
-             ativo !== undefined ? (ativo ? 1 : 0) : 1,
-             empresa_id || 1, req.user ? req.user.nome : 'Sistema']
+            `INSERT INTO clientes (nome, nome_fantasia, razao_social, cnpj, contato, telefone, celular, email, website,
+             endereco, numero, complemento, bairro, cidade, estado, cep,
+             inscricao_estadual, inscricao_municipal, credito_total, ativo, empresa_id,
+             banco, agencia, conta, conta_corrente, pix, titular_doc, titular_nome,
+             fax, ddd_fax, enviar_anexos,
+             suframa, simples_nacional, produtor_rural, tipo_atividade, cnae, obs_internas, obs_detalhadas,
+             parcelas_padrao, vendedor_padrao, email_nfe, transportadora, codigo_receita,
+             bloquear_faturamento, tags,
+             data_cadastro, incluido_por)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,
+                     ?, ?, ?, ?, ?, ?, ?,
+                     ?, ?, ?, ?, ?,
+                     ?, ?, ?, ?, ?, ?, ?,
+                     ?, ?, ?,
+                     ?, ?, ?, ?, ?, ?, ?,
+                     ?, ?, ?, ?, ?,
+                     ?, ?,
+                     NOW(), ?)`,
+            [b.nome, b.nome_fantasia || null, b.nome || null, b.cnpj || null, b.contato || null,
+             b.telefone || null, b.celular || null, b.email || null, b.website || null,
+             b.endereco || null, b.numero || null, b.complemento || null, b.bairro || null,
+             b.cidade || null, b.uf || null, b.cep || null,
+             b.inscricao_estadual || null, b.inscricao_municipal || null,
+             b.limite_credito ? parseFloat(b.limite_credito) : 0,
+             b.ativo !== undefined ? (b.ativo ? 1 : 0) : 1,
+             b.empresa_id || 1,
+             b.banco || null, b.agencia || null, b.conta || null, b.conta || null,
+             b.pix || null, b.titular_doc || null, b.titular_nome || null,
+             b.fax || null, b.ddd_fax || null, b.enviar_anexos ? 1 : 0,
+             b.suframa || null, b.simples_nacional ? 1 : 0, b.produtor_rural ? 1 : 0,
+             b.tipo_atividade || null, b.cnae || null, b.obs_internas || null, b.obs_detalhadas || null,
+             b.parcelas_padrao || null, b.vendedor_padrao || null, b.email_nfe || null,
+             b.transportadora || null, b.codigo_receita || null,
+             b.bloquear_faturamento ? 1 : 0, b.tags || null,
+             req.user ? req.user.nome : 'Sistema']
         );
         res.status(201).json({ message: 'Cliente cadastrado com sucesso!', id: result.insertId });
     } catch (error) {
@@ -5194,29 +5237,40 @@ apiVendasRouter.put('/clientes/:id', async (req, res, next) => {
             return res.json({ message: `Cliente ${body.ativo ? 'ativado' : 'inativado'} com sucesso.` });
         }
 
-        const { nome, nome_fantasia, cnpj, contato, telefone, celular, email, website,
-                endereco, numero, complemento, bairro, cidade, uf, cep,
-                inscricao_estadual, inscricao_municipal, limite_credito, empresa_id } = body;
-        if (!nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
-
-        let enderecoFinal = endereco || null;
-        if (enderecoFinal && numero) enderecoFinal += `, ${numero}`;
-        if (enderecoFinal && complemento) enderecoFinal += ` - ${complemento}`;
+        const b = req.body;
+        if (!b.nome) return res.status(400).json({ message: 'Nome é obrigatório.' });
 
         const [result] = await pool.query(
             `UPDATE clientes SET nome = ?, nome_fantasia = ?, cnpj = ?, contato = ?,
-             telefone = ?, email = ?, endereco = ?, bairro = ?, cidade = ?,
+             telefone = ?, celular = ?, email = ?, website = ?,
+             endereco = ?, numero = ?, complemento = ?, bairro = ?, cidade = ?,
              estado = ?, cep = ?, inscricao_estadual = ?, inscricao_municipal = ?,
              credito_total = ?, ativo = ?, empresa_id = ?,
+             banco = ?, agencia = ?, conta = ?, conta_corrente = ?, pix = ?, titular_doc = ?, titular_nome = ?,
+             fax = ?, ddd_fax = ?, enviar_anexos = ?,
+             suframa = ?, simples_nacional = ?, produtor_rural = ?, tipo_atividade = ?, cnae = ?,
+             obs_internas = ?, obs_detalhadas = ?,
+             parcelas_padrao = ?, vendedor_padrao = ?, email_nfe = ?, transportadora = ?, codigo_receita = ?,
+             bloquear_faturamento = ?, tags = ?,
              data_ultima_alteracao = NOW(), alterado_por = ?
              WHERE id = ?`,
-            [nome, nome_fantasia || null, cnpj || null, contato || null,
-             telefone || null, email || null, enderecoFinal, bairro || null,
-             cidade || null, uf || null, cep || null, inscricao_estadual || null,
-             inscricao_municipal || null,
-             limite_credito ? parseFloat(limite_credito) : 0,
-             body.ativo !== undefined ? (body.ativo ? 1 : 0) : 1,
-             empresa_id || 1,
+            [b.nome, b.nome_fantasia || null, b.cnpj || null, b.contato || null,
+             b.telefone || null, b.celular || null, b.email || null, b.website || null,
+             b.endereco || null, b.numero || null, b.complemento || null, b.bairro || null,
+             b.cidade || null, b.uf || null, b.cep || null,
+             b.inscricao_estadual || null, b.inscricao_municipal || null,
+             b.limite_credito ? parseFloat(b.limite_credito) : 0,
+             b.ativo !== undefined ? (b.ativo ? 1 : 0) : 1,
+             b.empresa_id || 1,
+             b.banco || null, b.agencia || null, b.conta || null, b.conta || null,
+             b.pix || null, b.titular_doc || null, b.titular_nome || null,
+             b.fax || null, b.ddd_fax || null, b.enviar_anexos ? 1 : 0,
+             b.suframa || null, b.simples_nacional ? 1 : 0, b.produtor_rural ? 1 : 0,
+             b.tipo_atividade || null, b.cnae || null,
+             b.obs_internas || null, b.obs_detalhadas || null,
+             b.parcelas_padrao || null, b.vendedor_padrao || null, b.email_nfe || null,
+             b.transportadora || null, b.codigo_receita || null,
+             b.bloquear_faturamento ? 1 : 0, b.tags || null,
              req.user ? req.user.nome : 'Sistema', id]
         );
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
@@ -5284,15 +5338,15 @@ apiVendasRouter.get('/clientes/:id/resumo', authenticateToken, async (req, res, 
         const [clienteRows] = await pool.query('SELECT id, empresa_id, created_at FROM clientes WHERE id = ?', [id]);
         if (clienteRows.length === 0) return res.status(404).json({ message: 'Cliente não encontrado.' });
         const cliente = clienteRows[0];
-        const empresaId = cliente.empresa_id;
+        const clienteId = parseInt(id);
 
-        // Estatísticas de pedidos
+        // Estatísticas de pedidos DO CLIENTE
         const [statsRows] = await pool.query(`
             SELECT COUNT(*) AS total_pedidos,
                    COALESCE(SUM(valor), 0) AS valor_total,
                    COALESCE(AVG(valor), 0) AS ticket_medio,
                    COALESCE(MAX(valor), 0) AS maior_pedido
-            FROM pedidos WHERE empresa_id = ?`, [empresaId]);
+            FROM pedidos WHERE cliente_id = ?`, [clienteId]);
         const estatisticas = statsRows[0] || { total_pedidos: 0, valor_total: 0, ticket_medio: 0, maior_pedido: 0 };
 
         // Tempo como cliente
@@ -5303,29 +5357,29 @@ apiVendasRouter.get('/clientes/:id/resumo', authenticateToken, async (req, res, 
         const meses = Math.floor((totalDias % 365) / 30);
         const dias = totalDias % 30;
 
-        // Pedidos recentes
+        // Pedidos recentes DO CLIENTE
         const [pedidosRecentes] = await pool.query(
-            'SELECT id, valor, status, created_at FROM pedidos WHERE empresa_id = ? ORDER BY created_at DESC LIMIT 10', [empresaId]);
+            'SELECT id, valor, status, created_at FROM pedidos WHERE cliente_id = ? ORDER BY created_at DESC LIMIT 10', [clienteId]);
 
-        // Produtos mais comprados
+        // Produtos mais comprados PELO CLIENTE
         const [produtosMaisComprados] = await pool.query(`
             SELECT pi.descricao AS produto, SUM(pi.quantidade) AS total_quantidade, COUNT(DISTINCT pi.pedido_id) AS total_pedidos
             FROM pedido_itens pi JOIN pedidos p ON pi.pedido_id = p.id
-            WHERE p.empresa_id = ? GROUP BY pi.descricao ORDER BY total_quantidade DESC LIMIT 5`, [empresaId]);
+            WHERE p.cliente_id = ? GROUP BY pi.descricao ORDER BY total_quantidade DESC LIMIT 5`, [clienteId]);
 
-        // Pedidos por status
+        // Pedidos por status DO CLIENTE
         const [statusRows] = await pool.query(
-            'SELECT status, COUNT(*) AS total FROM pedidos WHERE empresa_id = ? GROUP BY status', [empresaId]);
+            'SELECT status, COUNT(*) AS total FROM pedidos WHERE cliente_id = ? GROUP BY status', [clienteId]);
         const pedidos_por_status = {};
         statusRows.forEach(r => { pedidos_por_status[r.status] = r.total; });
 
-        // Financeiro (estimativa com base em pedidos)
+        // Financeiro DO CLIENTE
         const [finRows] = await pool.query(`
             SELECT COALESCE(SUM(CASE WHEN status IN ('faturado','recibo') THEN valor ELSE 0 END), 0) AS valor_pago,
                    COALESCE(SUM(CASE WHEN status IN ('orcamento','analise','aprovado','faturar') THEN valor ELSE 0 END), 0) AS valor_pendente,
                    0 AS valor_vencido,
                    COUNT(*) AS total_titulos
-            FROM pedidos WHERE empresa_id = ?`, [empresaId]);
+            FROM pedidos WHERE cliente_id = ?`, [clienteId]);
         const financeiro = finRows[0] || { valor_pago: 0, valor_pendente: 0, valor_vencido: 0, total_titulos: 0 };
 
         res.json({
@@ -6205,15 +6259,39 @@ apiVendasRouter.get('/me', async (req, res, next) => {
 
 // --- ROTA DE DASHBOARD (ADMIN) ---
 // **ATUALIZADA E OTIMIZADA** para aceitar filtros e ser mais performática
-apiVendasRouter.get('/dashboard-stats', authorizeAdmin, async (req, res, next) => {
+apiVendasRouter.get('/dashboard-stats', authenticateToken, async (req, res, next) => {
     try {
-        const { status } = req.query;
+        const { status, vendedor_id } = req.query;
         let whereClause = "WHERE created_at >= DATE_FORMAT(NOW(), '%Y-%m-01')";
         let params = [];
 
         if (status && status !== 'all') {
             whereClause += " AND status = ?";
             params.push(status);
+        }
+
+        // Filtro por vendedor (não-admin vê apenas seus próprios dados)
+        const userRole = req.user.role || '';
+        const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+        let vendedorIds = [];
+
+        if (vendedor_id) {
+            vendedorIds = [parseInt(vendedor_id)];
+        } else if (!isAdmin) {
+            vendedorIds = [req.user.id];
+            // Incluir vendedores vinculados
+            try {
+                const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                if (uRows[0]?.vendedores_vinculados) {
+                    const linked = uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean);
+                    vendedorIds.push(...linked);
+                }
+            } catch(e) {}
+        }
+
+        if (vendedorIds.length > 0) {
+            whereClause += ` AND vendedor_id IN (${vendedorIds.map(() => '?').join(',')})`;
+            params.push(...vendedorIds);
         }
 
         const query = `
@@ -6235,23 +6313,47 @@ apiVendasRouter.get('/dashboard-stats', authorizeAdmin, async (req, res, next) =
     }
 });
 
-// GET: monthly aggregates for last N months (admin only)
-apiVendasRouter.get('/dashboard/monthly', authorizeAdmin, async (req, res, next) => {
+// GET: monthly aggregates for last N months
+apiVendasRouter.get('/dashboard/monthly', authenticateToken, async (req, res, next) => {
     try {
         const months = Math.max(parseInt(req.query.months || '12'), 1);
+        const vendedorIdParam = req.query.vendedor_id;
         // compute start date (first day of month N-1 months ago)
         const now = new Date();
         const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
         const startStr = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-01`;
 
         if (dbAvailable) {
+            // Filtro por vendedor
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            let vendedorIds = [];
+            let vendedorFilter = '';
+
+            if (vendedorIdParam) {
+                vendedorIds = [parseInt(vendedorIdParam)];
+            } else if (!isAdmin) {
+                vendedorIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) {
+                        const linked = uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean);
+                        vendedorIds.push(...linked);
+                    }
+                } catch(e) {}
+            }
+
+            if (vendedorIds.length > 0) {
+                vendedorFilter = ` AND vendedor_id IN (${vendedorIds.map(() => '?').join(',')})`;
+            }
+
             const [rows] = await pool.query(
                 `SELECT DATE_FORMAT(created_at, '%Y-%m') AS ym, COALESCE(SUM(CASE WHEN status IN ('faturado', 'recibo') THEN valor ELSE 0 END), 0) AS total
                  FROM pedidos
-                 WHERE created_at >= ?
+                 WHERE created_at >= ?${vendedorFilter}
                  GROUP BY ym
                  ORDER BY ym ASC`,
-                 [startStr]
+                 [startStr, ...vendedorIds]
             );
 
             // convert rows to map for quick lookup
@@ -6295,6 +6397,30 @@ apiVendasRouter.get('/dashboard/top-vendedores', authenticateToken, async (req, 
         }
 
         if (dbAvailable) {
+            // Filtro por vendedor
+            const vendedorIdParam = req.query.vendedor_id;
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            let vendedorIds = [];
+            let vendedorFilter = '';
+
+            if (vendedorIdParam) {
+                vendedorIds = [parseInt(vendedorIdParam)];
+            } else if (!isAdmin) {
+                vendedorIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) {
+                        const linked = uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean);
+                        vendedorIds.push(...linked);
+                    }
+                } catch(e) {}
+            }
+
+            if (vendedorIds.length > 0) {
+                vendedorFilter = ` AND u.id IN (${vendedorIds.map(() => '?').join(',')})`;
+            }
+
             const [rows] = await pool.query(
                 `SELECT
                     u.id,
@@ -6304,11 +6430,11 @@ apiVendasRouter.get('/dashboard/top-vendedores', authenticateToken, async (req, 
                  FROM pedidos p
                  JOIN usuarios u ON p.vendedor_id = u.id
                  WHERE u.role = 'comercial'
-                   AND p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)
+                   AND p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)${vendedorFilter}
                  GROUP BY u.id, u.nome
                  ORDER BY valor DESC
                  LIMIT ?`,
-                 [startStr, endStr, limit]
+                 [startStr, endStr, ...vendedorIds, limit]
             );
             return res.json(rows.map(r => ({
                 id: r.id,
@@ -6324,7 +6450,7 @@ apiVendasRouter.get('/dashboard/top-vendedores', authenticateToken, async (req, 
 });
 
 // GET: top produtos mais vendidos (baseado nos itens dos pedidos)
-apiVendasRouter.get('/dashboard/top-produtos', async (req, res, next) => {
+apiVendasRouter.get('/dashboard/top-produtos', authenticateToken, async (req, res, next) => {
     try {
         const limit = Math.max(parseInt(req.query.limit || '5'), 1);
         const periodDays = Math.max(parseInt(req.query.period || req.query.days || '30'), 1);
@@ -6344,6 +6470,30 @@ apiVendasRouter.get('/dashboard/top-produtos', async (req, res, next) => {
         }
 
         if (dbAvailable) {
+            // Filtro por vendedor
+            const vendedorIdParam = req.query.vendedor_id;
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            let vendedorIds = [];
+            let vendedorFilter = '';
+
+            if (vendedorIdParam) {
+                vendedorIds = [parseInt(vendedorIdParam)];
+            } else if (!isAdmin) {
+                vendedorIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) {
+                        const linked = uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean);
+                        vendedorIds.push(...linked);
+                    }
+                } catch(e) {}
+            }
+
+            if (vendedorIds.length > 0) {
+                vendedorFilter = ` AND p.vendedor_id IN (${vendedorIds.map(() => '?').join(',')})`;
+            }
+
             // Tentar buscar da tabela pedido_itens com join nos pedidos
             try {
                 const [rows] = await pool.query(
@@ -6354,11 +6504,11 @@ apiVendasRouter.get('/dashboard/top-produtos', async (req, res, next) => {
                         SUM(pi.total) as valor
                      FROM pedido_itens pi
                      JOIN pedidos p ON pi.pedido_id = p.id
-                     WHERE p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)
+                     WHERE p.created_at >= ? AND p.created_at <= DATE_ADD(?, INTERVAL 1 DAY)${vendedorFilter}
                      GROUP BY COALESCE(pi.descricao, pi.codigo)
                      ORDER BY valor DESC
                      LIMIT ?`,
-                    [startStr, endStr, limit]
+                    [startStr, endStr, ...vendedorIds, limit]
                 );
 
                 if (rows && rows.length > 0) {
@@ -6619,6 +6769,20 @@ apiVendasRouter.get('/relatorios/vendas-periodo/pdf', authenticateToken, async (
         if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
         if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
         if (vendedor_id) { query += ' AND p.vendedor_id = ?'; params.push(vendedor_id); }
+        else {
+            // Non-admin: filtrar por vendedor logado + vinculados
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            if (!isAdmin) {
+                let vIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) vIds.push(...uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean));
+                } catch(e) {}
+                query += ` AND p.vendedor_id IN (${vIds.map(() => '?').join(',')})`;
+                params.push(...vIds);
+            }
+        }
         if (status && status !== 'todos') { query += ' AND p.status = ?'; params.push(status); }
         query += ' ORDER BY p.created_at DESC';
 
@@ -6646,11 +6810,24 @@ apiVendasRouter.get('/relatorios/comissoes/pdf', authenticateToken, async (req, 
         const pct = parseFloat(percentual_comissao) || 1;
         let query = `SELECT p.vendedor_nome, COUNT(*) as qtd, SUM(p.valor) as total_vendas,
                      SUM(p.valor * ${pct} / 100) as comissao
-                     FROM pedidos p WHERE p.status IN ('faturado','entregue','aprovado')`;
+                     FROM pedidos p WHERE p.status IN ('aprovado','pedido-aprovado','faturar','faturado','recibo')`;
         const params = [];
         if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
         if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
         if (vendedor_id) { query += ' AND p.vendedor_id = ?'; params.push(vendedor_id); }
+        else {
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            if (!isAdmin) {
+                let vIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) vIds.push(...uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean));
+                } catch(e) {}
+                query += ` AND p.vendedor_id IN (${vIds.map(() => '?').join(',')})`;
+                params.push(...vIds);
+            }
+        }
         query += ' GROUP BY p.vendedor_id, p.vendedor_nome ORDER BY comissao DESC';
 
         const [rows] = await pool.query(query, params);
@@ -6717,6 +6894,20 @@ apiVendasRouter.get('/relatorios/produtos/pdf', authenticateToken, async (req, r
         const params = [];
         if (data_inicio) { query += ' AND p.created_at >= ?'; params.push(data_inicio); }
         if (data_fim) { query += ' AND p.created_at <= ?'; params.push(data_fim + ' 23:59:59'); }
+        // Per-user filtering
+        {
+            const userRole = req.user.role || '';
+            const isAdmin = ['admin', 'ti', 'diretoria', 'super_admin'].includes(userRole);
+            if (!isAdmin) {
+                let vIds = [req.user.id];
+                try {
+                    const [uRows] = await pool.query('SELECT vendedores_vinculados FROM usuarios WHERE id = ?', [req.user.id]);
+                    if (uRows[0]?.vendedores_vinculados) vIds.push(...uRows[0].vendedores_vinculados.split(',').map(Number).filter(Boolean));
+                } catch(e) {}
+                query += ` AND p.vendedor_id IN (${vIds.map(() => '?').join(',')})`;
+                params.push(...vIds);
+            }
+        }
         query += ' GROUP BY pi.descricao, pi.codigo';
         const orderMap = { quantidade: 'qtd_total DESC', valor: 'valor_total DESC', nome: 'pi.descricao ASC' };
         query += ` ORDER BY ${orderMap[ordenar_por] || 'valor_total DESC'}`;

@@ -1540,7 +1540,6 @@
                 <button class="sidebar-btn" title="Comissões" onclick="window.location.href='comissoes.html'"><i class="fas fa-percentage"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
 
@@ -1576,7 +1575,7 @@
                 <button class="tab active">Pedidos</button>
                 <div class="tabs-actions">
                     <button class="tab-action-btn" title="Atualizar" onclick="carregarPedidos()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="tab-action-btn" title="Configurações" onclick="showToast('Configurações em breve disponíveis', 'info')"><i class="fas fa-cog"></i></button>
+
                 </div>
             </div>
 
@@ -1931,7 +1930,6 @@
                     <td>
                         <button class="action-btn" title="Ver Detalhes" onclick="verPedido(${p.id})"><i class="fas fa-eye"></i></button>
                         ${btnEditar}
-                        <button class="action-btn" title="Imprimir" onclick="imprimirPedido(${p.id})"><i class="fas fa-print"></i></button>
                     </td>
                 </tr>
             `}).join('');
@@ -2140,7 +2138,6 @@
                     <div style="font-size:11px;color:#888;margin-top:4px;">Pedido #${pedido.numero || pedido.id}</div>
                 </div>
                 ${podeEditar ? `<button class="sidebar-action-btn primary" onclick="editarPedido(${id})"><i class="fas fa-edit"></i> Editar</button>` : `<button class="sidebar-action-btn" disabled style="opacity:0.5;"><i class="fas fa-lock"></i> Somente Leitura</button>`}
-                <button class="sidebar-action-btn" onclick="imprimirPedido(${id})"><i class="fas fa-print"></i> Imprimir</button>
                 <button class="sidebar-action-btn" onclick="duplicarPedidoFromView(${id})"><i class="fas fa-copy"></i> Duplicar</button>
                 <div style="height:1px;background:#e5e7eb;margin:8px 0;"></div>
                 <button class="sidebar-action-btn" onclick="window.open('/api/vendas/pedidos/${id}/pdf', '_blank')"><i class="fas fa-file-pdf"></i> Gerar Orçamento</button>
@@ -2558,9 +2555,6 @@
                             <div class="modal-sidebar-actions">
                                 <button class="sidebar-action-btn primary" onclick="salvarEdicaoPedido()">
                                     <i class="fas fa-save"></i> Salvar
-                                </button>
-                                <button class="sidebar-action-btn" onclick="imprimirPedidoModal()">
-                                    <i class="fas fa-print"></i> Imprimir
                                 </button>
                                 <button class="sidebar-action-btn" onclick="duplicarPedidoModal()">
                                     <i class="fas fa-copy"></i> Duplicar

@@ -756,7 +756,6 @@
                 <button class="sidebar-btn" title="Comissões" onclick="window.location.href='comissoes.html'"><i class="fas fa-percentage"></i></button>
             </nav>
             <div class="sidebar-bottom">
-                <button class="sidebar-btn" title="Configurações"><i class="fas fa-cog"></i></button>
             </div>
         </aside>
 
@@ -789,7 +788,7 @@
                 <button class="tab active">Clientes</button>
                 <div class="tabs-actions">
                     <button class="tab-action-btn" title="Atualizar" onclick="carregarClientes()"><i class="fas fa-sync-alt"></i></button>
-                    <button class="tab-action-btn" title="Configurações"><i class="fas fa-cog"></i></button>
+
                 </div>
             </div>
 
@@ -997,16 +996,53 @@
                                 </div>
                             </div>
                             
-                            <p class="omie-link" style="margin-top: 24px; text-align: center;">
-                                <i class="fas fa-plus"></i> Clique aqui para <strong>adicionar um endereço de entrega diferente</strong> deste
+                            <p class="omie-link" style="margin-top: 24px; text-align: center; cursor:pointer;" onclick="toggleEnderecoEntrega()">
+                                <i class="fas fa-plus" id="iconEntregaToggle"></i> Clique aqui para <strong>adicionar um endereço de entrega diferente</strong> deste
                             </p>
+
+                            <!-- Endereço de Entrega (oculto por padrão) -->
+                            <div id="enderecoEntregaSection" style="display:none; margin-top:16px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px;">
+                                <h4 style="margin:0 0 12px; font-size:14px; color:#334155;"><i class="fas fa-truck"></i> Endereço de Entrega</h4>
+                                <div class="omie-form-grid cols-3">
+                                    <div class="omie-form-group" style="grid-column: span 2;">
+                                        <label>Endereço</label>
+                                        <input type="text" id="clienteEnderecoEntrega" placeholder="Rua, Avenida...">
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>Número</label>
+                                        <input type="text" id="clienteNumeroEntrega" placeholder="Nº">
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>Complemento</label>
+                                        <input type="text" id="clienteComplementoEntrega" placeholder="Sala, Bloco...">
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>Bairro</label>
+                                        <input type="text" id="clienteBairroEntrega" placeholder="Bairro">
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>UF</label>
+                                        <select id="clienteUFEntrega">
+                                            <option value="">UF</option>
+                                            <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option>
+                                        </select>
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>Cidade</label>
+                                        <input type="text" id="clienteCidadeEntrega" placeholder="Cidade">
+                                    </div>
+                                    <div class="omie-form-group">
+                                        <label>CEP <span class="omie-link" onclick="buscarCepEntrega()" style="margin-left:8px;"><i class="fas fa-search"></i> Pesquisar CEP</span></label>
+                                        <input type="text" id="clienteCepEntrega" placeholder="00000-000" onblur="buscarCepEntrega()">
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Tags -->
                             <div class="omie-tags-container">
                                 <div class="omie-tags-title">Preencha quantas Tags quiser para este cadastro</div>
-                                <div class="omie-tags">
-                                    <span class="omie-tag">Cliente <button class="omie-tag-remove">&times;</button></span>
-                                    <span class="omie-add-tag">Clique aqui para selecionar (ou criar) uma nova tag</span>
+                                <div class="omie-tags" id="clienteTagsContainer">
+                                    <span class="omie-add-tag" onclick="adicionarTag()">Clique aqui para selecionar (ou criar) uma nova tag</span>
                                 </div>
                             </div>
                         </div>
@@ -1043,7 +1079,7 @@
                             </div>
                             <div class="omie-checkbox-group" style="margin-top: 16px;">
                                 <input type="checkbox" id="clienteEnviarAnexos" checked>
-                                <label for="clienteEnviarAnexos">Portal Omie: <strong>enviar anexos por e-mail</strong> além do link para o Portal Omie para este cliente</label>
+                                <label for="clienteEnviarAnexos"><strong>Enviar anexos por e-mail</strong> além do link do portal para este cliente</label>
                             </div>
                         </div>
 
@@ -1518,7 +1554,7 @@
             const uf = document.getElementById('clienteUF').value;
             
             if (endereco && cidade) {
-                const enderecoCompleto = encodeURIComponent(`${endereco}, ${número} - ${cidade}, ${uf}`);
+                const enderecoCompleto = encodeURIComponent(`${endereco}, ${numero} - ${cidade}, ${uf}`);
                 const iframe = document.getElementById('mapaFrame');
                 iframe.src = `https://www.google.com/maps?q=${enderecoCompleto}&output=embed`;
             }
@@ -1642,6 +1678,9 @@
             
             // Faturamento
             if (document.getElementById('clienteBloquearFaturamento')) document.getElementById('clienteBloquearFaturamento').checked = !!cliente.bloquear_faturamento;
+            
+            // Tags
+            carregarTagsDoCliente(cliente.tags || '');
             
             // Atualizar avatar
             atualizarAvatarModal(cliente.nome);
@@ -1779,7 +1818,9 @@
                 transportadora: (document.getElementById('clienteTransportadora') || {}).value || '',
                 codigo_receita: (document.getElementById('clienteCodigoReceita') || {}).value || '',
                 // Faturamento
-                bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0
+                bloquear_faturamento: (document.getElementById('clienteBloquearFaturamento') || {}).checked ? 1 : 0,
+                // Tags
+                tags: clienteTags.join(',')
             };
             
             if (!cliente.nome) { mostrarToast('Razão Social é obrigatória', 'error'); return; }
@@ -1828,6 +1869,70 @@
                     mostrarToast('Endereço encontrado!', 'success');
                 }
             } catch (error) { mostrarToast('Erro ao buscar CEP', 'error'); }
+        }
+
+        // Toggle endereço de entrega
+        function toggleEnderecoEntrega() {
+            const section = document.getElementById('enderecoEntregaSection');
+            const icon = document.getElementById('iconEntregaToggle');
+            if (section.style.display === 'none') {
+                section.style.display = 'block';
+                icon.className = 'fas fa-minus';
+            } else {
+                section.style.display = 'none';
+                icon.className = 'fas fa-plus';
+            }
+        }
+
+        // Buscar CEP para endereço de entrega
+        async function buscarCepEntrega() {
+            const cep = document.getElementById('clienteCepEntrega').value.replace(/\D/g, '');
+            if (cep.length !== 8) return;
+            try {
+                const response = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+                const data = await response.json();
+                if (!data.erro) {
+                    document.getElementById('clienteEnderecoEntrega').value = data.logradouro || '';
+                    document.getElementById('clienteBairroEntrega').value = data.bairro || '';
+                    document.getElementById('clienteCidadeEntrega').value = data.localidade || '';
+                    document.getElementById('clienteUFEntrega').value = data.uf || '';
+                    mostrarToast('Endereço de entrega encontrado!', 'success');
+                }
+            } catch (error) { mostrarToast('Erro ao buscar CEP de entrega', 'error'); }
+        }
+
+        // Tags management
+        let clienteTags = [];
+
+        function renderTags() {
+            const container = document.getElementById('clienteTagsContainer');
+            container.innerHTML = clienteTags.map((tag, i) =>
+                `<span class="omie-tag">${escapeHtmlTag(tag)} <button class="omie-tag-remove" onclick="removerTag(${i})">&times;</button></span>`
+            ).join('') +
+            `<span class="omie-add-tag" onclick="adicionarTag()">Clique aqui para selecionar (ou criar) uma nova tag</span>`;
+        }
+
+        function escapeHtmlTag(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+        function adicionarTag() {
+            const tag = prompt('Digite o nome da nova tag:');
+            if (tag && tag.trim()) {
+                const t = tag.trim();
+                if (!clienteTags.includes(t)) {
+                    clienteTags.push(t);
+                    renderTags();
+                }
+            }
+        }
+
+        function removerTag(index) {
+            clienteTags.splice(index, 1);
+            renderTags();
+        }
+
+        function carregarTagsDoCliente(tagsStr) {
+            clienteTags = tagsStr ? tagsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+            renderTags();
         }
 
         // Função de validação de CNPJ com dígitos verificadores
