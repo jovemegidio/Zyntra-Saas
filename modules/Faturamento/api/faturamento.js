@@ -122,7 +122,7 @@ module.exports = (pool, authenticateToken) => {
 
             // 2. Verificar se já existe NF-e para este pedido (lock pessimista para evitar duplicata)
             const [nfeExistente] = await connection.query(`
-                SELECT id, numero_nfe, status FROM nfe WHERE pedido_id = ? FOR UPDATE
+                SELECT id, numero AS numero_nfe, status FROM nfes WHERE pedido_id = ? FOR UPDATE
             `, [pedido_id]);
 
             if (nfeExistente.length > 0) {
@@ -302,21 +302,21 @@ module.exports = (pool, authenticateToken) => {
 
             // 6. Criar registro da NF-e
             const [nfe] = await connection.query(`
-                INSERT INTO nfe (
+                INSERT INTO nfes (
                     pedido_id,
-                    numero_nfe,
+                    numero,
                     serie,
                     modelo,
                     tipo_emissao,
                     finalidade,
                     natureza_operacao,
                     cliente_id,
-                    cliente_nome,
-                    cliente_cnpj_cpf,
-                    cliente_endereco,
-                    cliente_cidade,
-                    cliente_estado,
-                    cliente_cep,
+                    destinatario_nome,
+                    destinatario_cnpj_cpf,
+                    destinatario_endereco,
+                    destinatario_cidade,
+                    destinatario_uf,
+                    destinatario_cep,
                     valor_produtos,
                     valor_frete,
                     valor_desconto,
@@ -445,7 +445,7 @@ module.exports = (pool, authenticateToken) => {
 
                 // Salvar XML e chave de acesso no registro da NF-e
                 await connection.query(`
-                    UPDATE nfe SET xml_nfe = ?, chave_acesso = ?, emitente_uf = ?, emitente_cnpj = ? WHERE id = ?
+                    UPDATE nfes SET xml_nfe = ?, chave_acesso = ?, emitente_uf = ?, emitente_cnpj = ? WHERE id = ?
                 `, [xmlNfe, chaveAcesso, emitente.uf, emitente.cnpj.replace(/\D/g, ''), nfe_id]);
 
                 console.log(`[FATURAMENTO] ✅ XML NF-e gerado com sucesso. Chave: ${chaveAcesso}`);
