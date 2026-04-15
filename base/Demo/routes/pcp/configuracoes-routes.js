@@ -1350,7 +1350,13 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
 
     router.get('/api/configuracoes/condicoes-pagamento', authenticateToken, async (req, res) => {
         try {
-            const [condicoes] = await pool.query('SELECT * FROM condicoes_pagamento ORDER BY nome');
+            // Garantir colunas extras
+            try {
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS parcelas INT DEFAULT 1`);
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS acrescimo DECIMAL(5,2) DEFAULT 0`);
+            } catch (e) { /* colunas já existem */ }
+
+            const [condicoes] = await pool.query('SELECT *, COALESCE(dias, 0) as prazo FROM condicoes_pagamento ORDER BY nome');
             res.json({ data: condicoes });
         } catch (error) {
             console.error('Erro ao buscar condições:', error);
@@ -1361,9 +1367,16 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     router.post('/api/configuracoes/condicoes-pagamento', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
             const { nome, parcelas, prazo, acrescimo, descricao } = req.body;
+
+            // Garantir colunas extras
+            try {
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS parcelas INT DEFAULT 1`);
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS acrescimo DECIMAL(5,2) DEFAULT 0`);
+            } catch (e) { /* colunas já existem */ }
+
             const [result] = await pool.query(
-                'INSERT INTO condicoes_pagamento (nome, dias, descricao) VALUES (?, ?, ?)',
-                [nome, prazo || dias || null, descricao || null]
+                'INSERT INTO condicoes_pagamento (nome, parcelas, dias, acrescimo, descricao) VALUES (?, ?, ?, ?, ?)',
+                [nome, parcelas || 1, prazo || null, acrescimo || 0, descricao || null]
             );
             res.json({ success: true, id: result.insertId });
         } catch (error) {
@@ -1376,8 +1389,8 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         try {
             const { nome, parcelas, prazo, acrescimo, descricao } = req.body;
             await pool.query(
-                'UPDATE condicoes_pagamento SET nome = ?, dias = ?, descricao = ? WHERE id = ?',
-                [nome, prazo || null, descricao || null, req.params.id]
+                'UPDATE condicoes_pagamento SET nome = ?, parcelas = ?, dias = ?, acrescimo = ?, descricao = ? WHERE id = ?',
+                [nome, parcelas || 1, prazo || null, acrescimo || 0, descricao || null, req.params.id]
             );
             res.json({ success: true });
         } catch (error) {

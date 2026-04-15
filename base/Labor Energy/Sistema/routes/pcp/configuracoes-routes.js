@@ -1185,6 +1185,15 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     // GET /api/configuracoes/impostos - Buscar configurações de impostos do sistema
     router.get('/api/configuracoes/impostos', authenticateToken, async (req, res) => {
         try {
+            // Garantir que as colunas extras existam
+            try {
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS regime_tributario VARCHAR(50) DEFAULT 'simples'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_interna VARCHAR(10) DEFAULT '5102'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_externa VARCHAR(10) DEFAULT '6102'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_interna VARCHAR(10) DEFAULT '5202'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_externa VARCHAR(10) DEFAULT '6202'`);
+            } catch (e) { /* colunas já existem */ }
+
             const [rows] = await pool.query('SELECT * FROM configuracoes_impostos LIMIT 1');
 
             if (rows && rows.length > 0) {
@@ -1224,7 +1233,18 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     // POST /api/configuracoes/impostos - Salvar configurações de impostos
     router.post('/api/configuracoes/impostos', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
-            const { icms, ipi, pis, cofins, iss, csll, irpj, icms_st, mva } = req.body;
+            const { icms, ipi, pis, cofins, iss, csll, irpj, icms_st, mva,
+                    regime_tributario, cfop_venda_interna, cfop_venda_externa,
+                    cfop_devolucao_interna, cfop_devolucao_externa } = req.body;
+
+            // Garantir que as colunas extras existam
+            try {
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS regime_tributario VARCHAR(50) DEFAULT 'simples'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_interna VARCHAR(10) DEFAULT '5102'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_venda_externa VARCHAR(10) DEFAULT '6102'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_interna VARCHAR(10) DEFAULT '5202'`);
+                await pool.query(`ALTER TABLE configuracoes_impostos ADD COLUMN IF NOT EXISTS cfop_devolucao_externa VARCHAR(10) DEFAULT '6202'`);
+            } catch (e) { /* colunas já existem */ }
 
             const [existing] = await pool.query('SELECT id FROM configuracoes_impostos LIMIT 1');
 
@@ -1232,16 +1252,24 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
                 await pool.query(`
                     UPDATE configuracoes_impostos
                     SET icms = ?, ipi = ?, pis = ?, cofins = ?, iss = ?,
-                        csll = ?, irpj = ?, icms_st = ?, mva = ?
+                        csll = ?, irpj = ?, icms_st = ?, mva = ?,
+                        regime_tributario = ?, cfop_venda_interna = ?, cfop_venda_externa = ?,
+                        cfop_devolucao_interna = ?, cfop_devolucao_externa = ?
                     WHERE id = ?
                 `, [icms || 18, ipi || 5, pis || 1.65, cofins || 7.6, iss || 5,
-                    csll || 9, irpj || 15, icms_st || 0, mva || 0, existing[0].id]);
+                    csll || 9, irpj || 15, icms_st || 0, mva || 0,
+                    regime_tributario || 'simples', cfop_venda_interna || '5102', cfop_venda_externa || '6102',
+                    cfop_devolucao_interna || '5202', cfop_devolucao_externa || '6202',
+                    existing[0].id]);
             } else {
                 await pool.query(`
-                    INSERT INTO configuracoes_impostos (icms, ipi, pis, cofins, iss, csll, irpj, icms_st, mva)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO configuracoes_impostos (icms, ipi, pis, cofins, iss, csll, irpj, icms_st, mva,
+                        regime_tributario, cfop_venda_interna, cfop_venda_externa, cfop_devolucao_interna, cfop_devolucao_externa)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 `, [icms || 18, ipi || 5, pis || 1.65, cofins || 7.6, iss || 5,
-                    csll || 9, irpj || 15, icms_st || 0, mva || 0]);
+                    csll || 9, irpj || 15, icms_st || 0, mva || 0,
+                    regime_tributario || 'simples', cfop_venda_interna || '5102', cfop_venda_externa || '6102',
+                    cfop_devolucao_interna || '5202', cfop_devolucao_externa || '6202']);
             }
 
             res.json({ success: true, message: 'Configurações de impostos salvas' });
@@ -1322,7 +1350,13 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
 
     router.get('/api/configuracoes/condicoes-pagamento', authenticateToken, async (req, res) => {
         try {
-            const [condicoes] = await pool.query('SELECT * FROM condicoes_pagamento ORDER BY nome');
+            // Garantir colunas extras
+            try {
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS parcelas INT DEFAULT 1`);
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS acrescimo DECIMAL(5,2) DEFAULT 0`);
+            } catch (e) { /* colunas já existem */ }
+
+            const [condicoes] = await pool.query('SELECT *, COALESCE(dias, 0) as prazo FROM condicoes_pagamento ORDER BY nome');
             res.json({ data: condicoes });
         } catch (error) {
             console.error('Erro ao buscar condições:', error);
@@ -1333,9 +1367,16 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
     router.post('/api/configuracoes/condicoes-pagamento', authenticateToken, authorizeAdmin, async (req, res) => {
         try {
             const { nome, parcelas, prazo, acrescimo, descricao } = req.body;
+
+            // Garantir colunas extras
+            try {
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS parcelas INT DEFAULT 1`);
+                await pool.query(`ALTER TABLE condicoes_pagamento ADD COLUMN IF NOT EXISTS acrescimo DECIMAL(5,2) DEFAULT 0`);
+            } catch (e) { /* colunas já existem */ }
+
             const [result] = await pool.query(
-                'INSERT INTO condicoes_pagamento (nome, dias, descricao) VALUES (?, ?, ?)',
-                [nome, prazo || dias || null, descricao || null]
+                'INSERT INTO condicoes_pagamento (nome, parcelas, dias, acrescimo, descricao) VALUES (?, ?, ?, ?, ?)',
+                [nome, parcelas || 1, prazo || null, acrescimo || 0, descricao || null]
             );
             res.json({ success: true, id: result.insertId });
         } catch (error) {
@@ -1348,8 +1389,8 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         try {
             const { nome, parcelas, prazo, acrescimo, descricao } = req.body;
             await pool.query(
-                'UPDATE condicoes_pagamento SET nome = ?, dias = ?, descricao = ? WHERE id = ?',
-                [nome, prazo || null, descricao || null, req.params.id]
+                'UPDATE condicoes_pagamento SET nome = ?, parcelas = ?, dias = ?, acrescimo = ?, descricao = ? WHERE id = ?',
+                [nome, parcelas || 1, prazo || null, acrescimo || 0, descricao || null, req.params.id]
             );
             res.json({ success: true });
         } catch (error) {
@@ -2501,6 +2542,35 @@ module.exports = function registerConfiguracoesRoutes(router, deps) {
         } catch (error) {
             console.error('❌ Erro ao salvar certificado:', error);
             res.status(500).json({ error: 'Erro ao salvar certificado: ' + error.message });
+        }
+    });
+
+    // DELETE - Remover certificado digital
+    router.delete('/api/configuracoes/certificado', authenticateToken, authorizeAdmin, async (req, res) => {
+        try {
+            console.log('🗑️ Removendo certificado digital...');
+            const empresaId = 1;
+
+            // Limpar certificado da tabela nfe_configuracoes
+            await pool.query(`
+                UPDATE nfe_configuracoes
+                SET certificado_pfx = NULL,
+                    certificado_senha = NULL,
+                    certificado_validade = NULL,
+                    certificado_cnpj = NULL,
+                    certificado_nome = NULL,
+                    updated_at = NOW()
+                WHERE empresa_id = ?
+            `, [empresaId]);
+
+            // Limpar da tabela certificados_digitais
+            await pool.query('DELETE FROM certificados_digitais');
+
+            console.log('✅ Certificado removido com sucesso');
+            res.json({ success: true, message: 'Certificado removido com sucesso' });
+        } catch (error) {
+            console.error('❌ Erro ao remover certificado:', error);
+            res.status(500).json({ error: 'Erro ao remover certificado' });
         }
     });
 
